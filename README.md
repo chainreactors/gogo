@@ -4,10 +4,13 @@ just a weak scanner
 
 ## Usage
 
-* -port:
+* -ip:
   input network segment with submask like 192.168.1.1
   
-* -thread:
+* -ports:
+  the ports you want to scan, input like 81,82,83
+
+* -threads:
   int, default is 4000
   
 * -mod:
