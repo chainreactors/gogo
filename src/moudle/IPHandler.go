@@ -125,15 +125,6 @@ func HandleIPAMASK(server string) (start uint32, fin uint32) {
 	return start, fin
 }
 
-func IPifNeed(ip string) bool {
-	ip = ip + "/24"
-	start, _ := HandleIPAMASK(ip)
-	if _, ok := blacklist[start]; ok {
-		return false
-	}
-	return true
-}
-
 func IPifNeed2(ip string) bool {
 	s2ip := net.ParseIP(ip).To4()
 	c := s2ip[2]

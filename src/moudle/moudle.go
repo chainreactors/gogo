@@ -38,7 +38,9 @@ func StraightMod(target string, portlist []string, Threads int) {
 
 func StraightScan(ipi interface{}) {
 	ip := ipi.(string)
-	res := http.MyHttpSocket(ip)
+	//fmt.Println(ip)
+	//res := http.MyHttpSocket(ip)
+	res := http.SystemHttp(ip)
 	if res == "" {
 
 	} else {
@@ -109,29 +111,7 @@ func SmartBMod(target string, portlist []string, Threads int) {
 
 }
 
-func SmartScan(ipi interface{}, ResMap map[uint32]bool) {
-	ip := ipi.(string)
-	res := http.MyHttpSocket(ip)
-	if res == "" {
-
-	} else {
-		ip = strings.Split(ip, ":")[0] + "/24"
-		start, _ := HandleIPAMASK(ip)
-		if _, ok := ResMap[start]; ok {
-			return
-		}
-		sum++
-		lock.Lock()
-
-		ResMap[start] = true
-
-		fmt.Println("[-]" + ip)
-		lock.Unlock()
-		//fmt.Println(res)
-	}
-
-}
-
+// slice 方式进行启发式扫描
 func SmartScan2(ipi interface{}, Reslice []int) {
 	ip := ipi.(string)
 	res := http.MyHttpSocket(ip)
