@@ -12,6 +12,7 @@ import (
 var sum int = 0
 var lock sync.Mutex
 
+//直接扫描
 func StraightMod(target string, portlist []string, Threads int) {
 	var wgs sync.WaitGroup
 	ch := GenIP(target)
@@ -39,8 +40,8 @@ func StraightMod(target string, portlist []string, Threads int) {
 func StraightScan(ipi interface{}) {
 	ip := ipi.(string)
 	//fmt.Println(ip)
-	//res := http.MyHttpSocket(ip)
-	res := http.SystemHttp(ip)
+	res := http.MyHttpSocket(ip)
+	//res := http.SystemHttp(ip)
 	if res == "" {
 
 	} else {
@@ -95,14 +96,10 @@ func SmartBMod(target string, portlist []string, Threads int) {
 
 	for _, alive := range Alive {
 		if alive != "" {
-			//fmt.Println(alive)
-			//go func(a string){
 
-			//wg.Add(1)
 			fmt.Println(alive)
 			StraightMod(alive, portlist, Threads/2)
-			//wg.Done()
-			//}(alive)
+
 		}
 
 	}

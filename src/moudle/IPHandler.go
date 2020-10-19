@@ -39,6 +39,7 @@ func HandleMask(mask string) (before uint32, after uint32) {
 	return before, after
 }
 
+//使用管道生成IP
 func GenIP(target string) chan string {
 	start, fin := HandleIPAMASK(target)
 	ch := make(chan string)
@@ -54,6 +55,7 @@ func GenIP(target string) chan string {
 	return ch
 }
 
+//此处的生成方式是每个C段交替生成,1.1,2.1....1.255,2.255这样
 func GenIP2(target string) chan string {
 	start, _ := HandleIPAMASK(target)
 	ch := make(chan string)
@@ -94,10 +96,6 @@ func GenIPC(alive []string, AliveNum int) chan string {
 	}
 	return Tchan
 }
-
-//func GenIPC2(alive []string) chan string{
-//
-//}
 
 func GenTarget(ch chan string, portlist []string) chan string {
 	Tchan := make(chan string)
