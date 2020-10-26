@@ -14,13 +14,25 @@ import (
 
 var alivesum, titlesum int
 
+func Dispatch(target string,delay int) string{
+	var tmp []string
+	var result string
+	tmp = strings.Split(target, ":")
+	switch tmp[1] {
+	case "443","8443":
+		result = SystemHttp(target,delay)
+	default:
+		result = SocketHttp(target,delay)
+	}
+	return result
+}
 //socket进行对网站的连接
-func MyHttpSocket(ip string, Delay int) string {
+func SocketHttp(target string, delay int) string {
 	//fmt.Println(ip)
 	var result string
 
 	//socket tcp连接,超时时间
-	conn, err := net.DialTimeout("tcp", ip, time.Duration(Delay)*time.Second)
+	conn, err := net.DialTimeout("tcp", target, time.Duration(delay)*time.Second)
 
 	if err != nil {
 
@@ -29,14 +41,14 @@ func MyHttpSocket(ip string, Delay int) string {
 	}
 
 	//发送内容
-	_, err = conn.Write([]byte("GET / HTTP/1.1\r\nHost: " + ip + "\r\n\r\n"))
+	_, err = conn.Write([]byte("GET / HTTP/1.1\r\nHost: " + target + "\r\n\r\n"))
 
 	if err != nil {
 		return ""
 	}
 
 	//读取时间2秒超时
-	err = conn.SetReadDeadline(time.Now().Add(time.Duration(Delay) * time.Second))
+	err = conn.SetReadDeadline(time.Now().Add(time.Duration(delay) * time.Second))
 
 	if err != nil {
 		return ""
@@ -54,50 +66,29 @@ func MyHttpSocket(ip string, Delay int) string {
 	if err != nil {
 		return ""
 	}
-	html := string(reply)
+	content := string(reply)
 
 	//获取状态码
-	status := GetStatusCode(html)
+	status := GetStatusCode(content)
 
 	//如果是400可能是因为没有用https
 	if status == "400" {
-		result = SystemHttp(ip)
+		result = SystemHttp(target,delay)
 		return result
 	}
 
 	//正则匹配title
-	r, _ := regexp.Compile("<title>(.*)</title>")
 
-	res := r.FindStringSubmatch(html)
-
-	if len(res) < 2 {
-
-		if (strings.Count(html, "") - 1) > 20 {
-			result = "[+]" + ip + "  open ---------" + string([]byte(html)[:14])
-			alivesum++
-			return result
-		} else {
-			result = "[+]" + ip + "  open ---------" + html
-			alivesum++
-			return result
-		}
-		//fmt.Println(result)
-
-	}
-
-	result = "[+]" + ip + "  open ---------" + res[1]
-
-	alivesum++
 	titlesum++
 
-	return result
+	return GetTitle(content,target)
+
 
 }
 
 //使用封装好了http
-func SystemHttp(ip string) string {
-	var result string
-	ip = "https://" + ip
+func SystemHttp(target string,delay int) string {
+	target = "https://" + target
 
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
@@ -105,9 +96,9 @@ func SystemHttp(ip string) string {
 
 	c := &http.Client{
 		Transport: tr,
-		Timeout:   2 * time.Second,
+		Timeout:  time.Duration(delay) * time.Second,
 	}
-	resp, err := c.Get(ip)
+	resp, err := c.Get(target)
 
 	if err != nil {
 		return ""
@@ -116,30 +107,14 @@ func SystemHttp(ip string) string {
 	reply, err := ioutil.ReadAll(resp.Body)
 	resp.Body.Close()
 
-	html := string(reply)
+	content := string(reply)
 
 	if err != nil {
 
 		return ""
 	}
 
-	r, _ := regexp.Compile("<title>(.*)</title>")
-
-	res := r.FindStringSubmatch(html)
-
-	if len(res) < 2 {
-		result = "[+]" + ip + "  open ---------"
-		//fmt.Println(result)
-		alivesum++
-		return result
-	}
-
-	result = "[+]" + ip + "  open ---------" + res[1]
-
-	alivesum++
-	titlesum++
-
-	return result
+	return GetTitle(content,target)
 }
 
 func GetStatusCode(html string) string {
@@ -159,4 +134,22 @@ func OutputAliveSum() {
 
 func OutputTitleSum() {
 	fmt.Println("TitleSum: " + strconv.Itoa(titlesum))
+}
+
+
+func GetTitle(content string,target string)string{
+	var result string
+
+	r, _ := regexp.Compile("<title>(.*)</title>")
+
+	res := r.FindStringSubmatch(content)
+
+	if len(res) < 2 {
+		result = "[+]" + target + "  open ---------" + string([]byte(content)[:13])
+		//fmt.Println(result)
+	} else {
+		result = "[+]" + target + "  open ---------" + res[1]
+	}
+	alivesum++
+	return result
 }

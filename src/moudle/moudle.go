@@ -40,7 +40,7 @@ func StraightMod(target string, portlist []string, Threads int, Delay int) {
 func StraightScan(ipi interface{}, Delay int) {
 	ip := ipi.(string)
 	//fmt.Println(ip)
-	res := http.MyHttpSocket(ip, Delay)
+	res := http.SocketHttp(ip, Delay)
 	//res := http.SystemHttp(ip)
 	if res == "" {
 
@@ -111,17 +111,14 @@ func SmartBMod(target string, portlist []string, Threads int, Delay int) {
 // slice 方式进行启发式扫描
 func SmartScan2(ipi interface{}, Reslice []int, Delay int) {
 	ip := ipi.(string)
-	res := http.MyHttpSocket(ip, Delay)
-	if res == "" {
+	res := http.Dispatch(ip, Delay)
+	if res != "" {
 
-	} else {
 		ip = strings.Split(ip, ":")[0]
 		s2ip := net.ParseIP(ip).To4()
 		c := s2ip[2]
 		Reslice[c] += 1
-		//fmt.Println(res)
 	}
-
 }
 
 func OutputBsum() int {
