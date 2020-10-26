@@ -102,6 +102,7 @@ func Getbanner(init vars)vars  {
 	if init.IPaddress == ""{
 		fmt.Println(
 			"Usage of ./getitle:" +
+				"\n  example ./getitle -ip 192.168.92.1 -p top2" +
 				"\n  -d int			超时,默认2s (default 2)  " +
 				"\n  -ip string		IP地址 like 192.168.1.1/24" +
 				"\n  -m string        扫描模式：straight or smartB (default \"straight\")" +
