@@ -15,12 +15,12 @@ import (
 var alivesum, titlesum int
 
 //socket进行对网站的连接
-func MyHttpSocket(ip string) string {
+func MyHttpSocket(ip string, Delay int) string {
 	//fmt.Println(ip)
 	var result string
 
 	//socket tcp连接,超时时间
-	conn, err := net.DialTimeout("tcp", ip, 3*time.Second)
+	conn, err := net.DialTimeout("tcp", ip, time.Duration(Delay)*time.Second)
 
 	if err != nil {
 
@@ -36,7 +36,7 @@ func MyHttpSocket(ip string) string {
 	}
 
 	//读取时间2秒超时
-	err = conn.SetReadDeadline(time.Now().Add(2 * time.Second))
+	err = conn.SetReadDeadline(time.Now().Add(time.Duration(Delay) * time.Second))
 
 	if err != nil {
 		return ""

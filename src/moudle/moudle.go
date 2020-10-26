@@ -13,7 +13,7 @@ var sum int = 0
 var lock sync.Mutex
 
 //直接扫描
-func StraightMod(target string, portlist []string, Threads int) {
+func StraightMod(target string, portlist []string, Threads int, Delay int) {
 	var wgs sync.WaitGroup
 	ch := GenIP(target)
 
@@ -24,7 +24,7 @@ func StraightMod(target string, portlist []string, Threads int) {
 	// Use the pool with a function,
 	// set 10 to the capacity of goroutine pool and 1 second for expired duration.
 	p1, _ := ants.NewPoolWithFunc(Threads, func(j interface{}) {
-		StraightScan(j)
+		StraightScan(j, Delay)
 		wgs.Done()
 	})
 	defer p1.Release()
@@ -37,10 +37,10 @@ func StraightMod(target string, portlist []string, Threads int) {
 	wgs.Wait()
 }
 
-func StraightScan(ipi interface{}) {
+func StraightScan(ipi interface{}, Delay int) {
 	ip := ipi.(string)
 	//fmt.Println(ip)
-	res := http.MyHttpSocket(ip)
+	res := http.MyHttpSocket(ip, Delay)
 	//res := http.SystemHttp(ip)
 	if res == "" {
 
@@ -49,7 +49,7 @@ func StraightScan(ipi interface{}) {
 	}
 }
 
-func SmartBMod(target string, portlist []string, Threads int) {
+func SmartBMod(target string, portlist []string, Threads int, Delay int) {
 	var wg sync.WaitGroup
 	//var wg2 sync.WaitGroup
 	ch := GenIP2(target)
@@ -64,7 +64,7 @@ func SmartBMod(target string, portlist []string, Threads int) {
 
 	p2, _ := ants.NewPoolWithFunc(Threads, func(i interface{}) {
 		//SmartScan(i,ResMap)
-		SmartScan2(i, ResSlice)
+		SmartScan2(i, ResSlice, Delay)
 		wg.Done()
 	})
 	defer p2.Release()
@@ -98,7 +98,7 @@ func SmartBMod(target string, portlist []string, Threads int) {
 		if alive != "" {
 
 			fmt.Println(alive)
-			StraightMod(alive, portlist, Threads/2)
+			StraightMod(alive, portlist, Threads/2, Delay)
 
 		}
 
@@ -109,9 +109,9 @@ func SmartBMod(target string, portlist []string, Threads int) {
 }
 
 // slice 方式进行启发式扫描
-func SmartScan2(ipi interface{}, Reslice []int) {
+func SmartScan2(ipi interface{}, Reslice []int, Delay int) {
 	ip := ipi.(string)
-	res := http.MyHttpSocket(ip)
+	res := http.MyHttpSocket(ip, Delay)
 	if res == "" {
 
 	} else {
