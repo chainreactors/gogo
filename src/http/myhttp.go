@@ -20,7 +20,7 @@ func Dispatch(target string,delay int) string{
 	tmp = strings.Split(target, ":")
 	switch tmp[1] {
 	case "443","8443":
-		result = SystemHttp(target,delay)
+		result = SystemHttp(target,delay,"400")
 	default:
 		result = SocketHttp(target,delay)
 	}
@@ -56,6 +56,7 @@ func SocketHttp(target string, delay int) string {
 
 	//最多只读8192位,一般来说有title就肯定已经有了
 	reply := make([]byte, 8192)
+	titlesum++
 	_, err = conn.Read(reply)
 
 	if err != nil {
@@ -73,13 +74,12 @@ func SocketHttp(target string, delay int) string {
 
 	//如果是400可能是因为没有用https
 	if status == "400" || strings.HasPrefix(status,"3") {
-		result = SystemHttp(target,delay)
+		result = SystemHttp(target,delay,status)
 		return result
 	}
 
 	//正则匹配title
 
-	titlesum++
 
 	return GetTitle(content,target)
 
@@ -87,9 +87,12 @@ func SocketHttp(target string, delay int) string {
 }
 
 //使用封装好了http
-func SystemHttp(target string,delay int) string {
-	target = "https://" + target
-
+func SystemHttp(target string,delay int,status string) string {
+	if status == "400" {
+		target = "https://" + target
+	} else{
+		target = "http://" + target
+	}
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
@@ -145,10 +148,10 @@ func GetTitle(content string,target string)string{
 	res := r.FindStringSubmatch(content)
 
 	if len(res) < 2 {
-		result = "[+]" + target + "  open ---------" + string([]byte(content)[:13])
+		result = "[+] " + target + "  open ---------" + string([]byte(content)[:13])
 		//fmt.Println(result)
 	} else {
-		result = "[+]" + target + "  open ---------" + res[1]
+		result = "[+] " + target + "  open ---------" + res[1]
 	}
 	alivesum++
 	return result
