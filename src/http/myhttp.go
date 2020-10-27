@@ -72,7 +72,7 @@ func SocketHttp(target string, delay int) string {
 	status := GetStatusCode(content)
 
 	//如果是400可能是因为没有用https
-	if status == "400" {
+	if status == "400" || strings.HasPrefix(status,"3") {
 		result = SystemHttp(target,delay)
 		return result
 	}
