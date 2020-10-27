@@ -13,12 +13,13 @@ import (
 )
 
 type vars struct {
-	ports string
-	threads int
+	ports     string
+	threads   int
 	IPaddress string
-	mod string
-	delay int
+	mod       string
+	delay     int
 }
+
 func main() {
 	defer ants.Release()
 
@@ -34,7 +35,6 @@ func main() {
 	mod := flag.String("m", "straight", "扫描模式：straight or smartB")
 	delay := flag.Int("d", 2, "超时,默认2s")
 
-
 	t1 := time.Now()
 
 	//server := "192.167.0.1/24"
@@ -42,7 +42,7 @@ func main() {
 	//portlist := []string{"80","81","7001","9001","8080","8081","8000","8009","88","443","9999","7080","8070","9080","8082","8888","8089","9001","5555","9001"}
 
 	flag.Parse()
-	init := vars{*ports,*threads,*IPaddress,*mod,*delay}
+	init := vars{*ports, *threads, *IPaddress, *mod, *delay}
 	init = Getbanner(init)
 	fmt.Println(init.IPaddress)
 	if init.IPaddress == "" {
@@ -97,9 +97,9 @@ func main() {
 
 }
 
-func Getbanner(init vars)vars  {
+func Getbanner(init vars) vars {
 	fmt.Println("*********  getitle 0.0.4 beta by Sangfor  *********")
-	if init.IPaddress == ""{
+	if init.IPaddress == "" {
 		fmt.Println(
 			"Usage of ./getitle:" +
 				"\n  example ./getitle -ip 192.168.92.1 -p top2" +
