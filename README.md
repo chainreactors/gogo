@@ -20,3 +20,6 @@ just a weak scanner
   2. smartB:
     Heuristic scanning the input but your input's submask must be 16
   
+## Makefile
+
+ * make release VERSION=VERSION to bulid getitle to all platform
