@@ -40,7 +40,7 @@ func StraightMod(target string, portlist []string, Threads int, Delay int) {
 func StraightScan(ipi interface{}, Delay int) {
 	ip := ipi.(string)
 	//fmt.Println(ip)
-	res := http.SocketHttp(ip, Delay)
+	res := http.Dispatch(ip, Delay)
 	//res := http.SystemHttp(ip)
 	if res == "" {
 
