@@ -37,6 +37,8 @@ just a weak scanner
 ## Change Note
 
 * v0.0.1 just a demo
+* v0.0.3 
+  * 获取不到getitile的情况下输出前13位字符(如果是http正好到状态码)
 * v0.0.4 
   * 添加了端口预设top1为最常见的http端口,top2为常见的http端口,db为常见数据库默认端口,win为windows常见开放的端口
   * 简化了端口参数
