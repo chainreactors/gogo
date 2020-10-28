@@ -9,7 +9,6 @@ import (
 	"sync"
 )
 
-var sum int = 0
 var lock sync.Mutex
 
 //直接扫描
@@ -49,10 +48,10 @@ func StraightScan(ipi interface{}, Delay int) {
 	}
 }
 
-func SmartBMod(target string, portlist []string, Threads int, Delay int) {
+func SmartBMod(target string, temp []int, portlist []string, Threads int, Delay int) {
 	var wg sync.WaitGroup
 	//var wg2 sync.WaitGroup
-	ch := GenIP2(target)
+	ch := GenIP2(target, temp)
 
 	SimpleList := []string{"80"}
 	Tch := GenTarget(ch, SimpleList)
@@ -60,11 +59,9 @@ func SmartBMod(target string, portlist []string, Threads int, Delay int) {
 	var Gentarget string
 	//ResMap := GetMap()
 
-	ResSlice := GetSlice()
-
 	p2, _ := ants.NewPoolWithFunc(Threads, func(i interface{}) {
 		//SmartScan(i,ResMap)
-		SmartScan2(i, ResSlice, Delay)
+		SmartScan2(i, temp, Delay)
 		wg.Done()
 	})
 	defer p2.Release()
@@ -81,7 +78,7 @@ func SmartBMod(target string, portlist []string, Threads int, Delay int) {
 
 	start, _ := HandleIPAMASK(target)
 
-	for k, v := range ResSlice {
+	for k, v := range temp {
 
 		if v > 0 {
 			newC := MyInt2IP(start)
@@ -121,6 +118,17 @@ func SmartScan2(ipi interface{}, Reslice []int, Delay int) {
 	}
 }
 
-func OutputBsum() int {
-	return sum
+func SmartAMod(target string, portlist []string, Threads int, Delay int) {
+	BSlice := make([][]int, 256)
+
+	Tchan := GenBIP(target)
+	var sum int = 0
+	for i := range Tchan {
+		CurB := i + "/16"
+		fmt.Println("now start:" + CurB)
+		Temp := make([]int, 256)
+		BSlice = append(BSlice, Temp)
+		sum += 1
+		//SmartBMod(CurB, Temp, portlist, Threads,Delay)
+	}
 }

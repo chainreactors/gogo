@@ -8,7 +8,6 @@ import (
 )
 
 var blacklist = make(map[uint32]bool)
-var temp = make([]int, 256)
 
 func MyIP2Int(ipmask string) uint32 {
 	ParseIP := strings.Split(ipmask, "/")
@@ -47,7 +46,6 @@ func GenIP(target string) chan string {
 	var i uint32
 	go func() {
 		for i = 0; i <= sum; i++ {
-
 			ch <- MyInt2IP(i + start)
 		}
 		close(ch)
@@ -56,7 +54,7 @@ func GenIP(target string) chan string {
 }
 
 //此处的生成方式是每个C段交替生成,1.1,2.1....1.255,2.255这样
-func GenIP2(target string) chan string {
+func GenIP2(target string, temp []int) chan string {
 	start, _ := HandleIPAMASK(target)
 	ch := make(chan string)
 	var outIP string
@@ -67,7 +65,7 @@ func GenIP2(target string) chan string {
 		for i = 0; i < 256; i++ {
 			for j = 0; j < 256; j++ {
 				outIP = MyInt2IP(start + 256*j + i)
-				if IPifNeed2(outIP) {
+				if IPifNeed2(outIP, temp) {
 					ch <- outIP
 				} else {
 					continue
@@ -123,7 +121,7 @@ func HandleIPAMASK(server string) (start uint32, fin uint32) {
 	return start, fin
 }
 
-func IPifNeed2(ip string) bool {
+func IPifNeed2(ip string, temp []int) bool {
 	s2ip := net.ParseIP(ip).To4()
 	c := s2ip[2]
 	if temp[c] > 0 {
@@ -132,10 +130,26 @@ func IPifNeed2(ip string) bool {
 	return true
 }
 
-func GetMap() map[uint32]bool {
-	return blacklist
-}
+func GenBIP(target string) chan string {
+	start, fin := HandleIPAMASK(target)
+	startB := byte(start >> 16)
+	finB := byte((fin + 1) >> 16)
 
-func GetSlice() []int {
-	return temp
+	ch := make(chan string)
+
+	ip := make(net.IP, net.IPv4len)
+	ip[0] = byte(start >> 24)
+	ip[1] = byte(start >> 16)
+	ip[2] = byte(start >> 8)
+	ip[3] = byte(start)
+
+	var i byte
+	go func() {
+		for i = 0; i < finB-startB; i++ {
+			ip[1] = startB + i
+			ch <- ip.String()
+		}
+		close(ch)
+	}()
+	return ch
 }

@@ -7,18 +7,8 @@ import (
 	"fmt"
 	"github.com/panjf2000/ants/v2"
 	"os"
-	"strconv"
-	"strings"
 	"time"
 )
-
-type vars struct {
-	ports     string
-	threads   int
-	IPaddress string
-	mod       string
-	delay     int
-}
 
 func main() {
 	defer ants.Release()
@@ -32,7 +22,7 @@ func main() {
 
 	threads := flag.Int("t", 4000, "threads")
 	IPaddress := flag.String("ip", "", "IP地址 like 192.168.1.1/24")
-	mod := flag.String("m", "straight", "扫描模式：straight or smartB")
+	mod := flag.String("m", "straight", "扫描模式：straight,smartB or smartA(掩码小于8)")
 	delay := flag.Int("d", 2, "超时,默认2s")
 
 	t1 := time.Now()
@@ -42,8 +32,8 @@ func main() {
 	//portlist := []string{"80","81","7001","9001","8080","8081","8000","8009","88","443","9999","7080","8070","9080","8082","8888","8089","9001","5555","9001"}
 
 	flag.Parse()
-	init := vars{*ports, *threads, *IPaddress, *mod, *delay}
-	init = Getbanner(init)
+	init := moudle.Params{*ports, *threads, *IPaddress, *mod, *delay}
+	init = moudle.Getbanner(init)
 	fmt.Println(init.IPaddress)
 	if init.IPaddress == "" {
 		fmt.Println("Something wrong,Please use --help to see the usage")
@@ -51,41 +41,20 @@ func main() {
 	}
 
 	//init the IP
-
-	var portlist []string
-	var rawportlist []string
-	rawportlist = strings.Split(init.ports, ",")
-
-	//生成端口列表 支持,和-
-	for i := 0; i < len(rawportlist); i++ {
-		if strings.Index(rawportlist[i], "-") > 0 {
-			//fmt.Println(rawportlist[i])
-			sf := strings.Split(rawportlist[i], "-")
-			start, _ := strconv.Atoi(sf[0])
-
-			fin, _ := strconv.Atoi(sf[1])
-
-			for j := start; j <= fin; j++ {
-				cur := strconv.Itoa(j)
-				portlist = append(portlist, cur)
-			}
-		} else {
-			portlist = append(portlist, rawportlist[i])
-		}
-	}
-
-	//for m := 0 ; m < len(portlist); m++ {
-	//	fmt.Println(portlist[m])
-	//}
+	portlist := moudle.HandlePortlist(init.Ports)
 
 	// 原始的样子
 	switch *mod {
 	case "straight":
 		//直接扫描
-		moudle.StraightMod(init.IPaddress, portlist, init.threads, init.delay)
+		moudle.StraightMod(init.IPaddress, portlist, init.Threads, init.Delay)
 	case "smartB":
 		//启发式扫描
-		moudle.SmartBMod(init.IPaddress, portlist, init.threads, init.delay)
+		temp := make([]int, 256)
+		moudle.SmartBMod(init.IPaddress, temp, portlist, init.Threads, init.Delay)
+	case "smartA":
+		//mask < 16时,按照B启发式扫描
+		moudle.SmartAMod(init.IPaddress, portlist, init.Threads, init.Delay)
 	}
 
 	elapsed := time.Since(t1)
@@ -95,46 +64,4 @@ func main() {
 	http.OutputAliveSum()
 	http.OutputTitleSum()
 
-}
-
-func Getbanner(init vars) vars {
-	fmt.Println("*********  getitle 0.0.4 beta by Sangfor  *********")
-	if init.IPaddress == "" {
-		fmt.Println(
-			"Usage of ./getitle:" +
-				"\n  example ./getitle -ip 192.168.92.1 -p top2" +
-				"\n  -d int			超时,默认2s (default 2)  " +
-				"\n  -ip string		IP地址 like 192.168.1.1/24" +
-				"\n  -m string        扫描模式：straight or smartB (default \"straight\")" +
-				"\n  -p string        ports (default \"top1\")" +
-				"\n     ports preset:   top1(default) 80,81,88,443,8080,7001,9001,8081,8000,8443" +
-				"\n                     top2 80-90,443,7000-7009,9000-9009,8080-8090,8000-8009,8443,7080,8070,9080,8888,7777,9999,9090,800,801,808,5555,10080" +
-				"\n                     db 3306,1433,1521,5432,6379,11211,27017" +
-				"\n                     rce 1090,1098,1099,4444,11099,47001,47002,10999,45000,45001,8686,9012,50500,4848,11111,4445,4786,5555,5556" +
-				"\n                     win 53,88,135,139,389,445,3389,5985" +
-				"\n                     brute 21,22,389,445,1433,1521,3306,3389,5901,5432,6379,11211,27017" +
-				"\n                     all 21,22,23,25,53,69,80,81-89,110,135,139,143,443,445,465,993,995,1080,1158,1433,1521,1863,2100,3128,3306,3389,7001,8080,8081-8088,8888,9080,9090,5900,1090,1099,7002,8161,9043,50000,50070,389,5432,5984,9200,11211,27017,161,873,1833,2049,2181,2375,6000,6666,6667,7777,6868,9000,9001,12345,5632,9081,3700,4848,1352,8069,9300" +
-				"\n  -t int        threads (default 4000)\n ",
-		)
-	}
-	switch init.ports {
-	case "top1":
-		init.ports = "80,443,8080,7001,9001,8081,8082,8089,8000,8443,81"
-	case "top2":
-		init.ports = "80-89,443,7000-7009,9000-9009,8080-8090,8000-8009,8443,7080,8070,9080,8888,7777,9090,800,801,9999,10080"
-	case "db":
-		init.ports = "3306,1433,1521,5432,6379,11211,27017"
-	case "rce":
-		init.ports = "1090,1098,1099,4444,11099,47001,47002,10999,45000,45001,8686,9012,50500,4848,11111,4445,4786,5555,5556"
-	case "win":
-		init.ports = "53,88,135,139,389,445,3389,5985"
-	case "brute":
-		init.ports = "21,22,389,445,1433,1521,3306,3389,5901,5432,6379,11211,27017"
-	case "all":
-		init.ports = "21,22,23,25,53,69,80-89,110,135,139,143,443,445,465,993,995,1080,1158,1433,1521,1863,2100,3128,3306,3389,7001,8080-8089,8888,9080,9090,5900,1090,1099,7002,8161,9043,50000,50070,389,5432,5984,9200,11211,27017,161,873,1833,2049,2181,2375,6000,6666,6667,7777,6868,9000,9001,12345,5632,9081,3700,4848,1352,8069,9300"
-
-	default:
-
-	}
-	return init
 }
