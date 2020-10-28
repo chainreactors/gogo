@@ -14,7 +14,7 @@ func SocketSend(conn net.Conn, data []byte) []byte {
 	}
 
 	//最多只读8192位,一般来说有title就肯定已经有了
-	reply := make([]byte, 8192)
+	reply := make([]byte, 2048)
 	_, err = conn.Read(reply)
 
 	if err != nil {

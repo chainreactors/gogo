@@ -49,7 +49,7 @@ func SocketHttp(target string) string {
 	//正则匹配title
 
 
-	return GetTitle(content,target)
+	return InfoFilter(content,target)
 
 
 }
@@ -85,7 +85,7 @@ func SystemHttp(target string,status string) string {
 		return ""
 	}
 
-	return GetTitle(content,target)
+	return InfoFilter(content,target)
 }
 
 func GetStatusCode(html string) string {
@@ -107,22 +107,66 @@ func OutputTitleSum() {
 	fmt.Println("TitleSum: " + strconv.Itoa(titlesum))
 }
 
+func InfoFilter(content string,target string)string  {
+	title := GetTitle(content)
+	midware := GetMidware(content)
+	language := GetLanguage(content)
+	framework := GetFrameWork(content)
 
+	return 	Encode(fmt.Sprintf("[+] %s [OPEN] [%s] [%s] [%s] [%s]",target,midware,language,framework,title))
 
+}
 
-func GetTitle(content string,target string)string{
+func GetTitle(content string)string{
 	var result string
-	content = Encode(content)
-	r, _ := regexp.Compile("(?i)<title>(.*)</title>")
 
-	res := r.FindStringSubmatch(content)
-
-	if len(res) < 2 {
-		result = "[+] " + target + "  open ---------" + string([]byte(content)[:13])
-		//fmt.Println(result)
+	titleRegexp, _ := regexp.Compile("(?i)<title>(.*)</title>")
+	title := titleRegexp.FindStringSubmatch(content)
+	if len(title) < 2 {
+		result = Encode(string([]byte(content)[:13]))
 	} else {
-		result = "[+] " + target + "  open ---------" + res[1]
+		result = title[1]
 	}
 	titlesum++
 	return result
+}
+
+func GetMidware(content string)string  {
+	headerserverRegexp,_ := regexp.Compile("(?i)Server: ([\x21-\x73]+)")
+	servers := headerserverRegexp.FindStringSubmatch(strings.Split(content,"\r\n\r\n")[0])
+
+	if len(servers) >= 2{
+		return servers[1]
+	}
+
+	return ""
+
+}
+
+func GetLanguage(content string)string  {
+
+	poweredRegexp,_ := regexp.Compile("(?i)X-Powered-By: ([!-s]+)")
+	powered :=poweredRegexp.FindStringSubmatch(strings.Split(content,"\r\n\r\n")[0])
+	if len(powered) >= 2 {
+		return powered[1]
+	}
+	sessionRegexp,_ := regexp.Compile("(?i)\x20(.{1,8}SESS.*?ID)")
+	sessionid := sessionRegexp.FindStringSubmatch(content)
+
+	if len(sessionid) >= 2 {
+		switch sessionid[1] {
+		case "JSESSIONID":
+			return "JAVA"
+		case "ASP.NET_SessionId":
+			return "ASP.NET"
+		case "PHPSESSID":
+			return "PHP"
+		}
+	}
+
+	return ""
+}
+
+func GetFrameWork(content string)string  {
+	return ""
 }
