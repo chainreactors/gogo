@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/panjf2000/ants/v2"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -48,8 +49,8 @@ func main() {
 	case "s":
 		//启发式扫描
 		temp := make([]int, 256)
-		mask := strings.Split(init.IPaddress, "/")[1]
-		if mask < "16" {
+		mask, _ := strconv.Atoi(strings.Split(init.IPaddress, "/")[1])
+		if  mask  < 16  {
 			moudle.SmartBMod(init.IPaddress, temp, portlist, init.Threads, init.Delay)
 		} else {
 			moudle.SmartAMod(init.IPaddress, portlist, init.Threads, init.Delay)
