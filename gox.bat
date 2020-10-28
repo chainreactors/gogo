@@ -1,0 +1,1 @@
+gox.exe -osarch="linux/amd64 windows/amd64" -output=".\bin\getitle%1" .\src\main\

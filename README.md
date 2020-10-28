@@ -46,3 +46,4 @@ just a weak scanner
   * 修复了400与30x页面无法获取titile的问题
   * 修复了无法自定义端口的bug
   * 添加了brute与all两个端口预设,brute为可爆破端口,all为常见端口
+  * 忽略匹配title的大小写问题

@@ -20,7 +20,6 @@ func Dispatch(target string,delay int) string{
 	tmp = strings.Split(target, ":")
 	switch tmp[1] {
 	case "443","8443":
-
 		result = SystemHttp(target,delay,"400")
 	default:
 		result = SocketHttp(target,delay)
@@ -144,7 +143,7 @@ func OutputTitleSum() {
 func GetTitle(content string,target string)string{
 	var result string
 
-	r, _ := regexp.Compile("(?i)<title>(.*)</title>")
+	r, _ := regexp.Compile("<title>(.*)</title>")
 
 	res := r.FindStringSubmatch(content)
 
