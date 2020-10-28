@@ -1,12 +1,12 @@
 package main
 
 import (
-	"antest/src/http"
+	"antest/src/Scan"
 	"antest/src/moudle"
 	"flag"
 	"fmt"
 	"github.com/panjf2000/ants/v2"
-	"os"
+	"strings"
 	"time"
 )
 
@@ -22,8 +22,8 @@ func main() {
 
 	threads := flag.Int("t", 4000, "threads")
 	IPaddress := flag.String("ip", "", "IP地址 like 192.168.1.1/24")
-	mod := flag.String("m", "straight", "扫描模式：straight,smartB or smartA(掩码小于8)")
-	delay := flag.Int("d", 2, "超时,默认2s")
+	mod := flag.String("m", "default", "扫描模式：straight(default),smart(s).")
+	delay := flag.Duration("d", 2, "超时,默认2s")
 
 	t1 := time.Now()
 
@@ -33,35 +33,34 @@ func main() {
 
 	flag.Parse()
 	init := moudle.Params{*ports, *threads, *IPaddress, *mod, *delay}
-	init = moudle.Getbanner(init)
+	init = moudle.Init(init)
 	fmt.Println(init.IPaddress)
-	if init.IPaddress == "" {
-		fmt.Println("Something wrong,Please use --help to see the usage")
-		os.Exit(0)
-	}
 
 	//init the IP
-	portlist := moudle.HandlePortlist(init.Ports)
+	portlist := moudle.Ports2Portlist(init.Ports)
 
 	// 原始的样子
+
 	switch *mod {
-	case "straight":
+	case "default":
 		//直接扫描
 		moudle.StraightMod(init.IPaddress, portlist, init.Threads, init.Delay)
-	case "smartB":
+	case "s":
 		//启发式扫描
 		temp := make([]int, 256)
-		moudle.SmartBMod(init.IPaddress, temp, portlist, init.Threads, init.Delay)
-	case "smartA":
-		//mask < 16时,按照B启发式扫描
-		moudle.SmartAMod(init.IPaddress, portlist, init.Threads, init.Delay)
+		mask := strings.Split(init.IPaddress, "/")[1]
+		if mask < "16" {
+			moudle.SmartBMod(init.IPaddress, temp, portlist, init.Threads, init.Delay)
+		} else {
+			moudle.SmartAMod(init.IPaddress, portlist, init.Threads, init.Delay)
+		}
 	}
 
 	elapsed := time.Since(t1)
 	fmt.Println("Totally run: ", elapsed)
 
 	//输出扫描存活的数量和输出扫到有title的数量
-	http.OutputAliveSum()
-	http.OutputTitleSum()
+	Scan.OutputAliveSum()
+	Scan.OutputTitleSum()
 
 }

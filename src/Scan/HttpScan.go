@@ -1,4 +1,4 @@
-package http
+package Scan
 
 import (
 	"crypto/tls"
@@ -12,69 +12,37 @@ import (
 	"time"
 )
 
-var alivesum, titlesum int
 
-func Dispatch(target string,delay int) string{
-	var tmp []string
-	var result string
-	tmp = strings.Split(target, ":")
-	switch tmp[1] {
-	case "443","8443":
-		result = SystemHttp(target,delay,"400")
-	default:
-		result = SocketHttp(target,delay)
-	}
-	return result
-}
+
 //socket进行对网站的连接
-func SocketHttp(target string, delay int) string {
+func SocketHttp(target string) string {
 	//fmt.Println(ip)
 	var result string
-
 	//socket tcp连接,超时时间
-	conn, err := net.DialTimeout("tcp", target, time.Duration(delay)*time.Second)
-
+	conn, err := net.DialTimeout("tcp", target, Delay* time.Second)
 	if err != nil {
 
 		//fmt.Println(err)
 		return ""
 	}
+	alivesum++
+	err = conn.SetReadDeadline(time.Now().Add(Delay * time.Second))
+
 
 	//发送内容
-	_, err = conn.Write([]byte("GET / HTTP/1.1\r\nHost: " + target + "\r\n\r\n"))
-
-	if err != nil {
-		return ""
-	}
-
-	//读取时间2秒超时
-	err = conn.SetReadDeadline(time.Now().Add(time.Duration(delay) * time.Second))
-
-	if err != nil {
-		return ""
-	}
-
-	//最多只读8192位,一般来说有title就肯定已经有了
-	reply := make([]byte, 8192)
-	titlesum++
-	_, err = conn.Read(reply)
-
-	if err != nil {
-		return ""
-	}
-
+	data :=[]byte("GET / HTTP/1.1\r\nHost: " + target + "\r\n\r\n")
+	content := string(SocketSend(conn,data))
 	err = conn.Close()
 	if err != nil {
 		return ""
 	}
-	content := string(reply)
 
 	//获取状态码
 	status := GetStatusCode(content)
 
 	//如果是400可能是因为没有用https
 	if status == "400" || strings.HasPrefix(status,"3") {
-		result = SystemHttp(target,delay,status)
+		result = SystemHttp(target,status)
 		return result
 	}
 
@@ -87,11 +55,11 @@ func SocketHttp(target string, delay int) string {
 }
 
 //使用封装好了http
-func SystemHttp(target string,delay int,status string) string {
+func SystemHttp(target string,status string) string {
 	if status == "400" {
 		target = "https://" + target
 	} else{
-		target = "http://" + target
+		target = "Scan://" + target
 	}
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
@@ -99,14 +67,14 @@ func SystemHttp(target string,delay int,status string) string {
 
 	c := &http.Client{
 		Transport: tr,
-		Timeout:  time.Duration(delay) * time.Second,
+		Timeout:   Delay * time.Second,
 	}
 	resp, err := c.Get(target)
 
 	if err != nil {
 		return ""
 	}
-
+	alivesum++
 	reply, err := ioutil.ReadAll(resp.Body)
 	resp.Body.Close()
 
@@ -140,10 +108,12 @@ func OutputTitleSum() {
 }
 
 
+
+
 func GetTitle(content string,target string)string{
 	var result string
-
-	r, _ := regexp.Compile("<title>(.*)</title>")
+	content = Encode(content)
+	r, _ := regexp.Compile("(?i)<title>(.*)</title>")
 
 	res := r.FindStringSubmatch(content)
 
@@ -153,6 +123,6 @@ func GetTitle(content string,target string)string{
 	} else {
 		result = "[+] " + target + "  open ---------" + res[1]
 	}
-	alivesum++
+	titlesum++
 	return result
 }

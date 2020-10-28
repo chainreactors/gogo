@@ -1,18 +1,19 @@
 package moudle
 
 import (
-	"antest/src/http"
+	"antest/src/Scan"
 	"fmt"
 	"github.com/panjf2000/ants/v2"
 	"net"
 	"strings"
 	"sync"
+	"time"
 )
 
 var lock sync.Mutex
 
 //直接扫描
-func StraightMod(target string, portlist []string, Threads int, Delay int) {
+func StraightMod(target string, portlist []string, Threads int, Delay time.Duration) {
 	var wgs sync.WaitGroup
 	ch := GenIP(target)
 
@@ -36,11 +37,11 @@ func StraightMod(target string, portlist []string, Threads int, Delay int) {
 	wgs.Wait()
 }
 
-func StraightScan(ipi interface{}, Delay int) {
+func StraightScan(ipi interface{}, Delay time.Duration) {
 	ip := ipi.(string)
 	//fmt.Println(ip)
-	res := http.Dispatch(ip, Delay)
-	//res := http.SystemHttp(ip)
+	res := Scan.Dispatch(ip, Delay)
+	//res := Scan.SystemHttp(ip)
 	if res == "" {
 
 	} else {
@@ -48,7 +49,7 @@ func StraightScan(ipi interface{}, Delay int) {
 	}
 }
 
-func SmartBMod(target string, temp []int, portlist []string, Threads int, Delay int) {
+func SmartBMod(target string, temp []int, portlist []string, Threads int, Delay time.Duration) {
 	var wg sync.WaitGroup
 	//var wg2 sync.WaitGroup
 	ch := GenIP2(target, temp)
@@ -106,9 +107,9 @@ func SmartBMod(target string, temp []int, portlist []string, Threads int, Delay 
 }
 
 // slice 方式进行启发式扫描
-func SmartScan2(ipi interface{}, Reslice []int, Delay int) {
+func SmartScan2(ipi interface{}, Reslice []int, Delay time.Duration) {
 	ip := ipi.(string)
-	res := http.Dispatch(ip, Delay)
+	res := Scan.Dispatch(ip, Delay)
 	if res != "" {
 
 		ip = strings.Split(ip, ":")[0]
@@ -118,7 +119,7 @@ func SmartScan2(ipi interface{}, Reslice []int, Delay int) {
 	}
 }
 
-func SmartAMod(target string, portlist []string, Threads int, Delay int) {
+func SmartAMod(target string, portlist []string, Threads int, Delay time.Duration) {
 	BSlice := make([][]int, 256)
 
 	Tchan := GenBIP(target)
@@ -132,3 +133,5 @@ func SmartAMod(target string, portlist []string, Threads int, Delay int) {
 		//SmartBMod(CurB, Temp, portlist, Threads,Delay)
 	}
 }
+
+

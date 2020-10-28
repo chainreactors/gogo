@@ -5,7 +5,8 @@ import (
 	"strings"
 )
 
-func HandlePortlist(ports string) []string {
+
+func Ports2Portlist(ports string) []string {
 	var portlist []string
 
 	rawportlist := strings.Split(ports, ",")
