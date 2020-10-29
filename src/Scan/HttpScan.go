@@ -15,20 +15,19 @@ import (
 var Outp string
 
 //socket进行对网站的连接
-func SocketHttp(target string) map[string]string {
+func SocketHttp(target string) Utils.Result {
 	//fmt.Println(ip)
-	var result map[string]string
-	result = make(map[string]string)
+	var result *Utils.Result = new(Utils.Result)
 	//socket tcp连接,超时时间
 	conn, err := net.DialTimeout("tcp", target, Delay* time.Second)
 	if err != nil {
 
 		//fmt.Println(err)
-		result["stat"] = "CLOSE"
-		result["error"] = err.Error()
-		return result
+		result.Stat = "CLOSE"
+		result.Error = err.Error()
+		return *result
 	}
-	result["stat"] = "OPEN"
+	result.Stat = "OPEN"
 	alivesum++
 	err = conn.SetReadDeadline(time.Now().Add(Delay * time.Second))
 
@@ -38,8 +37,8 @@ func SocketHttp(target string) map[string]string {
 	content := string(Utils.SocketSend(conn,data))
 	err = conn.Close()
 	if err != nil {
-		result["error"] = err.Error()
-		return result
+		result.Error = err.Error()
+		return *result
 	}
 
 	//获取状态码
@@ -48,7 +47,7 @@ func SocketHttp(target string) map[string]string {
 	//如果是400可能是因为没有用https
 	if status == "400" || strings.HasPrefix(status,"3") {
 		result = SystemHttp(target,status)
-		return result
+		return *result
 	}
 
 	//正则匹配title
@@ -60,9 +59,9 @@ func SocketHttp(target string) map[string]string {
 }
 
 //使用封装好了http
-func SystemHttp(target string,status string) map[string]string {
-	var result map[string]string
-	result = make(map[string]string)
+func SystemHttp(target string,status string) Utils.Result  {
+	var result *Utils.Result = new(Utils.Result)
+
 	var protocol string
 	if status == "400" {
 		target = "https://" + target
@@ -82,11 +81,11 @@ func SystemHttp(target string,status string) map[string]string {
 
 	resp, err := c.Get(target)
 	if err != nil {
-		result["stat"] = "CLOSE"
-		result["error"] = err.Error()
-		return  result
+		result.Stat = "CLOSE"
+		result.Error = err.Error()
+		return  *result
 	}
-	result["stat"] = "OPEN"
+	result.Stat = "OPEN"
 
 	alivesum++
 	reply, err := ioutil.ReadAll(resp.Body)
@@ -96,8 +95,8 @@ func SystemHttp(target string,status string) map[string]string {
 
 	if err != nil {
 
-		result["error"] = err.Error()
-		return  result
+		result.Error = err.Error()
+		return  *result
 
 	}
 

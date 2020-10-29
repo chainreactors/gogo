@@ -3,19 +3,34 @@ package Utils
 import (
 	"regexp"
 	"strings"
+
 )
 
+type Result struct {
+	Ip        string
+	Port      string
+	Stat      string
+	Os        string
+	Host      string
+	Isshare   bool
+	Title     string
+	Midware   string
+	Language  string
+	Framework string
+	Vuln   string
+	Protocol string
+	Error string
+}
 //发送内容
-func InfoFilter(content string,protocol string)map[string]string  {
+func InfoFilter(content string,protocol string)Result  {
 
-	var result map[string]string
-	result = make(map[string]string)
-	result["stat"] = "OPEN"
-	result["protocol"] = protocol
-	result["title"] = GetTitle(content)
-	result["midware"] = GetMidware(content)
-	result["language"] = GetLanguage(content)
-	result["framework"] = GetFrameWork(content)
+	var result *Result = new(Result)
+	result.Stat = "OPEN"
+	result.Protocol = protocol
+	result.Title = GetTitle(content)
+	result.Midware = GetMidware(content)
+	result.Language = GetLanguage(content)
+	result.Framework = GetFrameWork(content)
 
 	return result
 

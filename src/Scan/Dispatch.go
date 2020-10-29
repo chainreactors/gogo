@@ -1,6 +1,7 @@
 package Scan
 
 import (
+	"getitle/src/Utils"
 	"time"
 )
 
@@ -9,9 +10,8 @@ var alivesum, titlesum int
 
 var Delay time.Duration
 
-func Dispatch(ip string,port string,delay time.Duration) map[string]string{
-	var result map[string]string
-	result = make(map[string]string)
+func Dispatch(ip string,port string,delay time.Duration) Utils.Result{
+	var result *Utils.Result = new(Utils.Result)
 	Delay = delay
 
 	target := ip + ":" + port
@@ -27,7 +27,7 @@ func Dispatch(ip string,port string,delay time.Duration) map[string]string{
 		result = SocketHttp(target)
 	}
 
-	result["ip"] = ip
-	result["port"] = port
+	result.ip = ip
+	result.port = port
 	return result
 }
