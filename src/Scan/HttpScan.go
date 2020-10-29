@@ -25,6 +25,7 @@ func SocketHttp(target string, result Utils.Result) Utils.Result {
 		return result
 	}
 	result.Stat = "OPEN"
+	result.Protocol = "http"
 	alivesum++
 	err = conn.SetReadDeadline(time.Now().Add(Delay * time.Second))
 

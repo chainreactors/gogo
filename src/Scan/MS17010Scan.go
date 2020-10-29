@@ -27,6 +27,7 @@ func MS17010Scan(target string, result Utils.Result) Utils.Result {
 		return result
 	}
 	result.Stat = "OPEN"
+	result.Protocol = "SMB"
 	defer conn.Close()
 	_ = conn.SetDeadline(time.Now().Add(time.Second * Delay))
 	_, err = conn.Write(negotiateProtocolRequest)
