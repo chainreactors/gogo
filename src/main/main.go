@@ -10,8 +10,6 @@ import (
 	"time"
 )
 
-
-
 func main() {
 	defer ants.Release()
 
@@ -26,7 +24,8 @@ func main() {
 	IPaddress := flag.String("ip", "", "IP地址 like 192.168.1.1/24")
 	mod := flag.String("m", "default", "扫描模式：straight(default),smart(s).")
 	delay := flag.Int("d", 2, "超时,默认2s")
-	Output := flag.String("o","full","clean or full")
+	Output := flag.String("o", "full", "clean or full")
+	Filename := flag.String("f", "", "filename")
 
 	//Scan.Outp = *Output
 
@@ -39,7 +38,7 @@ func main() {
 	flag.Parse()
 	moudle.Outputforamt = *Output
 
-	init := moudle.Params{*ports, *threads, *IPaddress, *mod, time.Duration(*delay)}
+	init := moudle.Params{*ports, *threads, *IPaddress, *mod, time.Duration(*delay), *Filename}
 	init = moudle.Init(init)
 	fmt.Println(init.IPaddress)
 
@@ -52,11 +51,11 @@ func main() {
 	case "default":
 		//直接扫描
 		moudle.StraightMod(init.IPaddress, portlist, init.Threads, init.Delay)
-	case "s","smart":
+	case "s", "smart":
 		//启发式扫描
 		temp := make([]int, 256)
 		mask, _ := strconv.Atoi(strings.Split(init.IPaddress, "/")[1])
-		if  mask  < 16  {
+		if mask < 16 {
 			moudle.SmartBMod(init.IPaddress, temp, portlist, init.Threads, init.Delay)
 		} else {
 			moudle.SmartAMod(init.IPaddress, portlist, init.Threads, init.Delay)
@@ -65,6 +64,5 @@ func main() {
 
 	elapsed := time.Since(t1)
 	fmt.Println("Totally run: ", elapsed)
-
 
 }

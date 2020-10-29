@@ -45,9 +45,9 @@ func SocketHttp(target string, result Utils.Result) Utils.Result {
 	if status == "400" || strings.HasPrefix(status, "3") {
 		return SystemHttp(target, result, status)
 	}
-	if strings.Contains(content, "-ERR wrong") {
-		result = RedisScan(target, result)
-	}
+	//if strings.Contains(content, "-ERR wrong") {
+	//	result = RedisScan(target, result)
+	//}
 
 	//正则匹配title
 

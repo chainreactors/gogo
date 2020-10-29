@@ -7,6 +7,9 @@ import (
 	"time"
 )
 
+var Datach = make(chan string, 10000)
+var FileHandle *os.File
+var O2File bool = false
 
 type Params struct {
 	Ports     string
@@ -14,16 +17,16 @@ type Params struct {
 	IPaddress string
 	Mod       string
 	Delay     time.Duration
+	Filename  string
 }
 
 func Init(initparams Params) Params {
 	fmt.Println("*********  getitle 0.1.2 beta by Sangfor  *********")
 
-
 	if initparams.IPaddress == "" {
 		Banner()
 		os.Exit(0)
-	} else if !strings.Contains(initparams.IPaddress,"/") {
+	} else if !strings.Contains(initparams.IPaddress, "/") {
 		initparams.IPaddress += "/32"
 	}
 
@@ -46,5 +49,35 @@ func Init(initparams Params) Params {
 	default:
 
 	}
+	var err error
+
+	if initparams.Filename != "" {
+		O2File = true
+		if CheckFileIsExist(initparams.Filename) { //如果文件存在
+			FileHandle, err = os.OpenFile(initparams.Filename, os.O_APPEND|os.O_WRONLY, os.ModeAppend) //打开文件
+			//fmt.Println("文件存在")
+			if err != nil {
+				os.Exit(0)
+			}
+			//io.WriteString(FileHandle, "123")
+		} else {
+			FileHandle, err = os.Create(initparams.Filename) //创建文件
+			//fmt.Println("文件不存在")
+			if err != nil {
+				os.Exit(0)
+			}
+			//io.WriteString(FileHandle, "123")
+		}
+
+	}
+
 	return initparams
+}
+
+func CheckFileIsExist(filename string) bool {
+	var exist = true
+	if _, err := os.Stat(filename); os.IsNotExist(err) {
+		exist = false
+	}
+	return exist
 }

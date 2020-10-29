@@ -19,8 +19,8 @@ func Dispatch(result Utils.Result, delay time.Duration) Utils.Result {
 		result = MS17010Scan(result.Ip, result)
 	case "137":
 		result = NbtScan(result.Ip, result)
-	case "6379":
-		result = RedisScan(target, result)
+	//case "6379":
+	//	result = RedisScan(target, result)
 
 	default:
 		result = SocketHttp(target, result)
