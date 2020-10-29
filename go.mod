@@ -1,4 +1,4 @@
-module antest
+module getitle
 
 go 1.14
 

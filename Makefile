@@ -27,7 +27,8 @@ release:
 		#go clean
 		CGO_ENABLED=0 GOOS=windows GOARCH=386 go build -o ./bin/getitle-win32-${VERSION}.exe ./src/main/main.go
 		#upx ./bin/getitle-win32-${VERSION}.exe
-		#go clean
+		#compress
+		tar cvf release/getitle%1.zip bin/*
 # Cleans our projects: deletes binaries
 clean:
 		go clean

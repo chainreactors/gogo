@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+
 type Params struct {
 	Ports     string
 	Threads   int
@@ -17,6 +18,7 @@ type Params struct {
 
 func Init(initparams Params) Params {
 	fmt.Println("*********  getitle 0.0.7 beta by Sangfor  *********")
+
 
 	if initparams.IPaddress == "" {
 		fmt.Println(

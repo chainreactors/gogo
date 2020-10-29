@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-
+var Outp string
 
 //socket进行对网站的连接
 func SocketHttp(target string) string {
@@ -113,7 +113,12 @@ func InfoFilter(content string,target string)string  {
 	language := GetLanguage(content)
 	framework := GetFrameWork(content)
 
-	return 	Encode(fmt.Sprintf("[+] %s [OPEN] [%s] [%s] [%s] [%s]",target,midware,language,framework,title))
+	if Outp == "clean"{
+		return Encode(fmt.Sprintf("[+] %s [OPEN] [%s] ",target,title))
+	}else {
+
+		return Encode(fmt.Sprintf("[+] %s [OPEN] [%s] [%s] [%s] [%s]", target, midware, language, framework, title))
+	}
 
 }
 

@@ -1,15 +1,17 @@
 package main
 
 import (
-	"antest/src/Scan"
-	"antest/src/moudle"
 	"flag"
 	"fmt"
+	"getitle/src/Scan"
+	"getitle/src/moudle"
 	"github.com/panjf2000/ants/v2"
 	"strconv"
 	"strings"
 	"time"
 )
+
+
 
 func main() {
 	defer ants.Release()
@@ -25,6 +27,10 @@ func main() {
 	IPaddress := flag.String("ip", "", "IP地址 like 192.168.1.1/24")
 	mod := flag.String("m", "default", "扫描模式：straight(default),smart(s).")
 	delay := flag.Duration("d", 2, "超时,默认2s")
+	Output := flag.String("o","clean","clean or full")
+
+
+	Scan.Outp = *Output
 
 	t1 := time.Now()
 
@@ -46,7 +52,7 @@ func main() {
 	case "default":
 		//直接扫描
 		moudle.StraightMod(init.IPaddress, portlist, init.Threads, init.Delay)
-	case "s":
+	case "s","smart":
 		//启发式扫描
 		temp := make([]int, 256)
 		mask, _ := strconv.Atoi(strings.Split(init.IPaddress, "/")[1])
