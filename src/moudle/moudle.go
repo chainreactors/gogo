@@ -3,6 +3,7 @@ package moudle
 import (
 	"fmt"
 	"getitle/src/Scan"
+	"getitle/src/Utils"
 	"github.com/panjf2000/ants/v2"
 	"net"
 	"strings"
@@ -12,6 +13,7 @@ import (
 
 var lock sync.Mutex
 var Outputforamt string
+
 //直接扫描
 func StraightMod(target string, portlist []string, Threads int, Delay time.Duration) {
 	var wgs sync.WaitGroup
@@ -40,14 +42,17 @@ func StraightMod(target string, portlist []string, Threads int, Delay time.Durat
 func StraightScan(ipi interface{}, Delay time.Duration) {
 	target := ipi.(string)
 	//fmt.Println(ip)
-	ip:= strings.Split(target,":")[0]
-	port := strings.Split(target,":")[1]
-	res := Scan.Dispatch(ip,port, Delay)
+	var result = new(Utils.Result)
+	result.Ip = strings.Split(target, ":")[0]
+	result.Port = strings.Split(target, ":")[1]
+
+	*result = Scan.Dispatch(*result, Delay)
 	//res := Scan.SystemHttp(ip)
-	if res["stat"] == "CLOSE" {
+
+	if result.Stat == "CLOSE" {
 
 	} else {
-		output(res,Outputforamt)
+		output(*result, Outputforamt)
 	}
 }
 
@@ -111,14 +116,14 @@ func SmartBMod(target string, temp []int, portlist []string, Threads int, Delay 
 // slice 方式进行启发式扫描
 func SmartScan2(ipi interface{}, Reslice []int, Delay time.Duration) {
 	target := ipi.(string)
-	ip:= strings.Split(target,":")[0]
-	port := strings.Split(target,":")[1]
+	var result = new(Utils.Result)
+	result.Ip = strings.Split(target, ":")[0]
+	result.Port = strings.Split(target, ":")[1]
 
-	res := Scan.Dispatch(ip,port, Delay)
-	if res["stat"] == "OPEN" {
+	*result = Scan.Dispatch(*result, Delay)
+	if result.Stat == "OPEN" {
 
-		ip = strings.Split(ip, ":")[0]
-		s2ip := net.ParseIP(ip).To4()
+		s2ip := net.ParseIP(result.Ip).To4()
 		c := s2ip[2]
 		Reslice[c] += 1
 	}

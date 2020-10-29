@@ -9,26 +9,22 @@ var alivesum, titlesum int
 
 var Delay time.Duration
 
-func Dispatch(ip string,port string,delay time.Duration) Utils.Result{
-	var result *Utils.Result = new(Utils.Result)
+func Dispatch(result Utils.Result, delay time.Duration) Utils.Result {
 	Delay = delay
-
-	target := ip + ":" + port
-	switch port {
+	target := result.Ip + ":" + result.Port
+	switch result.Port {
 	case "443", "8443":
-		result = SystemHttp(target, "400")
+		result = SystemHttp(target, result, "400")
 	case "445":
-		result = MS17010Scan(ip)
+		result = MS17010Scan(result.Ip, result)
 	case "137":
-		result = NbtScan(ip)
+		result = NbtScan(result.Ip, result)
 	case "6379":
-		result = RedisScan(target)
+		result = RedisScan(target, result)
 
 	default:
-		result = SocketHttp(target)
+		result = SocketHttp(target, result)
 	}
 
-	result.ip = ip
-	result.port = port
-	return *result
+	return result
 }

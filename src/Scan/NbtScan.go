@@ -70,19 +70,16 @@ func init() {
 	}
 }
 
-func NbtScan(ip string) map[string]string {
-
-	var result map[string]string
-	result = make(map[string]string)
+func NbtScan(ip string, result Utils.Result) Utils.Result {
 
 	var Share bool = false
 	reply := Sendpayload(ip)
 
 	if len(reply) > 58 {
-		result["stat"] = "OPEN"
+		result.Stat = "OPEN"
 
 	} else {
-		result["stat"] = "CLOSE"
+		result.Stat = "CLOSE"
 		return result
 	}
 
@@ -127,7 +124,7 @@ func NbtScan(ip string) map[string]string {
 	if Share {
 		msg = msg + "        sharing"
 	}
-	result["title"] = msg
+	result.Title = msg
 
 	return result
 }

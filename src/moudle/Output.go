@@ -3,9 +3,10 @@ package moudle
 import (
 	"encoding/json"
 	"fmt"
+	"getitle/src/Utils"
 )
 
-func output(result map[string]string,outputformat string)  {
+func output(result Utils.Result, outputformat string) {
 	switch outputformat {
 	case "clean":
 		cleanOutput(result)
@@ -16,21 +17,28 @@ func output(result map[string]string,outputformat string)  {
 	}
 }
 
-func cleanOutput(result map[string]string)  {
-	fmt.Printf("[+] %s://%s:%s [OPEN] %s \n",result["protocol"],result["ip"],result["port"],result["title"])
+func cleanOutput(result Utils.Result) {
+	fmt.Printf("[+] %s://%s:%s [OPEN] %s ", result.Protocol, result.Ip, result.Port, result.Title)
+	println()
 }
 
-func fullOutput(result map[string]string)  {
-	fmt.Printf("[+] %s://%s:%s [OPEN] [%s] [%s] [%s] [%s] \n",result["protocol"],result["ip"],result["port"],result["midware"],result["language"],result["framework"],result["title"])
+func fullOutput(result Utils.Result) {
+	fmt.Printf("[+] %s://%s:%s [OPEN] [%s] [%s] [%s] [%s] ", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, result.Framework, result.Title)
+	println()
 }
-func jsonOutput(result map[string]string)  {
+func jsonOutput(result Utils.Result) {
 	jsons, err := json.Marshal(result)
 	if err == nil {
 		println(string(jsons))
 	}
 }
 
-func Banner()  {
+func vulnOutput(result Utils.Result) {
+	if result.Vuln != "" {
+		fmt.Print("Find Vuln:" + result.Vuln)
+	}
+}
+func Banner() {
 	fmt.Println(
 		"Usage of ./getitle:" +
 			"\n  -d int			超时,默认2s (default 2)  " +

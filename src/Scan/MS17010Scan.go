@@ -3,6 +3,7 @@ package Scan
 import (
 	"encoding/binary"
 	"encoding/hex"
+	"getitle/src/Utils"
 	"net"
 	"time"
 )
@@ -15,26 +16,24 @@ var (
 	trans2SessionSetupRequest, _ = hex.DecodeString("0000004eff534d4232000000001807c00000000000000000000000000008fffe000841000f0c0000000100000000000000a6d9a40000000c00420000004e0001000e000d0000000000000000000000000000")
 )
 
-func MS17010Scan(target string)map[string]string {
+func MS17010Scan(target string, result Utils.Result) Utils.Result {
 	// connecting to a host in LAN if reachable should be very quick
-	var result map[string]string
-	result = make(map[string]string)
-	conn, err := net.DialTimeout("tcp", target+":445", Delay* time.Second)
+	conn, err := net.DialTimeout("tcp", target+":445", Delay*time.Second)
 	if err != nil {
 
 		//fmt.Println(err)
-		result["stat"] = "CLOSE"
-		result["error"] = err.Error()
+		result.Stat = "CLOSE"
+		result.Error = err.Error()
 		return result
 	}
-	result["stat"] = "OPEN"
+	result.Stat = "OPEN"
 	defer conn.Close()
-	conn.SetDeadline(time.Now().Add(time.Second * Delay))
+	_ = conn.SetDeadline(time.Now().Add(time.Second * Delay))
 	_, err = conn.Write(negotiateProtocolRequest)
 	reply := make([]byte, 1024)
 	// let alone half packet
 	if n, err := conn.Read(reply); err != nil || n < 36 {
-		result["error"] = err.Error()
+		result.Error = err.Error()
 		return result
 	}
 
@@ -42,19 +41,17 @@ func MS17010Scan(target string)map[string]string {
 		// status != 0
 		return result
 	}
-
 
 	_, _ = conn.Write(sessionSetupRequest)
 
 	n, err := conn.Read(reply)
 	if err != nil || n < 36 {
-		result["error"] = err.Error()
+		result.Error = err.Error()
 		return result
 	}
 
 	if binary.LittleEndian.Uint32(reply[9:13]) != 0 {
 		// status != 0
-		result["MS17010"] = "UNKNOWN"
 		return result
 	}
 
@@ -83,7 +80,7 @@ func MS17010Scan(target string)map[string]string {
 	_, _ = conn.Write(treeConnectRequest)
 
 	if n, err := conn.Read(reply); err != nil || n < 36 {
-		result["error"] = err.Error()
+		result.Error = err.Error()
 		return result
 	}
 
@@ -95,17 +92,14 @@ func MS17010Scan(target string)map[string]string {
 
 	_, _ = conn.Write(transNamedPipeRequest)
 	if n, err := conn.Read(reply); err != nil || n < 36 {
-		result["error"] = err.Error()
+		result.Error = err.Error()
 		return result
 	}
 
 	if reply[9] == 0x05 && reply[10] == 0x02 && reply[11] == 0x00 && reply[12] == 0xc0 {
-		result["os"] = os
-		result["MS17010"] = "VULNERABLE"
+		result.Os = os
+		result.Vuln = "MS17010"
 		// detect present of DOUBLEPULSAR SMB implant
-	} else {
-		//result = target + os + " stays in safety"
-		result["MS17010"] = "SAFETY"
 	}
 	return result
 }

@@ -3,72 +3,66 @@ package Scan
 import (
 	"crypto/tls"
 	"fmt"
+	"getitle/src/Utils"
 	"io/ioutil"
 	"net"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
-	"getitle/src/Utils"
 )
 
-var Outp string
-
 //socket进行对网站的连接
-func SocketHttp(target string) Utils.Result {
+func SocketHttp(target string, result Utils.Result) Utils.Result {
 	//fmt.Println(ip)
-	var result *Utils.Result = new(Utils.Result)
 	//socket tcp连接,超时时间
-	conn, err := net.DialTimeout("tcp", target, Delay* time.Second)
+	conn, err := net.DialTimeout("tcp", target, Delay*time.Second)
 	if err != nil {
 
 		//fmt.Println(err)
 		result.Stat = "CLOSE"
 		result.Error = err.Error()
-		return *result
+		return result
 	}
 	result.Stat = "OPEN"
 	alivesum++
 	err = conn.SetReadDeadline(time.Now().Add(Delay * time.Second))
 
-
 	//发送内容
-	data :=[]byte("GET / HTTP/1.1\r\nHost: " + target + "\r\n\r\n")
-	content := string(Utils.SocketSend(conn,data))
+	data := []byte("GET / HTTP/1.1\r\nHost: " + target + "\r\n\r\n")
+	content := string(Utils.SocketSend(conn, data))
 	err = conn.Close()
 	if err != nil {
 		result.Error = err.Error()
-		return *result
+		return result
 	}
 
 	//获取状态码
 	status := GetStatusCode(content)
 
 	//如果是400可能是因为没有用https
-	if status == "400" || strings.HasPrefix(status,"3") {
-		result = SystemHttp(target,status)
-		return *result
+	if status == "400" || strings.HasPrefix(status, "3") {
+		return SystemHttp(target, result, status)
+	}
+	if strings.Contains(content, "-ERR wrong") {
+		result = RedisScan(target, result)
 	}
 
 	//正则匹配title
 
-
-	return Utils.InfoFilter(content,"http")
-
+	return Utils.InfoFilter(content, result)
 
 }
 
 //使用封装好了http
-func SystemHttp(target string,status string) Utils.Result  {
-	var result *Utils.Result = new(Utils.Result)
+func SystemHttp(target string, result Utils.Result, status string) Utils.Result {
 
-	var protocol string
 	if status == "400" {
 		target = "https://" + target
-		protocol = "https"
-	} else{
+		result.Protocol = "https"
+	} else {
 		target = "http://" + target
-		protocol = "http"
+		result.Protocol = "http"
 	}
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
@@ -83,7 +77,7 @@ func SystemHttp(target string,status string) Utils.Result  {
 	if err != nil {
 		result.Stat = "CLOSE"
 		result.Error = err.Error()
-		return  *result
+		return result
 	}
 	result.Stat = "OPEN"
 
@@ -96,11 +90,11 @@ func SystemHttp(target string,status string) Utils.Result  {
 	if err != nil {
 
 		result.Error = err.Error()
-		return  *result
+		return result
 
 	}
 
-	return Utils.InfoFilter(content,protocol)
+	return Utils.InfoFilter(content, result)
 }
 
 func GetStatusCode(html string) string {
@@ -121,6 +115,3 @@ func OutputAliveSum() {
 func OutputTitleSum() {
 	fmt.Println("TitleSum: " + strconv.Itoa(titlesum))
 }
-
-
-
