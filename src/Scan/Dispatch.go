@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-var alivesum, titlesum int
+var Alivesum, Titlesum int
 
 var Delay time.Duration
 
@@ -25,11 +25,11 @@ func Dispatch(result Utils.Result, delay time.Duration) Utils.Result {
 	default:
 		result = SocketHttp(target, result)
 	}
-	if result.Stat == "OPEN" {
-		alivesum ++
-	}
-	if result.Title != "" {
-		titlesum ++
-	}
+	//if result.Stat == "OPEN" {
+	//	Alivesum ++
+	//}
+	//if result.Title != "" {
+	//	Titlesum ++
+	//}
 	return result
 }

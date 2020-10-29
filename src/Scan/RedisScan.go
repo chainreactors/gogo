@@ -16,6 +16,8 @@ func RedisScan(target string, result Utils.Result) Utils.Result {
 		result.Stat = "CLOSE"
 		return result
 	}
+	_ = conn.SetDeadline(time.Now().Add(time.Second * Delay))
+
 	result.Stat = "OPEN"
 	result.Protocol = "redis"
 	recv := Utils.SocketSend(conn, []byte("info"))

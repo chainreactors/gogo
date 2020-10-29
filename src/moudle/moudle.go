@@ -52,7 +52,7 @@ func StraightScan(ipi interface{}, Delay time.Duration) {
 	if result.Stat == "CLOSE" {
 
 	} else {
-		output(*result, Outputforamt)
+		output(*result)
 	}
 }
 

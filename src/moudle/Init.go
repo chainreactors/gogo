@@ -16,10 +16,13 @@ type Params struct {
 	Delay     time.Duration
 }
 
-func Init(initparams Params) Params {
+func Init(initparams Params,key string) Params {
 	fmt.Println("*********  getitle 0.1.2 beta by Sangfor  *********")
 
-
+	if key != "sangfor" {
+		println("FUCK OFF")
+		os.Exit(0)
+	}
 	if initparams.IPaddress == "" {
 		Banner()
 		os.Exit(0)
