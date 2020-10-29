@@ -27,7 +27,7 @@ func SocketHttp(target string, result Utils.Result) Utils.Result {
 	result.Stat = "OPEN"
 	result.Protocol = "http"
 	alivesum++
-	err = conn.SetReadDeadline(time.Now().Add(Delay * time.Second))
+	err = conn.SetDeadline(time.Now().Add(Delay * time.Second))
 
 	//发送内容
 	data := []byte("GET / HTTP/1.1\r\nHost: " + target + "\r\n\r\n")
