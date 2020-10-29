@@ -25,6 +25,11 @@ func Dispatch(result Utils.Result, delay time.Duration) Utils.Result {
 	default:
 		result = SocketHttp(target, result)
 	}
-
+	if result.Stat == "OPEN" {
+		alivesum ++
+	}
+	if result.Title != "" {
+		titlesum ++
+	}
 	return result
 }

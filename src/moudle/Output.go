@@ -18,13 +18,13 @@ func output(result Utils.Result, outputformat string) {
 }
 
 func cleanOutput(result Utils.Result) {
-	fmt.Printf("[+] %s://%s:%s [OPEN] %s ", result.Protocol, result.Ip, result.Port, result.Title)
+	fmt.Printf("[+] %s://%s:%s	OPEN	%s	", result.Protocol, result.Ip, result.Port, result.Title)
 	vulnOutput(result)
 	println()
 }
 
 func fullOutput(result Utils.Result) {
-	fmt.Printf("[+] %s://%s:%s [OPEN] [%s] [%s] [%s] [%s] ", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, result.Framework, result.Title)
+	fmt.Printf("[+] %s://%s:%s	OPEN	%s	%s	%s	%s	", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, result.Framework, result.Title)
 	vulnOutput(result)
 	println()
 }
@@ -40,6 +40,8 @@ func vulnOutput(result Utils.Result) {
 		fmt.Print("Find Vuln:" + result.Vuln)
 	}
 }
+
+
 func Banner() {
 	fmt.Println(
 		"Usage of ./getitle:" +

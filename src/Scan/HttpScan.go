@@ -69,12 +69,12 @@ func SystemHttp(target string, result Utils.Result, status string) Utils.Result 
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
 
-	c := &http.Client{
+	conn := &http.Client{
 		Transport: tr,
 		Timeout:   Delay * time.Second,
 	}
 
-	resp, err := c.Get(target)
+	resp, err := conn.Get(target)
 	if err != nil {
 		result.Stat = "CLOSE"
 		result.Error = err.Error()
