@@ -20,7 +20,7 @@ func RedisScan(target string)map[string]string  {
 	result["stat"] = "OPEN"
 	recv := Utils.SocketSend(conn,[]byte("info"))
 	if strings.Contains(string(recv),"redis_version") {
-		result["framework"] =  Utils.Match("redis_version:",string(recv))
+		result["framework"] =  Utils.Match("redis_version:(.*)",string(recv))
 	}
 	return result
 }
