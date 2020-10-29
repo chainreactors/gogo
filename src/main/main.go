@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"getitle/src/Scan"
 	"getitle/src/moudle"
 	"github.com/panjf2000/ants/v2"
@@ -42,7 +41,7 @@ func main() {
 
 	init := moudle.Params{*ports, *threads, *IPaddress, *mod, time.Duration(*delay),*Filename}
 	init = moudle.Init(init,*key)
-	fmt.Println(init.IPaddress)
+	println(init.IPaddress)
 
 	//init the IP
 	portlist := moudle.Ports2Portlist(init.Ports)
@@ -66,7 +65,7 @@ func main() {
 
 	elapsed := time.Since(t1)
 
-	fmt.Printf("Alive sum: %d\n" , Scan.Alivesum)
-	fmt.Println("Totally run: ", elapsed)
+	println("Alive sum: " + strconv.Itoa(Scan.Alivesum))
+	println("Totally run: " + elapsed.String())
 
 }

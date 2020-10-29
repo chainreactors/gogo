@@ -56,6 +56,7 @@ Usage of ./getitle:
   * 添加了brute与all两个端口预设,brute为可爆破端口,all为常见端口
   * 忽略匹配title的大小写问题
 * v0.0.6
+  
   * 添加了大于B段启发式扫描模式
 * v0.1.0
   * 优化了参数
@@ -83,4 +84,8 @@ Usage of ./getitle:
 
   
 
- 
+ ## Todo List
+
+1. 添加OXID
+2. 添加简单目录扫描
+3. 更灵活的端口模式

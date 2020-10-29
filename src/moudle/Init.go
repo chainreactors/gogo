@@ -1,7 +1,6 @@
 package moudle
 
 import (
-	"fmt"
 	"os"
 	"strings"
 	"time"
@@ -21,10 +20,10 @@ type Params struct {
 }
 
 func Init(initparams Params,key string) Params {
-	fmt.Println("*********  getitle 0.1.2 beta by Sangfor  *********")
+	println("*********  getitle 0.1.5 beta by Sangfor  *********")
 
 	if key != "sangfor" {
-		fmt.Print("FUCK OFF!!!")
+		println("FUCK OFF!!!")
 		os.Exit(0)
 	}
 	if initparams.IPaddress == "" {
