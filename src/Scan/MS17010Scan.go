@@ -4,8 +4,6 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"getitle/src/Utils"
-	"net"
-	"time"
 )
 
 var (
@@ -18,7 +16,7 @@ var (
 
 func MS17010Scan(target string, result Utils.Result) Utils.Result {
 	// connecting to a host in LAN if reachable should be very quick
-	conn, err := net.DialTimeout("tcp", target+":445", Delay*time.Second)
+	conn, err := Utils.SocketConn(target,Delay)
 	if err != nil {
 
 		//fmt.Println(err)
@@ -29,7 +27,6 @@ func MS17010Scan(target string, result Utils.Result) Utils.Result {
 	result.Stat = "OPEN"
 	result.Protocol = "SMB"
 	defer conn.Close()
-	_ = conn.SetDeadline(time.Now().Add(time.Second * Delay))
 	_, err = conn.Write(negotiateProtocolRequest)
 	reply := make([]byte, 1024)
 	// let alone half packet

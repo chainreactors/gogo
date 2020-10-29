@@ -2,21 +2,19 @@ package Scan
 
 import (
 	"getitle/src/Utils"
-	"net"
 	"strings"
-	"time"
 )
 
 func RedisScan(target string, result Utils.Result) Utils.Result {
 
-	conn, err := net.DialTimeout("tcp", target, Delay*time.Second)
+	conn, err := Utils.SocketConn(target,Delay)
 	if err != nil {
 
 		//fmt.Println(err)
 		result.Stat = "CLOSE"
+		result.Error = err.Error()
 		return result
 	}
-	_ = conn.SetDeadline(time.Now().Add(time.Second * Delay))
 
 	result.Stat = "OPEN"
 	result.Protocol = "redis"

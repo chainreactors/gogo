@@ -4,7 +4,6 @@ import (
 	"crypto/tls"
 	"getitle/src/Utils"
 	"io/ioutil"
-	"net"
 	"net/http"
 	"strings"
 	"time"
@@ -14,9 +13,9 @@ import (
 func SocketHttp(target string, result Utils.Result) Utils.Result {
 	//fmt.Println(ip)
 	//socket tcp连接,超时时间
-	conn, err := net.DialTimeout("tcp", target, Delay*time.Second)
-	if err != nil {
 
+	conn, err := Utils.SocketConn(target, Delay)
+	if err != nil {
 		//fmt.Println(err)
 		result.Stat = "CLOSE"
 		result.Error = err.Error()
@@ -24,7 +23,6 @@ func SocketHttp(target string, result Utils.Result) Utils.Result {
 	}
 	result.Stat = "OPEN"
 	result.Protocol = "http"
-	err = conn.SetDeadline(time.Now().Add(Delay * time.Second))
 
 	//发送内容
 	data := []byte("GET / HTTP/1.1\r\nHost: " + target + "\r\n\r\n")

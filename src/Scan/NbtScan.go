@@ -3,24 +3,14 @@ package Scan
 import (
 	"encoding/hex"
 	"getitle/src/Utils"
-	"net"
 	"strconv"
 	"strings"
-	"time"
 )
 
 var UNIQUE_NAMES, GROUP_NAMES, NetBIOS_ITEM_TYPE map[string]string
 
 func Sendpayload(target string) []byte {
-	conn, err := net.DialTimeout("udp", target+":137", 2*time.Second)
-	if err != nil {
-
-		//fmt.Println(err)
-		return []byte("\x00")
-	}
-
-	err = conn.SetReadDeadline(time.Now().Add(2 * time.Second))
-
+	conn, err := Utils.SocketConn(target,Delay)
 	if err != nil {
 
 		//fmt.Println(err)
@@ -82,7 +72,7 @@ func NbtScan(ip string, result Utils.Result) Utils.Result {
 		result.Stat = "CLOSE"
 		return result
 	}
-
+	result.Protocol = "NetBIOS"
 	num, err := Byte2Int(reply[56:57])
 	if err != nil {
 		return result
