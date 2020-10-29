@@ -1,13 +1,9 @@
-package Scan
+package Utils
 
-import (
-	"net"
-	"strings"
-)
-
+import "net"
 
 func SocketSend(conn net.Conn, data []byte) []byte {
-	//发送内容
+
 	var err error
 	_, err = conn.Write(data)
 	if err != nil {
@@ -24,8 +20,3 @@ func SocketSend(conn net.Conn, data []byte) []byte {
 	return reply
 }
 
-func Encode(s string)string {
-	s = strings.Replace(s,"\r","%13",-1)
-	s = strings.Replace(s,"\n","%10",-1)
-	return s
-}

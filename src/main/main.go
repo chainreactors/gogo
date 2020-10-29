@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"getitle/src/Scan"
 	"getitle/src/moudle"
 	"github.com/panjf2000/ants/v2"
 	"strconv"
@@ -26,11 +25,10 @@ func main() {
 	threads := flag.Int("t", 4000, "threads")
 	IPaddress := flag.String("ip", "", "IP地址 like 192.168.1.1/24")
 	mod := flag.String("m", "default", "扫描模式：straight(default),smart(s).")
-	delay := flag.Duration("d", 2, "超时,默认2s")
-	Output := flag.String("o","clean","clean or full")
+	delay := flag.Int("d", 2, "超时,默认2s")
+	Output := flag.String("o","full","clean or full")
 
-
-	Scan.Outp = *Output
+	//Scan.Outp = *Output
 
 	t1 := time.Now()
 
@@ -39,7 +37,9 @@ func main() {
 	//portlist := []string{"80","81","7001","9001","8080","8081","8000","8009","88","443","9999","7080","8070","9080","8082","8888","8089","9001","5555","9001"}
 
 	flag.Parse()
-	init := moudle.Params{*ports, *threads, *IPaddress, *mod, *delay}
+	moudle.Outputforamt = *Output
+
+	init := moudle.Params{*ports, *threads, *IPaddress, *mod, time.Duration(*delay)}
 	init = moudle.Init(init)
 	fmt.Println(init.IPaddress)
 
@@ -66,8 +66,5 @@ func main() {
 	elapsed := time.Since(t1)
 	fmt.Println("Totally run: ", elapsed)
 
-	//输出扫描存活的数量和输出扫到有title的数量
-	Scan.OutputAliveSum()
-	Scan.OutputTitleSum()
 
 }

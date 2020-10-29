@@ -11,7 +11,7 @@ import (
 )
 
 var lock sync.Mutex
-
+var Outputforamt string
 //直接扫描
 func StraightMod(target string, portlist []string, Threads int, Delay time.Duration) {
 	var wgs sync.WaitGroup
@@ -23,8 +23,8 @@ func StraightMod(target string, portlist []string, Threads int, Delay time.Durat
 
 	// Use the pool with a function,
 	// set 10 to the capacity of goroutine pool and 1 second for expired duration.
-	p1, _ := ants.NewPoolWithFunc(Threads, func(j interface{}) {
-		StraightScan(j, Delay)
+	p1, _ := ants.NewPoolWithFunc(Threads, func(ipi interface{}) {
+		StraightScan(ipi, Delay)
 		wgs.Done()
 	})
 	defer p1.Release()
@@ -38,14 +38,16 @@ func StraightMod(target string, portlist []string, Threads int, Delay time.Durat
 }
 
 func StraightScan(ipi interface{}, Delay time.Duration) {
-	ip := ipi.(string)
+	target := ipi.(string)
 	//fmt.Println(ip)
-	res := Scan.Dispatch(ip, Delay)
+	ip:= strings.Split(target,":")[0]
+	port := strings.Split(target,":")[1]
+	res := Scan.Dispatch(ip,port, Delay)
 	//res := Scan.SystemHttp(ip)
-	if res == "" {
+	if res["stat"] == "CLOSE" {
 
 	} else {
-		fmt.Println(res)
+		output(res,Outputforamt)
 	}
 }
 
@@ -108,9 +110,12 @@ func SmartBMod(target string, temp []int, portlist []string, Threads int, Delay 
 
 // slice 方式进行启发式扫描
 func SmartScan2(ipi interface{}, Reslice []int, Delay time.Duration) {
-	ip := ipi.(string)
-	res := Scan.Dispatch(ip, Delay)
-	if res != "" {
+	target := ipi.(string)
+	ip:= strings.Split(target,":")[0]
+	port := strings.Split(target,":")[1]
+
+	res := Scan.Dispatch(ip,port, Delay)
+	if res["stat"] == "OPEN" {
 
 		ip = strings.Split(ip, ":")[0]
 		s2ip := net.ParseIP(ip).To4()
