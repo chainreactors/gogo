@@ -98,7 +98,7 @@ func MS17010Scan(target string, result Utils.Result) Utils.Result {
 	}
 
 	if reply[9] == 0x05 && reply[10] == 0x02 && reply[11] == 0x00 && reply[12] == 0xc0 {
-		result.Os = os
+		result.Title = os
 		result.Vuln = "MS17010"
 		// detect present of DOUBLEPULSAR SMB implant
 	}

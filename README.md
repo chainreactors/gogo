@@ -70,6 +70,7 @@ Usage of ./getitle:
 * v0.1.3
   * 添加了nbtscan
   * 修复了部分bug
+  * 添加了json格式输出
 
 
 
