@@ -19,7 +19,7 @@ func output(result Utils.Result) {
 	if strings.Contains(Outputforamt,"json") {
 		out += jsonOutput(result)
 	}
-	print(out)
+	fmt.Print(out)
 }
 
 func cleanOutput(result Utils.Result)string {
