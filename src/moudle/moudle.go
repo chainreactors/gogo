@@ -1,8 +1,8 @@
 package moudle
 
 import (
-	"antest/src/Scan"
 	"fmt"
+	"getitle/src/Scan"
 	"github.com/panjf2000/ants/v2"
 	"net"
 	"strings"
@@ -130,8 +130,6 @@ func SmartAMod(target string, portlist []string, Threads int, Delay time.Duratio
 		Temp := make([]int, 256)
 		BSlice = append(BSlice, Temp)
 		sum += 1
-		//SmartBMod(CurB, Temp, portlist, Threads,Delay)
+		SmartBMod(CurB, Temp, portlist, Threads, Delay)
 	}
 }
-
-

@@ -12,23 +12,23 @@ release:
 		rm -rf *.gz
 		# Build for mac
 		go build -o ./bin/getitle-mac64-${VERSION} ./src/main/main.go
-		#tar czvf ./bingetitle-mac64-${VERSION}.tar.gz ./bin/getitle-mac64-${VERSION}
+		upx -9 ./bin/getitle-mac64-${VERSION}
 		# Build for linux
 		#go clean
 		CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ./bin/getitle-linux64-${VERSION} ./src/main/main.go
-		#tar czvf ./bin/getitle-linux64-${VERSION}.tar.gz ./getitle-linux64-${VERSION}
+		upx -9 ./bin/getitle-linux64-${VERSION}
 		#go clean
 		CGO_ENABLED=0 GOOS=linux GOARCH=386 go build -o ./bin/getitle-linux32-${VERSION} ./src/main/main.go
-		#tar czvf ./bin/getitle-linux32-${VERSION}.tar.gz ./bin/getitle-linux32-${VERSION}
+		upx -9 ./bin/getitle-linux32-${VERSION}
 		# Build for win
 		#go clean
 		CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o ./bin/getitle-win64-${VERSION}.exe  ./src/main/main.go
-		#upx ./bin/getitle-win64-${VERSION}.exe
+		upx -9 ./bin/getitle-win64-${VERSION}.exe
 		#go clean
 		CGO_ENABLED=0 GOOS=windows GOARCH=386 go build -o ./bin/getitle-win32-${VERSION}.exe ./src/main/main.go
-		#upx ./bin/getitle-win32-${VERSION}.exe
+		upx -9 ./bin/getitle-win32-${VERSION}.exe
 		#compress
-		tar cvf release/getitle%1.zip bin/*
+		tar cvf release/getitle.tar.gz bin/*
 # Cleans our projects: deletes binaries
 clean:
 		go clean
