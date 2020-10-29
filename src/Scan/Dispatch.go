@@ -5,7 +5,6 @@ import (
 	"time"
 )
 
-
 var alivesum, titlesum int
 
 var Delay time.Duration
@@ -16,10 +15,12 @@ func Dispatch(ip string,port string,delay time.Duration) Utils.Result{
 
 	target := ip + ":" + port
 	switch port {
-	case "443","8443":
-		result = SystemHttp(target,"400")
+	case "443", "8443":
+		result = SystemHttp(target, "400")
 	case "445":
 		result = MS17010Scan(ip)
+	case "137":
+		result = NbtScan(ip)
 	case "6379":
 		result = RedisScan(target)
 
@@ -29,5 +30,5 @@ func Dispatch(ip string,port string,delay time.Duration) Utils.Result{
 
 	result.ip = ip
 	result.port = port
-	return result
+	return *result
 }
