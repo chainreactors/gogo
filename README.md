@@ -20,6 +20,7 @@ Usage of ./getitle:
 0070,389,5432,5984,9200,11211,27017,161,873,1833,2049,2181,2375,6000,6666,6667,7777,6868,9000,9001,12345,5632,9081,3700,4848,1352,8069,9300
   -t int        threads (default 4000)
   -o string     输出格式:clean,full(default) or json
+  
 
      example:           ./getitle -ip 192.168.1.1 -p top2
      smart mod example: ./getitle -ip 192.168.1.1/8 -p top2 -m s
@@ -71,6 +72,11 @@ Usage of ./getitle:
   * 添加了nbtscan
   * 修复了部分bug
   * 添加了json格式输出
+* v0.1.4
+  * 修复了rediscan未位置timeout的bug
+  * 添加了更复杂的输出模式
+  * 去除了banner
+  * 添加了key
 
 
 

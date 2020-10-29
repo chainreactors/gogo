@@ -2,12 +2,10 @@ package Scan
 
 import (
 	"crypto/tls"
-	"fmt"
 	"getitle/src/Utils"
 	"io/ioutil"
 	"net"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -26,8 +24,7 @@ func SocketHttp(target string, result Utils.Result) Utils.Result {
 	}
 	result.Stat = "OPEN"
 	result.Protocol = "http"
-	alivesum++
-	err = conn.SetReadDeadline(time.Now().Add(Delay * time.Second))
+	err = conn.SetDeadline(time.Now().Add(Delay * time.Second))
 
 	//发送内容
 	data := []byte("GET / HTTP/1.1\r\nHost: " + target + "\r\n\r\n")
@@ -69,12 +66,12 @@ func SystemHttp(target string, result Utils.Result, status string) Utils.Result 
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
 
-	c := &http.Client{
+	conn := &http.Client{
 		Transport: tr,
 		Timeout:   Delay * time.Second,
 	}
 
-	resp, err := c.Get(target)
+	resp, err := conn.Get(target)
 	if err != nil {
 		result.Stat = "CLOSE"
 		result.Error = err.Error()
@@ -82,7 +79,6 @@ func SystemHttp(target string, result Utils.Result, status string) Utils.Result 
 	}
 	result.Stat = "OPEN"
 
-	alivesum++
 	reply, err := ioutil.ReadAll(resp.Body)
 	resp.Body.Close()
 
@@ -109,10 +105,4 @@ func GetStatusCode(html string) string {
 	return ""
 }
 
-func OutputAliveSum() {
-	fmt.Println("AliveSum: " + strconv.Itoa(alivesum))
-}
 
-func OutputTitleSum() {
-	fmt.Println("TitleSum: " + strconv.Itoa(titlesum))
-}

@@ -1,6 +1,18 @@
 package Utils
 
-import "net"
+import (
+	"net"
+)
+
+//func SocketConn(conn net.Conn)(net.Conn,error ) {
+//	conn, err := net.DialTimeout("tcp", target, Delay*time.Second)
+//	if err != nil {
+//		return nil, err
+//	}
+//	err = conn.SetDeadline(time.Now().Add(Delay * time.Second))
+//	return  conn,err
+//}
+
 
 func SocketSend(conn net.Conn, data []byte) []byte {
 
