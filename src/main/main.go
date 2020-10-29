@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"getitle/src/Scan"
 	"getitle/src/moudle"
 	"github.com/panjf2000/ants/v2"
 	"strconv"
@@ -27,7 +28,7 @@ func main() {
 	mod := flag.String("m", "default","")
 	delay := flag.Int("d", 2, "")
 	Output := flag.String("o","full","")
-	Filename := flag.String("f","out.txt","")
+	Filename := flag.String("f","","")
 	//Scan.Outp = *Output
 
 	t1 := time.Now()
@@ -39,8 +40,8 @@ func main() {
 	flag.Parse()
 	moudle.Outputforamt = *Output
 
-	init := moudle.Params{*ports, *threads, *IPaddress, *mod, time.Duration(*delay),Filename}
-	init = moudle.Init(init)
+	init := moudle.Params{*ports, *threads, *IPaddress, *mod, time.Duration(*delay),*Filename}
+	init = moudle.Init(init,*key)
 	fmt.Println(init.IPaddress)
 
 	//init the IP
@@ -65,8 +66,7 @@ func main() {
 
 	elapsed := time.Since(t1)
 
-
+	fmt.Printf("Alive sum: %d\n" , Scan.Alivesum)
 	fmt.Println("Totally run: ", elapsed)
-
 
 }

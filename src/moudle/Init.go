@@ -20,9 +20,13 @@ type Params struct {
 	Filename  string
 }
 
-func Init(initparams Params) Params {
+func Init(initparams Params,key string) Params {
 	fmt.Println("*********  getitle 0.1.2 beta by Sangfor  *********")
 
+	if key != "sangfor" {
+		fmt.Print("FUCK OFF!!!")
+		os.Exit(0)
+	}
 	if initparams.IPaddress == "" {
 		Banner()
 		os.Exit(0)

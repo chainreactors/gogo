@@ -68,7 +68,7 @@ func StraightScan(ipi interface{}, Delay time.Duration) {
 	if result.Stat == "CLOSE" {
 
 	} else {
-		output(*result, Outputforamt)
+		output(*result)
 		if O2File {
 			Datach <- JsonReturn(*result)
 		}
