@@ -10,7 +10,7 @@ import (
 )
 
 //直接扫描
-func StraightMod(target string, portlist []string) {
+func StraightMod(target string, portlist []string, thread int) {
 	var wgs sync.WaitGroup
 	ch := GenIP(target)
 
@@ -20,7 +20,7 @@ func StraightMod(target string, portlist []string) {
 
 	// Use the pool with a function,
 	// set 10 to the capacity of goroutine pool and 1 second for expired duration.
-	p1, _ := ants.NewPoolWithFunc(Threads, func(ipi interface{}) {
+	p1, _ := ants.NewPoolWithFunc(thread, func(ipi interface{}) {
 		StraightScan(ipi)
 		wgs.Done()
 	})
@@ -80,7 +80,6 @@ func SmartBMod(target string, temp []int, portlist []string) {
 
 	var Gentarget string
 	//ResMap := GetMap()
-
 	p2, _ := ants.NewPoolWithFunc(Threads, func(i interface{}) {
 		//SmartScan(i,ResMap)
 		SmartScan2(i, temp)
@@ -117,7 +116,7 @@ func SmartBMod(target string, temp []int, portlist []string) {
 		if alive != "" {
 
 			println("[*] Find " + alive)
-			StraightMod(alive, portlist)
+			StraightMod(alive, portlist, Threads/2)
 
 		}
 
