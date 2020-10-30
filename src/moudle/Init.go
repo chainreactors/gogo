@@ -1,6 +1,7 @@
 package moudle
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -14,10 +15,10 @@ var Outputforamt string
 var Threads int
 
 func Init(IPaddress string, key string) string {
-	println("*********  getitle 0.1.5 beta by Sangfor  *********")
+	fmt.Println("*********  getitle 0.1.5 beta by Sangfor  *********")
 
 	if key != "sangfor" {
-		println("FUCK OFF!!!")
+		fmt.Println("FUCK OFF!!!")
 		os.Exit(0)
 	}
 	if IPaddress == "" {
