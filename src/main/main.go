@@ -38,27 +38,28 @@ func main() {
 	flag.Parse()
 	moudle.Outputforamt = *Output
 
-	init := moudle.Params{*ports, *threads, *IPaddress, *mod, time.Duration(*delay), *Filename}
-	init = moudle.Init(init, *key)
-	println(init.IPaddress)
-
+	//set config
+	Scan.Delay = time.Duration(*delay)
+	moudle.Threads = *threads
+	moudle.Filename = *Filename
 	//init the IP
-	portlist := moudle.Ports2Portlist(init.Ports)
+	CIDR := moudle.Init(*IPaddress, *key)
+	portlist := moudle.PortHandler(*ports)
 
-	// 原始的样子
+	println("[*] Start Scan " + CIDR)
 
 	switch *mod {
 	case "default":
 		//直接扫描
-		moudle.StraightMod(init.IPaddress, portlist, init.Threads, init.Delay)
+		moudle.StraightMod(CIDR, portlist)
 	case "s", "smart":
 		//启发式扫描
 		temp := make([]int, 256)
-		mask, _ := strconv.Atoi(strings.Split(init.IPaddress, "/")[1])
+		mask, _ := strconv.Atoi(strings.Split(CIDR, "/")[1])
 		if mask < 16 {
-			moudle.SmartBMod(init.IPaddress, temp, portlist, init.Threads, init.Delay)
+			moudle.SmartBMod(CIDR, temp, portlist)
 		} else {
-			moudle.SmartAMod(init.IPaddress, portlist, init.Threads, init.Delay)
+			moudle.SmartAMod(CIDR, portlist)
 		}
 	}
 

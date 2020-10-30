@@ -16,16 +16,15 @@ var (
 
 func MS17010Scan(target string, result Utils.Result) Utils.Result {
 	// connecting to a host in LAN if reachable should be very quick
-	conn, err := Utils.SocketConn(target,Delay)
+	result.Protocol = "SMB"
+	conn, err := Utils.TcpSocketConn(target, Delay)
 	if err != nil {
 
 		//fmt.Println(err)
-		result.Stat = "CLOSE"
 		result.Error = err.Error()
 		return result
 	}
 	result.Stat = "OPEN"
-	result.Protocol = "SMB"
 	defer conn.Close()
 	_, err = conn.Write(negotiateProtocolRequest)
 	reply := make([]byte, 1024)

@@ -105,3 +105,4 @@ Usage of ./getitle:
 1. 添加OXID
 2. 添加简单目录扫描
 3. 更灵活的端口模式
+4. tcp reset扫描

@@ -5,15 +5,27 @@ import (
 	"time"
 )
 
-func SocketConn(target string,Delay time.Duration)(net.Conn,error ) {
+func TcpSocketConn(target string, Delay time.Duration) (net.Conn, error) {
+
 	conn, err := net.DialTimeout("tcp", target, Delay*time.Second)
+
 	if err != nil {
 		return nil, err
 	}
 	err = conn.SetDeadline(time.Now().Add(Delay * time.Second))
-	return  conn,err
+	return conn, err
 }
 
+func UdpSocketConn(target string, Delay time.Duration) (net.Conn, error) {
+
+	conn, err := net.DialTimeout("udp", target, Delay*time.Second)
+
+	if err != nil {
+		return nil, err
+	}
+	err = conn.SetDeadline(time.Now().Add(Delay * time.Second))
+	return conn, err
+}
 
 func SocketSend(conn net.Conn, data []byte) []byte {
 
@@ -33,3 +45,6 @@ func SocketSend(conn net.Conn, data []byte) []byte {
 	return reply
 }
 
+func GetTarget(ip string, port string) string {
+	return ip + ":" + port
+}

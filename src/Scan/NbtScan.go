@@ -9,21 +9,6 @@ import (
 
 var UNIQUE_NAMES, GROUP_NAMES, NetBIOS_ITEM_TYPE map[string]string
 
-func Sendpayload(target string) []byte {
-	conn, err := Utils.SocketConn(target,Delay)
-	if err != nil {
-
-		//fmt.Println(err)
-		return []byte("\x00")
-	}
-
-	payload := []byte("ff\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00 CKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\x00\x00!\x00\x01")
-
-	reply := Utils.SocketSend(conn, payload)
-
-	return reply
-}
-
 func Byte2Int(input []byte) (int, error) {
 	encodedStr := hex.EncodeToString(input)
 	output, err := strconv.Atoi(encodedStr)
@@ -60,19 +45,24 @@ func init() {
 	}
 }
 
-func NbtScan(ip string, result Utils.Result) Utils.Result {
-
+func NbtScan(target string, result Utils.Result) Utils.Result {
 	var Share bool = false
-	reply := Sendpayload(ip)
+	result.Protocol = "NetBIOS"
+	conn, err := Utils.UdpSocketConn(target, Delay)
+	if err != nil {
 
-	if len(reply) > 58 {
-		result.Stat = "OPEN"
-
-	} else {
-		result.Stat = "CLOSE"
+		//fmt.Println(err)
 		return result
 	}
-	result.Protocol = "NetBIOS"
+
+	payload := []byte("ff\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00 CKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\x00\x00!\x00\x01")
+	reply := Utils.SocketSend(conn, payload)
+	if len(reply) > 58 {
+		result.Stat = "OPEN"
+	} else {
+		return result
+	}
+
 	num, err := Byte2Int(reply[56:57])
 	if err != nil {
 		return result

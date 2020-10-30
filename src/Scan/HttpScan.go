@@ -13,16 +13,14 @@ import (
 func SocketHttp(target string, result Utils.Result) Utils.Result {
 	//fmt.Println(ip)
 	//socket tcp连接,超时时间
-
-	conn, err := Utils.SocketConn(target, Delay)
+	result.Protocol = "http"
+	conn, err := Utils.TcpSocketConn(target, Delay)
 	if err != nil {
 		//fmt.Println(err)
-		result.Stat = "CLOSE"
 		result.Error = err.Error()
 		return result
 	}
 	result.Stat = "OPEN"
-	result.Protocol = "http"
 
 	//发送内容
 	data := []byte("GET / HTTP/1.1\r\nHost: " + target + "\r\n\r\n")
@@ -71,7 +69,6 @@ func SystemHttp(target string, result Utils.Result, status string) Utils.Result 
 
 	resp, err := conn.Get(target)
 	if err != nil {
-		result.Stat = "CLOSE"
 		result.Error = err.Error()
 		return result
 	}
@@ -102,5 +99,3 @@ func GetStatusCode(html string) string {
 
 	return ""
 }
-
-

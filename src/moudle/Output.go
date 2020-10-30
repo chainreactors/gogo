@@ -22,18 +22,17 @@ func output(result Utils.Result) {
 
 }
 
-func cleanOutput(result Utils.Result)string {
-	s := fmt.Sprintf("[+] %s://%s:%s\t\tOPEN\t\t%s\t\t\n", result.Protocol, result.Ip, result.Port, result.Title)
+func cleanOutput(result Utils.Result) string {
+	s := fmt.Sprintf("[+] %s://%s:%s\tOPEN\t%s\t\n", result.Protocol, result.Ip, result.Port, result.Title)
 	s += vulnOutput(result)
 	return s
 }
 
-func fullOutput(result Utils.Result)string {
-	s := fmt.Sprintf("[+] %s://%s:%s\t\tOPEN\t\t%s\t\t%s\t\t%s\t\t%s\t\t\n", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, result.Framework, result.Title)
+func fullOutput(result Utils.Result) string {
+	s := fmt.Sprintf("[+] %s://%s:%s\tOPEN\t%s\t%s\t%s\t%s\t\n", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, result.Framework, result.Title)
 	s += vulnOutput(result)
 	return s
 }
-
 
 func jsonOutput(result Utils.Result) string {
 	jsons, err := json.Marshal(result)

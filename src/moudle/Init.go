@@ -2,69 +2,44 @@ package moudle
 
 import (
 	"os"
+	"strconv"
 	"strings"
-	"time"
 )
 
 var Datach = make(chan string, 1000)
 var FileHandle *os.File
 var O2File bool = false
+var Filename string
+var Outputforamt string
+var Threads int
 
-type Params struct {
-	Ports     string
-	Threads   int
-	IPaddress string
-	Mod       string
-	Delay     time.Duration
-	Filename  string
-}
-
-func Init(initparams Params, key string) Params {
+func Init(IPaddress string, key string) string {
 	println("*********  getitle 0.1.5 beta by Sangfor  *********")
 
 	if key != "sangfor" {
 		println("FUCK OFF!!!")
 		os.Exit(0)
 	}
-	if initparams.IPaddress == "" {
+	if IPaddress == "" {
 		Banner()
 		os.Exit(0)
-	} else if !strings.Contains(initparams.IPaddress, "/") {
-		initparams.IPaddress += "/32"
+	} else if !strings.Contains(IPaddress, "/") {
+		IPaddress += "/32"
 	}
 
-	switch initparams.Ports {
-	case "top1":
-		initparams.Ports = "80,443,8080,7001,9001,8081,8082,8089,8000,8443,81"
-	case "top2":
-		initparams.Ports = "80-89,443,7000-7009,9000-9009,8080-8090,8000-8009,8443,7080,8070,9080,8888,7777,9090,800,801,9999,10080"
-	case "db":
-		initparams.Ports = "3306,1433,1521,5432,6379,11211,27017"
-	case "rce":
-		initparams.Ports = "1090,1098,1099,4444,11099,47001,47002,10999,45000,45001,8686,9012,50500,4848,11111,4445,4786,5555,5556"
-	case "win":
-		initparams.Ports = "53,88,135,139,389,445,3389,5985"
-	case "brute":
-		initparams.Ports = "21,22,389,445,1433,1521,3306,3389,5901,5432,6379,11211,27017"
-	case "all":
-		initparams.Ports = "21,22,23,25,53,69,80-89,110,135,139,143,443,445,465,993,995,1080,1158,1433,1521,1863,2100,3128,3306,3389,7001,8080-8089,8888,9080,9090,5900,1090,1099,7002,8161,9043,50000,50070,389,5432,5984,9200,11211,27017,161,873,1833,2049,2181,2375,6000,6666,6667,7777,6868,9000,9001,12345,5632,9081,3700,4848,1352,8069,9300"
-
-	default:
-
-	}
 	var err error
 
-	if initparams.Filename != "" {
+	if Filename != "" {
 		O2File = true
-		if CheckFileIsExist(initparams.Filename) { //如果文件存在
-			FileHandle, err = os.OpenFile(initparams.Filename, os.O_APPEND|os.O_WRONLY, os.ModeAppend) //打开文件
+		if CheckFileIsExist(Filename) { //如果文件存在
+			FileHandle, err = os.OpenFile(Filename, os.O_APPEND|os.O_WRONLY, os.ModeAppend) //打开文件
 			//fmt.Println("文件存在")
 			if err != nil {
 				os.Exit(0)
 			}
 			//io.WriteString(FileHandle, "123")
 		} else {
-			FileHandle, err = os.Create(initparams.Filename) //创建文件
+			FileHandle, err = os.Create(Filename) //创建文件
 			//fmt.Println("文件不存在")
 			if err != nil {
 				os.Exit(0)
@@ -74,8 +49,7 @@ func Init(initparams Params, key string) Params {
 		go Write2File(FileHandle, Datach)
 
 	}
-
-	return initparams
+	return IPaddress
 }
 
 func CheckFileIsExist(filename string) bool {
@@ -90,4 +64,53 @@ func Write2File(FileHandle *os.File, Datach chan string) {
 	for res := range Datach {
 		FileHandle.WriteString(res)
 	}
+}
+
+func PortHandler(portstring string) []string {
+	var ports []string
+	postslist := strings.Split(portstring, ",")
+	for _, portname := range postslist {
+		ports = append(ports, choiceports(portname)...)
+	}
+	return ports
+
+}
+
+func choiceports(portname string) []string {
+	var ports []string
+	switch portname {
+	case "top1":
+		ports = []string{"80", "443", "8080"}
+	case "top2":
+		ports = []string{"80-90", "443", "4443", "7000-7009", "9000-9009", "8080-8090", "8000-8009", "8443", "8787", "7080", "8070", "9080", "6666", "8888", "7777", "9090", "800", "801", "9999", "10000"}
+	case "db":
+		ports = []string{"3306", "1433", "1521", "5432", "6379", "11211", "27017"}
+	case "rce":
+		ports = []string{"1090", "1098", "1099", "4444", "11099", "47001", "47002", "10999", "45000", "45001", "8686", "9012", "50500", "4848", "11111", "4445", "4786", "5555", "5556"}
+	case "win":
+		ports = []string{"21", "22", "23", "53", "88", "135", "137", "139", "389", "445", "1080", "3389", "5985"}
+	case "all":
+		ports = []string{"25", "69", "110", "143", "161", "389", "465", "873", "993", "995", "1158", "1352", "1833", "1863", "2049", "2100", "2181", "2375", "3128", "3700", "5632", "5900", "5984", "6000", "6868", "8069", "8161", "9081", "9200", "9300", "9043", "12345", "50000", "50070"}
+	default:
+		ports = []string{portname}
+	}
+	return ports
+}
+
+func Ports2PortSlice(ports []string) []string {
+
+	//生成端口列表 支持,和-
+	for _, pr := range ports {
+		if strings.Contains(pr, "-") {
+			sf := strings.Split(pr, "-")
+			start, _ := strconv.Atoi(sf[0])
+			fin, _ := strconv.Atoi(sf[1])
+			for port := start; port <= fin; port++ {
+				ports = append(ports, strconv.Itoa(port))
+			}
+		} else {
+			ports = append(ports, pr)
+		}
+	}
+	return ports
 }
