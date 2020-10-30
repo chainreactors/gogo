@@ -10,7 +10,6 @@ import (
 	"time"
 )
 
-var lock sync.Mutex
 var Outputforamt string
 
 //直接扫描
@@ -40,17 +39,18 @@ func StraightMod(target string, portlist []string, Threads int, Delay time.Durat
 	//for i := range Datach{
 	//	fmt.Println(i)
 	//}
-	if O2File {
-		timeout := time.NewTimer(time.Microsecond * 1000)
-		for {
-			select {
-			case x := <-Datach:
-				FileHandle.WriteString(x)
-			case <-timeout.C:
-				return
-			}
-		}
-	}
+
+	//if O2File {
+	//	timeout := time.NewTimer(time.Microsecond * 1000)
+	//	for {
+	//		select {
+	//		case x := <-Datach:
+	//			FileHandle.WriteString(x)
+	//		case <-timeout.C:
+	//			return
+	//		}
+	//	}
+	//}
 
 }
 
