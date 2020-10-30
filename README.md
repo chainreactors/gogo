@@ -20,10 +20,11 @@ Usage of ./getitle:
 0070,389,5432,5984,9200,11211,27017,161,873,1833,2049,2181,2375,6000,6666,6667,7777,6868,9000,9001,12345,5632,9081,3700,4848,1352,8069,9300
   -t int        threads (default 4000)
   -o string     输出格式:clean,full(default) or json
-  
+  -f string     输出文件名,默认为空,请用相对路径(./)或绝对路径
+  -k string     启动密码(必须输入)为sangfor  
 
-     example:           ./getitle -ip 192.168.1.1 -p top2
-     smart mod example: ./getitle -ip 192.168.1.1/8 -p top2 -m s
+     example:           ./getitle -ip 192.168.1.1 -p top2 -k sangfor
+     smart mod example: ./getitle -ip 192.168.1.1/8 -p top2 -m s -k sangfor
 ```
 
 
@@ -81,7 +82,8 @@ Usage of ./getitle:
 * v0.1.5
   * 添加了-f参数,输出到文件,会有30%的性能损失
   * 修复了格式化输出的一个bug,导致无法使用tee重定向
-
+* v0.1.6
+    * 修复了输出文件降低效率的问题(优化写入方式)
   
 
  ## Todo List
