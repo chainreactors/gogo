@@ -16,7 +16,7 @@ func RedisScan(target string, result Utils.Result) Utils.Result {
 	}
 	result.Stat = "OPEN"
 	result.Protocol = "redis"
-	recv := Utils.SocketSend(conn, []byte("info"))
+	_, recv, _ := Utils.SocketSend(conn, []byte("info"), 2048)
 	if strings.Contains(string(recv), "redis_version") {
 		result.Title = Utils.Match("redis_version:(.*)", string(recv))
 	}

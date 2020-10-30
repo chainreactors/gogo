@@ -56,7 +56,7 @@ func NbtScan(target string, result Utils.Result) Utils.Result {
 	}
 
 	payload := []byte("ff\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00 CKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\x00\x00!\x00\x01")
-	reply := Utils.SocketSend(conn, payload)
+	_, reply, _ := Utils.SocketSend(conn, payload, 1024)
 	if len(reply) > 58 {
 		result.Stat = "OPEN"
 	} else {
@@ -104,7 +104,7 @@ func NbtScan(target string, result Utils.Result) Utils.Result {
 	if Share {
 		msg = msg + "        sharing"
 	}
-	result.Title = msg
+	result.Host = msg
 
 	return result
 }

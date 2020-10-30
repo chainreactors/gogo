@@ -27,22 +27,22 @@ func UdpSocketConn(target string, Delay time.Duration) (net.Conn, error) {
 	return conn, err
 }
 
-func SocketSend(conn net.Conn, data []byte) []byte {
+func SocketSend(conn net.Conn, data []byte, length int) (int, []byte, error) {
 
 	var err error
 	_, err = conn.Write(data)
 	if err != nil {
-		return []byte{0x00}
+		return 0, []byte{0x00}, err
 	}
 
 	//最多只读8192位,一般来说有title就肯定已经有了
-	reply := make([]byte, 2048)
-	_, err = conn.Read(reply)
+	reply := make([]byte, length)
+	n, err := conn.Read(reply)
 
 	if err != nil {
-		return []byte{0x00}
+		return n, []byte{0x00}, err
 	}
-	return reply
+	return n, reply, err
 }
 
 func GetTarget(ip string, port string) string {

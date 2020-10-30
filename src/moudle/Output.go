@@ -29,7 +29,7 @@ func cleanOutput(result Utils.Result) string {
 }
 
 func fullOutput(result Utils.Result) string {
-	s := fmt.Sprintf("[+] %s://%s:%s\tOPEN\t%s\t%s\t%s\t%s\t\n", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, result.Framework, result.Title)
+	s := fmt.Sprintf("[+] %s://%s:%s\tOPEN\t%s\t%s\t%s\t%s\t\n", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, result.Host, result.Title)
 	s += vulnOutput(result)
 	return s
 }
