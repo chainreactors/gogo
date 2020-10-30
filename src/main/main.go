@@ -46,7 +46,7 @@ func main() {
 	CIDR := moudle.Init(*IPaddress, *key)
 	portlist := moudle.PortHandler(*ports)
 
-	println("[*] Start Scan " + CIDR)
+	fmt.Println("[*] Start Scan " + CIDR)
 
 	switch *mod {
 	case "default":
@@ -56,7 +56,7 @@ func main() {
 		//启发式扫描
 		temp := make([]int, 256)
 		mask, _ := strconv.Atoi(strings.Split(CIDR, "/")[1])
-		if mask < 16 {
+		if mask == 16 {
 			moudle.SmartBMod(CIDR, temp, portlist)
 		} else {
 			moudle.SmartAMod(CIDR, portlist)
