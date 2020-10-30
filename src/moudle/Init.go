@@ -72,6 +72,8 @@ func PortHandler(portstring string) []string {
 	for _, portname := range postslist {
 		ports = append(ports, choiceports(portname)...)
 	}
+	ports = Ports2PortSlice(ports)
+	ports = removeDuplicateElement(ports)
 	return ports
 
 }
@@ -98,7 +100,7 @@ func choiceports(portname string) []string {
 }
 
 func Ports2PortSlice(ports []string) []string {
-
+	var tmpports []string
 	//生成端口列表 支持,和-
 	for _, pr := range ports {
 		if strings.Contains(pr, "-") {
@@ -106,11 +108,23 @@ func Ports2PortSlice(ports []string) []string {
 			start, _ := strconv.Atoi(sf[0])
 			fin, _ := strconv.Atoi(sf[1])
 			for port := start; port <= fin; port++ {
-				ports = append(ports, strconv.Itoa(port))
+				tmpports = append(tmpports, strconv.Itoa(port))
 			}
 		} else {
-			ports = append(ports, pr)
+			tmpports = append(tmpports, pr)
 		}
 	}
-	return ports
+	return tmpports
+}
+
+func removeDuplicateElement(ss []string) []string {
+	result := make([]string, 0, len(ss))
+	temp := map[string]struct{}{}
+	for _, item := range ss {
+		if _, ok := temp[item]; !ok {
+			temp[item] = struct{}{}
+			result = append(result, item)
+		}
+	}
+	return result
 }
