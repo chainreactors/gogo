@@ -27,6 +27,10 @@ Usage of ./getitle:
      smart mod example: ./getitle -ip 192.168.1.1/8 -p top2 -m s -k sangfor
 ```
 
+### 常见用法
+
+扫描C段的关键端口
+
 
 
 ## Makefile

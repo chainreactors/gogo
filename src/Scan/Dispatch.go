@@ -5,12 +5,14 @@ import (
 	"time"
 )
 
-var Alivesum, Titlesum int
+var Alivesum, Sum int
 
 var Delay time.Duration
 
 func Dispatch(result Utils.Result) Utils.Result {
 	target := Utils.GetTarget(result.Ip, result.Port)
+	Sum++
+
 	switch result.Port {
 	case "443", "8443":
 		result = SystemHttp(target, result, "400")
