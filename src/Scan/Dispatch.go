@@ -21,7 +21,6 @@ func Dispatch(result Utils.Result, delay time.Duration) Utils.Result {
 		result = NbtScan(result.Ip, result)
 	case "135":
 		result = OXIDScan(result.Ip,result)
-
 	case "6379":
 		result = RedisScan(target, result)
 

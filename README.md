@@ -44,45 +44,59 @@ Usage of ./getitle:
 ## Change Note
 
 * v0.0.1 just a demo
+
 * v0.0.3 
   
   * 获取不到getitile的情况下输出前13位字符(如果是http恰好到状态码)
+  
 * v0.0.4 
   * 添加了端口预设top1为最常见的http端口,top2为常见的http端口,db为常见数据库默认端口,win为windows常见开放的端口
   * 简化了端口参数
+  
 * v0.0.5 
   * 修复了400与30x页面无法获取titile的问题
   * 修复了无法自定义端口的bug
   * 添加了brute与all两个端口预设,brute为可爆破端口,all为常见端口
   * 忽略匹配title的大小写问题
+  
 * v0.0.6
   
   * 添加了大于B段启发式扫描模式
+  
 * v0.1.0
   * 优化了参数
   * 添加了ms17010漏洞扫描
   * 修复了扫描单个ip报错的情况
+  
 * v0.1.1
 
   * 修复了启发式扫描的ip计算错误的bug
   * 添加了基于`Server`与`X-Powered-By`的简单指纹识别  
+  
 * v0.1.2
   * 添加了redis未授权扫描
   * 重构了输出函数
+  
 * v0.1.3
   * 添加了nbtscan
   * 修复了部分bug
   * 添加了json格式输出
+  
 * v0.1.4
   * 修复了rediscan未位置timeout的bug
   * 添加了更复杂的输出模式
   * 去除了banner
   * 添加了key
+  
 * v0.1.5
   * 添加了-f参数,输出到文件,会有30%的性能损失
   * 修复了格式化输出的一个bug,导致无法使用tee重定向
 
+* v0.1.6
   
+  * 优化了tee保存结果,去除进度信息保存到文件
+    
+    
 
  ## Todo List
 
