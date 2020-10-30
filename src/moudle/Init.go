@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-var Datach = make(chan string, 10000)
+var Datach = make(chan string, 1000)
 var FileHandle *os.File
 var O2File bool = false
 
@@ -19,7 +19,7 @@ type Params struct {
 	Filename  string
 }
 
-func Init(initparams Params,key string) Params {
+func Init(initparams Params, key string) Params {
 	println("*********  getitle 0.1.5 beta by Sangfor  *********")
 
 	if key != "sangfor" {
@@ -71,6 +71,7 @@ func Init(initparams Params,key string) Params {
 			}
 			//io.WriteString(FileHandle, "123")
 		}
+		go Write2File(FileHandle, Datach)
 
 	}
 
@@ -83,4 +84,10 @@ func CheckFileIsExist(filename string) bool {
 		exist = false
 	}
 	return exist
+}
+
+func Write2File(FileHandle *os.File, Datach chan string) {
+	for res := range Datach {
+		FileHandle.WriteString(res)
+	}
 }

@@ -9,13 +9,13 @@ import (
 
 func output(result Utils.Result) {
 	var out string
-	if strings.Contains(Outputforamt,"clean") {
+	if strings.Contains(Outputforamt, "clean") {
 		out += cleanOutput(result)
 	}
-	if strings.Contains(Outputforamt,"full") {
+	if strings.Contains(Outputforamt, "full") {
 		out += fullOutput(result)
 	}
-	if strings.Contains(Outputforamt,"json") {
+	if strings.Contains(Outputforamt, "json") {
 		out += jsonOutput(result)
 	}
 	fmt.Print(out)
@@ -33,7 +33,9 @@ func fullOutput(result Utils.Result)string {
 	s += vulnOutput(result)
 	return s
 }
-func jsonOutput(result Utils.Result)string {
+
+
+func jsonOutput(result Utils.Result) string {
 	jsons, err := json.Marshal(result)
 	if err != nil {
 		return ""
@@ -53,12 +55,13 @@ func JsonReturn(result Utils.Result) string {
 	return ""
 }
 
-func vulnOutput(result Utils.Result)string {
+func vulnOutput(result Utils.Result) string {
 	if result.Vuln != "" {
 		return fmt.Sprint("Find Vuln:" + result.Vuln)
 	}
 	return ""
 }
+
 func Banner() {
 	//fmt.Println(
 	//	"Usage of ./getitle:" +
