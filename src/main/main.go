@@ -44,7 +44,7 @@ func main() {
 	CIDR := moudle.Init(*IPaddress, *key)
 	portlist := moudle.PortHandler(*ports)
 
-	fmt.Println("[*] Start Scan " + CIDR)
+	println("[*] Start Scan " + CIDR)
 
 	switch *mod {
 	case "default":
@@ -56,17 +56,19 @@ func main() {
 		mask, _ := strconv.Atoi(strings.Split(CIDR, "/")[1])
 		if mask == 16 {
 			moudle.SmartBMod(CIDR, temp, portlist)
-		} else {
+		} else if mask < 16 {
 			moudle.SmartAMod(CIDR, portlist)
+		} else {
+			println("[-] mask error")
 		}
 	}
 
 	elapsed := time.Since(t1)
 
-	sum := "Alive sum: " + strconv.Itoa(Scan.Alivesum)
+	sum := "[*] Alive sum: " + strconv.Itoa(Scan.Alivesum)
 	moudle.Datach <- sum
 	time.Sleep(time.Microsecond * 500)
 	println(sum)
-	println("Totally run: " + elapsed.String())
+	println("[*] Totally run: " + elapsed.String())
 
 }

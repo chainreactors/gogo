@@ -23,15 +23,17 @@ Usage of ./getitle:
   -f string     输出文件名,默认为空,请用相对路径(./)或绝对路径
   -k string     启动密码(必须输入)为sangfor  
 
-     example:           ./getitle -ip 192.168.1.1 -p top2 -k sangfor
-     smart mod example: ./getitle -ip 192.168.1.1/8 -p top2 -m s -k sangfor
 ```
 
 ### 常见用法
 
 扫描C段的关键端口
 
+`./gt.exe  -k sangfor -ip 192.168.1.1/24 -p top2,win,db `
 
+扫描启发式扫描B段或大于B段
+
+`./gt.exe  -k sangfor -ip 172.16.1.1/12 -p top2,win,db -m s `
 
 ## Makefile
 

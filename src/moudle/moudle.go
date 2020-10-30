@@ -1,7 +1,6 @@
 package moudle
 
 import (
-	"fmt"
 	"getitle/src/Scan"
 	"getitle/src/Utils"
 	"github.com/panjf2000/ants/v2"
@@ -116,7 +115,7 @@ func SmartBMod(target string, temp []int, portlist []string) {
 	for _, alive := range Alive {
 		if alive != "" {
 
-			fmt.Println("[*] Find " + alive)
+			println("[*] Find " + alive)
 			StraightMod(alive, portlist, Threads/2)
 
 		}
@@ -150,7 +149,7 @@ func SmartAMod(target string, portlist []string) {
 	var sum int = 0
 	for i := range Tchan {
 		CurB := i + "/16"
-		fmt.Println("[*] Processing:" + CurB)
+		println("[*] Processing:" + CurB)
 		Temp := make([]int, 256)
 		BSlice = append(BSlice, Temp)
 		sum += 1
