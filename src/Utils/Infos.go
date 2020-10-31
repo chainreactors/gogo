@@ -59,7 +59,7 @@ func GetTitle(content string) string {
 
 func GetMidware(content string) string {
 
-	server := Match("(?i)Server: ([\x21-\x73]+)", strings.Split(content, "\r\n\r\n")[0])
+	server := Match("(?i)Server: ([\x21-\x7e]+)", strings.Split(content, "\r\n\r\n")[0])
 	if server != "" {
 		return server
 	}
@@ -70,7 +70,7 @@ func GetMidware(content string) string {
 
 func GetLanguage(content string) string {
 
-	powered := Match("(?i)X-Powered-By: ([!-s]+)", strings.Split(content, "\r\n\r\n")[0])
+	powered := Match("(?i)X-Powered-By: ([\x21-\x7e]+)", strings.Split(content, "\r\n\r\n")[0])
 
 	if powered != "" {
 		return powered
