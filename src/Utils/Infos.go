@@ -13,11 +13,13 @@ type Result struct {
 	Host      string
 	Title     string
 	Midware   string
+	HttpStat  string
 	Language  string
 	Framework string
 	Vuln      string
 	Protocol  string
 	Error     string
+	Content   string
 }
 
 //发送内容
@@ -92,4 +94,12 @@ func GetLanguage(content string) string {
 
 func GetFrameWork(content string) string {
 	return ""
+}
+
+func GetStatusCode(content string) string {
+	if strings.Contains(content, "HTTP") {
+		return content[9:12]
+	}
+
+	return "999"
 }

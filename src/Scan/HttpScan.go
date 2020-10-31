@@ -1,12 +1,10 @@
 package Scan
 
 import (
-	"crypto/tls"
 	"getitle/src/Utils"
 	"io/ioutil"
-	"net/http"
+	"strconv"
 	"strings"
-	"time"
 )
 
 //socket进行对网站的连接
@@ -24,7 +22,7 @@ func SocketHttp(target string, result Utils.Result) Utils.Result {
 
 	//发送内容
 	senddata := []byte("GET / HTTP/1.1\r\nHost: " + target + "\r\n\r\n")
-	_, data, _ := Utils.SocketSend(conn, senddata, 2048)
+	_, data, _ := Utils.SocketSend(conn, senddata, 4096)
 	content := string(data)
 	err = conn.Close()
 	if err != nil {
@@ -33,14 +31,11 @@ func SocketHttp(target string, result Utils.Result) Utils.Result {
 	}
 
 	//获取状态码
-	status := GetStatusCode(content)
-
+	result.Content = content
+	result.HttpStat = Utils.GetStatusCode(content)
 	//如果是400可能是因为没有用https
-	if status == "400" || strings.HasPrefix(status, "3") {
-		return SystemHttp(target, result, status)
-	}
-	if strings.Contains(content, "-ERR wrong") {
-		result = RedisScan(target, result)
+	if result.HttpStat == "400" || strings.HasPrefix(result.HttpStat, "3") {
+		result = SystemHttp(target, result)
 	}
 
 	//正则匹配title
@@ -50,23 +45,15 @@ func SocketHttp(target string, result Utils.Result) Utils.Result {
 }
 
 //使用封装好了http
-func SystemHttp(target string, result Utils.Result, status string) Utils.Result {
-
-	if status == "400" {
+func SystemHttp(target string, result Utils.Result) Utils.Result {
+	if result.HttpStat == "400" || result.Port == "443" || result.Port == "8443" || result.Port == "4443" {
 		target = "https://" + target
 		result.Protocol = "https"
 	} else {
 		target = "http://" + target
 		result.Protocol = "http"
 	}
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-
-	conn := &http.Client{
-		Transport: tr,
-		Timeout:   Delay * time.Second,
-	}
+	conn := Utils.HttpConn(Delay)
 
 	resp, err := conn.Get(target)
 	if err != nil {
@@ -74,9 +61,10 @@ func SystemHttp(target string, result Utils.Result, status string) Utils.Result 
 		return result
 	}
 	result.Stat = "OPEN"
-
+	result.HttpStat = strconv.Itoa(resp.StatusCode)
+	//result.Content
 	reply, err := ioutil.ReadAll(resp.Body)
-	resp.Body.Close()
+	_ = resp.Body.Close()
 
 	content := string(reply)
 
@@ -88,15 +76,4 @@ func SystemHttp(target string, result Utils.Result, status string) Utils.Result 
 	}
 
 	return Utils.InfoFilter(content, result)
-}
-
-func GetStatusCode(html string) string {
-	http1 := strings.Split(html, "\n")[0]
-	statusC := strings.Split(http1, " ")
-	if len(statusC) > 2 {
-		statusCode := statusC[1]
-		return statusCode
-	}
-
-	return ""
 }

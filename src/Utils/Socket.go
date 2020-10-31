@@ -1,7 +1,9 @@
 package Utils
 
 import (
+	"crypto/tls"
 	"net"
+	"net/http"
 	"time"
 )
 
@@ -47,4 +49,16 @@ func SocketSend(conn net.Conn, data []byte, length int) (int, []byte, error) {
 
 func GetTarget(ip string, port string) string {
 	return ip + ":" + port
+}
+
+func HttpConn(delay time.Duration) http.Client {
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+
+	conn := &http.Client{
+		Transport: tr,
+		Timeout:   delay * time.Second,
+	}
+	return *conn
 }

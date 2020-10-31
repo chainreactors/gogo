@@ -26,6 +26,8 @@ func main() {
 	delay := flag.Int("d", 2, "")
 	Output := flag.String("o", "full", "")
 	Filename := flag.String("f", "", "")
+	Exploit := flag.Bool("e", false, "")
+
 	flag.Parse()
 	//Scan.Outp = *Output
 	t1 := time.Now()
@@ -40,6 +42,7 @@ func main() {
 	Scan.Delay = time.Duration(*delay)
 	moudle.Threads = *threads
 	moudle.Filename = *Filename
+	Scan.Exploit = *Exploit
 	//init the IP
 	CIDR := moudle.Init(*IPaddress, *key)
 	portlist := moudle.PortHandler(*ports)

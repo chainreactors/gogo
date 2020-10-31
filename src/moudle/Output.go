@@ -23,14 +23,17 @@ func output(result Utils.Result) {
 }
 
 func cleanOutput(result Utils.Result) string {
-	s := fmt.Sprintf("[+] %s://%s:%s\tOPEN\t%s\t\n", result.Protocol, result.Ip, result.Port, result.Title)
+	s := fmt.Sprintf("[+] %s://%s:%s\tOPEN\t%s\t", result.Protocol, result.Ip, result.Port, result.Title)
 	s += vulnOutput(result)
+	s += "\n"
 	return s
 }
 
 func fullOutput(result Utils.Result) string {
-	s := fmt.Sprintf("[+] %s://%s:%s\tOPEN\t%s\t%s\t%s\t%s\t\n", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, result.Host, result.Title)
+	s := fmt.Sprintf("[+] %s://%s:%s\tOPEN\t%s\t%s\t%s\t%s\t[%s] %s", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, result.Host, result.Framework, result.HttpStat, result.Title)
 	s += vulnOutput(result)
+	s += "\n"
+
 	return s
 }
 
@@ -56,7 +59,7 @@ func JsonReturn(result Utils.Result) string {
 
 func vulnOutput(result Utils.Result) string {
 	if result.Vuln != "" {
-		return fmt.Sprint("Find Vuln:" + result.Vuln)
+		return fmt.Sprintf("[ Find Vuln: %s ]", result.Vuln)
 	}
 	return ""
 }
