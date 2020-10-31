@@ -2,7 +2,6 @@ package Scan
 
 import (
 	"getitle/src/Utils"
-	"io/ioutil"
 	"strconv"
 	"strings"
 )
@@ -62,18 +61,12 @@ func SystemHttp(target string, result Utils.Result) Utils.Result {
 	}
 	result.Stat = "OPEN"
 	result.HttpStat = strconv.Itoa(resp.StatusCode)
+
 	//result.Content
-	reply, err := ioutil.ReadAll(resp.Body)
+
 	_ = resp.Body.Close()
 
-	content := string(reply)
+	result.Content = Utils.GetHttpRaw(*resp)
 
-	if err != nil {
-
-		result.Error = err.Error()
-		return result
-
-	}
-
-	return Utils.InfoFilter(content, result)
+	return Utils.InfoFilter(result.Content, result)
 }
