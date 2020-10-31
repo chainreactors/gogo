@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"getitle/src/Scan"
+	"getitle/src/Utils"
 	"getitle/src/moudle"
 	"github.com/panjf2000/ants/v2"
 	"strconv"
@@ -69,7 +70,10 @@ func main() {
 	elapsed := time.Since(t1)
 
 	sum := "[*] Alive sum: " + strconv.Itoa(Scan.Alivesum)
-	moudle.Datach <- sum
+	//moudle.Datach <- sum
+	res := new(Utils.Result)
+	Sres := moudle.JsonReturn(*res)
+	moudle.FileHandle.WriteString(Sres + "]")
 	time.Sleep(time.Microsecond * 500)
 	println(sum)
 	println("[*] Totally run: " + elapsed.String())
