@@ -53,7 +53,7 @@ func Match(Regexp string, s string) string {
 }
 
 func GetTitle(content string) string {
-	title := Match("(?i)<title>(.*)</title>", content)
+	title := Match("(?im)<title>(.*)</title>", content)
 	if title != "" {
 		return title
 	}

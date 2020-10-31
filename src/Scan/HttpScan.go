@@ -20,7 +20,7 @@ func SocketHttp(target string, result Utils.Result) Utils.Result {
 	result.Stat = "OPEN"
 
 	//发送内容
-	senddata := []byte("GET / HTTP/1.1\r\nHost: " + target + "\r\n\r\n")
+	senddata := []byte("GET / HTTP/1.1\r\nHost: " + target + "\r\nAccept-Encoding: gzip, deflate\r\n\r\n")
 	_, data, _ := Utils.SocketSend(conn, senddata, 4096)
 	content := string(data)
 	err = conn.Close()
@@ -34,7 +34,7 @@ func SocketHttp(target string, result Utils.Result) Utils.Result {
 	result.HttpStat = Utils.GetStatusCode(content)
 	//如果是400可能是因为没有用https
 	if result.HttpStat == "400" || strings.HasPrefix(result.HttpStat, "3") {
-		result = SystemHttp(target, result)
+		return SystemHttp(target, result)
 	}
 
 	//正则匹配title
@@ -61,12 +61,7 @@ func SystemHttp(target string, result Utils.Result) Utils.Result {
 	}
 	result.Stat = "OPEN"
 	result.HttpStat = strconv.Itoa(resp.StatusCode)
-
-	//result.Content
-
-	_ = resp.Body.Close()
-
 	result.Content = Utils.GetHttpRaw(*resp)
-
+	_ = resp.Body.Close()
 	return Utils.InfoFilter(result.Content, result)
 }
