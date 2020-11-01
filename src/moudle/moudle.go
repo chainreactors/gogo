@@ -102,7 +102,7 @@ func SmartBMod(target string, temp []int, portlist []string) {
 	for k, v := range temp {
 
 		if v > 0 {
-			newC := MyInt2IP(start)
+			newC := Int2IP(start)
 			HnewC := net.ParseIP(newC).To4()
 			HnewC[2] = byte(k)
 			NextCTarget = HnewC.String() + "/24"

@@ -63,7 +63,7 @@ func main() {
 		} else if mask < 16 {
 			moudle.SmartAMod(CIDR, portlist)
 		} else {
-			println("[-] mask error")
+			moudle.StraightMod(CIDR, portlist, moudle.Threads)
 		}
 	}
 

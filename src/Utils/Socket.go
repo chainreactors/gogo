@@ -53,6 +53,7 @@ func GetTarget(ip string, port string) string {
 
 func HttpConn(delay time.Duration) http.Client {
 	tr := &http.Transport{
+		//TLSHandshakeTimeout : delay * time.Second,
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
 
