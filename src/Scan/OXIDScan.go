@@ -33,8 +33,8 @@ func OXIDScan(target string, result Utils.Result) Utils.Result {
 	for k, hostname := range hostname_list {
 		if k == 0 {
 			result.Host = hostname
-		} else {
-			result.Title += hostname + " , "
+		} else if len(hostname) > 1 {
+			result.Title += strings.ReplaceAll(hostname, "\x00", "")[1:] + " , "
 		}
 
 	}
