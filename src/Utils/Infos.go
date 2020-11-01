@@ -79,7 +79,7 @@ func GetLanguage(content string) string {
 		return powered
 	}
 
-	sessionid := Match("(?i)\x20(.{1,8}SESS.*?ID)", content)
+	sessionid := Match("(?i) (.*SESS.*?ID)", content)
 
 	if sessionid != "" {
 		switch sessionid {

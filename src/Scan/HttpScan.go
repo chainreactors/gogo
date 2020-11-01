@@ -20,7 +20,7 @@ func SocketHttp(target string, result Utils.Result) Utils.Result {
 	result.Stat = "OPEN"
 
 	//发送内容
-	senddata := []byte("GET / HTTP/1.1\r\nHost: " + target + "\r\nAccept-Encoding: gzip, deflate\r\n\r\n")
+	senddata := []byte("GET / HTTP/1.1\r\nHost: " + target + "\r\n\r\n")
 	_, data, _ := Utils.SocketSend(conn, senddata, 4096)
 	content := string(data)
 	err = conn.Close()
