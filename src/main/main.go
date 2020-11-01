@@ -60,7 +60,7 @@ func main() {
 		} else if mask < 16 {
 			moudle.SmartAMod(CIDR, portlist)
 		} else {
-			println("[-] mask error")
+			println("[-] mod s :please check your mask < 16")
 		}
 	}
 
