@@ -21,6 +21,9 @@ func OXIDScan(target string, result Utils.Result) Utils.Result {
 	sendData2 := "\x05\x00\x00\x03\x10\x00\x00\x00\x18\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x05\x00"
 	n, recv, _ := Utils.SocketSend(conn, []byte(sendData2), 4096)
 	recvStr := string(recv[:n])
+	if len(recvStr) < 42 {
+		return result
+	}
 	recvStr_v2 := recvStr[42:]
 	packet_v2_end := strings.Index(recvStr_v2, "\x09\x00\xff\xff\x00\x00")
 	packet_v2 := recvStr_v2[:packet_v2_end]

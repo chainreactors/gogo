@@ -73,6 +73,8 @@ func PortHandler(portstring string) []string {
 	for _, portname := range postslist {
 		ports = append(ports, choiceports(portname)...)
 	}
+	ports = Ports2PortSlice(ports)
+	ports = removeDuplicateElement(ports)
 	return ports
 
 }
@@ -83,7 +85,7 @@ func choiceports(portname string) []string {
 	case "top1":
 		ports = []string{"80", "443", "8080"}
 	case "top2":
-		ports = []string{"80-90", "443", "4443", "7000-7009", "9000-9009", "8080-8090", "8000-8009", "8443", "8787", "7080", "8070", "9080", "6666", "8888", "7777", "9090", "800", "801", "9999", "10000"}
+		ports = []string{"80-90", "443", "4443", "7000-7009", "9000-9009", "8080-8090", "8000-8010", "8443", "8787", "7080", "8070", "9080", "6666", "8888", "7777", "9090", "800", "801", "9999", "10000", "10080"}
 	case "db":
 		ports = []string{"3306", "1433", "1521", "5432", "6379", "11211", "27017"}
 	case "rce":
@@ -92,6 +94,10 @@ func choiceports(portname string) []string {
 		ports = []string{"21", "22", "23", "53", "88", "135", "137", "139", "389", "445", "1080", "3389", "5985"}
 	case "all":
 		ports = []string{"25", "69", "110", "143", "161", "389", "465", "873", "993", "995", "1158", "1352", "1833", "1863", "2049", "2100", "2181", "2375", "3128", "3700", "5632", "5900", "5984", "6000", "6868", "8069", "8161", "9081", "9200", "9300", "9043", "12345", "50000", "50070"}
+		ports = append(ports, choiceports("top2")...)
+		ports = append(ports, choiceports("db")...)
+		ports = append(ports, choiceports("win")...)
+		ports = append(ports, choiceports("rce")...)
 	default:
 		ports = []string{portname}
 	}
@@ -99,7 +105,7 @@ func choiceports(portname string) []string {
 }
 
 func Ports2PortSlice(ports []string) []string {
-
+	var tmpports []string
 	//生成端口列表 支持,和-
 	for _, pr := range ports {
 		if strings.Contains(pr, "-") {
@@ -107,11 +113,23 @@ func Ports2PortSlice(ports []string) []string {
 			start, _ := strconv.Atoi(sf[0])
 			fin, _ := strconv.Atoi(sf[1])
 			for port := start; port <= fin; port++ {
-				ports = append(ports, strconv.Itoa(port))
+				tmpports = append(tmpports, strconv.Itoa(port))
 			}
 		} else {
-			ports = append(ports, pr)
+			tmpports = append(tmpports, pr)
 		}
 	}
-	return ports
+	return tmpports
+}
+
+func removeDuplicateElement(ss []string) []string {
+	result := make([]string, 0, len(ss))
+	temp := map[string]struct{}{}
+	for _, item := range ss {
+		if _, ok := temp[item]; !ok {
+			temp[item] = struct{}{}
+			result = append(result, item)
+		}
+	}
+	return result
 }

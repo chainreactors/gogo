@@ -1,6 +1,9 @@
 package Utils
 
 import (
+	"fmt"
+	"io/ioutil"
+	"net/http"
 	"regexp"
 	"strings"
 )
@@ -13,11 +16,13 @@ type Result struct {
 	Host      string
 	Title     string
 	Midware   string
+	HttpStat  string
 	Language  string
 	Framework string
 	Vuln      string
 	Protocol  string
 	Error     string
+	Content   string
 }
 
 //发送内容
@@ -48,7 +53,7 @@ func Match(Regexp string, s string) string {
 }
 
 func GetTitle(content string) string {
-	title := Match("(?i)<title>(.*)</title>", content)
+	title := Match("(?im)<title>(.*)</title>", content)
 	if title != "" {
 		return title
 	}
@@ -57,7 +62,7 @@ func GetTitle(content string) string {
 
 func GetMidware(content string) string {
 
-	server := Match("(?i)Server: ([\x21-\x73]+)", strings.Split(content, "\r\n\r\n")[0])
+	server := Match("(?i)Server: ([\x20-\x7e]+)", strings.Split(content, "\r\n\r\n")[0])
 	if server != "" {
 		return server
 	}
@@ -68,13 +73,13 @@ func GetMidware(content string) string {
 
 func GetLanguage(content string) string {
 
-	powered := Match("(?i)X-Powered-By: ([!-s]+)", strings.Split(content, "\r\n\r\n")[0])
+	powered := Match("(?i)X-Powered-By: ([\x20-\x7e]+)", strings.Split(content, "\r\n\r\n")[0])
 
 	if powered != "" {
 		return powered
 	}
 
-	sessionid := Match("(?i)\x20(.{1,8}SESS.*?ID)", content)
+	sessionid := Match("(?i) (.*SESS.*?ID)", content)
 
 	if sessionid != "" {
 		switch sessionid {
@@ -92,4 +97,30 @@ func GetLanguage(content string) string {
 
 func GetFrameWork(content string) string {
 	return ""
+}
+
+func GetHttpRaw(resp http.Response) string {
+	var raw string
+
+	raw += fmt.Sprintf("%s %s\r\n", resp.Proto, resp.Status)
+	for k, v := range resp.Header {
+		for _, i := range v {
+			raw += fmt.Sprintf("%s: %s\r\n", k, i)
+		}
+	}
+	raw += "\r\n"
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return raw
+	}
+	raw += string(body)
+	return raw
+}
+
+func GetStatusCode(content string) string {
+	if strings.Contains(content, "HTTP") {
+		return content[9:12]
+	}
+
+	return "999"
 }
