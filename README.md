@@ -100,10 +100,15 @@ Usage of ./getitle:
     * 优化了二进制文件大小
     * 添加了更强的端口配置模式,例如` -p top2,db,12345` 
     * 修复了无法扫描A段的bug
-* v0.2.0 beta2
+* v0.2.0(v0.1.7)
     * 修复了OXID部分情况下报错的bug
     * 修复了https无法获取title的bug
+    * 优化了匹配title,中间件与语言的正则表达式,使其可以匹配到更多的信息
     * 优化了端口配置,all预设将会拼接所有的预设并自动去重
+    * 优化了输出格式
+    * 优化了OXIDscan的网卡信息输出
+    * 添加了shiroscan(beta)
+    * 添加了-e参数(bool值,不需要添加值,只需要存在-e即可),redisscan与shiroscan只有在开启该参数才会启用(beta)
 
 ​    
 

@@ -17,8 +17,8 @@ func Dispatch(result Utils.Result) Utils.Result {
 	switch result.Port {
 	case "443", "8443", "4443":
 		result = SystemHttp(target, result)
-	case "445":
-		result = MS17010Scan(target, result)
+	//case "445":
+	//	result = MS17010Scan(target, result)
 	case "137":
 		result = NbtScan(target, result)
 	case "135":
