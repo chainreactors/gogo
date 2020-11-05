@@ -1,6 +1,7 @@
 package moudle
 
 import (
+	"fmt"
 	"getitle/src/Scan"
 	"getitle/src/Utils"
 	"github.com/panjf2000/ants/v2"
@@ -63,9 +64,9 @@ func StraightScan(ipi interface{}) {
 	if result.Stat == "" {
 
 	} else {
-		output(*result)
+		fmt.Print(output(*result, "full"))
 		if O2File {
-			Datach <- JsonReturn(*result)
+			Datach <- output(*result, "full")
 		}
 	}
 }

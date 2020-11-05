@@ -100,7 +100,7 @@ Usage of ./getitle:
     * 优化了二进制文件大小
     * 添加了更强的端口配置模式,例如` -p top2,db,12345` 
     * 修复了无法扫描A段的bug
-* v0.2.0(v0.1.7)
+* v0.2.0(beta1/2)
     * 修复了OXID部分情况下报错的bug
     * 修复了https无法获取title的bug
     * 优化了匹配title,中间件与语言的正则表达式,使其可以匹配到更多的信息
@@ -109,6 +109,10 @@ Usage of ./getitle:
     * 优化了OXIDscan的网卡信息输出
     * 添加了shiroscan(beta)
     * 添加了-e参数(bool值,不需要添加值,只需要存在-e即可),redisscan与shiroscan只有在开启该参数才会启用(beta)
+* v0.2.0(beta3)
+    * 修复了https协议shiro无法正确识别的bug
+    * 优化了Nbtscan于OXIDscan中不可见字符输出问题
+    * 添加了top3端口预设
 
 ​    
 
@@ -119,4 +123,7 @@ Usage of ./getitle:
 3. 添加OXID [√]
 4. 添加简单目录扫描
 5. 更灵活的端口模式 [√]
-6. tcp reset扫描
+6. 更智能的扫描配置
+7. 重构主要逻辑代码
+8. 添加从文件中读取扫描目标
+9. Shiro 100key爆破

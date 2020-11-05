@@ -27,14 +27,14 @@ func OXIDScan(target string, result Utils.Result) Utils.Result {
 	recvStr_v2 := recvStr[42:]
 	packet_v2_end := strings.Index(recvStr_v2, "\x09\x00\xff\xff\x00\x00")
 	packet_v2 := recvStr_v2[:packet_v2_end]
-	strings.ReplaceAll(packet_v2, " ", "")
+	packet_v2 = strings.Replace(packet_v2, "\x00", "", -1)
 	hostname_list := strings.Split(packet_v2, "\x00\x00")
 	//result.Title = hostname_list[0]
 	for k, hostname := range hostname_list {
 		if k == 0 {
 			result.Host = hostname
 		} else if len(hostname) > 1 {
-			result.Title += strings.ReplaceAll(hostname, "\x00", "")[1:] + " , "
+			result.Title += hostname[1:] + " , "
 		}
 
 	}

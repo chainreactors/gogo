@@ -10,7 +10,6 @@ var Datach = make(chan string, 1000)
 var FileHandle *os.File
 var O2File bool = false
 var Filename string
-var Outputforamt string
 var Threads int
 
 func Init(IPaddress string, key string) string {
@@ -63,7 +62,7 @@ func CheckFileIsExist(filename string) bool {
 
 func Write2File(FileHandle *os.File, Datach chan string) {
 	for res := range Datach {
-		FileHandle.WriteString(res + ",\n")
+		FileHandle.WriteString(res)
 	}
 }
 
@@ -87,7 +86,7 @@ func choiceports(portname string) []string {
 	case "top2":
 		ports = []string{"80-90", "443", "4443", "7000-7009", "9000-9009", "8080-8090", "8000-8010", "8443", "8787", "7080", "8070", "9080", "6666", "8888", "7777", "9090", "800", "801", "9999", "10000", "10080"}
 	case "top3":
-		ports = []string{"10800,10801,10802"}
+		ports = []string{"10800,10801,10802", "7070", "4430"}
 	case "db":
 		ports = []string{"3306", "1433", "1521", "5432", "6379", "11211", "27017"}
 	case "rce":

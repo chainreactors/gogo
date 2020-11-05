@@ -100,9 +100,10 @@ func NbtScan(target string, result Utils.Result) Utils.Result {
 
 	}
 	msg := group + "\\" + unique
+	msg = strings.Replace(msg, "\x00", "", -1)
 
 	if Share {
-		msg = msg + "        sharing"
+		msg = msg + "\tsharing"
 	}
 	result.Host = msg
 

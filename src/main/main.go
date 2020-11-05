@@ -25,7 +25,7 @@ func main() {
 	IPaddress := flag.String("ip", "", "")
 	mod := flag.String("m", "default", "")
 	delay := flag.Int("d", 2, "")
-	Output := flag.String("o", "full", "")
+	//Output := flag.String("o", "full", "")
 	Filename := flag.String("f", "", "")
 	Exploit := flag.Bool("e", false, "")
 
@@ -36,8 +36,6 @@ func main() {
 	//server := "192.167.0.1/24"
 
 	//portlist := []string{"80","81","7001","9001","8080","8081","8000","8009","88","443","9999","7080","8070","9080","8082","8888","8089","9001","5555","9001"}
-
-	moudle.Outputforamt = *Output
 
 	//set config
 	Scan.Delay = time.Duration(*delay)
@@ -71,9 +69,7 @@ func main() {
 
 	sum := "[*] Alive sum: " + strconv.Itoa(Scan.Alivesum)
 	//moudle.Datach <- sum
-	res := new(Utils.Result)
-	Sres := moudle.JsonReturn(*res)
-	moudle.FileHandle.WriteString(Sres + "]")
+	_, _ = moudle.FileHandle.WriteString(moudle.JsonOutput(*new(Utils.Result)) + "]")
 	time.Sleep(time.Microsecond * 500)
 	println(sum)
 	println("[*] Totally run: " + elapsed.String())

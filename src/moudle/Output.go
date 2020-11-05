@@ -4,32 +4,34 @@ import (
 	"encoding/json"
 	"fmt"
 	"getitle/src/Utils"
-	"strings"
 )
 
-func output(result Utils.Result) {
+func output(result Utils.Result, outType string) string {
 	var out string
-	if strings.Contains(Outputforamt, "clean") {
-		out += cleanOutput(result)
+
+	switch outType {
+	case "clean":
+		out = CleanOutput(result)
+	case "full":
+		out = FullOutput(result)
+	case "json":
+		out = JsonOutput(result)
+	default:
+		out = FullOutput(result)
+
 	}
-	if strings.Contains(Outputforamt, "full") {
-		out += fullOutput(result)
-	}
-	if strings.Contains(Outputforamt, "json") {
-		out += jsonOutput(result)
-	}
-	fmt.Print(out)
+	return out
 
 }
 
-func cleanOutput(result Utils.Result) string {
+func CleanOutput(result Utils.Result) string {
 	s := fmt.Sprintf("[+] %s://%s:%s\t%s\t", result.Protocol, result.Ip, result.Port, result.Title)
 	s += vulnOutput(result)
 	s += "\n"
 	return s
 }
 
-func fullOutput(result Utils.Result) string {
+func FullOutput(result Utils.Result) string {
 	s := fmt.Sprintf("[+] %s://%s:%s\t%s\t%s\t%s\t%s\t[%s] %s", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, result.Framework, result.Host, result.HttpStat, result.Title)
 	s += vulnOutput(result)
 	s += "\n"
@@ -37,24 +39,12 @@ func fullOutput(result Utils.Result) string {
 	return s
 }
 
-func jsonOutput(result Utils.Result) string {
+func JsonOutput(result Utils.Result) string {
 	jsons, err := json.Marshal(result)
 	if err != nil {
 		return ""
 	}
 	return string(jsons) + "\n"
-}
-
-func JsonReturn(result Utils.Result) string {
-	jsons, err := json.Marshal(result)
-	//if err == nil {
-	//	return jsons
-	//}
-	//return []byte("\x00")
-	if err == nil {
-		return string(jsons)
-	}
-	return ""
 }
 
 func vulnOutput(result Utils.Result) string {
