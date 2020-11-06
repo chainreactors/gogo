@@ -9,6 +9,7 @@ import (
 var Datach = make(chan string, 1000)
 var FileHandle *os.File
 var O2File bool = false
+var IsJson bool = false
 var Filename string
 var Outputforamt string
 var Threads int
@@ -63,7 +64,12 @@ func CheckFileIsExist(filename string) bool {
 
 func Write2File(FileHandle *os.File, Datach chan string) {
 	for res := range Datach {
-		FileHandle.WriteString(res + ",\n")
+		if !IsJson {
+			FileHandle.WriteString(res)
+		} else {
+			FileHandle.WriteString(res + ",\n")
+		}
+
 	}
 }
 
