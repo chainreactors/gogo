@@ -124,3 +124,18 @@ func GetStatusCode(content string) string {
 
 	return "999"
 }
+
+func FilterCertDomain(domins []string) string {
+	var res string
+	if len(domins) == 0 {
+		return ""
+	} else if len(domins) == 1 {
+		return domins[0]
+	}
+	for _, domain := range domins {
+		if !strings.Contains(domain, "www.") {
+			res += domain + ","
+		}
+	}
+	return res[:len(res)-1]
+}

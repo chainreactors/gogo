@@ -4,26 +4,28 @@ import (
 	"encoding/json"
 	"fmt"
 	"getitle/src/Utils"
-	"strings"
 )
 
-func output(result Utils.Result) {
+func output(result Utils.Result, outType string) string {
 	var out string
-	if strings.Contains(Outputforamt, "clean") {
-		out += cleanOutput(result)
+
+
+	switch outType {
+	case "clean":
+		out = CleanOutput(result)
+	case "json":
+		out = JsonOutput(result)
+	default:
+		out = FullOutput(result)
+
 	}
-	if strings.Contains(Outputforamt, "full") {
-		out += FullOutput(result)
-	}
-	if strings.Contains(Outputforamt, "json") {
-		out += jsonOutput(result)
-	}
-	fmt.Print(out)
+	return out
 
 }
 
-func cleanOutput(result Utils.Result) string {
-	s := fmt.Sprintf("[+] %s://%s:%s\t%s\t", result.Protocol, result.Ip, result.Port, result.Title)
+func CleanOutput(result Utils.Result) string {
+	//s := fmt.Sprintf("[+] %s://%s:%s\t%s\t", result.Protocol, result.Ip, result.Port, result.Title)
+	s := fmt.Sprintf("%s:%s", result.Ip, result.Port)
 	s += vulnOutput(result)
 	s += "\n"
 	return s
@@ -31,21 +33,20 @@ func cleanOutput(result Utils.Result) string {
 
 
 func FullOutput(result Utils.Result) string {
-	s := fmt.Sprintf("[+] %s://%s:%s\tOPEN\t%s\t%s\t%s\t%s\t[%s] %s", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, result.Framework, result.Host, result.HttpStat, result.Title)
+	s := fmt.Sprintf("[+] %s://%s:%s\t%s\t%s\t%s\t%s\t[%s] %s", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, result.Framework, result.Host, result.HttpStat, result.Title)
 	s += vulnOutput(result)
 	s += "\n"
 
 	return s
 }
 
-func jsonOutput(result Utils.Result) string {
+func JsonOutput(result Utils.Result) string {
 	jsons, err := json.Marshal(result)
 	if err != nil {
 		return ""
 	}
 	return string(jsons) + "\n"
 }
-
 
 func vulnOutput(result Utils.Result) string {
 	if result.Vuln != "" {

@@ -8,7 +8,7 @@ import (
 
 func ShiroScan(target string, result Utils.Result) Utils.Result {
 	var isshiro = false
-	if result.HttpStat == "400" {
+	if result.HttpStat == "400" || result.Port == "443" || result.Port == "8443" || result.Port == "4443" {
 		target = "https://" + target
 		result.Protocol = "https"
 	} else {

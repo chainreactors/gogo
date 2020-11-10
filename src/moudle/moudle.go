@@ -1,6 +1,7 @@
 package moudle
 
 import (
+	"fmt"
 	"getitle/src/Scan"
 	"getitle/src/Utils"
 	"github.com/panjf2000/ants/v2"
@@ -12,9 +13,8 @@ import (
 //直接扫描
 func StraightMod(target string, portlist []string, thread int) {
 	var wgs sync.WaitGroup
-	ch := GenIP(target)
-
-	Tch := GenTarget(ch, portlist)
+	ipChannel := Ipgenerator(target)
+	targetChannel := GenTarget(ipChannel, portlist)
 
 	var Gentarget string
 
@@ -26,7 +26,7 @@ func StraightMod(target string, portlist []string, thread int) {
 	})
 	defer p1.Release()
 
-	for Gentarget = range Tch {
+	for Gentarget = range targetChannel {
 		wgs.Add(1)
 		_ = p1.Invoke(Gentarget)
 	}
@@ -44,14 +44,11 @@ func StraightScan(ipi interface{}) {
 	*result = Scan.Dispatch(*result)
 	//res := Scan.SystemHttp(ip)
 
-	if result.Stat == "" {
 
-	} else {
-		output(*result)
-		if O2File && (!IsJson) {
-			Datach <- FullOutput(*result)
-		} else {
-			Datach <- JsonReturn(*result)
+	if result.Stat != "" {
+		fmt.Print(output(*result, OutputType))
+		if O2File {
+			Datach <- output(*result, OutputType)
 		}
 
 	}
@@ -103,7 +100,7 @@ func SmartBMod(target string, temp []int, portlist []string) {
 	for k, v := range temp {
 
 		if v > 0 {
-			newC := MyInt2IP(start)
+			newC := Int2IP(start)
 			HnewC := net.ParseIP(newC).To4()
 			HnewC[2] = byte(k)
 			NextCTarget = HnewC.String() + "/24"

@@ -8,7 +8,6 @@ import (
 )
 
 func TcpSocketConn(target string, Delay time.Duration) (net.Conn, error) {
-
 	conn, err := net.DialTimeout("tcp", target, Delay*time.Second)
 
 	if err != nil {
@@ -53,6 +52,7 @@ func GetTarget(ip string, port string) string {
 
 func HttpConn(delay time.Duration) http.Client {
 	tr := &http.Transport{
+		//TLSHandshakeTimeout : delay * time.Second,
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
 

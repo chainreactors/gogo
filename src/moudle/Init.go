@@ -11,11 +11,11 @@ var FileHandle *os.File
 var O2File bool = false
 var IsJson bool = false
 var Filename string
-var Outputforamt string
 var Threads int
+var OutputType string
 
 func Init(IPaddress string, key string) string {
-	println("*********  getitle 0.1.5 beta by Sangfor  *********")
+	println("*********  getitle 0.2.0 beta by Sangfor  *********")
 
 	if key != "sangfor" {
 		println("FUCK OFF!!!")
@@ -64,11 +64,7 @@ func CheckFileIsExist(filename string) bool {
 
 func Write2File(FileHandle *os.File, Datach chan string) {
 	for res := range Datach {
-		if !IsJson {
-			FileHandle.WriteString(res)
-		} else {
-			FileHandle.WriteString(res + ",\n")
-		}
+		FileHandle.WriteString(res)
 
 	}
 }
@@ -92,6 +88,8 @@ func choiceports(portname string) []string {
 		ports = []string{"80", "443", "8080"}
 	case "top2":
 		ports = []string{"80-90", "443", "4443", "7000-7009", "9000-9009", "8080-8090", "8000-8010", "8443", "8787", "7080", "8070", "9080", "6666", "8888", "7777", "9090", "800", "801", "9999", "10000", "10080"}
+	case "top3":
+		ports = []string{"10800,10801,10802", "7070", "4430"}
 	case "db":
 		ports = []string{"3306", "1433", "1521", "5432", "6379", "11211", "27017"}
 	case "rce":
@@ -101,6 +99,7 @@ func choiceports(portname string) []string {
 	case "all":
 		ports = []string{"25", "69", "110", "143", "161", "389", "465", "873", "993", "995", "1158", "1352", "1833", "1863", "2049", "2100", "2181", "2375", "3128", "3700", "5632", "5900", "5984", "6000", "6868", "8069", "8161", "9081", "9200", "9300", "9043", "12345", "50000", "50070"}
 		ports = append(ports, choiceports("top2")...)
+		ports = append(ports, choiceports("top3")...)
 		ports = append(ports, choiceports("db")...)
 		ports = append(ports, choiceports("win")...)
 		ports = append(ports, choiceports("rce")...)
