@@ -1,4 +1,4 @@
-package moudle
+package core
 
 import (
 	"math"

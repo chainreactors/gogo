@@ -1,4 +1,4 @@
-package moudle
+package core
 
 import (
 	"encoding/json"
@@ -8,7 +8,6 @@ import (
 
 func output(result Utils.Result, outType string) string {
 	var out string
-
 
 	switch outType {
 	case "clean":
@@ -30,7 +29,6 @@ func CleanOutput(result Utils.Result) string {
 	s += "\n"
 	return s
 }
-
 
 func FullOutput(result Utils.Result) string {
 	s := fmt.Sprintf("[+] %s://%s:%s\t%s\t%s\t%s\t%s\t[%s] %s", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, result.Framework, result.Host, result.HttpStat, result.Title)

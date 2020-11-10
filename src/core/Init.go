@@ -1,4 +1,4 @@
-package moudle
+package core
 
 import (
 	"os"
@@ -28,6 +28,12 @@ func Init(IPaddress string, key string) string {
 		IPaddress += "/32"
 	}
 
+	initFile()
+	go Write2File(FileHandle, Datach)
+
+	return IPaddress
+}
+func initFile() {
 	var err error
 
 	if Filename != "" {
@@ -47,11 +53,10 @@ func Init(IPaddress string, key string) string {
 			}
 			//io.WriteString(FileHandle, "123")
 		}
-		FileHandle.WriteString("[")
-		go Write2File(FileHandle, Datach)
-
+		if OutputType == "json" {
+			_, _ = FileHandle.WriteString("[")
+		}
 	}
-	return IPaddress
 }
 
 func CheckFileIsExist(filename string) bool {

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"getitle/src/Scan"
 	"getitle/src/Utils"
-	"getitle/src/moudle"
+	"getitle/src/core"
 	"github.com/panjf2000/ants/v2"
 	"strconv"
 	"strings"
@@ -40,40 +40,40 @@ func main() {
 
 	//set config
 	Scan.Delay = time.Duration(*delay)
-	moudle.Threads = *threads
-	moudle.Filename = *Filename
-	moudle.OutputType = *Output
+	core.Threads = *threads
+	core.Filename = *Filename
+	core.OutputType = *Output
 	Scan.Exploit = *Exploit
 	//init the IP
-	CIDR := moudle.Init(*IPaddress, *key)
-	portlist := moudle.PortHandler(*ports)
+	CIDR := core.Init(*IPaddress, *key)
+	portlist := core.PortHandler(*ports)
 
 	println(fmt.Sprintf("[*] Start Scan %s ,total ports: %d", CIDR, len(portlist)))
 
 	switch *mod {
 	case "default":
 		//直接扫描
-		moudle.StraightMod(CIDR, portlist, moudle.Threads)
+		core.StraightMod(CIDR, portlist, core.Threads)
 	case "s", "smart":
 		//启发式扫描
 		mask, _ := strconv.Atoi(strings.Split(CIDR, "/")[1])
 		if mask < 24 && mask >= 16 {
-			moudle.SmartBMod(CIDR, portlist)
+			core.SmartBMod(CIDR, portlist)
 		} else if mask < 16 {
-			moudle.SmartAMod(CIDR, portlist)
+			core.SmartAMod(CIDR, portlist)
 		} else {
 
-			moudle.StraightMod(CIDR, portlist, moudle.Threads)
+			core.StraightMod(CIDR, portlist, core.Threads)
 
 		}
 	}
 
 	endtime := time.Since(starttime)
 
-	//moudle.Datach <- sum
-
-	_, _ = moudle.FileHandle.WriteString(moudle.JsonOutput(*new(Utils.Result)) + "]")
-
+	//core.Datach <- sum
+	if *Output == "json" {
+		_, _ = core.FileHandle.WriteString(core.JsonOutput(*new(Utils.Result)) + "]")
+	}
 	time.Sleep(time.Microsecond * 500)
 	println("[*] Alive sum: " + strconv.Itoa(Scan.Alivesum))
 	println("[*] Totally run: " + endtime.String())
