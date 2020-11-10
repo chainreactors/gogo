@@ -63,8 +63,9 @@ func SafeSlice(temp []int, ch chan int, baseip string) {
 	}
 }
 
-func SmartBMod(target string, temp []int, portlist []string) {
+func SmartBMod(target string, portlist []string) {
 	var wg sync.WaitGroup
+	temp := make([]int, 256)
 	aliveC := make(chan int, 256)
 	ip_B := strings.Join(strings.Split(target, ".")[:2], ".")
 	go SafeSlice(temp, aliveC, ip_B)
@@ -148,15 +149,9 @@ func SmartScan(ipi interface{}, AliveCh chan int) {
 }
 
 func SmartAMod(target string, portlist []string) {
-	bslice := make([][]int, 256)
-
-	Tchan := GenBIP(target)
-	var sum int = 0
-	for i := range Tchan {
-		println("[*] Processing B class IP:" + i + "/16")
-		temp := make([]int, 256)
-		bslice = append(bslice, temp)
-		sum += 1
-		SmartBMod(i+"/16", temp, portlist)
+	btargetChannel := GenBIP(target)
+	for i := range btargetChannel {
+		println("[*] Processing Bclass IP:" + i + "/16")
+		SmartBMod(i+"/16", portlist)
 	}
 }

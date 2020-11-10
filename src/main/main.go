@@ -56,10 +56,9 @@ func main() {
 		moudle.StraightMod(CIDR, portlist, moudle.Threads)
 	case "s", "smart":
 		//启发式扫描
-		temp := make([]int, 256)
 		mask, _ := strconv.Atoi(strings.Split(CIDR, "/")[1])
-		if mask == 16 {
-			moudle.SmartBMod(CIDR, temp, portlist)
+		if mask < 24 && mask >= 16 {
+			moudle.SmartBMod(CIDR, portlist)
 		} else if mask < 16 {
 			moudle.SmartAMod(CIDR, portlist)
 		} else {

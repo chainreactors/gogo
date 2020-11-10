@@ -8,8 +8,8 @@ import (
 )
 
 func Ip2Int(ipmask string) int {
-	ParseIP := strings.Split(ipmask, "/")
-	s2ip := net.ParseIP(ParseIP[0]).To4()
+	Ip := strings.Split(ipmask, "/")
+	s2ip := net.ParseIP(Ip[0]).To4()
 	return int(s2ip[3]) | int(s2ip[2])<<8 | int(s2ip[1])<<16 | int(s2ip[0])<<24
 }
 
@@ -77,16 +77,16 @@ func Ipgenerator(target string) chan string {
 
 //此处的生成方式是每个C段交替生成,1.1,2.1....1.255,2.255这样
 func SmartIpGenerator(target string, temp []int) chan string {
-	start, _ := GetIpRange(target)
+	start, fin := GetIpRange(target)
 	ch := make(chan string)
 	var outIP string
 	//sum := fin -start
-	var i, j int
+	var C, B int
 
 	go func() {
-		for i = 1; i < 255; i++ {
-			for j = 0; j < 256; j++ {
-				outIP = Int2IP(start + 256*j + i)
+		for C = 1; C < 255; C++ {
+			for B = 0; B <= (fin-start)/256; B++ {
+				outIP = Int2IP(start + 256*B + C)
 				if isAlive(outIP, temp) {
 					ch <- outIP
 				}
@@ -130,11 +130,7 @@ func GenBIP(target string) chan string {
 
 	ch := make(chan string)
 
-	ip := make(net.IP, net.IPv4len)
-	ip[0] = byte(start >> 24)
-	ip[1] = byte(start >> 16)
-	ip[2] = byte(start >> 8)
-	ip[3] = byte(start)
+	ip := net.ParseIP(Int2IP(start)).To4()
 
 	var i byte
 	go func() {
