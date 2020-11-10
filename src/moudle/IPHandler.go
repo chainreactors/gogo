@@ -7,7 +7,6 @@ import (
 	"strings"
 )
 
-var blacklist = make(map[uint32]bool)
 
 func Ip2Int(ipmask string) uint32 {
 	ParseIP := strings.Split(ipmask, "/")
@@ -36,14 +35,18 @@ func HandleMask(mask string) (before uint32, after uint32) {
 }
 
 //使用管道生成IP
-func GenIP(target string) chan string {
+func Ipgenerator(target string) chan string {
 	start, fin := HandleIPAMASK(target)
 	ch := make(chan string)
 	sum := fin - start
 	var i uint32
 	go func() {
 		for i = 0; i <= sum; i++ {
-			ch <- Int2IP(i + start)
+			// 如果是广播地址或网络地址,则跳过
+			if (i+start)%256!=255 && (i+start)%256!=0 {
+				ch <- Int2IP(i + start)
+			}
+
 		}
 		close(ch)
 	}()
@@ -81,7 +84,7 @@ func GenIPC(alive []string, AliveNum int) chan string {
 	for _, v := range alive {
 		go func() {
 			for i := 0; i <= 256*AliveNum; i++ {
-				target = <-GenIP(v)
+				target = <-Ipgenerator(v)
 				Tchan <- target
 			}
 			close(Tchan)
@@ -127,6 +130,7 @@ func IPifNeed2(ip string, temp []int) bool {
 	return true
 }
 
+//
 func GenBIP(target string) chan string {
 	start, fin := HandleIPAMASK(target)
 	startB := byte(start >> 16)

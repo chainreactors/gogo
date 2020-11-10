@@ -13,9 +13,8 @@ import (
 //直接扫描
 func StraightMod(target string, portlist []string, thread int) {
 	var wgs sync.WaitGroup
-	ch := GenIP(target)
-
-	Tch := GenTarget(ch, portlist)
+	ipChannel := Ipgenerator(target)
+	targetChannel := GenTarget(ipChannel, portlist)
 
 	var Gentarget string
 
@@ -27,7 +26,7 @@ func StraightMod(target string, portlist []string, thread int) {
 	})
 	defer p1.Release()
 
-	for Gentarget = range Tch {
+	for Gentarget = range targetChannel {
 		wgs.Add(1)
 		_ = p1.Invoke(Gentarget)
 	}
@@ -61,9 +60,7 @@ func StraightScan(ipi interface{}) {
 	*result = Scan.Dispatch(*result)
 	//res := Scan.SystemHttp(ip)
 
-	if result.Stat == "" {
-
-	} else {
+	if result.Stat != "" {
 		fmt.Print(output(*result, OutputType))
 		if O2File {
 			Datach <- output(*result, "full")
