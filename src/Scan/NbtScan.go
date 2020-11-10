@@ -47,6 +47,7 @@ func init() {
 
 func NbtScan(target string, result Utils.Result) Utils.Result {
 	var Share bool = false
+	var DC bool = false
 	result.Protocol = "NetBIOS"
 	conn, err := Utils.UdpSocketConn(target, Delay)
 	if err != nil {
@@ -89,7 +90,9 @@ func NbtScan(target string, result Utils.Result) Utils.Result {
 			}
 		} else {
 			if _, ok := GROUP_NAMES[string(flag_bit)]; ok {
-				//fmt.Printf("%s\t%s\t%s\n",name,"G",GROUP_NAMES[string(flag_bit)])
+				if string(flag_bit) == "\x1C" {
+					DC = true
+				}
 			} else if _, ok := UNIQUE_NAMES[string(flag_bit)]; ok {
 				if string(flag_bit) == "\x20" {
 					Share = true
@@ -103,6 +106,9 @@ func NbtScan(target string, result Utils.Result) Utils.Result {
 
 	if Share {
 		msg = msg + "        sharing"
+	}
+	if DC {
+		msg = msg + "  DC"
 	}
 	result.Host = msg
 

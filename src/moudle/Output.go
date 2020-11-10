@@ -13,7 +13,7 @@ func output(result Utils.Result) {
 		out += cleanOutput(result)
 	}
 	if strings.Contains(Outputforamt, "full") {
-		out += fullOutput(result)
+		out += FullOutput(result)
 	}
 	if strings.Contains(Outputforamt, "json") {
 		out += jsonOutput(result)
@@ -29,8 +29,9 @@ func cleanOutput(result Utils.Result) string {
 	return s
 }
 
-func fullOutput(result Utils.Result) string {
-	s := fmt.Sprintf("[+] %s://%s:%s\t%s\t%s\t%s\t%s\t[%s] %s", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, result.Framework, result.Host, result.HttpStat, result.Title)
+
+func FullOutput(result Utils.Result) string {
+	s := fmt.Sprintf("[+] %s://%s:%s\tOPEN\t%s\t%s\t%s\t%s\t[%s] %s", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, result.Framework, result.Host, result.HttpStat, result.Title)
 	s += vulnOutput(result)
 	s += "\n"
 
@@ -45,17 +46,6 @@ func jsonOutput(result Utils.Result) string {
 	return string(jsons) + "\n"
 }
 
-func JsonReturn(result Utils.Result) string {
-	jsons, err := json.Marshal(result)
-	//if err == nil {
-	//	return jsons
-	//}
-	//return []byte("\x00")
-	if err == nil {
-		return string(jsons)
-	}
-	return ""
-}
 
 func vulnOutput(result Utils.Result) string {
 	if result.Vuln != "" {

@@ -33,22 +33,6 @@ func StraightMod(target string, portlist []string, thread int) {
 
 	wgs.Wait()
 
-	//for i := range Datach{
-	//	fmt.Println(i)
-	//}
-
-	//if O2File {
-	//	timeout := time.NewTimer(time.Microsecond * 1000)
-	//	for {
-	//		select {
-	//		case x := <-Datach:
-	//			FileHandle.WriteString(x)
-	//		case <-timeout.C:
-	//			return
-	//		}
-	//	}
-	//}
-
 }
 
 func StraightScan(ipi interface{}) {
@@ -64,31 +48,48 @@ func StraightScan(ipi interface{}) {
 
 	} else {
 		output(*result)
-		if O2File {
+		if O2File && (!IsJson) {
+			Datach <- FullOutput(*result)
+		} else {
 			Datach <- JsonReturn(*result)
 		}
+
 	}
 }
 
 func SmartBMod(target string, temp []int, portlist []string) {
 	var wg sync.WaitGroup
-	//var wg2 sync.WaitGroup
+	AliveC := make(chan int, 100)
+
+	go SafeSlice(temp, AliveC)
+
 	ch := GenIP2(target, temp)
 
 	SimpleList := []string{"80"}
 	Tch := GenTarget(ch, SimpleList)
 
 	var Gentarget string
-	//ResMap := GetMap()
+
+	//old smartB
+
+	//p2, _ := ants.NewPoolWithFunc(Threads, func(i interface{}) {
+	//	//SmartScan(i,ResMap)
+	//	SmartScan2(i, temp)
+	//	wg.Done()
+	//})
+
+	// new smartB
+
 	p2, _ := ants.NewPoolWithFunc(Threads, func(i interface{}) {
 		//SmartScan(i,ResMap)
-		SmartScan2(i, temp)
+		SmartScan3(i, AliveC)
 		wg.Done()
 	})
+
 	defer p2.Release()
 
 	for Gentarget = range Tch {
-		//fmt.Println(target)
+
 		wg.Add(1)
 		_ = p2.Invoke(Gentarget)
 	}
@@ -134,11 +135,35 @@ func SmartScan2(ipi interface{}, Reslice []int) {
 	result.Port = strings.Split(target, ":")[1]
 
 	*result = Scan.Dispatch(*result)
+
 	if result.Stat == "OPEN" {
 
 		s2ip := net.ParseIP(result.Ip).To4()
 		c := s2ip[2]
 		Reslice[c] += 1
+	}
+}
+
+func SmartScan3(ipi interface{}, AliveCh chan int) {
+	target := ipi.(string)
+	var result = new(Utils.Result)
+	result.Ip = strings.Split(target, ":")[0]
+	result.Port = strings.Split(target, ":")[1]
+
+	*result = Scan.Dispatch(*result)
+
+	if result.Stat == "OPEN" {
+
+		s2ip := net.ParseIP(result.Ip).To4()
+		c := s2ip[2]
+		AliveCh <- int(c)
+	}
+}
+
+func SafeSlice(temp []int, ch chan int) {
+	for aliveC := range ch {
+
+		temp[aliveC] += 1
 	}
 }
 
