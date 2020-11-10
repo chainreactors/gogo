@@ -15,10 +15,6 @@ func Dispatch(result Utils.Result) Utils.Result {
 	Sum++
 	//println(result.Ip,result.Port)
 	switch result.Port {
-	//case "443", "8443", "4443":
-	//	result = SystemHttp(target, result)
-	//case "445":
-	//	result = MS17010Scan(target, result)
 	case "137":
 		result = NbtScan(target, result)
 	case "135":
@@ -53,6 +49,9 @@ func ExploitDispatch(result Utils.Result) Utils.Result {
 	}
 	if result.HttpStat == "200" || strings.HasPrefix(result.HttpStat, "3") {
 		result = ShiroScan(target, result)
+	}
+	if result.Port == "445" {
+		//result = MS17010Scan(target, result)
 	}
 	return result
 }
