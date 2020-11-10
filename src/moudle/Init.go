@@ -11,6 +11,7 @@ var FileHandle *os.File
 var O2File bool = false
 var Filename string
 var Threads int
+var OutputType string
 
 func Init(IPaddress string, key string) string {
 	println("*********  getitle 0.2.0 beta by Sangfor  *********")

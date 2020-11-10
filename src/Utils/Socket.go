@@ -8,7 +8,6 @@ import (
 )
 
 func TcpSocketConn(target string, Delay time.Duration) (net.Conn, error) {
-
 	conn, err := net.DialTimeout("tcp", target, Delay*time.Second)
 
 	if err != nil {

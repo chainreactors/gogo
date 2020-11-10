@@ -113,6 +113,7 @@ Usage of ./getitle:
     * 修复了https协议shiro无法正确识别的bug
     * 优化了Nbtscan于OXIDscan中不可见字符输出问题
     * 添加了top3端口预设
+    * 使用go1.11编译,兼容windows server2003与xp系统
 
 ​    
 

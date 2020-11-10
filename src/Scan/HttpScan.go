@@ -60,6 +60,9 @@ func SystemHttp(target string, result Utils.Result) Utils.Result {
 		return result
 	}
 	result.Stat = "OPEN"
+	if result.Protocol == "https" && resp.TLS != nil {
+		result.Host = Utils.FilterCertDomain(resp.TLS.PeerCertificates[0].DNSNames)
+	}
 	result.HttpStat = strconv.Itoa(resp.StatusCode)
 	result.Content = Utils.GetHttpRaw(*resp)
 	_ = resp.Body.Close()

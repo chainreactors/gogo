@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"getitle/src/Scan"
 	"getitle/src/Utils"
 	"getitle/src/moudle"
@@ -25,12 +26,12 @@ func main() {
 	IPaddress := flag.String("ip", "", "")
 	mod := flag.String("m", "default", "")
 	delay := flag.Int("d", 2, "")
-	//Output := flag.String("o", "full", "")
+	Output := flag.String("o", "full", "")
 	Filename := flag.String("f", "", "")
 	Exploit := flag.Bool("e", false, "")
 
 	flag.Parse()
-	//Scan.Outp = *Output
+
 	t1 := time.Now()
 
 	//server := "192.167.0.1/24"
@@ -41,12 +42,13 @@ func main() {
 	Scan.Delay = time.Duration(*delay)
 	moudle.Threads = *threads
 	moudle.Filename = *Filename
+	moudle.OutputType = *Output
 	Scan.Exploit = *Exploit
 	//init the IP
 	CIDR := moudle.Init(*IPaddress, *key)
 	portlist := moudle.PortHandler(*ports)
 
-	println("[*] Start Scan " + CIDR)
+	println(fmt.Sprintf("[*] Start Scan %s ,total ports: %d", CIDR, len(portlist)))
 
 	switch *mod {
 	case "default":

@@ -64,7 +64,7 @@ func StraightScan(ipi interface{}) {
 	if result.Stat == "" {
 
 	} else {
-		fmt.Print(output(*result, "full"))
+		fmt.Print(output(*result, OutputType))
 		if O2File {
 			Datach <- output(*result, "full")
 		}
