@@ -7,15 +7,13 @@ import (
 	"strings"
 )
 
-
-func Ip2Int(ipmask string) uint32 {
+func Ip2Int(ipmask string) int {
 	ParseIP := strings.Split(ipmask, "/")
-	ip := ParseIP[0]
-	s2ip := net.ParseIP(ip).To4()
-	return uint32(s2ip[3]) | uint32(s2ip[2])<<8 | uint32(s2ip[1])<<16 | uint32(s2ip[0])<<24
+	s2ip := net.ParseIP(ParseIP[0]).To4()
+	return int(s2ip[3]) | int(s2ip[2])<<8 | int(s2ip[1])<<16 | int(s2ip[0])<<24
 }
 
-func Int2IP(ipint uint32) string {
+func Int2IP(ipint int) string {
 	ip := make(net.IP, net.IPv4len)
 	ip[0] = byte(ipint >> 24)
 	ip[1] = byte(ipint >> 16)
@@ -24,78 +22,27 @@ func Int2IP(ipint uint32) string {
 	return ip.String()
 }
 
-func HandleMask(mask string) (before uint32, after uint32) {
+func GetMaskRange(mask string) (before int, after int) {
 	IntMask, _ := strconv.Atoi(mask)
 
-	before = uint32(math.Pow(2, 32) - math.Pow(2, float64(32-IntMask)))
-
-	after = uint32(math.Pow(2, float64(32-IntMask)) - 1)
-
+	before = int(math.Pow(2, 32) - math.Pow(2, float64(32-IntMask)))
+	after = int(math.Pow(2, float64(32-IntMask)) - 1)
 	return before, after
 }
 
-//使用管道生成IP
-func Ipgenerator(target string) chan string {
-	start, fin := HandleIPAMASK(target)
-	ch := make(chan string)
-	sum := fin - start
-	var i uint32
-	go func() {
-		for i = 0; i <= sum; i++ {
-			// 如果是广播地址或网络地址,则跳过
-			if (i+start)%256!=255 && (i+start)%256!=0 {
-				ch <- Int2IP(i + start)
-			}
+func GetIpRange(target string) (start int, fin int) {
+	mask := strings.Split(target, "/")[1]
 
-		}
-		close(ch)
-	}()
-	return ch
+	before, after := GetMaskRange(mask)
+
+	ipint := Ip2Int(target)
+
+	start = ipint & before
+	fin = ipint | after
+	return start, fin
 }
 
-//此处的生成方式是每个C段交替生成,1.1,2.1....1.255,2.255这样
-func GenIP2(target string, temp []int) chan string {
-	start, _ := HandleIPAMASK(target)
-	ch := make(chan string)
-	var outIP string
-	//sum := fin -start
-	var i, j uint32
-
-	go func() {
-		for i = 0; i < 256; i++ {
-			for j = 0; j < 256; j++ {
-				outIP = Int2IP(start + 256*j + i)
-				if IPifNeed2(outIP, temp) {
-					ch <- outIP
-				} else {
-					continue
-				}
-
-			}
-		}
-		close(ch)
-	}()
-	return ch
-}
-
-func GenIPC(alive []string, AliveNum int) chan string {
-	Tchan := make(chan string)
-	var target string
-	for _, v := range alive {
-		go func() {
-			for i := 0; i <= 256*AliveNum; i++ {
-				target = <-Ipgenerator(v)
-				Tchan <- target
-			}
-			close(Tchan)
-
-		}()
-		return Tchan
-	}
-	return Tchan
-}
-
-func GenTarget(ch chan string, portlist []string) chan string {
+func TargetGenerator(ch chan string, portlist []string) chan string {
 	Tchan := make(chan string)
 
 	go func() {
@@ -109,30 +56,75 @@ func GenTarget(ch chan string, portlist []string) chan string {
 	return Tchan
 }
 
-func HandleIPAMASK(server string) (start uint32, fin uint32) {
-	mask := strings.Split(server, "/")[1]
+//使用管道生成IP
+func Ipgenerator(target string) chan string {
+	start, fin := GetIpRange(target)
+	ch := make(chan string)
+	sum := fin - start
+	var i int
+	go func() {
+		for i = 0; i <= sum; i++ {
+			// 如果是广播地址或网络地址,则跳过
+			if (i+start)%256 != 255 && (i+start)%256 != 0 {
+				ch <- Int2IP(i + start)
+			}
 
-	before, after := HandleMask(mask)
-
-	ipint := Ip2Int(server)
-
-	start = ipint & before
-	fin = ipint | after
-	return start, fin
+		}
+		close(ch)
+	}()
+	return ch
 }
 
-func IPifNeed2(ip string, temp []int) bool {
-	s2ip := net.ParseIP(ip).To4()
-	c := s2ip[2]
+//此处的生成方式是每个C段交替生成,1.1,2.1....1.255,2.255这样
+func SmartIpGenerator(target string, temp []int) chan string {
+	start, _ := GetIpRange(target)
+	ch := make(chan string)
+	var outIP string
+	//sum := fin -start
+	var i, j int
+
+	go func() {
+		for i = 1; i < 255; i++ {
+			for j = 0; j < 256; j++ {
+				outIP = Int2IP(start + 256*j + i)
+				if isAlive(outIP, temp) {
+					ch <- outIP
+				}
+			}
+		}
+		close(ch)
+	}()
+	return ch
+}
+
+func isAlive(ip string, temp []int) bool {
+	c := net.ParseIP(ip).To4()[2]
 	if temp[c] > 0 {
 		return false
 	}
 	return true
 }
 
+//func GenIPC(alive []string, AliveNum int) chan string {
+//	Tchan := make(chan string)
+//	var target string
+//	for _, v := range alive {
+//		go func() {
+//			for i := 0; i <= 256*AliveNum; i++ {
+//				target = <-Ipgenerator(v)
+//				Tchan <- target
+//			}
+//			close(Tchan)
+//
+//		}()
+//		return Tchan
+//	}
+//	return Tchan
+//}
+
 //
 func GenBIP(target string) chan string {
-	start, fin := HandleIPAMASK(target)
+	start, fin := GetIpRange(target)
 	startB := byte(start >> 16)
 	finB := byte((fin + 1) >> 16)
 

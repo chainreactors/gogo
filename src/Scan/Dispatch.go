@@ -13,6 +13,7 @@ var Delay time.Duration
 func Dispatch(result Utils.Result) Utils.Result {
 	target := Utils.GetTarget(result.Ip, result.Port)
 	Sum++
+	//println(result.Ip,result.Port)
 	switch result.Port {
 	//case "443", "8443", "4443":
 	//	result = SystemHttp(target, result)

@@ -6,6 +6,7 @@ import (
 	"getitle/src/Utils"
 	"github.com/panjf2000/ants/v2"
 	"net"
+	"strconv"
 	"strings"
 	"sync"
 )
@@ -14,14 +15,14 @@ import (
 func StraightMod(target string, portlist []string, thread int) {
 	var wgs sync.WaitGroup
 	ipChannel := Ipgenerator(target)
-	targetChannel := GenTarget(ipChannel, portlist)
+	targetChannel := TargetGenerator(ipChannel, portlist)
 
 	var Gentarget string
 
 	// Use the pool with a function,
 	// set 10 to the capacity of goroutine pool and 1 second for expired duration.
 	p1, _ := ants.NewPoolWithFunc(thread, func(ipi interface{}) {
-		StraightScan(ipi)
+		DefaultScan(ipi)
 		wgs.Done()
 	})
 	defer p1.Release()
@@ -35,7 +36,7 @@ func StraightMod(target string, portlist []string, thread int) {
 
 }
 
-func StraightScan(ipi interface{}) {
+func DefaultScan(ipi interface{}) {
 	target := ipi.(string)
 	//fmt.Println(ip)
 	var result = new(Utils.Result)
@@ -43,7 +44,6 @@ func StraightScan(ipi interface{}) {
 	result.Port = strings.Split(target, ":")[1]
 	*result = Scan.Dispatch(*result)
 	//res := Scan.SystemHttp(ip)
-
 
 	if result.Stat != "" {
 		fmt.Print(output(*result, OutputType))
@@ -54,22 +54,28 @@ func StraightScan(ipi interface{}) {
 	}
 }
 
+func SafeSlice(temp []int, ch chan int, baseip string) {
+	for aliveC := range ch {
+		temp[aliveC] += 1
+		if temp[aliveC] == 1 {
+			println("[*] Find " + baseip + "." + strconv.Itoa(aliveC) + ".0/24")
+		}
+	}
+}
+
 func SmartBMod(target string, temp []int, portlist []string) {
 	var wg sync.WaitGroup
-	AliveC := make(chan int, 100)
+	aliveC := make(chan int, 256)
+	ip_B := strings.Join(strings.Split(target, ".")[:2], ".")
+	go SafeSlice(temp, aliveC, ip_B)
 
-	go SafeSlice(temp, AliveC)
+	ipChannel := SmartIpGenerator(target, temp)
 
-	ch := GenIP2(target, temp)
-
-	SimpleList := []string{"80"}
-	Tch := GenTarget(ch, SimpleList)
-
-	var Gentarget string
+	targetChannel := TargetGenerator(ipChannel, []string{"80"})
 
 	//old smartB
 
-	//p2, _ := ants.NewPoolWithFunc(Threads, func(i interface{}) {
+	//scanPool, _ := ants.NewPoolWithFunc(Threads, func(i interface{}) {
 	//	//SmartScan(i,ResMap)
 	//	SmartScan2(i, temp)
 	//	wg.Done()
@@ -77,45 +83,30 @@ func SmartBMod(target string, temp []int, portlist []string) {
 
 	// new smartB
 
-	p2, _ := ants.NewPoolWithFunc(Threads, func(i interface{}) {
-		//SmartScan(i,ResMap)
-		SmartScan3(i, AliveC)
+	scanPool, _ := ants.NewPoolWithFunc(Threads, func(t interface{}) {
+		SmartScan(t, aliveC)
 		wg.Done()
 	})
 
-	defer p2.Release()
+	defer scanPool.Release()
 
-	for Gentarget = range Tch {
+	for t := range targetChannel {
 
 		wg.Add(1)
-		_ = p2.Invoke(Gentarget)
+		_ = scanPool.Invoke(t)
 	}
 	wg.Wait()
+	close(aliveC)
 
-	var Alive = make([]string, 100, 100)
-	var NextCTarget string
-
-	start, _ := HandleIPAMASK(target)
+	ip_B = ip_B + ".0.0"
+	tmpip := net.ParseIP(ip_B).To4()
 
 	for k, v := range temp {
 
 		if v > 0 {
-			newC := Int2IP(start)
-			HnewC := net.ParseIP(newC).To4()
-			HnewC[2] = byte(k)
-			NextCTarget = HnewC.String() + "/24"
-			//fmt.Println(NextCTarget)
-			Alive = append(Alive, NextCTarget)
-		}
-
-	}
-
-	for _, alive := range Alive {
-		if alive != "" {
-
-			println("[*] Find " + alive)
-			StraightMod(alive, portlist, Threads/2)
-
+			tmpip[2] = byte(k)
+			println("[*] Processing:" + tmpip.String() + "/24")
+			StraightMod(tmpip.String()+"/24", portlist, Threads)
 		}
 
 	}
@@ -125,7 +116,23 @@ func SmartBMod(target string, temp []int, portlist []string) {
 }
 
 // slice 方式进行启发式扫描
-func SmartScan2(ipi interface{}, Reslice []int) {
+//func SmartScan2(ipi interface{}, Reslice []int) {
+//	target := ipi.(string)
+//	var result = new(Utils.Result)
+//	result.Ip = strings.Split(target, ":")[0]
+//	result.Port = strings.Split(target, ":")[1]
+//
+//	*result = Scan.Dispatch(*result)
+//
+//	if result.Stat == "OPEN" {
+//
+//		s2ip := net.ParseIP(result.Ip).To4()
+//		c := s2ip[2]
+//		Reslice[c] += 1
+//	}
+//}
+
+func SmartScan(ipi interface{}, AliveCh chan int) {
 	target := ipi.(string)
 	var result = new(Utils.Result)
 	result.Ip = strings.Split(target, ":")[0]
@@ -134,47 +141,22 @@ func SmartScan2(ipi interface{}, Reslice []int) {
 	*result = Scan.Dispatch(*result)
 
 	if result.Stat == "OPEN" {
-
-		s2ip := net.ParseIP(result.Ip).To4()
-		c := s2ip[2]
-		Reslice[c] += 1
-	}
-}
-
-func SmartScan3(ipi interface{}, AliveCh chan int) {
-	target := ipi.(string)
-	var result = new(Utils.Result)
-	result.Ip = strings.Split(target, ":")[0]
-	result.Port = strings.Split(target, ":")[1]
-
-	*result = Scan.Dispatch(*result)
-
-	if result.Stat == "OPEN" {
-
 		s2ip := net.ParseIP(result.Ip).To4()
 		c := s2ip[2]
 		AliveCh <- int(c)
 	}
 }
 
-func SafeSlice(temp []int, ch chan int) {
-	for aliveC := range ch {
-
-		temp[aliveC] += 1
-	}
-}
-
 func SmartAMod(target string, portlist []string) {
-	BSlice := make([][]int, 256)
+	bslice := make([][]int, 256)
 
 	Tchan := GenBIP(target)
 	var sum int = 0
 	for i := range Tchan {
-		CurB := i + "/16"
-		println("[*] Processing:" + CurB)
-		Temp := make([]int, 256)
-		BSlice = append(BSlice, Temp)
+		println("[*] Processing B class IP:" + i + "/16")
+		temp := make([]int, 256)
+		bslice = append(bslice, temp)
 		sum += 1
-		SmartBMod(CurB, Temp, portlist)
+		SmartBMod(i+"/16", temp, portlist)
 	}
 }
