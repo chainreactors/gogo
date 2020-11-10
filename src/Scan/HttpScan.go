@@ -33,7 +33,8 @@ func SocketHttp(target string, result Utils.Result) Utils.Result {
 	result.Content = content
 	result.HttpStat = Utils.GetStatusCode(content)
 	//如果是400可能是因为没有用https
-	if result.HttpStat == "400" || strings.HasPrefix(result.HttpStat, "3") {
+
+	if result.HttpStat == "400" || result.HttpStat == "999" || strings.HasPrefix(result.HttpStat, "3") {
 		return SystemHttp(target, result)
 	}
 
@@ -45,7 +46,7 @@ func SocketHttp(target string, result Utils.Result) Utils.Result {
 
 //使用封装好了http
 func SystemHttp(target string, result Utils.Result) Utils.Result {
-	if result.HttpStat == "400" || result.Port == "443" || result.Port == "8443" || result.Port == "4443" {
+	if result.HttpStat == "400" || result.HttpStat == "999" {
 		target = "https://" + target
 		result.Protocol = "https"
 	} else {
@@ -60,7 +61,7 @@ func SystemHttp(target string, result Utils.Result) Utils.Result {
 		return result
 	}
 	result.Stat = "OPEN"
-	if result.Protocol == "https" && resp.TLS != nil {
+	if resp.TLS != nil {
 		result.Host = Utils.FilterCertDomain(resp.TLS.PeerCertificates[0].DNSNames)
 	}
 	result.HttpStat = strconv.Itoa(resp.StatusCode)
