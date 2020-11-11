@@ -14,10 +14,10 @@ import (
 //直接扫描
 func StraightMod(target string, portlist []string, thread int) {
 	var wgs sync.WaitGroup
-	ipChannel := Ipgenerator(target)
+	ipChannel := IpGenerator(target)
 	targetChannel := TargetGenerator(ipChannel, portlist)
 
-	var Gentarget string
+	var t string
 
 	// Use the pool with a function,
 	// set 10 to the capacity of goroutine pool and 1 second for expired duration.
@@ -27,9 +27,9 @@ func StraightMod(target string, portlist []string, thread int) {
 	})
 	defer p1.Release()
 
-	for Gentarget = range targetChannel {
+	for t = range targetChannel {
 		wgs.Add(1)
-		_ = p1.Invoke(Gentarget)
+		_ = p1.Invoke(t)
 	}
 
 	wgs.Wait()
@@ -149,7 +149,7 @@ func SmartScan(ipi interface{}, AliveCh chan int) {
 }
 
 func SmartAMod(target string, portlist []string) {
-	btargetChannel := GenBIP(target)
+	btargetChannel := BipGenerator(target)
 	for i := range btargetChannel {
 		println("[*] Processing Bclass IP:" + i + "/16")
 		SmartBMod(i+"/16", portlist)

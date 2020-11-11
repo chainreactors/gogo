@@ -75,7 +75,7 @@ func main() {
 		_, _ = core.FileHandle.WriteString(core.JsonOutput(*new(Utils.Result)) + "]")
 	}
 	time.Sleep(time.Microsecond * 500)
-	println("[*] Alive sum: " + strconv.Itoa(Scan.Alivesum))
+	println(fmt.Sprintf("[*] Alive sum: %d, Target sum : %d", Scan.Alivesum, Scan.Sum))
 	println("[*] Totally run: " + endtime.String())
 
 }

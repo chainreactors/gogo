@@ -17,10 +17,10 @@ var OutputType string
 func Init(IPaddress string, key string) string {
 	println("*********  getitle 0.2.0 beta by Sangfor  *********")
 
-	if key != "sangfor" {
-		println("FUCK OFF!!!")
-		os.Exit(0)
-	}
+	//if key != "sangfor" {
+	//	println("FUCK OFF!!!")
+	//	os.Exit(0)
+	//}
 	if IPaddress == "" {
 		Banner()
 		os.Exit(0)

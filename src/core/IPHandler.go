@@ -57,7 +57,7 @@ func TargetGenerator(ch chan string, portlist []string) chan string {
 }
 
 //使用管道生成IP
-func Ipgenerator(target string) chan string {
+func IpGenerator(target string) chan string {
 	start, fin := GetIpRange(target)
 	ch := make(chan string)
 	sum := fin - start
@@ -111,7 +111,7 @@ func isAlive(ip string, temp []int) bool {
 //	for _, v := range alive {
 //		go func() {
 //			for i := 0; i <= 256*AliveNum; i++ {
-//				target = <-Ipgenerator(v)
+//				target = <-IpGenerator(v)
 //				Tchan <- target
 //			}
 //			close(Tchan)
@@ -123,7 +123,7 @@ func isAlive(ip string, temp []int) bool {
 //}
 
 //
-func GenBIP(target string) chan string {
+func BipGenerator(target string) chan string {
 	start, fin := GetIpRange(target)
 	startB := byte(start >> 16)
 	finB := byte((fin + 1) >> 16)
