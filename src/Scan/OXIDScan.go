@@ -38,5 +38,6 @@ func OXIDScan(target string, result Utils.Result) Utils.Result {
 		}
 
 	}
+	conn.Close()
 	return result
 }

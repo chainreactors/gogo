@@ -60,10 +60,9 @@ func TargetGenerator(ch chan string, portlist []string) chan string {
 func IpGenerator(target string) chan string {
 	start, fin := GetIpRange(target)
 	ch := make(chan string)
-	sum := fin - start
 	var i uint
 	go func() {
-		for i = 0; i <= sum; i++ {
+		for i = 0; i <= fin - start; i++ {
 			// 如果是广播地址或网络地址,则跳过
 			if (i+start)%256 != 255 && (i+start)%256 != 0 {
 				ch <- Int2IP(i + start)
