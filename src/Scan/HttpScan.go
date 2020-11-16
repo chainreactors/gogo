@@ -56,14 +56,15 @@ func SystemHttp(target string, result Utils.Result) Utils.Result {
 	conn := Utils.HttpConn(Delay)
 
 	resp, err := conn.Get(target)
+	if resp != nil && resp.TLS != nil {
+		result.Host = Utils.FilterCertDomain(resp.TLS.PeerCertificates[0].DNSNames)
+	}
 	if err != nil {
 		result.Error = err.Error()
 		return result
 	}
 	result.Stat = "OPEN"
-	if resp.TLS != nil {
-		result.Host = Utils.FilterCertDomain(resp.TLS.PeerCertificates[0].DNSNames)
-	}
+
 	result.HttpStat = strconv.Itoa(resp.StatusCode)
 	result.Content = Utils.GetHttpRaw(*resp)
 	_ = resp.Body.Close()
