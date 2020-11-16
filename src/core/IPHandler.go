@@ -7,13 +7,13 @@ import (
 	"strings"
 )
 
-func Ip2Int(ipmask string) int {
+func Ip2Int(ipmask string) uint {
 	Ip := strings.Split(ipmask, "/")
 	s2ip := net.ParseIP(Ip[0]).To4()
-	return int(s2ip[3]) | int(s2ip[2])<<8 | int(s2ip[1])<<16 | int(s2ip[0])<<24
+	return uint(s2ip[3]) | uint(s2ip[2])<<8 | uint(s2ip[1])<<16 | uint(s2ip[0])<<24
 }
 
-func Int2IP(ipint int) string {
+func Int2IP(ipint uint) string {
 	ip := make(net.IP, net.IPv4len)
 	ip[0] = byte(ipint >> 24)
 	ip[1] = byte(ipint >> 16)
@@ -22,15 +22,15 @@ func Int2IP(ipint int) string {
 	return ip.String()
 }
 
-func GetMaskRange(mask string) (before int, after int) {
+func GetMaskRange(mask string) (before uint, after uint) {
 	IntMask, _ := strconv.Atoi(mask)
 
-	before = int(math.Pow(2, 32) - math.Pow(2, float64(32-IntMask)))
-	after = int(math.Pow(2, float64(32-IntMask)) - 1)
+	before = uint(math.Pow(2, 32) - math.Pow(2, float64(32-IntMask)))
+	after = uint(math.Pow(2, float64(32-IntMask)) - 1)
 	return before, after
 }
 
-func GetIpRange(target string) (start int, fin int) {
+func GetIpRange(target string) (start uint, fin uint) {
 	mask := strings.Split(target, "/")[1]
 
 	before, after := GetMaskRange(mask)
@@ -60,10 +60,9 @@ func TargetGenerator(ch chan string, portlist []string) chan string {
 func IpGenerator(target string) chan string {
 	start, fin := GetIpRange(target)
 	ch := make(chan string)
-	sum := fin - start
-	var i int
+	var i uint
 	go func() {
-		for i = 0; i <= sum; i++ {
+		for i = 0; i <= fin - start; i++ {
 			// 如果是广播地址或网络地址,则跳过
 			if (i+start)%256 != 255 && (i+start)%256 != 0 {
 				ch <- Int2IP(i + start)
@@ -81,7 +80,7 @@ func SmartIpGenerator(target string, temp []int) chan string {
 	ch := make(chan string)
 	var outIP string
 	//sum := fin -start
-	var C, B int
+	var C, B uint
 
 	go func() {
 		for C = 1; C < 255; C++ {
