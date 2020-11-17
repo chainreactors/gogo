@@ -43,17 +43,17 @@ func GetIpRange(target string) (start uint, fin uint) {
 }
 
 func TargetGenerator(ch chan string, portlist []string) chan string {
-	Tchan := make(chan string)
+	targetChannel := make(chan string)
 
 	go func() {
 		for ip := range ch {
 			for _, port := range portlist {
-				Tchan <- ip + ":" + port
+				targetChannel <- ip + ":" + port
 			}
 		}
-		close(Tchan)
+		close(targetChannel)
 	}()
-	return Tchan
+	return targetChannel
 }
 
 //使用管道生成IP
@@ -62,7 +62,7 @@ func IpGenerator(target string) chan string {
 	ch := make(chan string)
 	var i uint
 	go func() {
-		for i = 0; i <= fin - start; i++ {
+		for i = 0; i <= fin-start; i++ {
 			// 如果是广播地址或网络地址,则跳过
 			if (i+start)%256 != 255 && (i+start)%256 != 0 {
 				ch <- Int2IP(i + start)

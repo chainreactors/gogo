@@ -1,6 +1,8 @@
 package core
 
 import (
+	"fmt"
+	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
@@ -14,25 +16,75 @@ var Filename string
 var Threads int
 var OutputType string
 
-func Init(IPaddress string, key string) string {
+func Init() {
 	println("*********  getitle 0.2.0 beta by Sangfor  *********")
 
 	//if key != "sangfor" {
 	//	println("FUCK OFF!!!")
 	//	os.Exit(0)
 	//}
-	if IPaddress == "" {
-		Banner()
-		os.Exit(0)
-	} else if !strings.Contains(IPaddress, "/") {
-		IPaddress += "/32"
-	}
-
 	initFile()
 	go Write2File(FileHandle, Datach)
-
-	return IPaddress
 }
+
+func IpInit(ip string) string {
+	if !strings.Contains(ip, "/") {
+		ip += "/32"
+	}
+	return ip
+}
+
+func RunTask(CIDR string, portlist []string, mod string) {
+	println(fmt.Sprintf("[*] Start Scan Task %s ,total ports: %d , mod: %s", CIDR, len(portlist), mod))
+	switch mod {
+	case "default":
+		//直接扫描
+		StraightMod(CIDR, portlist, Threads)
+	case "s", "smart":
+		//启发式扫描
+		mask, _ := strconv.Atoi(strings.Split(CIDR, "/")[1])
+		if mask < 24 && mask >= 16 {
+			SmartBMod(CIDR, portlist)
+		} else if mask < 16 {
+			SmartAMod(CIDR, portlist)
+		} else {
+			StraightMod(CIDR, portlist, Threads)
+		}
+	default:
+		StraightMod(CIDR, portlist, Threads)
+	}
+
+}
+
+func ReadTargetFile(targetfile string) []string {
+
+	file, err := os.Open(targetfile)
+	if err != nil {
+		println(err.Error())
+		os.Exit(0)
+	}
+	defer file.Close()
+	targetb, _ := ioutil.ReadAll(file)
+	targets := strings.TrimSpace(string(targetb))
+	return strings.Split(targets, "\n")
+}
+
+func TargetHandler(s string) (string, []string, string) {
+	ss := strings.Split(s, " ")
+	var mod, CIDR string
+	var portlist []string
+	if len(ss) == 3 {
+		CIDR = ss[0]
+		portlist = PortHandler(ss[1])
+		mod = ss[2]
+	} else {
+		CIDR = ss[0]
+		portlist = PortHandler(ss[1])
+		mod = "default"
+	}
+	return CIDR, portlist, mod
+}
+
 func initFile() {
 	var err error
 
@@ -76,6 +128,8 @@ func Write2File(FileHandle *os.File, Datach chan string) {
 
 func PortHandler(portstring string) []string {
 	var ports []string
+	portstring = strings.Replace(portstring, "\r", "", -1)
+
 	postslist := strings.Split(portstring, ",")
 	for _, portname := range postslist {
 		ports = append(ports, choiceports(portname)...)
@@ -86,18 +140,19 @@ func PortHandler(portstring string) []string {
 
 }
 
+// 端口预设
 func choiceports(portname string) []string {
 	var ports []string
 	switch portname {
 	case "top1":
 		ports = []string{"80", "443", "8080"}
 	case "top2":
-		ports = []string{"80-90", "443", "4443", "7000-7009", "9000-9009", "8080-8090", "8000-8024", "8443", "8787", "7080", "8070", "7070", "9080", "5555", "6666", "7777", " 9999", "8888", "8889", "9090", "8091", "8099", "8848", "8060", "8899", "800", "801", "10000", "10080", "10800"}
+		ports = []string{"80-90", "443", "4443", "7000-7009", "9000-9009", "8080-8090", "8000-8020", "8443", "8787", "7080", "8070", "7070", "9080", "5555", "6666", "7777", " 9999", "8888", "8889", "9090", "8091", "8099", "8848", "8060", "8899", "800", "801", "10000", "10080", "10800"}
 	case "top3":
 
 		// 一些待定端口,需要更多测试
 		//"8444-8447" "10800-10810" '10080"
-		ports = []string{"4430", "9443", "6080", "9091", "8100-8110", "8880-8890", "8010-8020", "8090-8100", "8180-8181", "8800", "8761", "8873", "8866", "8900", "8282", "8999", "8989", "8066", "8200", "8111", "8030", "8040", "8060", "8180"}
+		ports = []string{"4430", "9443", "6080", "9091", "8100-8110", "8021-8030", "8880-8890", "8010-8020", "8090-8100", "8180-8181", "8800", "8761", "8873", "8866", "8900", "8282", "8999", "8989", "8066", "8200", "8111", "8030", "8040", "8060", "8180"}
 	case "db":
 		ports = []string{"3306", "3307", "1433", "1521", "5432", "6379", "11211", "27017"}
 	case "rce":
@@ -135,6 +190,7 @@ func Ports2PortSlice(ports []string) []string {
 	return tmpports
 }
 
+//切片去重
 func removeDuplicateElement(ss []string) []string {
 	result := make([]string, 0, len(ss))
 	temp := map[string]struct{}{}
