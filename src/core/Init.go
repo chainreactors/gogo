@@ -53,7 +53,7 @@ func RunTask(CIDR string, portlist []string, mod string) {
 	default:
 		StraightMod(CIDR, portlist, Threads)
 	}
-
+	FileHandle.Sync()
 }
 
 func ReadTargetFile(targetfile string) []string {
