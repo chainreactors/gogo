@@ -43,7 +43,7 @@ func JsonOutput(result Utils.Result) string {
 	if err != nil {
 		return ""
 	}
-	return string(jsons) + "\n"
+	return string(jsons) + ",\n"
 }
 
 func vulnOutput(result Utils.Result) string {

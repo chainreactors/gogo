@@ -2,6 +2,7 @@ package Scan
 
 import (
 	"getitle/src/Utils"
+	"net/http"
 	"strconv"
 	"strings"
 )
@@ -32,13 +33,11 @@ func SocketHttp(target string, result Utils.Result) Utils.Result {
 	//获取状态码
 	result.Content = content
 	result.HttpStat = Utils.GetStatusCode(content)
-	//如果是400可能是因为没有用https
 
+	//所有30x,400,以及非http协议的开放端口都送到http包尝试获取更多信息
 	if result.HttpStat == "400" || result.HttpStat == "999" || strings.HasPrefix(result.HttpStat, "3") {
 		return SystemHttp(target, result)
 	}
-
-	//正则匹配title
 
 	return Utils.InfoFilter(content, result)
 
@@ -46,6 +45,9 @@ func SocketHttp(target string, result Utils.Result) Utils.Result {
 
 //使用封装好了http
 func SystemHttp(target string, result Utils.Result) Utils.Result {
+	var conn http.Client
+
+	// 如果是400或者不可识别协议,则使用https
 	if result.HttpStat == "400" || result.HttpStat == "999" {
 		target = "https://" + target
 		result.Protocol = "https"
@@ -53,7 +55,11 @@ func SystemHttp(target string, result Utils.Result) Utils.Result {
 		target = "http://" + target
 		result.Protocol = "http"
 	}
-	conn := Utils.HttpConn(Delay)
+
+	//如果是https或者30x跳转,则增加超时时间
+	if result.Protocol == "https" || strings.HasPrefix(result.HttpStat, "3") {
+		conn = Utils.HttpConn(Delay + 2)
+	}
 
 	resp, err := conn.Get(target)
 	if resp != nil && resp.TLS != nil {
@@ -64,7 +70,6 @@ func SystemHttp(target string, result Utils.Result) Utils.Result {
 		return result
 	}
 	result.Stat = "OPEN"
-
 	result.HttpStat = strconv.Itoa(resp.StatusCode)
 	result.Content = Utils.GetHttpRaw(*resp)
 	_ = resp.Body.Close()
