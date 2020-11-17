@@ -35,25 +35,25 @@ func main() {
 		os.Exit(0)
 	}
 
-	core.Init()
 	starttime := time.Now()
 
 	//server := "192.167.0.1/24"
 
 	//portlist := []string{"80","81","7001","9001","8080","8081","8000","8009","88","443","9999","7080","8070","9080","8082","8888","8089","9001","5555","9001"}
 
-	//set config
+	//初始化全局变量
 	Scan.Delay = time.Duration(*delay)
 	core.Threads = *threads
 	core.Filename = *Filename
 	core.OutputType = *Output
 	Scan.Exploit = *Exploit
 
+	core.Init()
 	if *list != "" {
 		targetList := core.ReadTargetFile(*list)
 		for _, v := range targetList {
 			CIDR, portlist, m := core.TargetHandler(v)
-			core.RunTask(CIDR, portlist, m)
+			core.RunTask(core.IpInit(CIDR), portlist, m)
 		}
 	} else {
 		CIDR := core.IpInit(*IPaddress)
