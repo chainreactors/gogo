@@ -1,6 +1,7 @@
 package core
 
 import (
+	"getitle/src/Utils"
 	"math"
 	"net"
 	"strconv"
@@ -104,24 +105,6 @@ func isAlive(ip string, temp []int) bool {
 	return true
 }
 
-//func GenIPC(alive []string, AliveNum int) chan string {
-//	Tchan := make(chan string)
-//	var target string
-//	for _, v := range alive {
-//		go func() {
-//			for i := 0; i <= 256*AliveNum; i++ {
-//				target = <-IpGenerator(v)
-//				Tchan <- target
-//			}
-//			close(Tchan)
-//
-//		}()
-//		return Tchan
-//	}
-//	return Tchan
-//}
-
-//
 func BipGenerator(target string) chan string {
 	start, fin := GetIpRange(target)
 	startB := byte(start >> 16)
@@ -140,4 +123,12 @@ func BipGenerator(target string) chan string {
 		close(ch)
 	}()
 	return ch
+}
+
+func CheckIp(CIDR string) string {
+	fmtip := Utils.GetIp(strings.Split(CIDR, "/")[0])
+	if fmtip != "" {
+		return fmtip + "/" + strings.Split(CIDR, "/")[1]
+	}
+	return ""
 }

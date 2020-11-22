@@ -3,6 +3,7 @@ package Utils
 import (
 	"fmt"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"regexp"
 	"strings"
@@ -138,4 +139,26 @@ func FilterCertDomain(domins []string) string {
 		}
 	}
 	return res[:len(res)-1]
+}
+
+func isIPv4(ip string) bool {
+	address := net.ParseIP(ip)
+	if address != nil {
+		return true
+	}
+	return false
+}
+
+func GetIp(target string) string {
+	if isIPv4(target) {
+		return target
+	}
+	iprecords, _ := net.LookupIP(target)
+	for _, ip := range iprecords {
+		if isIPv4(ip.String()) {
+			println("[*] parse domin SUCCESS, map " + target + " to " + ip.String())
+			return ip.String()
+		}
+	}
+	return ""
 }

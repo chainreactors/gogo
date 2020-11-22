@@ -35,6 +35,12 @@ func IpInit(ip string) string {
 }
 
 func RunTask(CIDR string, portlist []string, mod string) {
+	CIDR = cuthttpstr(CIDR)
+	CIDR = CheckIp(CIDR)
+	if CIDR == "" {
+		println("[-] target (" + CIDR + ") format ERROR,")
+		return
+	}
 	println(fmt.Sprintf("[*] Start Scan Task %s ,total ports: %d , mod: %s", CIDR, len(portlist), mod))
 	switch mod {
 	case "default":
@@ -201,4 +207,10 @@ func removeDuplicateElement(ss []string) []string {
 		}
 	}
 	return result
+}
+
+func cuthttpstr(target string) string {
+	target = strings.Replace(target, "http://", "", -1)
+	target = strings.Replace(target, "https://", "", -1)
+	return target
 }
