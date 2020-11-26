@@ -3,7 +3,6 @@ package Utils
 import (
 	"fmt"
 	"io/ioutil"
-	"net"
 	"net/http"
 	"regexp"
 	"strings"
@@ -27,9 +26,10 @@ type Result struct {
 }
 
 type Finger struct {
-	Name    string   `json:"name"`
-	Level   int      `json:"level"`
-	Regexps []string `json:"regexps"`
+	Name        string   `json:"name"`
+	Level       int      `json:"level"`
+	Defaultport string   `json:"defaultport"`
+	Regexps     []string `json:"regexps"`
 }
 
 var fingers = GetFinger()
@@ -49,7 +49,7 @@ func InfoFilter(content string, result Result) Result {
 	//如果是http协议,则判断cms,如果是tcp则匹配规则库
 	if result.HttpStat == "tcp" {
 		var title string
-		result.Framework, title = GetFrameWork(content)
+		result.Framework, title = GetFrameWork(content, result.Port)
 		if title != "" {
 			result.Title = title
 		}
@@ -129,9 +129,19 @@ func GetHttpCMS(content string) string {
 }
 
 //第一个返回值为详细的版本信息,第二个返回值为规则名字
-func GetFrameWork(content string) (string, string) {
-	// 遍历框架
-	for _, finger := range fingers {
+func GetFrameWork(content string, port string) (version string, title string) {
+
+	// 通过默认端口加快匹配速度
+	defaultportFingers, otherportFingers := fingerSplit(port)
+	version, title = fingerMatch(content, defaultportFingers)
+	if version == "" {
+		version, title = fingerMatch(content, otherportFingers)
+	}
+	return version, title
+}
+
+func fingerMatch(content string, tmpfingers []Finger) (string, string) {
+	for _, finger := range tmpfingers {
 		//遍历正则
 		for _, regexpstr := range finger.Regexps {
 			regexpstr = regexpstr
@@ -186,26 +196,4 @@ func FilterCertDomain(domins []string) string {
 		}
 	}
 	return res[:len(res)-1]
-}
-
-func isIPv4(ip string) bool {
-	address := net.ParseIP(ip)
-	if address != nil {
-		return true
-	}
-	return false
-}
-
-func GetIp(target string) string {
-	if isIPv4(target) {
-		return target
-	}
-	iprecords, _ := net.LookupIP(target)
-	for _, ip := range iprecords {
-		if isIPv4(ip.String()) {
-			println("[*] parse domin SUCCESS, map " + target + " to " + ip.String())
-			return ip.String()
-		}
-	}
-	return ""
 }

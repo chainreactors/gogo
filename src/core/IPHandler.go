@@ -1,7 +1,6 @@
 package core
 
 import (
-	"getitle/src/Utils"
 	"math"
 	"net"
 	"strconv"
@@ -126,9 +125,31 @@ func BipGenerator(target string) chan string {
 }
 
 func CheckIp(CIDR string) string {
-	fmtip := Utils.GetIp(strings.Split(CIDR, "/")[0])
+	fmtip := GetIp(strings.Split(CIDR, "/")[0])
 	if fmtip != "" {
 		return fmtip + "/" + strings.Split(CIDR, "/")[1]
+	}
+	return ""
+}
+
+func isIPv4(ip string) bool {
+	address := net.ParseIP(ip)
+	if address != nil {
+		return true
+	}
+	return false
+}
+
+func GetIp(target string) string {
+	if isIPv4(target) {
+		return target
+	}
+	iprecords, _ := net.LookupIP(target)
+	for _, ip := range iprecords {
+		if isIPv4(ip.String()) {
+			println("[*] parse domin SUCCESS, map " + target + " to " + ip.String())
+			return ip.String()
+		}
 	}
 	return ""
 }
