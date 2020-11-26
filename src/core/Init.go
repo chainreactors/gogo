@@ -212,5 +212,6 @@ func removeDuplicateElement(ss []string) []string {
 func cuthttpstr(target string) string {
 	target = strings.Replace(target, "http://", "", -1)
 	target = strings.Replace(target, "https://", "", -1)
+	target = strings.TrimRight(target, "/")
 	return target
 }

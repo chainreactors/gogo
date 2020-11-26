@@ -55,7 +55,10 @@ func HtmlOutput(result Utils.Result) (s string) {
 	} else {
 		s = fmt.Sprintf("[+] %s://%s:%s\t%s\t%s\t%s\t%s\t[%s] %s", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, result.Framework, result.Host, result.HttpStat, result.Title)
 	}
-	s += "<b style=\"color:red;\">" + vulnOutput(result) + "</b>"
+	vulnstr := vulnOutput(result)
+	if vulnstr != "" {
+		s += "<b style=\"color:red;\">" + vulnOutput(result) + "</b>"
+	}
 	s += "\n"
 
 	return s
