@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"getitle/src/Utils"
+	"strings"
 )
 
 func output(result Utils.Result, outType string) string {
@@ -14,6 +15,8 @@ func output(result Utils.Result, outType string) string {
 		out = CleanOutput(result)
 	case "json":
 		out = JsonOutput(result)
+	case "html":
+		out = HtmlOutput(result)
 	default:
 		out = FullOutput(result)
 
@@ -44,6 +47,19 @@ func JsonOutput(result Utils.Result) string {
 		return ""
 	}
 	return string(jsons) + ",\n"
+}
+
+func HtmlOutput(result Utils.Result) (s string) {
+	if strings.HasPrefix(result.Protocol, "http") {
+		s = fmt.Sprintf("[+] <a>%s://%s:%s</a>\t%s\t%s\t%s\t%s\t[%s] %s", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, result.Framework, result.Host, result.HttpStat, result.Title)
+	} else {
+		s = fmt.Sprintf("[+] %s://%s:%s\t%s\t%s\t%s\t%s\t[%s] %s", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, result.Framework, result.Host, result.HttpStat, result.Title)
+	}
+	s += "<b style=\"color:red;\">" + vulnOutput(result) + "</b>"
+	s += "\n"
+
+	return s
+
 }
 
 func vulnOutput(result Utils.Result) string {

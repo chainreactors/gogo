@@ -12,7 +12,7 @@ import (
 func SocketHttp(target string, result Utils.Result) Utils.Result {
 	//fmt.Println(ip)
 	//socket tcp连接,超时时间
-	result.Protocol = "http"
+	result.Protocol = "tcp"
 	conn, err := Utils.TcpSocketConn(target, Delay)
 	if err != nil {
 		//fmt.Println(err)
@@ -34,9 +34,11 @@ func SocketHttp(target string, result Utils.Result) Utils.Result {
 	//获取状态码
 	result.Content = content
 	result.HttpStat = Utils.GetStatusCode(content)
-
+	if result.HttpStat != "tcp" {
+		result.Protocol = "http"
+	}
 	//所有30x,400,以及非http协议的开放端口都送到http包尝试获取更多信息
-	if result.HttpStat == "400" || result.HttpStat == "999" || strings.HasPrefix(result.HttpStat, "3") {
+	if result.HttpStat == "400" || strings.HasPrefix(result.HttpStat, "3") {
 		return SystemHttp(target, result)
 	}
 
@@ -49,7 +51,7 @@ func SystemHttp(target string, result Utils.Result) Utils.Result {
 	var conn http.Client
 	var delay time.Duration
 	// 如果是400或者不可识别协议,则使用https
-	if result.HttpStat == "400" || result.HttpStat == "999" {
+	if result.HttpStat == "400" || result.HttpStat == "tcp" {
 		target = "https://" + target
 		result.Protocol = "https"
 	} else {
