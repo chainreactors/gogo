@@ -106,8 +106,8 @@ func isAlive(ip string, temp []int) bool {
 
 func BipGenerator(target string) chan string {
 	start, fin := GetIpRange(target)
-	startB := byte(start >> 16)
-	finB := byte((fin + 1) >> 16)
+	startB := net.ParseIP(Int2IP(start)).To4()[1]
+	finB := net.ParseIP(Int2IP(fin)).To4()[1]
 
 	ch := make(chan string)
 
@@ -115,8 +115,8 @@ func BipGenerator(target string) chan string {
 
 	var i byte
 	go func() {
-		for i = 0; i < finB-startB; i++ {
-			ip[1] = startB + i
+		for i = startB; i <= finB; i++ {
+			ip[1] = startB
 			ch <- ip.String()
 		}
 		close(ch)
