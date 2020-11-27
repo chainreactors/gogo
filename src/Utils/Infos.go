@@ -1,9 +1,11 @@
 package Utils
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"regexp"
 	"strings"
 )
@@ -32,7 +34,7 @@ type Finger struct {
 	Regexps     []string `json:"regexps"`
 }
 
-var fingers = GetFinger()
+var fingers = getFingers()
 var Version bool
 
 func InfoFilter(result Result) Result {
@@ -196,4 +198,29 @@ func FilterCertDomain(domins []string) string {
 		}
 	}
 	return res[:len(res)-1]
+}
+
+func getFingers() []Finger {
+	fingersJson := loadFingers()
+
+	var fingers []Finger
+	err := json.Unmarshal([]byte(fingersJson), &fingers)
+	if err != nil {
+		println("[-] fingers load FAIL!")
+		os.Exit(0)
+	}
+	return fingers
+}
+
+// 通过默认端口加快匹配速度
+func fingerSplit(port string) ([]Finger, []Finger) {
+	var defaultportFingers, otherportFingers []Finger
+	for _, finger := range fingers {
+		if finger.Defaultport == port {
+			defaultportFingers = append(defaultportFingers, finger)
+		} else {
+			otherportFingers = append(otherportFingers, finger)
+		}
+	}
+	return defaultportFingers, otherportFingers
 }
