@@ -1,9 +1,11 @@
 package Utils
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"regexp"
 	"strings"
 )
@@ -25,13 +27,37 @@ type Result struct {
 	Content   string
 }
 
-//发送内容
-func InfoFilter(content string, result Result) Result {
+type Finger struct {
+	Name        string   `json:"name"`
+	Level       int      `json:"level"`
+	Defaultport string   `json:"defaultport"`
+	Regexps     []string `json:"regexps"`
+}
 
+var fingers = getFingers()
+var Version bool
+
+func InfoFilter(result Result) Result {
+	content := result.Content
 	result.Title = GetTitle(content)
 	result.Midware = GetMidware(content)
 	result.Language = GetLanguage(content)
-	result.Framework = GetFrameWork(content)
+
+	// 因为正则匹配耗时较长,如果没有-v参数则字节不进行服务识别
+	if !Version {
+		return result
+	}
+
+	//如果是http协议,则判断cms,如果是tcp则匹配规则库
+	if result.HttpStat == "tcp" {
+		var title string
+		result.Framework, title = GetFrameWork(content, result.Port)
+		if title != "" {
+			result.Title = title
+		}
+	} else {
+		result.Framework = GetHttpCMS(content)
+	}
 
 	return result
 
@@ -43,11 +69,16 @@ func Encode(s string) string {
 	return s
 }
 
-func Match(Regexp string, s string) string {
-	Reg, _ := regexp.Compile(Regexp)
+func Match(regexpstr string, s string) string {
+	Reg, err := regexp.Compile(regexpstr)
+	if err != nil {
+		return ""
+	}
 	res := Reg.FindStringSubmatch(s)
-	if len(res) >= 2 {
-		return string(res[1])
+	if len(res) == 1 {
+		return "matched"
+	} else if len(res) == 2 {
+		return res[1]
 	}
 	return ""
 }
@@ -95,8 +126,37 @@ func GetLanguage(content string) string {
 	return ""
 }
 
-func GetFrameWork(content string) string {
+func GetHttpCMS(content string) string {
 	return ""
+}
+
+//第一个返回值为详细的版本信息,第二个返回值为规则名字
+func GetFrameWork(content string, port string) (version string, title string) {
+
+	// 通过默认端口加快匹配速度
+	defaultportFingers, otherportFingers := fingerSplit(port)
+	version, title = fingerMatch(content, defaultportFingers)
+	if version == "" {
+		version, title = fingerMatch(content, otherportFingers)
+	}
+	return version, title
+}
+
+func fingerMatch(content string, tmpfingers []Finger) (string, string) {
+	for _, finger := range tmpfingers {
+		//遍历正则
+		for _, regexpstr := range finger.Regexps {
+			regexpstr = regexpstr
+			res := Match("(?im)"+regexpstr, content)
+			if res == "matched" {
+				//println("[*] " + res)
+				return finger.Name, finger.Name
+			} else if res != "" {
+				return res, finger.Name
+			}
+		}
+	}
+	return "", ""
 }
 
 func GetHttpRaw(resp http.Response) string {
@@ -122,7 +182,7 @@ func GetStatusCode(content string) string {
 		return content[9:12]
 	}
 
-	return "999"
+	return "tcp"
 }
 
 func FilterCertDomain(domins []string) string {
@@ -138,4 +198,29 @@ func FilterCertDomain(domins []string) string {
 		}
 	}
 	return res[:len(res)-1]
+}
+
+func getFingers() []Finger {
+	fingersJson := loadFingers()
+
+	var fingers []Finger
+	err := json.Unmarshal([]byte(fingersJson), &fingers)
+	if err != nil {
+		println("[-] fingers load FAIL!")
+		os.Exit(0)
+	}
+	return fingers
+}
+
+// 通过默认端口加快匹配速度
+func fingerSplit(port string) ([]Finger, []Finger) {
+	var defaultportFingers, otherportFingers []Finger
+	for _, finger := range fingers {
+		if finger.Defaultport == port {
+			defaultportFingers = append(defaultportFingers, finger)
+		} else {
+			otherportFingers = append(otherportFingers, finger)
+		}
+	}
+	return defaultportFingers, otherportFingers
 }

@@ -104,28 +104,10 @@ func isAlive(ip string, temp []int) bool {
 	return true
 }
 
-//func GenIPC(alive []string, AliveNum int) chan string {
-//	Tchan := make(chan string)
-//	var target string
-//	for _, v := range alive {
-//		go func() {
-//			for i := 0; i <= 256*AliveNum; i++ {
-//				target = <-IpGenerator(v)
-//				Tchan <- target
-//			}
-//			close(Tchan)
-//
-//		}()
-//		return Tchan
-//	}
-//	return Tchan
-//}
-
-//
 func BipGenerator(target string) chan string {
 	start, fin := GetIpRange(target)
-	startB := byte(start >> 16)
-	finB := byte((fin + 1) >> 16)
+	startB := net.ParseIP(Int2IP(start)).To4()[1]
+	finB := net.ParseIP(Int2IP(fin)).To4()[1]
 
 	ch := make(chan string)
 
@@ -133,11 +115,53 @@ func BipGenerator(target string) chan string {
 
 	var i byte
 	go func() {
-		for i = 0; i < finB-startB; i++ {
-			ip[1] = startB + i
+		for i = startB; i <= finB; i++ {
+			ip[1] = i
 			ch <- ip.String()
 		}
 		close(ch)
 	}()
 	return ch
+}
+
+func CheckIp(CIDR string) string {
+	fmtip := GetIp(strings.Split(CIDR, "/")[0])
+	if fmtip != "" {
+		return fmtip + "/" + strings.Split(CIDR, "/")[1]
+	}
+	println("[-] CIRD cannot find host:" + CIDR + "'s ip address")
+	return ""
+}
+
+func isIPv4(ip string) bool {
+	address := net.ParseIP(ip)
+	if address != nil {
+		return true
+	}
+	return false
+}
+
+func GetIp(target string) string {
+	if isIPv4(target) {
+		return target
+	}
+	iprecords, _ := net.LookupIP(target)
+	for _, ip := range iprecords {
+		if isIPv4(ip.String()) {
+			println("[*] parse domin SUCCESS, map " + target + " to " + ip.String())
+			return ip.String()
+		}
+	}
+	return ""
+}
+
+func IpInit(target string) string {
+	target = strings.Replace(target, "http://", "", -1)
+	target = strings.Replace(target, "https://", "", -1)
+	if target[len(target)-1:] == "/" {
+		target = target + "32"
+	} else if !strings.Contains(target, "/") {
+		target = target + "/32"
+	}
+	return target
 }

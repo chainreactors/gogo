@@ -112,6 +112,6 @@ func NbtScan(target string, result Utils.Result) Utils.Result {
 		msg = msg + "  DC"
 	}
 	result.Host = msg
-
+	result.HttpStat = "NetBIOS"
 	return result
 }

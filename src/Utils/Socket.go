@@ -7,24 +7,24 @@ import (
 	"time"
 )
 
-func TcpSocketConn(target string, Delay time.Duration) (net.Conn, error) {
-	conn, err := net.DialTimeout("tcp", target, Delay*time.Second)
+func TcpSocketConn(target string, delay time.Duration) (net.Conn, error) {
+	conn, err := net.DialTimeout("tcp", target, delay*time.Second)
 
 	if err != nil {
 		return nil, err
 	}
-	err = conn.SetDeadline(time.Now().Add(Delay * time.Second))
+	err = conn.SetDeadline(time.Now().Add(delay * time.Second))
 	return conn, err
 }
 
-func UdpSocketConn(target string, Delay time.Duration) (net.Conn, error) {
+func UdpSocketConn(target string, delay time.Duration) (net.Conn, error) {
 
-	conn, err := net.DialTimeout("udp", target, Delay*time.Second)
+	conn, err := net.DialTimeout("udp", target, delay*time.Second)
 
 	if err != nil {
 		return nil, err
 	}
-	err = conn.SetDeadline(time.Now().Add(Delay * time.Second))
+	err = conn.SetDeadline(time.Now().Add(delay * time.Second))
 	return conn, err
 }
 

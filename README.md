@@ -1,6 +1,5 @@
 # Getitle
-just a weak scanner
-
+一个资产探测扫描器. 
 
 ## Usage
 
@@ -13,14 +12,14 @@ Usage of ./getitle:
   -t int       threads (default 4000)
   -o string    输出格式:clean,full(default) or json
   -f string    输出文件名,默认为空,请用相对路径(./)或绝对路径
-  -k string    启动密码(必须输入)为sangfor  
+  # -k string    启动密码(必须输入)为sangfor  
   -l string    从文件中读取任务,例如:-l ip.txt
 
 ```
 
 
 
-端口预设:
+端口预设(v0.2.0 beta4):
 
 ```
 	case "top1":
@@ -42,7 +41,11 @@ Usage of ./getitle:
 
 ### 用法
 
+因为并发过高,性能限制主要来自路由器设备.因此**建议在阿里云,华为云等vps上使用**,如果扫描国外资产,建议在国外vps上使用.本地使用如果网络设备性能不佳会带来大量丢包.
 
+如果使用中发现疯狂报错,大概率是io设备问题(例如多次扫描后io没有被正确释放,或者配合proxifier以及类似代理工具使用报错),可以通过重启电脑,或者虚拟机中使用,关闭代理工具解决.如果依旧无法解决请联系我们.
+
+一般情况下无法在代理环境中使用,除非使用-t参数指定较低的速率(默认协程池上线为4000).
 
 * 扫描C段的关键端口
 
@@ -58,9 +61,11 @@ Usage of ./getitle:
 
 `./gt.exe -ip 172.16.1.1/12 -p top2,db,1000-1009,12345`
 
+当前top2预设约90个端口,top2+top3约140个端口,主要从来内外网http资产探测.
+
 * 如果302过多或者扫描结果不稳定,需要增加timeout时间.参数`-d 4`
 * 如果网络状态不佳,请视情况减少协程数,默认4000, `-t 1000`指定
-* 如果报错uckoff,请输入`-k sangfor`
+* 如果报错fuckoff,请输入`-k sangfor`
 * 支持nbtscan与OXIDscan.只需要在端口中添加对应的端口,例如:
 
 `./gt.exe -ip 172.16.1.1/12 -p top2,135,137`
@@ -96,11 +101,50 @@ Usage of ./getitle:
 
 扫描外网C段,top2预设端口(共70个端口). 耗时10s
 
-扫描外网B段,top2预设端口, smart模式. 耗时
+扫描外网B段,top2预设端口, smart模式. 耗时3分钟
 
 扫描内网172.16.0.0/12段,smart模式,资产较少的情况下耗时10分钟.
 
 如果发现的目标多时间会略微增加.
+
+当前`getitle`扫描准确度与速度以及能获取的信息量均优于Serverscan,allin等扫描器.
+
+## 配置指纹识别
+
+指纹的json位于`src\Utils\finger.json`.
+
+为了保证单文件可使用,将会在运行gox.bat时将json中的数据写到`src\Utils\finger.go`中
+
+
+
+配置示例:
+
+```
+[    
+	{
+        "name": "Mysql_unauthorized",
+        "level": 0,
+        "defaultport": "3306",
+        "regexps": [
+            "Host .* is not allowed to connect to this MySQL server"
+        ]
+    }
+]
+```
+
+`name`为规则名,string,请保证不重名
+
+`level`为优先级,int,最高优先级为0
+
+`defaultport`为该服务默认端口,string,用作提高匹配速度
+
+`regexps`为正则列表,[]string, 默认为数组,同一规则可以配置多个正则依次匹配
+
+### 注意事项
+
+* json不接受`\x00`,`\0`等转义,请将类似转义修改成`\u0000`.
+
+* 请注意数组元素间的逗号,否则可能导致json报错
 
 ## Makefile
 
@@ -193,17 +237,37 @@ Usage of ./getitle:
   * 优化了http扫描,增加了https与跳转的请求超时时间.
   * 优化了文件写入,防止程序中途崩溃导致进度消失.
   * 修复了一个json格式输出的bug
+* v0.2.0(beta6)
+    * 现在ip参数可以接受`https://1.1.1.1`,并自动删除`https://`或`http://`
+    * 现在ip参数可以接受域名如`https://baidu.com`,并自动获取ip.如果域名绑定了多个ip,只会获取第一个.
+    * 优化了top2默认端口,添加了`1080,3000,5000,6443`等常见端口
+    * -o 参数新增html格式,使用方式为`-o html`
+    * 新增tcp端口指纹探测,-v参数启用,详细配置见`配置指纹识别`
+    * 优化了输出信息,更准确的判断http与tcp协议.
+    * 修复子网掩码为8/9的情况下的ip解析错误
 
 ​    
+
+
 
  ## Todo List
 
 1. 添加NetBIOS  [√]
+
 2. 添加MS17010 [√]
+
 3. 添加OXID [√]
-4. 添加简单目录扫描
+
+4. 添加简单目录扫描 (将在新的工具中实现,gt主要进行资产探测)
+
 5. 更灵活的端口模式 [√]
+
 6. 更智能的扫描配置  [√]
+
 7. 重构主要逻辑代码  [√]
-8. 添加从文件中读取扫描目标
-9. Shiro 100key爆破
+
+8. 添加从文件中读取扫描目标  [√]
+
+9. 添加常见服务指纹识别
+
+   

@@ -28,7 +28,7 @@ func main() {
 	Output := flag.String("o", "full", "")
 	Filename := flag.String("f", "", "")
 	Exploit := flag.Bool("e", false, "")
-
+	Version := flag.Bool("v", false, "")
 	flag.Parse()
 
 	if *IPaddress == "" && *list == "" {
@@ -43,7 +43,7 @@ func main() {
 	core.Filename = *Filename
 	core.OutputType = *Output
 	Scan.Exploit = *Exploit
-
+	Utils.Version = *Version
 	core.Init()
 	if *list != "" {
 		targetList := core.ReadTargetFile(*list)

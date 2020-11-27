@@ -26,8 +26,12 @@ func Dispatch(result Utils.Result) Utils.Result {
 		result = SocketHttp(target, result)
 	}
 
+	// 如果端口开放-e参数为true,则尝试进行漏洞探测
 	if result.Stat == "OPEN" {
 		Alivesum++
+		result = Utils.InfoFilter(result)
+
+		// 如果-e参数为true,则进行漏洞探测
 		if Exploit {
 			result = ExploitDispatch(result)
 		}
