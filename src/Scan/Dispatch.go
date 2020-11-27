@@ -29,7 +29,7 @@ func Dispatch(result Utils.Result) Utils.Result {
 	// 如果端口开放-e参数为true,则尝试进行漏洞探测
 	if result.Stat == "OPEN" {
 		Alivesum++
-		if result.Port != "135" || result.Port != "137" {
+		if result.Port != "135" && result.Port != "137" {
 			result = Utils.InfoFilter(result)
 		}
 		// 如果-e参数为true,则进行漏洞探测
