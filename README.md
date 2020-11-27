@@ -1,5 +1,5 @@
 # Getitle
-一个资产探测扫描器. 设计之初为在内网中对A段进行可接受时间内(大约八小时,睡一觉的时间)的资产探测. 开发完成后发现对外网资产探测同样好用.
+一个资产探测扫描器. 
 
 ## Usage
 
@@ -109,6 +109,43 @@ Usage of ./getitle:
 
 当前`getitle`扫描准确度与速度以及能获取的信息量均优于Serverscan,allin等扫描器.
 
+## 配置指纹识别
+
+指纹的json位于`src\Utils\finger.json`.
+
+为了保证单文件可使用,将会在运行gox.bat时将json中的数据写到`src\Utils\finger.go`中
+
+
+
+配置示例:
+
+```
+[    
+	{
+        "name": "Mysql_unauthorized",
+        "level": 0,
+        "defaultport": "3306",
+        "regexps": [
+            "Host .* is not allowed to connect to this MySQL server"
+        ]
+    }
+]
+```
+
+`name`为规则名,string,请保证不重名
+
+`level`为优先级,int,最高优先级为0
+
+`defaultport`为该服务默认端口,string,用作提高匹配速度
+
+`regexps`为正则列表,[]string, 默认为数组,同一规则可以配置多个正则依次匹配
+
+### 注意事项
+
+* json不接受`\x00`,`\0`等转义,请将类似转义修改成`\u0000`.
+
+* 请注意数组元素间的逗号,否则可能导致json报错
+
 ## Makefile
 
  * make release VERSION=VERSION to bulid getitle to all platform
@@ -205,11 +242,13 @@ Usage of ./getitle:
     * 现在ip参数可以接受域名如`https://baidu.com`,并自动获取ip.如果域名绑定了多个ip,只会获取第一个.
     * 优化了top2默认端口,添加了`1080,3000,5000,6443`等常见端口
     * -o 参数新增html格式,使用方式为`-o html`
-    * 新增tcp端口指纹探测
-    * 优化了输出信息,非http协议,状态码为tcp
+    * 新增tcp端口指纹探测,-v参数启用,详细配置见`配置指纹识别`
+    * 优化了输出信息,更准确的判断http与tcp协议.
     * 修复子网掩码为8/9的情况下的ip解析错误
 
 ​    
+
+
 
  ## Todo List
 
