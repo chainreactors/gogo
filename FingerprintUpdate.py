@@ -23,5 +23,5 @@ if __name__ == "__main__":
 	}
 	'''
 	f.write(base%json.dumps(j))
-	print("finger update success")
+	print("fingerprint update success")
 
