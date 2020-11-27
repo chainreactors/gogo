@@ -35,8 +35,8 @@ type Finger struct {
 var fingers = GetFinger()
 var Version bool
 
-func InfoFilter(content string, result Result) Result {
-
+func InfoFilter(result Result) Result {
+	content := result.Content
 	result.Title = GetTitle(content)
 	result.Midware = GetMidware(content)
 	result.Language = GetLanguage(content)

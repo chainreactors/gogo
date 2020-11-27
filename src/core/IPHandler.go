@@ -116,7 +116,7 @@ func BipGenerator(target string) chan string {
 	var i byte
 	go func() {
 		for i = startB; i <= finB; i++ {
-			ip[1] = startB
+			ip[1] = i
 			ch <- ip.String()
 		}
 		close(ch)
@@ -129,6 +129,7 @@ func CheckIp(CIDR string) string {
 	if fmtip != "" {
 		return fmtip + "/" + strings.Split(CIDR, "/")[1]
 	}
+	println("[-] CIRD cannot find host:" + CIDR + "'s ip address")
 	return ""
 }
 
@@ -152,4 +153,15 @@ func GetIp(target string) string {
 		}
 	}
 	return ""
+}
+
+func IpInit(target string) string {
+	target = strings.Replace(target, "http://", "", -1)
+	target = strings.Replace(target, "https://", "", -1)
+	if target[len(target)-1:] == "/" {
+		target = target + "32"
+	} else if !strings.Contains(target, "/") {
+		target = target + "/32"
+	}
+	return target
 }
