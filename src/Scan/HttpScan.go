@@ -68,7 +68,8 @@ func SystemHttp(target string, result Utils.Result) Utils.Result {
 	//resp, err := conn.Get(target+"/servlet/bsh.servlet.BshServlet")
 	if resp != nil && resp.TLS != nil {
 		result.Protocol = "https"
-		result.Host = Utils.FilterCertDomain(resp.TLS.PeerCertificates[0].DNSNames)
+		result.Host = strings.Join(resp.TLS.PeerCertificates[0].DNSNames, ",")
+		//result.Host = Utils.FilterCertDomain(resp.TLS.PeerCertificates[0].DNSNames)
 	}
 	if err != nil {
 		result.Error = err.Error()
