@@ -16,11 +16,11 @@ if __name__ == "__main__":
 	f = open("src/Utils/finger.go","w",encoding="utf-8")
 	base = '''package Utils
 
-	func loadFingers()string  {
-		return `
+func loadFingers()string  {
+	return `
 	%s
 	`
-	}
+}
 	'''
 	f.write(base%json.dumps(j))
 	print("fingerprint update success")
