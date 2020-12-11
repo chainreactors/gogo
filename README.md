@@ -12,7 +12,7 @@ Usage of ./getitle:
   -t int       threads (default 4000)
   -o string    输出格式:clean,full(default) or json
   -f string    输出文件名,默认为空,请用相对路径(./)或绝对路径
-  -k string    启动密码(必须输入)为sangfor  
+  -k string    启动密码(必须输入)为puaking  
   -l string    从文件中读取任务,例如:-l ip.txt
 
 ```
@@ -90,6 +90,18 @@ Usage of ./getitle:
 当前只支持redis未授权,shiro key发现,ms17-010(免杀原因临时移除)
 
 `./gt.exe -ip 172.16.1.1/12 -p top2,445  -e`
+
+-v参数开启详细版本号匹配
+
+`./gt.exe -ip 172.16.1.1/12 -p top2  -v`
+
+icmp扫描
+
+指定探测内网网段: `./gt.exe -ip auto -p top2`
+
+外网icmp探测: `./gt.exe -ip 47.95.116.1/16 -p icmp`
+
+外网icmp启发式扫描:  `./gt.exe -ip 47.95.116.1/16 -p top2 -m sp`
 
 
 

@@ -18,7 +18,7 @@ func main() {
 	//默认参数信息
 
 	ports := flag.String("p", "top1", "")
-	//key := flag.String("k", "", "")
+	key := flag.String("k", "", "")
 	list := flag.String("l", "", "")
 	threads := flag.Int("t", 4000, "")
 	IPaddress := flag.String("ip", "", "")
@@ -30,7 +30,10 @@ func main() {
 	Exploit := flag.Bool("e", false, "")
 	Version := flag.Bool("v", false, "")
 	flag.Parse()
-
+	if *key != "puaking" {
+		//println("FUCK OFF!!!")
+		os.Exit(0)
+	}
 	if *IPaddress == "" && *list == "" {
 		os.Exit(0)
 	}

@@ -18,12 +18,7 @@ var OutputType string
 var Mod string
 
 func Init() {
-	println("*********  getitle 0.2.0 beta by Sangfor  *********")
-
-	//if key != "sangfor" {
-	//	println("FUCK OFF!!!")
-	//	os.Exit(0)
-	//}
+	println("*********  getitle 0.2.0 beta7 by Sangfor  *********")
 	initFile()
 	go write2File(FileHandle, Datach)
 }
