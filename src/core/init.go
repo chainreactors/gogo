@@ -15,6 +15,7 @@ var Clean = false
 var Filename string
 var Threads int
 var OutputType string
+var Mod string
 
 func Init() {
 	println("*********  getitle 0.2.0 beta by Sangfor  *********")
@@ -39,8 +40,8 @@ func RunTask(inp string, portlist []string, mod string) {
 	switch mod {
 	case "default":
 		//直接扫描
-		StraightMod(CIDR, portlist, Threads)
-	case "s", "smart":
+		StraightMod(CIDR, portlist)
+	case "s", "sp":
 		//启发式扫描
 		mask, _ := strconv.Atoi(strings.Split(CIDR, "/")[1])
 		if mask < 24 && mask >= 16 {
@@ -48,10 +49,13 @@ func RunTask(inp string, portlist []string, mod string) {
 		} else if mask < 16 {
 			SmartAMod(CIDR, portlist)
 		} else {
-			StraightMod(CIDR, portlist, Threads)
+			StraightMod(CIDR, portlist)
 		}
+
+	case "a", "auto":
+		AutoMod(portlist)
 	default:
-		StraightMod(CIDR, portlist, Threads)
+		StraightMod(CIDR, portlist)
 	}
 	FileHandle.Sync()
 }
@@ -71,16 +75,21 @@ func ReadTargetFile(targetfile string) []string {
 
 func TargetHandler(s string) (string, []string, string) {
 	ss := strings.Split(s, " ")
+
 	var mod, CIDR string
 	var portlist []string
-	if len(ss) == 3 {
-		CIDR = ss[0]
+
+	if len(ss) == 0 {
+		return CIDR, portlist, mod
+	}
+
+	CIDR = IpInit(ss[0])
+	mod = "default"
+	if len(ss) > 1 {
 		portlist = PortHandler(ss[1])
+	}
+	if len(ss) > 2 {
 		mod = ss[2]
-	} else {
-		CIDR = ss[0]
-		portlist = PortHandler(ss[1])
-		mod = "default"
 	}
 	return CIDR, portlist, mod
 }

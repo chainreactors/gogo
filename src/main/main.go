@@ -8,6 +8,7 @@ import (
 	"getitle/src/core"
 	"github.com/panjf2000/ants/v2"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -44,9 +45,15 @@ func main() {
 	Scan.Exploit = *Exploit
 	core.Clean = *Clean
 	Utils.Version = *Version
+	core.Mod = *mod
 	core.Init()
 
-	if *list != "" {
+	if *IPaddress == "auto" {
+		portlist := core.PortHandler(*ports)
+		println("[*] Auto scan to find Intranet ip")
+		println("[*] ports: " + strings.Join(portlist, ","))
+		core.AutoMod(portlist)
+	} else if *list != "" {
 		targetList := core.ReadTargetFile(*list)
 		for _, v := range targetList {
 			CIDR, portlist, m := core.TargetHandler(v)

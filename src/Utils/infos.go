@@ -38,24 +38,30 @@ var fingers = getFingers()
 var Version bool
 
 func InfoFilter(result Result) Result {
+	var ishttp = false
+	if strings.HasPrefix(result.Protocol, "http") {
+		ishttp = true
+	}
 	content := result.Content
 	result.Title = GetTitle(content)
-	result.Midware = GetMidware(content)
-	result.Language = GetLanguage(content)
 
+	if ishttp {
+		result.Language = GetLanguage(content)
+		result.Midware = GetMidware(content)
+	}
 	// 因为正则匹配耗时较长,如果没有-v参数则字节不进行服务识别
 	if !Version {
 		return result
 	}
 
 	//如果是http协议,则判断cms,如果是tcp则匹配规则库
-	if result.HttpStat == "tcp" {
+	if result.Protocol == "tcp" {
 		var title string
 		result.Framework, title = GetFrameWork(content, result.Port)
 		if title != "" {
 			result.Title = title
 		}
-	} else {
+	} else if ishttp {
 		result.Framework = GetHttpCMS(content)
 	}
 
