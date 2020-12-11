@@ -13,7 +13,7 @@ var Delay time.Duration
 func Dispatch(result Utils.Result) Utils.Result {
 	target := Utils.GetTarget(result.Ip, result.Port)
 	Sum++
-	//println(result.Ip,result.Port)
+	//println(result.ip,result.Port)
 	switch result.Port {
 	case "137":
 		result = NbtScan(target, result)
@@ -21,6 +21,8 @@ func Dispatch(result Utils.Result) Utils.Result {
 		result = OXIDScan(target, result)
 	//case "6379":
 	//	result = RedisScan(target, result)
+	case "icmp":
+		result = IcmpScan(target, result)
 
 	default:
 		result = SocketHttp(target, result)
@@ -29,9 +31,7 @@ func Dispatch(result Utils.Result) Utils.Result {
 	// 如果端口开放-e参数为true,则尝试进行漏洞探测
 	if result.Stat == "OPEN" {
 		Alivesum++
-		if result.Port != "135" && result.Port != "137" {
-			result = Utils.InfoFilter(result)
-		}
+		result = Utils.InfoFilter(result)
 		// 如果-e参数为true,则进行漏洞探测
 		if Exploit {
 			result = ExploitDispatch(result)

@@ -5,15 +5,16 @@ import (
 	"net"
 	"strconv"
 	"strings"
+	"sync"
 )
 
-func Ip2Int(ipmask string) uint {
+func ip2int(ipmask string) uint {
 	Ip := strings.Split(ipmask, "/")
 	s2ip := net.ParseIP(Ip[0]).To4()
 	return uint(s2ip[3]) | uint(s2ip[2])<<8 | uint(s2ip[1])<<16 | uint(s2ip[0])<<24
 }
 
-func Int2IP(ipint uint) string {
+func int2ip(ipint uint) string {
 	ip := make(net.IP, net.IPv4len)
 	ip[0] = byte(ipint >> 24)
 	ip[1] = byte(ipint >> 16)
@@ -22,7 +23,7 @@ func Int2IP(ipint uint) string {
 	return ip.String()
 }
 
-func GetMaskRange(mask string) (before uint, after uint) {
+func getMaskRange(mask string) (before uint, after uint) {
 	IntMask, _ := strconv.Atoi(mask)
 
 	before = uint(math.Pow(2, 32) - math.Pow(2, float64(32-IntMask)))
@@ -30,25 +31,27 @@ func GetMaskRange(mask string) (before uint, after uint) {
 	return before, after
 }
 
-func GetIpRange(target string) (start uint, fin uint) {
+func getIpRange(target string) (start uint, fin uint) {
 	mask := strings.Split(target, "/")[1]
 
-	before, after := GetMaskRange(mask)
+	before, after := getMaskRange(mask)
 
-	ipint := Ip2Int(target)
+	ipint := ip2int(target)
 
 	start = ipint & before
 	fin = ipint | after
 	return start, fin
 }
 
-func TargetGenerator(ch chan string, portlist []string) chan string {
-	targetChannel := make(chan string)
-
+func tcGenerator(ch chan string, portlist []string) chan TargetConfig {
+	targetChannel := make(chan TargetConfig)
+	var tc TargetConfig
 	go func() {
 		for ip := range ch {
 			for _, port := range portlist {
-				targetChannel <- ip + ":" + port
+				tc.ip = ip
+				tc.port = port
+				targetChannel <- tc
 			}
 		}
 		close(targetChannel)
@@ -57,15 +60,15 @@ func TargetGenerator(ch chan string, portlist []string) chan string {
 }
 
 //使用管道生成IP
-func IpGenerator(target string) chan string {
-	start, fin := GetIpRange(target)
+func ipGenerator(target string) chan string {
+	start, fin := getIpRange(target)
 	ch := make(chan string)
 	var i uint
 	go func() {
 		for i = 0; i <= fin-start; i++ {
 			// 如果是广播地址或网络地址,则跳过
 			if (i+start)%256 != 255 && (i+start)%256 != 0 {
-				ch <- Int2IP(i + start)
+				ch <- int2ip(i + start)
 			}
 
 		}
@@ -75,8 +78,8 @@ func IpGenerator(target string) chan string {
 }
 
 //此处的生成方式是每个C段交替生成,1.1,2.1....1.255,2.255这样
-func SmartIpGenerator(target string, temp []int) chan string {
-	start, fin := GetIpRange(target)
+func smartIpGenerator(target string, temp *sync.Map) chan string {
+	start, fin := getIpRange(target)
 	ch := make(chan string)
 	var outIP string
 	//sum := fin -start
@@ -85,8 +88,8 @@ func SmartIpGenerator(target string, temp []int) chan string {
 	go func() {
 		for C = 1; C < 255; C++ {
 			for B = 0; B <= (fin-start)/256; B++ {
-				outIP = Int2IP(start + 256*B + C)
-				if isAlive(outIP, temp) {
+				outIP = int2ip(start + 256*B + C)
+				if isAlive(int2ip(start+256*B+1), temp) {
 					ch <- outIP
 				}
 			}
@@ -96,22 +99,19 @@ func SmartIpGenerator(target string, temp []int) chan string {
 	return ch
 }
 
-func isAlive(ip string, temp []int) bool {
-	c := net.ParseIP(ip).To4()[2]
-	if temp[c] > 0 {
-		return false
-	}
-	return true
+func isAlive(ip string, temp *sync.Map) bool {
+	_, ok := temp.Load(ip)
+	return !ok
 }
 
-func BipGenerator(target string) chan string {
-	start, fin := GetIpRange(target)
-	startB := net.ParseIP(Int2IP(start)).To4()[1]
-	finB := net.ParseIP(Int2IP(fin)).To4()[1]
+func bipGenerator(target string) chan string {
+	start, fin := getIpRange(target)
+	startB := net.ParseIP(int2ip(start)).To4()[1]
+	finB := net.ParseIP(int2ip(fin)).To4()[1]
 
 	ch := make(chan string)
 
-	ip := net.ParseIP(Int2IP(start)).To4()
+	ip := net.ParseIP(int2ip(start)).To4()
 
 	var i byte
 	go func() {
@@ -124,8 +124,32 @@ func BipGenerator(target string) chan string {
 	return ch
 }
 
-func CheckIp(CIDR string) string {
-	fmtip := GetIp(strings.Split(CIDR, "/")[0])
+func autoIcmpGenerator() chan string {
+	start10, end10 := getIpRange("10.0.0.0/8")
+	start172, end172 := getIpRange("172.16.0.0/12")
+	start192, end192 := getIpRange("192.168.0.0/16")
+	ch := make(chan string)
+	var i uint
+	go func() {
+		println("[*] Processing ICMP: 10.0.0.0/8")
+		for i = start10 + 1; i <= end10; i += 256 {
+			ch <- int2ip(i)
+		}
+		println("[*] Processing ICMP: 172.16.0.0/12")
+		for i = start172 + 1; i <= end172; i += 256 {
+			ch <- int2ip(i)
+		}
+		println("[*] Processing ICMP: 192.168.0.0/16")
+		for i = start192 + 1; i <= end192; i += 256 {
+			ch <- int2ip(i)
+		}
+		close(ch)
+	}()
+	return ch
+}
+
+func checkIp(CIDR string) string {
+	fmtip := getIp(strings.Split(CIDR, "/")[0])
 	if fmtip != "" {
 		return fmtip + "/" + strings.Split(CIDR, "/")[1]
 	}
@@ -141,7 +165,7 @@ func isIPv4(ip string) bool {
 	return false
 }
 
-func GetIp(target string) string {
+func getIp(target string) string {
 	if isIPv4(target) {
 		return target
 	}
