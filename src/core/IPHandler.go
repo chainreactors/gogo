@@ -124,8 +124,8 @@ func BipGenerator(target string) chan string {
 	return ch
 }
 
-func CheckIp(CIDR string) string {
-	fmtip := GetIp(strings.Split(CIDR, "/")[0])
+func checkIp(CIDR string) string {
+	fmtip := getIp(strings.Split(CIDR, "/")[0])
 	if fmtip != "" {
 		return fmtip + "/" + strings.Split(CIDR, "/")[1]
 	}
@@ -141,7 +141,7 @@ func isIPv4(ip string) bool {
 	return false
 }
 
-func GetIp(target string) string {
+func getIp(target string) string {
 	if isIPv4(target) {
 		return target
 	}

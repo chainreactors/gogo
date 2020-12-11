@@ -10,8 +10,8 @@ import (
 
 var Datach = make(chan string, 1000)
 var FileHandle *os.File
-var O2File bool = false
-var IsJson bool = false
+var O2File = false
+var Clean = false
 var Filename string
 var Threads int
 var OutputType string
@@ -24,17 +24,18 @@ func Init() {
 	//	os.Exit(0)
 	//}
 	initFile()
-	go Write2File(FileHandle, Datach)
+	go write2File(FileHandle, Datach)
 }
 
 func RunTask(inp string, portlist []string, mod string) {
 	CIDR := IpInit(inp)
-	CIDR = CheckIp(CIDR)
+	CIDR = checkIp(CIDR)
 	if CIDR == "" {
 		println("[-] target (" + inp + ") format ERROR,")
 		return
 	}
 	println(fmt.Sprintf("[*] Start Scan Task %s ,total ports: %d , mod: %s", CIDR, len(portlist), mod))
+	println("[*] ports: " + strings.Join(portlist, ","))
 	switch mod {
 	case "default":
 		//直接扫描
@@ -89,7 +90,7 @@ func initFile() {
 
 	if Filename != "" {
 		O2File = true
-		if CheckFileIsExist(Filename) { //如果文件存在
+		if checkFileIsExist(Filename) { //如果文件存在
 			FileHandle, err = os.OpenFile(Filename, os.O_APPEND|os.O_WRONLY, os.ModeAppend) //打开文件
 			//fmt.Println("文件存在")
 			if err != nil {
@@ -110,7 +111,7 @@ func initFile() {
 	}
 }
 
-func CheckFileIsExist(filename string) bool {
+func checkFileIsExist(filename string) bool {
 	var exist = true
 	if _, err := os.Stat(filename); os.IsNotExist(err) {
 		exist = false
@@ -118,7 +119,7 @@ func CheckFileIsExist(filename string) bool {
 	return exist
 }
 
-func Write2File(FileHandle *os.File, Datach chan string) {
+func write2File(FileHandle *os.File, Datach chan string) {
 	for res := range Datach {
 		FileHandle.WriteString(res)
 
@@ -133,7 +134,7 @@ func PortHandler(portstring string) []string {
 	for _, portname := range postslist {
 		ports = append(ports, choiceports(portname)...)
 	}
-	ports = Ports2PortSlice(ports)
+	ports = ports2PortSlice(ports)
 	ports = removeDuplicateElement(ports)
 	return ports
 
@@ -151,7 +152,7 @@ func choiceports(portname string) []string {
 
 		// 一些待定端口,需要更多测试
 		//"8444-8447" "10800-10810" '10080"
-		ports = []string{"4430", "9443", "6080", "6443", "9091", "7003-7010", "9003-9010", "8100-8110", "8021-8030", "8880-8890", "8010-8020", "8090-8100", "8180-8181", "8363", "8800", "8761", "8873", "8866", "8900", "8282", "8999", "8989", "8066", "8200", "8111", "8030", "8040", "8060", "8180", "10800"}
+		ports = []string{"4430", "9443", "6080", "6443", "9091", "7003-7010", "9003-9010", "8100-8110", "8161", "8021-8030", "8880-8890", "8010-8020", "8090-8100", "8180-8181", "8363", "8800", "8761", "8873", "8866", "8900", "8282", "8999", "8989", "8066", "8200", "8111", "8030", "8040", "8060", "8180", "10800"}
 	case "db":
 		ports = []string{"3306", "3307", "1433", "1521", "5432", "6379", "11211", "27017"}
 	case "rce":
@@ -171,7 +172,7 @@ func choiceports(portname string) []string {
 	return ports
 }
 
-func Ports2PortSlice(ports []string) []string {
+func ports2PortSlice(ports []string) []string {
 	var tmpports []string
 	//生成端口列表 支持,和-
 	for _, pr := range ports {

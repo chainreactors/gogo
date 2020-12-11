@@ -46,7 +46,9 @@ func DefaultScan(ipi interface{}) {
 	//res := Scan.SystemHttp(ip)
 
 	if result.Stat != "" {
-		fmt.Print(output(*result, OutputType))
+		if !Clean {
+			fmt.Print(output(*result, OutputType))
+		}
 		if O2File {
 			Datach <- output(*result, OutputType)
 		}
