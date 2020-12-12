@@ -18,7 +18,7 @@ var OutputType string
 var Mod string
 
 func Init() {
-	println("*********  getitle 0.2.0 beta7 by Sangfor  *********")
+	println("*********  Getitle 0.2.0 beta7   *********")
 	initFile()
 	go write2File(FileHandle, Datach)
 }
