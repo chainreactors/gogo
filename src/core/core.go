@@ -7,6 +7,7 @@ import (
 	"github.com/panjf2000/ants/v2"
 	"net"
 	"sync"
+	"time"
 )
 
 type TargetConfig struct {
@@ -104,6 +105,7 @@ func SmartBMod(target string, portlist []string) {
 		_ = scanPool.Invoke(t)
 	}
 	wg.Wait()
+	time.Sleep(2 * time.Second)
 	close(aliveC)
 
 	temp.Range(func(key, value interface{}) bool {
@@ -180,6 +182,7 @@ func AutoMod(portlist []string) {
 		_ = scanPool.Invoke(t)
 	}
 	wgs.Wait()
+	time.Sleep(2 * time.Second)
 	close(aliveC)
 
 	temp.Range(func(key, value interface{}) bool {

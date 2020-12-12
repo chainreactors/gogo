@@ -52,11 +52,11 @@ func ExploitDispatch(result Utils.Result) Utils.Result {
 	if strings.Contains(result.Content, "-ERR wrong") {
 		result = RedisScan(target, result)
 	}
-	if result.HttpStat == "200" || strings.HasPrefix(result.HttpStat, "3") {
+	if strings.HasPrefix(result.Protocol, "http") {
 		result = ShiroScan(target, result)
 	}
 	if result.Port == "445" {
-		//result = MS17010Scan(target, result)
+		result = MS17010Scan(target, result)
 	}
 	return result
 }
