@@ -17,6 +17,8 @@ func IcmpScan(target string, result Utils.Result) Utils.Result {
 	var seq int16 = 1
 	const ECHO_REQUEST_HEAD_LEN = 8
 
+	Sum++
+
 	size = 32
 	delay := time.Duration(1)
 	target = strings.Split(target, ":")[0]
@@ -51,7 +53,7 @@ func IcmpScan(target string, result Utils.Result) Utils.Result {
 	_, err = conn.Read(receive)
 
 	if err != nil || receive[ECHO_REPLY_HEAD_LEN+4] != msg[4] || receive[ECHO_REPLY_HEAD_LEN+5] != msg[5] || receive[ECHO_REPLY_HEAD_LEN+6] != msg[6] || receive[ECHO_REPLY_HEAD_LEN+7] != msg[7] || receive[ECHO_REPLY_HEAD_LEN] == 11 {
-		result.Error = err.Error()
+		//result.Error = err.Error()
 		return result
 	} else {
 		result.Stat = "OPEN"
