@@ -108,7 +108,7 @@ func SmartBMod(target string, portlist []string) {
 
 	temp.Range(func(key, value interface{}) bool {
 		if value.(int) > 0 {
-			println("[*] Processing:" + key.(string) + "/24")
+			println(Utils.GetCurtime() + "[*] Processing:" + key.(string) + "/24")
 			StraightMod(key.(string)+"/24", portlist)
 		}
 		return true
@@ -143,7 +143,7 @@ func smartScan(tc TargetConfig, AliveCh chan string) {
 func SmartAMod(target string, portlist []string) {
 	btargetChannel := bipGenerator(target)
 	for i := range btargetChannel {
-		println("[*] Processing Bclass IP:" + i + "/16")
+		println(Utils.GetCurtime() + "[*] Processing Bclass IP:" + i + "/16")
 		SmartBMod(i+"/16", portlist)
 	}
 }
@@ -184,7 +184,8 @@ func AutoMod(portlist []string) {
 
 	temp.Range(func(key, value interface{}) bool {
 		if value.(int) > 0 {
-			println("[*] Processing:" + key.(string) + "/24")
+
+			println(Utils.GetCurtime() + " [*] Processing:" + key.(string) + "/24")
 			StraightMod(key.(string)+"/24", portlist)
 		}
 		return true

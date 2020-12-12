@@ -7,7 +7,9 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
+	"time"
 )
 
 type Result struct {
@@ -229,4 +231,13 @@ func fingerSplit(port string) ([]Finger, []Finger) {
 		}
 	}
 	return defaultportFingers, otherportFingers
+}
+
+func GetCurtime() string {
+	h := strconv.Itoa(time.Now().Hour())
+	m := strconv.Itoa(time.Now().Minute())
+	s := strconv.Itoa(time.Now().Second())
+
+	curtime := h + ":" + m + ":" + s
+	return curtime
 }
