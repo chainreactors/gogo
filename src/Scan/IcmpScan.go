@@ -14,14 +14,13 @@ import (
 
 func IcmpScan(target string, result Utils.Result) Utils.Result {
 	var size int
-	var timeout int64
 	var seq int16 = 1
 	const ECHO_REQUEST_HEAD_LEN = 8
 
 	size = 32
-	timeout = 1000
+	delay := time.Duration(1)
 	target = strings.Split(target, ":")[0]
-	conn, err := net.DialTimeout("ip4:icmp", target, time.Duration(timeout*1000*1000))
+	conn, err := net.DialTimeout("ip4:icmp", target, delay*time.Second)
 	if err != nil {
 		result.Error = err.Error()
 		return result
@@ -43,7 +42,7 @@ func IcmpScan(target string, result Utils.Result) Utils.Result {
 	msg[2] = byte(check >> 8)
 	msg[3] = byte(check & 255)
 
-	conn.SetDeadline(time.Now().Add(Delay * time.Second))
+	conn.SetDeadline(time.Now().Add(delay * time.Second))
 	_, err = conn.Write(msg[0:length])
 
 	const ECHO_REPLY_HEAD_LEN = 20

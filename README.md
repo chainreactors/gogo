@@ -97,7 +97,7 @@ Usage of ./getitle:
 
 icmp扫描
 
-指定探测内网网段: `./gt.exe -ip auto -p top2`
+指定探测内网网段: `./gt.exe -ip auto -p top2 ` (默认为`10/8,172.16/12,192.168/16`)
 
 外网icmp探测: `./gt.exe -ip 47.95.116.1/16 -p icmp`
 
