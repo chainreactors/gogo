@@ -110,7 +110,7 @@ func SmartBMod(target string, portlist []string) {
 
 	temp.Range(func(key, value interface{}) bool {
 		if value.(int) > 0 {
-			println(Utils.GetCurtime() + "[*] Processing:" + key.(string) + "/24")
+			fmt.Println(Utils.GetCurtime() + "[*] Processing:" + key.(string) + "/24")
 			StraightMod(key.(string)+"/24", portlist)
 		}
 		return true
@@ -145,7 +145,7 @@ func smartScan(tc TargetConfig, AliveCh chan string) {
 func SmartAMod(target string, portlist []string) {
 	btargetChannel := bipGenerator(target)
 	for i := range btargetChannel {
-		println(Utils.GetCurtime() + "[*] Processing Bclass IP:" + i + "/16")
+		fmt.Println(Utils.GetCurtime() + "[*] Processing Bclass IP:" + i + "/16")
 		SmartBMod(i+"/16", portlist)
 	}
 }
@@ -157,10 +157,10 @@ func AutoMod(portlist []string) {
 	var tcChannel chan TargetConfig
 	if Mod == "s" {
 		println("[*] current Mod : Socket")
-		tcChannel = tcGenerator(autoIcmpChannel, []string{"icmp"})
+		tcChannel = tcGenerator(autoIcmpChannel, []string{"80"})
 	} else {
 		println("[*] current Mod : ICMP")
-		tcChannel = tcGenerator(autoIcmpChannel, []string{"80"})
+		tcChannel = tcGenerator(autoIcmpChannel, []string{"ICMP"})
 	}
 
 	var temp sync.Map

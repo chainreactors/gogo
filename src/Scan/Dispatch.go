@@ -19,8 +19,8 @@ func Dispatch(result Utils.Result) Utils.Result {
 		result = NbtScan(target, result)
 	case "135":
 		result = OXIDScan(target, result)
-	//case "6379":
-	//	result = RedisScan(target, result)
+	case "445":
+		result = MS17010Scan(target, result)
 	case "icmp":
 		result = IcmpScan(target, result)
 
