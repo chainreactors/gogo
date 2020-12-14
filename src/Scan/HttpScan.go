@@ -75,8 +75,9 @@ func SystemHttp(target string, result Utils.Result) Utils.Result {
 		result.Error = err.Error()
 		if strings.Contains(result.Error, "http: server gave HTTP response to HTTPS client") {
 			result.Protocol = "http"
+		} else if strings.Contains(result.Error, "first record does not look like a TLS handshake") {
+			result.Protocol = "tcp"
 		}
-
 		// 如果已经匹配到状态码,且再次请求报错,则返回
 		if result.HttpStat != "" {
 			return result

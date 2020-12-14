@@ -13,7 +13,7 @@ var Delay time.Duration
 func Dispatch(result Utils.Result) Utils.Result {
 	target := Utils.GetTarget(result.Ip, result.Port)
 	Sum++
-	println(result.Ip, result.Port)
+	//println(result.Ip, result.Port)
 	switch result.Port {
 	case "137":
 		result = NbtScan(target, result)
@@ -39,6 +39,7 @@ func Dispatch(result Utils.Result) Utils.Result {
 	//	Titlesum ++
 	//}
 	result.Content = ""
+	result.Title = strings.TrimSpace(result.Title)
 	return result
 }
 
@@ -54,6 +55,9 @@ func ExploitDispatch(result Utils.Result) Utils.Result {
 	}
 	if result.Port == "445" {
 		result = MS17010Scan(target, result)
+	}
+	if result.Port == "11211" {
+		result = MemcacheScan(target, result)
 	}
 	return result
 }

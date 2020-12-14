@@ -6,7 +6,7 @@ import (
 )
 
 func RedisScan(target string, result Utils.Result) Utils.Result {
-
+	result.Framework = "redis"
 	conn, err := Utils.TcpSocketConn(target, Delay)
 	if err != nil {
 
@@ -15,10 +15,10 @@ func RedisScan(target string, result Utils.Result) Utils.Result {
 		return result
 	}
 
-	_, recv, _ := Utils.SocketSend(conn, []byte("info"), 2048)
+	_, recv, _ := Utils.SocketSend(conn, []byte("info\r\n"), 1024)
 	if strings.Contains(string(recv), "redis_version") {
-		result.Protocol = "redis"
-		result.Title = Utils.Match("redis_version:(.*)", string(recv))
+		result.Protocol = "tcp"
+		result.Title = "redis " + Utils.Match("redis_version:(.*)", string(recv))
 		result.Vuln = "redis Unauth"
 	}
 	return result
