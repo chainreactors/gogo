@@ -8,7 +8,6 @@ import (
 	"getitle/src/core"
 	"github.com/panjf2000/ants/v2"
 	"os"
-	"strings"
 	"time"
 )
 
@@ -23,6 +22,7 @@ func main() {
 	threads := flag.Int("t", 4000, "")
 	IPaddress := flag.String("ip", "", "")
 	mod := flag.String("m", "default", "")
+	typ := flag.String("n", "socket", "")
 	delay := flag.Int("d", 2, "")
 	Clean := flag.Bool("c", false, "")
 	Output := flag.String("o", "full", "")
@@ -31,10 +31,10 @@ func main() {
 	Version := flag.Bool("v", false, "")
 	flag.Parse()
 	if *key != "puaking" {
-		//println("FUCK OFF!!!")
+		println("segment fault")
 		os.Exit(0)
 	}
-	if *IPaddress == "" && *list == "" {
+	if *IPaddress == "" && *list == "" && *mod != "a" {
 		os.Exit(0)
 	}
 
@@ -48,24 +48,23 @@ func main() {
 	Scan.Exploit = *Exploit
 	core.Clean = *Clean
 	Utils.Version = *Version
-	core.Mod = *mod
 	core.Init()
 
-	if *IPaddress == "auto" {
-		portlist := core.PortHandler(*ports)
-		println("[*] Auto scan to find Intranet ip")
-		println("[*] ports: " + strings.Join(portlist, ","))
-		core.AutoMod(portlist)
-	} else if *list != "" {
+	//if *IPaddress == "auto" {
+	//	portlist := core.PortHandler(*ports)
+	//	println("[*] Auto scan to find Intranet ip")
+	//	println("[*] ports: " + strings.Join(portlist, ","))
+	//	core.AutoMod(portlist)
+	//} else
+	if *list != "" {
 		targetList := core.ReadTargetFile(*list)
 		for _, v := range targetList {
-			CIDR, portlist, m := core.TargetHandler(v)
-			core.RunTask(core.IpInit(CIDR), portlist, m)
+			CIDR, portlist, m, ty := core.TargetHandler(v)
+			core.RunTask(core.IpInit(CIDR), portlist, m, ty)
 		}
 	} else {
-		CIDR := core.IpInit(*IPaddress)
 		portlist := core.PortHandler(*ports)
-		core.RunTask(CIDR, portlist, *mod)
+		core.RunTask(*IPaddress, portlist, *mod, *typ)
 	}
 
 	endtime := time.Since(starttime)

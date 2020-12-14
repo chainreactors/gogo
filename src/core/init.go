@@ -15,7 +15,6 @@ var Clean = false
 var Filename string
 var Threads int
 var OutputType string
-var Mod string
 
 func Init() {
 	println("*********  getitle 0.2.0 beta7 by Sangfor  *********")
@@ -23,9 +22,14 @@ func Init() {
 	go write2File(FileHandle, Datach)
 }
 
-func RunTask(inp string, portlist []string, mod string) {
-	CIDR := IpInit(inp)
-	CIDR = checkIp(CIDR)
+func RunTask(inp string, portlist []string, mod string, typ string) {
+	var CIDR string
+	if mod != "a" {
+		CIDR = IpInit(inp)
+		CIDR = checkIp(CIDR)
+	} else {
+		CIDR = "auto"
+	}
 	if CIDR == "" {
 		println("[-] target (" + inp + ") format ERROR,")
 		return
@@ -36,19 +40,18 @@ func RunTask(inp string, portlist []string, mod string) {
 	case "default":
 		//直接扫描
 		StraightMod(CIDR, portlist)
-	case "s", "sp":
+	case "a", "auto":
+		SmartBMod(CIDR, portlist, mod, typ)
+	case "s", "f":
 		//启发式扫描
 		mask, _ := strconv.Atoi(strings.Split(CIDR, "/")[1])
 		if mask < 24 && mask >= 16 {
-			SmartBMod(CIDR, portlist)
+			SmartBMod(CIDR, portlist, mod, typ)
 		} else if mask < 16 {
-			SmartAMod(CIDR, portlist)
+			SmartAMod(CIDR, portlist, mod, typ)
 		} else {
 			StraightMod(CIDR, portlist)
 		}
-
-	case "a", "auto":
-		AutoMod(portlist)
 	default:
 		StraightMod(CIDR, portlist)
 	}
@@ -68,25 +71,30 @@ func ReadTargetFile(targetfile string) []string {
 	return strings.Split(targets, "\n")
 }
 
-func TargetHandler(s string) (string, []string, string) {
+func TargetHandler(s string) (string, []string, string, string) {
 	ss := strings.Split(s, " ")
 
-	var mod, CIDR string
+	var mod, CIDR, typ string
 	var portlist []string
 
 	if len(ss) == 0 {
-		return CIDR, portlist, mod
+		return CIDR, portlist, mod, typ
 	}
 
 	CIDR = IpInit(ss[0])
+	portlist = PortHandler("top1")
 	mod = "default"
+	typ = "socket"
 	if len(ss) > 1 {
 		portlist = PortHandler(ss[1])
 	}
 	if len(ss) > 2 {
 		mod = ss[2]
 	}
-	return CIDR, portlist, mod
+	if len(ss) > 3 {
+		typ = ss[3]
+	}
+	return CIDR, portlist, mod, typ
 }
 
 func initFile() {
@@ -151,16 +159,16 @@ func choiceports(portname string) []string {
 	case "top1":
 		ports = []string{"80", "443", "8080"}
 	case "top2":
-		ports = []string{"80-90", "443", "1080", "3000", "4443", "5000", "7000-7003", "9000-9003", "8080-8090", "8000-8020", "8443", "8787", "7080", "8070", "7070", "9080", "5555", "6666", "7777", "9999", "8888", "8889", "9090", "8091", "8099", "8848", "8060", "8899", "800", "801", "10000", "10080"}
+		ports = []string{"80-90", "443", "1080", "3000", "4443", "4430", "5000", "6000", "7000-7003", "9000-9003", "8080-8090", "8000-8020", "8443", "8787", "7080", "8070", "7070", "9080", "5555", "6666", "7777", "9999", "8888", "8889", "9090", "8091", "8099", "8848", "8060", "8899", "800", "801", "10000", "10080"}
 	case "top3":
 
 		// 一些待定端口,需要更多测试
 		//"8444-8447" "10800-10810" '10080"
-		ports = []string{"4430", "9443", "6080", "6443", "9091", "7003-7010", "9003-9010", "8100-8110", "8161", "8021-8030", "8880-8890", "8010-8020", "8090-8100", "8180-8181", "8363", "8800", "8761", "8873", "8866", "8900", "8282", "8999", "8989", "8066", "8200", "8111", "8030", "8040", "8060", "8180", "10800"}
+		ports = []string{"9443", "6080", "6443", "9091", "7003-7010", "9003-9010", "8100-8110", "8161", "8021-8030", "8880-8890", "8010-8020", "8090-8100", "8180-8181", "8363", "8800", "8761", "8873", "8866", "8900", "8282", "8999", "8989", "8066", "8200", "8111", "8030", "8040", "8060", "8180", "10800"}
 	case "db":
-		ports = []string{"3306", "3307", "1433", "1521", "5432", "6379", "11211", "27017"}
+		ports = []string{"3300-3310", "1158", "1433", "1521", "5432", "6379", "11211", "27017"}
 	case "rce":
-		ports = []string{"1090", "1098", "1099", "4444", "11099", "47001", "47002", "10999", "45000", "45001", "8686", "9012", "50500", "61616", "4848", "6443", "11111", "4445", "4786", "5555", "5556"}
+		ports = []string{"1090", "1098", "1099", "4444", "11099", "47001", "10999", "45000", "45001", "8686", "9012", "50500", "61616", "4848", "6443", "11111", "4445", "4786", "5555", "5556"}
 	case "win":
 		ports = []string{"21", "22", "23", "53", "88", "135", "137", "139", "389", "445", "1080", "3389", "5985"}
 	case "all":

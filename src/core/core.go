@@ -18,7 +18,7 @@ type TargetConfig struct {
 //直接扫描
 func StraightMod(target string, portlist []string) {
 	var wgs sync.WaitGroup
-	ipChannel := ipGenerator(target)
+	ipChannel := ipGenerator(target, "default", nil)
 	targetChannel := tcGenerator(ipChannel, portlist)
 
 	// Use the pool with a function,
@@ -74,16 +74,15 @@ func safeMap(temp *sync.Map, ch chan string) {
 	}
 }
 
-func SmartBMod(target string, portlist []string) {
+func SmartBMod(target string, portlist []string, mod string, typ string) {
 	var wg sync.WaitGroup
 	var temp sync.Map
 	aliveC := make(chan string)
 	go safeMap(&temp, aliveC)
-
-	ipChannel := smartIpGenerator(target, &temp)
+	ipChannel := ipGenerator(target, mod, &temp)
 	var tcChannel chan TargetConfig
 
-	if Mod == "sp" {
+	if typ == "icmp" || typ == "i" {
 		println("[*] current Mod : ICMP")
 		tcChannel = tcGenerator(ipChannel, []string{"icmp"})
 	} else {
@@ -100,7 +99,6 @@ func SmartBMod(target string, portlist []string) {
 	defer scanPool.Release()
 
 	for t := range tcChannel {
-
 		wg.Add(1)
 		_ = scanPool.Invoke(t)
 	}
@@ -110,6 +108,7 @@ func SmartBMod(target string, portlist []string) {
 
 	temp.Range(func(key, value interface{}) bool {
 		if value.(int) > 0 {
+			//println(key.(string))
 			println("[*] Processing:" + key.(string) + "/24")
 			StraightMod(key.(string)+"/24", portlist)
 		}
@@ -142,55 +141,55 @@ func smartScan(tc TargetConfig, AliveCh chan string) {
 	}
 }
 
-func SmartAMod(target string, portlist []string) {
+func SmartAMod(target string, portlist []string, mod string, typ string) {
 	btargetChannel := bipGenerator(target)
 	for i := range btargetChannel {
 		println("[*] Processing Bclass IP:" + i + "/16")
-		SmartBMod(i+"/16", portlist)
+		SmartBMod(i+"/16", portlist, mod, typ)
 	}
 }
 
-func AutoMod(portlist []string) {
-	var wgs sync.WaitGroup
-	//if target {
-	autoIcmpChannel := autoIcmpGenerator()
-	var tcChannel chan TargetConfig
-	if Mod == "s" {
-		println("[*] current Mod : Socket")
-		tcChannel = tcGenerator(autoIcmpChannel, []string{"icmp"})
-	} else {
-		println("[*] current Mod : ICMP")
-		tcChannel = tcGenerator(autoIcmpChannel, []string{"80"})
-	}
-
-	var temp sync.Map
-	aliveC := make(chan string)
-	go safeMap(&temp, aliveC)
-
-	//go safeMap(temp, aliveC)
-	// Use the pool with a function,
-	// set 10 to the capacity of goroutine pool and 1 second for expired duration.
-	scanPool, _ := ants.NewPoolWithFunc(Threads, func(i interface{}) {
-		tc := i.(TargetConfig)
-		smartScan(tc, aliveC)
-		wgs.Done()
-	})
-	defer scanPool.Release()
-
-	for t := range tcChannel {
-		wgs.Add(1)
-		_ = scanPool.Invoke(t)
-	}
-	wgs.Wait()
-	time.Sleep(2 * time.Second)
-	close(aliveC)
-
-	temp.Range(func(key, value interface{}) bool {
-		if value.(int) > 0 {
-			println("[*] Processing:" + key.(string) + "/24")
-			StraightMod(key.(string)+"/24", portlist)
-		}
-		return true
-	})
-
-}
+//func AutoMod(portlist []string) {
+//	var wgs sync.WaitGroup
+//	//if target {
+//	autoIcmpChannel := ipGenerator("auto","defalut",nil)
+//	var tcChannel chan TargetConfig
+//	if Mod == "s" {
+//		println("[*] current Mod : Socket")
+//		tcChannel = tcGenerator(autoIcmpChannel, []string{"80"})
+//	} else {
+//		println("[*] current Mod : ICMP")
+//		tcChannel = tcGenerator(autoIcmpChannel, []string{"icmp"})
+//	}
+//
+//	var temp sync.Map
+//	aliveC := make(chan string)
+//	go safeMap(&temp, aliveC)
+//
+//	//go safeMap(temp, aliveC)
+//	// Use the pool with a function,
+//	// set 10 to the capacity of goroutine pool and 1 second for expired duration.
+//	scanPool, _ := ants.NewPoolWithFunc(Threads, func(i interface{}) {
+//		tc := i.(TargetConfig)
+//		smartScan(tc, aliveC)
+//		wgs.Done()
+//	})
+//	defer scanPool.Release()
+//
+//	for t := range tcChannel {
+//		wgs.Add(1)
+//		_ = scanPool.Invoke(t)
+//	}
+//	wgs.Wait()
+//	time.Sleep(2 * time.Second)
+//	close(aliveC)
+//
+//	temp.Range(func(key, value interface{}) bool {
+//		if value.(int) > 0 {
+//			println("[*] Processing:" + key.(string) + "/24")
+//			StraightMod(key.(string)+"/24", portlist)
+//		}
+//		return true
+//	})
+//
+//}

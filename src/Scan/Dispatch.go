@@ -13,17 +13,14 @@ var Delay time.Duration
 func Dispatch(result Utils.Result) Utils.Result {
 	target := Utils.GetTarget(result.Ip, result.Port)
 	Sum++
-	//println(result.ip,result.Port)
+	println(result.Ip, result.Port)
 	switch result.Port {
 	case "137":
 		result = NbtScan(target, result)
 	case "135":
 		result = OXIDScan(target, result)
-	//case "6379":
-	//	result = RedisScan(target, result)
 	case "icmp":
-		result = IcmpScan(target, result)
-
+		result = IcmpScan(result.Ip, result)
 	default:
 		result = SocketHttp(target, result)
 	}
