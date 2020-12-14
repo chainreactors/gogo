@@ -48,11 +48,13 @@ func defaultScan(tc TargetConfig) {
 	//res := Scan.SystemHttp(ip)
 
 	if result.Stat != "" {
-		if !Clean {
-			fmt.Print(output(*result, OutputType))
-		}
+
 		if O2File {
 			Datach <- output(*result, OutputType)
+		} else {
+			if !Clean {
+				fmt.Print(output(*result, OutputType))
+			}
 		}
 
 	}
@@ -188,7 +190,7 @@ func AutoMod(portlist []string) {
 	temp.Range(func(key, value interface{}) bool {
 		if value.(int) > 0 {
 
-			println(Utils.GetCurtime() + " [*] Processing:" + key.(string) + "/24")
+			fmt.Println(Utils.GetCurtime() + " [*] Processing:" + key.(string) + "/24")
 			StraightMod(key.(string)+"/24", portlist)
 		}
 		return true
