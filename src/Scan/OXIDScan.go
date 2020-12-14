@@ -7,7 +7,7 @@ import (
 
 func OXIDScan(target string, result Utils.Result) Utils.Result {
 
-	result.Protocol = "OXID"
+	result.Protocol = "tcp"
 	conn, err := Utils.TcpSocketConn(target, Delay)
 	if err != nil {
 

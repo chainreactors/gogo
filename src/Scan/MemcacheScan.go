@@ -6,7 +6,6 @@ import (
 )
 
 func MemcacheScan(target string, result Utils.Result) Utils.Result {
-	result.Framework = "memcache"
 	conn, err := Utils.TcpSocketConn(target, Delay)
 	if err != nil {
 
@@ -18,6 +17,7 @@ func MemcacheScan(target string, result Utils.Result) Utils.Result {
 	_, recv, _ := Utils.SocketSend(conn, []byte("stats\r\n"), 1024)
 	if strings.Contains(string(recv), "STAT version") {
 		result.Protocol = "tcp"
+		result.Framework = "memcache"
 		result.Title = "memcache " + Utils.Match("STAT version (.*)", string(recv))
 		result.Vuln = "memcache Unauth"
 	}

@@ -48,7 +48,7 @@ func init() {
 func NbtScan(target string, result Utils.Result) Utils.Result {
 	var Share bool = false
 	var DC bool = false
-	result.Protocol = "NetBIOS"
+	result.Protocol = "udp"
 	conn, err := Utils.UdpSocketConn(target, Delay)
 	if err != nil {
 
