@@ -60,7 +60,7 @@ func tcGenerator(ch chan string, portlist []string) chan TargetConfig {
 }
 
 //使用管道生成IP
-func defalutIpGenerator(CIDR string, ch chan string) chan string {
+func defaultIpGenerator(CIDR string, ch chan string) chan string {
 	start, fin := getIpRange(CIDR)
 	for i := start; i <= fin; i++ {
 		// 如果是广播地址或网络地址,则跳过
@@ -137,15 +137,18 @@ func firstIpGenerator(CIDR string, ch chan string) chan string {
 func ipGenerator(CIDR string, mod string, temp *sync.Map) chan string {
 	ch := make(chan string)
 	go func() {
-		if mod == "a" || CIDR == "auto" {
+		if mod == "a" {
 			// 生成内网ip的首段
+			println("[*] current Mod: auto")
 			ch = firstInterGenerator(ch)
 		} else if mod == "s" {
+			println("[*] current Mod: smart")
 			ch = smartIpGenerator(CIDR, ch, temp)
 		} else if mod == "f" {
+			println("[*] current Mod: first Ip")
 			ch = firstIpGenerator(CIDR, ch)
 		} else {
-			ch = defalutIpGenerator(CIDR, ch)
+			ch = defaultIpGenerator(CIDR, ch)
 		}
 		close(ch)
 	}()

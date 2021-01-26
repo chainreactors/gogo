@@ -24,13 +24,13 @@ func Init() {
 
 func RunTask(inp string, portlist []string, mod string, typ string) {
 	var CIDR string
-	if mod != "a" {
-		CIDR = IpInit(inp)
-		CIDR = checkIp(CIDR)
-	} else {
+	if mod == "a" || inp == "auto" {
 		// 内网探测默认使用icmp扫描
 		CIDR = "auto"
 		typ = "icmp"
+	} else {
+		CIDR = IpInit(inp)
+		CIDR = checkIp(CIDR)
 	}
 	if CIDR == "" {
 		println("[-] target (" + inp + ") format ERROR,")

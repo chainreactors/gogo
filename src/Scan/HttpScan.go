@@ -79,7 +79,7 @@ func SystemHttp(target string, result Utils.Result) Utils.Result {
 			result.Protocol = "tcp"
 		}
 		// 如果已经匹配到状态码,且再次请求报错,则返回
-		if result.HttpStat != "" {
+		if result.HttpStat != "tcp" {
 			return result
 		}
 

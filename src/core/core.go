@@ -86,10 +86,10 @@ func SmartBMod(target string, portlist []string, mod string, typ string) {
 	var tcChannel chan TargetConfig
 
 	if typ == "icmp" || typ == "i" {
-		println("[*] current Mod : ICMP")
+		println("[*] current Protocol: ICMP")
 		tcChannel = tcGenerator(ipChannel, []string{"icmp"})
 	} else {
-		println("[*] current Mod : Socket")
+		println("[*] current Protocol: Socket")
 		tcChannel = tcGenerator(ipChannel, []string{"80"})
 	}
 
