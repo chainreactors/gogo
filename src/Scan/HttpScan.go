@@ -93,7 +93,6 @@ func SystemHttp(target string, result Utils.Result) Utils.Result {
 		return result
 	}
 	result.Protocol = resp.Request.URL.Scheme
-	result.Stat = "OPEN"
 	result.HttpStat = strconv.Itoa(resp.StatusCode)
 	result.Content = Utils.GetHttpRaw(*resp)
 	_ = resp.Body.Close()

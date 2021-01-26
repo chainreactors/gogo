@@ -2,6 +2,7 @@ package Utils
 
 import (
 	"crypto/tls"
+	"fmt"
 	"net"
 	"net/http"
 	"time"
@@ -46,8 +47,12 @@ func SocketSend(conn net.Conn, data []byte, length int) (int, []byte, error) {
 	return n, reply, err
 }
 
-func GetTarget(ip string, port string) string {
-	return ip + ":" + port
+func GetTarget(result Result) string {
+	return fmt.Sprintf("%s:%s", result.Ip, result.Port)
+}
+
+func GetURL(result Result) string {
+	return fmt.Sprintf("%s://%s:%s", result.Protocol, result.Ip, result.Port)
 }
 
 func HttpConn(delay time.Duration) http.Client {

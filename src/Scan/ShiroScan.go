@@ -6,15 +6,9 @@ import (
 	"strings"
 )
 
-func ShiroScan(target string, result Utils.Result) Utils.Result {
+func ShiroScan(result Utils.Result) Utils.Result {
 	var isshiro = false
-	if result.HttpStat == "400" || result.Port == "443" || result.Port == "8443" || result.Port == "4443" {
-		target = "https://" + target
-		result.Protocol = "https"
-	} else {
-		target = "http://" + target
-		result.Protocol = "http"
-	}
+	target := Utils.GetURL(result)
 	conn := Utils.HttpConn(Delay)
 	req := setshirocookie(target, "1")
 	resp, err := conn.Do(req)

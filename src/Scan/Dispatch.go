@@ -11,7 +11,7 @@ var Exploit bool
 var Delay time.Duration
 
 func Dispatch(result Utils.Result) Utils.Result {
-	target := Utils.GetTarget(result.Ip, result.Port)
+	target := Utils.GetTarget(result)
 	Sum++
 	//println(result.Ip, result.Port)
 	switch result.Port {
@@ -46,12 +46,12 @@ func Dispatch(result Utils.Result) Utils.Result {
 func ExploitDispatch(result Utils.Result) Utils.Result {
 
 	//
-	target := Utils.GetTarget(result.Ip, result.Port)
+	target := Utils.GetTarget(result)
 	if strings.Contains(result.Content, "-ERR wrong") {
 		result = RedisScan(target, result)
 	}
 	if strings.HasPrefix(result.Protocol, "http") {
-		result = ShiroScan(target, result)
+		result = ShiroScan(result)
 	}
 	if result.Port == "445" {
 		result = MS17010Scan(target, result)
