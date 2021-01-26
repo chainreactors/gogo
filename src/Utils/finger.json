@@ -22,7 +22,6 @@
         "defaultport": "3306",
         "regexps": [
             "^.\u0000\u0000\u0000\n(.\\.[-_~.+\\w]+)\u0000",
-            "Host .* is blocked because of many connection errors",
             "^.\u0000\u0000\u0000\u00ffj\u0004'[\\d.]+' .* MySQL"
         ]
     },

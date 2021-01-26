@@ -49,6 +49,7 @@ func InfoFilter(result Result) Result {
 		result.Language = GetLanguage(content)
 		result.Midware = GetMidware(content)
 	}
+
 	// 因为正则匹配耗时较长,如果没有-v参数则字节不进行服务识别
 	if !Version {
 		return result

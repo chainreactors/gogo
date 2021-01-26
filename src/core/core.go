@@ -77,8 +77,11 @@ func safeMap(temp *sync.Map, ch chan string) {
 func SmartBMod(target string, portlist []string, mod string, typ string) {
 	var wg sync.WaitGroup
 	var temp sync.Map
+
 	aliveC := make(chan string)
 	go safeMap(&temp, aliveC)
+
+	// 选择ip生成器
 	ipChannel := ipGenerator(target, mod, &temp)
 	var tcChannel chan TargetConfig
 

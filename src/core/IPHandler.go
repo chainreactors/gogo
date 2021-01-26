@@ -137,7 +137,8 @@ func firstIpGenerator(CIDR string, ch chan string) chan string {
 func ipGenerator(CIDR string, mod string, temp *sync.Map) chan string {
 	ch := make(chan string)
 	go func() {
-		if mod == "a" {
+		if mod == "a" || CIDR == "auto" {
+			// 生成内网ip的首段
 			ch = firstInterGenerator(ch)
 		} else if mod == "s" {
 			ch = smartIpGenerator(CIDR, ch, temp)
