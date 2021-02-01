@@ -85,7 +85,7 @@ func SystemHttp(target string, result Utils.Result) Utils.Result {
 
 		// 匹配各种错误类型
 		if strings.Contains(result.Error, "context deadline exceeded") {
-			result.HttpStat = "timeout"
+			result.HttpStat = "no response"
 		} else if strings.Contains(result.Error, "EOF") {
 			result.HttpStat = "EOF"
 		}

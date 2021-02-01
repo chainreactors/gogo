@@ -37,7 +37,12 @@ func RunTask(inp string, portlist []string, mod string, typ string) {
 		return
 	}
 	println(fmt.Sprintf("[*] Start Scan Task %s ,total ports: %d , mod: %s", CIDR, len(portlist), mod))
-	println("[*] ports: " + strings.Join(portlist, ","))
+	if len(portlist) > 1000 {
+		println("[*] too much ports , only show top 1000 ports: " + strings.Join(portlist[:1000], ",") + "......")
+	} else {
+		println("[*] ports: " + strings.Join(portlist, ","))
+	}
+
 	switch mod {
 	case "default":
 		//直接扫描
