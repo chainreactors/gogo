@@ -47,7 +47,7 @@ func main() {
 	core.OutputType = *Output
 	Scan.Exploit = *Exploit
 	core.Clean = *Clean
-	Utils.Version = *Version
+	Scan.Version = *Version
 	core.Init()
 
 	//if *IPaddress == "auto" {

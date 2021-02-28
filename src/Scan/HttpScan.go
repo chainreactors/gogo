@@ -12,24 +12,22 @@ import (
 func SocketHttp(target string, result Utils.Result) Utils.Result {
 	//fmt.Println(ip)
 	//socket tcp连接,超时时间
+	var err error
 	result.Protocol = "tcp"
-	conn, err := Utils.TcpSocketConn(target, Delay)
+	result.TcpCon, err = Utils.TcpSocketConn(target, Delay)
 	if err != nil {
 		//fmt.Println(err)
 		result.Error = err.Error()
 		return result
 	}
 	result.Stat = "OPEN"
-
 	//发送内容
 	senddata := []byte("GET / HTTP/1.1\r\nHost: " + target + "\r\n\r\n")
-	_, data, _ := Utils.SocketSend(conn, senddata, 4096)
+	_, data, err := Utils.SocketSend(result.TcpCon, senddata, 4096)
+	println(err.Error())
+	result.Error = err.Error()
 	content := string(data)
-	err = conn.Close()
-	if err != nil {
-		result.Error = err.Error()
-		return result
-	}
+
 
 	//获取状态码
 	result.Content = content
@@ -37,6 +35,7 @@ func SocketHttp(target string, result Utils.Result) Utils.Result {
 	if result.HttpStat != "tcp" {
 		result.Protocol = "http"
 	}
+
 	//所有30x,400,以及非http协议的开放端口都送到http包尝试获取更多信息
 	if result.HttpStat == "400" || result.HttpStat == "tcp" || strings.HasPrefix(result.HttpStat, "3") {
 		return SystemHttp(target, result)

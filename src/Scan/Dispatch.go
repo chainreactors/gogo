@@ -8,6 +8,7 @@ import (
 
 var Alivesum, Sum int
 var Exploit bool
+var Version bool
 var Delay time.Duration
 
 func Dispatch(result Utils.Result) Utils.Result {
@@ -25,10 +26,16 @@ func Dispatch(result Utils.Result) Utils.Result {
 		result = SocketHttp(target, result)
 	}
 
-	// 如果端口开放-e参数为true,则尝试进行漏洞探测
 	if result.Stat == "OPEN" {
 		Alivesum++
+
+		//被动收集基本信息
 		result = Utils.InfoFilter(result)
+
+		// 因为正则匹配耗时较长,如果没有-v参数则字节不进行服务识别
+		if Version {
+			result = Utils.GetDetail(result)
+		}
 		// 如果-e参数为true,则进行漏洞探测
 		if Exploit {
 			result = ExploitDispatch(result)
@@ -38,6 +45,7 @@ func Dispatch(result Utils.Result) Utils.Result {
 	//if result.Title != "" {
 	//	Titlesum ++
 	//}
+	result.TcpCon.Close()
 	result.Content = ""
 	result.Title = strings.TrimSpace(result.Title)
 	return result

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"os"
 	"regexp"
@@ -14,6 +15,8 @@ type Result struct {
 	Ip        string
 	Port      string
 	Stat      string
+	TcpCon	  net.Conn
+	HttpCon   http.Client
 	Os        string
 	Host      string
 	Title     string
@@ -29,13 +32,16 @@ type Result struct {
 
 type Finger struct {
 	Name        string   `json:"name"`
+	Protocol	string	`json:"protocol"`
+	SendData	string	`json:"send_data"`
 	Level       int      `json:"level"`
-	Defaultport string   `json:"defaultport"`
+	Defaultport string   `json:"default_port"`
 	Regexps     []string `json:"regexps"`
+
 }
 
-var fingers = getFingers()
-var Version bool
+
+var Tcpfingers,Httpfingers = getFingers()
 
 func InfoFilter(result Result) Result {
 	var ishttp = false
@@ -50,24 +56,25 @@ func InfoFilter(result Result) Result {
 		result.Midware = GetMidware(content)
 	}
 
-	// 因为正则匹配耗时较长,如果没有-v参数则字节不进行服务识别
-	if !Version {
-		return result
+	return result
+
+}
+
+
+func GetDetail(result Result)Result  {
+	var ishttp = false
+	if strings.HasPrefix(result.Protocol, "http") {
+		ishttp = true
 	}
 
-	//如果是http协议,则判断cms,如果是tcp则匹配规则库
-	if result.Protocol == "tcp" {
-		var title string
-		result.Framework, title = GetFrameWork(content, result.Port)
-		if title != "" {
-			result.Title = title
-		}
-	} else if ishttp {
-		result.Framework = GetHttpCMS(content)
+	//如果是http协议,则判断cms,如果是tcp则匹配规则库.暂时不考虑udp
+	if ishttp {
+		result = GetHttpCMS(result)
+	} else {
+		result = GetTCPFrameWork(result)
 	}
 
 	return result
-
 }
 
 func Encode(s string) string {
@@ -133,37 +140,78 @@ func GetLanguage(content string) string {
 	return ""
 }
 
-func GetHttpCMS(content string) string {
-	return ""
+func GetHttpCMS(result Result) Result {
+	
+	return result
 }
 
 //第一个返回值为详细的版本信息,第二个返回值为规则名字
-func GetFrameWork(content string, port string) (version string, title string) {
-
-	// 通过默认端口加快匹配速度
-	defaultportFingers, otherportFingers := fingerSplit(port)
-	version, title = fingerMatch(content, defaultportFingers)
-	if version == "" {
-		version, title = fingerMatch(content, otherportFingers)
+func GetTCPFrameWork(result Result) Result {
+	// 第一遍循环只匹配默认端口
+	for _,finger :=range Tcpfingers {
+		if  finger.Defaultport == result.Port{
+			result = tcpFingerMatch(result, finger)
+		}
+		if result.Framework != "" {
+			return result
+		}
 	}
-	return version, title
+
+	// 若默认端口未匹配到结果,这匹配全部
+	for _,finger :=range Tcpfingers {
+		if  finger.Defaultport != result.Port{
+			result = tcpFingerMatch(result, finger)
+		}
+
+		if result.Framework != "" {
+			return result
+		}
+	}
+
+	return result
 }
 
-func fingerMatch(content string, tmpfingers []Finger) (string, string) {
-	for _, finger := range tmpfingers {
-		//遍历正则
-		for _, regexpstr := range finger.Regexps {
-			regexpstr = regexpstr
-			res := Match("(?im)"+regexpstr, content)
-			if res == "matched" {
-				//println("[*] " + res)
-				return finger.Name, finger.Name
-			} else if res != "" {
-				return res, finger.Name
+func tcpFingerMatch(result Result,finger Finger) Result {
+	content := result.Content
+	var data []byte
+	var err error
+
+	// 某些规则需要主动发送一个数据包探测
+	if finger.SendData != "" {
+		// 复用tcp链接
+		_, data, err = SocketSend(result.TcpCon, []byte(finger.SendData), 1024)
+
+		// 如果报错为EOF,则需要重新建立tcp连接
+		if err.Error() == "EOF" {
+			target := GetTarget(result)
+			result.TcpCon, _ = TcpSocketConn(target, 2)
+			_, data, err = SocketSend(result.TcpCon, []byte(finger.SendData), 1024)
+
+			// 重新建立链接后再次报错,则跳过该规则匹配
+			if err != nil {
+				println(err.Error())
+				return result
 			}
 		}
 	}
-	return "", ""
+	// 如果主动探测有回包,则正则匹配回包内容
+	if string(data) != "" {
+		content = string(data)
+	}
+
+	//遍历正则
+	for _, regexpstr := range finger.Regexps {
+		res := Match("(?im)"+regexpstr,content )
+		if res == "matched" {
+			//println("[*] " + res)
+			result.Framework = finger.Name
+		} else if res != "" {
+			result.Framework = finger.Name
+			result.Title = res
+		}
+	}
+
+	return result
 }
 
 func GetHttpRaw(resp http.Response) string {
@@ -207,27 +255,24 @@ func FilterCertDomain(domins []string) string {
 	return res[:len(res)-1]
 }
 
-func getFingers() []Finger {
+func getFingers() ([]Finger,[]Finger){
 	fingersJson := loadFingers()
 
-	var fingers []Finger
+	var tcpfingers,httpfingers,fingers []Finger
+
 	err := json.Unmarshal([]byte(fingersJson), &fingers)
+
 	if err != nil {
 		println("[-] fingers load FAIL!")
 		os.Exit(0)
 	}
-	return fingers
-}
-
-// 通过默认端口加快匹配速度
-func fingerSplit(port string) ([]Finger, []Finger) {
-	var defaultportFingers, otherportFingers []Finger
-	for _, finger := range fingers {
-		if finger.Defaultport == port {
-			defaultportFingers = append(defaultportFingers, finger)
-		} else {
-			otherportFingers = append(otherportFingers, finger)
+	for _,finger := range fingers{
+		if finger.Protocol == "tcp"{
+			tcpfingers = append(tcpfingers,finger)
+		}else if finger.Protocol == "http"{
+			httpfingers = append(httpfingers,finger)
 		}
 	}
-	return defaultportFingers, otherportFingers
+
+	return tcpfingers,httpfingers
 }
