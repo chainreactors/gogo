@@ -39,6 +39,15 @@
         "regexps": [
             "^.\u0000\u0000\u0000\n(5\\.[-_~.+:\\w]+MariaDB-[-_~.+:\\w]+)\u0000"
         ]
+    },
+    {
+        "name": "redis_unauthorized",
+        "level": 0,
+        "default_port": "6379",
+        "protocol":"tcp",
+        "send_data":"info\n",
+        "regexps": [
+            "redis_version:(.*)"
+        ]
     }
-    
 ]

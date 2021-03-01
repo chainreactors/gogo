@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func RedisScan(target string, result Utils.Result) Utils.Result {
+func RedisScan(target string, result *Utils.Result) *Utils.Result {
 	result.Framework = "redis"
 	conn, err := Utils.TcpSocketConn(target, Delay)
 	if err != nil {

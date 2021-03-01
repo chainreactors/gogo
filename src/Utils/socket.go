@@ -46,15 +46,15 @@ func SocketSend(conn net.Conn, data []byte, length int) (int, []byte, error) {
 	return n, reply, err
 }
 
-func TcpIsClose(conn net.Conn)  {
+func TcpIsClose(conn net.Conn) {
 
 }
 
-func HttpIsClose(conn http.Client)  {
+func HttpIsClose(conn http.Client) {
 
 }
 
-func GetTarget(result Result) string {
+func GetTarget(result *Result) string {
 	return fmt.Sprintf("%s:%s", result.Ip, result.Port)
 }
 

@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func MemcacheScan(target string, result Utils.Result) Utils.Result {
+func MemcacheScan(target string, result *Utils.Result) *Utils.Result {
 	conn, err := Utils.TcpSocketConn(target, Delay)
 	if err != nil {
 

@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-func IcmpScan(host string, result Utils.Result) Utils.Result {
+func IcmpScan(host string, result *Utils.Result) *Utils.Result {
 	var size int
 	var seq int16 = 1
 	const ECHO_REQUEST_HEAD_LEN = 8

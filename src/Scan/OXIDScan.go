@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func OXIDScan(target string, result Utils.Result) Utils.Result {
+func OXIDScan(target string, result *Utils.Result) *Utils.Result {
 
 	result.Protocol = "tcp"
 	conn, err := Utils.TcpSocketConn(target, Delay)

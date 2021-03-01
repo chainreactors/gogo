@@ -6,9 +6,9 @@ import (
 	"strings"
 )
 
-func ShiroScan(result Utils.Result) Utils.Result {
+func ShiroScan(result *Utils.Result) *Utils.Result {
 	var isshiro = false
-	target := Utils.GetURL(result)
+	target := Utils.GetURL(*result)
 	conn := Utils.HttpConn(Delay)
 	req := setshirocookie(target, "1")
 	resp, err := conn.Do(req)
@@ -17,7 +17,7 @@ func ShiroScan(result Utils.Result) Utils.Result {
 		return result
 	}
 	deleteme := resp.Header.Get("Set-Cookie")
-	if strings.Contains(deleteme, "deleteMe") {
+	if strings.Contains(deleteme, "=deleteme") {
 		result.Framework = "shiro"
 		isshiro = true
 	}

@@ -44,7 +44,7 @@ func defaultScan(tc TargetConfig) {
 	var result = new(Utils.Result)
 	result.Ip = tc.ip
 	result.Port = tc.port
-	*result = Scan.Dispatch(*result)
+	Scan.Dispatch(result)
 	//res := Scan.SystemHttp(ip)
 
 	if result.Stat != "" {
@@ -135,7 +135,7 @@ func smartScan(tc TargetConfig, AliveCh chan string) {
 	result.Ip = tc.ip
 	result.Port = tc.port
 
-	*result = Scan.Dispatch(*result)
+	Scan.Dispatch(result)
 
 	if result.Stat == "OPEN" {
 		s2ip := net.ParseIP(result.Ip).To4()
