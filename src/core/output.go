@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func output(result Utils.Result, outType string) string {
+func output(result *Utils.Result, outType string) string {
 	var out string
 
 	switch outType {
@@ -25,7 +25,7 @@ func output(result Utils.Result, outType string) string {
 
 }
 
-func CleanOutput(result Utils.Result) string {
+func CleanOutput(result *Utils.Result) string {
 	//s := fmt.Sprintf("[+] %s://%s:%s\t%s\t", result.Protocol, result.ip, result.Port, result.Title)
 	s := fmt.Sprintf("%s:%s", result.Ip, result.Port)
 	s += vulnOutput(result)
@@ -33,14 +33,14 @@ func CleanOutput(result Utils.Result) string {
 	return s
 }
 
-func FullOutput(result Utils.Result) string {
+func FullOutput(result *Utils.Result) string {
 	s := fmt.Sprintf("[+] %s://%s:%s\t%s\t%s\t%s\t%s\t[%s] %s ", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, result.Framework, result.Host, result.HttpStat, result.Title)
 	s += vulnOutput(result)
 	s += "\n"
 	return s
 }
 
-func JsonOutput(result Utils.Result) string {
+func JsonOutput(result *Utils.Result) string {
 	jsons, err := json.Marshal(result)
 	if err != nil {
 		return ""
@@ -48,7 +48,7 @@ func JsonOutput(result Utils.Result) string {
 	return string(jsons) + ",\n"
 }
 
-func HtmlOutput(result Utils.Result) (s string) {
+func HtmlOutput(result *Utils.Result) (s string) {
 	if strings.HasPrefix(result.Protocol, "http") {
 		s = fmt.Sprintf("[+] <a>%s://%s:%s</a>\t%s\t%s\t%s\t%s\t[%s] %s", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, result.Framework, result.Host, result.HttpStat, result.Title)
 	} else {
@@ -64,7 +64,7 @@ func HtmlOutput(result Utils.Result) (s string) {
 
 }
 
-func vulnOutput(result Utils.Result) string {
+func vulnOutput(result *Utils.Result) string {
 	if result.Vuln != "" {
 		return fmt.Sprintf("[ Find Vuln: %s ]", result.Vuln)
 	}

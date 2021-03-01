@@ -49,10 +49,10 @@ func defaultScan(tc TargetConfig) {
 
 	if result.Stat != "" {
 		if !Clean {
-			fmt.Print(output(*result, OutputType))
+			fmt.Print(output(result, OutputType))
 		}
 		if O2File {
-			Datach <- output(*result, OutputType)
+			Datach <- output(result, OutputType)
 		}
 
 	}

@@ -45,7 +45,8 @@ func Dispatch(result *Utils.Result) *Utils.Result {
 	//if result.Title != "" {
 	//	Titlesum ++
 	//}
-	(*result.TcpCon).Close()
+	if (result.TcpCon) != nil {
+	}
 	result.Content = ""
 	result.Title = strings.TrimSpace(result.Title)
 	return result

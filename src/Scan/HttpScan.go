@@ -15,14 +15,15 @@ func SocketHttp(target string, result *Utils.Result) *Utils.Result {
 	var err error
 	result.Protocol = "tcp"
 	conn, err := Utils.TcpSocketConn(target, Delay)
-	result.TcpCon = &conn
-
 	if err != nil {
 		//fmt.Println(err)
 		result.Error = err.Error()
 		return result
 	}
+
 	result.Stat = "OPEN"
+	result.TcpCon = &conn
+
 	//发送内容
 	senddata := []byte("GET / HTTP/1.1\r\nHost: " + target + "\r\n\r\n")
 	_, data, err := Utils.SocketSend(*result.TcpCon, senddata, 4096)
