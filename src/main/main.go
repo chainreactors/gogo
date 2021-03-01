@@ -71,7 +71,7 @@ func main() {
 
 	//core.Datach <- sum
 	if *Output == "json" {
-		_, _ = core.FileHandle.WriteString(core.JsonOutput(*new(Utils.Result)) + "]")
+		_, _ = core.FileHandle.WriteString(core.JsonOutput(new(Utils.Result)) + "]")
 	}
 	time.Sleep(time.Microsecond * 500)
 	println(fmt.Sprintf("[*] Alive sum: %d, Target sum : %d", Scan.Alivesum, Scan.Sum))
