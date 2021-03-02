@@ -17,7 +17,7 @@ var Threads int
 var OutputType string
 
 func Init() {
-	println("*********  getitle 0.2.0 beta8 by Sangfor  *********")
+	println("*********  getitle 0.3.0 beta by Sangfor  *********")
 	initFile()
 	go write2File(FileHandle, Datach)
 }

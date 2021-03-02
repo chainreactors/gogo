@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -425,4 +426,13 @@ func getFingers() ([]Finger, []Finger) {
 	//}
 
 	return tcpfingers, httpfingers
+}
+
+func GetCurtime() string {
+	h := strconv.Itoa(time.Now().Hour())
+	m := strconv.Itoa(time.Now().Minute())
+	s := strconv.Itoa(time.Now().Second())
+
+	curtime := h + ":" + m + ":" + s
+	return curtime
 }
