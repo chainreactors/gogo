@@ -11,7 +11,7 @@ var Exploit bool
 var Version bool
 var Delay time.Duration
 
-func Dispatch(result *Utils.Result) *Utils.Result {
+func Dispatch(result *Utils.Result) {
 	target := Utils.GetTarget(result)
 	Sum++
 	//println(result.Ip, result.Port)
@@ -49,10 +49,11 @@ func Dispatch(result *Utils.Result) *Utils.Result {
 	}
 	result.Content = ""
 	result.Title = strings.TrimSpace(result.Title)
-	return result
+	return
+
 }
 
-func ExploitDispatch(result *Utils.Result) *Utils.Result {
+func ExploitDispatch(result *Utils.Result) {
 
 	//
 	target := Utils.GetTarget(result)
@@ -68,5 +69,5 @@ func ExploitDispatch(result *Utils.Result) *Utils.Result {
 	if result.Port == "11211" {
 		MemcacheScan(target, result)
 	}
-	return result
+	return
 }

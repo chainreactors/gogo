@@ -29,7 +29,7 @@ func UdpSocketConn(target string, delay time.Duration) (net.Conn, error) {
 }
 
 func SocketSend(conn net.Conn, data []byte, length int) (int, []byte, error) {
-	_ = conn.SetDeadline(time.Now().Add(2 * time.Second))
+	_ = conn.SetDeadline(time.Now().Add(time.Duration(2) * time.Second))
 	var err error
 	_, err = conn.Write(data)
 	if err != nil {
@@ -58,7 +58,7 @@ func GetTarget(result *Result) string {
 	return fmt.Sprintf("%s:%s", result.Ip, result.Port)
 }
 
-func GetURL(result Result) string {
+func GetURL(result *Result) string {
 	return fmt.Sprintf("%s://%s:%s", result.Protocol, result.Ip, result.Port)
 }
 

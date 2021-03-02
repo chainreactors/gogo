@@ -5,13 +5,13 @@ import (
 	"strings"
 )
 
-func MemcacheScan(target string, result *Utils.Result) *Utils.Result {
+func MemcacheScan(target string, result *Utils.Result) {
 	conn, err := Utils.TcpSocketConn(target, Delay)
 	if err != nil {
 
 		//fmt.Println(err)
 		result.Error = err.Error()
-		return result
+		return
 	}
 
 	_, recv, _ := Utils.SocketSend(conn, []byte("stats\n"), 1024)
@@ -21,5 +21,5 @@ func MemcacheScan(target string, result *Utils.Result) *Utils.Result {
 		result.Title = "memcache " + Utils.Match("STAT version (.*)", string(recv))
 		result.Vuln = "memcache Unauth"
 	}
-	return result
+	return
 }

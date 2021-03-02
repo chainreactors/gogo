@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-func IcmpScan(host string, result *Utils.Result) *Utils.Result {
+func IcmpScan(host string, result *Utils.Result) {
 	var size int
 	var seq int16 = 1
 	const ECHO_REQUEST_HEAD_LEN = 8
@@ -23,7 +23,7 @@ func IcmpScan(host string, result *Utils.Result) *Utils.Result {
 	conn, err := net.DialTimeout("ip4:icmp", host, delay*time.Second)
 	if err != nil {
 		result.Error = err.Error()
-		return result
+		return
 	}
 	defer conn.Close()
 	id0, id1 := genidentifier(host)
@@ -52,13 +52,13 @@ func IcmpScan(host string, result *Utils.Result) *Utils.Result {
 
 	if err != nil || receive[ECHO_REPLY_HEAD_LEN+4] != msg[4] || receive[ECHO_REPLY_HEAD_LEN+5] != msg[5] || receive[ECHO_REPLY_HEAD_LEN+6] != msg[6] || receive[ECHO_REPLY_HEAD_LEN+7] != msg[7] || receive[ECHO_REPLY_HEAD_LEN] == 11 {
 		//result.Error = err.Error()
-		return result
+		return
 	} else {
 		result.Stat = "OPEN"
 		result.Protocol = "icmp"
 		result.HttpStat = "icmp"
 	}
-	return result
+	return
 }
 
 //func IcmpOK(host string)(isok bool) {

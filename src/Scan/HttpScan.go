@@ -9,7 +9,7 @@ import (
 )
 
 //socket进行对网站的连接
-func SocketHttp(target string, result *Utils.Result) *Utils.Result {
+func SocketHttp(target string, result *Utils.Result) {
 	//fmt.Println(ip)
 	//socket tcp连接,超时时间
 	var err error
@@ -18,7 +18,7 @@ func SocketHttp(target string, result *Utils.Result) *Utils.Result {
 	if err != nil {
 		//fmt.Println(err)
 		result.Error = err.Error()
-		return result
+		return
 	}
 
 	result.Stat = "OPEN"
@@ -41,15 +41,15 @@ func SocketHttp(target string, result *Utils.Result) *Utils.Result {
 
 	//所有30x,400,以及非http协议的开放端口都送到http包尝试获取更多信息
 	if result.HttpStat == "400" || result.HttpStat == "tcp" || strings.HasPrefix(result.HttpStat, "3") {
-		return SystemHttp(target, result)
+		//return SystemHttp(target, result)
+		SystemHttp(target, result)
 	}
-
-	return result
+	return
 
 }
 
 //使用封装好了http
-func SystemHttp(target string, result *Utils.Result) *Utils.Result {
+func SystemHttp(target string, result *Utils.Result) {
 	var conn http.Client
 	var delay time.Duration
 	// 如果是400或者不可识别协议,则使用https
@@ -66,7 +66,6 @@ func SystemHttp(target string, result *Utils.Result) *Utils.Result {
 		delay = Delay + 1
 	}
 	conn = Utils.HttpConn(delay)
-	result.HttpCon = &conn
 	resp, err := conn.Get(target)
 	//resp, err := conn.Get(target+"/servlet/bsh.servlet.BshServlet")
 	if resp != nil && resp.TLS != nil {
@@ -83,22 +82,22 @@ func SystemHttp(target string, result *Utils.Result) *Utils.Result {
 		}
 		// 如果已经匹配到状态码,且再次请求报错,则返回
 		if result.HttpStat != "tcp" {
-			return result
+			return
 		}
 
 		// 匹配各种错误类型
 		if strings.Contains(result.Error, "context deadline exceeded") {
-			result.HttpStat = "no response"
+			result.Error = "no response"
 		} else if strings.Contains(result.Error, "EOF") {
-			result.HttpStat = "EOF"
+			result.Error = "EOF"
 		}
-
-		return result
+		return
 	}
 	result.Protocol = resp.Request.URL.Scheme
 	result.HttpStat = strconv.Itoa(resp.StatusCode)
-	result.Content = Utils.GetBody(resp)
+	result.Content = string(Utils.GetBody(resp))
 	result.Httpresp = resp
 	_ = resp.Body.Close()
-	return result
+
+	return
 }

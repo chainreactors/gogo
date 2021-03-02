@@ -6,15 +6,15 @@ import (
 	"strings"
 )
 
-func ShiroScan(result *Utils.Result) *Utils.Result {
+func ShiroScan(result *Utils.Result) {
 	var isshiro = false
-	target := Utils.GetURL(*result)
+	target := Utils.GetURL(result)
 	conn := Utils.HttpConn(Delay)
 	req := setshirocookie(target, "1")
 	resp, err := conn.Do(req)
 	if err != nil {
 		result.Error = err.Error()
-		return result
+		return
 	}
 	deleteme := resp.Header.Get("Set-Cookie")
 	if strings.Contains(deleteme, "=deleteme") {
@@ -25,13 +25,13 @@ func ShiroScan(result *Utils.Result) *Utils.Result {
 	resp, err = conn.Do(req)
 	if err != nil {
 		result.Error = err.Error()
-		return result
+		return
 	}
 	deleteme = resp.Header.Get("Set-Cookie")
 	if isshiro && !strings.Contains(deleteme, "deleteMe") {
 		result.Vuln = "shiro 550"
 	}
-	return result
+	return
 
 }
 
