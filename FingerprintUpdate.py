@@ -18,10 +18,11 @@ def fingerload(filename):
 if __name__ == "__main__":
 	j1 = fingerload("tcpfingers.json")
 	j2 = fingerload("httpfingers.json")
+	j3 = json.loads(open("src/Utils/md5fingers.json","r",encoding="utf-8").read())
 	f = open("src/Utils/finger.go","w",encoding="utf-8")
 	base = '''package Utils
 
-func loadFingers(typ string)string  {
+func LoadFingers(typ string)string  {
 	if typ == "tcp" {
 		return `
 		%s
@@ -30,10 +31,15 @@ func loadFingers(typ string)string  {
 		return `
 		%s
 	`
-	}
+	}else if typ =="md5"{
+     		return `
+     		%s
+     		`
+    }
 	return  ""
 }
 	'''
-	f.write(base%(json.dumps(j1),json.dumps(j2)))
+
+	f.write(base%(json.dumps(j1),json.dumps(j2),json.dumps(j3)))
 	print("fingerprint update success")
 
