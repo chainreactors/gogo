@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// -defalut
 //socket进行对网站的连接
 func SocketHttp(target string, result *Utils.Result) {
 	//fmt.Println(ip)

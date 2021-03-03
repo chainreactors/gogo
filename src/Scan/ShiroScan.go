@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// -e
 func ShiroScan(result *Utils.Result) {
 	var isshiro = false
 	target := Utils.GetURL(result)
