@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+// -default
 var UNIQUE_NAMES, GROUP_NAMES, NetBIOS_ITEM_TYPE map[string]string
 
 func Byte2Int(input []byte) (int, error) {

@@ -12,6 +12,7 @@ import (
 	"time"
 )
 
+// -n i
 func IcmpScan(host string, result *Utils.Result) {
 	var size int
 	var seq int16 = 1

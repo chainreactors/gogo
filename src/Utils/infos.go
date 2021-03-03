@@ -189,6 +189,7 @@ func httpFingerMatch(result *Result, finger Finger) {
 			return
 		}
 		content = string(GetBody(resp))
+		resp.Body.Close()
 	}
 	if resp != nil {
 		cookies = getCookies(resp)
@@ -404,15 +405,15 @@ func getFingers() ([]Finger, []Finger) {
 
 	var tcpfingers, httpfingers []Finger
 	// 根据权重排序在python脚本中已经实现
-	err := json.Unmarshal([]byte(loadFingers("tcp")), &tcpfingers)
+	err := json.Unmarshal([]byte(LoadFingers("tcp")), &tcpfingers)
 
 	if err != nil {
-		println("[-] fingers load FAIL!")
+		println("[-] tcpfingers load FAIL!")
 		os.Exit(0)
 	}
-	err = json.Unmarshal([]byte(loadFingers("http")), &httpfingers)
+	err = json.Unmarshal([]byte(LoadFingers("http")), &httpfingers)
 	if err != nil {
-		println("[-] fingers load FAIL!")
+		println("[-] httpfingers load FAIL!")
 		os.Exit(0)
 	}
 

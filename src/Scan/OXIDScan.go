@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// -default
 func OXIDScan(target string, result *Utils.Result) {
 
 	result.Protocol = "tcp"

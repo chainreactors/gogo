@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// -e
 func RedisScan(target string, result *Utils.Result) {
 	result.Framework = "redis"
 	conn, err := Utils.TcpSocketConn(target, Delay)
