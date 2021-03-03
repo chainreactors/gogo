@@ -30,7 +30,10 @@ func FaviconScan(result *Utils.Result) {
 	content := string(Utils.GetBody(resp))
 	m := md5.Sum([]byte(content))
 	ms := hex.EncodeToString(m[:])
+
 	if fingers[ms] != nil {
 		result.Framework = fingers[ms].(string)
+		return
 	}
+	return
 }

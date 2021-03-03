@@ -35,7 +35,7 @@ func Dispatch(result *Utils.Result) {
 		// 因为正则匹配耗时较长,如果没有-v参数则字节不进行服务识别
 		if Version {
 			Utils.GetDetail(result)
-			if result.Framework == "" {
+			if result.Framework == "" && strings.HasPrefix(result.Protocol, "http") {
 				FaviconScan(result)
 			}
 		}
