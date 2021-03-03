@@ -1,9 +1,12 @@
 package Utils
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"os"
 	"regexp"
@@ -16,6 +19,8 @@ type Result struct {
 	Ip        string
 	Port      string
 	Stat      string
+	TcpCon    *net.Conn
+	Httpresp  *http.Response
 	Os        string
 	Host      string
 	Title     string
@@ -30,45 +35,50 @@ type Result struct {
 }
 
 type Finger struct {
-	Name        string   `json:"name"`
-	Level       int      `json:"level"`
-	Defaultport string   `json:"defaultport"`
-	Regexps     []string `json:"regexps"`
+	Name        string  `json:"name"`
+	Protocol    string  `json:"protocol"`
+	SendData    string  `json:"send_data"`
+	Vuln        string  `json:"vuln"`
+	Level       int     `json:"level"`
+	Defaultport string  `json:"default_port"`
+	Regexps     Regexps `json:"regexps"`
 }
 
-var fingers = getFingers()
-var Version bool
+type Regexps struct {
+	HTML   []string `json:"html"`
+	MD5    []string `json:"md5"`
+	Regexp []string `json:"regexp"`
+	Cookie []string `json:"cookie"`
+	Header []string `json:"header"`
+	Info   []string `json:"info"`
+}
 
-func InfoFilter(result Result) Result {
-	var ishttp = false
+var Tcpfingers, Httpfingers = getFingers()
+
+func InfoFilter(result *Result) {
+
 	if strings.HasPrefix(result.Protocol, "http") {
-		ishttp = true
-	}
-	content := result.Content
-	result.Title = GetTitle(content)
+		result.Title = GetTitle(result.Content)
+		result.Language = GetLanguage(result.Httpresp, result.Content)
+		result.Midware = GetMidware(result.Httpresp, result.Content)
 
-	if ishttp {
-		result.Language = GetLanguage(content)
-		result.Midware = GetMidware(content)
-	}
-	// 因为正则匹配耗时较长,如果没有-v参数则字节不进行服务识别
-	if !Version {
-		return result
+	} else {
+		result.Title = GetTitle(result.Content)
 	}
 
-	//如果是http协议,则判断cms,如果是tcp则匹配规则库
-	if result.Protocol == "tcp" {
-		var title string
-		result.Framework, title = GetFrameWork(content, result.Port)
-		if title != "" {
-			result.Title = title
-		}
-	} else if ishttp {
-		result.Framework = GetHttpCMS(content)
+	//return result
+
+}
+
+func GetDetail(result *Result) {
+
+	//如果是http协议,则判断cms,如果是tcp则匹配规则库.暂时不考虑udp
+	if strings.HasPrefix(result.Protocol, "http") {
+		getHttpCMS(result)
+	} else {
+		getTCPFrameWork(result)
 	}
-
-	return result
-
+	return
 }
 
 func Encode(s string) string {
@@ -99,9 +109,13 @@ func GetTitle(content string) string {
 	return Encode(string([]byte(content)[:13]))
 }
 
-func GetMidware(content string) string {
-
-	server := Match("(?i)Server: ([\x20-\x7e]+)", strings.Split(content, "\r\n\r\n")[0])
+func GetMidware(resp *http.Response, content string) string {
+	var server string
+	if resp == nil {
+		server = Match("(?i)Server: ([\x20-\x7e]+)", strings.Split(content, "\r\n\r\n")[0])
+	} else {
+		server = resp.Header.Get("Server")
+	}
 	if server != "" {
 		return server
 	}
@@ -110,64 +124,227 @@ func GetMidware(content string) string {
 
 }
 
-func GetLanguage(content string) string {
+func GetLanguage(resp *http.Response, content string) string {
+	// update: 减少正则匹配的速度略微提升性能
+	var powered string
+	if resp == nil {
+		powered = Match("(?i)X-Powered-By: ([\x20-\x7e]+)", strings.Split(content, "\r\n\r\n")[0])
+		if powered != "" {
+			return powered
+		}
 
-	powered := Match("(?i)X-Powered-By: ([\x20-\x7e]+)", strings.Split(content, "\r\n\r\n")[0])
+		sessionid := Match("(?i) (.*SESS.*?ID)", "")
 
-	if powered != "" {
-		return powered
-	}
+		if sessionid != "" {
+			switch sessionid {
+			case "JSESSIONID":
+				return "JAVA"
+			case "ASP.NET_SessionId":
+				return "ASP.NET"
+			case "PHPSESSID":
+				return "PHP"
+			}
+		}
 
-	sessionid := Match("(?i) (.*SESS.*?ID)", content)
+	} else {
+		powered = resp.Header.Get("X-Powered-By")
+		if powered != "" {
+			return powered
+		}
 
-	if sessionid != "" {
-		switch sessionid {
-		case "JSESSIONID":
+		cookies := getCookies(resp)
+		if cookies["JSESSIONID"] != "" {
 			return "JAVA"
-		case "ASP.NET_SessionId":
-			return "ASP.NET"
-		case "PHPSESSID":
+		} else if cookies["ASP.NET_SessionId"] != "" {
+			return "ASP"
+		} else if cookies["PHPSESSID"] != "" {
 			return "PHP"
+		} else {
+			return ""
 		}
 	}
 
 	return ""
 }
 
-func GetHttpCMS(content string) string {
-	return ""
-}
-
-//第一个返回值为详细的版本信息,第二个返回值为规则名字
-func GetFrameWork(content string, port string) (version string, title string) {
-
-	// 通过默认端口加快匹配速度
-	defaultportFingers, otherportFingers := fingerSplit(port)
-	version, title = fingerMatch(content, defaultportFingers)
-	if version == "" {
-		version, title = fingerMatch(content, otherportFingers)
+func getHttpCMS(result *Result) {
+	for _, finger := range Httpfingers {
+		httpFingerMatch(result, finger)
+		if result.Framework != "" {
+			return
+		}
 	}
-	return version, title
+	return
 }
 
-func fingerMatch(content string, tmpfingers []Finger) (string, string) {
-	for _, finger := range tmpfingers {
-		//遍历正则
-		for _, regexpstr := range finger.Regexps {
-			regexpstr = regexpstr
-			res := Match("(?im)"+regexpstr, content)
+func httpFingerMatch(result *Result, finger Finger) {
+
+	resp := result.Httpresp
+	content := result.Content
+	var cookies map[string]string
+	if finger.SendData != "" {
+		conn := HttpConn(2)
+		resp, err := conn.Get(GetURL(result) + finger.SendData)
+		if err != nil {
+			return
+		}
+		content = string(GetBody(resp))
+	}
+	if resp != nil {
+		cookies = getCookies(resp)
+	}
+
+	if finger.Regexps.HTML != nil {
+		for _, html := range finger.Regexps.HTML {
+			if strings.Contains(content, html) {
+				result.Framework = finger.Name
+				return
+			}
+		}
+	} else if finger.Regexps.Regexp != nil {
+		for _, reg := range finger.Regexps.Regexp {
+			res := Match("(?im)"+reg, content)
 			if res == "matched" {
 				//println("[*] " + res)
-				return finger.Name, finger.Name
+				result.Framework = finger.Name
+				return
 			} else if res != "" {
-				return res, finger.Name
+				result.Framework = finger.Name + res
+				//result.Title = res
+				return
+			}
+		}
+	} else if finger.Regexps.Header != nil {
+		for _, header := range finger.Regexps.Header {
+			if resp == nil {
+				if strings.Contains(content, header) {
+					result.Framework = finger.Name
+					return
+				}
+			} else if resp.Header.Get(header) != "" {
+				result.Framework = finger.Name
+				return
+			}
+		}
+	} else if finger.Regexps.Cookie != nil {
+		for _, cookie := range finger.Regexps.Cookie {
+			if resp == nil {
+				if strings.Contains(content, cookie) {
+					result.Framework = finger.Name
+					return
+				}
+			} else if cookies[cookie] != "" {
+				result.Framework = finger.Name
+				return
+			}
+		}
+	} else if finger.Regexps.MD5 != nil {
+		for _, md5s := range finger.Regexps.MD5 {
+			m := md5.Sum([]byte(content))
+			if md5s == hex.EncodeToString(m[:]) {
+				result.Framework = finger.Name
+				return
 			}
 		}
 	}
-	return "", ""
 }
 
-func GetHttpRaw(resp http.Response) string {
+//第一个返回值为详细的版本信息,第二个返回值为规则名字
+func getTCPFrameWork(result *Result) {
+	// 优先匹配默认端口,第一遍循环只匹配默认端口
+	for _, finger := range Tcpfingers {
+		if finger.Defaultport == result.Port {
+			tcpFingerMatch(result, finger)
+		}
+		if result.Framework != "" {
+			return
+		}
+	}
+
+	// 若默认端口未匹配到结果,则匹配全部
+	for _, finger := range Tcpfingers {
+		if finger.Defaultport != result.Port {
+			tcpFingerMatch(result, finger)
+		}
+
+		if result.Framework != "" {
+			return
+		}
+	}
+
+	return
+}
+
+func tcpFingerMatch(result *Result, finger Finger) {
+	content := result.Content
+	var data []byte
+	var err error
+
+	// 某些规则需要主动发送一个数据包探测
+	if finger.SendData != "" {
+		// 复用tcp链接
+
+		_, data, err = SocketSend(*result.TcpCon, []byte(finger.SendData), 1024)
+
+		// 如果报错为EOF,则需要重新建立tcp连接
+		if err != nil && err.Error() == "EOF" {
+			target := GetTarget(result)
+			// 如果对端已经关闭,则本地socket也关闭,并重新建立连接
+			(*result.TcpCon).Close()
+			*result.TcpCon, err = TcpSocketConn(target, time.Duration(2))
+			if err != nil {
+				return
+			}
+			_, data, err = SocketSend(*result.TcpCon, []byte(finger.SendData), 1024)
+
+			// 重新建立链接后再次报错,则跳过该规则匹配
+			if err != nil {
+				result.Error = err.Error()
+				return
+			}
+		}
+	}
+	// 如果主动探测有回包,则正则匹配回包内容, 若主动探测没有返回内容,则直接跳过该规则
+	if string(data) != "" {
+		content = string(data)
+	} else if finger.SendData != "" && string(data) == "" {
+		return
+	}
+
+	//遍历漏洞正则
+	for _, regexpstr := range finger.Regexps.Regexp {
+		res := Match("(?im)"+regexpstr, content)
+		if res == "matched" {
+			//println("[*] " + res)
+			result.Framework = finger.Name
+			return
+		} else if res != "" {
+			result.HttpStat = finger.Protocol
+			result.Framework = finger.Name + " " + strings.TrimSpace(res)
+			result.Vuln = finger.Vuln
+			//result.Title = res
+			return
+		}
+	}
+	// 遍历信息泄露正则
+	for _, regexpstr := range finger.Regexps.Info {
+		res := Match("(?im)"+regexpstr, content)
+		if res == "matched" {
+			//println("[*] " + res)
+			result.Framework = finger.Name
+			return
+		} else if res != "" {
+			result.HttpStat = "tcp"
+			result.Framework = finger.Name + " " + strings.TrimSpace(res)
+			//result.Title = res
+			return
+		}
+	}
+
+	return
+}
+
+func GetHttpRaw(resp *http.Response) string {
 	var raw string
 
 	raw += fmt.Sprintf("%s %s\r\n", resp.Proto, resp.Status)
@@ -185,6 +362,21 @@ func GetHttpRaw(resp http.Response) string {
 	return raw
 }
 
+func GetBody(resp *http.Response) []byte {
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return []byte{}
+	}
+	return body
+}
+
+func getCookies(resp *http.Response) map[string]string {
+	cookies := make(map[string]string)
+	for _, cookie := range resp.Cookies() {
+		cookies[cookie.Name] = cookie.Value
+	}
+	return cookies
+}
 func GetStatusCode(content string) string {
 	if strings.Contains(content, "HTTP") {
 		return content[9:12]
@@ -208,29 +400,32 @@ func FilterCertDomain(domins []string) string {
 	return res[:len(res)-1]
 }
 
-func getFingers() []Finger {
-	fingersJson := loadFingers()
+func getFingers() ([]Finger, []Finger) {
 
-	var fingers []Finger
-	err := json.Unmarshal([]byte(fingersJson), &fingers)
+	var tcpfingers, httpfingers []Finger
+	// 根据权重排序在python脚本中已经实现
+	err := json.Unmarshal([]byte(loadFingers("tcp")), &tcpfingers)
+
 	if err != nil {
 		println("[-] fingers load FAIL!")
 		os.Exit(0)
 	}
-	return fingers
-}
-
-// 通过默认端口加快匹配速度
-func fingerSplit(port string) ([]Finger, []Finger) {
-	var defaultportFingers, otherportFingers []Finger
-	for _, finger := range fingers {
-		if finger.Defaultport == port {
-			defaultportFingers = append(defaultportFingers, finger)
-		} else {
-			otherportFingers = append(otherportFingers, finger)
-		}
+	err = json.Unmarshal([]byte(loadFingers("http")), &httpfingers)
+	if err != nil {
+		println("[-] fingers load FAIL!")
+		os.Exit(0)
 	}
-	return defaultportFingers, otherportFingers
+
+	//// tcp与http规则适用不同的扫描逻辑
+	//for _, finger := range fingers {
+	//	if finger.Protocol == "tcp" {
+	//		tcpfingers = append(tcpfingers, finger)
+	//	} else if finger.Protocol == "http" {
+	//		httpfingers = append(httpfingers, finger)
+	//	}
+	//}
+
+	return tcpfingers, httpfingers
 }
 
 func GetCurtime() string {

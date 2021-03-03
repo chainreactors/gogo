@@ -6,24 +6,18 @@ import (
 	"strings"
 )
 
-func ShiroScan(target string, result Utils.Result) Utils.Result {
+func ShiroScan(result *Utils.Result) {
 	var isshiro = false
-	if result.HttpStat == "400" || result.Port == "443" || result.Port == "8443" || result.Port == "4443" {
-		target = "https://" + target
-		result.Protocol = "https"
-	} else {
-		target = "http://" + target
-		result.Protocol = "http"
-	}
+	target := Utils.GetURL(result)
 	conn := Utils.HttpConn(Delay)
 	req := setshirocookie(target, "1")
 	resp, err := conn.Do(req)
 	if err != nil {
 		result.Error = err.Error()
-		return result
+		return
 	}
 	deleteme := resp.Header.Get("Set-Cookie")
-	if strings.Contains(deleteme, "deleteMe") {
+	if strings.Contains(deleteme, "=deleteme") {
 		result.Framework = "shiro"
 		isshiro = true
 	}
@@ -31,13 +25,13 @@ func ShiroScan(target string, result Utils.Result) Utils.Result {
 	resp, err = conn.Do(req)
 	if err != nil {
 		result.Error = err.Error()
-		return result
+		return
 	}
 	deleteme = resp.Header.Get("Set-Cookie")
 	if isshiro && !strings.Contains(deleteme, "deleteMe") {
 		result.Vuln = "shiro 550"
 	}
-	return result
+	return
 
 }
 

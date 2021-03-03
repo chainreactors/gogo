@@ -12,23 +12,21 @@ import (
 	"time"
 )
 
-func IcmpScan(target string, result Utils.Result) Utils.Result {
+func IcmpScan(host string, result *Utils.Result) {
 	var size int
 	var seq int16 = 1
 	const ECHO_REQUEST_HEAD_LEN = 8
 
-	Sum++
-
 	size = 32
 	delay := time.Duration(1)
-	target = strings.Split(target, ":")[0]
-	conn, err := net.DialTimeout("ip4:icmp", target, delay*time.Second)
+	host = strings.Split(host, ":")[0]
+	conn, err := net.DialTimeout("ip4:icmp", host, delay*time.Second)
 	if err != nil {
 		result.Error = err.Error()
-		return result
+		return
 	}
 	defer conn.Close()
-	id0, id1 := genidentifier(target)
+	id0, id1 := genidentifier(host)
 
 	var msg []byte = make([]byte, size+ECHO_REQUEST_HEAD_LEN)
 	msg[0] = 8                        // echo
@@ -54,13 +52,13 @@ func IcmpScan(target string, result Utils.Result) Utils.Result {
 
 	if err != nil || receive[ECHO_REPLY_HEAD_LEN+4] != msg[4] || receive[ECHO_REPLY_HEAD_LEN+5] != msg[5] || receive[ECHO_REPLY_HEAD_LEN+6] != msg[6] || receive[ECHO_REPLY_HEAD_LEN+7] != msg[7] || receive[ECHO_REPLY_HEAD_LEN] == 11 {
 		//result.Error = err.Error()
-		return result
+		return
 	} else {
 		result.Stat = "OPEN"
 		result.Protocol = "icmp"
 		result.HttpStat = "icmp"
 	}
-	return result
+	return
 }
 
 //func IcmpOK(host string)(isok bool) {

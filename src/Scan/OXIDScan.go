@@ -5,15 +5,15 @@ import (
 	"strings"
 )
 
-func OXIDScan(target string, result Utils.Result) Utils.Result {
+func OXIDScan(target string, result *Utils.Result) {
 
-	result.Protocol = "OXID"
+	result.Protocol = "tcp"
 	conn, err := Utils.TcpSocketConn(target, Delay)
 	if err != nil {
 
 		//fmt.Println(err)
 		result.Error = err.Error()
-		return result
+		return
 	}
 	defer conn.Close()
 	result.Stat = "OPEN"
@@ -23,7 +23,7 @@ func OXIDScan(target string, result Utils.Result) Utils.Result {
 	n, recv, _ := Utils.SocketSend(conn, []byte(sendData2), 4096)
 	recvStr := string(recv[:n])
 	if len(recvStr) < 42 {
-		return result
+		return
 	}
 	recvStr_v2 := recvStr[42:]
 	packet_v2_end := strings.Index(recvStr_v2, "\x09\x00\xff\xff\x00\x00")
@@ -40,5 +40,5 @@ func OXIDScan(target string, result Utils.Result) Utils.Result {
 
 	}
 	result.HttpStat = "OXID"
-	return result
+	return
 }

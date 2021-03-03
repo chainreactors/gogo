@@ -8,55 +8,66 @@ import (
 
 var Alivesum, Sum int
 var Exploit bool
+var Version bool
 var Delay time.Duration
 
-func Dispatch(result Utils.Result) Utils.Result {
-	target := Utils.GetTarget(result.Ip, result.Port)
+func Dispatch(result *Utils.Result) {
+	target := Utils.GetTarget(result)
 	Sum++
-	//println(result.ip,result.Port)
+	//println(result.Ip, result.Port)
 	switch result.Port {
 	case "137":
-		result = NbtScan(target, result)
+		NbtScan(target, result)
 	case "135":
-		result = OXIDScan(target, result)
-	case "445":
-		result = MS17010Scan(target, result)
+		OXIDScan(target, result)
 	case "icmp":
-		result = IcmpScan(target, result)
-
+		IcmpScan(result.Ip, result)
 	default:
-		result = SocketHttp(target, result)
+		SocketHttp(target, result)
 	}
 
-	// 如果端口开放-e参数为true,则尝试进行漏洞探测
 	if result.Stat == "OPEN" {
 		Alivesum++
-		result = Utils.InfoFilter(result)
+
+		//被动收集基本信息
+		Utils.InfoFilter(result)
+
+		// 因为正则匹配耗时较长,如果没有-v参数则字节不进行服务识别
+		if Version {
+			Utils.GetDetail(result)
+		}
 		// 如果-e参数为true,则进行漏洞探测
 		if Exploit {
-			result = ExploitDispatch(result)
+			ExploitDispatch(result)
 		}
 	}
 
 	//if result.Title != "" {
 	//	Titlesum ++
 	//}
+	if (result.TcpCon) != nil {
+	}
 	result.Content = ""
-	return result
+	result.Title = strings.TrimSpace(result.Title)
+	return
+
 }
 
-func ExploitDispatch(result Utils.Result) Utils.Result {
+func ExploitDispatch(result *Utils.Result) {
 
 	//
-	target := Utils.GetTarget(result.Ip, result.Port)
+	target := Utils.GetTarget(result)
 	if strings.Contains(result.Content, "-ERR wrong") {
-		result = RedisScan(target, result)
+		RedisScan(target, result)
 	}
 	if strings.HasPrefix(result.Protocol, "http") {
-		result = ShiroScan(target, result)
+		ShiroScan(result)
 	}
 	if result.Port == "445" {
-		result = MS17010Scan(target, result)
+		MS17010Scan(target, result)
 	}
-	return result
+	if result.Port == "11211" {
+		MemcacheScan(target, result)
+	}
+	return
 }

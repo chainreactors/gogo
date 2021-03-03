@@ -45,15 +45,15 @@ func init() {
 	}
 }
 
-func NbtScan(target string, result Utils.Result) Utils.Result {
+func NbtScan(target string, result *Utils.Result) {
 	var Share bool = false
 	var DC bool = false
-	result.Protocol = "NetBIOS"
+	result.Protocol = "udp"
 	conn, err := Utils.UdpSocketConn(target, Delay)
 	if err != nil {
 
 		//fmt.Println(err)
-		return result
+		return
 	}
 
 	payload := []byte("ff\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00 CKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\x00\x00!\x00\x01")
@@ -61,12 +61,12 @@ func NbtScan(target string, result Utils.Result) Utils.Result {
 	if len(reply) > 58 {
 		result.Stat = "OPEN"
 	} else {
-		return result
+		return
 	}
 
 	num, err := Byte2Int(reply[56:57])
 	if err != nil {
-		return result
+		return
 	}
 	var name, group, unique string
 	var flag_bit []byte
@@ -113,5 +113,5 @@ func NbtScan(target string, result Utils.Result) Utils.Result {
 	}
 	result.Host = msg
 	result.HttpStat = "NetBIOS"
-	return result
+	return
 }

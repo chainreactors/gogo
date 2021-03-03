@@ -60,42 +60,34 @@ func tcGenerator(ch chan string, portlist []string) chan TargetConfig {
 }
 
 //使用管道生成IP
-func ipGenerator(target string) chan string {
-	start, fin := getIpRange(target)
-	ch := make(chan string)
-	var i uint
-	go func() {
-		for i = 0; i <= fin-start; i++ {
-			// 如果是广播地址或网络地址,则跳过
-			if (i+start)%256 != 255 && (i+start)%256 != 0 {
-				ch <- int2ip(i + start)
-			}
-
+func defaultIpGenerator(CIDR string, ch chan string) chan string {
+	start, fin := getIpRange(CIDR)
+	for i := start; i <= fin; i++ {
+		// 如果是广播地址或网络地址,则跳过
+		if (i)%256 != 255 && (i)%256 != 0 {
+			ch <- int2ip(i)
 		}
-		close(ch)
-	}()
+	}
+
 	return ch
 }
 
 //此处的生成方式是每个C段交替生成,1.1,2.1....1.255,2.255这样
-func smartIpGenerator(target string, temp *sync.Map) chan string {
-	start, fin := getIpRange(target)
-	ch := make(chan string)
+func smartIpGenerator(CIDR string, ch chan string, temp *sync.Map) chan string {
+	start, fin := getIpRange(CIDR)
 	var outIP string
 	//sum := fin -start
 	var C, B uint
 
-	go func() {
-		for C = 1; C < 255; C++ {
-			for B = 0; B <= (fin-start)/256; B++ {
-				outIP = int2ip(start + 256*B + C)
-				if isAlive(int2ip(start+256*B+1), temp) {
-					ch <- outIP
-				}
+	for C = 1; C < 255; C++ {
+		for B = 0; B <= (fin-start)/256; B++ {
+			outIP = int2ip(start + 256*B + C)
+			if isAlive(int2ip(start+256*B+1), temp) {
+				ch <- outIP
 			}
 		}
-		close(ch)
-	}()
+	}
+
 	return ch
 }
 
@@ -104,8 +96,8 @@ func isAlive(ip string, temp *sync.Map) bool {
 	return !ok
 }
 
-func bipGenerator(target string) chan string {
-	start, fin := getIpRange(target)
+func bipGenerator(CIDR string) chan string {
+	start, fin := getIpRange(CIDR)
 	startB := net.ParseIP(int2ip(start)).To4()[1]
 	finB := net.ParseIP(int2ip(fin)).To4()[1]
 
@@ -124,27 +116,43 @@ func bipGenerator(target string) chan string {
 	return ch
 }
 
-func autoIcmpGenerator() chan string {
-	start10, end10 := getIpRange("10.0.0.0/8")
-	start172, end172 := getIpRange("172.16.0.0/12")
-	start192, end192 := getIpRange("192.168.0.0/16")
+func firstInterGenerator(ch chan string) chan string {
+	println("[*] Processing : 10.0.0.0/8")
+	ch = firstIpGenerator("10.0.0.0/8", ch)
+	println("[*] Processing : 172.16.0.0/12")
+	ch = firstIpGenerator("172.16.0.0/12", ch)
+	println("[*] Processing : 192.168.0.0/16")
+	ch = firstIpGenerator("192.168.0.0/16", ch)
+	return ch
+}
+
+func firstIpGenerator(CIDR string, ch chan string) chan string {
+	start, end := getIpRange(CIDR)
+	for i := start + 1; i < end; i += 256 {
+		ch <- int2ip(i)
+	}
+	return ch
+}
+
+func ipGenerator(CIDR string, mod string, temp *sync.Map) chan string {
 	ch := make(chan string)
-	var i uint
 	go func() {
-		println("[*] Processing ICMP: 10.0.0.0/8")
-		for i = start10 + 1; i <= end10; i += 256 {
-			ch <- int2ip(i)
-		}
-		println("[*] Processing ICMP: 172.16.0.0/12")
-		for i = start172 + 1; i <= end172; i += 256 {
-			ch <- int2ip(i)
-		}
-		println("[*] Processing ICMP: 192.168.0.0/16")
-		for i = start192 + 1; i <= end192; i += 256 {
-			ch <- int2ip(i)
+		if mod == "a" {
+			// 生成内网ip的首段
+			println("[*] current Mod: auto")
+			ch = firstInterGenerator(ch)
+		} else if mod == "s" {
+			println("[*] current Mod: smart")
+			ch = smartIpGenerator(CIDR, ch, temp)
+		} else if mod == "f" {
+			println("[*] current Mod: first Ip")
+			ch = firstIpGenerator(CIDR, ch)
+		} else {
+			ch = defaultIpGenerator(CIDR, ch)
 		}
 		close(ch)
 	}()
+
 	return ch
 }
 
