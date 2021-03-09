@@ -4,8 +4,29 @@ import (
 	"encoding/json"
 	"fmt"
 	"getitle/src/Utils"
+	"io/ioutil"
 	"strings"
 )
+
+var first bool = true
+
+type portformat struct {
+	port      string
+	stat      string
+	title     string
+	host      string
+	midware   string
+	language  string
+	framework string
+	vuln      string
+	protocol  string
+}
+type ipformat struct {
+	ip          string
+	portformats map[string]portformat
+	hostname    string
+	network     string
+}
 
 func output(result *Utils.Result, outType string) string {
 	var out string
@@ -28,14 +49,14 @@ func output(result *Utils.Result, outType string) string {
 func CleanOutput(result *Utils.Result) string {
 	//s := fmt.Sprintf("[+] %s://%s:%s\t%s\t", result.Protocol, result.ip, result.Port, result.Title)
 	s := fmt.Sprintf("%s:%s", result.Ip, result.Port)
-	s += vulnOutput(result)
+	s += vulnOutput(result.Vuln)
 	s += "\n"
 	return s
 }
 
 func FullOutput(result *Utils.Result) string {
 	s := fmt.Sprintf("[+] %s://%s:%s\t%s\t%s\t%s\t%s\t[%s] %s ", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, result.Framework, result.Host, result.HttpStat, result.Title)
-	s += vulnOutput(result)
+	s += vulnOutput(result.Vuln)
 	s += "\n"
 	return s
 }
@@ -45,7 +66,13 @@ func JsonOutput(result *Utils.Result) string {
 	if err != nil {
 		return ""
 	}
-	return string(jsons) + ",\n"
+	if first {
+		first = false
+		return string(jsons)
+	} else {
+		return ",\n" + string(jsons)
+	}
+
 }
 
 func HtmlOutput(result *Utils.Result) (s string) {
@@ -54,9 +81,9 @@ func HtmlOutput(result *Utils.Result) (s string) {
 	} else {
 		s = fmt.Sprintf("[+] %s://%s:%s\t%s\t%s\t%s\t%s\t[%s] %s", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, result.Framework, result.Host, result.HttpStat, result.Title)
 	}
-	vulnstr := vulnOutput(result)
+	vulnstr := vulnOutput(result.Vuln)
 	if vulnstr != "" {
-		s += "<b style=\"color:red;\">" + vulnOutput(result) + "</b>"
+		s += "<b style=\"color:red;\">" + vulnstr + "</b>"
 	}
 	s += "\n"
 
@@ -64,11 +91,67 @@ func HtmlOutput(result *Utils.Result) (s string) {
 
 }
 
-func vulnOutput(result *Utils.Result) string {
-	if result.Vuln != "" {
-		return fmt.Sprintf("[ Find Vuln: %s ]", result.Vuln)
+func vulnOutput(vuln string) string {
+	if vuln != "" {
+		return fmt.Sprintf("[ Find Vuln: %s ]", vuln)
 	}
 	return ""
+
+}
+
+func FormatOutput(filename string, outputfile string) {
+	content, err := ioutil.ReadFile(filename)
+	if err != nil {
+		panic(err)
+	}
+	var results []Utils.Result
+	err = json.Unmarshal(content, &results)
+	if err != nil {
+		println(err)
+	}
+	pfs := make(map[string]map[string]portformat)
+	//ipfs := make(map[string]ipformat)
+	for _, result := range results {
+		pf := portformat{
+			port:      result.Port,
+			stat:      result.HttpStat,
+			title:     result.Title,
+			host:      result.Host,
+			midware:   result.Midware,
+			language:  result.Language,
+			framework: result.Framework,
+			vuln:      result.Vuln,
+			protocol:  result.Protocol,
+		}
+		if pfs[result.Ip] == nil {
+			pfs[result.Ip] = make(map[string]portformat)
+		}
+		pfs[result.Ip][result.Port] = pf
+
+	}
+
+	for ip, fo := range pfs {
+		var hostname, network, netbiosstat string
+		if _, k := fo["137"]; k {
+			hostname = fo["137"].host
+			netbiosstat = fo["137"].stat
+		}
+		if _, k := fo["135"]; k {
+			hostname = fo["135"].host
+			network = fo["135"].title
+		}
+		s := fmt.Sprintf("[+] %s %s %s %s\n", ip, hostname, netbiosstat, network)
+		for pint, p := range fo {
+			// 跳过OXID与NetBois
+			if !(p.port == "135" || p.port == "137") {
+				s += fmt.Sprintf("\t\t%s://%s:%s\t%s\t%s\t%s\t%s\t[%s] %s", p.protocol, ip, pint, p.midware, p.language, p.framework, p.host, p.stat, p.title)
+				s += vulnOutput(p.vuln)
+				s += "\n"
+			}
+		}
+		print(s)
+	}
+	//fmt.Println(string(content))
 }
 
 func Banner() {

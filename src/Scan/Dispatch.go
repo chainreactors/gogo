@@ -18,10 +18,13 @@ func Dispatch(result *Utils.Result) {
 	switch result.Port {
 	case "137":
 		NbtScan(target, result)
+		return
 	case "135":
 		OXIDScan(target, result)
+		return
 	case "icmp":
 		IcmpScan(result.Ip, result)
+		return
 	default:
 		SocketHttp(target, result)
 	}
@@ -49,8 +52,8 @@ func Dispatch(result *Utils.Result) {
 	//	Titlesum ++
 	//}
 	if (result.TcpCon) != nil {
+		(*result.TcpCon).Close()
 	}
-	result.Content = ""
 	result.Title = strings.TrimSpace(result.Title)
 	return
 

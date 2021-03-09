@@ -16,32 +16,32 @@ import (
 )
 
 type Result struct {
-	Ip        string
-	Port      string
-	Stat      string
-	TcpCon    *net.Conn
-	Httpresp  *http.Response
-	Os        string
-	Host      string
-	Title     string
-	Midware   string
-	HttpStat  string
-	Language  string
-	Framework string
-	Vuln      string
-	Protocol  string
-	Error     string
-	Content   string
+	Ip        string         `json:"ip"`
+	Port      string         `json:"port"`
+	Stat      string         `json:"-"`
+	TcpCon    *net.Conn      `json:"-"`
+	Httpresp  *http.Response `json:"-"`
+	Os        string         `json:"os"`
+	Host      string         `json:"host"`
+	Title     string         `json:"title"`
+	Midware   string         `json:"midware"`
+	HttpStat  string         `json:"http_stat"`
+	Language  string         `json:"language"`
+	Framework string         `json:"framework"`
+	Vuln      string         `json:"vuln"`
+	Protocol  string         `json:"protocol"`
+	Error     string         `json:"-"`
+	Content   string         `json:"-"`
 }
 
 type Finger struct {
-	Name        string  `json:"name"`
-	Protocol    string  `json:"protocol"`
-	SendData    string  `json:"send_data"`
-	Vuln        string  `json:"vuln"`
-	Level       int     `json:"level"`
-	Defaultport string  `json:"default_port"`
-	Regexps     Regexps `json:"regexps"`
+	Name        string          `json:"name"`
+	Protocol    string          `json:"protocol"`
+	SendData    string          `json:"send_data"`
+	Vuln        string          `json:"vuln"`
+	Level       int             `json:"level"`
+	Defaultport map[string]bool `json:"default_port"`
+	Regexps     Regexps         `json:"regexps"`
 }
 
 type Regexps struct {
@@ -254,7 +254,7 @@ func httpFingerMatch(result *Result, finger Finger) {
 func getTCPFrameWork(result *Result) {
 	// 优先匹配默认端口,第一遍循环只匹配默认端口
 	for _, finger := range Tcpfingers {
-		if finger.Defaultport == result.Port {
+		if finger.Defaultport[result.Port] == true {
 			tcpFingerMatch(result, finger)
 		}
 		if result.Framework != "" {
@@ -264,7 +264,7 @@ func getTCPFrameWork(result *Result) {
 
 	// 若默认端口未匹配到结果,则匹配全部
 	for _, finger := range Tcpfingers {
-		if finger.Defaultport != result.Port {
+		if finger.Defaultport[result.Port] != false {
 			tcpFingerMatch(result, finger)
 		}
 

@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"getitle/src/Scan"
-	"getitle/src/Utils"
 	"getitle/src/core"
 	"github.com/panjf2000/ants/v2"
 	"os"
@@ -29,9 +28,19 @@ func main() {
 	Filename := flag.String("f", "", "")
 	Exploit := flag.Bool("e", false, "")
 	Version := flag.Bool("v", false, "")
+	isPortConfig := flag.Bool("P", false, "")
+	Formatout := flag.String("F", "", "")
 	flag.Parse()
 	if *key != "puaking" {
 		println("segment fault")
+		os.Exit(0)
+	}
+	if *isPortConfig {
+		core.Listportconfig()
+		os.Exit(0)
+	}
+	if *Formatout != "" {
+		core.FormatOutput(*Formatout, *Formatout)
 		os.Exit(0)
 	}
 	if *IPaddress == "" && *list == "" && *mod != "a" {
@@ -68,13 +77,11 @@ func main() {
 	}
 
 	endtime := time.Since(starttime)
-
-	//core.Datach <- sum
-	if *Output == "json" {
-		_, _ = core.FileHandle.WriteString(core.JsonOutput(new(Utils.Result)) + "]")
+	if *Filename != "" {
+		core.Datach <- "]"
 	}
 	time.Sleep(time.Microsecond * 500)
-	println(fmt.Sprintf("[*] Alive sum: %d, Target sum : %d", Scan.Alivesum, Scan.Sum))
+	println(fmt.Sprintf("\n[*] Alive sum: %d, Target sum : %d", Scan.Alivesum, Scan.Sum))
 	println("[*] Totally run: " + endtime.String())
 
 }

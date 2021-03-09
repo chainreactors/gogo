@@ -7,7 +7,7 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer,encoding='utf8')
 
 
 def fingerload(filename):
-    tcpfinger = open("src/Utils/%s"%filename,"r",encoding="utf-8")
+    tcpfinger = open("src/config/%s"%filename,"r",encoding="utf-8")
     tcpjsonstr = tcpfinger.read()
     tcpjsonstr = tcpjsonstr.replace("\\0","\\u0000").replace("\\x","\\u00")
     j = json.loads(tcpjsonstr)
@@ -18,28 +18,27 @@ def fingerload(filename):
 if __name__ == "__main__":
 	j1 = fingerload("tcpfingers.json")
 	j2 = fingerload("httpfingers.json")
-	j3 = json.loads(open("src/Utils/md5fingers.json","r",encoding="utf-8").read())
+	j3 = json.loads(open("src/config/md5fingers.json","r",encoding="utf-8").read())
+	j4 = json.loads(open("src/config/port.json","r",encoding="utf-8").read())
+
+
 	f = open("src/Utils/finger.go","w",encoding="utf-8")
 	base = '''package Utils
 
 func LoadFingers(typ string)string  {
 	if typ == "tcp" {
-		return `
-		%s
-	`
+		return `%s`
 	}else if typ=="http"{
-		return `
-		%s
-	`
+		return `%s`
 	}else if typ =="md5"{
-     		return `
-     		%s
-     		`
-    }
+     		return `%s`
+    }else if typ == "port"{
+         	return `%s`
+     	}
 	return  ""
 }
 	'''
 
-	f.write(base%(json.dumps(j1),json.dumps(j2),json.dumps(j3)))
+	f.write(base%(json.dumps(j1),json.dumps(j2),json.dumps(j3),json.dumps(j4)))
 	print("fingerprint update success")
 
