@@ -107,12 +107,12 @@ func NbtScan(target string, result *Utils.Result) {
 	msg = strings.Replace(msg, "\x00", "", -1)
 
 	if Share {
-		msg = msg + "\tsharing"
+		result.HttpStat += "sharing"
 	}
 	if DC {
-		msg = msg + "  DC"
+		result.HttpStat += "DC"
 	}
 	result.Host = msg
-	result.HttpStat = "NetBIOS"
+	result.Protocol = "NetBIOS"
 	return
 }
