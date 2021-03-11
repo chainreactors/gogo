@@ -102,7 +102,7 @@ func Match(regexpstr string, s string) string {
 }
 
 func GetTitle(content string) string {
-	title := Match("(?is)<title>(.*)</title>", content)
+	title := Match("(?Uis)<title>(.*)</title>", content)
 	if title != "" {
 		return title
 	}
