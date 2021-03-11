@@ -27,7 +27,7 @@ func SocketHttp(target string, result *Utils.Result) {
 
 	//发送内容
 	senddata := []byte("GET / HTTP/1.1\r\nHost: " + target + "\r\n\r\n")
-	_, data, err := Utils.SocketSend(*result.TcpCon, senddata, 4096)
+	data, err := Utils.SocketSend(*result.TcpCon, senddata, 4096)
 	if err != nil {
 		result.Error = err.Error()
 	}

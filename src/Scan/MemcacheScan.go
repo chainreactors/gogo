@@ -15,7 +15,7 @@ func MemcacheScan(target string, result *Utils.Result) {
 		return
 	}
 
-	_, recv, _ := Utils.SocketSend(conn, []byte("stats\n"), 1024)
+	recv, _ := Utils.SocketSend(conn, []byte("stats\n"), 1024)
 	if strings.Contains(string(recv), "STAT version") {
 		result.Protocol = "tcp"
 		result.Framework = "memcache"

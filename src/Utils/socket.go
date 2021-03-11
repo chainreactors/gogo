@@ -1,6 +1,7 @@
 package Utils
 
 import (
+	"bytes"
 	"crypto/tls"
 	"fmt"
 	"net"
@@ -28,22 +29,31 @@ func UdpSocketConn(target string, delay time.Duration) (net.Conn, error) {
 	return conn, err
 }
 
-func SocketSend(conn net.Conn, data []byte, length int) (int, []byte, error) {
-	_ = conn.SetDeadline(time.Now().Add(time.Duration(2) * time.Second))
+func SocketSend(conn net.Conn, data []byte, max int) ([]byte, error) {
+	_ = conn.SetDeadline(time.Now().Add(time.Duration(10) * time.Second))
 	var err error
 	_, err = conn.Write(data)
 	if err != nil {
-		return 0, []byte{}, err
+		return []byte{}, err
 	}
 
-	//最多只读8192位,一般来说有title就肯定已经有了
-	reply := make([]byte, length)
-	n, err := conn.Read(reply)
-
+	buf := make([]byte, max)
+	//len := 0
+	//for {
+	//	n, err := conn.Read(buf[len:])
+	//	if n > 0 {
+	//		len += n
+	//	}
+	//	if err != nil ||len >= max || n == 0 {
+	//		return buf,err
+	//	}
+	//}
+	time.Sleep(time.Duration(100) * time.Millisecond)
+	_, err = conn.Read(buf)
 	if err != nil {
-		return n, []byte{}, err
+		return buf, err
 	}
-	return n, reply, err
+	return bytes.Trim(buf, "\x00"), err
 }
 
 func TcpIsClose(conn net.Conn) {

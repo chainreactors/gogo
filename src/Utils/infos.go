@@ -102,7 +102,7 @@ func Match(regexpstr string, s string) string {
 }
 
 func GetTitle(content string) string {
-	title := Match("(?im)<title>(.*)</title>", content)
+	title := Match("(?is)<title>(.*)</title>", content)
 	if title != "" {
 		return title
 	}
@@ -285,7 +285,7 @@ func tcpFingerMatch(result *Result, finger Finger) {
 	if finger.SendData != "" {
 		// 复用tcp链接
 
-		_, data, err = SocketSend(*result.TcpCon, []byte(finger.SendData), 1024)
+		data, err = SocketSend(*result.TcpCon, []byte(finger.SendData), 1024)
 
 		// 如果报错为EOF,则需要重新建立tcp连接
 		if err != nil && err.Error() == "EOF" {
@@ -296,7 +296,7 @@ func tcpFingerMatch(result *Result, finger Finger) {
 			if err != nil {
 				return
 			}
-			_, data, err = SocketSend(*result.TcpCon, []byte(finger.SendData), 1024)
+			data, err = SocketSend(*result.TcpCon, []byte(finger.SendData), 1024)
 
 			// 重新建立链接后再次报错,则跳过该规则匹配
 			if err != nil {
