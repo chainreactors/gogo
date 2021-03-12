@@ -30,7 +30,7 @@ func UdpSocketConn(target string, delay time.Duration) (net.Conn, error) {
 }
 
 func SocketSend(conn net.Conn, data []byte, max int) ([]byte, error) {
-	_ = conn.SetDeadline(time.Now().Add(time.Duration(10) * time.Second))
+	_ = conn.SetDeadline(time.Now().Add(time.Duration(2) * time.Second))
 	var err error
 	_, err = conn.Write(data)
 	if err != nil {
