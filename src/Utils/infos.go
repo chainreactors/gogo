@@ -379,7 +379,7 @@ func getCookies(resp *http.Response) map[string]string {
 	return cookies
 }
 func GetStatusCode(content string) string {
-	if strings.Contains(content, "HTTP") {
+	if len(content) > 12 && strings.Contains(content, "HTTP") {
 		return content[9:12]
 	}
 

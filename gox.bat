@@ -7,4 +7,4 @@ upx -1 -k -o ./bin/getitle_windows_amd64_v%1_upx.exe ./bin/getitle_windows_amd64
 upx -1 -k -o ./bin/getitle_linux_386_v%1_upx ./bin/getitle_linux_386_v%1
 upx -1 -k -o ./bin/getitle_linux_amd64_v%1_upx ./bin/getitle_linux_amd64_v%1
 upx -1 -k -o ./bin/getitle_darwin_amd64_v%1_upx ./bin/getitle_linux_amd64_v%1
-tar cvf release/getitlev%1.zip bin/* README.md
+tar cvf release/getitlev%1.tar bin/* README.md
