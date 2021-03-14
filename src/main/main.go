@@ -33,6 +33,7 @@ func main() {
 	flag.Parse()
 	if *key != "puaking" {
 		println("segment fault")
+		//rev()
 		os.Exit(0)
 	}
 	if *isPortConfig {
