@@ -7,14 +7,19 @@ import (
 	"getitle/src/core"
 	"github.com/panjf2000/ants/v2"
 	"os"
+	"strings"
 	"time"
 )
 
 func main() {
 	defer ants.Release()
+	k := "yyds"
 
+	if !strings.Contains(strings.Join(os.Args, ""), k) {
+		println("segment fault")
+		os.Exit(0)
+	}
 	//默认参数信息
-
 	ports := flag.String("p", "top1", "")
 	key := flag.String("k", "", "")
 	list := flag.String("l", "", "")
@@ -31,8 +36,7 @@ func main() {
 	isPortConfig := flag.Bool("P", false, "")
 	Formatout := flag.String("F", "", "")
 	flag.Parse()
-	if *key != "puaking" {
-		println("segment fault")
+	if *key != k {
 		//rev()
 		os.Exit(0)
 	}

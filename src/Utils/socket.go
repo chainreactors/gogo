@@ -51,7 +51,7 @@ func SocketSend(conn net.Conn, data []byte, max int) ([]byte, error) {
 	time.Sleep(time.Duration(100) * time.Millisecond)
 	_, err = conn.Read(buf)
 	if err != nil {
-		return buf, err
+		return bytes.Trim(buf, "\x00"), err
 	}
 	return bytes.Trim(buf, "\x00"), err
 }
