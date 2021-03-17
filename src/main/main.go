@@ -28,13 +28,14 @@ func main() {
 	mod := flag.String("m", "default", "")
 	typ := flag.String("n", "socket", "")
 	delay := flag.Int("d", 2, "")
-	Clean := flag.Bool("c", false, "")
+	clean := flag.Bool("c", false, "")
 	Output := flag.String("o", "full", "")
-	Filename := flag.String("f", "", "")
-	Exploit := flag.Bool("e", false, "")
-	Version := flag.Bool("v", false, "")
+	filename := flag.String("f", "", "")
+	exploit := flag.Bool("e", false, "")
+	version := flag.Bool("v", false, "")
 	isPortConfig := flag.Bool("P", false, "")
-	Formatout := flag.String("F", "", "")
+	formatoutput := flag.String("F", "", "")
+	noScan := flag.Bool("no", false, "")
 	flag.Parse()
 	if *key != k {
 		//rev()
@@ -44,8 +45,8 @@ func main() {
 		core.Listportconfig()
 		os.Exit(0)
 	}
-	if *Formatout != "" {
-		core.FormatOutput(*Formatout, *Formatout)
+	if *formatoutput != "" {
+		core.FormatOutput(*formatoutput, *formatoutput)
 		os.Exit(0)
 	}
 	if *IPaddress == "" && *list == "" && *mod != "a" {
@@ -57,11 +58,12 @@ func main() {
 	//初始化全局变量
 	Scan.Delay = time.Duration(*delay)
 	core.Threads = *threads
-	core.Filename = *Filename
+	core.Filename = *filename
 	core.OutputType = *Output
-	Scan.Exploit = *Exploit
-	core.Clean = *Clean
-	Scan.Version = *Version
+	Scan.Exploit = *exploit
+	core.Clean = *clean
+	Scan.Version = *version
+	core.NoScan = *noScan
 	core.Init()
 
 	//if *IPaddress == "auto" {
@@ -82,7 +84,7 @@ func main() {
 	}
 
 	endtime := time.Since(starttime)
-	if *Filename != "" {
+	if *filename != "" {
 		core.Datach <- "]"
 	}
 	time.Sleep(time.Microsecond * 500)

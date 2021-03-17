@@ -15,6 +15,8 @@ type TargetConfig struct {
 	port string
 }
 
+var NoScan bool
+
 //直接扫描
 func StraightMod(target string, portlist []string) {
 	var wgs sync.WaitGroup
@@ -100,7 +102,6 @@ func SmartBMod(target string, portlist []string, mod string, typ string) {
 	})
 
 	defer scanPool.Release()
-
 	for t := range tcChannel {
 		wg.Add(1)
 		_ = scanPool.Invoke(t)
@@ -108,24 +109,15 @@ func SmartBMod(target string, portlist []string, mod string, typ string) {
 	wg.Wait()
 	time.Sleep(2 * time.Second)
 	close(aliveC)
-
-	temp.Range(func(key, value interface{}) bool {
-		if value.(int) > 0 {
-			println("[*] " + Utils.GetCurtime() + " Processing:" + key.(string) + "/24")
-			StraightMod(key.(string)+"/24", portlist)
-		}
-		return true
-	})
-	//for k, v := range temp {
-	//	println(k,v)
-	//	if v > 0 {
-	//		println("[*] Processing:" + k + "/24")
-	//		StraightMod(k+"/24", portlist)
-	//	}
-
-	//}
-
-	//wg.Wait()
+	if !NoScan {
+		temp.Range(func(key, value interface{}) bool {
+			if value.(int) > 0 {
+				println("[*] " + Utils.GetCurtime() + " Processing:" + key.(string) + "/24")
+				StraightMod(key.(string)+"/24", portlist)
+			}
+			return true
+		})
+	}
 
 }
 
