@@ -26,7 +26,7 @@ type PortFinger struct {
 }
 
 func Init() {
-	println("*********  getitle 0.3.0 beta by Sangfor  *********")
+	println("*********  getitle 0.3.3 beta by Sangfor  *********")
 	initFile()
 }
 

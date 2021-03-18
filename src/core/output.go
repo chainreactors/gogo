@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"getitle/src/Utils"
 	"io/ioutil"
+	"sort"
 	"strings"
 )
 
@@ -32,9 +33,9 @@ func output(result *Utils.Result, outType string) string {
 	var out string
 
 	switch outType {
-	case "clean":
-		out = CleanOutput(result)
-	case "json":
+	case "color", "c":
+		out = ColorOutput(result)
+	case "json", "j":
 		out = JsonOutput(result)
 	case "html":
 		out = HtmlOutput(result)
@@ -46,10 +47,9 @@ func output(result *Utils.Result, outType string) string {
 
 }
 
-func CleanOutput(result *Utils.Result) string {
-	//s := fmt.Sprintf("[+] %s://%s:%s\t%s\t", result.Protocol, result.ip, result.Port, result.Title)
-	s := fmt.Sprintf("%s:%s", result.Ip, result.Port)
-	s += vulnOutput(result.Vuln)
+func ColorOutput(result *Utils.Result) string {
+	s := fmt.Sprintf("[+] %s://%s:%s\t%s\t%s\t%s\t%s\t[%s] %s ", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, blue(result.Framework), result.Host, yellow(result.HttpStat), blue(result.Title))
+	s += red(vulnOutput(result.Vuln))
 	s += "\n"
 	return s
 }
@@ -102,12 +102,12 @@ func vulnOutput(vuln string) string {
 func FormatOutput(filename string, outputfile string) {
 	content, err := ioutil.ReadFile(filename)
 	if err != nil {
-		panic(err)
+		print(err.Error())
 	}
 	var results []Utils.Result
 	err = json.Unmarshal(content, &results)
 	if err != nil {
-		println(err)
+		println("json error")
 	}
 	pfs := make(map[string]map[string]portformat)
 	//ipfs := make(map[string]ipformat)
@@ -130,18 +130,26 @@ func FormatOutput(filename string, outputfile string) {
 
 	}
 
-	for ip, fo := range pfs {
+	// 排序
+	var keys []int
+	for ip, _ := range pfs {
+		keys = append(keys, int(ip2int(ip)))
+	}
+	sort.Ints(keys)
+
+	for _, ipi := range keys {
+		ip := int2ip(uint(ipi))
 		var hostname, network, netbiosstat string
-		if _, k := fo["137"]; k {
-			hostname = fo["137"].host
-			netbiosstat = fo["137"].stat
+		if _, k := pfs[ip]["137"]; k {
+			hostname = pfs[ip]["137"].host
+			netbiosstat = pfs[ip]["137"].stat
 		}
-		if _, k := fo["135"]; k {
-			hostname = fo["135"].host
-			network = fo["135"].title
+		if _, k := pfs[ip]["135"]; k {
+			hostname = pfs[ip]["135"].host
+			network = pfs[ip]["135"].title
 		}
 		s := fmt.Sprintf("[+] %s %s %s %s\n", ip, hostname, netbiosstat, network)
-		for pint, p := range fo {
+		for pint, p := range pfs[ip] {
 			// 跳过OXID与NetBois
 			if !(p.port == "135" || p.port == "137") {
 				s += fmt.Sprintf("\t\t%s://%s:%s\t%s\t%s\t%s\t%s\t[%s] %s", p.protocol, ip, pint, p.midware, p.language, p.framework, p.host, p.stat, p.title)
@@ -149,7 +157,7 @@ func FormatOutput(filename string, outputfile string) {
 				s += "\n"
 			}
 		}
-		print(s)
+		fmt.Print(s)
 	}
 	//fmt.Println(string(content))
 }
@@ -174,4 +182,19 @@ func Banner() {
 	//		"\n     smart mod example: ./getitle -ip 192.168.1.1/8 -p top2 -m s",
 	//)
 
+}
+func red(s string) string {
+	return "\033[1;31m" + s + "\033[0m"
+}
+
+func green(s string) string {
+	return "\033[1;32m" + s + "\033[0m"
+}
+
+func yellow(s string) string {
+	return "\033[4;33m" + s + "\033[0m"
+}
+
+func blue(s string) string {
+	return "\033[1;34m" + s + "\033[0m"
 }
