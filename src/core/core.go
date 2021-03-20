@@ -54,7 +54,7 @@ func defaultScan(tc TargetConfig) {
 			fmt.Print(output(result, OutputType))
 		}
 		if O2File {
-			Datach <- output(result, OutputType)
+			Datach <- JsonFile(result)
 		}
 
 	}
@@ -70,7 +70,7 @@ func safeMap(temp *sync.Map, ch chan string) {
 			//temp[aliveC] = 1
 		} else {
 			temp.Store(aliveC, 1)
-			println("[*] Find " + aliveC)
+			fmt.Println("[*] Find " + aliveC)
 			//temp[aliveC] += 1
 		}
 	}
@@ -88,10 +88,10 @@ func SmartBMod(target string, portlist []string, mod string, typ string) {
 	var tcChannel chan TargetConfig
 
 	if typ == "icmp" || typ == "i" {
-		println("[*] current Protocol: ICMP")
+		fmt.Println("[*] current Protocol: ICMP")
 		tcChannel = tcGenerator(ipChannel, []string{"icmp"})
 	} else {
-		println("[*] current Protocol: Socket")
+		fmt.Println("[*] current Protocol: Socket")
 		tcChannel = tcGenerator(ipChannel, []string{"80"})
 	}
 
@@ -112,7 +112,7 @@ func SmartBMod(target string, portlist []string, mod string, typ string) {
 	if !NoScan {
 		temp.Range(func(key, value interface{}) bool {
 			if value.(int) > 0 {
-				println("[*] " + Utils.GetCurtime() + " Processing:" + key.(string) + "/24")
+				fmt.Println("[*] " + Utils.GetCurtime() + " Processing:" + key.(string) + "/24")
 				StraightMod(key.(string)+"/24", portlist)
 			}
 			return true
@@ -138,7 +138,7 @@ func smartScan(tc TargetConfig, AliveCh chan string) {
 func SmartAMod(target string, portlist []string, mod string, typ string) {
 	btargetChannel := bipGenerator(target)
 	for i := range btargetChannel {
-		println("[*]" + Utils.GetCurtime() + "Processing Bclass IP:" + i + "/16")
+		fmt.Println("[*]" + Utils.GetCurtime() + "Processing Bclass IP:" + i + "/16")
 		SmartBMod(i+"/16", portlist, mod, typ)
 	}
 }

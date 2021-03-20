@@ -25,7 +25,7 @@ func UdpSocketConn(target string, delay time.Duration) (net.Conn, error) {
 	if err != nil {
 		return nil, err
 	}
-	err = conn.SetDeadline(time.Now().Add(delay * time.Second))
+	//err = conn.SetDeadline(time.Now().Add(delay * time.Second))
 	return conn, err
 }
 

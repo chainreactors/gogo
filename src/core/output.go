@@ -66,8 +66,16 @@ func JsonOutput(result *Utils.Result) string {
 	if err != nil {
 		return ""
 	}
+	return string(jsons) + "\n"
+
+}
+
+func JsonFile(result *Utils.Result) string {
+	jsons, err := json.Marshal(result)
+	if err != nil {
+		return ""
+	}
 	if first {
-		first = false
 		return string(jsons)
 	} else {
 		return ",\n" + string(jsons)
@@ -139,20 +147,28 @@ func FormatOutput(filename string, outputfile string) {
 
 	for _, ipi := range keys {
 		ip := int2ip(uint(ipi))
-		var hostname, network, netbiosstat string
-		if _, k := pfs[ip]["137"]; k {
-			hostname = pfs[ip]["137"].host
-			netbiosstat = pfs[ip]["137"].stat
+
+		if len(pfs[ip]) == 1 {
+			for pint, p := range pfs[ip] {
+				fmt.Printf("[+] %s://%s:%s\t%s\t%s\t%s\t%s\t[%s] %s\n", p.protocol, ip, pint, p.midware, p.language, p.framework, p.host, p.stat, p.title)
+				continue
+			}
 		}
+		var hostname, network, netbiosstat string
+
 		if _, k := pfs[ip]["135"]; k {
 			hostname = pfs[ip]["135"].host
 			network = pfs[ip]["135"].title
+		}
+		if _, k := pfs[ip]["137"]; k {
+			hostname = pfs[ip]["137"].host
+			netbiosstat = pfs[ip]["137"].stat
 		}
 		s := fmt.Sprintf("[+] %s %s %s %s\n", ip, hostname, netbiosstat, network)
 		for pint, p := range pfs[ip] {
 			// 跳过OXID与NetBois
 			if !(p.port == "135" || p.port == "137") {
-				s += fmt.Sprintf("\t\t%s://%s:%s\t%s\t%s\t%s\t%s\t[%s] %s", p.protocol, ip, pint, p.midware, p.language, p.framework, p.host, p.stat, p.title)
+				s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s\t%s\t[%s] %s", p.protocol, ip, pint, p.midware, p.language, p.framework, p.host, p.stat, p.title)
 				s += vulnOutput(p.vuln)
 				s += "\n"
 			}

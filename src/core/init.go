@@ -44,11 +44,11 @@ func RunTask(inp string, portlist []string, mod string, typ string) {
 		println("[-] target (" + inp + ") format ERROR,")
 		return
 	}
-	println(fmt.Sprintf("[*] Start Scan Task %s ,total ports: %d , mod: %s", CIDR, len(portlist), mod))
+	fmt.Println(fmt.Sprintf("[*] Start Scan Task %s ,total ports: %d , mod: %s", CIDR, len(portlist), mod))
 	if len(portlist) > 1000 {
-		println("[*] too much ports , only show top 1000 ports: " + strings.Join(portlist[:1000], ",") + "......")
+		fmt.Println("[*] too much ports , only show top 1000 ports: " + strings.Join(portlist[:1000], ",") + "......")
 	} else {
-		println("[*] ports: " + strings.Join(portlist, ","))
+		fmt.Println("[*] ports: " + strings.Join(portlist, ","))
 	}
 
 	switch mod {

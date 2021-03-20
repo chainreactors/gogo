@@ -1,6 +1,7 @@
 package core
 
 import (
+	"fmt"
 	"math"
 	"net"
 	"strconv"
@@ -98,17 +99,18 @@ func isAlive(ip string, temp *sync.Map) bool {
 
 func bipGenerator(CIDR string) chan string {
 	start, fin := getIpRange(CIDR)
-	startB := net.ParseIP(int2ip(start)).To4()[1]
-	finB := net.ParseIP(int2ip(fin)).To4()[1]
+	startB := uint(net.ParseIP(int2ip(start)).To4()[1])
+	finB := uint(net.ParseIP(int2ip(fin)).To4()[1])
 
 	ch := make(chan string)
 
 	ip := net.ParseIP(int2ip(start)).To4()
 
-	var i byte
+	var i uint
 	go func() {
 		for i = startB; i <= finB; i++ {
-			ip[1] = i
+
+			ip[1] = uint8(i)
 			ch <- ip.String()
 		}
 		close(ch)
@@ -117,11 +119,11 @@ func bipGenerator(CIDR string) chan string {
 }
 
 func firstInterGenerator(ch chan string) chan string {
-	println("[*] Processing : 10.0.0.0/8")
+	fmt.Println("[*] Processing : 10.0.0.0/8")
 	ch = firstIpGenerator("10.0.0.0/8", ch)
-	println("[*] Processing : 172.16.0.0/12")
+	fmt.Println("[*] Processing : 172.16.0.0/12")
 	ch = firstIpGenerator("172.16.0.0/12", ch)
-	println("[*] Processing : 192.168.0.0/16")
+	fmt.Println("[*] Processing : 192.168.0.0/16")
 	ch = firstIpGenerator("192.168.0.0/16", ch)
 	return ch
 }
@@ -139,13 +141,13 @@ func ipGenerator(CIDR string, mod string, temp *sync.Map) chan string {
 	go func() {
 		if mod == "a" {
 			// 生成内网ip的首段
-			println("[*] current Mod: auto")
+			fmt.Println("[*] current Mod: auto")
 			ch = firstInterGenerator(ch)
 		} else if mod == "s" {
-			println("[*] current Mod: smart")
+			fmt.Println("[*] current Mod: smart")
 			ch = smartIpGenerator(CIDR, ch, temp)
 		} else if mod == "f" {
-			println("[*] current Mod: first Ip")
+			fmt.Println("[*] current Mod: first Ip")
 			ch = firstIpGenerator(CIDR, ch)
 		} else {
 			ch = defaultIpGenerator(CIDR, ch)
@@ -180,7 +182,7 @@ func getIp(target string) string {
 	iprecords, _ := net.LookupIP(target)
 	for _, ip := range iprecords {
 		if isIPv4(ip.String()) {
-			println("[*] parse domin SUCCESS, map " + target + " to " + ip.String())
+			fmt.Println("[*] parse domin SUCCESS, map " + target + " to " + ip.String())
 			return ip.String()
 		}
 	}

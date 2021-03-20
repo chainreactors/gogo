@@ -88,7 +88,7 @@ func main() {
 		core.Datach <- "]"
 	}
 	time.Sleep(time.Microsecond * 500)
-	println(fmt.Sprintf("\n[*] Alive sum: %d, Target sum : %d", Scan.Alivesum, Scan.Sum))
-	println("[*] Totally run: " + endtime.String())
+	fmt.Println(fmt.Sprintf("\n[*] Alive sum: %d, Target sum : %d", Scan.Alivesum, Scan.Sum))
+	fmt.Println("[*] Totally run: " + endtime.String())
 
 }
