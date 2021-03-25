@@ -373,12 +373,11 @@ func getCookies(resp *http.Response) map[string]string {
 	}
 	return cookies
 }
-func GetStatusCode(content string) string {
+func GetStatusCode(content string) (bool, string) {
 	if len(content) > 12 && strings.Contains(content, "HTTP") {
-		return content[9:12]
+		return true, content[9:12]
 	}
-
-	return "tcp"
+	return false, "tcp"
 }
 
 func FilterCertDomain(domins []string) string {

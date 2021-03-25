@@ -14,6 +14,8 @@ func SocketHttp(target string, result *Utils.Result) {
 	//fmt.Println(ip)
 	//socket tcp连接,超时时间
 	var err error
+	var ishttp = false
+	var statuscode = ""
 	result.Protocol = "tcp"
 	conn, err := Utils.TcpSocketConn(target, Delay)
 	if err != nil {
@@ -31,23 +33,26 @@ func SocketHttp(target string, result *Utils.Result) {
 	data, err := Utils.SocketSend(*result.TcpCon, senddata, 4096)
 	if err != nil {
 		result.Error = err.Error()
-		if strings.Contains(result.Error, "wsasend") {
+		if strings.Contains(result.Error, "wsasend") || strings.Contains(result.Error, "wsarecv") {
 			result.HttpStat = "reset"
 		}
-		return
+		if result.Error == "EOF" {
+			result.HttpStat = "EOF"
+		}
 	}
 
 	content := string(data)
 
 	//获取状态码
 	result.Content = content
-	result.HttpStat = Utils.GetStatusCode(content)
-	if result.HttpStat != "tcp" {
+	ishttp, statuscode = Utils.GetStatusCode(content)
+	if ishttp {
+		result.HttpStat = statuscode
 		result.Protocol = "http"
 	}
 
 	//所有30x,400,以及非http协议的开放端口都送到http包尝试获取更多信息
-	if result.HttpStat == "400" || result.HttpStat == "tcp" || strings.HasPrefix(result.HttpStat, "3") {
+	if result.HttpStat == "400" || result.Protocol == "tcp" || strings.HasPrefix(result.HttpStat, "3") {
 		//return SystemHttp(target, result)
 		SystemHttp(target, result)
 	}
@@ -61,7 +66,7 @@ func SystemHttp(target string, result *Utils.Result) {
 	var delay time.Duration
 	// 如果是400或者不可识别协议,则使用https
 	var ishttps bool
-	if result.HttpStat == "400" || result.HttpStat == "tcp" {
+	if result.HttpStat == "400" || result.Protocol == "tcp" {
 		target = "https://" + target
 		ishttps = true
 	} else {
@@ -88,15 +93,16 @@ func SystemHttp(target string, result *Utils.Result) {
 			result.Protocol = "tcp"
 		}
 		// 如果已经匹配到状态码,且再次请求报错,则返回
-		if result.HttpStat != "tcp" {
+		if result.Protocol != "tcp" {
 			return
 		}
 
 		// 匹配各种错误类型
-		if strings.Contains(result.Error, "context deadline exceeded") {
-			result.Error = "no response"
-		} else if strings.Contains(result.Error, "EOF") {
-			result.Error = "EOF"
+		if strings.Contains(result.Error, "wsasend") || strings.Contains(result.Error, "wsarecv") {
+			result.HttpStat = "reset"
+		}
+		if result.Error == "EOF" {
+			result.HttpStat = "EOF"
 		}
 		return
 	}
