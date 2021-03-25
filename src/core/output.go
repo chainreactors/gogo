@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-var first bool = true
+var first = true
 
 type portformat struct {
 	port      string
@@ -21,12 +21,6 @@ type portformat struct {
 	framework string
 	vuln      string
 	protocol  string
-}
-type ipformat struct {
-	ip          string
-	portformats map[string]portformat
-	hostname    string
-	network     string
 }
 
 func output(result *Utils.Result, outType string) string {
@@ -76,9 +70,10 @@ func JsonFile(result *Utils.Result) string {
 		return ""
 	}
 	if first {
+		first = false
 		return string(jsons)
 	} else {
-		return ",\n" + string(jsons)
+		return "," + string(jsons)
 	}
 
 }

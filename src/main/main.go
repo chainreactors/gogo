@@ -84,7 +84,7 @@ func main() {
 	}
 
 	endtime := time.Since(starttime)
-	if *filename != "" {
+	if core.O2File {
 		core.Datach <- "]"
 	}
 	time.Sleep(time.Microsecond * 500)

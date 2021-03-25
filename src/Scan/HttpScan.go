@@ -23,6 +23,7 @@ func SocketHttp(target string, result *Utils.Result) {
 	}
 
 	result.Stat = "OPEN"
+	result.HttpStat = "tcp"
 	result.TcpCon = &conn
 
 	//发送内容
@@ -30,7 +31,12 @@ func SocketHttp(target string, result *Utils.Result) {
 	data, err := Utils.SocketSend(*result.TcpCon, senddata, 4096)
 	if err != nil {
 		result.Error = err.Error()
+		if strings.Contains(result.Error, "wsasend") {
+			result.HttpStat = "reset"
+		}
+		return
 	}
+
 	content := string(data)
 
 	//获取状态码

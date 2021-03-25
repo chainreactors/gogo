@@ -130,7 +130,7 @@ func initFile() {
 		}
 		go write2File(FileHandle, Datach)
 
-		if OutputType == "json" {
+		if O2File {
 			_, _ = FileHandle.WriteString("[")
 		}
 	}

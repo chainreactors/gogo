@@ -110,18 +110,13 @@ func GetTitle(content string) string {
 }
 
 func GetMidware(resp *http.Response, content string) string {
-	var server string
+	var server string = ""
 	if resp == nil {
 		server = Match("(?i)Server: ([\x20-\x7e]+)", strings.Split(content, "\r\n\r\n")[0])
 	} else {
 		server = resp.Header.Get("Server")
 	}
-	if server != "" {
-		return server
-	}
-
-	return ""
-
+	return server
 }
 
 func GetLanguage(resp *http.Response, content string) string {
