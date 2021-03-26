@@ -13,8 +13,11 @@ import (
 
 func main() {
 	defer ants.Release()
-	k := "yyds"
-
+	k := "yysy"
+	// debug
+	//f, _ := os.Create("cpu.txt")
+	//pprof.StartCPUProfile(f)
+	//defer pprof.StopCPUProfile()
 	if !strings.Contains(strings.Join(os.Args, ""), k) {
 		println("segment fault")
 		os.Exit(0)
