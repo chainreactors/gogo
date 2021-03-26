@@ -38,16 +38,6 @@ func SocketSend(conn net.Conn, data []byte, max int) ([]byte, error) {
 	}
 
 	buf := make([]byte, max)
-	//len := 0
-	//for {
-	//	n, err := conn.Read(buf[len:])
-	//	if n > 0 {
-	//		len += n
-	//	}
-	//	if err != nil ||len >= max || n == 0 {
-	//		return buf,err
-	//	}
-	//}
 	time.Sleep(time.Duration(100) * time.Millisecond)
 	_, err = conn.Read(buf)
 	if err != nil {

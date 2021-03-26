@@ -35,6 +35,9 @@ func Dispatch(result *Utils.Result) {
 		//被动收集基本信息
 		Utils.InfoFilter(result)
 
+		//处理错误信息
+		Utils.ErrHandler(result)
+
 		// 因为正则匹配耗时较长,如果没有-v参数则字节不进行服务识别
 		if !Version {
 			Utils.GetDetail(result)
@@ -46,16 +49,13 @@ func Dispatch(result *Utils.Result) {
 		if Exploit {
 			ExploitDispatch(result)
 		}
+		if (result.TcpCon) != nil {
+			(*result.TcpCon).Close()
+		}
+		result.Title = strings.TrimSpace(result.Title)
+		result.Title = strings.Trim(result.Title, "\x00")
+		return
 	}
-
-	//if result.Title != "" {
-	//	Titlesum ++
-	//}
-	if (result.TcpCon) != nil {
-		(*result.TcpCon).Close()
-	}
-	result.Title = strings.TrimSpace(result.Title)
-	return
 
 }
 
@@ -63,17 +63,17 @@ func ExploitDispatch(result *Utils.Result) {
 
 	//
 	target := Utils.GetTarget(result)
-	if strings.Contains(result.Content, "-ERR wrong") {
-		RedisScan(target, result)
-	}
+	//if strings.Contains(result.Content, "-ERR wrong") {
+	//	RedisScan(target, result)
+	//}
 	if strings.HasPrefix(result.Protocol, "http") {
 		ShiroScan(result)
 	}
 	if result.Port == "445" {
 		MS17010Scan(target, result)
 	}
-	if result.Port == "11211" {
-		MemcacheScan(target, result)
-	}
+	//if result.Port == "11211" {
+	//	MemcacheScan(target, result)
+	//}
 	return
 }

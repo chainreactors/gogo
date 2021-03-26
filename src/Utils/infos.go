@@ -423,6 +423,7 @@ func getFingers() ([]Finger, []Finger) {
 	return tcpfingers, httpfingers
 }
 
+//获取当前时间
 func GetCurtime() string {
 	h := strconv.Itoa(time.Now().Hour())
 	m := strconv.Itoa(time.Now().Minute())
@@ -430,4 +431,17 @@ func GetCurtime() string {
 
 	curtime := h + ":" + m + ":" + s
 	return curtime
+}
+
+func ErrHandler(result *Result) {
+
+	if strings.Contains(result.Error, "wsasend") || strings.Contains(result.Error, "wsarecv") {
+		result.HttpStat = "reset"
+	} else if result.Error == "EOF" {
+		result.HttpStat = "EOF"
+	} else if strings.Contains(result.Error, "http: server gave HTTP response to HTTPS client") {
+		result.Protocol = "http"
+	} else if strings.Contains(result.Error, "first record does not look like a TLS handshake") {
+		result.Protocol = "tcp"
+	}
 }

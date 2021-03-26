@@ -33,12 +33,6 @@ func SocketHttp(target string, result *Utils.Result) {
 	data, err := Utils.SocketSend(*result.TcpCon, senddata, 4096)
 	if err != nil {
 		result.Error = err.Error()
-		if strings.Contains(result.Error, "wsasend") || strings.Contains(result.Error, "wsarecv") {
-			result.HttpStat = "reset"
-		}
-		if result.Error == "EOF" {
-			result.HttpStat = "EOF"
-		}
 	}
 
 	content := string(data)
@@ -87,23 +81,6 @@ func SystemHttp(target string, result *Utils.Result) {
 	}
 	if err != nil {
 		result.Error = err.Error()
-		if strings.Contains(result.Error, "http: server gave HTTP response to HTTPS client") {
-			result.Protocol = "http"
-		} else if strings.Contains(result.Error, "first record does not look like a TLS handshake") {
-			result.Protocol = "tcp"
-		}
-		// 如果已经匹配到状态码,且再次请求报错,则返回
-		if result.Protocol != "tcp" {
-			return
-		}
-
-		// 匹配各种错误类型
-		if strings.Contains(result.Error, "wsasend") || strings.Contains(result.Error, "wsarecv") {
-			result.HttpStat = "reset"
-		}
-		if result.Error == "EOF" {
-			result.HttpStat = "EOF"
-		}
 		return
 	}
 	result.Protocol = resp.Request.URL.Scheme

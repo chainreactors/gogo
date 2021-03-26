@@ -117,10 +117,9 @@ func initFile() {
 	if Filename != "" {
 		O2File = true
 		if checkFileIsExist(Filename) { //如果文件存在
-			FileHandle, err = os.OpenFile(Filename, os.O_APPEND|os.O_WRONLY, os.ModeAppend) //打开文件
-			if err != nil {
-				os.Exit(0)
-			}
+			//FileHandle, err = os.OpenFile(Filename, os.O_APPEND|os.O_WRONLY, os.ModeAppend) //打开文件
+			println("[-] File already exists")
+			os.Exit(0)
 		} else {
 			FileHandle, err = os.Create(Filename) //创建文件
 			if err != nil {
