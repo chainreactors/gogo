@@ -70,7 +70,6 @@ func RunTask(inp string, portlist []string, mod string, typ string) {
 	default:
 		StraightMod(CIDR, portlist)
 	}
-	FileHandle.Sync()
 }
 
 func ReadTargetFile(targetfile string) []string {
@@ -86,31 +85,31 @@ func ReadTargetFile(targetfile string) []string {
 	return strings.Split(targets, "\n")
 }
 
-func TargetHandler(s string) (string, []string, string, string) {
-	ss := strings.Split(s, " ")
-
-	var mod, CIDR, typ string
-	var portlist []string
-
-	if len(ss) == 0 {
-		return CIDR, portlist, mod, typ
-	}
-
-	CIDR = IpInit(ss[0])
-	portlist = PortHandler("top1")
-	mod = "default"
-	typ = "socket"
-	if len(ss) > 1 {
-		portlist = PortHandler(ss[1])
-	}
-	if len(ss) > 2 {
-		mod = ss[2]
-	}
-	if len(ss) > 3 {
-		typ = ss[3]
-	}
-	return CIDR, portlist, mod, typ
-}
+//func TargetHandler(s string) (string, []string, string, string) {
+//	ss := strings.Split(s, " ")
+//
+//	var mod, CIDR, typ string
+//	var portlist []string
+//
+//	if len(ss) == 0 {
+//		return CIDR, portlist, mod, typ
+//	}
+//
+//	CIDR = IpInit(ss[0])
+//	portlist = PortHandler("top1")
+//	mod = "default"
+//	typ = "socket"
+//	if len(ss) > 1 {
+//		portlist = PortHandler(ss[1])
+//	}
+//	if len(ss) > 2 {
+//		mod = ss[2]
+//	}
+//	if len(ss) > 3 {
+//		typ = ss[3]
+//	}
+//	return CIDR, portlist, mod, typ
+//}
 
 func initFile() {
 	var err error
@@ -128,11 +127,11 @@ func initFile() {
 				os.Exit(0)
 			}
 		}
+		// json写入
+		_, _ = FileHandle.WriteString("[")
+
 		go write2File(FileHandle, Datach)
 
-		if O2File {
-			_, _ = FileHandle.WriteString("[")
-		}
 	}
 }
 
@@ -148,6 +147,9 @@ func write2File(FileHandle *os.File, Datach chan string) {
 	for res := range Datach {
 		FileHandle.WriteString(res)
 	}
+
+	FileHandle.WriteString("]")
+	_ = FileHandle.Close()
 }
 
 func PortHandler(portstring string) []string {

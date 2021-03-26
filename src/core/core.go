@@ -114,6 +114,8 @@ func SmartBMod(target string, portlist []string, mod string, typ string) {
 			if value.(int) > 0 {
 				fmt.Println("[*] " + Utils.GetCurtime() + " Processing:" + key.(string) + "/24")
 				StraightMod(key.(string)+"/24", portlist)
+				//每个C段同步一次数据
+				FileHandle.Sync()
 			}
 			return true
 		})

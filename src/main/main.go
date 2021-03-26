@@ -66,29 +66,21 @@ func main() {
 	core.NoScan = *noScan
 	core.Init()
 
-	//if *IPaddress == "auto" {
-	//	portlist := core.PortHandler(*ports)
-	//	println("[*] Auto scan to find Intranet ip")
-	//	println("[*] ports: " + strings.Join(portlist, ","))
-	//	core.AutoMod(portlist)
-	//} else
+	portlist := core.PortHandler(*ports)
 	if *list != "" {
 		targetList := core.ReadTargetFile(*list)
 		for _, v := range targetList {
-			CIDR, portlist, m, ty := core.TargetHandler(v)
-			core.RunTask(core.IpInit(CIDR), portlist, m, ty)
+			core.RunTask(strings.TrimSpace(v), portlist, *mod, *typ)
 		}
 	} else {
-		portlist := core.PortHandler(*ports)
 		core.RunTask(*IPaddress, portlist, *mod, *typ)
 	}
 
-	endtime := time.Since(starttime)
-	if core.O2File {
-		core.Datach <- "]"
-	}
+	//关闭文件写入管道
+	close(core.Datach)
+
 	time.Sleep(time.Microsecond * 500)
 	fmt.Println(fmt.Sprintf("\n[*] Alive sum: %d, Target sum : %d", Scan.Alivesum, Scan.Sum))
-	fmt.Println("[*] Totally run: " + endtime.String())
+	fmt.Println("[*] Totally run: " + time.Since(starttime).String())
 
 }
