@@ -4,13 +4,9 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
-	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
-	"regexp"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -81,26 +77,6 @@ func GetDetail(result *Result) {
 	return
 }
 
-func Encode(s string) string {
-	s = strings.Replace(s, "\r", "%13", -1)
-	s = strings.Replace(s, "\n", "%10", -1)
-	return s
-}
-
-func Match(regexpstr string, s string) string {
-	Reg, err := regexp.Compile(regexpstr)
-	if err != nil {
-		return ""
-	}
-	res := Reg.FindStringSubmatch(s)
-	if len(res) == 1 {
-		return "matched"
-	} else if len(res) == 2 {
-		return res[1]
-	}
-	return ""
-}
-
 func GetTitle(content string) string {
 	title := Match("(?Uis)<title>(.*)</title>", content)
 	if title != "" {
@@ -120,7 +96,6 @@ func GetMidware(resp *http.Response, content string) string {
 }
 
 func GetLanguage(resp *http.Response, content string) string {
-	// update: 减少正则匹配的速度略微提升性能
 	var powered string
 	if resp == nil {
 		powered = Match("(?i)X-Powered-By: ([\x20-\x7e]+)", strings.Split(content, "\r\n\r\n")[0])
@@ -140,7 +115,6 @@ func GetLanguage(resp *http.Response, content string) string {
 				return "PHP"
 			}
 		}
-
 	} else {
 		powered = resp.Header.Get("X-Powered-By")
 		if powered != "" {
@@ -176,7 +150,7 @@ func httpFingerMatch(result *Result, finger Finger) {
 
 	resp := result.Httpresp
 	content := result.Content
-	var cookies map[string]string
+	//var cookies map[string]string
 	if finger.SendData != "" {
 		conn := HttpConn(2)
 		resp, err := conn.Get(GetURL(result) + finger.SendData)
@@ -185,9 +159,6 @@ func httpFingerMatch(result *Result, finger Finger) {
 		}
 		content = string(GetBody(resp))
 		resp.Body.Close()
-	}
-	if resp != nil {
-		cookies = getCookies(resp)
 	}
 
 	if finger.Regexps.HTML != nil {
@@ -217,23 +188,27 @@ func httpFingerMatch(result *Result, finger Finger) {
 					result.Framework = finger.Name
 					return
 				}
-			} else if resp.Header.Get(header) != "" {
-				result.Framework = finger.Name
-				return
-			}
-		}
-	} else if finger.Regexps.Cookie != nil {
-		for _, cookie := range finger.Regexps.Cookie {
-			if resp == nil {
-				if strings.Contains(content, cookie) {
+			} else {
+				headers := getHeaderstr(resp)
+				if strings.Contains(headers, header) {
 					result.Framework = finger.Name
 					return
 				}
-			} else if cookies[cookie] != "" {
-				result.Framework = finger.Name
-				return
 			}
+
 		}
+		//} else if finger.Regexps.Cookie != nil {
+		//	for _, cookie := range finger.Regexps.Cookie {
+		//		if resp == nil {
+		//			if strings.Contains(content, cookie) {
+		//				result.Framework = finger.Name
+		//				return
+		//			}
+		//		} else if cookies[cookie] != "" {
+		//			result.Framework = finger.Name
+		//			return
+		//		}
+		//	}
 	} else if finger.Regexps.MD5 != nil {
 		for _, md5s := range finger.Regexps.MD5 {
 			m := md5.Sum([]byte(content))
@@ -340,32 +315,6 @@ func tcpFingerMatch(result *Result, finger Finger) {
 	return
 }
 
-func GetHttpRaw(resp *http.Response) string {
-	var raw string
-
-	raw += fmt.Sprintf("%s %s\r\n", resp.Proto, resp.Status)
-	for k, v := range resp.Header {
-		for _, i := range v {
-			raw += fmt.Sprintf("%s: %s\r\n", k, i)
-		}
-	}
-	raw += "\r\n"
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return raw
-	}
-	raw += string(body)
-	return raw
-}
-
-func GetBody(resp *http.Response) []byte {
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return []byte{}
-	}
-	return body
-}
-
 func getCookies(resp *http.Response) map[string]string {
 	cookies := make(map[string]string)
 	for _, cookie := range resp.Cookies() {
@@ -373,6 +322,8 @@ func getCookies(resp *http.Response) map[string]string {
 	}
 	return cookies
 }
+
+//从socket中获取htt状态码
 func GetStatusCode(content string) (bool, string) {
 	if len(content) > 12 && strings.Contains(content, "HTTP") {
 		return true, content[9:12]
@@ -395,6 +346,8 @@ func FilterCertDomain(domins []string) string {
 	return res[:len(res)-1]
 }
 
+//加载指纹到全局变量
+//TODO 正则预编译
 func getFingers() ([]Finger, []Finger) {
 
 	var tcpfingers, httpfingers []Finger
@@ -410,29 +363,10 @@ func getFingers() ([]Finger, []Finger) {
 		println("[-] httpfingers load FAIL!")
 		os.Exit(0)
 	}
-
-	//// tcp与http规则适用不同的扫描逻辑
-	//for _, finger := range fingers {
-	//	if finger.Protocol == "tcp" {
-	//		tcpfingers = append(tcpfingers, finger)
-	//	} else if finger.Protocol == "http" {
-	//		httpfingers = append(httpfingers, finger)
-	//	}
-	//}
-
 	return tcpfingers, httpfingers
 }
 
-//获取当前时间
-func GetCurtime() string {
-	h := strconv.Itoa(time.Now().Hour())
-	m := strconv.Itoa(time.Now().Minute())
-	s := strconv.Itoa(time.Now().Second())
-
-	curtime := h + ":" + m + ":" + s
-	return curtime
-}
-
+//从错误中收集信息
 func ErrHandler(result *Result) {
 
 	if strings.Contains(result.Error, "wsasend") || strings.Contains(result.Error, "wsarecv") {

@@ -7,18 +7,19 @@
 Usage of ./getitle:
   -d int       超时,默认2s (default 2)
   -ip string   IP地址 like 192.168.1.1/24
-  -m string    扫描模式：default or s(smart)
+  -m string    扫描模式：default ,s(启发式),f(每个C段第一个ip) ,a(auto,内网三个网段)
   -n string    协议模式: socket(默认) or icmp
   -p string    ports (default "top1")
   -t int       threads (default 4000)
   -o string    输出格式:clean,full(default) or json
   -f string    输出文件名,默认为空,请用相对路径(./)或绝对路径
-  -v bool      扫描详细指纹,当前主要有常见CMS指纹
-  -e bool      启用漏洞插件扫描,目前主要有ms17-010与shiro
+  -v bool      扫描详细指纹.默认为打开状态,存在-v参数则关闭.
+  -e bool      启用漏洞插件扫描,目前有ms17-010与shiro(默认key)
   -k string    启动密码(必须输入)为puaking  
   -l string    从文件中读取任务,例如:-l ip.txt
   -P bool      查看端口预设
   -F file      格式化json
+  -no bool	   高级扫描模式只探测存活网段不进行端口扫描
 
 ```
 
@@ -35,6 +36,16 @@ Usage of ./getitle:
 #### 扫描启发式扫描B段或大于B段
 
 `./gt.exe -ip 172.16.1.1/12 -p top2 -m s`
+
+#### 写入到文件
+
+写入到文件的数据为json,需要配合-F参数格式化
+
+`./gt.exe -ip 172.16.1.1/12 -p top2 -m s -f out.txt`
+
+#### 格式化json输出
+
+`./gt.exe -F out.txt`
 
 启发式扫描只会先扫描80端口,如果在该C段中扫描到了80端口,则进行已配置端口的完整扫描.加快扫描速度.
 
@@ -54,7 +65,7 @@ Usage of ./getitle:
 
 用法:
 
-`./gt.exe -ip 192.168.1.1/24 -p top2 -v`
+`./gt.exe -ip 192.168.1.1/24 -p top2 `
 
 #### 漏洞探测
 
@@ -112,9 +123,9 @@ ICMP
 
 ### 注意事项
 
-* 因为并发过高,性能限制主要来自路由器设备.因此**建议在阿里云,华为云等vps上使用**,如果扫描国外资产,建议在国外vps上使用.本地使用如果网络设备性能不佳会带来大量丢包.
+* **(重要)**因为并发过高,性能限制主要来自路由器设备.因此**建议在阿里云,华为云等vps上使用**,如果扫描国外资产,建议在国外vps上使用.本地使用如果网络设备性能不佳会带来大量丢包.
 
-* 如果使用中发现疯狂报错,大概率是io设备问题(例如多次扫描后io没有被正确释放,或者配合proxifier以及类似代理工具使用报错),可以通过重启电脑,或者虚拟机中使用,关闭代理工具解决.如果依旧无法解决请联系我们.
+* 如果使用中发现疯狂报错,大概率是io问题(例如多次扫描后io没有被正确释放,或者配合proxifier以及类似代理工具使用报错),可以通过重启电脑,或者虚拟机中使用,关闭代理工具解决.如果依旧无法解决请联系我们.
 
 * 还需要注意,upx压缩后的版本虽然体积小,但是有可能被杀软杀,也有可能在部分机器上无法运行.
 
@@ -147,8 +158,6 @@ icmp扫描
 指纹的json位于`src\Utils\finger.json`.
 
 为了保证单文件可使用,将会在运行gox.bat时将json中的数据写到`src\Utils\finger.go`中
-
-
 
 配置示例:
 
@@ -187,7 +196,7 @@ icmp扫描
 
    ```
    go get github.com/mitchellh/gox
-   gox.bat
+   gox.bat [version] # .e.g gox.bat 0.3.0
    ```
 
    
@@ -334,4 +343,8 @@ icmp扫描
 
 9. 添加常见服务指纹识别
 
-   
+10. 节流算法
+
+11. 预编译正则表达式
+
+    
