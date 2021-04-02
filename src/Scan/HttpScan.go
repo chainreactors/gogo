@@ -83,6 +83,7 @@ func SystemHttp(target string, result *Utils.Result) {
 		result.Error = err.Error()
 		return
 	}
+	result.Error = ""
 	result.Protocol = resp.Request.URL.Scheme
 	result.HttpStat = strconv.Itoa(resp.StatusCode)
 	result.Content = string(Utils.GetBody(resp))

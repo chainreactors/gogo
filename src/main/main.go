@@ -32,7 +32,8 @@ func main() {
 	typ := flag.String("n", "socket", "")
 	delay := flag.Int("d", 2, "")
 	clean := flag.Bool("c", false, "")
-	Output := flag.String("o", "full", "")
+	output := flag.String("o", "full", "")
+	fileoutput := flag.String("O", "json", "")
 	filename := flag.String("f", "", "")
 	exploit := flag.Bool("e", false, "")
 	version := flag.Bool("v", false, "")
@@ -40,29 +41,32 @@ func main() {
 	formatoutput := flag.String("F", "", "")
 	noScan := flag.Bool("no", false, "")
 	flag.Parse()
+	// 密钥
 	if *key != k {
 		//rev()
 		os.Exit(0)
 	}
+	// 输出Port config
 	if *isPortConfig {
 		core.Listportconfig()
 		os.Exit(0)
 	}
+	// 格式化
 	if *formatoutput != "" {
-		core.FormatOutput(*formatoutput, *formatoutput)
+		core.FormatOutput(*formatoutput, *filename)
 		os.Exit(0)
 	}
 	if *IPaddress == "" && *list == "" && *mod != "a" {
 		os.Exit(0)
 	}
-
 	starttime := time.Now()
 
 	//初始化全局变量
 	Scan.Delay = time.Duration(*delay)
 	core.Threads = *threads
 	core.Filename = *filename
-	core.OutputType = *Output
+	core.OutputType = *output
+	core.FileOutputType = *fileoutput
 	Scan.Exploit = *exploit
 	core.Clean = *clean
 	Scan.Version = *version

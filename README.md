@@ -7,7 +7,7 @@
 Usage of ./getitle:
   -d int       超时,默认2s (default 2)
   -ip string   IP地址 like 192.168.1.1/24
-  -m string    扫描模式：default ,s(启发式),f(每个C段第一个ip) ,a(auto,内网三个网段)
+  -m string    扫描模式：default ,s(启发式),f(每个C段第一个ip) ,a(auto,内网三个网段,默认为icmp扫描,如要启用socket请指定-n socket)(每次只能选择一个生效)
   -n string    协议模式: socket(默认) or icmp
   -p string    ports (default "top1")
   -t int       threads (default 4000)
@@ -87,13 +87,9 @@ ms17-010
 
 `./gt.exe -m a`
 
-
-
 首ip网段探测,可通过-n 指定,默认为socket,例如:
 
 `gt.exe -ip 59.1.1.1/8 -m f`
-
-
 
 指定为首ip探测模式 icmp协议
 

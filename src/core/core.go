@@ -54,7 +54,7 @@ func defaultScan(tc TargetConfig) {
 			fmt.Print(output(result, OutputType))
 		}
 		if O2File {
-			Datach <- JsonFile(result)
+			Datach <- output(result, FileOutputType)
 		}
 
 	}

@@ -6,6 +6,7 @@ import (
 	"getitle/src/Utils"
 	"io/ioutil"
 	"os"
+	"runtime"
 	"strconv"
 	"strings"
 )
@@ -17,6 +18,7 @@ var Clean = false
 var Filename string
 var Threads int
 var OutputType string
+var FileOutputType string
 var Namemap, Typemap, Portmap map[string][]string = loadportconfig()
 
 type PortFinger struct {
@@ -26,13 +28,21 @@ type PortFinger struct {
 }
 
 func Init() {
-	println("*********  getitle 0.3.3 beta by Sangfor  *********")
+	//println("*********  getitle 0.3.3 beta by Sangfor  *********")
+	if Filename != "" {
+		Clean = !Clean
+	}
+	OS := runtime.GOOS
+	if Threads == 4000 && OS == "windows" {
+		Threads = 2000
+	}
+
 	initFile()
 }
 
 func RunTask(inp string, portlist []string, mod string, typ string) {
 	var CIDR string
-	if mod == "a" || inp == "auto" {
+	if mod == "a" {
 		// 内网探测默认使用icmp扫描
 		CIDR = "auto"
 		typ = "icmp"
@@ -42,7 +52,7 @@ func RunTask(inp string, portlist []string, mod string, typ string) {
 	}
 	if CIDR == "" {
 		println("[-] target (" + inp + ") format ERROR,")
-		return
+		os.Exit(0)
 	}
 	fmt.Println(fmt.Sprintf("[*] Start Scan Task %s ,total ports: %d , mod: %s", CIDR, len(portlist), mod))
 	if len(portlist) > 1000 {
