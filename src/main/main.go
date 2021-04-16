@@ -7,6 +7,7 @@ import (
 	"getitle/src/core"
 	"github.com/panjf2000/ants/v2"
 	"os"
+	"runtime"
 	"strings"
 	"time"
 )
@@ -22,24 +23,37 @@ func main() {
 		println("segment fault")
 		os.Exit(0)
 	}
+	var config core.Config
 	//默认参数信息
-	ports := flag.String("p", "top1", "")
+	flag.StringVar(&config.IP, "ip", "", "")
+	flag.StringVar(&config.Ports, "p", "top1", "")
 	key := flag.String("k", "", "")
-	list := flag.String("l", "", "")
-	threads := flag.Int("t", 4000, "")
-	IPaddress := flag.String("ip", "", "")
-	mod := flag.String("m", "default", "")
-	typ := flag.String("n", "socket", "")
+	flag.StringVar(&config.List, "l", "", "")
+	flag.IntVar(&config.Threads, "t", 4000, "")
+	flag.StringVar(&config.Mod, "m", "default", "")
+	flag.StringVar(&config.Typ, "n", "socket", "")
+	flag.StringVar(&config.Output, "o", "full", "")
+	//flag.StringVar(&config.Filename,"f", "", "")
+	flag.BoolVar(&config.Noscan, "no", false, "")
+	flag.BoolVar(&config.Clean, "c", false, "")
+	flag.StringVar(&config.Fileoutput, "O", "json", "")
+	//ports := flag.String("p", "top1", "")
+	//list := flag.String("l", "", "")
+	//threads := flag.Int("t", 4000, "")
+	//flag.StringVar(&config.ports,"p", "top1", "")
+	//IPaddress := flag.String("ip", "", "")
+	//mod := flag.String("m", "default", "")
+	//typ := flag.String("n", "socket", "")
 	delay := flag.Int("d", 2, "")
-	clean := flag.Bool("c", false, "")
-	output := flag.String("o", "full", "")
-	fileoutput := flag.String("O", "json", "")
+	//clean := flag.Bool("c", false, "")
+	//output := flag.String("o", "full", "")
+	//fileoutput := flag.String("O", "json", "")
 	filename := flag.String("f", "", "")
 	exploit := flag.Bool("e", false, "")
 	version := flag.Bool("v", false, "")
 	isPortConfig := flag.Bool("P", false, "")
 	formatoutput := flag.String("F", "", "")
-	noScan := flag.Bool("no", false, "")
+	//noScan := flag.Bool("no", false, "")
 	flag.Parse()
 	// 密钥
 	if *key != k {
@@ -53,34 +67,57 @@ func main() {
 	}
 	// 格式化
 	if *formatoutput != "" {
-		core.FormatOutput(*formatoutput, *filename)
+		core.FormatOutput(*formatoutput, config.Filename)
 		os.Exit(0)
 	}
-	if *IPaddress == "" && *list == "" && *mod != "a" {
+
+	if config.IP == "" && config.List == "" && config.Mod != "a" {
 		os.Exit(0)
 	}
+	// 存在文件输出则停止命令行输出
+	if config.Filename != "" {
+		config.Clean = !config.Clean
+	}
+	//windows系统默认协程数为2000
+	OS := runtime.GOOS
+	if config.Threads == 4000 && OS == "windows" {
+		config.Threads = 2000
+	}
+	p := fmt.Sprintf("[*] Current goroutine: %d,", config.Threads)
+	if !*version {
+		p += "Version Scan Running, "
+	} else {
+		p += "Version Scan Closed, "
+	}
+	if *exploit {
+		p += "Exploit Scan Running"
+	} else {
+		p += "Exploit Scan Closed"
+	}
+	println(p)
 	starttime := time.Now()
 
 	//初始化全局变量
 	Scan.Delay = time.Duration(*delay)
-	core.Threads = *threads
+	//core.Threads = *threads
 	core.Filename = *filename
-	core.OutputType = *output
-	core.FileOutputType = *fileoutput
+	//core.OutputType = *output
+	//core.FileOutputType = *fileoutput
 	Scan.Exploit = *exploit
-	core.Clean = *clean
+	//core.Clean = *clean
 	Scan.Version = *version
-	core.NoScan = *noScan
+	//core.NoScan = *noScan
 	core.Init()
 
-	portlist := core.PortHandler(*ports)
-	if *list != "" {
-		targetList := core.ReadTargetFile(*list)
+	config.Portlist = core.PortHandler(config.Ports)
+	if config.List != "" {
+		targetList := core.ReadTargetFile(config.List)
 		for _, v := range targetList {
-			core.RunTask(strings.TrimSpace(v), portlist, *mod, *typ)
+			config.IP = v
+			core.RunTask(config)
 		}
 	} else {
-		core.RunTask(*IPaddress, portlist, *mod, *typ)
+		core.RunTask(config)
 	}
 
 	//关闭文件写入管道

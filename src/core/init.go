@@ -6,7 +6,6 @@ import (
 	"getitle/src/Utils"
 	"io/ioutil"
 	"os"
-	"runtime"
 	"strconv"
 	"strings"
 )
@@ -14,11 +13,7 @@ import (
 var Datach = make(chan string, 100)
 var FileHandle *os.File
 var O2File = false
-var Clean = false
 var Filename string
-var Threads int
-var OutputType string
-var FileOutputType string
 var Namemap, Typemap, Portmap map[string][]string = loadportconfig()
 
 type PortFinger struct {
@@ -27,58 +22,66 @@ type PortFinger struct {
 	Type  []string `json:"type"`
 }
 
+type Config struct {
+	IP         string
+	Ports      string
+	Portlist   []string
+	List       string
+	Threads    int
+	Mod        string
+	Typ        string
+	Output     string
+	Filename   string
+	Fileoutput string
+	Noscan     bool
+	Clean      bool
+}
+
 func Init() {
-	//println("*********  getitle 0.3.3 beta by Sangfor  *********")
-	if Filename != "" {
-		Clean = !Clean
-	}
-	OS := runtime.GOOS
-	if Threads == 4000 && OS == "windows" {
-		Threads = 2000
-	}
+	//println("*********  main 0.3.3 beta by Sangfor  *********")
 
 	initFile()
 }
 
-func RunTask(inp string, portlist []string, mod string, typ string) {
+func RunTask(config Config) {
 	var CIDR string
-	if mod == "a" {
+	if config.Mod == "a" {
 		// 内网探测默认使用icmp扫描
 		CIDR = "auto"
-		typ = "icmp"
+		config.Typ = "icmp"
 	} else {
-		CIDR = IpInit(inp)
+		CIDR = IpInit(config.IP)
 		CIDR = checkIp(CIDR)
 	}
 	if CIDR == "" {
-		println("[-] target (" + inp + ") format ERROR,")
+		println("[-] target (" + config.IP + ") format ERROR,")
 		os.Exit(0)
 	}
-	fmt.Println(fmt.Sprintf("[*] Start Scan Task %s ,total ports: %d , mod: %s", CIDR, len(portlist), mod))
-	if len(portlist) > 1000 {
-		fmt.Println("[*] too much ports , only show top 1000 ports: " + strings.Join(portlist[:1000], ",") + "......")
+	fmt.Println(fmt.Sprintf("[*] Start Scan Task %s ,total ports: %d , mod: %s", CIDR, len(config.Portlist), config.Mod))
+	if len(config.Portlist) > 1000 {
+		fmt.Println("[*] too much ports , only show top 1000 ports: " + strings.Join(config.Portlist[:1000], ",") + "......")
 	} else {
-		fmt.Println("[*] ports: " + strings.Join(portlist, ","))
+		fmt.Println("[*] ports: " + strings.Join(config.Portlist, ","))
 	}
-
-	switch mod {
+	config.IP = CIDR
+	switch config.Mod {
 	case "default":
 		//直接扫描
-		StraightMod(CIDR, portlist)
+		StraightMod(config)
 	case "a", "auto":
-		SmartBMod(CIDR, portlist, mod, typ)
+		SmartBMod(config)
 	case "s", "f":
 		//启发式扫描
 		mask, _ := strconv.Atoi(strings.Split(CIDR, "/")[1])
 		if mask < 24 && mask >= 16 {
-			SmartBMod(CIDR, portlist, mod, typ)
+			SmartBMod(config)
 		} else if mask < 16 {
-			SmartAMod(CIDR, portlist, mod, typ)
+			SmartAMod(config)
 		} else {
-			StraightMod(CIDR, portlist)
+			StraightMod(config)
 		}
 	default:
-		StraightMod(CIDR, portlist)
+		StraightMod(config)
 	}
 }
 

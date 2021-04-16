@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"time"
 )
 
 type Result struct {
@@ -234,7 +233,7 @@ func getTCPFrameWork(result *Result) {
 
 	// 若默认端口未匹配到结果,则匹配全部
 	for _, finger := range Tcpfingers {
-		if finger.Defaultport[result.Port] != false {
+		if finger.Defaultport[result.Port] != true {
 			tcpFingerMatch(result, finger)
 		}
 
@@ -253,26 +252,30 @@ func tcpFingerMatch(result *Result, finger Finger) {
 
 	// 某些规则需要主动发送一个数据包探测
 	if finger.SendData != "" {
-		// 复用tcp链接
-
-		data, err = SocketSend(*result.TcpCon, []byte(finger.SendData), 1024)
+		var conn net.Conn
+		conn, err = TcpSocketConn(GetTarget(result), 2)
+		if err != nil {
+			return
+		}
+		data, err = SocketSend(conn, []byte(finger.SendData), 1024)
 
 		// 如果报错为EOF,则需要重新建立tcp连接
-		if err != nil && err.Error() == "EOF" {
-			target := GetTarget(result)
-			// 如果对端已经关闭,则本地socket也关闭,并重新建立连接
-			(*result.TcpCon).Close()
-			*result.TcpCon, err = TcpSocketConn(target, time.Duration(2))
-			if err != nil {
-				return
-			}
-			data, err = SocketSend(*result.TcpCon, []byte(finger.SendData), 1024)
-
-			// 重新建立链接后再次报错,则跳过该规则匹配
-			if err != nil {
-				result.Error = err.Error()
-				return
-			}
+		if err != nil {
+			return
+			//target := GetTarget(result)
+			//// 如果对端已经关闭,则本地socket也关闭,并重新建立连接
+			//(*result.TcpCon).Close()
+			//*result.TcpCon, err = TcpSocketConn(target, time.Duration(2))
+			//if err != nil {
+			//	return
+			//}
+			//data, err = SocketSend(*result.TcpCon, []byte(finger.SendData), 1024)
+			//
+			//// 重新建立链接后再次报错,则跳过该规则匹配
+			//if err != nil {
+			//	result.Error = err.Error()
+			//	return
+			//}
 		}
 	}
 	// 如果主动探测有回包,则正则匹配回包内容, 若主动探测没有返回内容,则直接跳过该规则

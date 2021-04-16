@@ -28,6 +28,9 @@ func OXIDScan(target string, result *Utils.Result) {
 	}
 	recvStr_v2 := recvStr[42:]
 	packet_v2_end := strings.Index(recvStr_v2, "\x09\x00\xff\xff\x00\x00")
+	if packet_v2_end == -1 {
+		return
+	}
 	packet_v2 := recvStr_v2[:packet_v2_end]
 	packet_v2 = strings.Replace(packet_v2, "\x00", "", -1)
 	hostname_list := strings.Split(packet_v2, "\x07")

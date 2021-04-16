@@ -2,7 +2,7 @@ package Scan
 
 //
 //import (
-//	"getitle/src/Utils"
+//	"main/src/Utils"
 //	"io/ioutil"
 //	"strings"
 //)
