@@ -30,7 +30,7 @@ func output(result *Utils.Result, outType string) string {
 	case "color", "c":
 		out = ColorOutput(result)
 	case "json", "j":
-		if O2File {
+		if FileHandle != nil {
 			out = JsonFile(result)
 		} else {
 			out = JsonOutput(result)

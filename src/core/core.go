@@ -11,25 +11,21 @@ import (
 )
 
 type TargetConfig struct {
-	ip             string
-	port           string
-	clean          bool
-	outputType     string
-	fileOutputType string
+	ip   string
+	port string
 }
 
 //直接扫描
 func StraightMod(config Config) {
 	var wgs sync.WaitGroup
-	ipChannel := ipGenerator(config.IP, "default", nil)
+	var ipChannel chan string
+	ipChannel = ipGenerator(config, nil)
 	targetChannel := tcGenerator(ipChannel, config.Portlist)
 
 	// Use the pool with a function,
 	// set 10 to the capacity of goroutine pool and 1 second for expired duration.
 	scanPool, _ := ants.NewPoolWithFunc(config.Threads, func(i interface{}) {
 		tc := i.(TargetConfig)
-		tc.clean = config.Clean
-		tc.fileOutputType = config.Filename
 		defaultScan(tc)
 		wgs.Done()
 	})
@@ -53,11 +49,11 @@ func defaultScan(tc TargetConfig) {
 	//res := Scan.SystemHttp(ip)
 
 	if result.Stat != "" {
-		if !tc.clean {
-			fmt.Print(output(result, tc.outputType))
+		if !Clean {
+			fmt.Print(output(result, Output))
 		}
-		if O2File {
-			Datach <- output(result, tc.fileOutputType)
+		if FileHandle != nil {
+			Datach <- output(result, FileOutput)
 		}
 
 	}
@@ -85,9 +81,10 @@ func SmartBMod(config Config) {
 
 	aliveC := make(chan string)
 	go safeMap(&temp, aliveC)
-
+	var ipChannel chan string
+	ipChannel = ipGenerator(config, &temp)
 	// 选择ip生成器
-	ipChannel := ipGenerator(config.IP, config.Mod, &temp)
+
 	var tcChannel chan TargetConfig
 
 	if config.Typ == "icmp" || config.Typ == "i" {
@@ -152,48 +149,3 @@ func SmartAMod(config Config) {
 		SmartBMod(tmpconfig)
 	}
 }
-
-//func AutoMod(portlist []string) {
-//	var wgs sync.WaitGroup
-//	//if target {
-//	autoIcmpChannel := ipGenerator("auto","defalut",nil)
-//	var tcChannel chan TargetConfig
-//	if Mod == "s" {
-//		println("[*] current Mod : Socket")
-//		tcChannel = tcGenerator(autoIcmpChannel, []string{"80"})
-//	} else {
-//		println("[*] current Mod : ICMP")
-//		tcChannel = tcGenerator(autoIcmpChannel, []string{"icmp"})
-//	}
-//
-//	var temp sync.Map
-//	aliveC := make(chan string)
-//	go safeMap(&temp, aliveC)
-//
-//	//go safeMap(temp, aliveC)
-//	// Use the pool with a function,
-//	// set 10 to the capacity of goroutine pool and 1 second for expired duration.
-//	scanPool, _ := ants.NewPoolWithFunc(Threads, func(i interface{}) {
-//		tc := i.(TargetConfig)
-//		smartScan(tc, aliveC)
-//		wgs.Done()
-//	})
-//	defer scanPool.Release()
-//
-//	for t := range tcChannel {
-//		wgs.Add(1)
-//		_ = scanPool.Invoke(t)
-//	}
-//	wgs.Wait()
-//	time.Sleep(2 * time.Second)
-//	close(aliveC)
-//
-//	temp.Range(func(key, value interface{}) bool {
-//		if value.(int) > 0 {
-//			println("[*] Processing:" + key.(string) + "/24")
-//			StraightMod(key.(string)+"/24", portlist)
-//		}
-//		return true
-//	})
-//
-//}

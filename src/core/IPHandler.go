@@ -24,6 +24,11 @@ func int2ip(ipint uint) string {
 	return ip.String()
 }
 
+func getMask(cidr string) int {
+	mask, _ := strconv.Atoi(strings.Split(cidr, "/")[0])
+	return mask
+}
+
 func getMaskRange(mask string) (before uint, after uint) {
 	IntMask, _ := strconv.Atoi(mask)
 
@@ -69,7 +74,6 @@ func defaultIpGenerator(CIDR string, ch chan string) chan string {
 			ch <- int2ip(i)
 		}
 	}
-
 	return ch
 }
 
@@ -77,7 +81,6 @@ func defaultIpGenerator(CIDR string, ch chan string) chan string {
 func smartIpGenerator(CIDR string, ch chan string, temp *sync.Map) chan string {
 	start, fin := getIpRange(CIDR)
 	var outIP string
-	//sum := fin -start
 	var C, B uint
 
 	for C = 1; C < 255; C++ {
@@ -88,7 +91,13 @@ func smartIpGenerator(CIDR string, ch chan string, temp *sync.Map) chan string {
 			}
 		}
 	}
+	return ch
+}
 
+func IPsGenerator(config Config, ch chan string) chan string {
+	for _, cidr := range config.IPlist {
+		ch = defaultIpGenerator(cidr, ch)
+	}
 	return ch
 }
 
@@ -109,7 +118,6 @@ func bipGenerator(CIDR string) chan string {
 	var i uint
 	go func() {
 		for i = startB; i <= finB; i++ {
-
 			ip[1] = uint8(i)
 			ch <- ip.String()
 		}
@@ -136,25 +144,24 @@ func firstIpGenerator(CIDR string, ch chan string) chan string {
 	return ch
 }
 
-func ipGenerator(CIDR string, mod string, temp *sync.Map) chan string {
+func ipGenerator(config Config, temp *sync.Map) chan string {
 	ch := make(chan string)
 	go func() {
-		if mod == "a" {
-			// 生成内网ip的首段
-			fmt.Println("[*] current Mod: auto")
-			ch = firstInterGenerator(ch)
-		} else if mod == "s" {
-			fmt.Println("[*] current Mod: smart")
-			ch = smartIpGenerator(CIDR, ch, temp)
-		} else if mod == "f" {
-			fmt.Println("[*] current Mod: first Ip")
-			ch = firstIpGenerator(CIDR, ch)
+		if config.IPlist != nil {
+			ch = IPsGenerator(config, ch)
 		} else {
-			ch = defaultIpGenerator(CIDR, ch)
+			if config.Mod == "a" {
+				ch = firstInterGenerator(ch)
+			} else if config.Mod == "s" {
+				ch = smartIpGenerator(config.IP, ch, temp)
+			} else if config.Mod == "f" {
+				ch = firstIpGenerator(config.IP, ch)
+			} else {
+				ch = defaultIpGenerator(config.IP, ch)
+			}
 		}
 		close(ch)
 	}()
-
 	return ch
 }
 
@@ -187,15 +194,4 @@ func getIp(target string) string {
 		}
 	}
 	return ""
-}
-
-func IpInit(target string) string {
-	target = strings.Replace(target, "http://", "", -1)
-	target = strings.Replace(target, "https://", "", -1)
-	if target[len(target)-1:] == "/" {
-		target = target + "32"
-	} else if !strings.Contains(target, "/") {
-		target = target + "/32"
-	}
-	return target
 }

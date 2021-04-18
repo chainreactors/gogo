@@ -12,8 +12,10 @@ import (
 
 var Datach = make(chan string, 100)
 var FileHandle *os.File
-var O2File = false
 var Filename string
+var Output string
+var FileOutput string
+var Clean bool
 var Namemap, Typemap, Portmap map[string][]string = loadportconfig()
 
 type PortFinger struct {
@@ -23,47 +25,54 @@ type PortFinger struct {
 }
 
 type Config struct {
-	IP         string
-	Ports      string
-	Portlist   []string
-	List       string
-	Threads    int
-	Mod        string
-	Typ        string
-	Output     string
-	Filename   string
-	Fileoutput string
-	Noscan     bool
-	Clean      bool
+	IP       string
+	IPlist   []string
+	Ports    string
+	Portlist []string
+	List     string
+	Threads  int
+	Mod      string
+	Typ      string
+	Output   string
+	Filename string
+	Noscan   bool
 }
 
-func Init() {
+func Init(config Config) Config {
 	//println("*********  main 0.3.3 beta by Sangfor  *********")
-
-	initFile()
+	config.Portlist = PortHandler(config.Ports)
+	if config.List != "" {
+		config.IPlist = ReadTargetFile(config.List)
+	}
+	initFile(config.Filename)
+	return config
 }
 
 func RunTask(config Config) {
-	var CIDR string
+	var taskname string = ""
 	if config.Mod == "a" {
 		// 内网探测默认使用icmp扫描
-		CIDR = "auto"
+		taskname = "auto"
 		config.Typ = "icmp"
 	} else {
-		CIDR = IpInit(config.IP)
-		CIDR = checkIp(CIDR)
+		config = IpInit(config)
+		if config.IP != "" {
+			taskname = config.IP
+		} else if config.List != "" {
+			taskname = config.List
+		}
 	}
-	if CIDR == "" {
-		println("[-] target (" + config.IP + ") format ERROR,")
+	if taskname == "" {
+		println("[-] No Task")
 		os.Exit(0)
 	}
-	fmt.Println(fmt.Sprintf("[*] Start Scan Task %s ,total ports: %d , mod: %s", CIDR, len(config.Portlist), config.Mod))
+
+	fmt.Println(fmt.Sprintf("[*] Start Scan Task %s ,total ports: %d , mod: %s", taskname, len(config.Portlist), config.Mod))
 	if len(config.Portlist) > 1000 {
 		fmt.Println("[*] too much ports , only show top 1000 ports: " + strings.Join(config.Portlist[:1000], ",") + "......")
 	} else {
 		fmt.Println("[*] ports: " + strings.Join(config.Portlist, ","))
 	}
-	config.IP = CIDR
 	switch config.Mod {
 	case "default":
 		//直接扫描
@@ -72,14 +81,8 @@ func RunTask(config Config) {
 		SmartBMod(config)
 	case "s", "f":
 		//启发式扫描
-		mask, _ := strconv.Atoi(strings.Split(CIDR, "/")[1])
-		if mask < 24 && mask >= 16 {
-			SmartBMod(config)
-		} else if mask < 16 {
-			SmartAMod(config)
-		} else {
-			StraightMod(config)
-		}
+		SmartBMod(config)
+
 	default:
 		StraightMod(config)
 	}
@@ -94,8 +97,10 @@ func ReadTargetFile(targetfile string) []string {
 	}
 	defer file.Close()
 	targetb, _ := ioutil.ReadAll(file)
-	targets := strings.TrimSpace(string(targetb))
-	return strings.Split(targets, "\n")
+	targetstr := strings.TrimSpace(string(targetb))
+	targetstr = strings.Replace(targetstr, "\r", "", -1)
+	targets := strings.Split(targetstr, "\n")
+	return targets
 }
 
 //func TargetHandler(s string) (string, []string, string, string) {
@@ -108,7 +113,7 @@ func ReadTargetFile(targetfile string) []string {
 //		return CIDR, portlist, mod, typ
 //	}
 //
-//	CIDR = IpInit(ss[0])
+//	CIDR = IpForamt(ss[0])
 //	portlist = PortHandler("top1")
 //	mod = "default"
 //	typ = "socket"
@@ -124,17 +129,16 @@ func ReadTargetFile(targetfile string) []string {
 //	return CIDR, portlist, mod, typ
 //}
 
-func initFile() {
+func initFile(filename string) {
 	var err error
 
-	if Filename != "" {
-		O2File = true
-		if checkFileIsExist(Filename) { //如果文件存在
-			//FileHandle, err = os.OpenFile(Filename, os.O_APPEND|os.O_WRONLY, os.ModeAppend) //打开文件
+	if filename != "" {
+		if checkFileIsExist(filename) { //如果文件存在
+			//FileHandle, err = os.OpenFile(filename, os.O_APPEND|os.O_WRONLY, os.ModeAppend) //打开文件
 			println("[-] File already exists")
 			os.Exit(0)
 		} else {
-			FileHandle, err = os.Create(Filename) //创建文件
+			FileHandle, err = os.Create(filename) //创建文件
 			if err != nil {
 				os.Exit(0)
 			}
@@ -175,7 +179,6 @@ func PortHandler(portstring string) []string {
 	ports = ports2PortSlice(ports)
 	ports = removeDuplicateElement(ports)
 	return ports
-
 }
 
 func loadportconfig() (map[string][]string, map[string][]string, map[string][]string) {
@@ -186,7 +189,6 @@ func loadportconfig() (map[string][]string, map[string][]string, map[string][]st
 		println("[-] port config load FAIL!")
 		os.Exit(0)
 	}
-
 	typemap := make(map[string][]string)
 	namemap := make(map[string][]string)
 	portmap := make(map[string][]string)
@@ -265,4 +267,41 @@ func removeDuplicateElement(ss []string) []string {
 		}
 	}
 	return res
+}
+
+func IpForamt(target string) string {
+	target = strings.Replace(target, "http://", "", -1)
+	target = strings.Replace(target, "https://", "", -1)
+	target = strings.Trim(target, "/")
+	if strings.Contains(target, "/") {
+		ip := strings.Split(target, "/")[0]
+		mask := strings.Split(target, "/")[1]
+		if isIPv4(ip) {
+			target = ip + "/" + mask
+		} else {
+			println("[-] error IPv4 " + ip)
+			os.Exit(0)
+		}
+	}
+	if !strings.Contains(target, "/") {
+		if isIPv4(target) {
+			target = target + "/32"
+		} else {
+			println("[-] error IPv4 " + target)
+			os.Exit(0)
+		}
+	}
+	return target
+}
+
+func IpInit(config Config) Config {
+	if config.IP != "" {
+		config.IP = IpForamt(config.IP)
+	}
+	if config.List != "" {
+		for i, ip := range config.IPlist {
+			config.IPlist[i] = IpForamt(ip)
+		}
+	}
+	return config
 }
