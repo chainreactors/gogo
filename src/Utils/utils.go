@@ -90,3 +90,49 @@ func getHeaderstr(resp *http.Response) string {
 	}
 	return headerstr
 }
+
+func SliceContains(s []string, e string) bool {
+	for _, v := range s {
+		if v == e {
+			return true
+		}
+	}
+	return false
+}
+
+func Ports2PortSlice(ports []string) []string {
+	var tmpports []string
+	//生成端口列表 支持,和-
+	for _, pr := range ports {
+		tmpports = append(tmpports, port2PortSlice(pr)...)
+	}
+	return tmpports
+}
+
+func port2PortSlice(port string) []string {
+	var tmpports []string
+	if strings.Contains(port, "-") {
+		sf := strings.Split(port, "-")
+		start, _ := strconv.Atoi(sf[0])
+		fin, _ := strconv.Atoi(sf[1])
+		for port := start; port <= fin; port++ {
+			tmpports = append(tmpports, strconv.Itoa(port))
+		}
+	} else {
+		tmpports = append(tmpports, port)
+	}
+	return tmpports
+}
+
+//切片去重
+func SliceUnique(ss []string) []string {
+	res := make([]string, 0, len(ss))
+	temp := map[string]struct{}{}
+	for _, item := range ss {
+		if _, ok := temp[item]; !ok {
+			temp[item] = struct{}{}
+			res = append(res, item)
+		}
+	}
+	return res
+}

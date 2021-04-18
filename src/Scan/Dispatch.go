@@ -3,41 +3,37 @@ package Scan
 import (
 	"getitle/src/Utils"
 	"strings"
-	"time"
 )
 
 var Alivesum, Sum int
 var Exploit bool
 var Version bool
-var Delay time.Duration
+var Delay int
 
 func Dispatch(result *Utils.Result) {
 	target := Utils.GetTarget(result)
 	Sum++
-	//println(result.Ip, result.Port)
-	switch result.Port {
-	case "137":
+
+	if result.Port == "137" {
 		NbtScan(target, result)
 		return
-	case "135":
+	} else if result.Port == "135" {
 		OXIDScan(target, result)
 		return
-	case "icmp":
+	} else if result.Port == "icmp" {
 		IcmpScan(result.Ip, result)
 		return
-	default:
+	} else if Utils.SliceContains(Utils.Portmap[result.Port], "snmp") {
+		SnmpScan(result.Ip, result)
+		return
+	} else {
 		SocketHttp(target, result)
 	}
 
 	if result.Stat == "OPEN" {
 		Alivesum++
-
 		//被动收集基本信息
 		Utils.InfoFilter(result)
-
-		//处理错误信息
-		Utils.ErrHandler(result)
-
 		// 因为正则匹配耗时较长,如果没有-v参数则字节不进行服务识别
 		if !Version {
 			Utils.GetDetail(result)

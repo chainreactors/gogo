@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 )
 
 // -defalut
@@ -57,7 +56,7 @@ func SocketHttp(target string, result *Utils.Result) {
 //使用封装好了http
 func SystemHttp(target string, result *Utils.Result) {
 	var conn http.Client
-	var delay time.Duration
+	var delay int
 	// 如果是400或者不可识别协议,则使用https
 	var ishttps bool
 	if result.HttpStat == "400" || result.Protocol == "tcp" {
@@ -69,7 +68,7 @@ func SystemHttp(target string, result *Utils.Result) {
 
 	//如果是https或者30x跳转,则增加超时时间
 	if ishttps || strings.HasPrefix(result.HttpStat, "3") {
-		delay = Delay + 1
+		delay = Delay + 2
 	}
 	conn = Utils.HttpConn(delay)
 	resp, err := conn.Get(target)

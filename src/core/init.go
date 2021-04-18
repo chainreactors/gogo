@@ -1,12 +1,10 @@
 package core
 
 import (
-	"encoding/json"
 	"fmt"
 	"getitle/src/Utils"
 	"io/ioutil"
 	"os"
-	"strconv"
 	"strings"
 )
 
@@ -16,13 +14,6 @@ var Filename string
 var Output string
 var FileOutput string
 var Clean bool
-var Namemap, Typemap, Portmap map[string][]string = loadportconfig()
-
-type PortFinger struct {
-	Name  string   `json:"name"`
-	Ports []string `json:"ports"`
-	Type  []string `json:"type"`
-}
 
 type Config struct {
 	IP       string
@@ -176,51 +167,26 @@ func PortHandler(portstring string) []string {
 	for _, portname := range postslist {
 		ports = append(ports, choiceports(portname)...)
 	}
-	ports = ports2PortSlice(ports)
-	ports = removeDuplicateElement(ports)
+	ports = Utils.Ports2PortSlice(ports)
+	ports = Utils.SliceUnique(ports)
 	return ports
-}
-
-func loadportconfig() (map[string][]string, map[string][]string, map[string][]string) {
-	var portfingers []PortFinger
-	err := json.Unmarshal([]byte(Utils.LoadFingers("port")), &portfingers)
-
-	if err != nil {
-		println("[-] port config load FAIL!")
-		os.Exit(0)
-	}
-	typemap := make(map[string][]string)
-	namemap := make(map[string][]string)
-	portmap := make(map[string][]string)
-
-	for _, v := range portfingers {
-		namemap[v.Name] = append(namemap[v.Name], v.Ports...)
-		for _, t := range v.Type {
-			typemap[t] = append(typemap[t], v.Ports...)
-		}
-		for _, p := range v.Ports {
-			portmap[p] = append(portmap[p], v.Name)
-		}
-	}
-
-	return typemap, namemap, portmap
 }
 
 // 端口预设
 func choiceports(portname string) []string {
 	var ports []string
 	if portname == "all" {
-		for p, _ := range Portmap {
+		for p, _ := range Utils.Portmap {
 			ports = append(ports, p)
 		}
 		return ports
 	}
 
-	if Namemap[portname] != nil {
-		ports = append(ports, Namemap[portname]...)
+	if Utils.Namemap[portname] != nil {
+		ports = append(ports, Utils.Namemap[portname]...)
 		return ports
-	} else if Typemap[portname] != nil {
-		ports = append(ports, Typemap[portname]...)
+	} else if Utils.Typemap[portname] != nil {
+		ports = append(ports, Utils.Typemap[portname]...)
 		return ports
 	} else {
 		return []string{portname}
@@ -229,44 +195,13 @@ func choiceports(portname string) []string {
 
 func Listportconfig() {
 	println("当前已有端口配置: (根据端口类型分类)")
-	for k, v := range Namemap {
+	for k, v := range Utils.Namemap {
 		println("	", k, ": ", strings.Join(v, ","))
 	}
 	println("当前已有端口配置: (根据服务分类)")
-	for k, v := range Typemap {
+	for k, v := range Utils.Typemap {
 		println("	", k, ": ", strings.Join(v, ","))
 	}
-}
-
-func ports2PortSlice(ports []string) []string {
-	var tmpports []string
-	//生成端口列表 支持,和-
-	for _, pr := range ports {
-		if strings.Contains(pr, "-") {
-			sf := strings.Split(pr, "-")
-			start, _ := strconv.Atoi(sf[0])
-			fin, _ := strconv.Atoi(sf[1])
-			for port := start; port <= fin; port++ {
-				tmpports = append(tmpports, strconv.Itoa(port))
-			}
-		} else {
-			tmpports = append(tmpports, pr)
-		}
-	}
-	return tmpports
-}
-
-//切片去重
-func removeDuplicateElement(ss []string) []string {
-	res := make([]string, 0, len(ss))
-	temp := map[string]struct{}{}
-	for _, item := range ss {
-		if _, ok := temp[item]; !ok {
-			temp[item] = struct{}{}
-			res = append(res, item)
-		}
-	}
-	return res
 }
 
 func IpForamt(target string) string {

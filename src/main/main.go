@@ -15,6 +15,8 @@ import (
 func main() {
 	defer ants.Release()
 	k := "yysy"
+	println(os.Environ())
+	println(os.Hostname())
 	// debug
 	//f, _ := os.Create("cpu.txt")
 	//pprof.StartCPUProfile(f)
@@ -27,7 +29,6 @@ func main() {
 	//默认参数信息
 	flag.StringVar(&config.IP, "ip", "", "")
 	flag.StringVar(&config.Ports, "p", "top1", "")
-	key := flag.String("k", "", "")
 	flag.StringVar(&config.List, "l", "", "")
 	flag.IntVar(&config.Threads, "t", 4000, "")
 	flag.StringVar(&config.Mod, "m", "default", "")
@@ -37,6 +38,7 @@ func main() {
 	flag.BoolVar(&core.Clean, "c", false, "")
 	flag.StringVar(&core.FileOutput, "O", "json", "")
 	flag.StringVar(&core.Filename, "f", "", "")
+	key := flag.String("k", "", "")
 	delay := flag.Int("d", 2, "")
 	exploit := flag.Bool("e", false, "")
 	version := flag.Bool("v", false, "")
@@ -86,7 +88,7 @@ func main() {
 	starttime := time.Now()
 
 	//初始化全局变量
-	Scan.Delay = time.Duration(*delay)
+	Scan.Delay = *delay
 	Scan.Exploit = *exploit
 	Scan.Version = *version
 	config = core.Init(config)

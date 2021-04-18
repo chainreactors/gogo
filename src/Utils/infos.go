@@ -10,44 +10,7 @@ import (
 	"strings"
 )
 
-type Result struct {
-	Ip        string         `json:"ip"`
-	Port      string         `json:"port"`
-	Stat      string         `json:"-"`
-	TcpCon    *net.Conn      `json:"-"`
-	Httpresp  *http.Response `json:"-"`
-	Os        string         `json:"os"`
-	Host      string         `json:"host"`
-	Title     string         `json:"title"`
-	Midware   string         `json:"midware"`
-	HttpStat  string         `json:"http_stat"`
-	Language  string         `json:"language"`
-	Framework string         `json:"framework"`
-	Vuln      string         `json:"vuln"`
-	Protocol  string         `json:"protocol"`
-	Error     string         `json:"-"`
-	Content   string         `json:"-"`
-}
-
-type Finger struct {
-	Name        string          `json:"name"`
-	Protocol    string          `json:"protocol"`
-	SendData    string          `json:"send_data"`
-	Vuln        string          `json:"vuln"`
-	Level       int             `json:"level"`
-	Defaultport map[string]bool `json:"default_port"`
-	Regexps     Regexps         `json:"regexps"`
-}
-
-type Regexps struct {
-	HTML   []string `json:"html"`
-	MD5    []string `json:"md5"`
-	Regexp []string `json:"regexp"`
-	Cookie []string `json:"cookie"`
-	Header []string `json:"header"`
-	Info   []string `json:"info"`
-}
-
+var Namemap, Typemap, Portmap map[string][]string = loadportconfig()
 var Tcpfingers, Httpfingers = getFingers()
 
 func InfoFilter(result *Result) {
@@ -60,6 +23,8 @@ func InfoFilter(result *Result) {
 	} else {
 		result.Title = GetTitle(result.Content)
 	}
+	//处理错误信息
+	ErrHandler(result)
 
 	//return result
 
@@ -381,4 +346,30 @@ func ErrHandler(result *Result) {
 	} else if strings.Contains(result.Error, "first record does not look like a TLS handshake") {
 		result.Protocol = "tcp"
 	}
+}
+
+func loadportconfig() (map[string][]string, map[string][]string, map[string][]string) {
+	var portfingers []PortFinger
+	err := json.Unmarshal([]byte(LoadFingers("port")), &portfingers)
+
+	if err != nil {
+		println("[-] port config load FAIL!")
+		os.Exit(0)
+	}
+	typemap := make(map[string][]string)
+	namemap := make(map[string][]string)
+	portmap := make(map[string][]string)
+
+	for _, v := range portfingers {
+		v.Ports = Ports2PortSlice(v.Ports)
+		namemap[v.Name] = append(namemap[v.Name], v.Ports...)
+		for _, t := range v.Type {
+			typemap[t] = append(typemap[t], v.Ports...)
+		}
+		for _, p := range v.Ports {
+			portmap[p] = append(portmap[p], v.Name)
+		}
+	}
+
+	return typemap, namemap, portmap
 }
