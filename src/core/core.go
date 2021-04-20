@@ -16,14 +16,15 @@ type TargetConfig struct {
 }
 
 //直接扫描
-func StraightMod(target string, portlist []string) {
+func StraightMod(config Config) {
 	var wgs sync.WaitGroup
-	ipChannel := ipGenerator(target, "default", nil)
-	targetChannel := tcGenerator(ipChannel, portlist)
+	var ipChannel chan string
+	ipChannel = ipGenerator(config, nil)
+	targetChannel := tcGenerator(ipChannel, config.Portlist)
 
 	// Use the pool with a function,
 	// set 10 to the capacity of goroutine pool and 1 second for expired duration.
-	scanPool, _ := ants.NewPoolWithFunc(Threads, func(i interface{}) {
+	scanPool, _ := ants.NewPoolWithFunc(config.Threads, func(i interface{}) {
 		tc := i.(TargetConfig)
 		defaultScan(tc)
 		wgs.Done()
@@ -49,10 +50,10 @@ func defaultScan(tc TargetConfig) {
 
 	if result.Stat != "" {
 		if !Clean {
-			fmt.Print(output(result, "full"))
+			fmt.Print(output(result, Output))
 		}
-		if O2File {
-			Datach <- output(result, OutputType)
+		if FileHandle != nil {
+			Datach <- output(result, FileOutput)
 		}
 
 	}
@@ -68,39 +69,39 @@ func safeMap(temp *sync.Map, ch chan string) {
 			//temp[aliveC] = 1
 		} else {
 			temp.Store(aliveC, 1)
-			println("[*] Find " + aliveC)
+			fmt.Println("[*] Find " + aliveC + "/24")
 			//temp[aliveC] += 1
 		}
 	}
 }
 
-func SmartBMod(target string, portlist []string, mod string, typ string) {
+func SmartBMod(config Config) {
 	var wg sync.WaitGroup
 	var temp sync.Map
 
 	aliveC := make(chan string)
 	go safeMap(&temp, aliveC)
-
+	var ipChannel chan string
+	ipChannel = ipGenerator(config, &temp)
 	// 选择ip生成器
-	ipChannel := ipGenerator(target, mod, &temp)
+
 	var tcChannel chan TargetConfig
 
-	if typ == "icmp" || typ == "i" {
-		println("[*] current Protocol: ICMP")
+	if config.Typ == "icmp" || config.Typ == "i" {
+		fmt.Println("[*] current Protocol: ICMP")
 		tcChannel = tcGenerator(ipChannel, []string{"icmp"})
 	} else {
-		println("[*] current Protocol: Socket")
+		fmt.Println("[*] current Protocol: Socket")
 		tcChannel = tcGenerator(ipChannel, []string{"80"})
 	}
 
-	scanPool, _ := ants.NewPoolWithFunc(Threads, func(i interface{}) {
+	scanPool, _ := ants.NewPoolWithFunc(config.Threads, func(i interface{}) {
 		tc := i.(TargetConfig)
 		smartScan(tc, aliveC)
 		wg.Done()
 	})
 
 	defer scanPool.Release()
-
 	for t := range tcChannel {
 		wg.Add(1)
 		_ = scanPool.Invoke(t)
@@ -109,23 +110,19 @@ func SmartBMod(target string, portlist []string, mod string, typ string) {
 	time.Sleep(2 * time.Second)
 	close(aliveC)
 
-	temp.Range(func(key, value interface{}) bool {
-		if value.(int) > 0 {
-			println(Utils.GetCurtime() + "[*] Processing:" + key.(string) + "/24")
-			StraightMod(key.(string)+"/24", portlist)
-		}
-		return true
-	})
-	//for k, v := range temp {
-	//	println(k,v)
-	//	if v > 0 {
-	//		println("[*] Processing:" + k + "/24")
-	//		StraightMod(k+"/24", portlist)
-	//	}
-
-	//}
-
-	//wg.Wait()
+	if !config.Noscan {
+		temp.Range(func(key, value interface{}) bool {
+			if value.(int) > 0 {
+				fmt.Println("[*] " + Utils.GetCurtime() + " Processing:" + key.(string) + "/24")
+				var tmpconfig = config
+				tmpconfig.IP = key.(string) + "/24"
+				StraightMod(tmpconfig)
+				//每个C段同步一次数据
+				FileHandle.Sync()
+			}
+			return true
+		})
+	}
 
 }
 
@@ -143,55 +140,12 @@ func smartScan(tc TargetConfig, AliveCh chan string) {
 	}
 }
 
-func SmartAMod(target string, portlist []string, mod string, typ string) {
-	btargetChannel := bipGenerator(target)
+func SmartAMod(config Config) {
+	btargetChannel := bipGenerator(config.IP)
 	for i := range btargetChannel {
-		println(Utils.GetCurtime() + "[*] Processing Bclass IP:" + i + "/16")
-		SmartBMod(i+"/16", portlist, mod, typ)
+		fmt.Println("[*]" + Utils.GetCurtime() + "Processing Bclass IP:" + i + "/16")
+		var tmpconfig = config
+		tmpconfig.IP = i + "/16"
+		SmartBMod(tmpconfig)
 	}
 }
-
-//func AutoMod(portlist []string) {
-//	var wgs sync.WaitGroup
-//	//if target {
-//	autoIcmpChannel := ipGenerator("auto","defalut",nil)
-//	var tcChannel chan TargetConfig
-//	if Mod == "s" {
-//		println("[*] current Mod : Socket")
-//		tcChannel = tcGenerator(autoIcmpChannel, []string{"80"})
-//	} else {
-//		println("[*] current Mod : ICMP")
-//		tcChannel = tcGenerator(autoIcmpChannel, []string{"icmp"})
-//	}
-//
-//	var temp sync.Map
-//	aliveC := make(chan string)
-//	go safeMap(&temp, aliveC)
-//
-//	//go safeMap(temp, aliveC)
-//	// Use the pool with a function,
-//	// set 10 to the capacity of goroutine pool and 1 second for expired duration.
-//	scanPool, _ := ants.NewPoolWithFunc(Threads, func(i interface{}) {
-//		tc := i.(TargetConfig)
-//		smartScan(tc, aliveC)
-//		wgs.Done()
-//	})
-//	defer scanPool.Release()
-//
-//	for t := range tcChannel {
-//		wgs.Add(1)
-//		_ = scanPool.Invoke(t)
-//	}
-//	wgs.Wait()
-//	time.Sleep(2 * time.Second)
-//	close(aliveC)
-//
-//	temp.Range(func(key, value interface{}) bool {
-//		if value.(int) > 0 {
-//			println("[*] Processing:" + key.(string) + "/24")
-//			StraightMod(key.(string)+"/24", portlist)
-//		}
-//		return true
-//	})
-//
-//}

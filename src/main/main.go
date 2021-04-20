@@ -7,81 +7,84 @@ import (
 	"getitle/src/core"
 	"github.com/panjf2000/ants/v2"
 	"os"
+	"strings"
 	"time"
 )
 
 func main() {
 	defer ants.Release()
-
-	//默认参数信息
-
-	ports := flag.String("p", "top1", "")
-	key := flag.String("k", "", "")
-	list := flag.String("l", "", "")
-	threads := flag.Int("t", 4000, "")
-	IPaddress := flag.String("ip", "", "")
-	mod := flag.String("m", "default", "")
-	typ := flag.String("n", "socket", "")
-	delay := flag.Int("d", 2, "")
-	Clean := flag.Bool("c", false, "")
-	Output := flag.String("o", "full", "")
-	Filename := flag.String("f", "", "")
-	Exploit := flag.Bool("e", false, "")
-	Version := flag.Bool("v", false, "")
-	isPortConfig := flag.Bool("P", false, "")
-	Formatout := flag.String("F", "", "")
-	flag.Parse()
-	if *key != "puaking" {
+	k := "niuzi" // debug
+	//f, _ := os.Create("cpu.txt")
+	//pprof.StartCPUProfile(f)
+	//defer pprof.StopCPUProfile()
+	if !strings.Contains(strings.Join(os.Args, ""), k) {
+		inforev()
 		println("segment fault")
 		os.Exit(0)
 	}
+	var config core.Config
+	//默认参数信息
+	flag.StringVar(&config.IP, "ip", "", "")
+	flag.StringVar(&config.Ports, "p", "top1", "")
+	flag.StringVar(&config.List, "l", "", "")
+	flag.IntVar(&config.Threads, "t", 4000, "")
+	flag.StringVar(&config.Mod, "m", "default", "")
+	flag.StringVar(&config.Typ, "n", "socket", "")
+	flag.BoolVar(&config.Noscan, "no", false, "")
+	flag.StringVar(&config.Filename, "f", "", "")
+
+	//全局变量初始化
+	flag.StringVar(&core.Output, "o", "full", "")
+	flag.BoolVar(&core.Clean, "c", false, "")
+	flag.StringVar(&core.FileOutput, "O", "json", "")
+	flag.IntVar(&Scan.Delay, "d", 2, "")
+
+	key := flag.String("k", "", "")
+	exploit := flag.Bool("e", false, "")
+	version := flag.Bool("v", false, "")
+	isPortConfig := flag.Bool("P", false, "")
+	formatoutput := flag.String("F", "", "")
+	flag.Parse()
+	// 密钥
+	if *key != k {
+		//rev()
+		os.Exit(0)
+	}
+	// 输出Port config
 	if *isPortConfig {
 		core.Listportconfig()
 		os.Exit(0)
 	}
-	if *Formatout != "" {
-		core.FormatOutput(*Formatout, *Formatout)
-		os.Exit(0)
-	}
-	if *IPaddress == "" && *list == "" && *mod != "a" {
+	// 格式化
+	if *formatoutput != "" {
+		core.FormatOutput(*formatoutput, config.Filename)
 		os.Exit(0)
 	}
 
+	p := fmt.Sprintf("[*] Current goroutines: %d,", config.Threads)
+	if !*version {
+		p += "Version Scan Running, "
+	} else {
+		p += "Version Scan Closed, "
+	}
+	if *exploit {
+		p += "Exploit Scan Running"
+	} else {
+		p += "Exploit Scan Closed"
+	}
+	println(p)
 	starttime := time.Now()
 
 	//初始化全局变量
-	Scan.Delay = time.Duration(*delay)
-	core.Threads = *threads
-	core.Filename = *Filename
-	core.OutputType = *Output
-	Scan.Exploit = *Exploit
-	core.Clean = *Clean
-	Scan.Version = *Version
-	core.Init()
+	Scan.Version = *version
+	Scan.Exploit = *exploit
+	config = core.Init(config)
+	core.RunTask(config)
+	//关闭文件写入管道
+	close(core.Datach)
 
-	//if *IPaddress == "auto" {
-	//	portlist := core.PortHandler(*ports)
-	//	println("[*] Auto scan to find Intranet ip")
-	//	println("[*] ports: " + strings.Join(portlist, ","))
-	//	core.AutoMod(portlist)
-	//} else
-	if *list != "" {
-		targetList := core.ReadTargetFile(*list)
-		for _, v := range targetList {
-			CIDR, portlist, m, ty := core.TargetHandler(v)
-			core.RunTask(core.IpInit(CIDR), portlist, m, ty)
-		}
-	} else {
-		portlist := core.PortHandler(*ports)
-		core.RunTask(*IPaddress, portlist, *mod, *typ)
-	}
-
-	endtime := time.Since(starttime)
-	if *Filename != "" {
-		core.Datach <- "]"
-	}
 	time.Sleep(time.Microsecond * 500)
-	println(fmt.Sprintf("\n[*] Alive sum: %d, Target sum : %d", Scan.Alivesum, Scan.Sum))
-	println("[*] Totally run: " + endtime.String())
+	fmt.Println(fmt.Sprintf("\n[*] Alive sum: %d, Target sum : %d", Scan.Alivesum, Scan.Sum))
+	fmt.Println("[*] Totally run: " + time.Since(starttime).String())
 
 }

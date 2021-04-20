@@ -58,7 +58,7 @@ func NbtScan(target string, result *Utils.Result) {
 	}
 
 	payload := []byte("ff\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00 CKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\x00\x00!\x00\x01")
-	_, reply, _ := Utils.SocketSend(conn, payload, 1024)
+	reply, _ := Utils.SocketSend(conn, payload, 1024)
 	if len(reply) > 58 {
 		result.Stat = "OPEN"
 	} else {

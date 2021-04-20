@@ -4,55 +4,13 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
-	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
-	"regexp"
-	"strconv"
 	"strings"
-	"time"
 )
 
-type Result struct {
-	Ip        string         `json:"ip"`
-	Port      string         `json:"port"`
-	Stat      string         `json:"-"`
-	TcpCon    *net.Conn      `json:"-"`
-	Httpresp  *http.Response `json:"-"`
-	Os        string         `json:"os"`
-	Host      string         `json:"host"`
-	Title     string         `json:"title"`
-	Midware   string         `json:"midware"`
-	HttpStat  string         `json:"http_stat"`
-	Language  string         `json:"language"`
-	Framework string         `json:"framework"`
-	Vuln      string         `json:"vuln"`
-	Protocol  string         `json:"protocol"`
-	Error     string         `json:"-"`
-	Content   string         `json:"-"`
-}
-
-type Finger struct {
-	Name        string          `json:"name"`
-	Protocol    string          `json:"protocol"`
-	SendData    string          `json:"send_data"`
-	Vuln        string          `json:"vuln"`
-	Level       int             `json:"level"`
-	Defaultport map[string]bool `json:"default_port"`
-	Regexps     Regexps         `json:"regexps"`
-}
-
-type Regexps struct {
-	HTML   []string `json:"html"`
-	MD5    []string `json:"md5"`
-	Regexp []string `json:"regexp"`
-	Cookie []string `json:"cookie"`
-	Header []string `json:"header"`
-	Info   []string `json:"info"`
-}
-
+var Namemap, Typemap, Portmap map[string][]string = loadportconfig()
 var Tcpfingers, Httpfingers = getFingers()
 
 func InfoFilter(result *Result) {
@@ -64,6 +22,10 @@ func InfoFilter(result *Result) {
 
 	} else {
 		result.Title = GetTitle(result.Content)
+	}
+	//处理错误信息
+	if result.Content != "" {
+		ErrHandler(result)
 	}
 
 	//return result
@@ -81,28 +43,8 @@ func GetDetail(result *Result) {
 	return
 }
 
-func Encode(s string) string {
-	s = strings.Replace(s, "\r", "%13", -1)
-	s = strings.Replace(s, "\n", "%10", -1)
-	return s
-}
-
-func Match(regexpstr string, s string) string {
-	Reg, err := regexp.Compile(regexpstr)
-	if err != nil {
-		return ""
-	}
-	res := Reg.FindStringSubmatch(s)
-	if len(res) == 1 {
-		return "matched"
-	} else if len(res) == 2 {
-		return res[1]
-	}
-	return ""
-}
-
 func GetTitle(content string) string {
-	title := Match("(?im)<title>(.*)</title>", content)
+	title := Match("(?Uis)<title>(.*)</title>", content)
 	if title != "" {
 		return title
 	}
@@ -110,22 +52,16 @@ func GetTitle(content string) string {
 }
 
 func GetMidware(resp *http.Response, content string) string {
-	var server string
+	var server string = ""
 	if resp == nil {
 		server = Match("(?i)Server: ([\x20-\x7e]+)", strings.Split(content, "\r\n\r\n")[0])
 	} else {
 		server = resp.Header.Get("Server")
 	}
-	if server != "" {
-		return server
-	}
-
-	return ""
-
+	return server
 }
 
 func GetLanguage(resp *http.Response, content string) string {
-	// update: 减少正则匹配的速度略微提升性能
 	var powered string
 	if resp == nil {
 		powered = Match("(?i)X-Powered-By: ([\x20-\x7e]+)", strings.Split(content, "\r\n\r\n")[0])
@@ -145,7 +81,6 @@ func GetLanguage(resp *http.Response, content string) string {
 				return "PHP"
 			}
 		}
-
 	} else {
 		powered = resp.Header.Get("X-Powered-By")
 		if powered != "" {
@@ -181,7 +116,7 @@ func httpFingerMatch(result *Result, finger Finger) {
 
 	resp := result.Httpresp
 	content := result.Content
-	var cookies map[string]string
+	//var cookies map[string]string
 	if finger.SendData != "" {
 		conn := HttpConn(2)
 		resp, err := conn.Get(GetURL(result) + finger.SendData)
@@ -190,9 +125,6 @@ func httpFingerMatch(result *Result, finger Finger) {
 		}
 		content = string(GetBody(resp))
 		resp.Body.Close()
-	}
-	if resp != nil {
-		cookies = getCookies(resp)
 	}
 
 	if finger.Regexps.HTML != nil {
@@ -222,23 +154,27 @@ func httpFingerMatch(result *Result, finger Finger) {
 					result.Framework = finger.Name
 					return
 				}
-			} else if resp.Header.Get(header) != "" {
-				result.Framework = finger.Name
-				return
-			}
-		}
-	} else if finger.Regexps.Cookie != nil {
-		for _, cookie := range finger.Regexps.Cookie {
-			if resp == nil {
-				if strings.Contains(content, cookie) {
+			} else {
+				headers := getHeaderstr(resp)
+				if strings.Contains(headers, header) {
 					result.Framework = finger.Name
 					return
 				}
-			} else if cookies[cookie] != "" {
-				result.Framework = finger.Name
-				return
 			}
+
 		}
+		//} else if finger.Regexps.Cookie != nil {
+		//	for _, cookie := range finger.Regexps.Cookie {
+		//		if resp == nil {
+		//			if strings.Contains(content, cookie) {
+		//				result.Framework = finger.Name
+		//				return
+		//			}
+		//		} else if cookies[cookie] != "" {
+		//			result.Framework = finger.Name
+		//			return
+		//		}
+		//	}
 	} else if finger.Regexps.MD5 != nil {
 		for _, md5s := range finger.Regexps.MD5 {
 			m := md5.Sum([]byte(content))
@@ -264,7 +200,7 @@ func getTCPFrameWork(result *Result) {
 
 	// 若默认端口未匹配到结果,则匹配全部
 	for _, finger := range Tcpfingers {
-		if finger.Defaultport[result.Port] != false {
+		if finger.Defaultport[result.Port] != true {
 			tcpFingerMatch(result, finger)
 		}
 
@@ -283,26 +219,30 @@ func tcpFingerMatch(result *Result, finger Finger) {
 
 	// 某些规则需要主动发送一个数据包探测
 	if finger.SendData != "" {
-		// 复用tcp链接
-
-		_, data, err = SocketSend(*result.TcpCon, []byte(finger.SendData), 1024)
+		var conn net.Conn
+		conn, err = TcpSocketConn(GetTarget(result), 2)
+		if err != nil {
+			return
+		}
+		data, err = SocketSend(conn, []byte(finger.SendData), 1024)
 
 		// 如果报错为EOF,则需要重新建立tcp连接
-		if err != nil && err.Error() == "EOF" {
-			target := GetTarget(result)
-			// 如果对端已经关闭,则本地socket也关闭,并重新建立连接
-			(*result.TcpCon).Close()
-			*result.TcpCon, err = TcpSocketConn(target, time.Duration(2))
-			if err != nil {
-				return
-			}
-			_, data, err = SocketSend(*result.TcpCon, []byte(finger.SendData), 1024)
-
-			// 重新建立链接后再次报错,则跳过该规则匹配
-			if err != nil {
-				result.Error = err.Error()
-				return
-			}
+		if err != nil {
+			return
+			//target := GetTarget(result)
+			//// 如果对端已经关闭,则本地socket也关闭,并重新建立连接
+			//(*result.TcpCon).Close()
+			//*result.TcpCon, err = TcpSocketConn(target, time.Duration(2))
+			//if err != nil {
+			//	return
+			//}
+			//data, err = SocketSend(*result.TcpCon, []byte(finger.SendData), 1024)
+			//
+			//// 重新建立链接后再次报错,则跳过该规则匹配
+			//if err != nil {
+			//	result.Error = err.Error()
+			//	return
+			//}
 		}
 	}
 	// 如果主动探测有回包,则正则匹配回包内容, 若主动探测没有返回内容,则直接跳过该规则
@@ -345,32 +285,6 @@ func tcpFingerMatch(result *Result, finger Finger) {
 	return
 }
 
-func GetHttpRaw(resp *http.Response) string {
-	var raw string
-
-	raw += fmt.Sprintf("%s %s\r\n", resp.Proto, resp.Status)
-	for k, v := range resp.Header {
-		for _, i := range v {
-			raw += fmt.Sprintf("%s: %s\r\n", k, i)
-		}
-	}
-	raw += "\r\n"
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return raw
-	}
-	raw += string(body)
-	return raw
-}
-
-func GetBody(resp *http.Response) []byte {
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return []byte{}
-	}
-	return body
-}
-
 func getCookies(resp *http.Response) map[string]string {
 	cookies := make(map[string]string)
 	for _, cookie := range resp.Cookies() {
@@ -378,12 +292,13 @@ func getCookies(resp *http.Response) map[string]string {
 	}
 	return cookies
 }
-func GetStatusCode(content string) string {
-	if strings.Contains(content, "HTTP") {
-		return content[9:12]
-	}
 
-	return "tcp"
+//从socket中获取htt状态码
+func GetStatusCode(content string) (bool, string) {
+	if len(content) > 12 && strings.Contains(content, "HTTP") {
+		return true, content[9:12]
+	}
+	return false, "tcp"
 }
 
 func FilterCertDomain(domins []string) string {
@@ -401,6 +316,8 @@ func FilterCertDomain(domins []string) string {
 	return res[:len(res)-1]
 }
 
+//加载指纹到全局变量
+//TODO 正则预编译
 func getFingers() ([]Finger, []Finger) {
 
 	var tcpfingers, httpfingers []Finger
@@ -416,24 +333,45 @@ func getFingers() ([]Finger, []Finger) {
 		println("[-] httpfingers load FAIL!")
 		os.Exit(0)
 	}
-
-	//// tcp与http规则适用不同的扫描逻辑
-	//for _, finger := range fingers {
-	//	if finger.Protocol == "tcp" {
-	//		tcpfingers = append(tcpfingers, finger)
-	//	} else if finger.Protocol == "http" {
-	//		httpfingers = append(httpfingers, finger)
-	//	}
-	//}
-
 	return tcpfingers, httpfingers
 }
 
-func GetCurtime() string {
-	h := strconv.Itoa(time.Now().Hour())
-	m := strconv.Itoa(time.Now().Minute())
-	s := strconv.Itoa(time.Now().Second())
+//从错误中收集信息
+func ErrHandler(result *Result) {
 
-	curtime := h + ":" + m + ":" + s
-	return curtime
+	if strings.Contains(result.Error, "wsasend") || strings.Contains(result.Error, "wsarecv") {
+		result.HttpStat = "reset"
+	} else if result.Error == "EOF" {
+		result.HttpStat = "EOF"
+	} else if strings.Contains(result.Error, "http: server gave HTTP response to HTTPS client") {
+		result.Protocol = "http"
+	} else if strings.Contains(result.Error, "first record does not look like a TLS handshake") {
+		result.Protocol = "tcp"
+	}
+}
+
+func loadportconfig() (map[string][]string, map[string][]string, map[string][]string) {
+	var portfingers []PortFinger
+	err := json.Unmarshal([]byte(LoadFingers("port")), &portfingers)
+
+	if err != nil {
+		println("[-] port config load FAIL!")
+		os.Exit(0)
+	}
+	typemap := make(map[string][]string)
+	namemap := make(map[string][]string)
+	portmap := make(map[string][]string)
+
+	for _, v := range portfingers {
+		v.Ports = Ports2PortSlice(v.Ports)
+		namemap[v.Name] = append(namemap[v.Name], v.Ports...)
+		for _, t := range v.Type {
+			typemap[t] = append(typemap[t], v.Ports...)
+		}
+		for _, p := range v.Ports {
+			portmap[p] = append(portmap[p], v.Name)
+		}
+	}
+
+	return typemap, namemap, portmap
 }

@@ -1,6 +1,7 @@
 package Utils
 
 import (
+	"bytes"
 	"crypto/tls"
 	"fmt"
 	"net"
@@ -8,8 +9,8 @@ import (
 	"time"
 )
 
-func TcpSocketConn(target string, delay time.Duration) (net.Conn, error) {
-	conn, err := net.DialTimeout("tcp", target, delay*time.Second)
+func TcpSocketConn(target string, delay int) (net.Conn, error) {
+	conn, err := net.DialTimeout("tcp", target, time.Duration(delay)*time.Second)
 	if err != nil {
 		return nil, err
 	}
@@ -17,41 +18,31 @@ func TcpSocketConn(target string, delay time.Duration) (net.Conn, error) {
 	return conn, err
 }
 
-func UdpSocketConn(target string, delay time.Duration) (net.Conn, error) {
+func UdpSocketConn(target string, delay int) (net.Conn, error) {
 
-	conn, err := net.DialTimeout("udp", target, delay*time.Second)
-
+	conn, err := net.DialTimeout("udp", target, time.Duration(delay)*time.Second)
 	if err != nil {
 		return nil, err
 	}
-	err = conn.SetDeadline(time.Now().Add(delay * time.Second))
+	//err = conn.SetDeadline(time.Now().Add(delay * time.Second))
 	return conn, err
 }
 
-func SocketSend(conn net.Conn, data []byte, length int) (int, []byte, error) {
+func SocketSend(conn net.Conn, data []byte, max int) ([]byte, error) {
 	_ = conn.SetDeadline(time.Now().Add(time.Duration(2) * time.Second))
 	var err error
 	_, err = conn.Write(data)
 	if err != nil {
-		return 0, []byte{}, err
+		return []byte{}, err
 	}
 
-	//最多只读8192位,一般来说有title就肯定已经有了
-	reply := make([]byte, length)
-	n, err := conn.Read(reply)
-
+	buf := make([]byte, max)
+	time.Sleep(time.Duration(100) * time.Millisecond)
+	_, err = conn.Read(buf)
 	if err != nil {
-		return n, []byte{}, err
+		return bytes.Trim(buf, "\x00"), err
 	}
-	return n, reply, err
-}
-
-func TcpIsClose(conn net.Conn) {
-
-}
-
-func HttpIsClose(conn http.Client) {
-
+	return bytes.Trim(buf, "\x00"), err
 }
 
 func GetTarget(result *Result) string {
@@ -62,7 +53,7 @@ func GetURL(result *Result) string {
 	return fmt.Sprintf("%s://%s:%s", result.Protocol, result.Ip, result.Port)
 }
 
-func HttpConn(delay time.Duration) http.Client {
+func HttpConn(delay int) http.Client {
 	tr := &http.Transport{
 		//TLSHandshakeTimeout : delay * time.Second,
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
@@ -70,7 +61,7 @@ func HttpConn(delay time.Duration) http.Client {
 
 	conn := &http.Client{
 		Transport: tr,
-		Timeout:   delay * time.Second,
+		Timeout:   time.Duration(delay) * time.Second,
 	}
 	return *conn
 }

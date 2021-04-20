@@ -1,6 +1,7 @@
 package core
 
 import (
+	"fmt"
 	"math"
 	"net"
 	"strconv"
@@ -21,6 +22,11 @@ func int2ip(ipint uint) string {
 	ip[2] = byte(ipint >> 8)
 	ip[3] = byte(ipint)
 	return ip.String()
+}
+
+func getMask(cidr string) int {
+	mask, _ := strconv.Atoi(strings.Split(cidr, "/")[0])
+	return mask
 }
 
 func getMaskRange(mask string) (before uint, after uint) {
@@ -68,7 +74,6 @@ func defaultIpGenerator(CIDR string, ch chan string) chan string {
 			ch <- int2ip(i)
 		}
 	}
-
 	return ch
 }
 
@@ -76,7 +81,6 @@ func defaultIpGenerator(CIDR string, ch chan string) chan string {
 func smartIpGenerator(CIDR string, ch chan string, temp *sync.Map) chan string {
 	start, fin := getIpRange(CIDR)
 	var outIP string
-	//sum := fin -start
 	var C, B uint
 
 	for C = 1; C < 255; C++ {
@@ -87,7 +91,13 @@ func smartIpGenerator(CIDR string, ch chan string, temp *sync.Map) chan string {
 			}
 		}
 	}
+	return ch
+}
 
+func IPsGenerator(config Config, ch chan string) chan string {
+	for _, cidr := range config.IPlist {
+		ch = defaultIpGenerator(cidr, ch)
+	}
 	return ch
 }
 
@@ -98,17 +108,17 @@ func isAlive(ip string, temp *sync.Map) bool {
 
 func bipGenerator(CIDR string) chan string {
 	start, fin := getIpRange(CIDR)
-	startB := net.ParseIP(int2ip(start)).To4()[1]
-	finB := net.ParseIP(int2ip(fin)).To4()[1]
+	startB := uint(net.ParseIP(int2ip(start)).To4()[1])
+	finB := uint(net.ParseIP(int2ip(fin)).To4()[1])
 
 	ch := make(chan string)
 
 	ip := net.ParseIP(int2ip(start)).To4()
 
-	var i byte
+	var i uint
 	go func() {
 		for i = startB; i <= finB; i++ {
-			ip[1] = i
+			ip[1] = uint8(i)
 			ch <- ip.String()
 		}
 		close(ch)
@@ -117,11 +127,11 @@ func bipGenerator(CIDR string) chan string {
 }
 
 func firstInterGenerator(ch chan string) chan string {
-	println("[*] Processing : 10.0.0.0/8")
+	fmt.Println("[*] Processing : 10.0.0.0/8")
 	ch = firstIpGenerator("10.0.0.0/8", ch)
-	println("[*] Processing : 172.16.0.0/12")
+	fmt.Println("[*] Processing : 172.16.0.0/12")
 	ch = firstIpGenerator("172.16.0.0/12", ch)
-	println("[*] Processing : 192.168.0.0/16")
+	fmt.Println("[*] Processing : 192.168.0.0/16")
 	ch = firstIpGenerator("192.168.0.0/16", ch)
 	return ch
 }
@@ -134,25 +144,24 @@ func firstIpGenerator(CIDR string, ch chan string) chan string {
 	return ch
 }
 
-func ipGenerator(CIDR string, mod string, temp *sync.Map) chan string {
+func ipGenerator(config Config, temp *sync.Map) chan string {
 	ch := make(chan string)
 	go func() {
-		if mod == "a" {
-			// 生成内网ip的首段
-			println("[*] current Mod: auto")
-			ch = firstInterGenerator(ch)
-		} else if mod == "s" {
-			println("[*] current Mod: smart")
-			ch = smartIpGenerator(CIDR, ch, temp)
-		} else if mod == "f" {
-			println("[*] current Mod: first Ip")
-			ch = firstIpGenerator(CIDR, ch)
+		if config.IPlist != nil {
+			ch = IPsGenerator(config, ch)
 		} else {
-			ch = defaultIpGenerator(CIDR, ch)
+			if config.Mod == "a" {
+				ch = firstInterGenerator(ch)
+			} else if config.Mod == "s" {
+				ch = smartIpGenerator(config.IP, ch, temp)
+			} else if config.Mod == "f" {
+				ch = firstIpGenerator(config.IP, ch)
+			} else {
+				ch = defaultIpGenerator(config.IP, ch)
+			}
 		}
 		close(ch)
 	}()
-
 	return ch
 }
 
@@ -180,20 +189,9 @@ func getIp(target string) string {
 	iprecords, _ := net.LookupIP(target)
 	for _, ip := range iprecords {
 		if isIPv4(ip.String()) {
-			println("[*] parse domin SUCCESS, map " + target + " to " + ip.String())
+			fmt.Println("[*] parse domin SUCCESS, map " + target + " to " + ip.String())
 			return ip.String()
 		}
 	}
 	return ""
-}
-
-func IpInit(target string) string {
-	target = strings.Replace(target, "http://", "", -1)
-	target = strings.Replace(target, "https://", "", -1)
-	if target[len(target)-1:] == "/" {
-		target = target + "32"
-	} else if !strings.Contains(target, "/") {
-		target = target + "/32"
-	}
-	return target
 }

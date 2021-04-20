@@ -20,7 +20,7 @@ if __name__ == "__main__":
 	j2 = fingerload("httpfingers.json")
 	j3 = json.loads(open("src/config/md5fingers.json","r",encoding="utf-8").read())
 	j4 = json.loads(open("src/config/port.json","r",encoding="utf-8").read())
-
+	j5 = json.loads(open("src/config/mmh3fingers.json","r",encoding="utf-8").read())
 
 	f = open("src/Utils/finger.go","w",encoding="utf-8")
 	base = '''package Utils
@@ -34,11 +34,13 @@ func LoadFingers(typ string)string  {
      		return `%s`
     }else if typ == "port"{
          	return `%s`
-     	}
+    }else if typ =="mmh3"{
+         	return `%s`
+    }
 	return  ""
 }
 	'''
 
-	f.write(base%(json.dumps(j1),json.dumps(j2),json.dumps(j3),json.dumps(j4)))
+	f.write(base%(json.dumps(j1),json.dumps(j2),json.dumps(j3),json.dumps(j4),json.dumps(j5)))
 	print("fingerprint update success")
 

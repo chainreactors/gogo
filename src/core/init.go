@@ -1,76 +1,97 @@
 package core
 
 import (
-	"encoding/json"
 	"fmt"
 	"getitle/src/Utils"
 	"io/ioutil"
 	"os"
-	"strconv"
+	"runtime"
 	"strings"
 )
 
 var Datach = make(chan string, 100)
 var FileHandle *os.File
-var O2File = false
-var Clean = false
-var Filename string
-var Threads int
-var OutputType string
-var Namemap, Typemap, Portmap map[string][]string = loadportconfig()
+var Output string
+var FileOutput string
+var Clean bool
 
-type PortFinger struct {
-	Name  string   `json:"name"`
-	Ports []string `json:"ports"`
-	Type  []string `json:"type"`
+type Config struct {
+	IP       string
+	IPlist   []string
+	Ports    string
+	Portlist []string
+	List     string
+	Threads  int
+	Mod      string
+	Typ      string
+	Output   string
+	Filename string
+	Noscan   bool
 }
 
-func Init() {
-	println("*********  getitle 0.3.0 beta by Sangfor  *********")
-	initFile()
+func Init(config Config) Config {
+	//println("*********  main 0.3.3 beta by Sangfor  *********")
+	config.Portlist = PortHandler(config.Ports)
+	if config.List != "" {
+		config.IPlist = ReadTargetFile(config.List)
+	}
+
+	//windows系统默认协程数为2000
+	OS := runtime.GOOS
+	if config.Threads == 4000 && OS == "windows" {
+		config.Threads = 2000
+	}
+
+	if config.IP == "" && config.List == "" && config.Mod != "a" {
+		os.Exit(0)
+	}
+	// 存在文件输出则停止命令行输出
+	if config.Filename != "" {
+		Clean = !Clean
+	}
+
+	initFile(config.Filename)
+	return config
 }
 
-func RunTask(inp string, portlist []string, mod string, typ string) {
-	var CIDR string
-	if mod == "a" || inp == "auto" {
+func RunTask(config Config) {
+	var taskname string = ""
+	if config.Mod == "a" {
 		// 内网探测默认使用icmp扫描
-		CIDR = "auto"
-		typ = "icmp"
+		taskname = "auto"
+		config.Typ = "icmp"
 	} else {
-		CIDR = IpInit(inp)
-		CIDR = checkIp(CIDR)
+		config = IpInit(config)
+		if config.IP != "" {
+			taskname = config.IP
+		} else if config.List != "" {
+			taskname = config.List
+		}
 	}
-	if CIDR == "" {
-		println("[-] target (" + inp + ") format ERROR,")
-		return
-	}
-	println(fmt.Sprintf("[*] Start Scan Task %s ,total ports: %d , mod: %s", CIDR, len(portlist), mod))
-	if len(portlist) > 1000 {
-		println("[*] too much ports , only show top 1000 ports: " + strings.Join(portlist[:1000], ",") + "......")
-	} else {
-		println("[*] ports: " + strings.Join(portlist, ","))
+	if taskname == "" {
+		println("[-] No Task")
+		os.Exit(0)
 	}
 
-	switch mod {
+	fmt.Println(fmt.Sprintf("[*] Start Scan Task %s ,total ports: %d , mod: %s", taskname, len(config.Portlist), config.Mod))
+	if len(config.Portlist) > 1000 {
+		fmt.Println("[*] too much ports , only show top 1000 ports: " + strings.Join(config.Portlist[:1000], ",") + "......")
+	} else {
+		fmt.Println("[*] ports: " + strings.Join(config.Portlist, ","))
+	}
+	switch config.Mod {
 	case "default":
 		//直接扫描
-		StraightMod(CIDR, portlist)
+		StraightMod(config)
 	case "a", "auto":
-		SmartBMod(CIDR, portlist, mod, typ)
+		SmartBMod(config)
 	case "s", "f":
 		//启发式扫描
-		mask, _ := strconv.Atoi(strings.Split(CIDR, "/")[1])
-		if mask < 24 && mask >= 16 {
-			SmartBMod(CIDR, portlist, mod, typ)
-		} else if mask < 16 {
-			SmartAMod(CIDR, portlist, mod, typ)
-		} else {
-			StraightMod(CIDR, portlist)
-		}
+		SmartBMod(config)
+
 	default:
-		StraightMod(CIDR, portlist)
+		StraightMod(config)
 	}
-	FileHandle.Sync()
 }
 
 func ReadTargetFile(targetfile string) []string {
@@ -82,57 +103,57 @@ func ReadTargetFile(targetfile string) []string {
 	}
 	defer file.Close()
 	targetb, _ := ioutil.ReadAll(file)
-	targets := strings.TrimSpace(string(targetb))
-	return strings.Split(targets, "\n")
+	targetstr := strings.TrimSpace(string(targetb))
+	targetstr = strings.Replace(targetstr, "\r", "", -1)
+	targets := strings.Split(targetstr, "\n")
+	return targets
 }
 
-func TargetHandler(s string) (string, []string, string, string) {
-	ss := strings.Split(s, " ")
+//func TargetHandler(s string) (string, []string, string, string) {
+//	ss := strings.Split(s, " ")
+//
+//	var mod, CIDR, typ string
+//	var portlist []string
+//
+//	if len(ss) == 0 {
+//		return CIDR, portlist, mod, typ
+//	}
+//
+//	CIDR = IpForamt(ss[0])
+//	portlist = PortHandler("top1")
+//	mod = "default"
+//	typ = "socket"
+//	if len(ss) > 1 {
+//		portlist = PortHandler(ss[1])
+//	}
+//	if len(ss) > 2 {
+//		mod = ss[2]
+//	}
+//	if len(ss) > 3 {
+//		typ = ss[3]
+//	}
+//	return CIDR, portlist, mod, typ
+//}
 
-	var mod, CIDR, typ string
-	var portlist []string
-
-	if len(ss) == 0 {
-		return CIDR, portlist, mod, typ
-	}
-
-	CIDR = IpInit(ss[0])
-	portlist = PortHandler("top1")
-	mod = "default"
-	typ = "socket"
-	if len(ss) > 1 {
-		portlist = PortHandler(ss[1])
-	}
-	if len(ss) > 2 {
-		mod = ss[2]
-	}
-	if len(ss) > 3 {
-		typ = ss[3]
-	}
-	return CIDR, portlist, mod, typ
-}
-
-func initFile() {
+func initFile(filename string) {
 	var err error
 
-	if Filename != "" {
-		O2File = true
-		if checkFileIsExist(Filename) { //如果文件存在
-			FileHandle, err = os.OpenFile(Filename, os.O_APPEND|os.O_WRONLY, os.ModeAppend) //打开文件
-			if err != nil {
-				os.Exit(0)
-			}
+	if filename != "" {
+		if checkFileIsExist(filename) { //如果文件存在
+			//FileHandle, err = os.OpenFile(filename, os.O_APPEND|os.O_WRONLY, os.ModeAppend) //打开文件
+			println("[-] File already exists")
+			os.Exit(0)
 		} else {
-			FileHandle, err = os.Create(Filename) //创建文件
+			FileHandle, err = os.Create(filename) //创建文件
 			if err != nil {
 				os.Exit(0)
 			}
 		}
+		// json写入
+		_, _ = FileHandle.WriteString("[")
+
 		go write2File(FileHandle, Datach)
 
-		if OutputType == "json" {
-			_, _ = FileHandle.WriteString("[")
-		}
 	}
 }
 
@@ -148,6 +169,9 @@ func write2File(FileHandle *os.File, Datach chan string) {
 	for res := range Datach {
 		FileHandle.WriteString(res)
 	}
+
+	FileHandle.WriteString("]")
+	_ = FileHandle.Close()
 }
 
 func PortHandler(portstring string) []string {
@@ -158,53 +182,26 @@ func PortHandler(portstring string) []string {
 	for _, portname := range postslist {
 		ports = append(ports, choiceports(portname)...)
 	}
-	ports = ports2PortSlice(ports)
-	ports = removeDuplicateElement(ports)
+	ports = Utils.Ports2PortSlice(ports)
+	ports = Utils.SliceUnique(ports)
 	return ports
-
-}
-
-func loadportconfig() (map[string][]string, map[string][]string, map[string][]string) {
-	var portfingers []PortFinger
-	err := json.Unmarshal([]byte(Utils.LoadFingers("port")), &portfingers)
-
-	if err != nil {
-		println("[-] port config load FAIL!")
-		os.Exit(0)
-	}
-
-	typemap := make(map[string][]string)
-	namemap := make(map[string][]string)
-	portmap := make(map[string][]string)
-
-	for _, v := range portfingers {
-		namemap[v.Name] = append(namemap[v.Name], v.Ports...)
-		for _, t := range v.Type {
-			typemap[t] = append(typemap[t], v.Ports...)
-		}
-		for _, p := range v.Ports {
-			portmap[p] = append(portmap[p], v.Name)
-		}
-	}
-
-	return typemap, namemap, portmap
 }
 
 // 端口预设
 func choiceports(portname string) []string {
 	var ports []string
 	if portname == "all" {
-		for p, _ := range Portmap {
+		for p, _ := range Utils.Portmap {
 			ports = append(ports, p)
 		}
 		return ports
 	}
 
-	if Namemap[portname] != nil {
-		ports = append(ports, Namemap[portname]...)
+	if Utils.Namemap[portname] != nil {
+		ports = append(ports, Utils.Namemap[portname]...)
 		return ports
-	} else if Typemap[portname] != nil {
-		ports = append(ports, Typemap[portname]...)
+	} else if Utils.Typemap[portname] != nil {
+		ports = append(ports, Utils.Typemap[portname]...)
 		return ports
 	} else {
 		return []string{portname}
@@ -213,42 +210,48 @@ func choiceports(portname string) []string {
 
 func Listportconfig() {
 	println("当前已有端口配置: (根据端口类型分类)")
-	for k, v := range Namemap {
+	for k, v := range Utils.Namemap {
 		println("	", k, ": ", strings.Join(v, ","))
 	}
 	println("当前已有端口配置: (根据服务分类)")
-	for k, v := range Typemap {
+	for k, v := range Utils.Typemap {
 		println("	", k, ": ", strings.Join(v, ","))
 	}
 }
 
-func ports2PortSlice(ports []string) []string {
-	var tmpports []string
-	//生成端口列表 支持,和-
-	for _, pr := range ports {
-		if strings.Contains(pr, "-") {
-			sf := strings.Split(pr, "-")
-			start, _ := strconv.Atoi(sf[0])
-			fin, _ := strconv.Atoi(sf[1])
-			for port := start; port <= fin; port++ {
-				tmpports = append(tmpports, strconv.Itoa(port))
-			}
+func IpForamt(target string) string {
+	target = strings.Replace(target, "http://", "", -1)
+	target = strings.Replace(target, "https://", "", -1)
+	target = strings.Trim(target, "/")
+	if strings.Contains(target, "/") {
+		ip := strings.Split(target, "/")[0]
+		mask := strings.Split(target, "/")[1]
+		if isIPv4(ip) {
+			target = ip + "/" + mask
 		} else {
-			tmpports = append(tmpports, pr)
+			println("[-] error IPv4 " + ip)
+			os.Exit(0)
 		}
 	}
-	return tmpports
+	if !strings.Contains(target, "/") {
+		if isIPv4(target) {
+			target = target + "/32"
+		} else {
+			println("[-] error IPv4 " + target)
+			os.Exit(0)
+		}
+	}
+	return target
 }
 
-//切片去重
-func removeDuplicateElement(ss []string) []string {
-	res := make([]string, 0, len(ss))
-	temp := map[string]struct{}{}
-	for _, item := range ss {
-		if _, ok := temp[item]; !ok {
-			temp[item] = struct{}{}
-			res = append(res, item)
+func IpInit(config Config) Config {
+	if config.IP != "" {
+		config.IP = IpForamt(config.IP)
+	}
+	if config.List != "" {
+		for i, ip := range config.IPlist {
+			config.IPlist[i] = IpForamt(ip)
 		}
 	}
-	return res
+	return config
 }
