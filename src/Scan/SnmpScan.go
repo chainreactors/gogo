@@ -17,5 +17,7 @@ func SnmpScan(target string, result *Utils.Result) {
 	result.Stat = "OPEN"
 	result.Protocol = "udp"
 	result.HttpStat = "snmp"
-	result.Midware = resp.Variables[0].Value.(string)
+	if len(resp.Variables) > 0 {
+		result.Midware = resp.Variables[0].Value.(string)
+	}
 }

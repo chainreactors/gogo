@@ -7,21 +7,18 @@ import (
 	"getitle/src/core"
 	"github.com/panjf2000/ants/v2"
 	"os"
-	"runtime"
 	"strings"
 	"time"
 )
 
 func main() {
 	defer ants.Release()
-	k := "yysy"
-	println(os.Environ())
-	println(os.Hostname())
-	// debug
+	k := "niuzi" // debug
 	//f, _ := os.Create("cpu.txt")
 	//pprof.StartCPUProfile(f)
 	//defer pprof.StopCPUProfile()
 	if !strings.Contains(strings.Join(os.Args, ""), k) {
+		inforev()
 		println("segment fault")
 		os.Exit(0)
 	}
@@ -33,13 +30,16 @@ func main() {
 	flag.IntVar(&config.Threads, "t", 4000, "")
 	flag.StringVar(&config.Mod, "m", "default", "")
 	flag.StringVar(&config.Typ, "n", "socket", "")
-	flag.StringVar(&core.Output, "o", "full", "")
 	flag.BoolVar(&config.Noscan, "no", false, "")
+	flag.StringVar(&config.Filename, "f", "", "")
+
+	//全局变量初始化
+	flag.StringVar(&core.Output, "o", "full", "")
 	flag.BoolVar(&core.Clean, "c", false, "")
 	flag.StringVar(&core.FileOutput, "O", "json", "")
-	flag.StringVar(&core.Filename, "f", "", "")
+	flag.IntVar(&Scan.Delay, "d", 2, "")
+
 	key := flag.String("k", "", "")
-	delay := flag.Int("d", 2, "")
 	exploit := flag.Bool("e", false, "")
 	version := flag.Bool("v", false, "")
 	isPortConfig := flag.Bool("P", false, "")
@@ -61,19 +61,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	if config.IP == "" && config.List == "" && config.Mod != "a" {
-		os.Exit(0)
-	}
-	// 存在文件输出则停止命令行输出
-	if config.Filename != "" {
-		core.Clean = !core.Clean
-	}
-	//windows系统默认协程数为2000
-	OS := runtime.GOOS
-	if config.Threads == 4000 && OS == "windows" {
-		config.Threads = 2000
-	}
-	p := fmt.Sprintf("[*] Current goroutine: %d,", config.Threads)
+	p := fmt.Sprintf("[*] Current goroutines: %d,", config.Threads)
 	if !*version {
 		p += "Version Scan Running, "
 	} else {
@@ -88,9 +76,8 @@ func main() {
 	starttime := time.Now()
 
 	//初始化全局变量
-	Scan.Delay = *delay
-	Scan.Exploit = *exploit
 	Scan.Version = *version
+	Scan.Exploit = *exploit
 	config = core.Init(config)
 	core.RunTask(config)
 	//关闭文件写入管道

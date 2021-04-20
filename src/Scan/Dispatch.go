@@ -34,6 +34,8 @@ func Dispatch(result *Utils.Result) {
 		Alivesum++
 		//被动收集基本信息
 		Utils.InfoFilter(result)
+
+		//主动信息收集
 		// 因为正则匹配耗时较长,如果没有-v参数则字节不进行服务识别
 		if !Version {
 			Utils.GetDetail(result)
@@ -45,6 +47,8 @@ func Dispatch(result *Utils.Result) {
 		if Exploit {
 			ExploitDispatch(result)
 		}
+
+		// 输出前处理
 		if (result.TcpCon) != nil {
 			(*result.TcpCon).Close()
 		}

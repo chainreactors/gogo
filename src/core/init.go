@@ -5,12 +5,12 @@ import (
 	"getitle/src/Utils"
 	"io/ioutil"
 	"os"
+	"runtime"
 	"strings"
 )
 
 var Datach = make(chan string, 100)
 var FileHandle *os.File
-var Filename string
 var Output string
 var FileOutput string
 var Clean bool
@@ -35,6 +35,21 @@ func Init(config Config) Config {
 	if config.List != "" {
 		config.IPlist = ReadTargetFile(config.List)
 	}
+
+	//windows系统默认协程数为2000
+	OS := runtime.GOOS
+	if config.Threads == 4000 && OS == "windows" {
+		config.Threads = 2000
+	}
+
+	if config.IP == "" && config.List == "" && config.Mod != "a" {
+		os.Exit(0)
+	}
+	// 存在文件输出则停止命令行输出
+	if config.Filename != "" {
+		Clean = !Clean
+	}
+
 	initFile(config.Filename)
 	return config
 }

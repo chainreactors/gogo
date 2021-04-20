@@ -69,7 +69,7 @@ func safeMap(temp *sync.Map, ch chan string) {
 			//temp[aliveC] = 1
 		} else {
 			temp.Store(aliveC, 1)
-			fmt.Println("[*] Find " + aliveC)
+			fmt.Println("[*] Find " + aliveC + "/24")
 			//temp[aliveC] += 1
 		}
 	}

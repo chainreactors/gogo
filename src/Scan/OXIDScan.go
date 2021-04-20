@@ -37,6 +37,7 @@ func OXIDScan(target string, result *Utils.Result) {
 
 	result.Host = hostname_list[0]
 	result.Title += strings.Join(hostname_list[1:], ",")
-	result.Protocol = "OXID"
+	result.HttpStat = "OXID"
+	result.Protocol = "tcp"
 	return
 }

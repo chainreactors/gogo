@@ -24,7 +24,9 @@ func InfoFilter(result *Result) {
 		result.Title = GetTitle(result.Content)
 	}
 	//处理错误信息
-	ErrHandler(result)
+	if result.Content != "" {
+		ErrHandler(result)
+	}
 
 	//return result
 
