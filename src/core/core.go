@@ -6,6 +6,7 @@ import (
 	"getitle/src/Utils"
 	"github.com/panjf2000/ants/v2"
 	"net"
+	"os"
 	"sync"
 	"time"
 )
@@ -59,28 +60,12 @@ func defaultScan(tc TargetConfig) {
 	}
 }
 
-func safeMap(temp *sync.Map, ch chan string) {
-	for aliveC := range ch {
-		v, ok := temp.Load(aliveC)
-		if ok {
-			count := v.(int) + 1
-			temp.Store(aliveC, count)
-
-			//temp[aliveC] = 1
-		} else {
-			temp.Store(aliveC, 1)
-			fmt.Println("[*] Find " + aliveC + "/24")
-			//temp[aliveC] += 1
-		}
-	}
-}
-
 func SmartBMod(config Config) {
 	var wg sync.WaitGroup
 	var temp sync.Map
 
 	aliveC := make(chan string)
-	go safeMap(&temp, aliveC)
+	//go safeMap(&temp, aliveC)
 	var ipChannel chan string
 	ipChannel = ipGenerator(config, &temp)
 	// 选择ip生成器
@@ -97,7 +82,7 @@ func SmartBMod(config Config) {
 
 	scanPool, _ := ants.NewPoolWithFunc(config.Threads, func(i interface{}) {
 		tc := i.(TargetConfig)
-		smartScan(tc, aliveC)
+		smartScan(tc, &temp)
 		wg.Done()
 	})
 
@@ -110,33 +95,47 @@ func SmartBMod(config Config) {
 	time.Sleep(2 * time.Second)
 	close(aliveC)
 
-	if !config.Noscan {
-		temp.Range(func(key, value interface{}) bool {
-			if value.(int) > 0 {
-				fmt.Println("[*] " + Utils.GetCurtime() + " Processing:" + key.(string) + "/24")
-				var tmpconfig = config
-				tmpconfig.IP = key.(string) + "/24"
-				StraightMod(tmpconfig)
-				//每个C段同步一次数据
-				FileHandle.Sync()
-			}
-			return true
-		})
+	if config.Noscan {
+		os.Exit(0)
 	}
+	temp.Range(func(key, value interface{}) bool {
+		if value.(int) > 0 {
+			fmt.Println("[*] " + Utils.GetCurtime() + " Processing:" + key.(string) + "/24")
+			var tmpconfig = config
+			tmpconfig.IP = key.(string) + "/24"
+			StraightMod(tmpconfig)
+
+			//每个C段同步一次数据
+			FileHandle.Sync()
+		}
+		return true
+	})
 
 }
 
-func smartScan(tc TargetConfig, AliveCh chan string) {
+func smartScan(tc TargetConfig, temp *sync.Map) {
 	var result = new(Utils.Result)
 	result.Ip = tc.ip
 	result.Port = tc.port
+	result.HttpStat = "s"
 
 	Scan.Dispatch(result)
 
 	if result.Stat == "OPEN" {
 		s2ip := net.ParseIP(result.Ip).To4()
 		s2ip[3] = 1
-		AliveCh <- s2ip.String()
+		aliveC := s2ip.String()
+		v, ok := temp.Load(aliveC)
+		if ok {
+			count := v.(int) + 1
+			temp.Store(aliveC, count)
+
+			//temp[aliveC] = 1
+		} else {
+			temp.Store(aliveC, 1)
+			fmt.Println("[*] Find " + aliveC + "/24")
+			//temp[aliveC] += 1
+		}
 	}
 }
 

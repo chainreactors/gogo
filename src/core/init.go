@@ -81,14 +81,9 @@ func RunTask(config Config) {
 	}
 	switch config.Mod {
 	case "default":
-		//直接扫描
 		StraightMod(config)
-	case "a", "auto":
+	case "a", "auto", "s", "f":
 		SmartBMod(config)
-	case "s", "f":
-		//启发式扫描
-		SmartBMod(config)
-
 	default:
 		StraightMod(config)
 	}

@@ -24,6 +24,12 @@ func SocketHttp(target string, result *Utils.Result) {
 	}
 
 	result.Stat = "OPEN"
+
+	// 启发式扫描探测直接返回不需要后续处理
+	if result.HttpStat == "s" {
+		return
+	}
+
 	result.HttpStat = "tcp"
 	result.TcpCon = &conn
 

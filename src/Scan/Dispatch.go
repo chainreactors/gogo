@@ -30,6 +30,11 @@ func Dispatch(result *Utils.Result) {
 		SocketHttp(target, result)
 	}
 
+	// 启发式扫描探测直接返回不需要后续处理
+	if result.HttpStat == "s" {
+		return
+	}
+
 	if result.Stat == "OPEN" {
 		Alivesum++
 		//被动收集基本信息
