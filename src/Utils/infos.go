@@ -1,17 +1,17 @@
 package Utils
 
 import (
-	"crypto/md5"
-	"encoding/hex"
 	"encoding/json"
-	"net"
 	"net/http"
 	"os"
+	"regexp"
 	"strings"
 )
 
 var Namemap, Typemap, Portmap map[string][]string = loadportconfig()
 var Tcpfingers, Httpfingers = getFingers()
+var Compiled = make(map[string][]regexp.Regexp)
+var CommonCompiled = initregexp()
 
 func InfoFilter(result *Result) {
 
@@ -32,19 +32,8 @@ func InfoFilter(result *Result) {
 
 }
 
-func GetDetail(result *Result) {
-
-	//如果是http协议,则判断cms,如果是tcp则匹配规则库.暂时不考虑udp
-	if strings.HasPrefix(result.Protocol, "http") {
-		getHttpCMS(result)
-	} else {
-		getTCPFrameWork(result)
-	}
-	return
-}
-
 func GetTitle(content string) string {
-	title := Match("(?Uis)<title>(.*)</title>", content)
+	title := CompileMatch(CommonCompiled["title"], content)
 	if title != "" {
 		return title
 	}
@@ -54,7 +43,7 @@ func GetTitle(content string) string {
 func GetMidware(resp *http.Response, content string) string {
 	var server string = ""
 	if resp == nil {
-		server = Match("(?i)Server: ([\x20-\x7e]+)", strings.Split(content, "\r\n\r\n")[0])
+		server = CompileMatch(CommonCompiled["server"], content)
 	} else {
 		server = resp.Header.Get("Server")
 	}
@@ -64,12 +53,12 @@ func GetMidware(resp *http.Response, content string) string {
 func GetLanguage(resp *http.Response, content string) string {
 	var powered string
 	if resp == nil {
-		powered = Match("(?i)X-Powered-By: ([\x20-\x7e]+)", strings.Split(content, "\r\n\r\n")[0])
+		powered = CompileMatch(CommonCompiled["xpb"], content)
 		if powered != "" {
 			return powered
 		}
 
-		sessionid := Match("(?i) (.*SESS.*?ID)", "")
+		sessionid := CompileMatch(CommonCompiled["sessionid"], content)
 
 		if sessionid != "" {
 			switch sessionid {
@@ -100,189 +89,6 @@ func GetLanguage(resp *http.Response, content string) string {
 	}
 
 	return ""
-}
-
-func getHttpCMS(result *Result) {
-	for _, finger := range Httpfingers {
-		httpFingerMatch(result, finger)
-		if result.Framework != "" {
-			return
-		}
-	}
-	return
-}
-
-func httpFingerMatch(result *Result, finger Finger) {
-
-	resp := result.Httpresp
-	content := result.Content
-	//var cookies map[string]string
-	if finger.SendData != "" {
-		conn := HttpConn(2)
-		resp, err := conn.Get(GetURL(result) + finger.SendData)
-		if err != nil {
-			return
-		}
-		content = string(GetBody(resp))
-		resp.Body.Close()
-	}
-
-	if finger.Regexps.HTML != nil {
-		for _, html := range finger.Regexps.HTML {
-			if strings.Contains(content, html) {
-				result.Framework = finger.Name
-				return
-			}
-		}
-	} else if finger.Regexps.Regexp != nil {
-		for _, reg := range finger.Regexps.Regexp {
-			res := Match("(?im)"+reg, content)
-			if res == "matched" {
-				//println("[*] " + res)
-				result.Framework = finger.Name
-				return
-			} else if res != "" {
-				result.Framework = finger.Name + res
-				//result.Title = res
-				return
-			}
-		}
-	} else if finger.Regexps.Header != nil {
-		for _, header := range finger.Regexps.Header {
-			if resp == nil {
-				if strings.Contains(content, header) {
-					result.Framework = finger.Name
-					return
-				}
-			} else {
-				headers := getHeaderstr(resp)
-				if strings.Contains(headers, header) {
-					result.Framework = finger.Name
-					return
-				}
-			}
-
-		}
-		//} else if finger.Regexps.Cookie != nil {
-		//	for _, cookie := range finger.Regexps.Cookie {
-		//		if resp == nil {
-		//			if strings.Contains(content, cookie) {
-		//				result.Framework = finger.Name
-		//				return
-		//			}
-		//		} else if cookies[cookie] != "" {
-		//			result.Framework = finger.Name
-		//			return
-		//		}
-		//	}
-	} else if finger.Regexps.MD5 != nil {
-		for _, md5s := range finger.Regexps.MD5 {
-			m := md5.Sum([]byte(content))
-			if md5s == hex.EncodeToString(m[:]) {
-				result.Framework = finger.Name
-				return
-			}
-		}
-	}
-}
-
-//第一个返回值为详细的版本信息,第二个返回值为规则名字
-func getTCPFrameWork(result *Result) {
-	// 优先匹配默认端口,第一遍循环只匹配默认端口
-	for _, finger := range Tcpfingers {
-		if finger.Defaultport[result.Port] == true {
-			tcpFingerMatch(result, finger)
-		}
-		if result.Framework != "" {
-			return
-		}
-	}
-
-	// 若默认端口未匹配到结果,则匹配全部
-	for _, finger := range Tcpfingers {
-		if finger.Defaultport[result.Port] != true {
-			tcpFingerMatch(result, finger)
-		}
-
-		if result.Framework != "" {
-			return
-		}
-	}
-
-	return
-}
-
-func tcpFingerMatch(result *Result, finger Finger) {
-	content := result.Content
-	var data []byte
-	var err error
-
-	// 某些规则需要主动发送一个数据包探测
-	if finger.SendData != "" {
-		var conn net.Conn
-		conn, err = TcpSocketConn(GetTarget(result), 2)
-		if err != nil {
-			return
-		}
-		data, err = SocketSend(conn, []byte(finger.SendData), 1024)
-
-		// 如果报错为EOF,则需要重新建立tcp连接
-		if err != nil {
-			return
-			//target := GetTarget(result)
-			//// 如果对端已经关闭,则本地socket也关闭,并重新建立连接
-			//(*result.TcpCon).Close()
-			//*result.TcpCon, err = TcpSocketConn(target, time.Duration(2))
-			//if err != nil {
-			//	return
-			//}
-			//data, err = SocketSend(*result.TcpCon, []byte(finger.SendData), 1024)
-			//
-			//// 重新建立链接后再次报错,则跳过该规则匹配
-			//if err != nil {
-			//	result.Error = err.Error()
-			//	return
-			//}
-		}
-	}
-	// 如果主动探测有回包,则正则匹配回包内容, 若主动探测没有返回内容,则直接跳过该规则
-	if string(data) != "" {
-		content = string(data)
-	} else if finger.SendData != "" && string(data) == "" {
-		return
-	}
-
-	//遍历漏洞正则
-	for _, regexpstr := range finger.Regexps.Regexp {
-		res := Match("(?im)"+regexpstr, content)
-		if res == "matched" {
-			//println("[*] " + res)
-			result.Framework = finger.Name
-			return
-		} else if res != "" {
-			result.HttpStat = finger.Protocol
-			result.Framework = finger.Name + " " + strings.TrimSpace(res)
-			result.Vuln = finger.Vuln
-			//result.Title = res
-			return
-		}
-	}
-	// 遍历信息泄露正则
-	for _, regexpstr := range finger.Regexps.Info {
-		res := Match("(?im)"+regexpstr, content)
-		if res == "matched" {
-			//println("[*] " + res)
-			result.Framework = finger.Name
-			return
-		} else if res != "" {
-			result.HttpStat = "tcp"
-			result.Framework = finger.Name + " " + strings.TrimSpace(res)
-			//result.Title = res
-			return
-		}
-	}
-
-	return
 }
 
 func getCookies(resp *http.Response) map[string]string {
@@ -318,20 +124,53 @@ func FilterCertDomain(domins []string) string {
 
 //加载指纹到全局变量
 //TODO 正则预编译
-func getFingers() ([]Finger, []Finger) {
+func getFingers() (map[string][]Finger, []Finger) {
 
-	var tcpfingers, httpfingers []Finger
+	var tmptcpfingers, httpfingers []Finger
+	var tcpfingers = make(map[string][]Finger)
 	// 根据权重排序在python脚本中已经实现
-	err := json.Unmarshal([]byte(LoadFingers("tcp")), &tcpfingers)
+	err := json.Unmarshal([]byte(LoadFingers("tcp")), &tmptcpfingers)
 
 	if err != nil {
 		println("[-] tcpfingers load FAIL!")
 		os.Exit(0)
 	}
+	//初步处理tcp指纹
+
+	for _, finger := range tmptcpfingers {
+		// 预编译指纹
+
+		// 普通指纹
+		for _, regstr := range finger.Regexps.Regexp {
+			Compiled[finger.Name] = append(Compiled[finger.Name], compile("(?im)"+regstr))
+		}
+		// 漏洞指纹,指纹名称后接 "_vuln"
+		for _, regstr := range finger.Regexps.Vuln {
+			Compiled[finger.Name+"_vuln"] = append(Compiled[finger.Name], compile("(?im)"+regstr))
+		}
+
+		// 根据端口分类指纹
+		for _, ports := range finger.Defaultport {
+			for _, port := range port2PortSlice(ports) {
+				tcpfingers[port] = []Finger{finger}
+			}
+		}
+	}
+
 	err = json.Unmarshal([]byte(LoadFingers("http")), &httpfingers)
 	if err != nil {
 		println("[-] httpfingers load FAIL!")
 		os.Exit(0)
+	}
+
+	for _, finger := range httpfingers {
+		// 预编译指纹
+		for _, regstr := range finger.Regexps.Regexp {
+			Compiled[finger.Name] = append(Compiled[finger.Name], compile("(?im)"+regstr))
+		}
+		for _, regstr := range finger.Regexps.Vuln {
+			Compiled[finger.Name+"_vuln"] = append(Compiled[finger.Name], compile("(?im)"+regstr))
+		}
 	}
 	return tcpfingers, httpfingers
 }
@@ -374,4 +213,22 @@ func loadportconfig() (map[string][]string, map[string][]string, map[string][]st
 	}
 
 	return typemap, namemap, portmap
+}
+
+func compile(s string) regexp.Regexp {
+	reg, err := regexp.Compile(s)
+	if err != nil {
+		println("[-] regexp string error: " + s)
+		os.Exit(0)
+	}
+	return *reg
+}
+
+func initregexp() map[string]regexp.Regexp {
+	comp := make(map[string]regexp.Regexp)
+	comp["title"] = compile("(?Uis)<title>(.*)</title>")
+	comp["server"] = compile("(?i)Server: ([\x20-\x7e]+)")
+	comp["xpb"] = compile("(?i)X-Powered-By: ([\x20-\x7e]+)")
+	comp["sessionid"] = compile("(?i) (.*SESS.*?ID)")
+	return comp
 }

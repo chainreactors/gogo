@@ -6,7 +6,6 @@ import (
 	"getitle/src/Utils"
 	"github.com/panjf2000/ants/v2"
 	"net"
-	"os"
 	"sync"
 	"time"
 )
@@ -96,8 +95,9 @@ func SmartBMod(config Config) {
 	close(aliveC)
 
 	if config.Noscan {
-		os.Exit(0)
+		return
 	}
+	config.Mod = "default"
 	temp.Range(func(key, value interface{}) bool {
 		if value.(int) > 0 {
 			fmt.Println("[*] " + Utils.GetCurtime() + " Processing:" + key.(string) + "/24")
