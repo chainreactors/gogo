@@ -20,10 +20,14 @@ func FingerScan(result *Utils.Result) {
 
 func getHttpCMS(result *Utils.Result) {
 	for _, finger := range Utils.Httpfingers {
+		if VersionLevel < finger.Level {
+			return
+		}
 		httpFingerMatch(result, finger)
 		if result.Framework != "" {
 			return
 		}
+
 	}
 	return
 }
@@ -115,6 +119,9 @@ func getTCPFrameWork(result *Utils.Result) {
 	// 若默认端口未匹配到结果,则匹配全部
 	for port, fingers := range Utils.Tcpfingers {
 		for _, finger := range fingers {
+			if VersionLevel < finger.Level {
+				return
+			}
 			if port != result.Port {
 				tcpFingerMatch(result, finger)
 			}
@@ -200,3 +207,5 @@ func tcpFingerMatch(result *Utils.Result, finger Utils.Finger) {
 
 	return
 }
+
+//func matchHTML()

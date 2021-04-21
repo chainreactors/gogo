@@ -7,8 +7,9 @@ import (
 
 var Alivesum, Sum int
 var Exploit bool
-var Version bool
+var VersionLevel = 0
 var Delay int
+var HttpsDelay int
 
 func Dispatch(result *Utils.Result) {
 	target := Utils.GetTarget(result)
@@ -42,12 +43,14 @@ func Dispatch(result *Utils.Result) {
 
 		//主动信息收集
 		// 因为正则匹配耗时较长,如果没有-v参数则字节不进行服务识别
-		if !Version {
-			FingerScan(result)
+
+		FingerScan(result)
+		if VersionLevel > 0 {
 			if result.Framework == "" && strings.HasPrefix(result.Protocol, "http") {
 				FaviconScan(result)
 			}
 		}
+
 		// 如果-e参数为true,则进行漏洞探测
 		if Exploit {
 			ExploitDispatch(result)

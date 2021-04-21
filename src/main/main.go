@@ -38,10 +38,13 @@ func main() {
 	flag.BoolVar(&core.Clean, "c", false, "")
 	flag.StringVar(&core.FileOutput, "O", "json", "")
 	flag.IntVar(&Scan.Delay, "d", 2, "")
+	flag.IntVar(&Scan.HttpsDelay, "D", 2, "")
 
 	key := flag.String("k", "", "")
 	exploit := flag.Bool("e", false, "")
 	version := flag.Bool("v", false, "")
+	version2 := flag.Bool("vv", false, "")
+
 	isPortConfig := flag.Bool("P", false, "")
 	formatoutput := flag.String("F", "", "")
 	flag.Parse()
@@ -76,7 +79,13 @@ func main() {
 	starttime := time.Now()
 
 	//初始化全局变量
-	Scan.Version = *version
+	if *version {
+		Scan.VersionLevel = 1
+	} else if *version2 {
+		Scan.VersionLevel = 2
+	} else {
+		Scan.VersionLevel = 0
+	}
 	Scan.Exploit = *exploit
 	config = core.Init(config)
 	core.RunTask(config)
