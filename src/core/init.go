@@ -12,6 +12,7 @@ import (
 var Datach = make(chan string, 100)
 var FileHandle *os.File
 var Output string
+var Noscan bool
 var FileOutput string
 var Clean bool
 
@@ -26,14 +27,25 @@ type Config struct {
 	Typ      string
 	Output   string
 	Filename string
-	Noscan   bool
+	Spray    bool
 }
 
 func Init(config Config) Config {
 	//println("*********  main 0.3.3 beta by Sangfor  *********")
+
+	if config.Mod != "default" && config.List != "" {
+		println("[-] error Smart scan config")
+		os.Exit(0)
+	}
+
 	config.Portlist = PortHandler(config.Ports)
 	if config.List != "" {
 		config.IPlist = ReadTargetFile(config.List)
+	}
+
+	if config.Spray && config.Mod != "default" {
+		println("[-] error Spray scan config")
+		os.Exit(0)
 	}
 
 	//windows系统默认协程数为2000
@@ -79,11 +91,16 @@ func RunTask(config Config) {
 	} else {
 		fmt.Println("[*] ports: " + strings.Join(config.Portlist, ","))
 	}
+
 	switch config.Mod {
 	case "default":
 		StraightMod(config)
 	case "a", "auto", "s", "f":
-		SmartBMod(config)
+		if getMask(config.IP) >= 24 {
+			StraightMod(config)
+		} else {
+			SmartBMod(config)
+		}
 	default:
 		StraightMod(config)
 	}
@@ -145,7 +162,9 @@ func initFile(filename string) {
 			}
 		}
 		// json写入
-		_, _ = FileHandle.WriteString("[")
+		if FileOutput == "json" && !Noscan {
+			_, _ = FileHandle.WriteString("[")
+		}
 
 		go write2File(FileHandle, Datach)
 
@@ -165,7 +184,9 @@ func write2File(FileHandle *os.File, Datach chan string) {
 		FileHandle.WriteString(res)
 	}
 
-	FileHandle.WriteString("]")
+	if FileOutput == "json" && !Noscan {
+		FileHandle.WriteString("]")
+	}
 	_ = FileHandle.Close()
 }
 

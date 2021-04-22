@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+	"getitle/src/Utils"
 	"math"
 	"net"
 	"strconv"
@@ -24,11 +25,6 @@ func int2ip(ipint uint) string {
 	return ip.String()
 }
 
-func getMask(cidr string) int {
-	mask, _ := strconv.Atoi(strings.Split(cidr, "/")[0])
-	return mask
-}
-
 func getMaskRange(mask string) (before uint, after uint) {
 	IntMask, _ := strconv.Atoi(mask)
 
@@ -49,22 +45,6 @@ func getIpRange(target string) (start uint, fin uint) {
 	return start, fin
 }
 
-func tcGenerator(ch chan string, portlist []string) chan TargetConfig {
-	targetChannel := make(chan TargetConfig)
-	var tc TargetConfig
-	go func() {
-		for ip := range ch {
-			for _, port := range portlist {
-				tc.ip = ip
-				tc.port = port
-				targetChannel <- tc
-			}
-		}
-		close(targetChannel)
-	}()
-	return targetChannel
-}
-
 //使用管道生成IP
 func defaultIpGenerator(CIDR string, ch chan string) chan string {
 	start, fin := getIpRange(CIDR)
@@ -74,6 +54,21 @@ func defaultIpGenerator(CIDR string, ch chan string) chan string {
 			ch <- int2ip(i)
 		}
 	}
+	return ch
+}
+
+func goDefaultIpGenerator(CIDR string) chan string {
+	start, fin := getIpRange(CIDR)
+	ch := make(chan string)
+	go func() {
+		for i := start; i <= fin; i++ {
+			// 如果是广播地址或网络地址,则跳过
+			if (i)%256 != 255 && (i)%256 != 0 {
+				ch <- int2ip(i)
+			}
+		}
+		close(ch)
+	}()
 	return ch
 }
 
@@ -94,16 +89,26 @@ func smartIpGenerator(CIDR string, ch chan string, temp *sync.Map) chan string {
 	return ch
 }
 
-func IPsGenerator(config Config, ch chan string) chan string {
-	for _, cidr := range config.IPlist {
-		ch = defaultIpGenerator(cidr, ch)
-	}
+func goIPsGenerator(config Config) chan string {
+	var ch = make(chan string)
+	go func() {
+		for _, cidr := range config.IPlist {
+			fmt.Println("[*] " + Utils.GetCurtime() + " Processing:" + cidr)
+			ch = defaultIpGenerator(cidr, ch)
+		}
+		close(ch)
+	}()
 	return ch
 }
 
 func isAlive(ip string, temp *sync.Map) bool {
 	_, ok := temp.Load(ip)
 	return !ok
+}
+
+func getMask(cidr string) int {
+	mask, _ := strconv.Atoi(strings.Split(cidr, "/")[0])
+	return mask
 }
 
 func bipGenerator(CIDR string) chan string {
@@ -147,22 +152,85 @@ func firstIpGenerator(CIDR string, ch chan string) chan string {
 func ipGenerator(config Config, temp *sync.Map) chan string {
 	ch := make(chan string)
 	go func() {
-		if config.IPlist != nil {
-			ch = IPsGenerator(config, ch)
+
+		if config.Mod == "a" {
+			ch = firstInterGenerator(ch)
+		} else if config.Mod == "s" {
+			ch = smartIpGenerator(config.IP, ch, temp)
+		} else if config.Mod == "f" {
+			ch = firstIpGenerator(config.IP, ch)
 		} else {
-			if config.Mod == "a" {
-				ch = firstInterGenerator(ch)
-			} else if config.Mod == "s" {
-				ch = smartIpGenerator(config.IP, ch, temp)
-			} else if config.Mod == "f" {
-				ch = firstIpGenerator(config.IP, ch)
-			} else {
-				ch = defaultIpGenerator(config.IP, ch)
-			}
+			ch = defaultIpGenerator(config.IP, ch)
 		}
+
 		close(ch)
 	}()
 	return ch
+}
+
+func tcGenerator(ch chan string, portlist []string) chan TargetConfig {
+	targetChannel := make(chan TargetConfig)
+	var tc TargetConfig
+	go func() {
+		for ip := range ch {
+			for _, port := range portlist {
+				tc.ip = ip
+				tc.port = port
+				targetChannel <- tc
+			}
+		}
+		close(targetChannel)
+	}()
+	return targetChannel
+}
+
+func generator(config Config) chan TargetConfig {
+	var ch chan string
+	targetChannel := make(chan TargetConfig)
+	var tc TargetConfig
+	go func() {
+		if config.Spray {
+			// 端口喷洒
+			for _, port := range config.Portlist {
+				if config.List != "" {
+					for _, cidr := range config.IPlist {
+						ch = goDefaultIpGenerator(cidr)
+						for ip := range ch {
+							tc.ip = ip
+							tc.port = port
+							targetChannel <- tc
+						}
+					}
+				} else {
+					ch = goDefaultIpGenerator(config.IP)
+					for ip := range ch {
+						tc.ip = ip
+						tc.port = port
+						targetChannel <- tc
+					}
+				}
+
+			}
+		} else {
+			// 默认模式
+			if config.IPlist != nil {
+				if config.IPlist != nil {
+					ch = goIPsGenerator(config)
+				}
+			} else {
+				ch = goDefaultIpGenerator(config.IP)
+			}
+			for ip := range ch {
+				for _, port := range config.Portlist {
+					tc.ip = ip
+					tc.port = port
+					targetChannel <- tc
+				}
+			}
+		}
+		close(targetChannel)
+	}()
+	return targetChannel
 }
 
 func checkIp(CIDR string) string {

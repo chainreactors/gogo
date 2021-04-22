@@ -30,9 +30,9 @@ func main() {
 	flag.IntVar(&config.Threads, "t", 4000, "")
 	flag.StringVar(&config.Mod, "m", "default", "")
 	flag.StringVar(&config.Typ, "n", "socket", "")
-	flag.BoolVar(&config.Noscan, "no", false, "")
+	flag.BoolVar(&core.Noscan, "no", false, "")
 	flag.StringVar(&config.Filename, "f", "", "")
-
+	flag.BoolVar(&config.Spray, "s", false, "")
 	//全局变量初始化
 	flag.StringVar(&core.Output, "o", "full", "")
 	flag.BoolVar(&core.Clean, "c", false, "")

@@ -18,15 +18,13 @@ type TargetConfig struct {
 //直接扫描
 func StraightMod(config Config) {
 	var wgs sync.WaitGroup
-	var ipChannel chan string
-	ipChannel = ipGenerator(config, nil)
-	targetChannel := tcGenerator(ipChannel, config.Portlist)
+
+	targetChannel := generator(config)
 
 	// Use the pool with a function,
 	// set 10 to the capacity of goroutine pool and 1 second for expired duration.
 	scanPool, _ := ants.NewPoolWithFunc(config.Threads, func(i interface{}) {
-		tc := i.(TargetConfig)
-		defaultScan(tc)
+		defaultScan(i.(TargetConfig))
 		wgs.Done()
 	})
 	defer scanPool.Release()
@@ -94,22 +92,17 @@ func SmartBMod(config Config) {
 	time.Sleep(2 * time.Second)
 	close(aliveC)
 
-	if config.Noscan {
+	if Noscan {
 		return
 	}
 	config.Mod = "default"
+	var iplist []string
 	temp.Range(func(key, value interface{}) bool {
-		if value.(int) > 0 {
-			fmt.Println("[*] " + Utils.GetCurtime() + " Processing:" + key.(string) + "/24")
-			var tmpconfig = config
-			tmpconfig.IP = key.(string) + "/24"
-			StraightMod(tmpconfig)
-
-			//每个C段同步一次数据
-			FileHandle.Sync()
-		}
+		iplist = append(iplist, key.(string)+"/24")
 		return true
 	})
+	config.IPlist = iplist
+	StraightMod(config)
 
 }
 
@@ -134,17 +127,20 @@ func smartScan(tc TargetConfig, temp *sync.Map) {
 		} else {
 			temp.Store(aliveC, 1)
 			fmt.Println("[*] Find " + aliveC + "/24")
+			if FileHandle != nil && Noscan {
+				Datach <- aliveC + "/24\n"
+			}
 			//temp[aliveC] += 1
 		}
 	}
 }
 
-func SmartAMod(config Config) {
-	btargetChannel := bipGenerator(config.IP)
-	for i := range btargetChannel {
-		fmt.Println("[*]" + Utils.GetCurtime() + "Processing Bclass IP:" + i + "/16")
-		var tmpconfig = config
-		tmpconfig.IP = i + "/16"
-		SmartBMod(tmpconfig)
-	}
-}
+//func SmartAMod(config Config) {
+//	btargetChannel := bipGenerator(config.IP)
+//	for i := range btargetChannel {
+//		fmt.Println("[*]" + Utils.GetCurtime() + "Processing Bclass IP:" + i + "/16")
+//		var tmpconfig = config
+//		tmpconfig.IP = i + "/16"
+//		SmartBMod(tmpconfig)
+//	}
+//}
