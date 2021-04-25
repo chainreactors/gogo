@@ -14,7 +14,7 @@ var HttpsDelay int
 func Dispatch(result *Utils.Result) {
 	target := Utils.GetTarget(result)
 	Sum++
-	//print(target)
+	//println(target)
 	if result.Port == "137" {
 		NbtScan(target, result)
 		return

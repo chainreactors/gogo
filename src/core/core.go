@@ -61,7 +61,6 @@ func SmartBMod(config Config) {
 	var wg sync.WaitGroup
 	var temp sync.Map
 
-	aliveC := make(chan string)
 	//go safeMap(&temp, aliveC)
 	var ipChannel chan string
 	ipChannel = ipGenerator(config, &temp)
@@ -79,7 +78,7 @@ func SmartBMod(config Config) {
 
 	scanPool, _ := ants.NewPoolWithFunc(config.Threads, func(i interface{}) {
 		tc := i.(TargetConfig)
-		smartScan(tc, &temp)
+		smartScan(tc, &temp, false)
 		wg.Done()
 	})
 
@@ -90,7 +89,6 @@ func SmartBMod(config Config) {
 	}
 	wg.Wait()
 	time.Sleep(2 * time.Second)
-	close(aliveC)
 
 	if Noscan {
 		return
@@ -106,7 +104,72 @@ func SmartBMod(config Config) {
 
 }
 
-func smartScan(tc TargetConfig, temp *sync.Map) {
+func SmartAMod(config Config) {
+	var wg sync.WaitGroup
+	var temp sync.Map
+
+	bIpChannel := aIpGenerator(config.IP, &temp)
+	tcChannel := tcGenerator(bIpChannel, []string{"80"})
+	scanPool, _ := ants.NewPoolWithFunc(config.Threads, func(i interface{}) {
+		tc := i.(TargetConfig)
+		smartScan(tc, &temp, true)
+		wg.Done()
+	})
+
+	defer scanPool.Release()
+	for t := range tcChannel {
+		wg.Add(1)
+		_ = scanPool.Invoke(t)
+	}
+	wg.Wait()
+
+	var iplist []string
+	temp.Range(func(key, value interface{}) bool {
+		iplist = append(iplist, key.(string)+"/16")
+		return true
+	})
+	for _, ip := range iplist {
+		config.IP = ip
+		fmt.Println("[*] " + Utils.GetCurtime() + " Spraying B class IP:" + ip)
+		SmartBMod(config)
+	}
+	//for i := range btargetChannel {
+	//	fmt.Println("[*]" + Utils.GetCurtime() + "Spraying B class IP:" + i)
+	//	var tmpconfig = config
+	//	tmpconfig.IP = i + "/16"
+	//	SmartBMod(tmpconfig)
+	//}
+}
+
+func c_alived(ip string, temp *sync.Map) {
+	s2ip := net.ParseIP(ip).To4()
+	s2ip[3] = 1
+	aliveC := s2ip.String()
+	_, ok := temp.Load(aliveC)
+
+	if !ok {
+		temp.Store(aliveC, 1)
+		fmt.Println("[*] Find " + aliveC + "/24")
+		if FileHandle != nil && Noscan {
+			//Datach <- aliveC + "/24\n"
+		}
+	}
+}
+
+func b_alived(ip string, temp *sync.Map) {
+	s2ip := net.ParseIP(ip).To4()
+	s2ip[3] = 1
+	s2ip[2] = 1
+	aliveB := s2ip.String()
+
+	_, ok := temp.Load(aliveB)
+	if !ok {
+		temp.Store(aliveB, 1)
+		fmt.Println("[*] Find " + aliveB + "/16")
+	}
+}
+
+func smartScan(tc TargetConfig, temp *sync.Map, isB bool) {
 	var result = new(Utils.Result)
 	result.Ip = tc.ip
 	result.Port = tc.port
@@ -115,32 +178,10 @@ func smartScan(tc TargetConfig, temp *sync.Map) {
 	Scan.Dispatch(result)
 
 	if result.Stat == "OPEN" {
-		s2ip := net.ParseIP(result.Ip).To4()
-		s2ip[3] = 1
-		aliveC := s2ip.String()
-		v, ok := temp.Load(aliveC)
-		if ok {
-			count := v.(int) + 1
-			temp.Store(aliveC, count)
-
-			//temp[aliveC] = 1
+		if isB {
+			b_alived(result.Ip, temp)
 		} else {
-			temp.Store(aliveC, 1)
-			fmt.Println("[*] Find " + aliveC + "/24")
-			if FileHandle != nil && Noscan {
-				Datach <- aliveC + "/24\n"
-			}
-			//temp[aliveC] += 1
+			c_alived(result.Ip, temp)
 		}
 	}
 }
-
-//func SmartAMod(config Config) {
-//	btargetChannel := bipGenerator(config.IP)
-//	for i := range btargetChannel {
-//		fmt.Println("[*]" + Utils.GetCurtime() + "Processing Bclass IP:" + i + "/16")
-//		var tmpconfig = config
-//		tmpconfig.IP = i + "/16"
-//		SmartBMod(tmpconfig)
-//	}
-//}

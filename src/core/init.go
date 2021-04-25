@@ -95,9 +95,14 @@ func RunTask(config Config) {
 	switch config.Mod {
 	case "default":
 		StraightMod(config)
-	case "a", "auto", "s", "f":
-		if getMask(config.IP) >= 24 {
+	case "a", "auto":
+		SmartBMod(config)
+	case "s", "f":
+		mask := getMask(config.IP)
+		if mask >= 24 {
 			StraightMod(config)
+		} else if mask < 16 {
+			SmartAMod(config)
 		} else {
 			SmartBMod(config)
 		}
