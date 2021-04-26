@@ -151,7 +151,7 @@ func c_alived(ip string, temp *sync.Map) {
 		temp.Store(aliveC, 1)
 		fmt.Println("[*] Find " + aliveC + "/24")
 		if FileHandle != nil && Noscan {
-			//Datach <- aliveC + "/24\n"
+			Datach <- aliveC + "/24\n"
 		}
 	}
 }

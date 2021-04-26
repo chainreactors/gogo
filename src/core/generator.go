@@ -160,7 +160,7 @@ func ipGenerator(config Config, temp *sync.Map) chan string {
 
 		if config.Mod == "a" {
 			ch = firstInterGenerator(ch)
-		} else if config.Mod == "s" {
+		} else if config.Mod == "s" || config.Mod == "ss" {
 			ch = smartIpGenerator(config.IP, ch, temp)
 		} else if config.Mod == "f" {
 			ch = firstIpGenerator(config.IP, ch)

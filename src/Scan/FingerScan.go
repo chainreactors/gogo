@@ -119,9 +119,6 @@ func getTCPFrameWork(result *Utils.Result) {
 	// 若默认端口未匹配到结果,则匹配全部
 	for port, fingers := range Utils.Tcpfingers {
 		for _, finger := range fingers {
-			if VersionLevel < finger.Level {
-				return
-			}
 			if port != result.Port {
 				tcpFingerMatch(result, finger)
 			}
@@ -140,7 +137,7 @@ func tcpFingerMatch(result *Utils.Result, finger Utils.Finger) {
 	var err error
 
 	// 某些规则需要主动发送一个数据包探测
-	if finger.SendData != "" {
+	if finger.SendData != "" && VersionLevel >= finger.Level {
 		var conn net.Conn
 		conn, err = Utils.TcpSocketConn(Utils.GetTarget(result), 2)
 		if err != nil {
@@ -170,8 +167,6 @@ func tcpFingerMatch(result *Utils.Result, finger Utils.Finger) {
 	// 如果主动探测有回包,则正则匹配回包内容, 若主动探测没有返回内容,则直接跳过该规则
 	if string(data) != "" {
 		content = string(data)
-	} else if finger.SendData != "" && string(data) == "" {
-		return
 	}
 
 	//遍历漏洞正则

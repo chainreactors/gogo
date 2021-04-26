@@ -101,7 +101,12 @@ func RunTask(config Config) {
 		mask := getMask(config.IP)
 		if mask >= 24 {
 			StraightMod(config)
-		} else if mask < 16 {
+		} else {
+			SmartBMod(config)
+		}
+	case "ss":
+		mask := getMask(config.IP)
+		if mask < 16 {
 			SmartAMod(config)
 		} else {
 			SmartBMod(config)
