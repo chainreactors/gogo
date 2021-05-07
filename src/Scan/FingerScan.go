@@ -47,23 +47,23 @@ func httpFingerMatch(result *Utils.Result, finger Utils.Finger) {
 		resp.Body.Close()
 	}
 
-	for _, reg := range Utils.Compiled[finger.Name+"_vuln"] {
-		res := Utils.CompileMatch(reg, content)
-		if res == "matched" {
-			//println("[*] " + res)
-			result.Framework = finger.Name
-			result.Vuln = finger.Vuln
-			return
-		} else if res != "" {
-			result.HttpStat = "tcp"
-			result.Framework = finger.Name + " " + strings.TrimSpace(res)
-			result.Vuln = finger.Vuln
-			//result.Title = res
-			return
+	if finger.Regexps.Vuln != nil {
+		for _, reg := range Utils.Compiled[finger.Name+"_vuln"] {
+			res := Utils.CompileMatch(reg, content)
+			if res == "matched" {
+				//println("[*] " + res)
+				result.Framework = finger.Name
+				result.Vuln = finger.Vuln
+				return
+			} else if res != "" {
+				result.HttpStat = "tcp"
+				result.Framework = finger.Name + " " + strings.TrimSpace(res)
+				result.Vuln = finger.Vuln
+				//result.Title = res
+				return
+			}
 		}
-	}
-
-	if finger.Regexps.HTML != nil {
+	} else if finger.Regexps.HTML != nil {
 		for _, html := range finger.Regexps.HTML {
 			if strings.Contains(content, html) {
 				result.Framework = finger.Name
