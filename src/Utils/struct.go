@@ -8,6 +8,7 @@ import (
 type Result struct {
 	Ip        string         `json:"ip"`
 	Port      string         `json:"port"`
+	Uri       string         `json:"uri"`
 	Stat      string         `json:"-"`
 	TcpCon    *net.Conn      `json:"-"`
 	Httpresp  *http.Response `json:"-"`

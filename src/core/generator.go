@@ -111,27 +111,25 @@ func getMask(cidr string) int {
 	return mask
 }
 
-func aIpGenerator(CIDR string, temp *sync.Map) chan string {
+func aIpGenerator(CIDR string, ch chan string, temp *sync.Map) chan string {
 	start, fin := getIpRange(CIDR)
-	ch := make(chan string)
+	//ch := make(chan string)
 	startb := start / 65536 % 256
 	finb := fin / 65536 % 256
-	var c, b, i uint
-	go func() {
-		for i = 1; i < 255; i++ {
-			for c = 0; c < 255; c++ {
-				for b = 0; b <= finb-startb; b++ {
-					//println(b)
-					//ip := int2ip(start + b*65536 + c + 1)
-					if notAlive(int2ip(start+b*65536+256+1), temp) {
-						ch <- int2ip(start + b*65536 + c*256 + i)
-					}
-				}
+	var c, b uint
+	//go func() {
+	for c = 0; c < 255; c++ {
+		for b = 0; b <= finb-startb; b++ {
+			//println(int2ip(start + b*65536 + c*256 + 1))
+			//ip := int2ip(start + b*65536 + c + 1)
+			if notAlive(int2ip(start+b*65536+256+1), temp) {
+				//println(int2ip(start + b*65536 + c*256 + 1))
+				ch <- int2ip(start + b*65536 + c*256 + 1)
 			}
 		}
-
-		close(ch)
-	}()
+	}
+	//	close(ch)
+	//}()
 
 	return ch
 }
@@ -156,18 +154,36 @@ func firstIpGenerator(CIDR string, ch chan string) chan string {
 
 func ipGenerator(config Config, temp *sync.Map) chan string {
 	ch := make(chan string)
+	mask := getMask(config.IP)
 	go func() {
-
 		if config.Mod == "a" {
 			ch = firstInterGenerator(ch)
-		} else if config.Mod == "s" || config.Mod == "ss" {
+			//fmt.Println("[*] Spraying : 10.0.0.0/8")
+			//ch = aIpGenerator("10.0.0.0/8",ch,temp)
+			//fmt.Println("[*] Spraying : 172.16.0.0/12")
+			//ch = aIpGenerator("172.16.0.0/12",ch,temp)
+			//fmt.Println("[*] Spraying : 192.168.0.0/16")
+			//ch = smartIpGenerator("192.168.1.1/16", ch, temp)
+		} else if config.Mod == "s" {
+			//if config.IPlist != nil{
+			//	for _,ip := range config.IPlist{
+			//		fmt.Println("[*] " + Utils.GetCurtime() + " Spraying B class IP:" + ip)
+			//		ch = smartIpGenerator(ip, ch, temp)
+			//	}
+			//}else {
 			ch = smartIpGenerator(config.IP, ch, temp)
+			//}
+		} else if config.Mod == "ss" {
+			if mask < 16 {
+				ch = aIpGenerator(config.IP, ch, temp)
+			} else {
+				ch = smartIpGenerator(config.IP, ch, temp)
+			}
 		} else if config.Mod == "f" {
 			ch = firstIpGenerator(config.IP, ch)
 		} else {
 			ch = defaultIpGenerator(config.IP, ch)
 		}
-
 		close(ch)
 	}()
 	return ch
@@ -253,18 +269,4 @@ func isIPv4(ip string) bool {
 		return true
 	}
 	return false
-}
-
-func getIp(target string) string {
-	if isIPv4(target) {
-		return target
-	}
-	iprecords, _ := net.LookupIP(target)
-	for _, ip := range iprecords {
-		if isIPv4(ip.String()) {
-			fmt.Println("[*] parse domin SUCCESS, map " + target + " to " + ip.String())
-			return ip.String()
-		}
-	}
-	return ""
 }

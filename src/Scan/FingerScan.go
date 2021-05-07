@@ -47,6 +47,22 @@ func httpFingerMatch(result *Utils.Result, finger Utils.Finger) {
 		resp.Body.Close()
 	}
 
+	for _, reg := range Utils.Compiled[finger.Name+"_vuln"] {
+		res := Utils.CompileMatch(reg, content)
+		if res == "matched" {
+			//println("[*] " + res)
+			result.Framework = finger.Name
+			result.Vuln = finger.Vuln
+			return
+		} else if res != "" {
+			result.HttpStat = "tcp"
+			result.Framework = finger.Name + " " + strings.TrimSpace(res)
+			result.Vuln = finger.Vuln
+			//result.Title = res
+			return
+		}
+	}
+
 	if finger.Regexps.HTML != nil {
 		for _, html := range finger.Regexps.HTML {
 			if strings.Contains(content, html) {
@@ -81,7 +97,6 @@ func httpFingerMatch(result *Utils.Result, finger Utils.Finger) {
 					return
 				}
 			}
-
 		}
 		//} else if finger.Regexps.Cookie != nil {
 		//	for _, cookie := range finger.Regexps.Cookie {
@@ -169,7 +184,7 @@ func tcpFingerMatch(result *Utils.Result, finger Utils.Finger) {
 		content = string(data)
 	}
 
-	//遍历漏洞正则
+	//遍历指纹正则
 	for _, reg := range Utils.Compiled[finger.Name] {
 		res := Utils.CompileMatch(reg, content)
 		if res == "matched" {
@@ -183,7 +198,7 @@ func tcpFingerMatch(result *Utils.Result, finger Utils.Finger) {
 			return
 		}
 	}
-	// 遍历信息泄露正则
+	// 遍历漏洞正则
 	for _, reg := range Utils.Compiled[finger.Name+"_vuln"] {
 		res := Utils.CompileMatch(reg, content)
 		if res == "matched" {

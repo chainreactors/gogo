@@ -10,6 +10,7 @@ var Exploit bool
 var VersionLevel = 0
 var Delay int
 var HttpsDelay int
+var Payloadstr string
 
 func Dispatch(result *Utils.Result) {
 	target := Utils.GetTarget(result)
@@ -38,12 +39,19 @@ func Dispatch(result *Utils.Result) {
 
 	if result.Stat == "OPEN" {
 		Alivesum++
+
+		// 指定payload扫描
+		if Payloadstr != "" {
+			PayloadScan(result)
+			Utils.InfoFilter(result)
+			return
+		}
+
 		//被动收集基本信息
 		Utils.InfoFilter(result)
 
 		//主动信息收集
 		// 因为正则匹配耗时较长,如果没有-v参数则字节不进行服务识别
-
 		FingerScan(result)
 		if VersionLevel > 0 {
 			if result.Framework == "" && strings.HasPrefix(result.Protocol, "http") {

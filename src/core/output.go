@@ -6,7 +6,6 @@ import (
 	"getitle/src/Utils"
 	"io/ioutil"
 	"sort"
-	"strings"
 )
 
 var first = true
@@ -35,8 +34,8 @@ func output(result *Utils.Result, outType string) string {
 		} else {
 			out = JsonOutput(result)
 		}
-	case "html":
-		out = HtmlOutput(result)
+	//case "html":
+	//	out = HtmlOutput(result)
 	default:
 		out = FullOutput(result)
 
@@ -53,7 +52,7 @@ func ColorOutput(result *Utils.Result) string {
 }
 
 func FullOutput(result *Utils.Result) string {
-	s := fmt.Sprintf("[+] %s://%s:%s\t%s\t%s\t%s\t%s\t[%s] %s ", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, result.Framework, result.Host, result.HttpStat, result.Title)
+	s := fmt.Sprintf("[+] %s://%s:%s%s\t%s\t%s\t%s\t%s\t[%s] %s ", result.Protocol, result.Ip, result.Port, result.Uri, result.Midware, result.Language, result.Framework, result.Host, result.HttpStat, result.Title)
 	s += vulnOutput(result.Vuln)
 	s += "\n"
 	return s
@@ -81,21 +80,21 @@ func JsonFile(result *Utils.Result) string {
 
 }
 
-func HtmlOutput(result *Utils.Result) (s string) {
-	if strings.HasPrefix(result.Protocol, "http") {
-		s = fmt.Sprintf("[+] <a>%s://%s:%s</a>\t%s\t%s\t%s\t%s\t[%s] %s", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, result.Framework, result.Host, result.HttpStat, result.Title)
-	} else {
-		s = fmt.Sprintf("[+] %s://%s:%s\t%s\t%s\t%s\t%s\t[%s] %s", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, result.Framework, result.Host, result.HttpStat, result.Title)
-	}
-	vulnstr := vulnOutput(result.Vuln)
-	if vulnstr != "" {
-		s += "<b style=\"color:red;\">" + vulnstr + "</b>"
-	}
-	s += "\n"
-
-	return s
-
-}
+//func HtmlOutput(result *Utils.Result) (s string) {
+//	if strings.HasPrefix(result.Protocol, "http") {
+//		s = fmt.Sprintf("[+] <a>%s://%s:%s</a>\t%s\t%s\t%s\t%s\t[%s] %s", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, result.Framework, result.Host, result.HttpStat, result.Title)
+//	} else {
+//		s = fmt.Sprintf("[+] %s://%s:%s\t%s\t%s\t%s\t%s\t[%s] %s", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, result.Framework, result.Host, result.HttpStat, result.Title)
+//	}
+//	vulnstr := vulnOutput(result.Vuln)
+//	if vulnstr != "" {
+//		s += "<b style=\"color:red;\">" + vulnstr + "</b>"
+//	}
+//	s += "\n"
+//
+//	return s
+//
+//}
 
 func vulnOutput(vuln string) string {
 	if vuln != "" {

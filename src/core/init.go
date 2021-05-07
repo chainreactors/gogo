@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"getitle/src/Utils"
 	"io/ioutil"
+	"net"
 	"os"
 	"runtime"
 	"strings"
@@ -33,7 +34,11 @@ type Config struct {
 func Init(config Config) Config {
 	//println("*********  main 0.3.3 beta by Sangfor  *********")
 
-	if config.Mod != "default" && config.List != "" {
+	//if config.Mod != "default" && config.List != "" {
+	//	println("[-] error Smart scan config")
+	//	os.Exit(0)
+	//}
+	if config.Mod == "ss" && config.List != "" {
 		println("[-] error Smart scan config")
 		os.Exit(0)
 	}
@@ -70,8 +75,7 @@ func RunTask(config Config) {
 	var taskname string = ""
 	if config.Mod == "a" {
 		// 内网探测默认使用icmp扫描
-		taskname = "auto"
-		config.Typ = "icmp"
+		taskname = "三个内网保留地址"
 	} else {
 		config = IpInit(config)
 		if config.IP != "" {
@@ -85,7 +89,7 @@ func RunTask(config Config) {
 		os.Exit(0)
 	}
 
-	fmt.Println(fmt.Sprintf("[*] Start Scan Task %s ,total ports: %d , mod: %s", taskname, len(config.Portlist), config.Mod))
+	fmt.Println(fmt.Sprintf("[*] Start scan task %s ,total ports: %d , mod: %s", taskname, len(config.Portlist), config.Mod))
 	if len(config.Portlist) > 1000 {
 		fmt.Println("[*] too much ports , only show top 1000 ports: " + strings.Join(config.Portlist[:1000], ",") + "......")
 	} else {
@@ -96,21 +100,36 @@ func RunTask(config Config) {
 	case "default":
 		StraightMod(config)
 	case "a", "auto":
+		config.Mod = "ss"
+		config.IP = "10.0.0.0/8"
+		fmt.Println("[*] Spraying : 10.0.0.0/8")
 		SmartBMod(config)
-	case "s", "f":
+
+		fmt.Println("[*] Spraying : 172.16.0.0/12")
+		config.IP = "172.16.0.0/12"
+		SmartBMod(config)
+
+		fmt.Println("[*] Spraying : 192.168.0.0/16")
+		config.IP = "192.168.0.0/16"
+		//config.Mod = "s"
+		SmartBMod(config)
+
+	case "s", "f", "ss":
 		mask := getMask(config.IP)
 		if mask >= 24 {
+			config.Mod = "default"
 			StraightMod(config)
 		} else {
 			SmartBMod(config)
 		}
-	case "ss":
-		mask := getMask(config.IP)
-		if mask < 16 {
-			SmartAMod(config)
-		} else {
-			SmartBMod(config)
-		}
+	//case "ss":
+	//	mask := getMask(config.IP)
+	//	if mask < 16 {
+	//		//SmartAMod(config)
+	//	} else {
+	//		config.Mod = "s"
+	//		SmartBMod(config)
+	//	}
 	default:
 		StraightMod(config)
 	}
@@ -245,6 +264,23 @@ func Listportconfig() {
 	}
 }
 
+func IpInit(config Config) Config {
+	if config.IP != "" {
+		config.IP = IpForamt(config.IP)
+	}
+	if config.List != "" {
+		var iplist []string
+		for _, ip := range config.IPlist {
+			t := IpForamt(ip)
+			if !strings.HasPrefix(t, "err") {
+				iplist = append(iplist, t)
+			}
+		}
+		config.IPlist = iplist
+	}
+	return config
+}
+
 func IpForamt(target string) string {
 	target = strings.Replace(target, "http://", "", -1)
 	target = strings.Replace(target, "https://", "", -1)
@@ -255,29 +291,33 @@ func IpForamt(target string) string {
 		if isIPv4(ip) {
 			target = ip + "/" + mask
 		} else {
-			println("[-] error IPv4 " + ip)
-			os.Exit(0)
+			target = getIp(ip) + "/" + mask
 		}
 	}
 	if !strings.Contains(target, "/") {
 		if isIPv4(target) {
 			target = target + "/32"
 		} else {
-			println("[-] error IPv4 " + target)
-			os.Exit(0)
+			target = getIp(target) + "/32"
 		}
 	}
 	return target
 }
 
-func IpInit(config Config) Config {
-	if config.IP != "" {
-		config.IP = IpForamt(config.IP)
+func getIp(target string) string {
+	if isIPv4(target) {
+		return target
 	}
-	if config.List != "" {
-		for i, ip := range config.IPlist {
-			config.IPlist[i] = IpForamt(ip)
+	iprecords, err := net.LookupIP(target)
+	if err != nil {
+		println("[-] error IPv4 or bad domain:" + target + ". JUMPED!")
+		return "err"
+	}
+	for _, ip := range iprecords {
+		if isIPv4(ip.String()) {
+			fmt.Println("[*] parse domain SUCCESS, map " + target + " to " + ip.String())
+			return ip.String()
 		}
 	}
-	return config
+	return "err"
 }

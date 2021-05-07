@@ -6,8 +6,8 @@ import (
 	"getitle/src/Utils"
 	"github.com/panjf2000/ants/v2"
 	"net"
+	"sort"
 	"sync"
-	"time"
 )
 
 type TargetConfig struct {
@@ -68,7 +68,7 @@ func SmartBMod(config Config) {
 
 	var tcChannel chan TargetConfig
 
-	if config.Typ == "icmp" || config.Typ == "i" {
+	if config.Mod == "a" || config.Mod == "ss" {
 		fmt.Println("[*] current Protocol: ICMP")
 		tcChannel = tcGenerator(ipChannel, []string{"icmp"})
 	} else {
@@ -78,7 +78,7 @@ func SmartBMod(config Config) {
 
 	scanPool, _ := ants.NewPoolWithFunc(config.Threads, func(i interface{}) {
 		tc := i.(TargetConfig)
-		smartScan(tc, &temp, false)
+		smartScan(tc, &temp, config.Mod)
 		wg.Done()
 	})
 
@@ -88,58 +88,80 @@ func SmartBMod(config Config) {
 		_ = scanPool.Invoke(t)
 	}
 	wg.Wait()
-	time.Sleep(2 * time.Second)
 
+	// 仅喷洒网段,不扫描
 	if Noscan {
 		return
 	}
-	config.Mod = "default"
-	var iplist []string
-	temp.Range(func(key, value interface{}) bool {
-		iplist = append(iplist, key.(string)+"/24")
-		return true
-	})
-	config.IPlist = iplist
-	StraightMod(config)
-
-}
-
-func SmartAMod(config Config) {
-	var wg sync.WaitGroup
-	var temp sync.Map
-
-	bIpChannel := aIpGenerator(config.IP, &temp)
-	tcChannel := tcGenerator(bIpChannel, []string{"80"})
-	scanPool, _ := ants.NewPoolWithFunc(config.Threads, func(i interface{}) {
-		tc := i.(TargetConfig)
-		smartScan(tc, &temp, true)
-		wg.Done()
-	})
-
-	defer scanPool.Release()
-	for t := range tcChannel {
-		wg.Add(1)
-		_ = scanPool.Invoke(t)
-	}
-	wg.Wait()
 
 	var iplist []string
 	temp.Range(func(key, value interface{}) bool {
-		iplist = append(iplist, key.(string)+"/16")
+		if config.Mod == "ss" {
+			iplist = append(iplist, key.(string)+"/16")
+		} else {
+			iplist = append(iplist, key.(string)+"/24")
+		}
 		return true
 	})
-	for _, ip := range iplist {
-		config.IP = ip
-		fmt.Println("[*] " + Utils.GetCurtime() + " Spraying B class IP:" + ip)
-		SmartBMod(config)
+	if iplist == nil {
+		return
 	}
-	//for i := range btargetChannel {
-	//	fmt.Println("[*]" + Utils.GetCurtime() + "Spraying B class IP:" + i)
-	//	var tmpconfig = config
-	//	tmpconfig.IP = i + "/16"
-	//	SmartBMod(tmpconfig)
-	//}
+	sort.Strings(iplist)
+	// 启发式扫描逐步降级,从喷洒B段到喷洒C段到默认扫描
+	if config.Mod == "ss" {
+		config.Mod = "s"
+		for _, ip := range iplist {
+			config.IP = ip
+			fmt.Println("[*] " + Utils.GetCurtime() + " Spraying B class IP:" + ip)
+			SmartBMod(config)
+		}
+	} else {
+		config.Mod = "default"
+		config.IPlist = iplist
+		StraightMod(config)
+	}
 }
+
+//func SmartAMod(config Config) {
+//	var wg sync.WaitGroup
+//	var temp sync.Map
+//
+//	bIpChannel := aIpGenerator(config.IP, &temp)
+//	tcChannel := tcGenerator(bIpChannel, []string{"icmp"})
+//	scanPool, _ := ants.NewPoolWithFunc(config.Threads, func(i interface{}) {
+//		tc := i.(TargetConfig)
+//		smartScan(tc, &temp, true)
+//		wg.Done()
+//	})
+//
+//	defer scanPool.Release()
+//	for t := range tcChannel {
+//		wg.Add(1)
+//		_ = scanPool.Invoke(t)
+//	}
+//	wg.Wait()
+//
+//	var iplist []string
+//	temp.Range(func(key, value interface{}) bool {
+//		iplist = append(iplist, key.(string)+"/16")
+//		return true
+//	})
+//
+//	if Noscan {
+//		return
+//	}
+//	for _, ip := range iplist {
+//		config.IP = ip
+//		fmt.Println("[*] " + Utils.GetCurtime() + " Spraying B class IP:" + ip)
+//		SmartBMod(config)
+//	}
+//	//for i := range btargetChannel {
+//	//	fmt.Println("[*]" + Utils.GetCurtime() + "Spraying B class IP:" + i)
+//	//	var tmpconfig = config
+//	//	tmpconfig.IP = i + "/16"
+//	//	SmartBMod(tmpconfig)
+//	//}
+//}
 
 func c_alived(ip string, temp *sync.Map) {
 	s2ip := net.ParseIP(ip).To4()
@@ -149,7 +171,7 @@ func c_alived(ip string, temp *sync.Map) {
 
 	if !ok {
 		temp.Store(aliveC, 1)
-		fmt.Println("[*] Find " + aliveC + "/24")
+		fmt.Println("[*] Found " + aliveC + "/24")
 		if FileHandle != nil && Noscan {
 			Datach <- aliveC + "/24\n"
 		}
@@ -165,11 +187,14 @@ func b_alived(ip string, temp *sync.Map) {
 	_, ok := temp.Load(aliveB)
 	if !ok {
 		temp.Store(aliveB, 1)
-		fmt.Println("[*] Find " + aliveB + "/16")
+		fmt.Println("[*] Found " + aliveB + "/16")
+		if FileHandle != nil && Noscan {
+			Datach <- aliveB + "/16\n"
+		}
 	}
 }
 
-func smartScan(tc TargetConfig, temp *sync.Map, isB bool) {
+func smartScan(tc TargetConfig, temp *sync.Map, mod string) {
 	var result = new(Utils.Result)
 	result.Ip = tc.ip
 	result.Port = tc.port
@@ -178,7 +203,7 @@ func smartScan(tc TargetConfig, temp *sync.Map, isB bool) {
 	Scan.Dispatch(result)
 
 	if result.Stat == "OPEN" {
-		if isB {
+		if mod == "ss" {
 			b_alived(result.Ip, temp)
 		} else {
 			c_alived(result.Ip, temp)

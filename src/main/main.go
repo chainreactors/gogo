@@ -39,6 +39,7 @@ func main() {
 	flag.StringVar(&core.FileOutput, "O", "json", "")
 	flag.IntVar(&Scan.Delay, "d", 2, "")
 	flag.IntVar(&Scan.HttpsDelay, "D", 2, "")
+	flag.StringVar(&Scan.Payloadstr, "payload", "", "")
 
 	key := flag.String("k", "", "")
 	exploit := flag.Bool("e", false, "")
