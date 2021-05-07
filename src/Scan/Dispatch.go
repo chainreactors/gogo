@@ -41,7 +41,7 @@ func Dispatch(result *Utils.Result) {
 		Alivesum++
 
 		// 指定payload扫描
-		if Payloadstr != "" {
+		if strings.HasPrefix(result.Protocol, "http") && Payloadstr != "" {
 			PayloadScan(result)
 			Utils.InfoFilter(result)
 			return

@@ -165,14 +165,28 @@ func FormatOutput(filename string, outputfile string) {
 		for pint, p := range pfs[ip] {
 			// 跳过OXID与NetBois
 			if !(p.port == "135" || p.port == "137") {
-				s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s\t%s\t[%s] %s", p.protocol, ip, pint, p.midware, p.language, p.framework, p.host, p.stat, p.title)
-				s += vulnOutput(p.vuln)
+				if Output == "c" {
+					// 颜色输出
+					s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s\t%s\t[%s] %s", p.protocol, ip, pint, p.midware, p.language, blue(p.framework), p.host, yellow(p.stat), blue(p.title))
+					s += red(vulnOutput(p.vuln))
+				} else {
+					s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s\t%s\t[%s] %s", p.protocol, ip, pint, p.midware, p.language, p.framework, p.host, p.stat, p.title)
+					s += vulnOutput(p.vuln)
+				}
 				s += "\n"
 			}
 		}
 		fmt.Print(s)
 	}
 	//fmt.Println(string(content))
+}
+
+func processLog(s string) {
+	s = s + " , " + Utils.GetCurtime() + "\n"
+	fmt.Print(s)
+	if LogFileHandle != nil {
+		LogDetach <- s
+	}
 }
 
 func Banner() {

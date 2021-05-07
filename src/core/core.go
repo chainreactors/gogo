@@ -57,14 +57,20 @@ func defaultScan(tc TargetConfig) {
 	}
 }
 
-func SmartBMod(config Config) {
+func SmartMod(config Config) {
+	var taskname string
+	if config.IP != "" {
+		taskname = config.IP
+	} else if config.IPlist != nil {
+		taskname = fmt.Sprintf("%d cidrs", len(config.IPlist))
+	}
+	processLog(fmt.Sprintf("[*] SmartScan %s, Mod: %s", taskname, config.Mod))
 	var wg sync.WaitGroup
 	var temp sync.Map
 
 	//go safeMap(&temp, aliveC)
-	var ipChannel chan string
-	ipChannel = ipGenerator(config, &temp)
-	// 选择ip生成器
+	//var ipChannel chan string
+	ipChannel := ipGenerator(config, &temp)
 
 	var tcChannel chan TargetConfig
 
@@ -112,8 +118,8 @@ func SmartBMod(config Config) {
 		config.Mod = "s"
 		for _, ip := range iplist {
 			config.IP = ip
-			fmt.Println("[*] " + Utils.GetCurtime() + " Spraying B class IP:" + ip)
-			SmartBMod(config)
+			processLog("[*] Spraying B class IP:" + ip)
+			SmartMod(config)
 		}
 	} else {
 		config.Mod = "default"
@@ -153,13 +159,13 @@ func SmartBMod(config Config) {
 //	for _, ip := range iplist {
 //		config.IP = ip
 //		fmt.Println("[*] " + Utils.GetCurtime() + " Spraying B class IP:" + ip)
-//		SmartBMod(config)
+//		SmartMod(config)
 //	}
 //	//for i := range btargetChannel {
 //	//	fmt.Println("[*]" + Utils.GetCurtime() + "Spraying B class IP:" + i)
 //	//	var tmpconfig = config
 //	//	tmpconfig.IP = i + "/16"
-//	//	SmartBMod(tmpconfig)
+//	//	SmartMod(tmpconfig)
 //	//}
 //}
 

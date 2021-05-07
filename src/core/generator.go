@@ -2,7 +2,6 @@ package core
 
 import (
 	"fmt"
-	"getitle/src/Utils"
 	"math"
 	"net"
 	"strconv"
@@ -93,7 +92,7 @@ func goIPsGenerator(config Config) chan string {
 	var ch = make(chan string)
 	go func() {
 		for _, cidr := range config.IPlist {
-			fmt.Println("[*] " + Utils.GetCurtime() + " Processing:" + cidr)
+			processLog("[*] Processing CIDR:" + cidr)
 			ch = defaultIpGenerator(cidr, ch)
 		}
 		close(ch)
@@ -213,7 +212,8 @@ func generator(config Config) chan TargetConfig {
 		if config.Spray {
 			// 端口喷洒
 			for _, port := range config.Portlist {
-				if config.List != "" {
+				processLog("[*] Processing Port:" + port)
+				if config.IPlist != nil {
 					for _, cidr := range config.IPlist {
 						ch = goDefaultIpGenerator(cidr)
 						for ip := range ch {
@@ -230,10 +230,11 @@ func generator(config Config) chan TargetConfig {
 						targetChannel <- tc
 					}
 				}
-
 			}
 		} else {
 			// 默认模式
+
+			// 批量处理
 			if config.IPlist != nil {
 				if config.IPlist != nil {
 					ch = goIPsGenerator(config)

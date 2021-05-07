@@ -10,12 +10,19 @@ import (
 	"strings"
 )
 
+//文件输出
 var Datach = make(chan string, 100)
-var FileHandle *os.File
-var Output string
-var Noscan bool
-var FileOutput string
+var FileHandle *os.File // 输出文件 handle
+
+var Output string     // 命令行输出格式
+var FileOutput string // 文件输出格式
+
+//进度tmp文件
+var LogDetach = make(chan string, 100)
+var LogFileHandle *os.File
+
 var Clean bool
+var Noscan bool
 
 type Config struct {
 	IP       string
@@ -48,10 +55,10 @@ func Init(config Config) Config {
 		config.IPlist = ReadTargetFile(config.List)
 	}
 
-	if config.Spray && config.Mod != "default" {
-		println("[-] error Spray scan config")
-		os.Exit(0)
-	}
+	//if config.Spray && config.Mod != "default" {
+	//	println("[-] error Spray scan config")
+	//	os.Exit(0)
+	//}
 
 	//windows系统默认协程数为2000
 	OS := runtime.GOOS
@@ -65,9 +72,18 @@ func Init(config Config) Config {
 	// 存在文件输出则停止命令行输出
 	if config.Filename != "" {
 		Clean = !Clean
+		// 创建filehandle
+		FileHandle = initFileHandle(config.Filename)
+		if FileOutput == "json" && !Noscan {
+			_, _ = FileHandle.WriteString("[")
+		}
+
 	}
 
-	initFile(config.Filename)
+	LogFileHandle = initFileHandle(".sock.lock")
+	initFile()
+	// 进度文件,任务完成后自动删除
+
 	return config
 }
 
@@ -75,7 +91,7 @@ func RunTask(config Config) {
 	var taskname string = ""
 	if config.Mod == "a" {
 		// 内网探测默认使用icmp扫描
-		taskname = "三个内网保留地址"
+		taskname = "Reserved interIP addresses"
 	} else {
 		config = IpInit(config)
 		if config.IP != "" {
@@ -89,7 +105,7 @@ func RunTask(config Config) {
 		os.Exit(0)
 	}
 
-	fmt.Println(fmt.Sprintf("[*] Start scan task %s ,total ports: %d , mod: %s", taskname, len(config.Portlist), config.Mod))
+	processLog(fmt.Sprintf("[*] Start scan task %s ,total ports: %d , mod: %s", taskname, len(config.Portlist), config.Mod))
 	if len(config.Portlist) > 1000 {
 		fmt.Println("[*] too much ports , only show top 1000 ports: " + strings.Join(config.Portlist[:1000], ",") + "......")
 	} else {
@@ -102,17 +118,17 @@ func RunTask(config Config) {
 	case "a", "auto":
 		config.Mod = "ss"
 		config.IP = "10.0.0.0/8"
-		fmt.Println("[*] Spraying : 10.0.0.0/8")
-		SmartBMod(config)
+		processLog("[*] Spraying : 10.0.0.0/8")
+		SmartMod(config)
 
-		fmt.Println("[*] Spraying : 172.16.0.0/12")
+		processLog("[*] Spraying : 172.16.0.0/12")
 		config.IP = "172.16.0.0/12"
-		SmartBMod(config)
+		SmartMod(config)
 
-		fmt.Println("[*] Spraying : 192.168.0.0/16")
+		processLog("[*] Spraying : 192.168.0.0/16")
 		config.IP = "192.168.0.0/16"
 		//config.Mod = "s"
-		SmartBMod(config)
+		SmartMod(config)
 
 	case "s", "f", "ss":
 		mask := getMask(config.IP)
@@ -120,7 +136,7 @@ func RunTask(config Config) {
 			config.Mod = "default"
 			StraightMod(config)
 		} else {
-			SmartBMod(config)
+			SmartMod(config)
 		}
 	//case "ss":
 	//	mask := getMask(config.IP)
@@ -128,7 +144,7 @@ func RunTask(config Config) {
 	//		//SmartAMod(config)
 	//	} else {
 	//		config.Mod = "s"
-	//		SmartBMod(config)
+	//		SmartMod(config)
 	//	}
 	default:
 		StraightMod(config)
@@ -150,54 +166,46 @@ func ReadTargetFile(targetfile string) []string {
 	return targets
 }
 
-//func TargetHandler(s string) (string, []string, string, string) {
-//	ss := strings.Split(s, " ")
-//
-//	var mod, CIDR, typ string
-//	var portlist []string
-//
-//	if len(ss) == 0 {
-//		return CIDR, portlist, mod, typ
-//	}
-//
-//	CIDR = IpForamt(ss[0])
-//	portlist = PortHandler("top1")
-//	mod = "default"
-//	typ = "socket"
-//	if len(ss) > 1 {
-//		portlist = PortHandler(ss[1])
-//	}
-//	if len(ss) > 2 {
-//		mod = ss[2]
-//	}
-//	if len(ss) > 3 {
-//		typ = ss[3]
-//	}
-//	return CIDR, portlist, mod, typ
-//}
-
-func initFile(filename string) {
+func initFileHandle(filename string) *os.File {
 	var err error
-
-	if filename != "" {
-		if checkFileIsExist(filename) { //如果文件存在
-			//FileHandle, err = os.OpenFile(filename, os.O_APPEND|os.O_WRONLY, os.ModeAppend) //打开文件
-			println("[-] File already exists")
+	var filehandle *os.File
+	if checkFileIsExist(filename) { //如果文件存在
+		//FileHandle, err = os.OpenFile(filename, os.O_APPEND|os.O_WRONLY, os.ModeAppend) //打开文件
+		println("[-] File already exists")
+		os.Exit(0)
+	} else {
+		filehandle, err = os.Create(filename) //创建文件
+		if err != nil {
 			os.Exit(0)
-		} else {
-			FileHandle, err = os.Create(filename) //创建文件
-			if err != nil {
-				os.Exit(0)
-			}
 		}
-		// json写入
-		if FileOutput == "json" && !Noscan {
-			_, _ = FileHandle.WriteString("[")
-		}
-
-		go write2File(FileHandle, Datach)
-
 	}
+	return filehandle
+}
+
+func initFile() {
+
+	//go write2File(FileHandle, Datach)
+	if FileHandle != nil {
+		go func() {
+			for res := range Datach {
+				FileHandle.WriteString(res)
+			}
+			if FileOutput == "json" && !Noscan {
+				FileHandle.WriteString("]")
+			}
+			_ = FileHandle.Close()
+
+		}()
+	}
+
+	go func() {
+		for res := range LogDetach {
+			LogFileHandle.WriteString(res)
+			LogFileHandle.Sync()
+		}
+		_ = LogFileHandle.Close()
+		_ = os.Remove(".sock.lock")
+	}()
 }
 
 func checkFileIsExist(filename string) bool {
@@ -208,16 +216,16 @@ func checkFileIsExist(filename string) bool {
 	return exist
 }
 
-func write2File(FileHandle *os.File, Datach chan string) {
-	for res := range Datach {
-		FileHandle.WriteString(res)
-	}
-
-	if FileOutput == "json" && !Noscan {
-		FileHandle.WriteString("]")
-	}
-	_ = FileHandle.Close()
-}
+//func write2File(filehandle *os.File, datach chan string) {
+//	for res := range datach {
+//		filehandle.WriteString(res)
+//	}
+//
+//	if FileOutput == "json" && !Noscan {
+//		filehandle.WriteString("]")
+//	}
+//	_ = filehandle.Close()
+//}
 
 func PortHandler(portstring string) []string {
 	var ports []string
