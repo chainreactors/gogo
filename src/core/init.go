@@ -287,9 +287,7 @@ func IpInit(config Config) Config {
 		}
 		config.IPlist = iplist
 	}
-	if strings.HasPrefix(config.IP, "err") {
-		os.Exit(0)
-	} else if len(config.IPlist) == 0 {
+	if strings.HasPrefix(config.IP, "err") && len(config.IPlist) == 0 {
 		println("[*] all IP error")
 		os.Exit(0)
 	}
