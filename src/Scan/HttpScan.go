@@ -24,6 +24,12 @@ func SocketHttp(target string, result *Utils.Result) {
 	}
 
 	result.Stat = "OPEN"
+
+	// 启发式扫描探测直接返回不需要后续处理
+	if result.HttpStat == "s" {
+		return
+	}
+
 	result.HttpStat = "tcp"
 	result.TcpCon = &conn
 
@@ -68,7 +74,7 @@ func SystemHttp(target string, result *Utils.Result) {
 
 	//如果是https或者30x跳转,则增加超时时间
 	if ishttps || strings.HasPrefix(result.HttpStat, "3") {
-		delay = Delay + 2
+		delay = Delay + HttpsDelay
 	}
 	conn = Utils.HttpConn(delay)
 	resp, err := conn.Get(target)

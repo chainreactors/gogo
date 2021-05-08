@@ -8,6 +8,7 @@ import (
 type Result struct {
 	Ip        string         `json:"ip"`
 	Port      string         `json:"port"`
+	Uri       string         `json:"uri"`
 	Stat      string         `json:"-"`
 	TcpCon    *net.Conn      `json:"-"`
 	Httpresp  *http.Response `json:"-"`
@@ -25,13 +26,13 @@ type Result struct {
 }
 
 type Finger struct {
-	Name        string          `json:"name"`
-	Protocol    string          `json:"protocol"`
-	SendData    string          `json:"send_data"`
-	Vuln        string          `json:"vuln"`
-	Level       int             `json:"level"`
-	Defaultport map[string]bool `json:"default_port"`
-	Regexps     Regexps         `json:"regexps"`
+	Name        string   `json:"name"`
+	Protocol    string   `json:"protocol"`
+	SendData    string   `json:"send_data"`
+	Vuln        string   `json:"vuln"`
+	Level       int      `json:"level"`
+	Defaultport []string `json:"default_port"`
+	Regexps     Regexps  `json:"regexps"`
 }
 
 type Regexps struct {
@@ -40,7 +41,7 @@ type Regexps struct {
 	Regexp []string `json:"regexp"`
 	Cookie []string `json:"cookie"`
 	Header []string `json:"header"`
-	Info   []string `json:"info"`
+	Vuln   []string `json:"vuln"`
 }
 
 type PortFinger struct {

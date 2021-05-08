@@ -30,18 +30,21 @@ func main() {
 	flag.IntVar(&config.Threads, "t", 4000, "")
 	flag.StringVar(&config.Mod, "m", "default", "")
 	flag.StringVar(&config.Typ, "n", "socket", "")
-	flag.BoolVar(&config.Noscan, "no", false, "")
+	flag.BoolVar(&config.Spray, "s", false, "")
 	flag.StringVar(&config.Filename, "f", "", "")
-
 	//全局变量初始化
 	flag.StringVar(&core.Output, "o", "full", "")
 	flag.BoolVar(&core.Clean, "c", false, "")
 	flag.StringVar(&core.FileOutput, "O", "json", "")
 	flag.IntVar(&Scan.Delay, "d", 2, "")
-
+	flag.IntVar(&Scan.HttpsDelay, "D", 2, "")
+	flag.StringVar(&Scan.Payloadstr, "payload", "", "")
+	flag.BoolVar(&core.Noscan, "no", false, "")
 	key := flag.String("k", "", "")
 	exploit := flag.Bool("e", false, "")
 	version := flag.Bool("v", false, "")
+	version2 := flag.Bool("vv", false, "")
+
 	isPortConfig := flag.Bool("P", false, "")
 	formatoutput := flag.String("F", "", "")
 	flag.Parse()
@@ -72,16 +75,24 @@ func main() {
 	} else {
 		p += "Exploit Scan Closed"
 	}
-	println(p)
+	fmt.Println(p)
 	starttime := time.Now()
 
 	//初始化全局变量
-	Scan.Version = *version
+	if *version {
+		Scan.VersionLevel = 1
+	} else if *version2 {
+		Scan.VersionLevel = 2
+	} else {
+		Scan.VersionLevel = 0
+	}
+
 	Scan.Exploit = *exploit
 	config = core.Init(config)
 	core.RunTask(config)
-	//关闭文件写入管道
+	//关闭文件写入管道与filehandler
 	close(core.Datach)
+	close(core.LogDetach)
 
 	time.Sleep(time.Microsecond * 500)
 	fmt.Println(fmt.Sprintf("\n[*] Alive sum: %d, Target sum : %d", Scan.Alivesum, Scan.Sum))

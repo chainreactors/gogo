@@ -68,11 +68,11 @@ func Encode(s string) string {
 }
 
 func Match(regexpstr string, s string) string {
-	Reg, err := regexp.Compile(regexpstr)
+	reg, err := regexp.Compile(regexpstr)
 	if err != nil {
 		return ""
 	}
-	res := Reg.FindStringSubmatch(s)
+	res := reg.FindStringSubmatch(s)
 	if len(res) == 1 {
 		return "matched"
 	} else if len(res) == 2 {
@@ -81,7 +81,17 @@ func Match(regexpstr string, s string) string {
 	return ""
 }
 
-func getHeaderstr(resp *http.Response) string {
+func CompileMatch(reg regexp.Regexp, s string) string {
+	res := reg.FindStringSubmatch(s)
+	if len(res) == 1 {
+		return "matched"
+	} else if len(res) == 2 {
+		return res[1]
+	}
+	return ""
+}
+
+func GetHeaderstr(resp *http.Response) string {
 	var headerstr = ""
 	for k, v := range resp.Header {
 		for _, i := range v {

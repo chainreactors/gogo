@@ -7,13 +7,15 @@ import (
 
 var Alivesum, Sum int
 var Exploit bool
-var Version bool
+var VersionLevel = 0
 var Delay int
+var HttpsDelay int
+var Payloadstr string
 
 func Dispatch(result *Utils.Result) {
 	target := Utils.GetTarget(result)
 	Sum++
-
+	//println(target)
 	if result.Port == "137" {
 		NbtScan(target, result)
 		return
@@ -30,19 +32,33 @@ func Dispatch(result *Utils.Result) {
 		SocketHttp(target, result)
 	}
 
+	// 启发式扫描探测直接返回不需要后续处理
+	if result.HttpStat == "s" {
+		return
+	}
+
 	if result.Stat == "OPEN" {
 		Alivesum++
+
+		// 指定payload扫描
+		if strings.HasPrefix(result.Protocol, "http") && Payloadstr != "" {
+			PayloadScan(result)
+			Utils.InfoFilter(result)
+			return
+		}
+
 		//被动收集基本信息
 		Utils.InfoFilter(result)
 
 		//主动信息收集
 		// 因为正则匹配耗时较长,如果没有-v参数则字节不进行服务识别
-		if !Version {
-			Utils.GetDetail(result)
+		FingerScan(result)
+		if VersionLevel > 0 {
 			if result.Framework == "" && strings.HasPrefix(result.Protocol, "http") {
 				FaviconScan(result)
 			}
 		}
+
 		// 如果-e参数为true,则进行漏洞探测
 		if Exploit {
 			ExploitDispatch(result)
