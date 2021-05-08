@@ -80,6 +80,7 @@ func Init(config Config) Config {
 
 	}
 
+	_ = os.Remove(".sock.lock")
 	LogFileHandle = initFileHandle(".sock.lock")
 	initFile()
 	// 进度文件,任务完成后自动删除
@@ -188,10 +189,10 @@ func initFile() {
 	if FileHandle != nil {
 		go func() {
 			for res := range Datach {
-				FileHandle.WriteString(res)
+				_, _ = FileHandle.WriteString(res)
 			}
 			if FileOutput == "json" && !Noscan {
-				FileHandle.WriteString("]")
+				_, _ = FileHandle.WriteString("]")
 			}
 			_ = FileHandle.Close()
 
@@ -200,8 +201,8 @@ func initFile() {
 
 	go func() {
 		for res := range LogDetach {
-			LogFileHandle.WriteString(res)
-			LogFileHandle.Sync()
+			_, _ = LogFileHandle.WriteString(res)
+			_ = LogFileHandle.Sync()
 		}
 		_ = LogFileHandle.Close()
 		_ = os.Remove(".sock.lock")
@@ -244,7 +245,7 @@ func PortHandler(portstring string) []string {
 func choiceports(portname string) []string {
 	var ports []string
 	if portname == "all" {
-		for p, _ := range Utils.Portmap {
+		for p := range Utils.Portmap {
 			ports = append(ports, p)
 		}
 		return ports
@@ -285,6 +286,12 @@ func IpInit(config Config) Config {
 			}
 		}
 		config.IPlist = iplist
+	}
+	if strings.HasPrefix(config.IP, "err") {
+		os.Exit(0)
+	} else if len(config.IPlist) == 0 {
+		println("[*] all IP error")
+		os.Exit(0)
 	}
 	return config
 }
