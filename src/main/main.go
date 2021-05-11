@@ -29,7 +29,7 @@ func main() {
 	flag.StringVar(&config.List, "l", "", "")
 	flag.IntVar(&config.Threads, "t", 4000, "")
 	flag.StringVar(&config.Mod, "m", "default", "")
-	flag.StringVar(&config.Typ, "n", "socket", "")
+	flag.StringVar(&config.SmartPort, "sp", "default", "")
 	flag.BoolVar(&config.Spray, "s", false, "")
 	flag.StringVar(&config.Filename, "f", "", "")
 	//全局变量初始化

@@ -25,17 +25,18 @@ var Clean bool
 var Noscan bool
 
 type Config struct {
-	IP       string
-	IPlist   []string
-	Ports    string
-	Portlist []string
-	List     string
-	Threads  int
-	Mod      string
-	Typ      string
-	Output   string
-	Filename string
-	Spray    bool
+	IP            string
+	IPlist        []string
+	Ports         string
+	Portlist      []string
+	List          string
+	Threads       int
+	Mod           string
+	SmartPort     string
+	SmartPortList []string
+	Output        string
+	Filename      string
+	Spray         bool
 }
 
 func Init(config Config) Config {
@@ -49,7 +50,15 @@ func Init(config Config) Config {
 		println("[-] error Smart scan config")
 		os.Exit(0)
 	}
-
+	if config.SmartPort != "default" {
+		config.SmartPortList = PortHandler(config.SmartPort)
+	} else {
+		if config.Mod == "s" {
+			config.SmartPortList = []string{"80"}
+		} else if config.Mod == "ss" || config.Mod == "f" {
+			config.SmartPortList = []string{"icmp"}
+		}
+	}
 	config.Portlist = PortHandler(config.Ports)
 	if config.List != "" {
 		config.IPlist = ReadTargetFile(config.List)
@@ -120,6 +129,9 @@ func RunTask(config Config) {
 		config.Mod = "ss"
 		config.IP = "10.0.0.0/8"
 		processLog("[*] Spraying : 10.0.0.0/8")
+		if config.SmartPort == "default" {
+			config.SmartPortList = []string{"icmp"}
+		}
 		SmartMod(config)
 
 		processLog("[*] Spraying : 172.16.0.0/12")
@@ -127,6 +139,9 @@ func RunTask(config Config) {
 		SmartMod(config)
 
 		processLog("[*] Spraying : 192.168.0.0/16")
+		if config.SmartPort == "default" {
+			config.SmartPortList = []string{"80"}
+		}
 		config.IP = "192.168.0.0/16"
 		//config.Mod = "s"
 		SmartMod(config)
