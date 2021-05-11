@@ -46,10 +46,13 @@ func Init(config Config) Config {
 	//	println("[-] error Smart scan config")
 	//	os.Exit(0)
 	//}
+
 	if config.Mod == "ss" && config.List != "" {
 		println("[-] error Smart scan config")
 		os.Exit(0)
 	}
+
+	// 初始化启发式扫描的端口
 	if config.SmartPort != "default" {
 		config.SmartPortList = PortHandler(config.SmartPort)
 	} else {
@@ -59,7 +62,11 @@ func Init(config Config) Config {
 			config.SmartPortList = []string{"icmp"}
 		}
 	}
+
+	// 初始化端口配置
 	config.Portlist = PortHandler(config.Ports)
+
+	// 如果从文件中读,初始化IP列表配置
 	if config.List != "" {
 		config.IPlist = ReadTargetFile(config.List)
 	}
