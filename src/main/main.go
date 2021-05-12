@@ -64,18 +64,6 @@ func main() {
 		os.Exit(0)
 	}
 
-	p := fmt.Sprintf("[*] Current goroutines: %d,", config.Threads)
-	if !*version {
-		p += "Version Scan Running, "
-	} else {
-		p += "Version Scan Closed, "
-	}
-	if *exploit {
-		p += "Exploit Scan Running"
-	} else {
-		p += "Exploit Scan Closed"
-	}
-	fmt.Println(p)
 	starttime := time.Now()
 
 	//初始化全局变量
@@ -86,7 +74,13 @@ func main() {
 	} else {
 		Scan.VersionLevel = 0
 	}
-
+	p := fmt.Sprintf("[*] Current goroutines: %d, Version Level %d, ", config.Threads, Scan.VersionLevel)
+	if *exploit {
+		p += "Exploit Scan Running"
+	} else {
+		p += "Exploit Scan Closed"
+	}
+	fmt.Println(p)
 	Scan.Exploit = *exploit
 	config = core.Init(config)
 	core.RunTask(config)

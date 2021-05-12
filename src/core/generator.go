@@ -94,6 +94,8 @@ func goIPsGenerator(config Config) chan string {
 		for _, cidr := range config.IPlist {
 			processLog("[*] Processing CIDR:" + cidr)
 			ch = defaultIpGenerator(cidr, ch)
+			// 每个c段同步数据到文件
+			_ = FileHandle.Sync()
 		}
 		close(ch)
 	}()
@@ -221,6 +223,7 @@ func generator(config Config) chan TargetConfig {
 							tc.port = port
 							targetChannel <- tc
 						}
+						_ = FileHandle.Sync()
 					}
 				} else {
 					ch = goDefaultIpGenerator(config.IP)
@@ -233,7 +236,6 @@ func generator(config Config) chan TargetConfig {
 			}
 		} else {
 			// 默认模式
-
 			// 批量处理
 			if config.IPlist != nil {
 				if config.IPlist != nil {
