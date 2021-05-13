@@ -352,7 +352,11 @@ func getIp(target string) string {
 	for _, ip := range iprecords {
 		if isIPv4(ip.String()) {
 			fmt.Println("[*] parse domain SUCCESS, map " + target + " to " + ip.String())
-			return ip.String()
+			if isIPv4(ip.String()) {
+				return ip.String()
+			} else {
+				return "err"
+			}
 		}
 	}
 	return "err"
