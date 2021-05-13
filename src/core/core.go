@@ -183,9 +183,9 @@ func c_alived(ip string, temp *sync.Map) {
 
 	if !ok {
 		temp.Store(aliveC, 1)
-		fmt.Println("[*] Found " + aliveC + "/24")
+		fmt.Println("[*] Found " + ip + "/24")
 		if FileHandle != nil && Noscan {
-			Datach <- aliveC + "/24\n"
+			Datach <- ip + "/24\n"
 		}
 	}
 }
@@ -199,9 +199,9 @@ func b_alived(ip string, temp *sync.Map) {
 	_, ok := temp.Load(aliveB)
 	if !ok {
 		temp.Store(aliveB, 1)
-		fmt.Println("[*] Found " + aliveB + "/16")
+		fmt.Println("[*] Found " + ip + "/16")
 		if FileHandle != nil && Noscan {
-			Datach <- aliveB + "/16\n"
+			Datach <- ip + "/16\n"
 		}
 	}
 }
