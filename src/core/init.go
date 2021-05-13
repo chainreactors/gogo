@@ -311,7 +311,7 @@ func IpInit(config Config) Config {
 
 	}
 	if strings.HasPrefix(config.IP, "err") && len(config.IPlist) == 0 {
-		println("[*] all IP error")
+		println("[-] all IP error")
 		os.Exit(0)
 	}
 	return config
@@ -329,8 +329,7 @@ func IpForamt(target string) string {
 		} else {
 			target = getIp(ip) + "/" + mask
 		}
-	}
-	if !strings.Contains(target, "/") {
+	} else {
 		if isIPv4(target) {
 			target = target + "/32"
 		} else {
@@ -341,22 +340,15 @@ func IpForamt(target string) string {
 }
 
 func getIp(target string) string {
-	if isIPv4(target) {
-		return target
-	}
 	iprecords, err := net.LookupIP(target)
 	if err != nil {
 		println("[-] error IPv4 or bad domain:" + target + ". JUMPED!")
 		return "err"
 	}
 	for _, ip := range iprecords {
-		if isIPv4(ip.String()) {
+		if ip.To4() != nil {
 			fmt.Println("[*] parse domain SUCCESS, map " + target + " to " + ip.String())
-			if isIPv4(ip.String()) {
-				return ip.String()
-			} else {
-				return "err"
-			}
+			return ip.String()
 		}
 	}
 	return "err"

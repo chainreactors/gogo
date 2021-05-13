@@ -9,9 +9,8 @@ import (
 	"sync"
 )
 
-func ip2int(ipmask string) uint {
-	Ip := strings.Split(ipmask, "/")
-	s2ip := net.ParseIP(Ip[0]).To4()
+func ip2int(ip string) uint {
+	s2ip := net.ParseIP(ip).To4()
 	return uint(s2ip[3]) | uint(s2ip[2])<<8 | uint(s2ip[1])<<16 | uint(s2ip[0])<<24
 }
 
@@ -24,20 +23,18 @@ func int2ip(ipint uint) string {
 	return ip.String()
 }
 
-func getMaskRange(mask string) (before uint, after uint) {
-	IntMask, _ := strconv.Atoi(mask)
+func getMaskRange(mask int) (before uint, after uint) {
 
-	before = uint(math.Pow(2, 32) - math.Pow(2, float64(32-IntMask)))
-	after = uint(math.Pow(2, float64(32-IntMask)) - 1)
+	before = uint(math.Pow(2, 32) - math.Pow(2, float64(32-mask)))
+	after = uint(math.Pow(2, float64(32-mask)) - 1)
 	return before, after
 }
 
 func getIpRange(target string) (start uint, fin uint) {
-	mask := strings.Split(target, "/")[1]
-
+	_, cidr, _ := net.ParseCIDR(target)
+	mask, _ := cidr.Mask.Size()
 	before, after := getMaskRange(mask)
-
-	ipint := ip2int(target)
+	ipint := ip2int(cidr.IP.String())
 
 	start = ipint & before
 	fin = ipint | after
@@ -267,7 +264,7 @@ func checkIp(CIDR string) string {
 }
 
 func isIPv4(ip string) bool {
-	address := net.ParseIP(ip)
+	address := net.ParseIP(ip).To4()
 	if address != nil {
 		return true
 	}
