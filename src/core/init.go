@@ -307,7 +307,8 @@ func IpInit(config Config) Config {
 				iplist = append(iplist, t)
 			}
 		}
-		config.IPlist = iplist
+		config.IPlist = Utils.SliceUnique(iplist)
+
 	}
 	if strings.HasPrefix(config.IP, "err") && len(config.IPlist) == 0 {
 		println("[*] all IP error")
