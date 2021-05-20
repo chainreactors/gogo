@@ -15,7 +15,6 @@ var Payloadstr string
 func Dispatch(result *Utils.Result) {
 	target := Utils.GetTarget(result)
 	Sum++
-	//println(target)
 	if result.Port == "137" {
 		NbtScan(target, result)
 		return
@@ -25,7 +24,7 @@ func Dispatch(result *Utils.Result) {
 	} else if result.Port == "icmp" {
 		IcmpScan(result.Ip, result)
 		return
-	} else if Utils.SliceContains(Utils.Portmap[result.Port], "snmp") {
+	} else if result.Port == "snmp" {
 		SnmpScan(result.Ip, result)
 		return
 	} else {

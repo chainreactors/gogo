@@ -39,7 +39,7 @@ Usage of ./getitle:
 
 #### 写入到文件
 
-写入到文件的数据为json,需要配合-F参数格式化
+写入到文件的数据为json,需要配合-F参数格式化,(写入到文件则默认命令行只输出进度)
 
 `./gt.exe -ip 172.16.1.1/12 -p top2 -m s -f out.txt`
 
@@ -61,6 +61,8 @@ Usage of ./getitle:
 
 #### 端口Spray模式
 
+端口优先的喷洒
+
 `./gt.exe -ip 172.16.1.1/24 -p top2 -s`
 
 #### 指纹识别
@@ -73,7 +75,7 @@ Usage of ./getitle:
 
 `./gt.exe -ip 192.168.1.1/24 -p top2`
 
-主动发包探测指纹,例如redis
+需要主动发包探测指纹或漏洞,例如redis,memcache
 
 `./gt.exe -ip 192.168.1.1/24 -p top2 -v `
 

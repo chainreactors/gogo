@@ -14,4 +14,4 @@ upx -1 -k -o ./bin/getitle_darwin_amd64_v%1_upx ./bin/getitle_darwin_amd64_v%1
 limelighter -I ./bin/getitle_windows_amd64_v%1.exe -O ./bin/getitle_windows_amd64_sangfor_v%1.exe -Domain www.sangfor.com
 rm *.sangfor.*
 
-tar cvf release/getitlev%1.tar bin/* README.md
+tar cvf release/getitlev%1.tar bin/* README.md gtfilter.py

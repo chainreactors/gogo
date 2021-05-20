@@ -7,6 +7,7 @@ import (
 	"github.com/panjf2000/ants/v2"
 	"net"
 	"sort"
+	"strings"
 	"sync"
 )
 
@@ -73,14 +74,16 @@ func SmartMod(config Config) {
 	ipChannel := ipGenerator(config, &temp)
 
 	var tcChannel chan TargetConfig
+	processLog("[*] Smart probe ports: " + strings.Join(config.SmartPortList, ","))
+	tcChannel = tcGenerator(ipChannel, config.SmartPortList)
 
-	if config.Mod == "a" || config.Mod == "ss" {
-		fmt.Println("[*] current Protocol: ICMP")
-		tcChannel = tcGenerator(ipChannel, []string{"icmp"})
-	} else {
-		fmt.Println("[*] current Protocol: Socket")
-		tcChannel = tcGenerator(ipChannel, []string{"80"})
-	}
+	//if config.Mod == "a" || config.Mod == "ss" {
+	//	fmt.Println("[*] current Protocol: ICMP")
+	//	tcChannel = tcGenerator(ipChannel, []string{"icmp"})
+	//} else {
+	//	fmt.Println("[*] current Protocol: Socket")
+	//	tcChannel = tcGenerator(ipChannel, []string{"80"})
+	//}
 
 	scanPool, _ := ants.NewPoolWithFunc(config.Threads, func(i interface{}) {
 		tc := i.(TargetConfig)
@@ -119,6 +122,9 @@ func SmartMod(config Config) {
 		for _, ip := range iplist {
 			config.IP = ip
 			processLog("[*] Spraying B class IP:" + ip)
+			if config.SmartPort == "default" {
+				config.SmartPortList = []string{"80"}
+			}
 			SmartMod(config)
 		}
 	} else {
@@ -177,9 +183,9 @@ func c_alived(ip string, temp *sync.Map) {
 
 	if !ok {
 		temp.Store(aliveC, 1)
-		fmt.Println("[*] Found " + aliveC + "/24")
+		fmt.Println("[*] Found " + ip + "/24")
 		if FileHandle != nil && Noscan {
-			Datach <- aliveC + "/24\n"
+			Datach <- ip + "/24\n"
 		}
 	}
 }
@@ -193,9 +199,9 @@ func b_alived(ip string, temp *sync.Map) {
 	_, ok := temp.Load(aliveB)
 	if !ok {
 		temp.Store(aliveB, 1)
-		fmt.Println("[*] Found " + aliveB + "/16")
+		fmt.Println("[*] Found " + ip + "/16")
 		if FileHandle != nil && Noscan {
-			Datach <- aliveB + "/16\n"
+			Datach <- ip + "/16\n"
 		}
 	}
 }

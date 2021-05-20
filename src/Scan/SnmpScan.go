@@ -6,9 +6,11 @@ import (
 )
 
 func SnmpScan(target string, result *Utils.Result) {
+	var err error
 	s, err := gosnmp.NewGoSNMP(target, "public", gosnmp.Version2c, int64(Delay+2))
 	if err != nil {
 		//log.Fatal(err)
+		return
 	}
 	resp, err := s.Get(".1.3.6.1.2.1.1.1.0")
 	if err != nil {

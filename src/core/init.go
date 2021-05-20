@@ -25,17 +25,18 @@ var Clean bool
 var Noscan bool
 
 type Config struct {
-	IP       string
-	IPlist   []string
-	Ports    string
-	Portlist []string
-	List     string
-	Threads  int
-	Mod      string
-	Typ      string
-	Output   string
-	Filename string
-	Spray    bool
+	IP            string
+	IPlist        []string
+	Ports         string
+	Portlist      []string
+	List          string
+	Threads       int
+	Mod           string
+	SmartPort     string
+	SmartPortList []string
+	Output        string
+	Filename      string
+	Spray         bool
 }
 
 func Init(config Config) Config {
@@ -45,12 +46,27 @@ func Init(config Config) Config {
 	//	println("[-] error Smart scan config")
 	//	os.Exit(0)
 	//}
+
 	if config.Mod == "ss" && config.List != "" {
 		println("[-] error Smart scan config")
 		os.Exit(0)
 	}
 
+	// 初始化启发式扫描的端口
+	if config.SmartPort != "default" {
+		config.SmartPortList = PortHandler(config.SmartPort)
+	} else {
+		if config.Mod == "s" {
+			config.SmartPortList = []string{"80"}
+		} else if config.Mod == "ss" || config.Mod == "f" {
+			config.SmartPortList = []string{"icmp"}
+		}
+	}
+
+	// 初始化端口配置
 	config.Portlist = PortHandler(config.Ports)
+
+	// 如果从文件中读,初始化IP列表配置
 	if config.List != "" {
 		config.IPlist = ReadTargetFile(config.List)
 	}
@@ -120,6 +136,9 @@ func RunTask(config Config) {
 		config.Mod = "ss"
 		config.IP = "10.0.0.0/8"
 		processLog("[*] Spraying : 10.0.0.0/8")
+		if config.SmartPort == "default" {
+			config.SmartPortList = []string{"icmp"}
+		}
 		SmartMod(config)
 
 		processLog("[*] Spraying : 172.16.0.0/12")
@@ -127,6 +146,9 @@ func RunTask(config Config) {
 		SmartMod(config)
 
 		processLog("[*] Spraying : 192.168.0.0/16")
+		if config.SmartPort == "default" {
+			config.SmartPortList = []string{"80"}
+		}
 		config.IP = "192.168.0.0/16"
 		//config.Mod = "s"
 		SmartMod(config)
@@ -285,10 +307,11 @@ func IpInit(config Config) Config {
 				iplist = append(iplist, t)
 			}
 		}
-		config.IPlist = iplist
+		config.IPlist = Utils.SliceUnique(iplist)
+
 	}
 	if strings.HasPrefix(config.IP, "err") && len(config.IPlist) == 0 {
-		println("[*] all IP error")
+		println("[-] all IP error")
 		os.Exit(0)
 	}
 	return config
@@ -306,8 +329,7 @@ func IpForamt(target string) string {
 		} else {
 			target = getIp(ip) + "/" + mask
 		}
-	}
-	if !strings.Contains(target, "/") {
+	} else {
 		if isIPv4(target) {
 			target = target + "/32"
 		} else {
@@ -318,16 +340,13 @@ func IpForamt(target string) string {
 }
 
 func getIp(target string) string {
-	if isIPv4(target) {
-		return target
-	}
 	iprecords, err := net.LookupIP(target)
 	if err != nil {
 		println("[-] error IPv4 or bad domain:" + target + ". JUMPED!")
 		return "err"
 	}
 	for _, ip := range iprecords {
-		if isIPv4(ip.String()) {
+		if ip.To4() != nil {
 			fmt.Println("[*] parse domain SUCCESS, map " + target + " to " + ip.String())
 			return ip.String()
 		}

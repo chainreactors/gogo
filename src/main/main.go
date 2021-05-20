@@ -29,7 +29,7 @@ func main() {
 	flag.StringVar(&config.List, "l", "", "")
 	flag.IntVar(&config.Threads, "t", 4000, "")
 	flag.StringVar(&config.Mod, "m", "default", "")
-	flag.StringVar(&config.Typ, "n", "socket", "")
+	flag.StringVar(&config.SmartPort, "sp", "default", "")
 	flag.BoolVar(&config.Spray, "s", false, "")
 	flag.StringVar(&config.Filename, "f", "", "")
 	//全局变量初始化
@@ -40,11 +40,12 @@ func main() {
 	flag.IntVar(&Scan.HttpsDelay, "D", 2, "")
 	flag.StringVar(&Scan.Payloadstr, "payload", "", "")
 	flag.BoolVar(&core.Noscan, "no", false, "")
+	flag.BoolVar(&Scan.Exploit, "e", false, "")
+
+	// 一些特殊参数初始化
 	key := flag.String("k", "", "")
-	exploit := flag.Bool("e", false, "")
 	version := flag.Bool("v", false, "")
 	version2 := flag.Bool("vv", false, "")
-
 	isPortConfig := flag.Bool("P", false, "")
 	formatoutput := flag.String("F", "", "")
 	flag.Parse()
@@ -64,18 +65,6 @@ func main() {
 		os.Exit(0)
 	}
 
-	p := fmt.Sprintf("[*] Current goroutines: %d,", config.Threads)
-	if !*version {
-		p += "Version Scan Running, "
-	} else {
-		p += "Version Scan Closed, "
-	}
-	if *exploit {
-		p += "Exploit Scan Running"
-	} else {
-		p += "Exploit Scan Closed"
-	}
-	fmt.Println(p)
 	starttime := time.Now()
 
 	//初始化全局变量
@@ -86,16 +75,16 @@ func main() {
 	} else {
 		Scan.VersionLevel = 0
 	}
-
-	Scan.Exploit = *exploit
 	config = core.Init(config)
+	fmt.Printf("[*] Current goroutines: %d, Version Level %d,Exploit Scan %t \n", config.Threads, Scan.VersionLevel, Scan.Exploit)
 	core.RunTask(config)
-	//关闭文件写入管道与filehandler
+
+	//关闭文件写入管道
 	close(core.Datach)
 	close(core.LogDetach)
 
 	time.Sleep(time.Microsecond * 500)
-	fmt.Println(fmt.Sprintf("\n[*] Alive sum: %d, Target sum : %d", Scan.Alivesum, Scan.Sum))
+	fmt.Printf("\n[*] Alive sum: %d, Target sum : %d\n", Scan.Alivesum, Scan.Sum)
 	fmt.Println("[*] Totally run: " + time.Since(starttime).String())
 
 }
