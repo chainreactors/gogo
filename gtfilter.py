@@ -22,9 +22,42 @@ def tores(js,typ):
 @click.argument("inputfile",type=click.File("r",encoding="utf-8"))
 @click.option('--outtype','-t', default="target", help='Output format.')
 @click.option('--fil','-f',multiple=True, help='filter rules')
-@click.option('--output','-o', help='filter rules')
+@click.option('--output','-o', help='output file')
 def main(inputfile,outtype,fil,output):
+    """    使用帮助:                      
+    
+    \b
+    过滤规则-f e.g:
+    全等匹配: port=443
+    模糊匹配: title:系统 
+    排除: protocol!tcp 
+    允许使用多个filter器,例如 -f port=443 -f title:系统
 
+    \b
+    输出规则-t ,当前有三种类型输出: ip(默认值),url,target    e.g:
+    ip: 192.168.1.1  [ip]
+    target: 192.168.1.1:445 [ip]:[port]
+    url: http://192.168.1.1:8080 [protocol]://[ip]:[port]
+
+    \b
+    输出到文件-o: e.g: -o res.txt, 如果不指定-o则输出到命令行
+
+    \b
+    example: 
+    # 输出端口为443的ip 
+    python gtfilter.py input.json -f port=443  
+    \b
+    # 输出端口为443的target结果
+    python gtfilter.py input.json -f port=443 -t target 
+    \b
+    # 输出端口为443,title中包含系统的url到命令行
+    python gtfilter.py input.json -f port=443 -f title:系统 -t url 
+    \b
+    # 与上相同,结果输出到res.txt文件
+    python gtfilter.py input.json -f port=443 -f title:系统 -t target -o res.txt 
+
+
+    """
     j = json.load(inputfile)
     for f in fil:
         if "=" in f:
@@ -53,31 +86,5 @@ def main(inputfile,outtype,fil,output):
 
 if __name__ == '__main__':
     main()
-    # f = open(sys.argv[1],"r",encoding="utf-8")
-    # j = json.load(f)
-    # p1 = sys.argv[2]
-    # p2 = sys.argv[3]
-    # need = sys.argv[4]
-    # # res = list(filter(lambda x:p2 in x[p1],j))
-    # print(len(j))
-    # res = list(filter(lambda x:"" != x[p1],j))
-    # res = list(filter(lambda x:x["protocol"].startswith("http") or x["framework"] != "",res))
-    # res = list(filter(lambda x:"HTTP" not in x[p1],res))
-    # print(len(res))
-    # tmp = []
-    # for i in res:
-    #     for k in need.split(","):
-    #         if k == "url":
-    #             print(geturl(i))
-    #         elif k == "target":
-    #             print(gettarget(i))
-    #         else:
-    #             tmp.append(i[k])
-    #
-    # print(len(tmp))
-    # for i in set(tmp):
-    #     print(i)
-
-
-    # print(",".join(res))
+   
 
