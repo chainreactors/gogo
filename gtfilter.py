@@ -16,10 +16,11 @@ def tores(js,typ):
         return gettarget(js)
     elif typ == "ip":
         return js["ip"]
-
+    else:
+        return ",".join(map(lambda x:js[x],typ.split(",")))
 
 @click.command()
-@click.argument("inputfile",type=click.File("r",encoding="utf-8"))
+@click.argument("inputfile")
 @click.option('--outtype','-t', default="target", help='Output format.')
 @click.option('--fil','-f',multiple=True, help='filter rules')
 @click.option('--output','-o', help='output file')
@@ -27,7 +28,7 @@ def main(inputfile,outtype,fil,output):
     """    使用帮助:                      
     
     \b
-    过滤规则-f e.g:
+    过滤规则-f e.g: !!!请使用小写字母!!!
     全等匹配: port=443
     模糊匹配: title:系统 
     排除: protocol!tcp 
@@ -58,19 +59,21 @@ def main(inputfile,outtype,fil,output):
 
 
     """
-    j = json.load(inputfile)
+
+    inputstr = open(inputfile,"r",encoding="utf-8").read().lower()
+    j = json.loads(inputstr)
     for f in fil:
         if "=" in f:
             source,sink = f.split("=")
-            j = list(filter(lambda x: x[source] == sink, j))
+            j = filter(lambda x: x[source] == sink, j)
 
         elif ":" in f:
             source,sink = f.split(":")
-            j = list(filter(lambda x: sink in x[source], j))
+            j = filter(lambda x: sink in x[source], j)
 
         elif "!" in f:
             source,sink = f.split("!")
-            j = list(filter(lambda x: sink not in x[source], j))
+            j = filter(lambda x: sink not in x[source], j)
 
     if output != None:
         file = open(output,"a")
