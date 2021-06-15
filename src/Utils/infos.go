@@ -50,6 +50,7 @@ func GetMidware(resp *http.Response, content string) string {
 	return server
 }
 
+// TODO 重构
 func GetLanguage(resp *http.Response, content string) string {
 	var powered string
 	if resp == nil {
@@ -123,7 +124,6 @@ func FilterCertDomain(domins []string) string {
 }
 
 //加载指纹到全局变量
-//TODO 正则预编译
 func getFingers() (map[string][]Finger, []Finger) {
 
 	var tmptcpfingers, httpfingers []Finger

@@ -30,6 +30,7 @@ func main() {
 	flag.IntVar(&config.Threads, "t", 4000, "")
 	flag.StringVar(&config.Mod, "m", "default", "")
 	flag.StringVar(&config.SmartPort, "sp", "default", "")
+	flag.StringVar(&config.IpProbe, "ipp", "default", "")
 	flag.BoolVar(&config.Spray, "s", false, "")
 	flag.StringVar(&config.Filename, "f", "", "")
 	//全局变量初始化
@@ -56,7 +57,7 @@ func main() {
 	}
 	// 输出Port config
 	if *isPortConfig {
-		core.Listportconfig()
+		core.Printportconfig()
 		os.Exit(0)
 	}
 	// 格式化

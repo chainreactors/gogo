@@ -77,7 +77,7 @@ func smartIpGenerator(CIDR string, ch chan string, temp *sync.Map) chan string {
 	for C = 1; C < 255; C++ {
 		for B = 0; B <= (fin-start)/256; B++ {
 			outIP = int2ip(start + 256*B + C)
-			if notAlive(int2ip(start+256*B+1), temp) {
+			if isnotAlive(int2ip(start+256*B), temp) {
 				ch <- outIP
 			}
 		}
@@ -99,7 +99,7 @@ func goIPsGenerator(config Config) chan string {
 	return ch
 }
 
-func notAlive(ip string, temp *sync.Map) bool {
+func isnotAlive(ip string, temp *sync.Map) bool {
 	_, ok := temp.Load(ip)
 	return !ok
 }
@@ -109,7 +109,7 @@ func getMask(cidr string) int {
 	return mask
 }
 
-func aIpGenerator(CIDR string, ch chan string, temp *sync.Map) chan string {
+func aIpGenerator(CIDR string, ipps []uint, ch chan string, temp *sync.Map) chan string {
 	start, fin := getIpRange(CIDR)
 	//ch := make(chan string)
 	startb := start / 65536 % 256
@@ -120,9 +120,11 @@ func aIpGenerator(CIDR string, ch chan string, temp *sync.Map) chan string {
 		for b = 0; b <= finb-startb; b++ {
 			//println(int2ip(start + b*65536 + c*256 + 1))
 			//ip := int2ip(start + b*65536 + c + 1)
-			if notAlive(int2ip(start+b*65536+256+1), temp) {
+			if isnotAlive(int2ip(start+b*65536+256), temp) {
 				//println(int2ip(start + b*65536 + c*256 + 1))
-				ch <- int2ip(start + b*65536 + c*256 + 1)
+				for _, p := range ipps {
+					ch <- int2ip(start + b*65536 + c*256 + p)
+				}
 			}
 		}
 	}
@@ -173,7 +175,7 @@ func ipGenerator(config Config, temp *sync.Map) chan string {
 			//}
 		} else if config.Mod == "ss" {
 			if mask < 16 {
-				ch = aIpGenerator(config.IP, ch, temp)
+				ch = aIpGenerator(config.IP, config.IpProbeList, ch, temp)
 			} else {
 				ch = smartIpGenerator(config.IP, ch, temp)
 			}

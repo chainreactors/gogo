@@ -15,6 +15,7 @@ var Payloadstr string
 func Dispatch(result *Utils.Result) {
 	target := Utils.GetTarget(result)
 	Sum++
+	//println(result.Ip)
 	if result.Port == "137" {
 		NbtScan(target, result)
 		return

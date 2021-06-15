@@ -177,7 +177,7 @@ func SmartMod(config Config) {
 
 func c_alived(ip string, temp *sync.Map) {
 	s2ip := net.ParseIP(ip).To4()
-	s2ip[3] = 1
+	s2ip[3] = 0
 	aliveC := s2ip.String()
 	_, ok := temp.Load(aliveC)
 
@@ -192,8 +192,8 @@ func c_alived(ip string, temp *sync.Map) {
 
 func b_alived(ip string, temp *sync.Map) {
 	s2ip := net.ParseIP(ip).To4()
-	s2ip[3] = 1
-	s2ip[2] = 1
+	s2ip[3] = 0
+	s2ip[2] = 0
 	aliveB := s2ip.String()
 
 	_, ok := temp.Load(aliveB)
