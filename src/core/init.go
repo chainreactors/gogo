@@ -7,6 +7,7 @@ import (
 	"net"
 	"os"
 	"runtime"
+	"strconv"
 	"strings"
 )
 
@@ -34,6 +35,8 @@ type Config struct {
 	Mod           string
 	SmartPort     string
 	SmartPortList []string
+	IpProbe       string
+	IpProbeList   []uint
 	Output        string
 	Filename      string
 	Spray         bool
@@ -61,6 +64,13 @@ func Init(config Config) Config {
 		} else if config.Mod == "ss" || config.Mod == "f" {
 			config.SmartPortList = []string{"icmp"}
 		}
+	}
+
+	// 默认ss默认只探测ip为1的c段,可以通过-ipp参数指定,例如-ipp 1,254,253
+	if config.IpProbe != "default" {
+		config.IpProbeList = str2uintlist(config.IpProbe)
+	} else {
+		config.IpProbeList = []uint{1}
 	}
 
 	// 初始化端口配置
@@ -284,14 +294,14 @@ func choiceports(portname string) []string {
 	}
 }
 
-func Listportconfig() {
+func Printportconfig() {
 	println("当前已有端口配置: (根据端口类型分类)")
 	for k, v := range Utils.Namemap {
-		println("	", k, ": ", strings.Join(v, ","))
+		fmt.Println("	", k, ": ", strings.Join(v, ","))
 	}
 	println("当前已有端口配置: (根据服务分类)")
 	for k, v := range Utils.Typemap {
-		println("	", k, ": ", strings.Join(v, ","))
+		fmt.Println("	", k, ": ", strings.Join(v, ","))
 	}
 }
 
@@ -352,4 +362,14 @@ func getIp(target string) string {
 		}
 	}
 	return "err"
+}
+
+func str2uintlist(s string) []uint {
+	var ipps []uint
+	ss := strings.Split(s, ",")
+	for _, ipp := range ss {
+		intipp, _ := strconv.Atoi(ipp)
+		ipps = append(ipps, uint(intipp))
+	}
+	return ipps
 }

@@ -50,7 +50,7 @@ func NbtScan(target string, result *Utils.Result) {
 	var Share bool = false
 	var DC bool = false
 	result.Protocol = "udp"
-	conn, err := Utils.UdpSocketConn(target, Delay)
+	conn, err := Utils.UdpSocketConn(target, Delay*2)
 	if err != nil {
 
 		//fmt.Println(err)

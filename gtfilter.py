@@ -62,18 +62,19 @@ def main(inputfile,outtype,fil,output):
 
     inputstr = open(inputfile,"r",encoding="utf-8").read().lower()
     j = json.loads(inputstr)
+    print(fil)
     for f in fil:
         if "=" in f:
             source,sink = f.split("=")
-            j = filter(lambda x: x[source] == sink, j)
+            j = list(filter(lambda x: x[source] == sink, j))
 
         elif ":" in f:
             source,sink = f.split(":")
-            j = filter(lambda x: sink in x[source], j)
+            j = list(filter(lambda x: sink in x[source], j))
 
         elif "!" in f:
             source,sink = f.split("!")
-            j = filter(lambda x: sink not in x[source], j)
+            j = list(filter(lambda x: sink not in x[source], j))
 
     if output != None:
         file = open(output,"a")
