@@ -74,7 +74,7 @@ func SmartMod(config Config) {
 	ipChannel := ipGenerator(config, &temp)
 
 	var tcChannel chan TargetConfig
-	processLog("[*] Smart probe ports: " + strings.Join(config.SmartPortList, ","))
+	processLog(fmt.Sprintf("[*] Smart probe ports: %s, Smart IP probe: %s", strings.Join(config.SmartPortList, ","), config.IpProbe))
 	tcChannel = tcGenerator(ipChannel, config.SmartPortList)
 
 	//if config.Mod == "a" || config.Mod == "ss" {
