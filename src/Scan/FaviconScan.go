@@ -31,7 +31,7 @@ func FaviconScan(result *Utils.Result) {
 	var md5fingers map[string]string
 	err = json.Unmarshal([]byte(Utils.LoadFingers("md5")), &md5fingers)
 	if err != nil {
-		println("[-] md5 fingers load FAIL!")
+		fmt.Println("[-] md5 fingers load FAIL!")
 		os.Exit(0)
 	}
 	md5h := md5Hash(content)
@@ -44,7 +44,7 @@ func FaviconScan(result *Utils.Result) {
 	var mmh3fingers map[string]string
 	err = json.Unmarshal([]byte(Utils.LoadFingers("mmh3")), &mmh3fingers)
 	if err != nil {
-		println("[-] mmh3 fingers load FAIL!")
+		fmt.Println("[-] mmh3 fingers load FAIL!")
 		os.Exit(0)
 	}
 	mmh3h := mmh3Hash32(content)

@@ -112,7 +112,7 @@ func FormatOutput(filename string, outputfile string) {
 	var results []Utils.Result
 	err = json.Unmarshal(content, &results)
 	if err != nil {
-		println("json error")
+		fmt.Println("json error")
 	}
 	pfs := make(map[string]map[string]portformat)
 	//ipfs := make(map[string]ipformat)

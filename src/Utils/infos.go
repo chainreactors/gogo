@@ -2,6 +2,7 @@ package Utils
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"os"
 	"regexp"
@@ -132,7 +133,7 @@ func getFingers() (map[string][]Finger, []Finger) {
 	err := json.Unmarshal([]byte(LoadFingers("tcp")), &tmptcpfingers)
 
 	if err != nil {
-		println("[-] tcpfingers load FAIL!")
+		fmt.Println("[-] tcpfingers load FAIL!")
 		os.Exit(0)
 	}
 	//初步处理tcp指纹
@@ -159,7 +160,7 @@ func getFingers() (map[string][]Finger, []Finger) {
 
 	err = json.Unmarshal([]byte(LoadFingers("http")), &httpfingers)
 	if err != nil {
-		println("[-] httpfingers load FAIL!")
+		fmt.Println("[-] httpfingers load FAIL!")
 		os.Exit(0)
 	}
 
@@ -194,7 +195,7 @@ func loadportconfig() (map[string][]string, map[string][]string, map[string][]st
 	err := json.Unmarshal([]byte(LoadFingers("port")), &portfingers)
 
 	if err != nil {
-		println("[-] port config load FAIL!")
+		fmt.Println("[-] port config load FAIL!")
 		os.Exit(0)
 	}
 	typemap := make(map[string][]string)
@@ -218,7 +219,7 @@ func loadportconfig() (map[string][]string, map[string][]string, map[string][]st
 func compile(s string) regexp.Regexp {
 	reg, err := regexp.Compile(s)
 	if err != nil {
-		println("[-] regexp string error: " + s)
+		fmt.Println("[-] regexp string error: " + s)
 		os.Exit(0)
 	}
 	return *reg

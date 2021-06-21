@@ -77,14 +77,6 @@ func SmartMod(config Config) {
 	processLog(fmt.Sprintf("[*] Smart probe ports: %s, Smart IP probe: %s", strings.Join(config.SmartPortList, ","), config.IpProbe))
 	tcChannel = tcGenerator(ipChannel, config.SmartPortList)
 
-	//if config.Mod == "a" || config.Mod == "ss" {
-	//	fmt.Println("[*] current Protocol: ICMP")
-	//	tcChannel = tcGenerator(ipChannel, []string{"icmp"})
-	//} else {
-	//	fmt.Println("[*] current Protocol: Socket")
-	//	tcChannel = tcGenerator(ipChannel, []string{"80"})
-	//}
-
 	scanPool, _ := ants.NewPoolWithFunc(config.Threads, func(i interface{}) {
 		tc := i.(TargetConfig)
 		smartScan(tc, &temp, config.Mod)
@@ -133,47 +125,6 @@ func SmartMod(config Config) {
 		StraightMod(config)
 	}
 }
-
-//func SmartAMod(config Config) {
-//	var wg sync.WaitGroup
-//	var temp sync.Map
-//
-//	bIpChannel := aIpGenerator(config.IP, &temp)
-//	tcChannel := tcGenerator(bIpChannel, []string{"icmp"})
-//	scanPool, _ := ants.NewPoolWithFunc(config.Threads, func(i interface{}) {
-//		tc := i.(TargetConfig)
-//		smartScan(tc, &temp, true)
-//		wg.Done()
-//	})
-//
-//	defer scanPool.Release()
-//	for t := range tcChannel {
-//		wg.Add(1)
-//		_ = scanPool.Invoke(t)
-//	}
-//	wg.Wait()
-//
-//	var iplist []string
-//	temp.Range(func(key, value interface{}) bool {
-//		iplist = append(iplist, key.(string)+"/16")
-//		return true
-//	})
-//
-//	if Noscan {
-//		return
-//	}
-//	for _, ip := range iplist {
-//		config.IP = ip
-//		fmt.Println("[*] " + Utils.GetCurtime() + " Spraying B class IP:" + ip)
-//		SmartMod(config)
-//	}
-//	//for i := range btargetChannel {
-//	//	fmt.Println("[*]" + Utils.GetCurtime() + "Spraying B class IP:" + i)
-//	//	var tmpconfig = config
-//	//	tmpconfig.IP = i + "/16"
-//	//	SmartMod(tmpconfig)
-//	//}
-//}
 
 func c_alived(ip string, temp *sync.Map) {
 	s2ip := net.ParseIP(ip).To4()

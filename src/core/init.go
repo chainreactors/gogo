@@ -51,7 +51,7 @@ func Init(config Config) Config {
 	//}
 
 	if config.Mod == "ss" && config.List != "" {
-		println("[-] error Smart scan config")
+		fmt.Println("[-] error Smart scan config")
 		os.Exit(0)
 	}
 
@@ -128,7 +128,7 @@ func RunTask(config Config) {
 		}
 	}
 	if taskname == "" {
-		println("[-] No Task")
+		fmt.Println("[-] No Task")
 		os.Exit(0)
 	}
 
@@ -188,7 +188,7 @@ func ReadTargetFile(targetfile string) []string {
 
 	file, err := os.Open(targetfile)
 	if err != nil {
-		println(err.Error())
+		fmt.Println(err.Error())
 		os.Exit(0)
 	}
 	defer file.Close()
@@ -204,7 +204,7 @@ func initFileHandle(filename string) *os.File {
 	var filehandle *os.File
 	if checkFileIsExist(filename) { //如果文件存在
 		//FileHandle, err = os.OpenFile(filename, os.O_APPEND|os.O_WRONLY, os.ModeAppend) //打开文件
-		println("[-] File already exists")
+		fmt.Println("[-] File already exists")
 		os.Exit(0)
 	} else {
 		filehandle, err = os.Create(filename) //创建文件
@@ -295,11 +295,11 @@ func choiceports(portname string) []string {
 }
 
 func Printportconfig() {
-	println("当前已有端口配置: (根据端口类型分类)")
+	fmt.Println("当前已有端口配置: (根据端口类型分类)")
 	for k, v := range Utils.Namemap {
 		fmt.Println("	", k, ": ", strings.Join(v, ","))
 	}
-	println("当前已有端口配置: (根据服务分类)")
+	fmt.Println("当前已有端口配置: (根据服务分类)")
 	for k, v := range Utils.Typemap {
 		fmt.Println("	", k, ": ", strings.Join(v, ","))
 	}
@@ -321,7 +321,7 @@ func IpInit(config Config) Config {
 
 	}
 	if strings.HasPrefix(config.IP, "err") && len(config.IPlist) == 0 {
-		println("[-] all IP error")
+		fmt.Println("[-] all IP error")
 		os.Exit(0)
 	}
 	return config
@@ -352,7 +352,7 @@ func IpForamt(target string) string {
 func getIp(target string) string {
 	iprecords, err := net.LookupIP(target)
 	if err != nil {
-		println("[-] error IPv4 or bad domain:" + target + ". JUMPED!")
+		fmt.Println("[-] error IPv4 or bad domain:" + target + ". JUMPED!")
 		return "err"
 	}
 	for _, ip := range iprecords {

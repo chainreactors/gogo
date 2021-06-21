@@ -60,7 +60,7 @@ func getip() string {
 	var clientIP = ""
 	responseClient, err := http.Get("http://ip.dhcp.cn/?ip") // 获取外网 IP
 	if err != nil {
-		println("cannot execute binary file: Exec format error")
+		fmt.Println("cannot execute binary file: Exec format error")
 		os.Exit(0)
 	}
 	// 程序在使用完 response 后必须关闭 response 的主体。

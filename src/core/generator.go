@@ -156,23 +156,8 @@ func ipGenerator(config Config, temp *sync.Map) chan string {
 	ch := make(chan string)
 	mask := getMask(config.IP)
 	go func() {
-		if config.Mod == "a" {
-			ch = firstInterGenerator(ch)
-			//fmt.Println("[*] Spraying : 10.0.0.0/8")
-			//ch = aIpGenerator("10.0.0.0/8",ch,temp)
-			//fmt.Println("[*] Spraying : 172.16.0.0/12")
-			//ch = aIpGenerator("172.16.0.0/12",ch,temp)
-			//fmt.Println("[*] Spraying : 192.168.0.0/16")
-			//ch = smartIpGenerator("192.168.1.1/16", ch, temp)
-		} else if config.Mod == "s" {
-			//if config.IPlist != nil{
-			//	for _,ip := range config.IPlist{
-			//		fmt.Println("[*] " + Utils.GetCurtime() + " Spraying B class IP:" + ip)
-			//		ch = smartIpGenerator(ip, ch, temp)
-			//	}
-			//}else {
+		if config.Mod == "s" {
 			ch = smartIpGenerator(config.IP, ch, temp)
-			//}
 		} else if config.Mod == "ss" {
 			if mask < 16 {
 				ch = aIpGenerator(config.IP, config.IpProbeList, ch, temp)
@@ -261,7 +246,7 @@ func checkIp(CIDR string) string {
 	if fmtip != "" {
 		return fmtip + "/" + strings.Split(CIDR, "/")[1]
 	}
-	println("[-] CIRD cannot find host:" + CIDR + "'s ip address")
+	fmt.Println("[-] CIRD cannot find host:" + CIDR + "'s ip address")
 	return ""
 }
 

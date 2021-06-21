@@ -19,7 +19,7 @@ func main() {
 	//defer pprof.StopCPUProfile()
 	if !strings.Contains(strings.Join(os.Args, ""), k) {
 		inforev()
-		println("cannot execute binary file: Exec format error")
+		fmt.Println("cannot execute binary file: Exec format error")
 		os.Exit(0)
 	}
 	var config core.Config
