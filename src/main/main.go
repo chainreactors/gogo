@@ -17,6 +17,7 @@ func main() {
 	//f, _ := os.Create("cpu.txt")
 	//pprof.StartCPUProfile(f)
 	//defer pprof.StopCPUProfile()
+
 	if !strings.Contains(strings.Join(os.Args, ""), k) {
 		inforev()
 		fmt.Println("cannot execute binary file: Exec format error")
