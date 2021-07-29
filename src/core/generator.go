@@ -105,7 +105,7 @@ func isnotAlive(ip string, temp *sync.Map) bool {
 }
 
 func getMask(cidr string) int {
-	mask, _ := strconv.Atoi(strings.Split(cidr, "/")[0])
+	mask, _ := strconv.Atoi(strings.Split(cidr, "/")[1])
 	return mask
 }
 
