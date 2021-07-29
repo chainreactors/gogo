@@ -6,21 +6,21 @@ import (
 )
 
 type Result struct {
-	Ip        string         `json:"ip"`
-	Port      string         `json:"port"`
-	Uri       string         `json:"uri"`
+	Ip        string         `json:"i"` // ip
+	Port      string         `json:"p"` // port
+	Uri       string         `json:"u"` // uri
 	Stat      string         `json:"-"`
 	TcpCon    *net.Conn      `json:"-"`
 	Httpresp  *http.Response `json:"-"`
-	Os        string         `json:"os"`
-	Host      string         `json:"host"`
-	Title     string         `json:"title"`
-	Midware   string         `json:"midware"`
-	HttpStat  string         `json:"http_stat"`
-	Language  string         `json:"language"`
-	Framework string         `json:"framework"`
-	Vuln      string         `json:"vuln"`
-	Protocol  string         `json:"protocol"`
+	Os        string         `json:"o"` // os
+	Host      string         `json:"h"` // host
+	Title     string         `json:"t"` // title
+	Midware   string         `json:"m"` // midware
+	HttpStat  string         `json:"s"` // http_stat
+	Language  string         `json:"l"` // language
+	Framework string         `json:"f"` // framework
+	Vuln      string         `json:"v"` // vuln
+	Protocol  string         `json:"r"` // protocol
 	Error     string         `json:"-"`
 	Content   string         `json:"-"`
 }

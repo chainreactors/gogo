@@ -11,15 +11,15 @@ import (
 var first = true
 
 type portformat struct {
-	port      string
-	stat      string
-	title     string
-	host      string
-	midware   string
-	language  string
-	framework string
-	vuln      string
-	protocol  string
+	Port      string `json:"p"`
+	Stat      string `json:"s"`
+	Title     string `json:"t"`
+	Host      string `json:"h"`
+	Midware   string `json:"m"`
+	Language  string `json:"l"`
+	Framework string `json:"f"`
+	Vuln      string `json:"v"`
+	Protocol  string `json:"r"`
 }
 
 func output(result *Utils.Result, outType string) string {
@@ -118,15 +118,15 @@ func FormatOutput(filename string, outputfile string) {
 	//ipfs := make(map[string]ipformat)
 	for _, result := range results {
 		pf := portformat{
-			port:      result.Port,
-			stat:      result.HttpStat,
-			title:     result.Title,
-			host:      result.Host,
-			midware:   result.Midware,
-			language:  result.Language,
-			framework: result.Framework,
-			vuln:      result.Vuln,
-			protocol:  result.Protocol,
+			Port:      result.Port,
+			Stat:      result.HttpStat,
+			Title:     result.Title,
+			Host:      result.Host,
+			Midware:   result.Midware,
+			Language:  result.Language,
+			Framework: result.Framework,
+			Vuln:      result.Vuln,
+			Protocol:  result.Protocol,
 		}
 		if pfs[result.Ip] == nil {
 			pfs[result.Ip] = make(map[string]portformat)
@@ -154,24 +154,24 @@ func FormatOutput(filename string, outputfile string) {
 		var hostname, network, netbiosstat string
 
 		if _, k := pfs[ip]["135"]; k {
-			hostname = pfs[ip]["135"].host
-			network = pfs[ip]["135"].title
+			hostname = pfs[ip]["135"].Host
+			network = pfs[ip]["135"].Title
 		}
 		if _, k := pfs[ip]["137"]; k {
-			hostname = pfs[ip]["137"].host
-			netbiosstat = pfs[ip]["137"].stat
+			hostname = pfs[ip]["137"].Host
+			netbiosstat = pfs[ip]["137"].Stat
 		}
 		s := fmt.Sprintf("[+] %s %s %s %s\n", ip, hostname, netbiosstat, network)
 		for pint, p := range pfs[ip] {
 			// 跳过OXID与NetBois
-			if !(p.port == "135" || p.port == "137" || p.port == "icmp") {
+			if !(p.Port == "135" || p.Port == "137" || p.Port == "icmp") {
 				if Output == "c" {
 					// 颜色输出
-					s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s\t%s\t[%s] %s", p.protocol, ip, pint, p.midware, p.language, blue(p.framework), p.host, yellow(p.stat), blue(p.title))
-					s += red(vulnOutput(p.vuln))
+					s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s\t%s\t[%s] %s", p.Protocol, ip, pint, p.Midware, p.Language, blue(p.Framework), p.Host, yellow(p.Stat), blue(p.Title))
+					s += red(vulnOutput(p.Vuln))
 				} else {
-					s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s\t%s\t[%s] %s", p.protocol, ip, pint, p.midware, p.language, p.framework, p.host, p.stat, p.title)
-					s += vulnOutput(p.vuln)
+					s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s\t%s\t[%s] %s", p.Protocol, ip, pint, p.Midware, p.Language, p.Framework, p.Host, p.Stat, p.Title)
+					s += vulnOutput(p.Vuln)
 				}
 				s += "\n"
 			}
