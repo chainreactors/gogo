@@ -1,6 +1,6 @@
 module getitle
 
-go 1.10
+go 1.11
 
 require (
 	github.com/alouca/gologger v0.0.0-20120904114645-7d4b7291de9c // indirect

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"getitle/src/Utils"
-	"io/ioutil"
 	"sort"
 )
 
@@ -105,24 +104,7 @@ func vulnOutput(vuln string) string {
 }
 
 func FormatOutput(filename string, outputfile string) {
-	content, err := ioutil.ReadFile(filename)
-	if err != nil {
-		print(err.Error())
-	}
-	// 自动修复未完成任务的json
-	laststr := string(content[len(content)-1:])
-	if laststr != "]" {
-		content = append(content, "]"...)
-		fmt.Println("[*] Task has not been completed,auto fix json")
-		fmt.Println("[*] Task has not been completed,auto fix json")
-		fmt.Println("[*] Task has not been completed,auto fix json")
-
-	}
-	var results []Utils.Result
-	err = json.Unmarshal(content, &results)
-	if err != nil {
-		fmt.Println("json error")
-	}
+	results := Utils.LoadResult(filename)
 	pfs := make(map[string]map[string]portformat)
 	//ipfs := make(map[string]ipformat)
 	for _, result := range results {
@@ -141,7 +123,6 @@ func FormatOutput(filename string, outputfile string) {
 			pfs[result.Ip] = make(map[string]portformat)
 		}
 		pfs[result.Ip][result.Port] = pf
-
 	}
 
 	// 排序

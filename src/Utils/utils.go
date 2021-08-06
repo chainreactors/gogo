@@ -1,9 +1,11 @@
 package Utils
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -155,4 +157,28 @@ func Str2uintlist(s string) []uint {
 		ipps = append(ipps, uint(intipp))
 	}
 	return ipps
+}
+
+func LoadResult(filename string) []Result {
+	content, err := ioutil.ReadFile(filename)
+	if err != nil {
+		print(err.Error())
+		os.Exit(0)
+	}
+	// 自动修复未完成任务的json
+	laststr := string(content[len(content)-1:])
+	if laststr != "]" {
+		content = append(content, "]"...)
+		fmt.Println("[*] Task has not been completed,auto fix json")
+		fmt.Println("[*] Task has not been completed,auto fix json")
+		fmt.Println("[*] Task has not been completed,auto fix json")
+
+	}
+	var results []Result
+	err = json.Unmarshal(content, &results)
+	if err != nil {
+		fmt.Println("json error")
+		os.Exit(0)
+	}
+	return results
 }
