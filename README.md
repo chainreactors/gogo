@@ -1,6 +1,8 @@
 # Getitle
 一个资产探测扫描器. 
 
+README Version 0.3.11`
+
 ## Usage
 
 ```
@@ -8,8 +10,9 @@ Usage of ./getitle:
   -d int       超时,默认2s (default 2)
   -ip string   IP地址 like 192.168.1.1/24
   -m string    扫描模式：default ,s(启发式),f(每个C段第一个ip) ,a(auto,内网三个网段,默认为icmp扫描,如要启用socket请指定-n socket)(每次只能选择一个生效)
-  -n string    协议模式: socket(默认) or icmp
   -p string    ports (default "top1")
+  -sp string   smart probe,启发式扫描端口探针,默认icmp
+  -ipp string  ip probe,-ss模式ip探针,默认1
   -t int       threads (default 4000)
   -o string    输出格式:clean,full(default) or json
   -f string    输出文件名,默认为空,请用相对路径(./)或绝对路径
@@ -17,6 +20,7 @@ Usage of ./getitle:
   -e bool      启用漏洞插件扫描,目前有ms17-010与shiro(默认key)
   -k string    启动密码(必须输入)为puaking  
   -l string    从文件中读取任务,例如:-l ip.txt
+  -j string	   从输出的json中读取任务,例如:-j 1.json
   -P bool      查看端口预设
   -F file      格式化json
   -no bool	   高级扫描模式只探测存活网段不进行端口扫描
@@ -25,9 +29,93 @@ Usage of ./getitle:
 
 
 
-### 用法
+## 参数解释
 
 所有用法都需输入-k [密钥]
+
+
+
+
+
+### IP输入
+
+当前支持三种输出形式:
+
+1. 直接输入cidr,参数-ip 1.1.1.1/24
+2. 从文件中读ip列表, 参数 -l 1.txt
+3. 从结果中读任务列表,参数 -j 1.json
+
+### 端口配置
+
+gt支持非常灵活的端口配置
+
+参看端口预设,参数 -P
+
+使用端口预设灵活配置端口: -p top2,http,1-1000,65534
+
+
+
+### 输出
+
+输出分为连大类,输出到文件或输出到命令行.在webshell场景下,通常无法输出到命令行.
+
+#### 输出到命令行
+
+默认即可输出到命令行,但是在选择输出到文件的时候会关闭命令行输出.此时可以使用-c手动开启
+
+输出到命令行的格式可以使用-o参数控制,默认为full,可以选择json,c(color,着色),未来将支持输出其他工具的格式
+
+#### 输出到文件
+
+输出格式与输出到命令行相同,不同需要使用-O参数控制, 默认为json.可以手动指定-O full修改为命令行式的输出
+
+#### 格式化JSON
+
+-F 参数可以格式化JSON,拥有比full更加整洁与美化的输出结果.
+
+还可以使用`-F 1.json -o c`来着色
+
+
+
+### 启发式扫描配置
+
+-m s 为喷洒C段模式,子网掩码要小于24才能使用
+
+-m ss 为喷洒B段模式, 子网掩码要小于16才能使用
+
+-s 为端口的spray模式,打开后将使用同一个端口与每个IP组合,防止同一个IP的请求过多造成漏报. 此参数支持-l 从文件中输入
+
+
+
+-no 只进行启发式扫描,在喷洒到网段后不进行全扫描. 可以配合-f参数将启发式扫描喷洒到的网段输出到文件.例如 `-s -no -f aliveC.txt`
+
+-sp (smart probe)控制启发式扫描的探针,默认为icmp协议,可以手动指定为其他配置,例如`-sp 80,icmp,445 ` 来在禁ping的环境下使用
+
+-ipp (IP probe) 控制-ss模式中的B段喷洒的ip探针,-ss模式默认只扫描每个C段的第一个ip,例如192.168.1.1. 可以手动修改,指定`-ipp 1,254,253`
+
+### 其他配置
+
+-t 设置线程数,linux默认4000,windows默认20000
+
+-d tcp与http协议的超时时间,默认2s
+
+-D 单独指定https协议的超时时间,默认4s
+
+
+
+
+
+### 进阶扫描
+
+默认只进行被动的指纹探测,即只进行一次http交互
+
+-v 会进行主动发包的指纹探测
+
+-e 进行漏洞探测,目前只是个demo,未来将会支持xray,goby的poc
+
+
+
+## 使用场景
 
 #### 扫描C段的关键端口
 
@@ -129,7 +217,7 @@ NBTScan
 
 `./gt.exe -ip 172.16.1.1/24 -p 137`
 
-ICMP
+PING
 
 `./gt.exe -ip 172.16.1.1/24 -p icmp`
 

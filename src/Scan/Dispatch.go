@@ -7,7 +7,7 @@ import (
 
 var Alivesum, Sum int
 var Exploit bool
-var VersionLevel = 0
+var VersionLevel int
 var Delay int
 var HttpsDelay int
 var Payloadstr string
