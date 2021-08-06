@@ -12,18 +12,16 @@ import (
 )
 
 type TargetConfig struct {
-	ip   string
-	port string
+	ip     string
+	port   string
+	finger string
 }
 
 //直接扫描
 func StraightMod(config Config) {
 	var wgs sync.WaitGroup
-
 	targetChannel := generator(config)
 
-	// Use the pool with a function,
-	// set 10 to the capacity of goroutine pool and 1 second for expired duration.
 	scanPool, _ := ants.NewPoolWithFunc(config.Threads, func(i interface{}) {
 		defaultScan(i.(TargetConfig))
 		wgs.Done()

@@ -46,8 +46,22 @@ func checkFileIsExist(filename string) bool {
 	return exist
 }
 
-func initFile() {
+func initFile(filename string) {
+	// 挂起两个文件操作的goroutine
 
+	// 存在文件输出则停止命令行输出
+	if filename != "" {
+		Clean = !Clean
+		// 创建output的filehandle
+		FileHandle = initFileHandle(filename)
+		if FileOutput == "json" && !Noscan {
+			_, _ = FileHandle.WriteString("[")
+		}
+
+	}
+
+	_ = os.Remove(".sock.lock")
+	LogFileHandle = initFileHandle(".sock.lock")
 	//go write2File(FileHandle, Datach)
 	if FileHandle != nil {
 		go func() {

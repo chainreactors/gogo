@@ -27,7 +27,8 @@ func main() {
 	//默认参数信息
 	flag.StringVar(&config.IP, "ip", "", "")
 	flag.StringVar(&config.Ports, "p", "top1", "")
-	flag.StringVar(&config.List, "l", "", "")
+	flag.StringVar(&config.ListFile, "l", "", "")
+	flag.StringVar(&config.JsonFile, "j", "", "")
 	flag.IntVar(&config.Threads, "t", 4000, "")
 	flag.StringVar(&config.Mod, "m", "default", "")
 	flag.StringVar(&config.SmartPort, "sp", "default", "")

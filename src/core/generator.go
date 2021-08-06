@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+	"getitle/src/Utils"
 	"math"
 	"net"
 	"strconv"
@@ -48,6 +49,9 @@ func defaultIpGenerator(CIDR string, ch chan string) chan string {
 		// 如果是广播地址或网络地址,则跳过
 		if (i)%256 != 255 && (i)%256 != 0 {
 			ch <- int2ip(i)
+		}
+		if i%65535 == 0 {
+			processLog(fmt.Sprintf("[*] Processing CIDR: %s/16", int2ip(i)))
 		}
 	}
 	return ch
@@ -195,44 +199,54 @@ func generator(config Config) chan TargetConfig {
 	targetChannel := make(chan TargetConfig)
 	var tc TargetConfig
 	go func() {
-		if config.Spray {
-			// 端口喷洒
-			for _, port := range config.Portlist {
-				processLog("[*] Processing Port:" + port)
-				if config.IPlist != nil {
-					for _, cidr := range config.IPlist {
-						ch = goDefaultIpGenerator(cidr)
+		if config.JsonFile != "" {
+			var result Utils.Result
+			for _, result = range config.Results {
+				tc.ip = result.Ip
+				tc.port = result.Port
+				tc.finger = result.Framework
+				targetChannel <- tc
+			}
+		} else {
+			if config.Spray {
+				// 端口喷洒
+				for _, port := range config.Portlist {
+					processLog("[*] Processing port:" + port)
+					if config.IPlist != nil {
+						for _, cidr := range config.IPlist {
+							ch = goDefaultIpGenerator(cidr)
+							for ip := range ch {
+								tc.ip = ip
+								tc.port = port
+								targetChannel <- tc
+							}
+							_ = FileHandle.Sync()
+						}
+					} else {
+						ch = goDefaultIpGenerator(config.IP)
 						for ip := range ch {
 							tc.ip = ip
 							tc.port = port
 							targetChannel <- tc
 						}
-						_ = FileHandle.Sync()
+					}
+				}
+			} else {
+				// 默认模式
+				// 批量处理
+				if config.IPlist != nil {
+					if config.IPlist != nil {
+						ch = goIPsGenerator(config)
 					}
 				} else {
 					ch = goDefaultIpGenerator(config.IP)
-					for ip := range ch {
+				}
+				for ip := range ch {
+					for _, port := range config.Portlist {
 						tc.ip = ip
 						tc.port = port
 						targetChannel <- tc
 					}
-				}
-			}
-		} else {
-			// 默认模式
-			// 批量处理
-			if config.IPlist != nil {
-				if config.IPlist != nil {
-					ch = goIPsGenerator(config)
-				}
-			} else {
-				ch = goDefaultIpGenerator(config.IP)
-			}
-			for ip := range ch {
-				for _, port := range config.Portlist {
-					tc.ip = ip
-					tc.port = port
-					targetChannel <- tc
 				}
 			}
 		}
