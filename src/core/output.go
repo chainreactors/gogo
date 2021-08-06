@@ -109,6 +109,15 @@ func FormatOutput(filename string, outputfile string) {
 	if err != nil {
 		print(err.Error())
 	}
+	// 自动修复未完成任务的json
+	laststr := string(content[len(content)-1:])
+	if laststr != "]" {
+		content = append(content, "]"...)
+		fmt.Println("[*] Task has not been completed,auto fix json")
+		fmt.Println("[*] Task has not been completed,auto fix json")
+		fmt.Println("[*] Task has not been completed,auto fix json")
+
+	}
 	var results []Utils.Result
 	err = json.Unmarshal(content, &results)
 	if err != nil {

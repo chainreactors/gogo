@@ -49,6 +49,9 @@ func defaultIpGenerator(CIDR string, ch chan string) chan string {
 		if (i)%256 != 255 && (i)%256 != 0 {
 			ch <- int2ip(i)
 		}
+		if i%65535 == 0 {
+			processLog(fmt.Sprintf("[*] Processing CIDR: %s/16", int2ip(i)))
+		}
 	}
 	return ch
 }
@@ -198,7 +201,7 @@ func generator(config Config) chan TargetConfig {
 		if config.Spray {
 			// 端口喷洒
 			for _, port := range config.Portlist {
-				processLog("[*] Processing Port:" + port)
+				processLog("[*] Processing port:" + port)
 				if config.IPlist != nil {
 					for _, cidr := range config.IPlist {
 						ch = goDefaultIpGenerator(cidr)
