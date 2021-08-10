@@ -3,6 +3,41 @@ import json
 import sys
 import click
 
+
+class ijson:
+    jsonmap = {
+    "ip":"i",
+    "port":"p",
+    "uri":"u",
+    "os":"o",
+    "host":"h",
+    "title":"t",
+    "midware":"m",
+    "http_stat":"s",
+    "languate":"l",
+    "framework":"f",
+    "vuln":"v",
+    "protocol":"r",
+    }
+    def __init__(self,json:dict):
+        self.json = json
+    
+    def __getitem__(self, item):
+        return self.json[self.jsonmap[item]]
+
+    def __iter__(self):
+        return self.json
+
+
+    def __contains__(self,item):
+        if self.jsonmap[item] in self.json:
+            return True
+        else:
+            return False
+
+    
+
+
 def geturl(i):
     return "%s://%s:%s"%(i["protocol"],i["ip"],i["port"])
 
@@ -18,6 +53,8 @@ def tores(js,typ):
         return js["ip"]
     else:
         return ",".join(map(lambda x:js[x],typ.split(",")))
+
+
 
 @click.command()
 @click.argument("inputfile")
@@ -61,7 +98,7 @@ def main(inputfile,outtype,fil,output):
     """
 
     inputstr = open(inputfile,"r",encoding="utf-8").read().lower()
-    j = json.loads(inputstr)
+    j = [ijson(i) for i in json.loads(inputstr)]
     print(fil)
     for f in fil:
         if "=" in f:
@@ -84,8 +121,6 @@ def main(inputfile,outtype,fil,output):
     else:
         for line in j:
             print(tores(line,outtype))
-
-
 
 
 if __name__ == '__main__':

@@ -9,9 +9,6 @@ type Result struct {
 	Ip        string         `json:"i"` // ip
 	Port      string         `json:"p"` // port
 	Uri       string         `json:"u"` // uri
-	Stat      string         `json:"-"`
-	TcpCon    *net.Conn      `json:"-"`
-	Httpresp  *http.Response `json:"-"`
 	Os        string         `json:"o"` // os
 	Host      string         `json:"h"` // host
 	Title     string         `json:"t"` // title
@@ -21,6 +18,9 @@ type Result struct {
 	Framework string         `json:"f"` // framework
 	Vuln      string         `json:"v"` // vuln
 	Protocol  string         `json:"r"` // protocol
+	Stat      string         `json:"-"`
+	TcpCon    *net.Conn      `json:"-"`
+	Httpresp  *http.Response `json:"-"`
 	Error     string         `json:"-"`
 	Content   string         `json:"-"`
 }
