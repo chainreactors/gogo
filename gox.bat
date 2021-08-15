@@ -22,4 +22,4 @@ upxs -1 -k -o ./bin/%name%_darwin_amd64_v%1_upx ./bin/%name%_darwin_amd64_v%1
 limelighter -I ./bin/%name%_windows_amd64_v%1.exe -O ./bin/%name%_windows_amd64_sangfor_v%1.exe -Domain www.sangfor.com
 rm *.sangfor.*
 
-tar cvf release/%name%v%1.tar bin/* README.md gtfilter.py
+tar cvf release/%name%v%1.tar bin/* README.md gtfilter.py UPDATELOG.md

@@ -279,160 +279,24 @@ snmp
  * make release VERSION=VERSION to bulid getitle to all platform
 
  * Windows build muli releases
-
+  
+### windows requirement:
+ * upxs 自定义修改版的upx壳,可以在gox.bat中替换成原版
+ * limelighter 签名伪造工具
+ * tar.exe 压缩打包工具
+ * gox go语言快捷编译工具
+ * go-strip go语言编译信息去除工具
+ 
    ```
-   go get github.com/mitchellh/gox
    gox.bat [version] # .e.g gox.bat 0.3.0
    ```
 
    
 
-## Change Note
+## THANKS
 
-* v0.0.1 just a demo
-
-* v0.0.3 
-  
-  * 获取不到getitile的情况下输出前13位字符(如果是http恰好到状态码)
-  
-* v0.0.4 
-  * 添加了端口预设top1为最常见的http端口,top2为常见的http端口,db为常见数据库默认端口,win为windows常见开放的端口
-  * 简化了端口参数
-  
-* v0.0.5 
-  * 修复了400与30x页面无法获取titile的问题
-  * 修复了无法自定义端口的bug
-  * 添加了brute与all两个端口预设,brute为可爆破端口,all为常见端口
-  * 忽略匹配title的大小写问题
-  
-* v0.0.6
-  
-  * 添加了大于B段启发式扫描模式
-  
-* v0.1.0
-  * 优化了参数
-  * 添加了ms17010漏洞扫描
-  * 修复了扫描单个ip报错的情况
-  
-* v0.1.1
-
-  * 修复了启发式扫描的ip计算错误的bug
-  * 添加了基于`Server`与`X-Powered-By`的简单指纹识别  
-  
-* v0.1.2
-  * 添加了redis未授权扫描
-  * 重构了输出函数
-  
-* v0.1.3
-  * 添加了nbtscan
-  * 修复了部分bug
-  * 添加了json格式输出
-  
-* v0.1.4
-  * 修复了rediscan未位置timeout的bug
-  * 添加了更复杂的输出模式
-  * 去除了banner
-  * 添加了key
-  
-* v0.1.5
-  * 添加了-f参数,输出到文件,会有30%的性能损失
-  * 修复了格式化输出的一个bug,导致无法使用tee重定向
-  
-* v0.1.6
-
-    * 修复了输出文件降低效率的问题(优化写入方式)
-    * 优化了tee保存结果,去除进度信息保存到文件
-    * 添加了OXID扫描
-    * 优化了二进制文件大小
-    * 添加了更强的端口配置模式,例如` -p top2,db,12345` 
-    * 修复了无法扫描A段的bug
-    
-* v0.2.0(beta1/2)
-    * 修复了OXID部分情况下报错的bug
-    * 修复了https无法获取title的bug
-    * 优化了匹配title,中间件与语言的正则表达式,使其可以匹配到更多的信息
-    * 优化了端口配置,all预设将会拼接所有的预设并自动去重
-    * 优化了输出格式
-    * 优化了OXIDscan的网卡信息输出
-    * 添加了shiroscan(beta)
-    * 添加了-e参数(bool值,不需要添加值,只需要存在-e即可),redisscan与shiroscan只有在开启该参数才会启用(beta)
-    
-* v0.2.0(beta3)
-    * 修复了https协议shiro无法正确识别的bug
-    * 优化了Nbtscan于OXIDscan中不可见字符输出问题
-    * 添加了top3端口预设
-    * 使用go1.11编译,兼容windows server2003与xp系统
-    
-* v0.2.0(beta4)
-    * 添加了证书信息收集
-    * 添加了线程的安全的slice进行启发式扫描
-    * 优化了扫描逻辑与扫描性能
-    * 优化了扫描进度信息输出
-    * 优化了内存占用,扫描A段内存占用低于150M
-    * 修复了多个bug
-    * 临时删除了ms17-010扫描
-    
-* v0.2.0(beta5)
-  * 修复了32位版本ip解析错误的bug
-  * 优化了top2,top3端口预设
-  * 添加了-l参数,可从文件中读取任务
-  * 优化了证书信息收集
-  * 优化了http扫描,增加了https与跳转的请求超时时间.
-  * 优化了文件写入,防止程序中途崩溃导致进度消失.
-  * 修复了一个json格式输出的bug
-  
-* v0.2.0(beta6)
-    * 现在ip参数可以接受`https://1.1.1.1`,并自动删除`https://`或`http://`
-    * 现在ip参数可以接受域名如`https://baidu.com`,并自动获取ip.如果域名绑定了多个ip,只会获取第一个.
-    * 优化了top2默认端口,添加了`1080,3000,5000,6443`等常见端口
-    * -o 参数新增html格式,使用方式为`-o html`
-    * 新增tcp端口指纹探测,-v参数启用,详细配置见`配置指纹识别`
-    * 优化了输出信息,更准确的判断http与tcp协议.
-    * 修复子网掩码为8/9的情况下的ip解析错误
-    
-* v0.2.0(beta7)
-    * 新增-c(clean)参数,如果存在则命令行只输出进度信息
-    * 重新添加-k,默认key为`puaking`
-    * 修复特定情况下证书错误的bug
-    * 新增-ip参数的`auto`关键字,将会自动对`10/8,172.16/12,192.168/16`三个内网网段的所有c段的第一个ip,如10.0.0.1进行探测,示例`./gt -ip auto -p top2`,默认为icmp扫描,也可以使用-m s指定为socket探测80端口
-    * 新增icmp扫描,有三种打开方式
-        1. 在-p参数中添加icmp,例如`-p top2,icmp`
-        2. 在-m参数指定`-m sp`,则使用icmp进行启发式扫描
-        3. 在-ip为`auto`的时候,自动启用icmp探测
-
-* v0.2.0(beta7.1)
-    修复beta7版本的多个bug
-
-    
-
-​    
-
-
-
- ## Todo List
-
-1. 添加NetBIOS  [√]
-
-2. 添加MS17010 [√]
-
-3. 添加OXID [√]
-
-4. 添加简单目录扫描 (将在新的工具中实现,gt主要进行资产探测)
-
-5. 更灵活的端口模式 [√]
-
-6. 更智能的扫描配置  [√]
-
-7. 重构主要逻辑代码  [√]
-
-8. 添加从文件中读取扫描目标  [√]
-
-9. 添加常见服务指纹识别
-
-10. 节流算法
-
-11. 预编译正则表达式
-
-12. GBK乱码解决
+* https://github.com/Tylous/Limelighter
+* https://github.com/boy-hack/go-strip
+* https://github.com/k8gege/LadonGo
 
     
