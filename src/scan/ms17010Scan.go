@@ -1,9 +1,9 @@
-package Scan
+package scan
 
 import (
 	"encoding/binary"
 	"encoding/hex"
-	"getitle/src/Utils"
+	"getitle/src/utils"
 	"strings"
 )
 
@@ -16,10 +16,10 @@ var (
 	trans2SessionSetupRequest, _ = hex.DecodeString("0000004eff534d4232000000001807c00000000000000000000000000008fffe000841000f0c0000000100000000000000a6d9a40000000c00420000004e0001000e000d0000000000000000000000000000")
 )
 
-func ms17010Scan(target string, result *Utils.Result) {
+func ms17010Scan(target string, result *utils.Result) {
 	// connecting to a host in LAN if reachable should be very quick
 	result.Protocol = "SMB"
-	conn, err := Utils.TcpSocketConn(target, Delay)
+	conn, err := utils.TcpSocketConn(target, Delay)
 	if err != nil {
 
 		//fmt.Println(err)

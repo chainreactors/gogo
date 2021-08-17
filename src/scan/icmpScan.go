@@ -1,4 +1,4 @@
-package Scan
+package scan
 
 //Ladon Scanner for golang
 //Author: k8gege
@@ -6,14 +6,14 @@ package Scan
 //Github: https://github.com/k8gege/LadonGo
 
 import (
-	"getitle/src/Utils"
+	"getitle/src/utils"
 	"net"
 	"strings"
 	"time"
 )
 
 // -n i
-func icmpScan(host string, result *Utils.Result) {
+func icmpScan(host string, result *utils.Result) {
 	var size int
 	var seq int16 = 1
 	const ECHO_REQUEST_HEAD_LEN = 8

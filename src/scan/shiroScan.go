@@ -1,16 +1,16 @@
-package Scan
+package scan
 
 import (
-	"getitle/src/Utils"
+	"getitle/src/utils"
 	"net/http"
 	"strings"
 )
 
 // -e
-func shiroScan(result *Utils.Result) {
+func shiroScan(result *utils.Result) {
 	var isshiro = false
-	target := Utils.GetURL(result)
-	conn := Utils.HttpConn(Delay)
+	target := utils.GetURL(result)
+	conn := utils.HttpConn(Delay)
 	req := setshirocookie(target, "1")
 	resp, err := conn.Do(req)
 	if err != nil {

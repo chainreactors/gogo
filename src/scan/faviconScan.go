@@ -1,4 +1,4 @@
-package Scan
+package scan
 
 import (
 	"bytes"
@@ -6,16 +6,16 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
-	"getitle/src/Utils"
+	"getitle/src/utils"
 	"github.com/twmb/murmur3"
 )
 
 // -v
 // 信息收集插件,通过匹配http服务的favicon md5值判断CMS
-func faviconScan(result *Utils.Result) {
+func faviconScan(result *utils.Result) {
 	var err error
-	conn := Utils.HttpConn(2)
-	url := Utils.GetURL(result)
+	conn := utils.HttpConn(2)
+	url := utils.GetURL(result)
 	resp, err := conn.Get(url + "/favicon.ico")
 	if err != nil {
 		return
@@ -23,19 +23,19 @@ func faviconScan(result *Utils.Result) {
 	if resp.StatusCode != 200 {
 		return
 	}
-	content := Utils.GetBody(resp)
+	content := utils.GetBody(resp)
 
 	// MD5 hash匹配
 	md5h := md5Hash(content)
-	if Utils.Md5fingers[md5h] != "" {
-		result.Framework = Utils.Md5fingers[md5h]
+	if utils.Md5fingers[md5h] != "" {
+		result.Framework = utils.Md5fingers[md5h]
 		return
 	}
 
 	// mmh3 hash匹配,指纹来自kscan
 	mmh3h := mmh3Hash32(content)
-	if Utils.Mmh3fingers[mmh3h] != "" {
-		result.Framework = Utils.Mmh3fingers[mmh3h]
+	if utils.Mmh3fingers[mmh3h] != "" {
+		result.Framework = utils.Mmh3fingers[mmh3h]
 		return
 	}
 	return

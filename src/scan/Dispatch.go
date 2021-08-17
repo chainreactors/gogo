@@ -1,7 +1,7 @@
-package Scan
+package scan
 
 import (
-	"getitle/src/Utils"
+	"getitle/src/utils"
 	"strings"
 )
 
@@ -12,8 +12,8 @@ var Delay int
 var HttpsDelay int
 var Payloadstr string
 
-func Dispatch(result *Utils.Result) {
-	target := Utils.GetTarget(result)
+func Dispatch(result *utils.Result) {
+	target := utils.GetTarget(result)
 	Sum++
 	//println(result.Ip)
 	if result.Port == "137" {
@@ -74,9 +74,9 @@ func Dispatch(result *Utils.Result) {
 
 }
 
-func ExploitDispatch(result *Utils.Result) {
+func ExploitDispatch(result *utils.Result) {
 	//
-	target := Utils.GetTarget(result)
+	target := utils.GetTarget(result)
 	//if strings.Contains(result.Content, "-ERR wrong") {
 	//	RedisScan(target, result)
 	//}

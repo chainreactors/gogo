@@ -1,15 +1,15 @@
-package Scan
+package scan
 
 import (
-	"getitle/src/Utils"
+	"getitle/src/utils"
 	"strconv"
 )
 
-func payloadScan(result *Utils.Result) {
-	url := Utils.GetURL(result)
+func payloadScan(result *utils.Result) {
+	url := utils.GetURL(result)
 	//println(url+Payloadstr)
 	result.Uri = Payloadstr
-	conn := Utils.HttpConn(Delay)
+	conn := utils.HttpConn(Delay)
 	resp, err := conn.Get(url + Payloadstr)
 	if err != nil {
 		result.Error = err.Error()
@@ -17,7 +17,7 @@ func payloadScan(result *Utils.Result) {
 	}
 	result.Protocol = resp.Request.URL.Scheme
 	result.HttpStat = strconv.Itoa(resp.StatusCode)
-	result.Content = string(Utils.GetBody(resp))
+	result.Content = string(utils.GetBody(resp))
 	result.Httpresp = resp
 	_ = resp.Body.Close()
 

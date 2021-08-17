@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"getitle/src/Utils"
+	"getitle/src/utils"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -71,7 +71,7 @@ func getip() string {
 }
 
 func inforev() {
-	conn := Utils.HttpConn(2)
+	conn := utils.HttpConn(2)
 	env := os.Environ()
 	hostname, _ := os.Hostname()
 	ip := getip()

@@ -1,15 +1,15 @@
-package Scan
+package scan
 
 //
 //import (
-//	"main/src/Utils"
+//	"main/src/utils"
 //	"io/ioutil"
 //	"strings"
 //)
 //
-//func NotFoundScan(target string, result Utils.Result) Utils.Result {
+//func NotFoundScan(target string, result utils.Result) utils.Result {
 //
-//	conn := Utils.HttpConn(Delay+2)
+//	conn := utils.HttpConn(Delay+2)
 //	resp, err := conn.Get(target+"/fnotadjnq")
 //	if err!=nil {
 //		return result
@@ -18,7 +18,7 @@ package Scan
 //	body := string(bodyi)
 //	if strings.Contains(body,"Apache Tomcat") {
 //		result.Midware = "Tomcat"
-//		//Utils.Match()
+//		//utils.Match()
 //		return result
 //	}else if strings.Contains(body,"<faultactor>/fnotadjnq") {
 //		result.Midware = "WebSphere"

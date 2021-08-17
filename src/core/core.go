@@ -2,8 +2,8 @@ package core
 
 import (
 	"fmt"
-	"getitle/src/Scan"
-	"getitle/src/Utils"
+	"getitle/src/scan"
+	"getitle/src/utils"
 	"github.com/panjf2000/ants/v2"
 	"net"
 	"sort"
@@ -39,11 +39,11 @@ func StraightMod(config Config) {
 
 func defaultScan(tc TargetConfig) {
 	//fmt.Println(ip)
-	var result = new(Utils.Result)
+	var result = new(utils.Result)
 	result.Ip = tc.ip
 	result.Port = tc.port
-	Scan.Dispatch(result)
-	//res := Scan.SystemHttp(ip)
+	scan.Dispatch(result)
+	//res := scan.SystemHttp(ip)
 
 	if result.Stat != "" {
 		if !Clean {
@@ -156,12 +156,12 @@ func b_alived(ip string, temp *sync.Map) {
 }
 
 func smartScan(tc TargetConfig, temp *sync.Map, mod string) {
-	var result = new(Utils.Result)
+	var result = new(utils.Result)
 	result.Ip = tc.ip
 	result.Port = tc.port
 	result.HttpStat = "s"
 
-	Scan.Dispatch(result)
+	scan.Dispatch(result)
 
 	if result.Stat == "OPEN" {
 		if mod == "ss" {

@@ -2,7 +2,7 @@ package core
 
 import (
 	"fmt"
-	"getitle/src/Utils"
+	"getitle/src/utils"
 	"net"
 	"os"
 	"runtime"
@@ -30,7 +30,7 @@ type Config struct {
 	Ports         string
 	Portlist      []string
 	JsonFile      string
-	Results       []Utils.Result
+	Results       []utils.Result
 	ListFile      string
 	Threads       int
 	Mod           string
@@ -64,7 +64,7 @@ func Init(config Config) Config {
 
 	// 如果输入的json不为空,则从json中加载result,并返回结果
 	if config.JsonFile != "" {
-		config.Results = Utils.LoadResult(config.JsonFile)
+		config.Results = utils.LoadResult(config.JsonFile)
 		return config
 	}
 
@@ -83,7 +83,7 @@ func Init(config Config) Config {
 	}
 	// 默认ss默认只探测ip为1的c段,可以通过-ipp参数指定,例如-ipp 1,254,253
 	if config.IpProbe != "default" {
-		config.IpProbeList = Utils.Str2uintlist(config.IpProbe)
+		config.IpProbeList = utils.Str2uintlist(config.IpProbe)
 	} else {
 		config.IpProbeList = []uint{1}
 	}
@@ -212,7 +212,7 @@ func ipInit(config Config) Config {
 				fmt.Println("[-] " + tmpip + " ip format error")
 			}
 		}
-		config.IPlist = Utils.SliceUnique(iplist) // 去重
+		config.IPlist = utils.SliceUnique(iplist) // 去重
 		if len(config.IPlist) == 0 {
 			fmt.Println("[-] all IP error")
 			os.Exit(0)
