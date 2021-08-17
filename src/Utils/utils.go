@@ -182,3 +182,12 @@ func LoadResult(filename string) []Result {
 	}
 	return results
 }
+
+func compile(s string) regexp.Regexp {
+	reg, err := regexp.Compile(s)
+	if err != nil {
+		fmt.Println("[-] regexp string error: " + s)
+		os.Exit(0)
+	}
+	return *reg
+}

@@ -4,11 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"regexp"
 )
 
 var Mmh3fingers, Md5fingers = loadHashFinger()
 var Tcpfingers, Httpfingers = loadVersionFingers()
 var Namemap, Typemap, Portmap = loadPortConfig()
+var Compiled = make(map[string][]regexp.Regexp)
+var CommonCompiled = initregexp()
 
 func loadPortConfig() (map[string][]string, map[string][]string, map[string][]string) {
 	var portfingers []PortFinger
@@ -102,4 +105,13 @@ func loadHashFinger() (map[string]string, map[string]string) {
 		os.Exit(0)
 	}
 	return mmh3fingers, md5fingers
+}
+
+func initregexp() map[string]regexp.Regexp {
+	comp := make(map[string]regexp.Regexp)
+	comp["title"] = compile("(?Uis)<title>(.*)</title>")
+	comp["server"] = compile("(?i)Server: ([\x20-\x7e]+)")
+	comp["xpb"] = compile("(?i)X-Powered-By: ([\x20-\x7e]+)")
+	comp["sessionid"] = compile("(?i) (.*SESS.*?ID)")
+	return comp
 }

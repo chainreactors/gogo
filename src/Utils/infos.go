@@ -1,15 +1,9 @@
 package Utils
 
 import (
-	"fmt"
 	"net/http"
-	"os"
-	"regexp"
 	"strings"
 )
-
-var Compiled = make(map[string][]regexp.Regexp)
-var CommonCompiled = initregexp()
 
 func InfoFilter(result *Result) {
 
@@ -133,22 +127,4 @@ func errHandler(result *Result) {
 	} else if strings.Contains(result.Error, "first record does not look like a TLS handshake") {
 		result.Protocol = "tcp"
 	}
-}
-
-func compile(s string) regexp.Regexp {
-	reg, err := regexp.Compile(s)
-	if err != nil {
-		fmt.Println("[-] regexp string error: " + s)
-		os.Exit(0)
-	}
-	return *reg
-}
-
-func initregexp() map[string]regexp.Regexp {
-	comp := make(map[string]regexp.Regexp)
-	comp["title"] = compile("(?Uis)<title>(.*)</title>")
-	comp["server"] = compile("(?i)Server: ([\x20-\x7e]+)")
-	comp["xpb"] = compile("(?i)X-Powered-By: ([\x20-\x7e]+)")
-	comp["sessionid"] = compile("(?i) (.*SESS.*?ID)")
-	return comp
 }
