@@ -1,7 +1,6 @@
 package Utils
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
@@ -9,8 +8,6 @@ import (
 	"strings"
 )
 
-var Namemap, Typemap, Portmap map[string][]string = loadportconfig()
-var Tcpfingers, Httpfingers = getFingers()
 var Compiled = make(map[string][]regexp.Regexp)
 var CommonCompiled = initregexp()
 
@@ -26,7 +23,7 @@ func InfoFilter(result *Result) {
 	}
 	//处理错误信息
 	if result.Content != "" {
-		ErrHandler(result)
+		errHandler(result)
 	}
 
 	//return result
@@ -124,60 +121,8 @@ func FilterCertDomain(domins []string) string {
 	return res[:len(res)-1]
 }
 
-//加载指纹到全局变量
-func getFingers() (map[string][]Finger, []Finger) {
-
-	var tmptcpfingers, httpfingers []Finger
-	var tcpfingers = make(map[string][]Finger)
-	// 根据权重排序在python脚本中已经实现
-	err := json.Unmarshal([]byte(LoadFingers("tcp")), &tmptcpfingers)
-
-	if err != nil {
-		fmt.Println("[-] tcpfingers load FAIL!")
-		os.Exit(0)
-	}
-	//初步处理tcp指纹
-
-	for _, finger := range tmptcpfingers {
-		// 预编译指纹
-
-		// 普通指纹
-		for _, regstr := range finger.Regexps.Regexp {
-			Compiled[finger.Name] = append(Compiled[finger.Name], compile("(?im)"+regstr))
-		}
-		// 漏洞指纹,指纹名称后接 "_vuln"
-		for _, regstr := range finger.Regexps.Vuln {
-			Compiled[finger.Name+"_vuln"] = append(Compiled[finger.Name], compile("(?im)"+regstr))
-		}
-
-		// 根据端口分类指纹
-		for _, ports := range finger.Defaultport {
-			for _, port := range port2PortSlice(ports) {
-				tcpfingers[port] = []Finger{finger}
-			}
-		}
-	}
-
-	err = json.Unmarshal([]byte(LoadFingers("http")), &httpfingers)
-	if err != nil {
-		fmt.Println("[-] httpfingers load FAIL!")
-		os.Exit(0)
-	}
-
-	for _, finger := range httpfingers {
-		// 预编译指纹
-		for _, regstr := range finger.Regexps.Regexp {
-			Compiled[finger.Name] = append(Compiled[finger.Name], compile("(?im)"+regstr))
-		}
-		for _, regstr := range finger.Regexps.Vuln {
-			Compiled[finger.Name+"_vuln"] = append(Compiled[finger.Name], compile("(?im)"+regstr))
-		}
-	}
-	return tcpfingers, httpfingers
-}
-
 //从错误中收集信息
-func ErrHandler(result *Result) {
+func errHandler(result *Result) {
 
 	if strings.Contains(result.Error, "wsasend") || strings.Contains(result.Error, "wsarecv") {
 		result.HttpStat = "reset"
@@ -188,32 +133,6 @@ func ErrHandler(result *Result) {
 	} else if strings.Contains(result.Error, "first record does not look like a TLS handshake") {
 		result.Protocol = "tcp"
 	}
-}
-
-func loadportconfig() (map[string][]string, map[string][]string, map[string][]string) {
-	var portfingers []PortFinger
-	err := json.Unmarshal([]byte(LoadFingers("port")), &portfingers)
-
-	if err != nil {
-		fmt.Println("[-] port config load FAIL!")
-		os.Exit(0)
-	}
-	typemap := make(map[string][]string)
-	namemap := make(map[string][]string)
-	portmap := make(map[string][]string)
-
-	for _, v := range portfingers {
-		v.Ports = Ports2PortSlice(v.Ports)
-		namemap[v.Name] = append(namemap[v.Name], v.Ports...)
-		for _, t := range v.Type {
-			typemap[t] = append(typemap[t], v.Ports...)
-		}
-		for _, p := range v.Ports {
-			portmap[p] = append(portmap[p], v.Name)
-		}
-	}
-
-	return typemap, namemap, portmap
 }
 
 func compile(s string) regexp.Regexp {

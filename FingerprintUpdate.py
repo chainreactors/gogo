@@ -16,12 +16,12 @@ def fingerload(filename):
 
 
 if __name__ == "__main__":
-	j1 = fingerload("tcpfingers.json")
-	j2 = fingerload("httpfingers.json")
-	j3 = json.loads(open("src/config/md5fingers.json","r",encoding="utf-8").read())
-	j4 = json.loads(open("src/config/port.json","r",encoding="utf-8").read())
-	j5 = json.loads(open("src/config/mmh3fingers.json","r",encoding="utf-8").read())
-
+	tcpfingers = fingerload("tcpfingers.json")
+	httpfingers = fingerload("httpfingers.json")
+	md5fingers = json.loads(open("src/config/md5fingers.json","r",encoding="utf-8").read())
+	port = json.loads(open("src/config/port.json","r",encoding="utf-8").read())
+	mmh3fingers = json.loads(open("src/config/mmh3fingers.json","r",encoding="utf-8").read())
+    nuclei = json.loads(open("src/config/nucleis.json","r",encoding="utf-8".read()
 	f = open("src/Utils/finger.go","w",encoding="utf-8")
 	base = '''package Utils
 
@@ -36,11 +36,13 @@ func LoadFingers(typ string)string  {
          	return `%s`
     }else if typ =="mmh3"{
          	return `%s`
-    }
+    }else if typ == "nuclei"{
+         	return `%s`
+     	}
 	return  ""
 }
 	'''
 
-	f.write(base%(json.dumps(j1),json.dumps(j2),json.dumps(j3),json.dumps(j4),json.dumps(j5)))
+	f.write(base%(json.dumps(tcpfingers),json.dumps(httpfingers),json.dumps(md5fingers),json.dumps(port),json.dumps(mmh3fingers),json.jump(j6)
 	print("fingerprint update success")
 
