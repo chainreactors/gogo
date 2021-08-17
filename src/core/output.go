@@ -3,7 +3,7 @@ package core
 import (
 	"encoding/json"
 	"fmt"
-	"getitle/src/Utils"
+	"getitle/src/utils"
 	"sort"
 )
 
@@ -21,43 +21,43 @@ type portformat struct {
 	Protocol  string `json:"r"`
 }
 
-func output(result *Utils.Result, outType string) string {
+func output(result *utils.Result, outType string) string {
 	var out string
 
 	switch outType {
 	case "color", "c":
-		out = ColorOutput(result)
+		out = colorOutput(result)
 	case "json", "j":
 		if FileHandle != nil {
-			out = JsonFile(result)
+			out = jsonFile(result)
 		} else {
-			out = JsonOutput(result)
+			out = jsonOutput(result)
 		}
 	//case "html":
 	//	out = HtmlOutput(result)
 	default:
-		out = FullOutput(result)
+		out = fullOutput(result)
 
 	}
 	return out
 
 }
 
-func ColorOutput(result *Utils.Result) string {
+func colorOutput(result *utils.Result) string {
 	s := fmt.Sprintf("[+] %s://%s:%s\t%s\t%s\t%s\t%s\t[%s] %s ", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, blue(result.Framework), result.Host, yellow(result.HttpStat), blue(result.Title))
 	s += red(vulnOutput(result.Vuln))
 	s += "\n"
 	return s
 }
 
-func FullOutput(result *Utils.Result) string {
+func fullOutput(result *utils.Result) string {
 	s := fmt.Sprintf("[+] %s://%s:%s%s\t%s\t%s\t%s\t%s\t[%s] %s ", result.Protocol, result.Ip, result.Port, result.Uri, result.Midware, result.Language, result.Framework, result.Host, result.HttpStat, result.Title)
 	s += vulnOutput(result.Vuln)
 	s += "\n"
 	return s
 }
 
-func JsonOutput(result *Utils.Result) string {
+func jsonOutput(result *utils.Result) string {
 	jsons, err := json.Marshal(result)
 	if err != nil {
 		return ""
@@ -65,7 +65,7 @@ func JsonOutput(result *Utils.Result) string {
 	return string(jsons) + "\n"
 }
 
-func JsonFile(result *Utils.Result) string {
+func jsonFile(result *utils.Result) string {
 	jsons, err := json.Marshal(result)
 	if err != nil {
 		return ""
@@ -79,7 +79,7 @@ func JsonFile(result *Utils.Result) string {
 
 }
 
-//func HtmlOutput(result *Utils.Result) (s string) {
+//func HtmlOutput(result *utils.Result) (s string) {
 //	if strings.HasPrefix(result.Protocol, "http") {
 //		s = fmt.Sprintf("[+] <a>%s://%s:%s</a>\t%s\t%s\t%s\t%s\t[%s] %s", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, result.Framework, result.Host, result.HttpStat, result.Title)
 //	} else {
@@ -104,7 +104,7 @@ func vulnOutput(vuln string) string {
 }
 
 func FormatOutput(filename string, outputfile string) {
-	results := Utils.LoadResult(filename)
+	results := utils.LoadResult(filename)
 	pfs := make(map[string]map[string]portformat)
 	//ipfs := make(map[string]ipformat)
 	for _, result := range results {
@@ -172,7 +172,7 @@ func FormatOutput(filename string, outputfile string) {
 }
 
 func processLog(s string) {
-	s = s + " , " + Utils.GetCurtime() + "\n"
+	s = s + " , " + utils.GetCurtime() + "\n"
 	fmt.Print(s)
 	if LogFileHandle != nil {
 		LogDetach <- s

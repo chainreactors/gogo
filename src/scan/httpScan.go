@@ -1,7 +1,7 @@
-package Scan
+package scan
 
 import (
-	"getitle/src/Utils"
+	"getitle/src/utils"
 	"net/http"
 	"strconv"
 	"strings"
@@ -9,14 +9,14 @@ import (
 
 // -defalut
 //socket进行对网站的连接
-func SocketHttp(target string, result *Utils.Result) {
+func socketHttp(target string, result *utils.Result) {
 	//fmt.Println(ip)
 	//socket tcp连接,超时时间
 	var err error
 	var ishttp = false
 	var statuscode = ""
 	result.Protocol = "tcp"
-	conn, err := Utils.TcpSocketConn(target, Delay)
+	conn, err := utils.TcpSocketConn(target, Delay)
 	if err != nil {
 		//fmt.Println(err)
 		result.Error = err.Error()
@@ -35,7 +35,7 @@ func SocketHttp(target string, result *Utils.Result) {
 
 	//发送内容
 	senddata := []byte("GET / HTTP/1.1\r\nHost: " + target + "\r\n\r\n")
-	data, err := Utils.SocketSend(*result.TcpCon, senddata, 4096)
+	data, err := utils.SocketSend(*result.TcpCon, senddata, 4096)
 	if err != nil {
 		result.Error = err.Error()
 	}
@@ -44,7 +44,7 @@ func SocketHttp(target string, result *Utils.Result) {
 
 	//获取状态码
 	result.Content = content
-	ishttp, statuscode = Utils.GetStatusCode(content)
+	ishttp, statuscode = utils.GetStatusCode(content)
 	if ishttp {
 		result.HttpStat = statuscode
 		result.Protocol = "http"
@@ -60,7 +60,7 @@ func SocketHttp(target string, result *Utils.Result) {
 }
 
 //使用封装好了http
-func SystemHttp(target string, result *Utils.Result) {
+func SystemHttp(target string, result *utils.Result) {
 	var conn http.Client
 	var delay int
 	// 如果是400或者不可识别协议,则使用https
@@ -76,13 +76,13 @@ func SystemHttp(target string, result *Utils.Result) {
 	if ishttps || strings.HasPrefix(result.HttpStat, "3") {
 		delay = Delay + HttpsDelay
 	}
-	conn = Utils.HttpConn(delay)
+	conn = utils.HttpConn(delay)
 	resp, err := conn.Get(target)
 	//resp, err := conn.Get(target+"/servlet/bsh.servlet.BshServlet")
 	if resp != nil && resp.TLS != nil {
 		result.Protocol = "https"
 		result.Host = strings.Join(resp.TLS.PeerCertificates[0].DNSNames, ",")
-		//result.Host = Utils.FilterCertDomain(resp.TLS.PeerCertificates[0].DNSNames)
+		//result.Host = utils.FilterCertDomain(resp.TLS.PeerCertificates[0].DNSNames)
 	}
 	if err != nil {
 		result.Error = err.Error()
@@ -91,7 +91,7 @@ func SystemHttp(target string, result *Utils.Result) {
 	result.Error = ""
 	result.Protocol = resp.Request.URL.Scheme
 	result.HttpStat = strconv.Itoa(resp.StatusCode)
-	result.Content = string(Utils.GetBody(resp))
+	result.Content = string(utils.GetBody(resp))
 	result.Httpresp = resp
 	_ = resp.Body.Close()
 

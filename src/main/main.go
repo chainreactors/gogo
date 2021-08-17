@@ -3,8 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
-	"getitle/src/Scan"
 	"getitle/src/core"
+	"getitle/src/scan"
 	"github.com/panjf2000/ants/v2"
 	"os"
 	"strings"
@@ -39,11 +39,11 @@ func main() {
 	flag.StringVar(&core.Output, "o", "full", "")
 	flag.BoolVar(&core.Clean, "c", false, "")
 	flag.StringVar(&core.FileOutput, "O", "json", "")
-	flag.IntVar(&Scan.Delay, "d", 2, "")
-	flag.IntVar(&Scan.HttpsDelay, "D", 2, "")
-	flag.StringVar(&Scan.Payloadstr, "payload", "", "")
+	flag.IntVar(&scan.Delay, "d", 2, "")
+	flag.IntVar(&scan.HttpsDelay, "D", 2, "")
+	flag.StringVar(&scan.Payloadstr, "payload", "", "")
 	flag.BoolVar(&core.Noscan, "no", false, "")
-	flag.BoolVar(&Scan.Exploit, "e", false, "")
+	flag.BoolVar(&scan.Exploit, "e", false, "")
 
 	// 一些特殊参数初始化
 	key := flag.String("k", "", "")
@@ -72,14 +72,14 @@ func main() {
 
 	//初始化全局变量
 	if *version {
-		Scan.VersionLevel = 1
+		scan.VersionLevel = 1
 	} else if *version2 {
-		Scan.VersionLevel = 2
+		scan.VersionLevel = 2
 	} else {
-		Scan.VersionLevel = 0
+		scan.VersionLevel = 0
 	}
 	config = core.Init(config)
-	fmt.Printf("[*] Current goroutines: %d, Version Level %d,Exploit Scan %t \n", config.Threads, Scan.VersionLevel, Scan.Exploit)
+	fmt.Printf("[*] Current goroutines: %d, Version Level %d,Exploit scan %t \n", config.Threads, scan.VersionLevel, scan.Exploit)
 	core.RunTask(config)
 
 	//关闭文件写入管道
@@ -87,7 +87,7 @@ func main() {
 	close(core.LogDetach)
 
 	time.Sleep(time.Microsecond * 500)
-	fmt.Printf("\n[*] Alive sum: %d, Target sum : %d\n", Scan.Alivesum, Scan.Sum)
+	fmt.Printf("\n[*] Alive sum: %d, Target sum : %d\n", scan.Alivesum, scan.Sum)
 	fmt.Println("[*] Totally run: " + time.Since(starttime).String())
 
 }

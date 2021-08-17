@@ -2,7 +2,7 @@ package core
 
 import (
 	"fmt"
-	"getitle/src/Utils"
+	"getitle/src/utils"
 	"net"
 	"os"
 	"runtime"
@@ -30,7 +30,7 @@ type Config struct {
 	Ports         string
 	Portlist      []string
 	JsonFile      string
-	Results       []Utils.Result
+	Results       []utils.Result
 	ListFile      string
 	Threads       int
 	Mod           string
@@ -64,7 +64,7 @@ func Init(config Config) Config {
 
 	// 如果输入的json不为空,则从json中加载result,并返回结果
 	if config.JsonFile != "" {
-		config.Results = Utils.LoadResult(config.JsonFile)
+		config.Results = utils.LoadResult(config.JsonFile)
 		return config
 	}
 
@@ -73,7 +73,7 @@ func Init(config Config) Config {
 	}
 	// 初始化启发式扫描的端口
 	if config.SmartPort != "default" {
-		config.SmartPortList = PortHandler(config.SmartPort)
+		config.SmartPortList = portHandler(config.SmartPort)
 	} else {
 		if config.Mod == "s" {
 			config.SmartPortList = []string{"80"}
@@ -83,15 +83,15 @@ func Init(config Config) Config {
 	}
 	// 默认ss默认只探测ip为1的c段,可以通过-ipp参数指定,例如-ipp 1,254,253
 	if config.IpProbe != "default" {
-		config.IpProbeList = Utils.Str2uintlist(config.IpProbe)
+		config.IpProbeList = utils.Str2uintlist(config.IpProbe)
 	} else {
 		config.IpProbeList = []uint{1}
 	}
 	// 初始化端口配置
-	config.Portlist = PortHandler(config.Ports)
+	config.Portlist = portHandler(config.Ports)
 	// 如果从文件中读,初始化IP列表配置
 	if config.ListFile != "" {
-		config.IPlist = ReadTargetFile(config.ListFile)
+		config.IPlist = readTargetFile(config.ListFile)
 	}
 
 	//if config.Spray && config.Mod != "default" {
@@ -146,7 +146,7 @@ func RunTask(config Config) {
 		// 内网探测默认使用icmp扫描
 		taskname = "Reserved interIP addresses"
 	} else {
-		config = IpInit(config)
+		config = ipInit(config)
 		if config.IP != "" {
 			taskname = config.IP
 		} else if config.ListFile != "" {
@@ -200,25 +200,25 @@ func RunTask(config Config) {
 	}
 }
 
-func IpInit(config Config) Config {
+func ipInit(config Config) Config {
 	// 如果输入的是文件,则格式化所有输入值.如果无有效ip
 	if config.ListFile != "" {
 		var iplist []string
 		for _, ip := range config.IPlist {
-			tmpip := IpForamt(ip)
+			tmpip := ipForamt(ip)
 			if !strings.HasPrefix(tmpip, "err") {
 				iplist = append(iplist, tmpip)
 			} else {
 				fmt.Println("[-] " + tmpip + " ip format error")
 			}
 		}
-		config.IPlist = Utils.SliceUnique(iplist) // 去重
+		config.IPlist = utils.SliceUnique(iplist) // 去重
 		if len(config.IPlist) == 0 {
 			fmt.Println("[-] all IP error")
 			os.Exit(0)
 		}
 	} else if config.IP != "" {
-		config.IP = IpForamt(config.IP)
+		config.IP = ipForamt(config.IP)
 		if strings.HasPrefix(config.IP, "err") {
 			fmt.Println("[-] IP format error")
 			os.Exit(0)
@@ -227,7 +227,7 @@ func IpInit(config Config) Config {
 	return config
 }
 
-func IpForamt(target string) string {
+func ipForamt(target string) string {
 	target = strings.Replace(target, "http://", "", -1)
 	target = strings.Replace(target, "https://", "", -1)
 	target = strings.Trim(target, "/")

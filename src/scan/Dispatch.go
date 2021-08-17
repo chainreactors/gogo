@@ -1,35 +1,35 @@
-package Scan
+package scan
 
 import (
-	"getitle/src/Utils"
+	"getitle/src/utils"
 	"strings"
 )
 
 var Alivesum, Sum int
 var Exploit bool
-var VersionLevel = 0
+var VersionLevel int
 var Delay int
 var HttpsDelay int
 var Payloadstr string
 
-func Dispatch(result *Utils.Result) {
-	target := Utils.GetTarget(result)
+func Dispatch(result *utils.Result) {
+	target := utils.GetTarget(result)
 	Sum++
 	//println(result.Ip)
 	if result.Port == "137" {
-		NbtScan(target, result)
+		nbtScan(target, result)
 		return
 	} else if result.Port == "135" {
-		OXIDScan(target, result)
+		oxidScan(target, result)
 		return
 	} else if result.Port == "icmp" {
-		IcmpScan(result.Ip, result)
+		icmpScan(result.Ip, result)
 		return
 	} else if result.Port == "snmp" {
-		SnmpScan(result.Ip, result)
+		snmpScan(result.Ip, result)
 		return
 	} else {
-		SocketHttp(target, result)
+		socketHttp(target, result)
 	}
 
 	// 启发式扫描探测直接返回不需要后续处理
@@ -40,22 +40,21 @@ func Dispatch(result *Utils.Result) {
 	if result.Stat == "OPEN" {
 		Alivesum++
 
+		//被动收集基本信息
+		result.InfoFilter()
+
 		// 指定payload扫描
 		if strings.HasPrefix(result.Protocol, "http") && Payloadstr != "" {
-			PayloadScan(result)
-			Utils.InfoFilter(result)
+			payloadScan(result)
 			return
 		}
 
-		//被动收集基本信息
-		Utils.InfoFilter(result)
-
 		//主动信息收集
 		// 因为正则匹配耗时较长,如果没有-v参数则字节不进行服务识别
-		FingerScan(result)
+		fingerScan(result)
 		if VersionLevel > 0 {
 			if result.Framework == "" && strings.HasPrefix(result.Protocol, "http") {
-				FaviconScan(result)
+				faviconScan(result)
 			}
 		}
 
@@ -75,18 +74,17 @@ func Dispatch(result *Utils.Result) {
 
 }
 
-func ExploitDispatch(result *Utils.Result) {
-
+func ExploitDispatch(result *utils.Result) {
 	//
-	target := Utils.GetTarget(result)
+	target := utils.GetTarget(result)
 	//if strings.Contains(result.Content, "-ERR wrong") {
 	//	RedisScan(target, result)
 	//}
 	if strings.HasPrefix(result.Protocol, "http") {
-		ShiroScan(result)
+		shiroScan(result)
 	}
 	if result.Port == "445" {
-		MS17010Scan(target, result)
+		ms17010Scan(target, result)
 	}
 	//if result.Port == "11211" {
 	//	MemcacheScan(target, result)

@@ -1,4 +1,4 @@
-package Utils
+package utils
 
 import (
 	"encoding/json"
@@ -181,4 +181,13 @@ func LoadResult(filename string) []Result {
 		os.Exit(0)
 	}
 	return results
+}
+
+func compile(s string) regexp.Regexp {
+	reg, err := regexp.Compile(s)
+	if err != nil {
+		fmt.Println("[-] regexp string error: " + s)
+		os.Exit(0)
+	}
+	return *reg
 }

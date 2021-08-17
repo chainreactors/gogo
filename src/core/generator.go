@@ -2,7 +2,7 @@ package core
 
 import (
 	"fmt"
-	"getitle/src/Utils"
+	"getitle/src/utils"
 	"math"
 	"net"
 	"strconv"
@@ -200,7 +200,7 @@ func generator(config Config) chan TargetConfig {
 	var tc TargetConfig
 	go func() {
 		if config.JsonFile != "" {
-			var result Utils.Result
+			var result utils.Result
 			for _, result = range config.Results {
 				tc.ip = result.Ip
 				tc.port = result.Port

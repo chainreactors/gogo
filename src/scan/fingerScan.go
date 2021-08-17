@@ -1,14 +1,14 @@
-package Scan
+package scan
 
 import (
 	"crypto/md5"
 	"encoding/hex"
-	"getitle/src/Utils"
+	"getitle/src/utils"
 	"net"
 	"strings"
 )
 
-func FingerScan(result *Utils.Result) {
+func fingerScan(result *utils.Result) {
 	//如果是http协议,则判断cms,如果是tcp则匹配规则库.暂时不考虑udp
 	if strings.HasPrefix(result.Protocol, "http") {
 		getHttpCMS(result)
@@ -18,8 +18,8 @@ func FingerScan(result *Utils.Result) {
 	return
 }
 
-func getHttpCMS(result *Utils.Result) {
-	for _, finger := range Utils.Httpfingers {
+func getHttpCMS(result *utils.Result) {
+	for _, finger := range utils.Httpfingers {
 		if VersionLevel < finger.Level {
 			return
 		}
@@ -32,24 +32,24 @@ func getHttpCMS(result *Utils.Result) {
 	return
 }
 
-func httpFingerMatch(result *Utils.Result, finger Utils.Finger) {
+func httpFingerMatch(result *utils.Result, finger utils.Finger) {
 
 	resp := result.Httpresp
 	content := result.Content
 	//var cookies map[string]string
 	if finger.SendData != "" {
-		conn := Utils.HttpConn(2)
-		resp, err := conn.Get(Utils.GetURL(result) + finger.SendData)
+		conn := utils.HttpConn(2)
+		resp, err := conn.Get(utils.GetURL(result) + finger.SendData)
 		if err != nil {
 			return
 		}
-		content = string(Utils.GetBody(resp))
+		content = string(utils.GetBody(resp))
 		resp.Body.Close()
 	}
 
 	if finger.Regexps.Vuln != nil {
-		for _, reg := range Utils.Compiled[finger.Name+"_vuln"] {
-			res := Utils.CompileMatch(reg, content)
+		for _, reg := range utils.Compiled[finger.Name+"_vuln"] {
+			res := utils.CompileMatch(reg, content)
 			if res == "matched" {
 				//println("[*] " + res)
 				result.Framework = finger.Name
@@ -71,8 +71,8 @@ func httpFingerMatch(result *Utils.Result, finger Utils.Finger) {
 			}
 		}
 	} else if finger.Regexps.Regexp != nil {
-		for _, reg := range Utils.Compiled[finger.Name] {
-			res := Utils.CompileMatch(reg, content)
+		for _, reg := range utils.Compiled[finger.Name] {
+			res := utils.CompileMatch(reg, content)
 			if res == "matched" {
 				//println("[*] " + res)
 				result.Framework = finger.Name
@@ -91,7 +91,7 @@ func httpFingerMatch(result *Utils.Result, finger Utils.Finger) {
 					return
 				}
 			} else {
-				headers := Utils.GetHeaderstr(resp)
+				headers := utils.GetHeaderstr(resp)
 				if strings.Contains(headers, header) {
 					result.Framework = finger.Name
 					return
@@ -122,9 +122,9 @@ func httpFingerMatch(result *Utils.Result, finger Utils.Finger) {
 }
 
 //第一个返回值为详细的版本信息,第二个返回值为规则名字
-func getTCPFrameWork(result *Utils.Result) {
+func getTCPFrameWork(result *utils.Result) {
 	// 优先匹配默认端口,第一遍循环只匹配默认端口
-	for _, finger := range Utils.Tcpfingers[result.Port] {
+	for _, finger := range utils.Tcpfingers[result.Port] {
 		tcpFingerMatch(result, finger)
 		if result.Framework != "" {
 			return
@@ -132,7 +132,7 @@ func getTCPFrameWork(result *Utils.Result) {
 	}
 
 	// 若默认端口未匹配到结果,则匹配全部
-	for port, fingers := range Utils.Tcpfingers {
+	for port, fingers := range utils.Tcpfingers {
 		for _, finger := range fingers {
 			if port != result.Port {
 				tcpFingerMatch(result, finger)
@@ -146,7 +146,7 @@ func getTCPFrameWork(result *Utils.Result) {
 	return
 }
 
-func tcpFingerMatch(result *Utils.Result, finger Utils.Finger) {
+func tcpFingerMatch(result *utils.Result, finger utils.Finger) {
 	content := result.Content
 	var data []byte
 	var err error
@@ -154,11 +154,11 @@ func tcpFingerMatch(result *Utils.Result, finger Utils.Finger) {
 	// 某些规则需要主动发送一个数据包探测
 	if finger.SendData != "" && VersionLevel >= finger.Level {
 		var conn net.Conn
-		conn, err = Utils.TcpSocketConn(Utils.GetTarget(result), 2)
+		conn, err = utils.TcpSocketConn(utils.GetTarget(result), 2)
 		if err != nil {
 			return
 		}
-		data, err = Utils.SocketSend(conn, []byte(finger.SendData), 1024)
+		data, err = utils.SocketSend(conn, []byte(finger.SendData), 1024)
 
 		// 如果报错为EOF,则需要重新建立tcp连接
 		if err != nil {
@@ -185,8 +185,8 @@ func tcpFingerMatch(result *Utils.Result, finger Utils.Finger) {
 	}
 
 	//遍历指纹正则
-	for _, reg := range Utils.Compiled[finger.Name] {
-		res := Utils.CompileMatch(reg, content)
+	for _, reg := range utils.Compiled[finger.Name] {
+		res := utils.CompileMatch(reg, content)
 		if res == "matched" {
 			//println("[*] " + res)
 			result.Framework = finger.Name
@@ -199,8 +199,8 @@ func tcpFingerMatch(result *Utils.Result, finger Utils.Finger) {
 		}
 	}
 	// 遍历漏洞正则
-	for _, reg := range Utils.Compiled[finger.Name+"_vuln"] {
-		res := Utils.CompileMatch(reg, content)
+	for _, reg := range utils.Compiled[finger.Name+"_vuln"] {
+		res := utils.CompileMatch(reg, content)
 		if res == "matched" {
 			//println("[*] " + res)
 			result.Framework = finger.Name
