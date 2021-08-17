@@ -1,4 +1,4 @@
-python FingerprintUpdate.py
+python ConfigUpdate.py
 set name=getitle
 gox.exe -osarch="linux/amd64 linux/arm64 linux/386 windows/amd64 linux/mips64 windows/386 darwin/amd64" -ldflags="-s -w" -gcflags="-trimpath=$GOPATH" -asmflags="-trimpath=$GOPATH" -output=".\bin\%name%_{{.OS}}_{{.Arch}}_v%1" .\src\main\
 
@@ -17,7 +17,6 @@ upxs -1 -k -o ./bin/%name%_windows_amd64_v%1_upx.exe ./bin/%name%_windows_amd64_
 upxs -1 -k -o ./bin/%name%_linux_386_v%1_upx ./bin/%name%_linux_386_v%1
 upxs -1 -k -o ./bin/%name%_linux_amd64_v%1_upx ./bin/%name%_linux_amd64_v%1
 upxs -1 -k -o ./bin/%name%_linux_arm64_v%1_upx ./bin/%name%_linux_arm64_v%1
-upxs -1 -k -o ./bin/%name%_darwin_amd64_v%1_upx ./bin/%name%_darwin_amd64_v%1
 
 limelighter -I ./bin/%name%_windows_amd64_v%1.exe -O ./bin/%name%_windows_amd64_sangfor_v%1.exe -Domain www.sangfor.com
 rm *.sangfor.*
