@@ -40,15 +40,14 @@ func Dispatch(result *Utils.Result) {
 	if result.Stat == "OPEN" {
 		Alivesum++
 
+		//被动收集基本信息
+		result.InfoFilter()
+
 		// 指定payload扫描
 		if strings.HasPrefix(result.Protocol, "http") && Payloadstr != "" {
 			PayloadScan(result)
-			Utils.InfoFilter(result)
 			return
 		}
-
-		//被动收集基本信息
-		Utils.InfoFilter(result)
 
 		//主动信息收集
 		// 因为正则匹配耗时较长,如果没有-v参数则字节不进行服务识别
@@ -76,7 +75,6 @@ func Dispatch(result *Utils.Result) {
 }
 
 func ExploitDispatch(result *Utils.Result) {
-
 	//
 	target := Utils.GetTarget(result)
 	//if strings.Contains(result.Content, "-ERR wrong") {

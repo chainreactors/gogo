@@ -5,25 +5,6 @@ import (
 	"strings"
 )
 
-func InfoFilter(result *Result) {
-
-	if strings.HasPrefix(result.Protocol, "http") {
-		result.Title = GetTitle(result.Content)
-		result.Language = GetLanguage(result.Httpresp, result.Content)
-		result.Midware = GetMidware(result.Httpresp, result.Content)
-
-	} else {
-		result.Title = GetTitle(result.Content)
-	}
-	//处理错误信息
-	if result.Content != "" {
-		errHandler(result)
-	}
-
-	//return result
-
-}
-
 func GetTitle(content string) string {
 	title := CompileMatch(CommonCompiled["title"], content)
 	if title != "" {
@@ -113,18 +94,4 @@ func FilterCertDomain(domins []string) string {
 		}
 	}
 	return res[:len(res)-1]
-}
-
-//从错误中收集信息
-func errHandler(result *Result) {
-
-	if strings.Contains(result.Error, "wsasend") || strings.Contains(result.Error, "wsarecv") {
-		result.HttpStat = "reset"
-	} else if result.Error == "EOF" {
-		result.HttpStat = "EOF"
-	} else if strings.Contains(result.Error, "http: server gave HTTP response to HTTPS client") {
-		result.Protocol = "http"
-	} else if strings.Contains(result.Error, "first record does not look like a TLS handshake") {
-		result.Protocol = "tcp"
-	}
 }
