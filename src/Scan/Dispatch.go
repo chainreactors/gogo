@@ -17,19 +17,19 @@ func Dispatch(result *Utils.Result) {
 	Sum++
 	//println(result.Ip)
 	if result.Port == "137" {
-		NbtScan(target, result)
+		nbtScan(target, result)
 		return
 	} else if result.Port == "135" {
-		OXIDScan(target, result)
+		oxidScan(target, result)
 		return
 	} else if result.Port == "icmp" {
-		IcmpScan(result.Ip, result)
+		icmpScan(result.Ip, result)
 		return
 	} else if result.Port == "snmp" {
-		SnmpScan(result.Ip, result)
+		snmpScan(result.Ip, result)
 		return
 	} else {
-		SocketHttp(target, result)
+		socketHttp(target, result)
 	}
 
 	// 启发式扫描探测直接返回不需要后续处理
@@ -45,16 +45,16 @@ func Dispatch(result *Utils.Result) {
 
 		// 指定payload扫描
 		if strings.HasPrefix(result.Protocol, "http") && Payloadstr != "" {
-			PayloadScan(result)
+			payloadScan(result)
 			return
 		}
 
 		//主动信息收集
 		// 因为正则匹配耗时较长,如果没有-v参数则字节不进行服务识别
-		FingerScan(result)
+		fingerScan(result)
 		if VersionLevel > 0 {
 			if result.Framework == "" && strings.HasPrefix(result.Protocol, "http") {
-				FaviconScan(result)
+				faviconScan(result)
 			}
 		}
 
@@ -81,10 +81,10 @@ func ExploitDispatch(result *Utils.Result) {
 	//	RedisScan(target, result)
 	//}
 	if strings.HasPrefix(result.Protocol, "http") {
-		ShiroScan(result)
+		shiroScan(result)
 	}
 	if result.Port == "445" {
-		MS17010Scan(target, result)
+		ms17010Scan(target, result)
 	}
 	//if result.Port == "11211" {
 	//	MemcacheScan(target, result)

@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func GetTitle(content string) string {
+func getTitle(content string) string {
 	title := CompileMatch(CommonCompiled["title"], content)
 	if title != "" {
 		return title
@@ -13,7 +13,7 @@ func GetTitle(content string) string {
 	return Encode(string([]byte(content)[:13]))
 }
 
-func GetMidware(resp *http.Response, content string) string {
+func getMidware(resp *http.Response, content string) string {
 	var server string = ""
 	if resp == nil {
 		server = CompileMatch(CommonCompiled["server"], content)
@@ -24,7 +24,7 @@ func GetMidware(resp *http.Response, content string) string {
 }
 
 // TODO 重构
-func GetLanguage(resp *http.Response, content string) string {
+func getLanguage(resp *http.Response, content string) string {
 	var powered string
 	if resp == nil {
 		powered = CompileMatch(CommonCompiled["xpb"], content)

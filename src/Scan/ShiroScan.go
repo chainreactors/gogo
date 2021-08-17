@@ -7,7 +7,7 @@ import (
 )
 
 // -e
-func ShiroScan(result *Utils.Result) {
+func shiroScan(result *Utils.Result) {
 	var isshiro = false
 	target := Utils.GetURL(result)
 	conn := Utils.HttpConn(Delay)

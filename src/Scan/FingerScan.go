@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func FingerScan(result *Utils.Result) {
+func fingerScan(result *Utils.Result) {
 	//如果是http协议,则判断cms,如果是tcp则匹配规则库.暂时不考虑udp
 	if strings.HasPrefix(result.Protocol, "http") {
 		getHttpCMS(result)

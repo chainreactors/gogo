@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func ReadTargetFile(targetfile string) []string {
+func readTargetFile(targetfile string) []string {
 
 	file, err := os.Open(targetfile)
 	if err != nil {

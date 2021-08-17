@@ -6,7 +6,7 @@ import (
 )
 
 // -default
-func OXIDScan(target string, result *Utils.Result) {
+func oxidScan(target string, result *Utils.Result) {
 
 	result.Protocol = "tcp"
 	conn, err := Utils.TcpSocketConn(target, Delay)

@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func PortHandler(portstring string) []string {
+func portHandler(portstring string) []string {
 	var ports []string
 	portstring = strings.Replace(portstring, "\r", "", -1)
 

@@ -13,7 +13,7 @@ import (
 )
 
 // -n i
-func IcmpScan(host string, result *Utils.Result) {
+func icmpScan(host string, result *Utils.Result) {
 	var size int
 	var seq int16 = 1
 	const ECHO_REQUEST_HEAD_LEN = 8

@@ -28,12 +28,12 @@ type Result struct {
 
 func (result *Result) InfoFilter() {
 	if strings.HasPrefix(result.Protocol, "http") {
-		result.Title = GetTitle(result.Content)
-		result.Language = GetLanguage(result.Httpresp, result.Content)
-		result.Midware = GetMidware(result.Httpresp, result.Content)
+		result.Title = getTitle(result.Content)
+		result.Language = getLanguage(result.Httpresp, result.Content)
+		result.Midware = getMidware(result.Httpresp, result.Content)
 
 	} else {
-		result.Title = GetTitle(result.Content)
+		result.Title = getTitle(result.Content)
 	}
 	//处理错误信息
 	if result.Content != "" {

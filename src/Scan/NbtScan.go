@@ -46,7 +46,7 @@ func init() {
 	}
 }
 
-func NbtScan(target string, result *Utils.Result) {
+func nbtScan(target string, result *Utils.Result) {
 	var Share bool = false
 	var DC bool = false
 	result.Protocol = "udp"

@@ -73,7 +73,7 @@ func Init(config Config) Config {
 	}
 	// 初始化启发式扫描的端口
 	if config.SmartPort != "default" {
-		config.SmartPortList = PortHandler(config.SmartPort)
+		config.SmartPortList = portHandler(config.SmartPort)
 	} else {
 		if config.Mod == "s" {
 			config.SmartPortList = []string{"80"}
@@ -88,10 +88,10 @@ func Init(config Config) Config {
 		config.IpProbeList = []uint{1}
 	}
 	// 初始化端口配置
-	config.Portlist = PortHandler(config.Ports)
+	config.Portlist = portHandler(config.Ports)
 	// 如果从文件中读,初始化IP列表配置
 	if config.ListFile != "" {
-		config.IPlist = ReadTargetFile(config.ListFile)
+		config.IPlist = readTargetFile(config.ListFile)
 	}
 
 	//if config.Spray && config.Mod != "default" {
@@ -146,7 +146,7 @@ func RunTask(config Config) {
 		// 内网探测默认使用icmp扫描
 		taskname = "Reserved interIP addresses"
 	} else {
-		config = IpInit(config)
+		config = ipInit(config)
 		if config.IP != "" {
 			taskname = config.IP
 		} else if config.ListFile != "" {
@@ -200,12 +200,12 @@ func RunTask(config Config) {
 	}
 }
 
-func IpInit(config Config) Config {
+func ipInit(config Config) Config {
 	// 如果输入的是文件,则格式化所有输入值.如果无有效ip
 	if config.ListFile != "" {
 		var iplist []string
 		for _, ip := range config.IPlist {
-			tmpip := IpForamt(ip)
+			tmpip := ipForamt(ip)
 			if !strings.HasPrefix(tmpip, "err") {
 				iplist = append(iplist, tmpip)
 			} else {
@@ -218,7 +218,7 @@ func IpInit(config Config) Config {
 			os.Exit(0)
 		}
 	} else if config.IP != "" {
-		config.IP = IpForamt(config.IP)
+		config.IP = ipForamt(config.IP)
 		if strings.HasPrefix(config.IP, "err") {
 			fmt.Println("[-] IP format error")
 			os.Exit(0)
@@ -227,7 +227,7 @@ func IpInit(config Config) Config {
 	return config
 }
 
-func IpForamt(target string) string {
+func ipForamt(target string) string {
 	target = strings.Replace(target, "http://", "", -1)
 	target = strings.Replace(target, "https://", "", -1)
 	target = strings.Trim(target, "/")

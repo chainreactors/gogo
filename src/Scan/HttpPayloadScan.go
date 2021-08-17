@@ -5,7 +5,7 @@ import (
 	"strconv"
 )
 
-func PayloadScan(result *Utils.Result) {
+func payloadScan(result *Utils.Result) {
 	url := Utils.GetURL(result)
 	//println(url+Payloadstr)
 	result.Uri = Payloadstr

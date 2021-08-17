@@ -5,7 +5,7 @@ import (
 	"github.com/alouca/gosnmp"
 )
 
-func SnmpScan(target string, result *Utils.Result) {
+func snmpScan(target string, result *Utils.Result) {
 	var err error
 	s, err := gosnmp.NewGoSNMP(target, "public", gosnmp.Version2c, int64(Delay+2))
 	if err != nil {
