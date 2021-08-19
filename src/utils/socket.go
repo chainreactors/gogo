@@ -56,7 +56,11 @@ func GetURL(result *Result) string {
 func HttpConn(delay int) http.Client {
 	tr := &http.Transport{
 		//TLSHandshakeTimeout : delay * time.Second,
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		TLSClientConfig: &tls.Config{
+			Renegotiation:      tls.RenegotiateOnceAsClient,
+			InsecureSkipVerify: true,
+		},
+		DisableKeepAlives: false,
 	}
 
 	conn := &http.Client{
