@@ -10,20 +10,20 @@ import (
 	"strings"
 )
 
-// RawRequest defines a basic HTTP raw request
-type RawRequest struct {
+// rawRequest defines a basic HTTP raw request
+type rawRequest struct {
 	FullURL        string
 	Method         string
 	Path           string
 	Data           string
 	Headers        map[string]string
-	UnsafeHeaders  Headers
+	UnsafeHeaders  headers
 	UnsafeRawBytes []byte
 }
 
-// Parse parses the raw request as supplied by the user
-func ParseRaw(request, baseURL string, unsafe bool) (*RawRequest, error) {
-	rawRequest := &RawRequest{
+// parse parses the raw request as supplied by the user
+func parseRaw(request, baseURL string, unsafe bool) (*rawRequest, error) {
+	rawRequest := &rawRequest{
 		Headers: make(map[string]string),
 	}
 	if unsafe {
@@ -71,7 +71,7 @@ func ParseRaw(request, baseURL string, unsafe bool) (*RawRequest, error) {
 		// therefore use the full line as key
 		_, found := rawRequest.Headers[key]
 		if unsafe {
-			rawRequest.UnsafeHeaders = append(rawRequest.UnsafeHeaders, Header{Key: line})
+			rawRequest.UnsafeHeaders = append(rawRequest.UnsafeHeaders, header{Key: line})
 		}
 
 		if unsafe && found {
@@ -130,7 +130,7 @@ func ParseRaw(request, baseURL string, unsafe bool) (*RawRequest, error) {
 	return rawRequest, nil
 }
 
-func (raw RawRequest) makeRequest() *http.Request {
+func (raw rawRequest) makeRequest() *http.Request {
 	var body io.ReadCloser
 
 	body = ioutil.NopCloser(strings.NewReader(raw.Data))
@@ -151,8 +151,8 @@ func (raw RawRequest) makeRequest() *http.Request {
 	return req
 
 }
-func Parse(method, path, body, baseURL string, headers map[string]string, unsafe bool) (*RawRequest, error) {
-	rawRequest := &RawRequest{
+func parse(method, path, body, baseURL string, headers map[string]string, unsafe bool) (*rawRequest, error) {
+	rawRequest := &rawRequest{
 		Headers: make(map[string]string),
 	}
 	rawRequest.Method = method

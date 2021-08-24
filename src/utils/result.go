@@ -1,29 +1,32 @@
 package utils
 
 import (
+	"fmt"
 	"net"
 	"net/http"
 	"strings"
 )
 
 type Result struct {
-	Ip        string         `json:"i"` // ip
-	Port      string         `json:"p"` // port
-	Uri       string         `json:"u"` // uri
-	Os        string         `json:"o"` // os
-	Host      string         `json:"h"` // host
-	Title     string         `json:"t"` // title
-	Midware   string         `json:"m"` // midware
-	HttpStat  string         `json:"s"` // http_stat
-	Language  string         `json:"l"` // language
-	Framework string         `json:"f"` // framework
-	Vuln      string         `json:"v"` // vuln
-	Protocol  string         `json:"r"` // protocol
-	Stat      string         `json:"-"`
-	TcpCon    *net.Conn      `json:"-"`
-	Httpresp  *http.Response `json:"-"`
-	Error     string         `json:"-"`
-	Content   string         `json:"-"`
+	Ip           string         `json:"i"`  // ip
+	Port         string         `json:"p"`  // port
+	Uri          string         `json:"u"`  // uri
+	Os           string         `json:"o"`  // os
+	Host         string         `json:"h"`  // host
+	Title        string         `json:"t"`  // title
+	Midware      string         `json:"m"`  // midware
+	HttpStat     string         `json:"s"`  // http_stat
+	Language     string         `json:"l"`  // language
+	Framework    string         `json:"f"`  // framework
+	Vuln         string         `json:"v"`  // vuln
+	Vuln_Payload string         `json:"vp"` // payload
+	Vuln_Detail  string         `json:"vd"` // extrator info
+	Protocol     string         `json:"r"`  // protocol
+	Stat         string         `json:"-"`
+	TcpCon       *net.Conn      `json:"-"`
+	Httpresp     *http.Response `json:"-"`
+	Error        string         `json:"-"`
+	Content      string         `json:"-"`
 }
 
 func (result *Result) InfoFilter() {
@@ -53,4 +56,8 @@ func (result *Result) errHandler() {
 	} else if strings.Contains(result.Error, "first record does not look like a TLS handshake") {
 		result.Protocol = "tcp"
 	}
+}
+
+func (result Result) GetURL() string {
+	return fmt.Sprintf("%s://%s:%s", result.Protocol, result.Ip, result.Port)
 }

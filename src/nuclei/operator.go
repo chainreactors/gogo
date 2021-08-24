@@ -1,10 +1,10 @@
 package nuclei
 
-// Operators contains the operators that can be applied on protocols
-type Operators struct {
+// operators contains the operators that can be applied on protocols
+type operators struct {
 	// Matchers contains the detection mechanism for the request to identify
 	// whether the request was successful
-	Matchers []*Matcher `json:"matchers,omitempty"`
+	Matchers []*matcher `json:"matchers,omitempty"`
 	// Extractors contains the extraction mechanism for the request to identify
 	// and extract parts of the response.
 	//Extractors []*extractors.Extractor `yaml:"extractors,omitempty"`
@@ -12,7 +12,7 @@ type Operators struct {
 	// whether to use AND or OR. Default is OR.
 	MatchersCondition string `json:"matchers-condition,omitempty"`
 	// cached variables that may be used along with request.
-	matchersCondition ConditionType
+	matchersCondition conditionType
 }
 
 // Result is a result structure created from operators running on data.
@@ -33,11 +33,11 @@ type Result struct {
 	PayloadValues map[string]interface{}
 }
 
-func (r *Operators) compile() error {
+func (r *operators) compile() error {
 	if r.MatchersCondition != "" {
-		r.matchersCondition = ConditionTypes[r.MatchersCondition]
+		r.matchersCondition = conditionTypes[r.MatchersCondition]
 	} else {
-		r.matchersCondition = ORCondition
+		r.matchersCondition = orCondition
 	}
 	for _, matcher := range r.Matchers {
 		if err := matcher.CompileMatchers(); err != nil {
@@ -47,16 +47,16 @@ func (r *Operators) compile() error {
 	return nil
 }
 
-// GetMatchersCondition returns the condition for the matchers
-func (r *Operators) GetMatchersCondition() ConditionType {
+// getMatchersCondition returns the condition for the matchers
+func (r *operators) getMatchersCondition() conditionType {
 	return r.matchersCondition
 }
 
-type MatchFunc func(data map[string]interface{}, matcher *Matcher) bool
+type matchFunc func(data map[string]interface{}, matcher *matcher) bool
 
 // Execute executes the operators on data and returns a result structure
-func (r *Operators) Execute(data map[string]interface{}, match MatchFunc) (*Result, bool) {
-	matcherCondition := r.GetMatchersCondition()
+func (r *operators) Execute(data map[string]interface{}, match matchFunc) (*Result, bool) {
+	matcherCondition := r.getMatchersCondition()
 
 	var matches bool
 	result := &Result{
@@ -89,7 +89,7 @@ func (r *Operators) Execute(data map[string]interface{}, match MatchFunc) (*Resu
 		// Check if the matcher matched
 		if !match(data, matcher) {
 			// If the condition is AND we haven't matched, try next request.
-			if matcherCondition == ANDCondition {
+			if matcherCondition == andCondition {
 				//if len(result.DynamicValues) > 0 {
 				//	return result, true
 				//}
@@ -98,7 +98,7 @@ func (r *Operators) Execute(data map[string]interface{}, match MatchFunc) (*Resu
 		} else {
 			// If the matcher has matched, and its an OR
 			// write the first output then move to next matcher.
-			if matcherCondition == ORCondition && matcher.Name != "" {
+			if matcherCondition == orCondition && matcher.Name != "" {
 				result.Matches[matcher.Name] = struct{}{}
 			}
 			matches = true

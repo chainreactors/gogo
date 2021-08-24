@@ -3,6 +3,7 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
+	"getitle/src/nuclei"
 	"os"
 	"regexp"
 )
@@ -12,7 +13,23 @@ var Tcpfingers, Httpfingers = loadVersionFingers()
 var Namemap, Typemap, Portmap = loadPortConfig()
 var Compiled = make(map[string][]regexp.Regexp)
 var CommonCompiled = initregexp()
+var TemplateMap = loadTemplates()
 
+func loadTemplates() map[string]nuclei.Template {
+	var templates []nuclei.Template
+	var templatemap = make(map[string]nuclei.Template)
+	err := json.Unmarshal([]byte(LoadConfig("nuclei")), &templates)
+	if err != nil {
+		fmt.Println("[-] nuclei config load FAIL!")
+		os.Exit(0)
+	}
+	for _, template := range templates {
+		if template.Finger != "" {
+			templatemap[template.Finger] = template
+		}
+	}
+	return templatemap
+}
 func loadPortConfig() (map[string][]string, map[string][]string, map[string][]string) {
 	var portfingers []PortFinger
 	err := json.Unmarshal([]byte(LoadConfig("port")), &portfingers)

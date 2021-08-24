@@ -39,7 +39,7 @@ func httpFingerMatch(result *utils.Result, finger utils.Finger) {
 	//var cookies map[string]string
 	if finger.SendData != "" {
 		conn := utils.HttpConn(2)
-		resp, err := conn.Get(utils.GetURL(result) + finger.SendData)
+		resp, err := conn.Get(result.GetURL() + finger.SendData)
 		if err != nil {
 			return
 		}

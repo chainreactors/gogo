@@ -1,18 +1,18 @@
 package nuclei
 
-// Header represents a HTTP header.
-type Header struct {
+// header represents a HTTP header.
+type header struct {
 	Key   string
 	Value string
 }
 
-type Headers []Header
+type headers []header
 
-func (h Headers) Len() int { return len(h) }
+func (h headers) Len() int { return len(h) }
 
-func (h Headers) Swap(i, j int) { h[i], h[j] = h[j], h[i] }
+func (h headers) Swap(i, j int) { h[i], h[j] = h[j], h[i] }
 
-func (h Headers) Less(i, j int) bool {
+func (h headers) Less(i, j int) bool {
 	switch {
 	case h[i].Key < h[j].Key:
 		return true

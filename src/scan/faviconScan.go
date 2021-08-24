@@ -15,7 +15,7 @@ import (
 func faviconScan(result *utils.Result) {
 	var err error
 	conn := utils.HttpConn(2)
-	url := utils.GetURL(result)
+	url := result.GetURL()
 	resp, err := conn.Get(url + "/favicon.ico")
 	if err != nil {
 		return

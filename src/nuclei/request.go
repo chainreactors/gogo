@@ -7,8 +7,8 @@ import (
 )
 
 type Request struct {
-	// Operators for the current request go here.
-	Operators `yaml:",inline"`
+	// operators for the current request go here.
+	operators `yaml:",inline"`
 	// Path contains the path/s for the request
 	Path []string `json:"path"`
 	// Raw contains raw requests
@@ -47,14 +47,14 @@ type Request struct {
 	// Currently only works with sequential http requests.
 	ReqCondition bool `json:"req-condition"`
 
-	//Matchers []*Matcher `json:"matchers,omitempty"`
+	//Matchers []*matcher `json:"matchers,omitempty"`
 	//MatchersCondition string `json:"matchers-condition,omitempty"`
-	//matchersCondition ConditionType
+	//matchersCondition conditionType
 
-	generator         *Generator // optional, only enabled when using payloads
+	generator         *generator // optional, only enabled when using payloads
 	httpClient        *http.Client
 	httpresp          *http.Response
-	CompiledOperators *Operators
+	CompiledOperators *operators
 	totalRequests     int
 	Result            *Result
 }
@@ -63,8 +63,8 @@ type Request struct {
 //	urlWithPortRegex = regexp.MustCompile(`{{BaseURL}}:(\d+)`)
 //)
 
-// Requests returns the total number of requests the YAML rule will perform
-func (r *Request) Requests() int {
+// requests returns the total number of requests the YAML rule will perform
+func (r *Request) requests() int {
 	if r.generator != nil {
 		payloadRequests := r.generator.NewIterator().Total() * len(r.Raw)
 		return payloadRequests
@@ -94,7 +94,7 @@ func (r *Request) Compile() error {
 
 	// 修改: 只编译一次Matcher
 	if r.CompiledOperators == nil && len(r.Matchers) > 0 { // todo extractor
-		compiled := &r.Operators
+		compiled := &r.operators
 		if compileErr := compiled.compile(); compileErr != nil {
 			return compileErr
 		}
@@ -111,7 +111,7 @@ func (r *Request) Compile() error {
 			return err
 		}
 	}
-	r.totalRequests = r.Requests()
+	r.totalRequests = r.requests()
 	return nil
 }
 
@@ -151,14 +151,14 @@ func (r *Request) executeRequest(request *generatedRequest, previous map[string]
 }
 
 // Match matches a generic data response again a given matcher
-func (r *Request) Match(data map[string]interface{}, matcher *Matcher) bool {
+func (r *Request) Match(data map[string]interface{}, matcher *matcher) bool {
 	item, ok := getMatchPart(matcher.Part, data)
 	if !ok {
 		return false
 	}
 
-	switch matcher.GetType() {
-	case StatusMatcher:
+	switch matcher.getType() {
+	case statusMatcher:
 		statusCode, ok := data["status_code"]
 		if !ok {
 			return false
@@ -167,15 +167,15 @@ func (r *Request) Match(data map[string]interface{}, matcher *Matcher) bool {
 		if !ok {
 			return false
 		}
-		return matcher.Result(matcher.MatchStatusCode(status))
-	case SizeMatcher:
-		return matcher.Result(matcher.MatchSize(len(item)))
-	case WordsMatcher:
-		return matcher.Result(matcher.MatchWords(item))
-	case RegexMatcher:
-		return matcher.Result(matcher.MatchRegex(item))
-	case BinaryMatcher:
-		return matcher.Result(matcher.MatchBinary(item))
+		return matcher.result(matcher.matchStatusCode(status))
+	case sizeMatcher:
+		return matcher.result(matcher.matchSize(len(item)))
+	case wordsMatcher:
+		return matcher.result(matcher.matchWords(item))
+	case regexMatcher:
+		return matcher.result(matcher.matchRegex(item))
+	case binaryMatcher:
+		return matcher.result(matcher.matchBinary(item))
 	}
 	return false
 }
@@ -189,15 +189,15 @@ func getMatchPart(part string, data map[string]interface{}) (string, bool) {
 
 	if part == "all" {
 		builder := &strings.Builder{}
-		builder.WriteString(ToString(data["body"]))
-		builder.WriteString(ToString(data["all_headers"]))
+		builder.WriteString(toString(data["body"]))
+		builder.WriteString(toString(data["all_headers"]))
 		itemStr = builder.String()
 	} else {
 		item, ok := data[part]
 		if !ok {
 			return "", false
 		}
-		itemStr = ToString(item)
+		itemStr = toString(item)
 	}
 	return itemStr, true
 }

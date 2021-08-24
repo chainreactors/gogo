@@ -6,7 +6,7 @@ import (
 )
 
 func payloadScan(result *utils.Result) {
-	url := utils.GetURL(result)
+	url := result.GetURL()
 	//println(url+Payloadstr)
 	result.Uri = Payloadstr
 	conn := utils.HttpConn(Delay)

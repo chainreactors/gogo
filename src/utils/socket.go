@@ -49,10 +49,6 @@ func GetTarget(result *Result) string {
 	return fmt.Sprintf("%s:%s", result.Ip, result.Port)
 }
 
-func GetURL(result *Result) string {
-	return fmt.Sprintf("%s://%s:%s", result.Protocol, result.Ip, result.Port)
-}
-
 func HttpConn(delay int) http.Client {
 	tr := &http.Transport{
 		//TLSHandshakeTimeout : delay * time.Second,

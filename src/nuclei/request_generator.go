@@ -12,11 +12,11 @@ import (
 type requestGenerator struct {
 	currentIndex    int
 	request         *Request
-	payloadIterator *Iterator
-	rawRequest      *RawRequest
+	payloadIterator *iterator
+	rawRequest      *rawRequest
 }
 
-// newGenerator creates a new request generator instance
+// newGenerator creates a New request generator instance
 func (r *Request) newGenerator() *requestGenerator {
 	generator := &requestGenerator{request: r}
 
@@ -110,7 +110,7 @@ func (r *requestGenerator) Make(baseURL string, dynamicValues map[string]interfa
 	}
 
 	data, parsed = baseURLWithTemplatePrefs(data, parsed)
-	values := MergeMaps(dynamicValues, map[string]interface{}{
+	values := mergeMaps(dynamicValues, map[string]interface{}{
 		"Hostname": parsed.Host,
 	})
 
@@ -120,7 +120,7 @@ func (r *requestGenerator) Make(baseURL string, dynamicValues map[string]interfa
 	}
 	parsedString := parsed.String()
 	values["BaseURL"] = parsedString
-	values = MergeMaps(payloads, values)
+	values = mergeMaps(payloads, values)
 
 	// If data contains \n it's a raw request, process it like raw. Else
 	// continue with the template based request flow.
@@ -152,7 +152,7 @@ func baseURLWithTemplatePrefs(data string, parsed *url.URL) (string, *url.URL) {
 
 // MakeHTTPRequestFromModel creates a *http.Request from a request template
 func (r *requestGenerator) makeHTTPRequestFromModel(data string, values map[string]interface{}) (*generatedRequest, error) {
-	final := Replace(data, values)
+	final := replace(data, values)
 
 	// Build a request on the specified URL
 	req, err := http.NewRequest(r.request.Method, final, nil)
@@ -174,8 +174,8 @@ func (r *requestGenerator) handleRawWithPayloads(rawRequest, baseURL string, val
 	// Combine the template payloads along with base
 	// request values.
 	var request *http.Request
-	rawRequest = Replace(rawRequest, values)
-	rawRequestData, err := ParseRaw(rawRequest, baseURL, r.request.Unsafe)
+	rawRequest = replace(rawRequest, values)
+	rawRequestData, err := parseRaw(rawRequest, baseURL, r.request.Unsafe)
 	if err != nil {
 		return nil, err
 	}
@@ -211,20 +211,20 @@ func (r *requestGenerator) handleRawWithPayloads(rawRequest, baseURL string, val
 func (r *requestGenerator) fillRequest(req *http.Request, values map[string]interface{}) *http.Request {
 	// Set the header values requested
 	for header, value := range r.request.Headers {
-		req.Header[header] = []string{Replace(value, values)}
+		req.Header[header] = []string{replace(value, values)}
 		if header == "Host" {
-			req.Host = Replace(value, values)
+			req.Host = replace(value, values)
 		}
 	}
 
 	// In case of multiple threads the underlying connection should remain open to allow reuse
-	//if r.request.Threads <= 0 && req.Header.Get("Connection") == "" {
+	//if r.request.Threads <= 0 && req.header.Get("Connection") == "" {
 	//	req.Close = true
 	//}
 
 	// Check if the user requested a request body
 	if r.request.Body != "" {
-		body := Replace(r.request.Body, values)
+		body := replace(r.request.Body, values)
 		req.Body = ioutil.NopCloser(strings.NewReader(body))
 	}
 
@@ -237,9 +237,9 @@ func (r *requestGenerator) fillRequest(req *http.Request, values map[string]inte
 }
 
 //
-//func (r *requestGenerator) newRawRequest(req *http.Request,rawreq RawRequest,values map[string]interface{})*http.Request{
+//func (r *requestGenerator) newRawRequest(req *http.Request,rawreq rawRequest,values map[string]interface{})*http.Request{
 //	rawreq = ReplaceRawRequest(rawreq,values)
-//	req.Header = rawreq.Headers
+//	req.header = rawreq.headers
 //}
 
 // setHeader sets some headers only if the header wasn't supplied by the user

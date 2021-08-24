@@ -6,17 +6,17 @@ import (
 	"strings"
 )
 
-// Generator is the generator struct for generating payloads
-type Generator struct {
+// generator is the generator struct for generating payloads
+type generator struct {
 	payloads map[string][]string
 }
 
 // Type is type of attack
 type Type int
 
-// New creates a new generator structure for payload generation
-func New(payloads map[string]interface{}) (*Generator, error) {
-	generator := &Generator{}
+// New creates a New generator structure for payload generation
+func New(payloads map[string]interface{}) (*generator, error) {
+	generator := &generator{}
 
 	compiled, err := loadPayloads(payloads)
 	if err != nil {
@@ -27,22 +27,22 @@ func New(payloads map[string]interface{}) (*Generator, error) {
 	return generator, nil
 }
 
-// Iterator is a single instance of an iterator for a generator structure
-type Iterator struct {
+// iterator is a single instance of an iterator for a generator structure
+type iterator struct {
 	position    int
 	msbIterator int
 	total       int
 	payloads    []*payloadIterator
 }
 
-// NewIterator creates a new iterator for the payloads generator
-func (g *Generator) NewIterator() *Iterator {
+// NewIterator creates a New iterator for the payloads generator
+func (g *generator) NewIterator() *iterator {
 	var payloads []*payloadIterator
 
 	for name, values := range g.payloads {
 		payloads = append(payloads, &payloadIterator{name: name, values: values})
 	}
-	iterator := &Iterator{
+	iterator := &iterator{
 		payloads: payloads,
 	}
 	iterator.total = iterator.Total()
@@ -50,7 +50,7 @@ func (g *Generator) NewIterator() *Iterator {
 }
 
 // Reset resets the iterator back to its initial value
-func (i *Iterator) Reset() {
+func (i *iterator) Reset() {
 	i.position = 0
 	i.msbIterator = 0
 
@@ -60,12 +60,12 @@ func (i *Iterator) Reset() {
 }
 
 // Remaining returns the amount of requests left for the generator.
-func (i *Iterator) Remaining() int {
+func (i *iterator) Remaining() int {
 	return i.total - i.position
 }
 
 // Total returns the amount of input combinations available
-func (i *Iterator) Total() int {
+func (i *iterator) Total() int {
 	count := 0
 	for _, p := range i.payloads {
 		count += len(p.values)
@@ -74,12 +74,12 @@ func (i *Iterator) Total() int {
 }
 
 // Value returns the next value for an iterator
-func (i *Iterator) Value() (map[string]interface{}, bool) {
+func (i *iterator) Value() (map[string]interface{}, bool) {
 	return i.sniperValue()
 }
 
 // sniperValue returns a list of all payloads for the iterator
-func (i *Iterator) sniperValue() (map[string]interface{}, bool) {
+func (i *iterator) sniperValue() (map[string]interface{}, bool) {
 	values := make(map[string]interface{}, 1)
 
 	currentIndex := i.msbIterator

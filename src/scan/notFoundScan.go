@@ -7,7 +7,7 @@ package scan
 //	"strings"
 //)
 //
-//func NotFoundScan(target string, result utils.Result) utils.Result {
+//func NotFoundScan(target string, result utils.result) utils.result {
 //
 //	conn := utils.HttpConn(Delay+2)
 //	resp, err := conn.Get(target+"/fnotadjnq")

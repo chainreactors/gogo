@@ -79,7 +79,7 @@ func jsonFile(result *utils.Result) string {
 
 }
 
-//func HtmlOutput(result *utils.Result) (s string) {
+//func HtmlOutput(result *utils.result) (s string) {
 //	if strings.HasPrefix(result.Protocol, "http") {
 //		s = fmt.Sprintf("[+] <a>%s://%s:%s</a>\t%s\t%s\t%s\t%s\t[%s] %s", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, result.Framework, result.Host, result.HttpStat, result.Title)
 //	} else {

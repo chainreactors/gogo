@@ -6,8 +6,8 @@ import (
 	"strings"
 )
 
-// MergeMaps merges two maps into a new map
-func MergeMaps(m1, m2 map[string]interface{}) map[string]interface{} {
+// mergeMaps merges two maps into a New map
+func mergeMaps(m1, m2 map[string]interface{}) map[string]interface{} {
 	m := make(map[string]interface{}, len(m1)+len(m2))
 	for k, v := range m1 {
 		m[k] = v
@@ -19,47 +19,47 @@ func MergeMaps(m1, m2 map[string]interface{}) map[string]interface{} {
 }
 
 const (
-	MarkerGeneral          = "§"
-	MarkerParenthesisOpen  = "{{"
-	MarkerParenthesisClose = "}}"
+	markerGeneral          = "§"
+	markerParenthesisOpen  = "{{"
+	markerParenthesisClose = "}}"
 )
 
-// Replace replaces placeholders in template with values on the fly.
-func Replace(template string, values map[string]interface{}) string {
+// replace replaces placeholders in template with values on the fly.
+func replace(template string, values map[string]interface{}) string {
 	var replacerItems []string
 
 	builder := &strings.Builder{}
 	for key, val := range values {
-		builder.WriteString(MarkerParenthesisOpen)
+		builder.WriteString(markerParenthesisOpen)
 		builder.WriteString(key)
-		builder.WriteString(MarkerParenthesisClose)
+		builder.WriteString(markerParenthesisClose)
 		replacerItems = append(replacerItems, builder.String())
 		builder.Reset()
-		replacerItems = append(replacerItems, ToString(val))
+		replacerItems = append(replacerItems, toString(val))
 
-		builder.WriteString(MarkerGeneral)
+		builder.WriteString(markerGeneral)
 		builder.WriteString(key)
-		builder.WriteString(MarkerGeneral)
+		builder.WriteString(markerGeneral)
 		replacerItems = append(replacerItems, builder.String())
 		builder.Reset()
-		replacerItems = append(replacerItems, ToString(val))
+		replacerItems = append(replacerItems, toString(val))
 	}
 	replacer := strings.NewReplacer(replacerItems...)
 	final := replacer.Replace(template)
 	return final
 }
 
-func ReplaceRawRequest(rawrequest RawRequest, values map[string]interface{}) RawRequest {
-	rawrequest.Data = Replace(rawrequest.Data, values)
-	rawrequest.FullURL = Replace(rawrequest.FullURL, values)
-	for k, v := range rawrequest.Headers {
-		rawrequest.Headers[k] = Replace(v, values)
-	}
-	return rawrequest
-}
+//func ReplaceRawRequest(rawrequest rawRequest, values map[string]interface{}) rawRequest {
+//	rawrequest.Data = replace(rawrequest.Data, values)
+//	rawrequest.FullURL = replace(rawrequest.FullURL, values)
+//	for k, v := range rawrequest.Headers {
+//		rawrequest.Headers[k] = replace(v, values)
+//	}
+//	return rawrequest
+//}
 
-// ToString converts an interface to string in a quick way
-func ToString(data interface{}) string {
+// toString converts an interface to string in a quick way
+func toString(data interface{}) string {
 	switch s := data.(type) {
 	case nil:
 		return ""

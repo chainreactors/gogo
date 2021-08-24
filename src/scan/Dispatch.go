@@ -58,6 +58,9 @@ func Dispatch(result *utils.Result) {
 			}
 		}
 
+		if result.Framework != "" {
+			Nuclei(result.GetURL(), result)
+		}
 		// 如果-e参数为true,则进行漏洞探测
 		if Exploit {
 			ExploitDispatch(result)
