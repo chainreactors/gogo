@@ -1,12 +1,14 @@
 package nuclei
 
 import (
+	"io/ioutil"
 	"net/http"
 	"strings"
 )
 
 type Request struct {
 	// Operators for the current request go here.
+	Operators `yaml:",inline"`
 	// Path contains the path/s for the request
 	Path []string `json:"path"`
 	// Raw contains raw requests
@@ -45,9 +47,15 @@ type Request struct {
 	// Currently only works with sequential http requests.
 	ReqCondition bool `json:"req-condition"`
 
-	generator     *Generator // optional, only enabled when using payloads
-	httpClient    *http.Client
-	totalRequests int
+	//Matchers []*Matcher `json:"matchers,omitempty"`
+	//MatchersCondition string `json:"matchers-condition,omitempty"`
+	//matchersCondition ConditionType
+
+	generator         *Generator // optional, only enabled when using payloads
+	httpClient        *http.Client
+	httpresp          *http.Response
+	CompiledOperators *Operators
+	totalRequests     int
 }
 
 //var (
@@ -82,13 +90,13 @@ func (r *Request) Compile() error {
 			}
 		}
 	}
-	//if len(r.Matchers) > 0 || len(r.Extractors) > 0 {
-	//	compiled := &r.Operators
-	//	if compileErr := compiled.Compile(); compileErr != nil {
-	//		return errors.Wrap(compileErr, "could not compile operators")
-	//	}
-	//	r.CompiledOperators = compiled
-	//}
+	if len(r.Matchers) > 0 { // todo extractor
+		compiled := &r.Operators
+		if compileErr := compiled.compile(); compileErr != nil {
+			return compileErr
+		}
+		r.CompiledOperators = compiled
+	}
 
 	if len(r.Payloads) > 0 {
 		if r.AttackType == "" {
@@ -108,7 +116,12 @@ func (r *Request) Compile() error {
 //
 //}
 
-func (r *Request) Execute(url string) {
+func (r *Request) Execute(url string) (bool, error) {
+	var err error
+	err = r.Compile()
+	if err != nil {
+		print(err.Error())
+	}
 	generator := r.newGenerator()
 	dynamicValues := make(map[string]interface{})
 	for {
@@ -116,6 +129,96 @@ func (r *Request) Execute(url string) {
 		if err != nil {
 			break
 		}
-		println(req)
+		resp, err := r.httpClient.Do(req.request)
+		if err != nil {
+			break
+		}
+		data := respToMap(resp, req.request)
+		res, _ := r.CompiledOperators.Execute(data, r.Match)
+		if res.Matched {
+			return res.Matched, err
+		}
+
+		//for _,matcher := range r.Matchers{
+		//	res := r.Match(data,matcher)
+		//	println(res)
+		//}
+
+		//matcherCondition := r.matchersCondition
+		//var matches bool
+		//println(req)
 	}
+	return false, err
+}
+
+// Match matches a generic data response again a given matcher
+func (r *Request) Match(data map[string]interface{}, matcher *Matcher) bool {
+	item, ok := getMatchPart(matcher.Part, data)
+	if !ok {
+		return false
+	}
+
+	switch matcher.GetType() {
+	case StatusMatcher:
+		statusCode, ok := data["status_code"]
+		if !ok {
+			return false
+		}
+		status, ok := statusCode.(int)
+		if !ok {
+			return false
+		}
+		return matcher.Result(matcher.MatchStatusCode(status))
+	case SizeMatcher:
+		return matcher.Result(matcher.MatchSize(len(item)))
+	case WordsMatcher:
+		return matcher.Result(matcher.MatchWords(item))
+	case RegexMatcher:
+		return matcher.Result(matcher.MatchRegex(item))
+	case BinaryMatcher:
+		return matcher.Result(matcher.MatchBinary(item))
+	}
+	return false
+}
+
+// getMatchPart returns the match part honoring "all" matchers + others.
+func getMatchPart(part string, data map[string]interface{}) (string, bool) {
+	if part == "header" {
+		part = "all_headers"
+	}
+	var itemStr string
+
+	if part == "all" {
+		builder := &strings.Builder{}
+		builder.WriteString(ToString(data["body"]))
+		builder.WriteString(ToString(data["all_headers"]))
+		itemStr = builder.String()
+	} else {
+		item, ok := data[part]
+		if !ok {
+			return "", false
+		}
+		itemStr = ToString(item)
+	}
+	return itemStr, true
+}
+
+func respToMap(resp *http.Response, req *http.Request) map[string]interface{} {
+	data := make(map[string]interface{})
+	data["host"] = req.Host
+	data["request"] = req
+	data["response"] = resp
+	data["content_length"] = resp.ContentLength
+	data["status_code"] = resp.StatusCode
+	bodybytes, _ := ioutil.ReadAll(resp.Body)
+	data["body"] = string(bodybytes)
+	data["url"] = req.URL
+	for _, cookie := range resp.Cookies() {
+		data[strings.ToLower(cookie.Name)] = cookie.Value
+	}
+	for k, v := range resp.Header {
+		k = strings.ToLower(strings.ReplaceAll(strings.TrimSpace(k), "-", "_"))
+		data[k] = strings.Join(v, " ")
+	}
+	return data
 }
