@@ -56,6 +56,7 @@ type Request struct {
 	httpresp          *http.Response
 	CompiledOperators *Operators
 	totalRequests     int
+	Result            *Result
 }
 
 //var (
@@ -90,7 +91,9 @@ func (r *Request) Compile() error {
 			}
 		}
 	}
-	if len(r.Matchers) > 0 { // todo extractor
+
+	// 修改: 只编译一次Matcher
+	if r.CompiledOperators == nil && len(r.Matchers) > 0 { // todo extractor
 		compiled := &r.Operators
 		if compileErr := compiled.compile(); compileErr != nil {
 			return compileErr
@@ -112,11 +115,7 @@ func (r *Request) Compile() error {
 	return nil
 }
 
-//func (r *Request) ExecuteRequest(url string,genrequest *generatedRequest){
-//
-//}
-
-func (r *Request) Execute(url string) (bool, error) {
+func (r *Request) ExecuteRequestWithResults(url string) (*Result, error) {
 	var err error
 	err = r.Compile()
 	if err != nil {
@@ -129,24 +128,24 @@ func (r *Request) Execute(url string) (bool, error) {
 		if err != nil {
 			break
 		}
-		resp, err := r.httpClient.Do(req.request)
-		if err != nil {
-			break
+		ok, err := r.executeRequest(req, dynamicValues)
+		if ok {
+			return r.Result, err
 		}
-		data := respToMap(resp, req.request)
-		res, _ := r.CompiledOperators.Execute(data, r.Match)
-		if res.Matched {
-			return res.Matched, err
-		}
+	}
+	return nil, err
+}
 
-		//for _,matcher := range r.Matchers{
-		//	res := r.Match(data,matcher)
-		//	println(res)
-		//}
-
-		//matcherCondition := r.matchersCondition
-		//var matches bool
-		//println(req)
+func (r *Request) executeRequest(request *generatedRequest, previous map[string]interface{}) (bool, error) {
+	resp, err := r.httpClient.Do(request.request)
+	if err != nil {
+		return false, err
+	}
+	data := respToMap(resp, request.request)
+	res, ok := r.CompiledOperators.Execute(data, r.Match)
+	if ok && res.Matched {
+		r.Result = res
+		return true, err
 	}
 	return false, err
 }
@@ -220,5 +219,6 @@ func respToMap(resp *http.Response, req *http.Request) map[string]interface{} {
 		k = strings.ToLower(strings.ReplaceAll(strings.TrimSpace(k), "-", "_"))
 		data[k] = strings.Join(v, " ")
 	}
+	resp.Body.Close()
 	return data
 }

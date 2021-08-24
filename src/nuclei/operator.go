@@ -93,7 +93,7 @@ func (r *Operators) Execute(data map[string]interface{}, match MatchFunc) (*Resu
 				//if len(result.DynamicValues) > 0 {
 				//	return result, true
 				//}
-				return result, true
+				return nil, false
 			}
 		} else {
 			// If the matcher has matched, and its an OR
@@ -116,8 +116,8 @@ func (r *Operators) Execute(data map[string]interface{}, match MatchFunc) (*Resu
 	}
 	// Write a final string of output if matcher type is
 	// AND or if we have extractors for the mechanism too.
-	//if len(result.Extracts) > 0 || len(result.OutputExtracts) > 0 || matches {
-	//	return result, true
-	//}
-	return result, true
+	if matches {
+		return result, true
+	}
+	return nil, true
 }
