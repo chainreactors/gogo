@@ -2,7 +2,6 @@ package core
 
 import (
 	"fmt"
-	"getitle/src/utils"
 	"math"
 	"net"
 	"strconv"
@@ -195,59 +194,15 @@ func tcGenerator(ch chan string, portlist []string) chan TargetConfig {
 }
 
 func generator(config Config) chan TargetConfig {
-	var ch chan string
 	targetChannel := make(chan TargetConfig)
-	var tc TargetConfig
 	go func() {
 		if config.JsonFile != "" {
-			var result utils.Result
-			for _, result = range config.Results {
-				tc.ip = result.Ip
-				tc.port = result.Port
-				tc.finger = result.Framework
-				targetChannel <- tc
-			}
+			genFromResults(config, &targetChannel)
 		} else {
-			if config.Spray {
-				// 端口喷洒
-				for _, port := range config.Portlist {
-					processLog("[*] Processing port:" + port)
-					if config.IPlist != nil {
-						for _, cidr := range config.IPlist {
-							ch = goDefaultIpGenerator(cidr)
-							for ip := range ch {
-								tc.ip = ip
-								tc.port = port
-								targetChannel <- tc
-							}
-							_ = FileHandle.Sync()
-						}
-					} else {
-						ch = goDefaultIpGenerator(config.IP)
-						for ip := range ch {
-							tc.ip = ip
-							tc.port = port
-							targetChannel <- tc
-						}
-					}
-				}
-			} else {
-				// 默认模式
-				// 批量处理
-				if config.IPlist != nil {
-					if config.IPlist != nil {
-						ch = goIPsGenerator(config)
-					}
-				} else {
-					ch = goDefaultIpGenerator(config.IP)
-				}
-				for ip := range ch {
-					for _, port := range config.Portlist {
-						tc.ip = ip
-						tc.port = port
-						targetChannel <- tc
-					}
-				}
+			if config.Spray { // 端口喷洒
+				genFromSpray(config, &targetChannel)
+			} else { // 默认模式 批量处理
+				genFromDefault(config, &targetChannel)
 			}
 		}
 		close(targetChannel)
@@ -255,13 +210,47 @@ func generator(config Config) chan TargetConfig {
 	return targetChannel
 }
 
-func checkIp(CIDR string) string {
-	fmtip := getIp(strings.Split(CIDR, "/")[0])
-	if fmtip != "" {
-		return fmtip + "/" + strings.Split(CIDR, "/")[1]
+func genFromResults(config Config, tcch *chan TargetConfig) {
+	for _, result := range config.Results {
+		*tcch <- TargetConfig{result.Ip, result.Port, result.Framework}
 	}
-	fmt.Println("[-] CIRD cannot find host:" + CIDR + "'s ip address")
-	return ""
+}
+
+func genFromSpray(config Config, tcch *chan TargetConfig) {
+	var ch chan string
+	for _, port := range config.Portlist {
+		processLog("[*] Processing port:" + port)
+		if config.IPlist != nil {
+			for _, cidr := range config.IPlist {
+				ch = goDefaultIpGenerator(cidr)
+				for ip := range ch {
+					*tcch <- TargetConfig{ip, port, ""}
+				}
+				_ = FileHandle.Sync()
+			}
+		} else {
+			ch = goDefaultIpGenerator(config.IP)
+			for ip := range ch {
+				*tcch <- TargetConfig{ip, port, ""}
+			}
+		}
+	}
+}
+
+func genFromDefault(config Config, tcch *chan TargetConfig) {
+	var ch chan string
+	if config.IPlist != nil {
+		if config.IPlist != nil {
+			ch = goIPsGenerator(config)
+		}
+	} else {
+		ch = goDefaultIpGenerator(config.IP)
+	}
+	for ip := range ch {
+		for _, port := range config.Portlist {
+			*tcch <- TargetConfig{ip, port, ""}
+		}
+	}
 }
 
 func isIPv4(ip string) bool {

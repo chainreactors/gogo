@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+	"getitle/src/scan"
 	"getitle/src/utils"
 	"net"
 	"os"
@@ -50,6 +51,7 @@ type Config struct {
 	Output        string
 	Filename      string
 	Spray         bool
+	NoSpray       bool
 }
 
 func Init(config Config) Config {
@@ -133,10 +135,11 @@ func checkCommand(config Config) {
 func printTaskInfo(config Config, taskname string) {
 	// 输出任务的基本信息
 
+	fmt.Printf("[*] Current goroutines: %d, Version Level: %d,Exploit Target: %s, Spray Scan: %t\n", config.Threads, scan.VersionLevel, scan.Exploit, config.Spray)
 	if config.JsonFile == "" {
 		processLog(fmt.Sprintf("[*] Start scan task %s ,total ports: %d , mod: %s", taskname, len(config.Portlist), config.Mod))
-		if len(config.Portlist) > 1000 {
-			fmt.Println("[*] too much ports , only show top 1000 ports: " + strings.Join(config.Portlist[:1000], ",") + "......")
+		if len(config.Portlist) > 500 {
+			fmt.Println("[*] too much ports , only show top 500 ports: " + strings.Join(config.Portlist[:500], ",") + "......")
 		} else {
 			fmt.Println("[*] ports: " + strings.Join(config.Portlist, ","))
 		}
@@ -150,7 +153,7 @@ func printTaskInfo(config Config, taskname string) {
 }
 
 func RunTask(config Config) {
-	var taskname string = ""
+	var taskname string
 	if config.Mod == "a" {
 		// 内网探测默认使用icmp扫描
 		taskname = "Reserved interIP addresses"
@@ -169,6 +172,10 @@ func RunTask(config Config) {
 		os.Exit(0)
 	}
 
+	// 如果指定端口超过100,则自动启用spray
+	if len(config.Portlist) > 100 && !config.NoSpray {
+		config.Spray = true
+	}
 	// 输出任务的基本信息
 	printTaskInfo(config, taskname)
 

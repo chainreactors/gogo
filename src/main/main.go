@@ -35,6 +35,8 @@ func main() {
 	flag.StringVar(&config.IpProbe, "ipp", "default", "")
 	flag.BoolVar(&config.Spray, "s", false, "")
 	flag.StringVar(&config.Filename, "f", "", "")
+	flag.BoolVar(&config.NoSpray, "ns", false, "")
+
 	//全局变量初始化
 	flag.StringVar(&core.Output, "o", "full", "")
 	flag.BoolVar(&core.Clean, "c", false, "")
@@ -43,12 +45,13 @@ func main() {
 	flag.IntVar(&scan.HttpsDelay, "D", 2, "")
 	flag.StringVar(&scan.Payloadstr, "payload", "", "")
 	flag.BoolVar(&core.Noscan, "no", false, "")
+
 	// 一些特殊参数初始化
 	key := flag.String("k", "", "")
 	version := flag.Bool("v", false, "")
 	version2 := flag.Bool("vv", false, "")
 	exploit := flag.Bool("e", false, "")
-	exploitConfig := flag.String("E", "off", "")
+	exploitConfig := flag.String("E", "none", "")
 	printType := flag.String("P", "no", "")
 	formatoutput := flag.String("F", "", "")
 	flag.Parse()
@@ -80,12 +83,13 @@ func main() {
 	// 配置exploit
 	if *exploit {
 		scan.Exploit = "auto"
-	} else if !*exploit && *exploitConfig != "off" {
+	} else if !*exploit && *exploitConfig != "none" {
+		scan.Exploit = *exploitConfig
+	} else {
 		scan.Exploit = *exploitConfig
 	}
 
 	config = core.Init(config)
-	fmt.Printf("[*] Current goroutines: %d, Version Level %d,Exploit scan %s \n", config.Threads, scan.VersionLevel, scan.Exploit)
 	core.RunTask(config)
 
 	//关闭文件写入管道
