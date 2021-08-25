@@ -59,7 +59,7 @@ func Dispatch(result *utils.Result) {
 		}
 
 		// 如果-e参数为true,则进行漏洞探测
-		if Exploit != "off" {
+		if Exploit != "noneaa" {
 			ExploitDispatch(result)
 		}
 

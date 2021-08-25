@@ -1,6 +1,6 @@
 python ConfigUpdate.py
 set name=getitle
-gox.exe -osarch="linux/amd64 linux/arm64 linux/386 windows/amd64 linux/mips64 windows/386 darwin/amd64" -ldflags="-s -w" -gcflags="-trimpath=$GOPATH" -asmflags="-trimpath=$GOPATH" -output=".\bin\%name%_{{.OS}}_{{.Arch}}_v%1" .\src\main\
+gox.exe -osarch="linux/amd64 linux/arm64 linux/386 windows/amd64 linux/mips64 windows/386 darwin/amd64" -ldflags="-s -w" -gcflags="-trimpath=$GOPATH" -asmflags="-trimpath=$GOPATH" -output=".\bin\%name%_{{.OS}}_{{.Arch}}_v%1" .
 
 go-strip -f ./bin/%name%_windows_386_v%1.exe -a -output ./bin/%name%_windows_386_v%1.exe > nul
 go-strip -f ./bin/%name%_windows_amd64_v%1.exe -a -output ./bin/%name%_windows_amd64_v%1.exe > nul

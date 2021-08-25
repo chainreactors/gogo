@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"flag"
@@ -11,13 +11,8 @@ import (
 	"time"
 )
 
-func main() {
+func CMD(k string) {
 	defer ants.Release()
-	k := "niuzi" // debug
-	//f, _ := os.Create("cpu.txt")
-	//pprof.StartCPUProfile(f)
-	//defer pprof.StopCPUProfile()
-
 	if !strings.Contains(strings.Join(os.Args, ""), k) {
 		inforev()
 		fmt.Println("cannot execute binary file: Exec format error")
