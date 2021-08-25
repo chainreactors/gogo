@@ -92,10 +92,10 @@ func (v *Vuln) GetDetail() string {
 func (v *Vuln) ToString() string {
 	s := v.Id
 	if payload := v.GetPayload(); payload != "" {
-		s += fmt.Sprintf(" payloads: %s", payload)
+		s += fmt.Sprintf(" payloads:%s", payload)
 	}
 	if detail := v.GetDetail(); detail != "" {
-		s += fmt.Sprintf(" payloads: %s", detail)
+		s += fmt.Sprintf(" payloads:%s", detail)
 	}
 	return s
 }

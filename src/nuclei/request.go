@@ -146,6 +146,7 @@ func (r *Request) executeRequest(request *generatedRequest, previous map[string]
 	data := respToMap(resp, request.request)
 	res, ok := r.CompiledOperators.Execute(data, r.Match)
 	if ok && res.Matched {
+		res.PayloadValues = request.meta
 		r.Result = res
 		return true, err
 	}

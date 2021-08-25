@@ -80,7 +80,7 @@ func ExploitDispatch(result *utils.Result) {
 	//if strings.Contains(result.Content, "-ERR wrong") {
 	//	RedisScan(target, result)
 	//}
-	if result.Framework != "" && result.IsHttp() {
+	if (result.Framework != "" || Exploit != "auto") && result.IsHttp() {
 		Nuclei(result.GetURL(), result)
 	}
 
