@@ -49,7 +49,7 @@ func main() {
 	version2 := flag.Bool("vv", false, "")
 	exploit := flag.Bool("e", false, "")
 	exploitConfig := flag.String("E", "off", "")
-	printConfig := flag.String("P", "no", "")
+	printType := flag.String("P", "no", "")
 	formatoutput := flag.String("F", "", "")
 	flag.Parse()
 	// 密钥
@@ -59,16 +59,7 @@ func main() {
 	}
 
 	// 输出Port config
-	if *printConfig == "port" {
-		core.Printportconfig()
-		os.Exit(0)
-	} else if *printConfig == "nuclei" {
-		core.PrintNucleiPoc()
-		os.Exit(0)
-	} else if *printConfig != "no" {
-		fmt.Println("choice port|nuclei")
-		os.Exit(0)
-	}
+	printConfigs(*printType)
 
 	// 格式化
 	if *formatoutput != "" {
@@ -94,7 +85,7 @@ func main() {
 	}
 
 	config = core.Init(config)
-	fmt.Printf("[*] Current goroutines: %d, Version Level %d,Exploit scan %t \n", config.Threads, scan.VersionLevel, scan.Exploit)
+	fmt.Printf("[*] Current goroutines: %d, Version Level %d,Exploit scan %s \n", config.Threads, scan.VersionLevel, scan.Exploit)
 	core.RunTask(config)
 
 	//关闭文件写入管道
@@ -105,4 +96,17 @@ func main() {
 	fmt.Printf("\n[*] Alive sum: %d, Target sum : %d\n", scan.Alivesum, scan.Sum)
 	fmt.Println("[*] Totally run: " + time.Since(starttime).String())
 
+}
+
+func printConfigs(t string) {
+	if t == "port" {
+		core.Printportconfig()
+		os.Exit(0)
+	} else if t == "nuclei" {
+		core.PrintNucleiPoc()
+		os.Exit(0)
+	} else if t != "no" {
+		fmt.Println("choice port|nuclei")
+		os.Exit(0)
+	}
 }

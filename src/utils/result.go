@@ -53,6 +53,13 @@ func (result Result) IsHttp() bool {
 	return false
 }
 
+func (result Result) IsHttps() bool {
+	if strings.HasPrefix(result.Protocol, "https") {
+		return true
+	}
+	return false
+}
+
 //从错误中收集信息
 func (result *Result) errHandler() {
 
