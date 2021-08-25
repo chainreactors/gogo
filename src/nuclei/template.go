@@ -1,5 +1,7 @@
 package nuclei
 
+import "strings"
+
 type Template struct {
 	Id     string `json:"id"`
 	Finger string `json:"finger"`
@@ -12,4 +14,11 @@ type Template struct {
 		Tags      string `json:"tags"`
 	} `json:"info"`
 	Requests []Request `json:"requests"`
+}
+
+func (t *Template) GetTags() []string {
+	if t.Info.Tags != "" {
+		return strings.Split(t.Info.Tags, ",")
+	}
+	return []string{}
 }

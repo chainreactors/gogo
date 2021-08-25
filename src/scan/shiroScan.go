@@ -30,7 +30,7 @@ func shiroScan(result *utils.Result) {
 	}
 	deleteme = resp.Header.Get("Set-Cookie")
 	if isshiro && !strings.Contains(deleteme, "deleteMe") {
-		result.Vuln = "shiro 550"
+		result.AddVuln(utils.Vuln{Id: "shiro_550"})
 	}
 	return
 

@@ -53,12 +53,12 @@ func httpFingerMatch(result *utils.Result, finger utils.Finger) {
 			if res == "matched" {
 				//println("[*] " + res)
 				result.Framework = finger.Name
-				result.Vuln = finger.Vuln
+				result.AddVuln(utils.Vuln{Id: finger.Vuln})
 				return
 			} else if res != "" {
 				result.HttpStat = "tcp"
 				result.Framework = finger.Name + " " + strings.TrimSpace(res)
-				result.Vuln = finger.Vuln
+				result.AddVuln(utils.Vuln{Id: finger.Vuln})
 				//result.Title = res
 				return
 			}
@@ -204,12 +204,12 @@ func tcpFingerMatch(result *utils.Result, finger utils.Finger) {
 		if res == "matched" {
 			//println("[*] " + res)
 			result.Framework = finger.Name
-			result.Vuln = finger.Vuln
+			result.AddVuln(utils.Vuln{Id: finger.Vuln})
 			return
 		} else if res != "" {
 			result.HttpStat = "tcp"
 			result.Framework = finger.Name + " " + strings.TrimSpace(res)
-			result.Vuln = finger.Vuln
+			result.AddVuln(utils.Vuln{Id: finger.Vuln})
 			//result.Title = res
 			return
 		}

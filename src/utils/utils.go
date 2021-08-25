@@ -160,13 +160,12 @@ func Str2uintlist(s string) []uint {
 }
 
 func MaptoString(m map[string]interface{}) string {
-	if m == nil {
+	if m == nil || len(m) == 0 {
 		return ""
 	}
 	var s string
 	for k, v := range m {
-		s += fmt.Sprintf(" %s:%s", k, ToString(v))
-		s += ","
+		s += fmt.Sprintf(" %s:%s ", k, ToString(v))
 	}
 	return s
 	// todo fix bug

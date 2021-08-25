@@ -45,14 +45,14 @@ func output(result *utils.Result, outType string) string {
 
 func colorOutput(result *utils.Result) string {
 	s := fmt.Sprintf("[+] %s://%s:%s\t%s\t%s\t%s\t%s\t[%s] %s ", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, blue(result.Framework), result.Host, yellow(result.HttpStat), blue(result.Title))
-	s += red(vulnOutput(result.Vuln))
+	s += red(vulnOutput(result.Vulns))
 	s += "\n"
 	return s
 }
 
 func fullOutput(result *utils.Result) string {
 	s := fmt.Sprintf("[+] %s://%s:%s%s\t%s\t%s\t%s\t%s\t[%s] %s ", result.Protocol, result.Ip, result.Port, result.Uri, result.Midware, result.Language, result.Framework, result.Host, result.HttpStat, result.Title)
-	s += vulnOutput(result.Vuln)
+	s += vulnOutput(result.Vulns)
 	s += "\n"
 	return s
 }
@@ -95,12 +95,12 @@ func jsonFile(result *utils.Result) string {
 //
 //}
 
-func vulnOutput(vuln string) string {
-	if vuln != "" {
-		return fmt.Sprintf("[ Find Vuln: %s ]", vuln)
+func vulnOutput(vulns []utils.Vuln) string {
+	var s string
+	for _, vuln := range vulns {
+		s += fmt.Sprintf("[ Find Vuln: %s ] ", vuln.ToString())
 	}
-	return ""
-
+	return s
 }
 
 func FormatOutput(filename string, outputfile string) {
@@ -116,7 +116,7 @@ func FormatOutput(filename string, outputfile string) {
 			Midware:   result.Midware,
 			Language:  result.Language,
 			Framework: result.Framework,
-			Vuln:      result.Vuln,
+			Vuln:      vulnOutput(result.Vulns),
 			Protocol:  result.Protocol,
 		}
 		if pfs[result.Ip] == nil {
@@ -158,10 +158,10 @@ func FormatOutput(filename string, outputfile string) {
 				if Output == "c" {
 					// 颜色输出
 					s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s\t%s\t[%s] %s", p.Protocol, ip, pint, p.Midware, p.Language, blue(p.Framework), p.Host, yellow(p.Stat), blue(p.Title))
-					s += red(vulnOutput(p.Vuln))
+					s += red(p.Vuln)
 				} else {
 					s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s\t%s\t[%s] %s", p.Protocol, ip, pint, p.Midware, p.Language, p.Framework, p.Host, p.Stat, p.Title)
-					s += vulnOutput(p.Vuln)
+					s += p.Vuln
 				}
 				s += "\n"
 			}

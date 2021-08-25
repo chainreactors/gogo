@@ -6,19 +6,19 @@ import (
 
 //tamplate =
 func Nuclei(url string, result *utils.Result) {
-	if template, ok := utils.TemplateMap[result.Framework]; ok {
-		for _, request := range template.Requests {
-			res, err := request.ExecuteRequestWithResults(url)
-			if err != nil {
-				println(err.Error())
-			}
-			if res != nil && res.Matched {
-				result.Vuln = template.Id
-				result.Vuln_Payload = utils.MaptoString(res.PayloadValues)
-				result.Vuln_Detail = utils.MaptoString(res.DynamicValues)
-				break
+	if templates, ok := utils.TemplateMap[result.Framework]; ok {
+		for _, template := range templates { // 遍历所有poc
+			for _, request := range template.Requests { // 逐个执行requests,每个poc获取返回值后退出
+				res, err := request.ExecuteRequestWithResults(url)
+				if err != nil {
+					println(err.Error())
+				}
+				if res != nil && res.Matched {
+					vuln := utils.Vuln{template.Id, res.PayloadValues, res.DynamicValues}
+					result.AddVuln(vuln)
+					break
+				}
 			}
 		}
 	}
-
 }

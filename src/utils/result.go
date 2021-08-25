@@ -8,25 +8,23 @@ import (
 )
 
 type Result struct {
-	Ip           string         `json:"i"`  // ip
-	Port         string         `json:"p"`  // port
-	Uri          string         `json:"u"`  // uri
-	Os           string         `json:"o"`  // os
-	Host         string         `json:"h"`  // host
-	Title        string         `json:"t"`  // title
-	Midware      string         `json:"m"`  // midware
-	HttpStat     string         `json:"s"`  // http_stat
-	Language     string         `json:"l"`  // language
-	Framework    string         `json:"f"`  // framework
-	Vuln         string         `json:"v"`  // vuln
-	Vuln_Payload string         `json:"vp"` // payload
-	Vuln_Detail  string         `json:"vd"` // extrator info
-	Protocol     string         `json:"r"`  // protocol
-	Stat         string         `json:"-"`
-	TcpCon       *net.Conn      `json:"-"`
-	Httpresp     *http.Response `json:"-"`
-	Error        string         `json:"-"`
-	Content      string         `json:"-"`
+	Ip        string         `json:"i"` // ip
+	Port      string         `json:"p"` // port
+	Uri       string         `json:"u"` // uri
+	Os        string         `json:"o"` // os
+	Host      string         `json:"h"` // host
+	Title     string         `json:"t"` // title
+	Midware   string         `json:"m"` // midware
+	HttpStat  string         `json:"s"` // http_stat
+	Language  string         `json:"l"` // language
+	Framework string         `json:"f"` // framework
+	Protocol  string         `json:"r"` // protocol
+	Vulns     []Vuln         `json:"vs"`
+	Stat      string         `json:"-"`
+	TcpCon    *net.Conn      `json:"-"`
+	Httpresp  *http.Response `json:"-"`
+	Error     string         `json:"-"`
+	Content   string         `json:"-"`
 }
 
 func (result *Result) InfoFilter() {
@@ -42,6 +40,10 @@ func (result *Result) InfoFilter() {
 	if result.Content != "" {
 		result.errHandler()
 	}
+}
+
+func (result *Result) AddVuln(vuln Vuln) {
+	result.Vulns = append(result.Vulns, vuln)
 }
 
 //从错误中收集信息
@@ -60,4 +62,29 @@ func (result *Result) errHandler() {
 
 func (result Result) GetURL() string {
 	return fmt.Sprintf("%s://%s:%s", result.Protocol, result.Ip, result.Port)
+}
+
+type Vuln struct {
+	Id      string                 `json:"v"`
+	Payload map[string]interface{} `json:"vp"`
+	Detail  map[string]interface{} `json:"vd"`
+}
+
+func (v *Vuln) GetPayload() string {
+	return MaptoString(v.Payload)
+}
+
+func (v *Vuln) GetDetail() string {
+	return MaptoString(v.Detail)
+}
+
+func (v *Vuln) ToString() string {
+	s := v.Id
+	if payload := v.GetPayload(); payload != "" {
+		s += fmt.Sprintf(" payloads: %s", payload)
+	}
+	if detail := v.GetDetail(); detail != "" {
+		s += fmt.Sprintf(" payloads: %s", detail)
+	}
+	return s
 }

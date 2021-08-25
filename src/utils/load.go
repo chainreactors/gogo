@@ -15,17 +15,23 @@ var Compiled = make(map[string][]regexp.Regexp)
 var CommonCompiled = initregexp()
 var TemplateMap = loadTemplates()
 
-func loadTemplates() map[string]nuclei.Template {
+func loadTemplates() map[string][]nuclei.Template {
 	var templates []nuclei.Template
-	var templatemap = make(map[string]nuclei.Template)
+	var templatemap = make(map[string][]nuclei.Template)
 	err := json.Unmarshal([]byte(LoadConfig("nuclei")), &templates)
 	if err != nil {
 		fmt.Println("[-] nuclei config load FAIL!")
 		os.Exit(0)
 	}
 	for _, template := range templates {
+		// 以指纹归类
 		if template.Finger != "" {
-			templatemap[template.Finger] = template
+			templatemap[template.Finger] = append(templatemap[template.Finger], template)
+		}
+
+		// 以tag归类
+		for _, tag := range template.GetTags() {
+			templatemap[tag] = append(templatemap[tag], template)
 		}
 	}
 	return templatemap
