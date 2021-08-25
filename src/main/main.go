@@ -65,7 +65,7 @@ func main() {
 	} else if *printConfig == "nuclei" {
 		core.PrintNucleiPoc()
 		os.Exit(0)
-	} else {
+	} else if *printConfig != "no" {
 		fmt.Println("choice port|nuclei")
 		os.Exit(0)
 	}
