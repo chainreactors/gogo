@@ -99,14 +99,17 @@ func main() {
 }
 
 func printConfigs(t string) {
+	if t == "no" {
+		return
+	}
 	if t == "port" {
 		core.Printportconfig()
-		os.Exit(0)
 	} else if t == "nuclei" {
 		core.PrintNucleiPoc()
-		os.Exit(0)
-	} else if t != "no" {
-		fmt.Println("choice port|nuclei")
-		os.Exit(0)
+	} else if t == "inter" {
+		core.PrintInterConfig()
+	} else {
+		fmt.Println("choice port|nuclei|inter")
 	}
+	os.Exit(0)
 }

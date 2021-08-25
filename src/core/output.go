@@ -214,13 +214,24 @@ func Printportconfig() {
 }
 
 func PrintNucleiPoc() {
+	fmt.Println("Nuclei Pocs")
 	for k, v := range utils.TemplateMap {
-		fmt.Println(k)
+		fmt.Println(k + ":")
 		for _, t := range v {
 			fmt.Println("\t" + t.Info.Name)
 		}
+
 	}
 }
+
+func PrintInterConfig() {
+	fmt.Println("Auto internet smart scan config")
+	fmt.Println("CIDR\t\tMOD\tPortProbe\tIpProbe")
+	for k, v := range InterConfig {
+		fmt.Printf("%s\t\t%s\n", k, strings.Join(v, "\t"))
+	}
+}
+
 func red(s string) string {
 	return "\033[1;31m" + s + "\033[0m"
 }

@@ -72,9 +72,14 @@ func SmartMod(config Config) {
 	ipChannel := ipGenerator(config, &temp)
 
 	var tcChannel chan TargetConfig
-	processLog(fmt.Sprintf("[*] Smart probe ports: %s, Smart IP probe: %s", strings.Join(config.SmartPortList, ","), config.IpProbe))
-	tcChannel = tcGenerator(ipChannel, config.SmartPortList)
 
+	probeconfig := "[*] Smart probe ports:" + strings.Join(config.SmartPortList, ",") + ", "
+	if config.Mod == "ss" {
+		probeconfig += "Smart IP probe: " + config.IpProbe
+	}
+	processLog(probeconfig)
+
+	tcChannel = tcGenerator(ipChannel, config.SmartPortList)
 	scanPool, _ := ants.NewPoolWithFunc(config.Threads, func(i interface{}) {
 		tc := i.(TargetConfig)
 		smartScan(tc, &temp, config.Mod)

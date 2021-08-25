@@ -159,6 +159,14 @@ func Str2uintlist(s string) []uint {
 	return ipps
 }
 
+func UintSlice2str(i []uint) []string {
+	s := make([]string, len(i))
+	for k, v := range i {
+		s[k] = ToString(v)
+	}
+	return s
+}
+
 func MaptoString(m map[string]interface{}) string {
 	if m == nil || len(m) == 0 {
 		return ""

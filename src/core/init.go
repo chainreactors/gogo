@@ -24,6 +24,15 @@ var LogFileHandle *os.File
 var Clean bool
 var Noscan bool
 
+var InterConfig = map[string][]string{
+	"10.0.0.0/8":     {"ss", "icmp", "1"},
+	"172.16.0.0/12":  {"ss", "icmp", "1"},
+	"192.168.0.0/16": {"s", "80", "all"},
+	"100.100.0.0/16": {"s", "icmp", "all"},
+	"169.254.0.0/16": {"s", "icmp", "all"},
+	"168.254.0.0/16": {"s", "icmp", "all"},
+}
+
 type Config struct {
 	IP            string
 	IPlist        []string
@@ -167,26 +176,7 @@ func RunTask(config Config) {
 	case "default":
 		StraightMod(config)
 	case "a", "auto":
-		config.Mod = "ss"
-		config.IP = "10.0.0.0/8"
-		processLog("[*] Spraying : 10.0.0.0/8")
-		if config.SmartPort == "default" {
-			config.SmartPortList = []string{"icmp"}
-		}
-		SmartMod(config)
-
-		processLog("[*] Spraying : 172.16.0.0/12")
-		config.IP = "172.16.0.0/12"
-		SmartMod(config)
-
-		processLog("[*] Spraying : 192.168.0.0/16")
-		if config.SmartPort == "default" {
-			config.SmartPortList = []string{"80"}
-		}
-		config.IP = "192.168.0.0/16"
-		//config.Mod = "s"
-		SmartMod(config)
-
+		autoScan(config)
 	case "s", "f", "ss":
 		mask := getMask(config.IP)
 		if mask >= 24 {
@@ -286,4 +276,21 @@ func countip(ip string) int {
 		count += 2 << (31 - uint(c))
 	}
 	return count
+}
+
+func autoScan(config Config) {
+	for cidr, st := range InterConfig {
+		processLog("[*] Spraying : " + cidr)
+		SmartMod(createSmartTask(config, cidr, st))
+	}
+}
+func createSmartTask(config Config, cidr string, c []string) Config {
+	config.IP = cidr
+	config.SmartPortList = portHandler(c[1])
+	config.Mod = c[0]
+	if c[2] != "all" {
+		config.IpProbe = c[2]
+		config.IpProbeList = utils.Str2uintlist(c[2])
+	}
+	return config
 }
