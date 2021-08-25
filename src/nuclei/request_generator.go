@@ -12,7 +12,7 @@ import (
 type requestGenerator struct {
 	currentIndex    int
 	request         *Request
-	payloadIterator *iterator
+	payloadIterator *Iterator
 	rawRequest      *rawRequest
 }
 

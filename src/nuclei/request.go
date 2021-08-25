@@ -55,6 +55,7 @@ type Request struct {
 	httpClient        *http.Client
 	httpresp          *http.Response
 	CompiledOperators *operators
+	attackType        Type
 	totalRequests     int
 	Result            *Result
 }
@@ -102,11 +103,12 @@ func (r *Request) Compile() error {
 	}
 
 	if len(r.Payloads) > 0 {
-		if r.AttackType == "" {
-			r.AttackType = "sniper"
+		attackType := r.AttackType
+		if attackType == "" {
+			attackType = "sniper"
 		}
-
-		r.generator, err = New(r.Payloads)
+		r.attackType = StringToType[attackType]
+		r.generator, err = New(r.Payloads, r.attackType)
 		if err != nil {
 			return err
 		}
