@@ -154,7 +154,7 @@ func tcpFingerMatch(result *utils.Result, finger utils.Finger) {
 	// 某些规则需要主动发送一个数据包探测
 	if finger.SendData != "" && VersionLevel >= finger.Level {
 		var conn net.Conn
-		conn, err = utils.TcpSocketConn(utils.GetTarget(result), 2)
+		conn, err = utils.TcpSocketConn(result.GetTarget(), 2)
 		if err != nil {
 			return
 		}

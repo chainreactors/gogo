@@ -3,7 +3,6 @@ package utils
 import (
 	"bytes"
 	"crypto/tls"
-	"fmt"
 	"net"
 	"net/http"
 	"time"
@@ -43,10 +42,6 @@ func SocketSend(conn net.Conn, data []byte, max int) ([]byte, error) {
 		return bytes.Trim(buf, "\x00"), err
 	}
 	return bytes.Trim(buf, "\x00"), err
-}
-
-func GetTarget(result *Result) string {
-	return fmt.Sprintf("%s:%s", result.Ip, result.Port)
 }
 
 func HttpConn(delay int) http.Client {

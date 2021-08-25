@@ -43,13 +43,13 @@ func main() {
 	flag.IntVar(&scan.HttpsDelay, "D", 2, "")
 	flag.StringVar(&scan.Payloadstr, "payload", "", "")
 	flag.BoolVar(&core.Noscan, "no", false, "")
-	flag.BoolVar(&scan.Exploit, "e", false, "")
-
 	// 一些特殊参数初始化
 	key := flag.String("k", "", "")
 	version := flag.Bool("v", false, "")
 	version2 := flag.Bool("vv", false, "")
-	isPortConfig := flag.Bool("P", false, "")
+	exploit := flag.Bool("e", false, "")
+	exploitConfig := flag.String("E", "off", "")
+	printConfig := flag.String("P", "no", "")
 	formatoutput := flag.String("F", "", "")
 	flag.Parse()
 	// 密钥
@@ -57,11 +57,19 @@ func main() {
 		//rev()
 		os.Exit(0)
 	}
+
 	// 输出Port config
-	if *isPortConfig {
+	if *printConfig == "port" {
 		core.Printportconfig()
 		os.Exit(0)
+	} else if *printConfig == "nuclei" {
+		core.PrintNucleiPoc()
+		os.Exit(0)
+	} else {
+		fmt.Println("choice port|nuclei")
+		os.Exit(0)
 	}
+
 	// 格式化
 	if *formatoutput != "" {
 		core.FormatOutput(*formatoutput, config.Filename)
@@ -78,6 +86,13 @@ func main() {
 	} else {
 		scan.VersionLevel = 0
 	}
+	// 配置exploit
+	if *exploit {
+		scan.Exploit = "auto"
+	} else if !*exploit && *exploitConfig != "off" {
+		scan.Exploit = *exploitConfig
+	}
+
 	config = core.Init(config)
 	fmt.Printf("[*] Current goroutines: %d, Version Level %d,Exploit scan %t \n", config.Threads, scan.VersionLevel, scan.Exploit)
 	core.RunTask(config)

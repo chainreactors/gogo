@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"getitle/src/utils"
 	"sort"
+	"strings"
 )
 
 var first = true
@@ -199,6 +200,26 @@ func Banner() {
 	//		"\n     smart mod example: ./main -ip 192.168.1.1/8 -p top2 -m s",
 	//)
 
+}
+
+func Printportconfig() {
+	fmt.Println("当前已有端口配置: (根据端口类型分类)")
+	for k, v := range utils.Namemap {
+		fmt.Println("	", k, ": ", strings.Join(v, ","))
+	}
+	fmt.Println("当前已有端口配置: (根据服务分类)")
+	for k, v := range utils.Typemap {
+		fmt.Println("	", k, ": ", strings.Join(v, ","))
+	}
+}
+
+func PrintNucleiPoc() {
+	for k, v := range utils.TemplateMap {
+		fmt.Println(k)
+		for _, t := range v {
+			fmt.Println("\t" + t.Info.Name)
+		}
+	}
 }
 func red(s string) string {
 	return "\033[1;31m" + s + "\033[0m"

@@ -1,7 +1,6 @@
 package core
 
 import (
-	"fmt"
 	"getitle/src/utils"
 	"strings"
 )
@@ -37,16 +36,5 @@ func choiceports(portname string) []string {
 		return ports
 	} else {
 		return []string{portname}
-	}
-}
-
-func Printportconfig() {
-	fmt.Println("当前已有端口配置: (根据端口类型分类)")
-	for k, v := range utils.Namemap {
-		fmt.Println("	", k, ": ", strings.Join(v, ","))
-	}
-	fmt.Println("当前已有端口配置: (根据服务分类)")
-	for k, v := range utils.Typemap {
-		fmt.Println("	", k, ": ", strings.Join(v, ","))
 	}
 }

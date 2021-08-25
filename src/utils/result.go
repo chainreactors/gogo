@@ -28,7 +28,7 @@ type Result struct {
 }
 
 func (result *Result) InfoFilter() {
-	if strings.HasPrefix(result.Protocol, "http") {
+	if result.IsHttp() {
 		result.Title = getTitle(result.Content)
 		result.Language = getLanguage(result.Httpresp, result.Content)
 		result.Midware = getMidware(result.Httpresp, result.Content)
@@ -46,6 +46,13 @@ func (result *Result) AddVuln(vuln Vuln) {
 	result.Vulns = append(result.Vulns, vuln)
 }
 
+func (result Result) IsHttp() bool {
+	if strings.HasPrefix(result.Protocol, "http") {
+		return true
+	}
+	return false
+}
+
 //从错误中收集信息
 func (result *Result) errHandler() {
 
@@ -60,8 +67,12 @@ func (result *Result) errHandler() {
 	}
 }
 
-func (result Result) GetURL() string {
+func (result *Result) GetURL() string {
 	return fmt.Sprintf("%s://%s:%s", result.Protocol, result.Ip, result.Port)
+}
+
+func (result *Result) GetTarget() string {
+	return fmt.Sprintf("%s:%s", result.Ip, result.Port)
 }
 
 type Vuln struct {

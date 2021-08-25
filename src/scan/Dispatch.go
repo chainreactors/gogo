@@ -6,14 +6,14 @@ import (
 )
 
 var Alivesum, Sum int
-var Exploit bool
+var Exploit string
 var VersionLevel int
 var Delay int
 var HttpsDelay int
 var Payloadstr string
 
 func Dispatch(result *utils.Result) {
-	target := utils.GetTarget(result)
+	target := result.GetTarget()
 	Sum++
 	//println(result.Ip)
 	if result.Port == "137" {
@@ -44,7 +44,7 @@ func Dispatch(result *utils.Result) {
 		result.InfoFilter()
 
 		// 指定payload扫描
-		if strings.HasPrefix(result.Protocol, "http") && Payloadstr != "" {
+		if result.IsHttp() && Payloadstr != "" {
 			payloadScan(result)
 			return
 		}
@@ -58,11 +58,8 @@ func Dispatch(result *utils.Result) {
 			}
 		}
 
-		if result.Framework != "" {
-			Nuclei(result.GetURL(), result)
-		}
 		// 如果-e参数为true,则进行漏洞探测
-		if Exploit {
+		if Exploit != "off" {
 			ExploitDispatch(result)
 		}
 
@@ -79,11 +76,18 @@ func Dispatch(result *utils.Result) {
 
 func ExploitDispatch(result *utils.Result) {
 	//
-	target := utils.GetTarget(result)
+	target := result.GetTarget()
 	//if strings.Contains(result.Content, "-ERR wrong") {
 	//	RedisScan(target, result)
 	//}
-	if strings.HasPrefix(result.Protocol, "http") {
+	if result.Framework != "" && result.IsHttp() {
+		Nuclei(result.GetURL(), result)
+	}
+
+	if Exploit != "auto" { // 如果exploit值不为auto,则不进行shiro和ms17010扫描
+		return
+	}
+	if result.IsHttp() {
 		shiroScan(result)
 	}
 	if result.Port == "445" {
