@@ -16,10 +16,13 @@ func Dispatch(result *utils.Result) {
 	target := result.GetTarget()
 	Sum++
 	//println(result.Ip)
-	if result.Port == "137" {
+	if result.Port == "137" || result.Port == "nbt" {
 		nbtScan(target, result)
 		return
-	} else if result.Port == "135" {
+	} else if result.Port == "135" || result.Port == "wmi" {
+		wmiScan(target, result)
+		return
+	} else if result.Port == "oxid" {
 		oxidScan(target, result)
 		return
 	} else if result.Port == "icmp" {
@@ -27,12 +30,12 @@ func Dispatch(result *utils.Result) {
 		return
 	} else if result.Port == "snmp" {
 		snmpScan(result.Ip, result)
-		if Exploit == "auto" || Exploit == "smb" || Exploit == "ms17010" {
-			ms17010Scan(target, result)
-		}
 		return
 	} else if result.Port == "445" {
 		smbScan(target, result)
+		if Exploit == "auto" || Exploit == "smb" || Exploit == "ms17010" {
+			ms17010Scan(target, result)
+		}
 		return
 	} else {
 		socketHttp(target, result)

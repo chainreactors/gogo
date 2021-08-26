@@ -148,11 +148,6 @@ func smb1Scan(target string) ([]byte, string, string, error) {
 	gss_native := r2[47:]
 	off_ntlm := bytes.Index(gss_native, []byte("NTLMSSP"))
 
-	//fmt.Println(off_ntlm)
-	//fmt.Printf("GSS-NATIVE: %x\n", gss[off_ntlm:])
-	//
-	//fmt.Printf("NTLM: %x\n", gss[off_ntlm:blob_length])
-	//fmt.Printf("native: %x\n", gss[int(blob_length):blob_count])
 	native := gss_native[int(blob_length):blob_count]
 	ss := strings.Split(string(native), "\x00\x00")
 	//fmt.Println(ss)
@@ -161,13 +156,6 @@ func smb1Scan(target string) ([]byte, string, string, error) {
 	NativeOS := TrimName(ss[0])
 	NativeLM := TrimName(ss[1])
 	return bs, NativeOS, NativeLM, err
-
-	//type2 := ntlmssp.ChallengeMsg{}
-	//tinfo := "\n" + type2.String(bs)
-	//fmt.Println(tinfo)
-	//fmt.Println(NativeOS, NativeLM)
-	//tinfo += fmt.Sprintf("NativeOS: %s\nNativeLM: %s\n%s", NativeOS, NativeLM, strings.Repeat("<", 50))
-	//result.Title = tinfo
 }
 
 func smb2Scan(target string) ([]byte, error) {
