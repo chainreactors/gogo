@@ -11,7 +11,9 @@ import (
 	"sync"
 )
 
-type TargetConfig struct {
+var Alivesum int
+
+type targetConfig struct {
 	ip     string
 	port   string
 	finger string
@@ -23,7 +25,7 @@ func StraightMod(config Config) {
 	targetChannel := generator(config)
 
 	scanPool, _ := ants.NewPoolWithFunc(config.Threads, func(i interface{}) {
-		defaultScan(i.(TargetConfig))
+		defaultScan(i.(targetConfig))
 		wgs.Done()
 	})
 	defer scanPool.Release()
@@ -37,7 +39,7 @@ func StraightMod(config Config) {
 
 }
 
-func defaultScan(tc TargetConfig) {
+func defaultScan(tc targetConfig) {
 	//fmt.Println(ip)
 	var result = new(utils.Result)
 	result.Ip = tc.ip
@@ -45,7 +47,8 @@ func defaultScan(tc TargetConfig) {
 	scan.Dispatch(result)
 	//res := scan.SystemHttp(ip)
 
-	if result.Stat != "" {
+	if result.Stat {
+		Alivesum++
 		if !Clean {
 			fmt.Print(output(result, Output))
 		}
@@ -71,7 +74,7 @@ func SmartMod(config Config) {
 	//var ipChannel chan string
 	ipChannel := ipGenerator(config, &temp)
 
-	var tcChannel chan TargetConfig
+	var tcChannel chan targetConfig
 
 	probeconfig := "[*] Smart probe ports:" + strings.Join(config.SmartPortList, ",") + ", "
 	if config.Mod == "ss" {
@@ -81,7 +84,7 @@ func SmartMod(config Config) {
 
 	tcChannel = tcGenerator(ipChannel, config.SmartPortList)
 	scanPool, _ := ants.NewPoolWithFunc(config.Threads, func(i interface{}) {
-		tc := i.(TargetConfig)
+		tc := i.(targetConfig)
 		smartScan(tc, &temp, config.Mod)
 		wg.Done()
 	})
@@ -160,7 +163,7 @@ func b_alived(ip string, temp *sync.Map) {
 	}
 }
 
-func smartScan(tc TargetConfig, temp *sync.Map, mod string) {
+func smartScan(tc targetConfig, temp *sync.Map, mod string) {
 	var result = new(utils.Result)
 	result.Ip = tc.ip
 	result.Port = tc.port
@@ -168,7 +171,7 @@ func smartScan(tc TargetConfig, temp *sync.Map, mod string) {
 
 	scan.Dispatch(result)
 
-	if result.Stat == "OPEN" {
+	if result.Stat {
 		if mod == "ss" {
 			b_alived(result.Ip, temp)
 		} else {

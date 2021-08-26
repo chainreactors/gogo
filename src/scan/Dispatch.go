@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-var Alivesum, Sum int
+var Sum int
 var Exploit string
 var VersionLevel int
 var Delay int
@@ -46,8 +46,7 @@ func Dispatch(result *utils.Result) {
 		return
 	}
 
-	if result.Stat == "OPEN" {
-		Alivesum++
+	if result.Stat {
 
 		//被动收集基本信息
 		result.InfoFilter()

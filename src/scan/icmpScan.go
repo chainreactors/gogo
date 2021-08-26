@@ -53,7 +53,7 @@ func icmpScan(result *utils.Result) {
 		//result.Error = err.Error()
 		return
 	} else {
-		result.Stat = "OPEN"
+		result.Stat = true
 		result.Protocol = "icmp"
 		result.HttpStat = "icmp"
 	}

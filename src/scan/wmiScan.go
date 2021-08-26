@@ -14,7 +14,7 @@ func wmiScan(result *utils.Result) {
 	if err != nil {
 		return
 	}
-	result.Stat = "OPEN"
+	result.Stat = true
 	ret, err := utils.SocketSend(conn, payload, 4096)
 	if err != nil {
 		return

@@ -92,7 +92,7 @@ func CMD(k string) {
 	close(core.LogDetach)
 
 	time.Sleep(time.Microsecond * 500)
-	fmt.Printf("\n[*] Alive sum: %d, Target sum : %d\n", scan.Alivesum, scan.Sum)
+	fmt.Printf("\n[*] Alive sum: %d, Target sum : %d\n", core.Alivesum, scan.Sum)
 	fmt.Println("[*] Totally run: " + time.Since(starttime).String())
 
 }

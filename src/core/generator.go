@@ -177,9 +177,9 @@ func ipGenerator(config Config, temp *sync.Map) chan string {
 	return ch
 }
 
-func tcGenerator(ch chan string, portlist []string) chan TargetConfig {
-	targetChannel := make(chan TargetConfig)
-	var tc TargetConfig
+func tcGenerator(ch chan string, portlist []string) chan targetConfig {
+	targetChannel := make(chan targetConfig)
+	var tc targetConfig
 	go func() {
 		for ip := range ch {
 			for _, port := range portlist {
@@ -193,8 +193,8 @@ func tcGenerator(ch chan string, portlist []string) chan TargetConfig {
 	return targetChannel
 }
 
-func generator(config Config) chan TargetConfig {
-	targetChannel := make(chan TargetConfig)
+func generator(config Config) chan targetConfig {
+	targetChannel := make(chan targetConfig)
 	go func() {
 		if config.JsonFile != "" {
 			genFromResults(config, &targetChannel)
@@ -210,13 +210,13 @@ func generator(config Config) chan TargetConfig {
 	return targetChannel
 }
 
-func genFromResults(config Config, tcch *chan TargetConfig) {
+func genFromResults(config Config, tcch *chan targetConfig) {
 	for _, result := range config.Results {
-		*tcch <- TargetConfig{result.Ip, result.Port, result.Framework}
+		*tcch <- targetConfig{result.Ip, result.Port, result.Framework}
 	}
 }
 
-func genFromSpray(config Config, tcch *chan TargetConfig) {
+func genFromSpray(config Config, tcch *chan targetConfig) {
 	var ch chan string
 	for _, port := range config.Portlist {
 		processLog("[*] Processing port:" + port)
@@ -224,20 +224,20 @@ func genFromSpray(config Config, tcch *chan TargetConfig) {
 			for _, cidr := range config.IPlist {
 				ch = goDefaultIpGenerator(cidr)
 				for ip := range ch {
-					*tcch <- TargetConfig{ip, port, ""}
+					*tcch <- targetConfig{ip, port, ""}
 				}
 				_ = FileHandle.Sync()
 			}
 		} else {
 			ch = goDefaultIpGenerator(config.IP)
 			for ip := range ch {
-				*tcch <- TargetConfig{ip, port, ""}
+				*tcch <- targetConfig{ip, port, ""}
 			}
 		}
 	}
 }
 
-func genFromDefault(config Config, tcch *chan TargetConfig) {
+func genFromDefault(config Config, tcch *chan targetConfig) {
 	var ch chan string
 	if config.IPlist != nil {
 		if config.IPlist != nil {
@@ -248,7 +248,7 @@ func genFromDefault(config Config, tcch *chan TargetConfig) {
 	}
 	for ip := range ch {
 		for _, port := range config.Portlist {
-			*tcch <- TargetConfig{ip, port, ""}
+			*tcch <- targetConfig{ip, port, ""}
 		}
 	}
 }

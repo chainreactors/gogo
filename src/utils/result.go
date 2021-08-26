@@ -20,7 +20,7 @@ type Result struct {
 	Framework string         `json:"f"` // framework
 	Protocol  string         `json:"r"` // protocol
 	Vulns     []Vuln         `json:"vs"`
-	Stat      string         `json:"-"`
+	Stat      bool           `json:"-"`
 	TcpCon    *net.Conn      `json:"-"`
 	Httpresp  *http.Response `json:"-"`
 	Error     string         `json:"-"`
