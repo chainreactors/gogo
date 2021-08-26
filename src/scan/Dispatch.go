@@ -27,6 +27,12 @@ func Dispatch(result *utils.Result) {
 		return
 	} else if result.Port == "snmp" {
 		snmpScan(result.Ip, result)
+		if Exploit == "auto" || Exploit == "smb" || Exploit == "ms17010" {
+			ms17010Scan(target, result)
+		}
+		return
+	} else if result.Port == "445" {
+		smbScan(target, result)
 		return
 	} else {
 		socketHttp(target, result)
@@ -59,7 +65,7 @@ func Dispatch(result *utils.Result) {
 		}
 
 		// 如果-e参数为true,则进行漏洞探测
-		if Exploit != "noneaa" {
+		if Exploit != "none" {
 			ExploitDispatch(result)
 		}
 
@@ -75,8 +81,6 @@ func Dispatch(result *utils.Result) {
 }
 
 func ExploitDispatch(result *utils.Result) {
-	//
-	target := result.GetTarget()
 	//if strings.Contains(result.Content, "-ERR wrong") {
 	//	RedisScan(target, result)
 	//}
@@ -90,9 +94,7 @@ func ExploitDispatch(result *utils.Result) {
 	if result.IsHttp() {
 		shiroScan(result)
 	}
-	if result.Port == "445" {
-		ms17010Scan(target, result)
-	}
+
 	//if result.Port == "11211" {
 	//	MemcacheScan(target, result)
 	//}

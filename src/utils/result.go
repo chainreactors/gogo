@@ -82,6 +82,13 @@ func (result *Result) GetTarget() string {
 	return fmt.Sprintf("%s:%s", result.Ip, result.Port)
 }
 
+func (result *Result) AddNTLMInfo(m map[string]string) {
+	result.Title = m["MsvAvNbDomainName"] + "/" + m["MsvAvNbComputerName"]
+	result.Host = m["MsvAvDnsDomainName"] + "/" + m["MsvAvDnsComputerName"]
+	result.Framework = m["Version"]
+
+}
+
 type Vuln struct {
 	Id      string                 `json:"v"`
 	Payload map[string]interface{} `json:"vp"`

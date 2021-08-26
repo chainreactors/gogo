@@ -36,12 +36,12 @@ func SocketSend(conn net.Conn, data []byte, max int) ([]byte, error) {
 	}
 
 	buf := make([]byte, max)
-	time.Sleep(time.Duration(100) * time.Millisecond)
+	time.Sleep(time.Duration(200) * time.Millisecond)
 	_, err = conn.Read(buf)
 	if err != nil {
-		return bytes.Trim(buf, "\x00"), err
+		return bytes.TrimRight(buf, "\x00"), err
 	}
-	return bytes.Trim(buf, "\x00"), err
+	return bytes.TrimRight(buf, "\x00"), err
 }
 
 func HttpConn(delay int) http.Client {
