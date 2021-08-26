@@ -9,9 +9,9 @@ var sendData = "\x05\x00\x0b\x03\x10\x00\x00\x00\x48\x00\x00\x00\x01\x00\x00\x00
 var sendData2 = "\x05\x00\x00\x03\x10\x00\x00\x00\x18\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x05\x00"
 
 // -default
-func oxidScan(target string, result *utils.Result) {
-
-	result.Protocol = "tcp"
+func oxidScan(result *utils.Result) {
+	result.Port = "135"
+	target := result.GetTarget()
 	conn, err := utils.TcpSocketConn(target, Delay)
 	if err != nil {
 
@@ -21,6 +21,7 @@ func oxidScan(target string, result *utils.Result) {
 	}
 	defer conn.Close()
 	result.Stat = "OPEN"
+
 	recv, _ := utils.SocketSend(conn, []byte(sendData), 4096)
 	recv, _ = utils.SocketSend(conn, []byte(sendData2), 4096)
 	recvStr := string(recv)

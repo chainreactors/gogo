@@ -17,24 +17,24 @@ func Dispatch(result *utils.Result) {
 	Sum++
 	//println(result.Ip)
 	if result.Port == "137" || result.Port == "nbt" {
-		nbtScan(target, result)
+		nbtScan(result)
 		return
 	} else if result.Port == "135" || result.Port == "wmi" {
-		wmiScan(target, result)
+		wmiScan(result)
 		return
 	} else if result.Port == "oxid" {
-		oxidScan(target, result)
+		oxidScan(result)
 		return
 	} else if result.Port == "icmp" {
-		icmpScan(result.Ip, result)
+		icmpScan(result)
 		return
 	} else if result.Port == "snmp" {
 		snmpScan(result.Ip, result)
 		return
-	} else if result.Port == "445" {
-		smbScan(target, result)
+	} else if result.Port == "445" || result.Port == "smb" {
+		smbScan(result)
 		if Exploit == "auto" || Exploit == "smb" || Exploit == "ms17010" {
-			ms17010Scan(target, result)
+			ms17010Scan(result)
 		}
 		return
 	} else {
@@ -51,7 +51,7 @@ func Dispatch(result *utils.Result) {
 
 		//被动收集基本信息
 		result.InfoFilter()
-
+		fingerScan(result)
 		// 指定payload扫描
 		if result.IsHttp() && Payloadstr != "" {
 			payloadScan(result)
@@ -60,7 +60,6 @@ func Dispatch(result *utils.Result) {
 
 		//主动信息收集
 		// 因为正则匹配耗时较长,如果没有-v参数则字节不进行服务识别
-		fingerScan(result)
 		if VersionLevel > 0 {
 			if result.Framework == "" && strings.HasPrefix(result.Protocol, "http") {
 				faviconScan(result)

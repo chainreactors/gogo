@@ -46,10 +46,12 @@ func init() {
 	}
 }
 
-func nbtScan(target string, result *utils.Result) {
+func nbtScan(result *utils.Result) {
 	var Share bool = false
 	var DC bool = false
 	result.Protocol = "udp"
+	result.Port = "137"
+	target := result.GetTarget()
 	conn, err := utils.UdpSocketConn(target, Delay*2)
 	if err != nil {
 
@@ -60,6 +62,7 @@ func nbtScan(target string, result *utils.Result) {
 	payload := []byte("ff\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00 CKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\x00\x00!\x00\x01")
 	reply, _ := utils.SocketSend(conn, payload, 1024)
 	if len(reply) > 58 {
+
 		result.Stat = "OPEN"
 	} else {
 		return

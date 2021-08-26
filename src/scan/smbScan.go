@@ -86,9 +86,10 @@ func getNTLMSSPNegotiateData(Flags []byte) []byte {
 	}
 }
 
-func smbScan(target string, result *utils.Result) {
+func smbScan(result *utils.Result) {
+	result.Port = "445"
+	target := result.GetTarget()
 	var err error
-
 	var ret []byte
 	var smbver string
 	//ff534d42 SMBv1的标示

@@ -8,19 +8,17 @@ package scan
 import (
 	"getitle/src/utils"
 	"net"
-	"strings"
 	"time"
 )
 
 // -n i
-func icmpScan(host string, result *utils.Result) {
+func icmpScan(result *utils.Result) {
 	var size int
 	var seq int16 = 1
 	const ECHO_REQUEST_HEAD_LEN = 8
-
+	host := result.Ip
 	size = 32
 	delay := time.Duration(1)
-	host = strings.Split(host, ":")[0]
 	conn, err := net.DialTimeout("ip4:icmp", host, delay*time.Second)
 	if err != nil {
 		result.Error = err.Error()
