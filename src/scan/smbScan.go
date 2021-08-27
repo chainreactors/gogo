@@ -115,7 +115,7 @@ func smbScan(result *utils.Result) {
 
 	if len(ret) > 0 {
 		tinfo := NTLMInfo(ret)
-		result.Stat = true
+		result.Open = true
 		result.Protocol = "smb"
 		result.HttpStat = smbver
 		result.AddNTLMInfo(tinfo)
@@ -154,8 +154,8 @@ func smb1Scan(target string) ([]byte, string, string, error) {
 	//fmt.Println(ss)
 	bs := gss_native[off_ntlm:blob_length]
 
-	NativeOS := TrimName(ss[0])
-	NativeLM := TrimName(ss[1])
+	NativeOS := trimName(ss[0])
+	NativeLM := trimName(ss[1])
 	return bs, NativeOS, NativeLM, err
 }
 

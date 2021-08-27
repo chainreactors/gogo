@@ -47,7 +47,7 @@ func defaultScan(tc targetConfig) {
 	scan.Dispatch(result)
 	//res := scan.SystemHttp(ip)
 
-	if result.Stat {
+	if result.Open {
 		Alivesum++
 		if !Clean {
 			fmt.Print(output(result, Output))
@@ -171,7 +171,7 @@ func smartScan(tc targetConfig, temp *sync.Map, mod string) {
 
 	scan.Dispatch(result)
 
-	if result.Stat {
+	if result.Open {
 		if mod == "ss" {
 			b_alived(result.Ip, temp)
 		} else {

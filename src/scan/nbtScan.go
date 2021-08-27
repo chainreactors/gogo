@@ -63,7 +63,7 @@ func nbtScan(result *utils.Result) {
 	reply, _ := utils.SocketSend(conn, payload, 1024)
 	if len(reply) > 58 {
 
-		result.Stat = true
+		result.Open = true
 	} else {
 		return
 	}

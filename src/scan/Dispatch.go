@@ -46,7 +46,7 @@ func Dispatch(result *utils.Result) {
 		return
 	}
 
-	if result.Stat {
+	if result.Open {
 
 		//被动收集基本信息
 		result.InfoFilter()

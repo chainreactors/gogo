@@ -20,7 +20,7 @@ func oxidScan(result *utils.Result) {
 		return
 	}
 	defer conn.Close()
-	result.Stat = true
+	result.Open = true
 
 	recv, _ := utils.SocketSend(conn, []byte(sendData), 4096)
 	recv, _ = utils.SocketSend(conn, []byte(sendData2), 4096)

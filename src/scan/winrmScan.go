@@ -19,7 +19,7 @@ package scan
 //	ntlminfo := resp.Header.Get("Www-Authenticate")[10:]
 //	data, err := base64.StdEncoding.DecodeString(ntlminfo)
 //	tinfo := NTLMInfo(data)
-//	result.Stat = "OPEN"
+//	result.Open = "OPEN"
 //	result.AddNTLMInfo(tinfo)
 //}
 //

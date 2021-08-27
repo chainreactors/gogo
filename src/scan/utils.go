@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func TrimName(name string) string {
+func trimName(name string) string {
 	return strings.TrimSpace(strings.Replace(name, "\x00", "", -1))
 }
 

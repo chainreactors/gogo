@@ -28,7 +28,7 @@ func ms17010Scan(result *utils.Result) {
 		return
 	}
 	result.Protocol = "SMB"
-	result.Stat = true
+	result.Open = true
 	defer conn.Close()
 	_, err = conn.Write(negotiateProtocolRequest)
 	reply := make([]byte, 1024)
