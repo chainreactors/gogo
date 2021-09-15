@@ -128,7 +128,7 @@ func smb1Scan(target string) ([]byte, string, string, error) {
 	if err != nil {
 		return []byte{0x01}, "", "", err
 	}
-
+	defer conn.Close()
 	_, err = utils.SocketSend(conn, NegotiateSMBv1Data1, 4096)
 	if err != nil {
 		return nil, "", "", err
@@ -165,6 +165,7 @@ func smb2Scan(target string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer conn.Close()
 	r2, err := utils.SocketSend(conn, NegotiateSMBv2Data1, 4096)
 
 	if err != nil {

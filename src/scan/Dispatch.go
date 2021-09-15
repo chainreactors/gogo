@@ -33,8 +33,13 @@ func Dispatch(result *utils.Result) {
 		return
 	} else if result.Port == "445" || result.Port == "smb" {
 		smbScan(result)
-		if Exploit == "auto" || Exploit == "smb" || Exploit == "ms17010" {
+		if Exploit == "ms17010" {
 			ms17010Scan(result)
+		} else if Exploit == "smbghost" || Exploit == "cve-2020-0796" {
+			smbGhostScan(result)
+		} else if Exploit == "auto" || Exploit == "smb" {
+			ms17010Scan(result)
+			smbGhostScan(result)
 		}
 		return
 	} else {
@@ -88,6 +93,7 @@ func ExploitDispatch(result *utils.Result) {
 	if (!result.NoFramework() || Exploit != "auto") && result.IsHttp() {
 		Nuclei(result.GetURL(), result)
 	}
+	// todo
 
 	if Exploit != "auto" { // 如果exploit值不为auto,则不进行shiro和ms17010扫描
 		return

@@ -58,7 +58,7 @@ func nbtScan(result *utils.Result) {
 		//fmt.Println(err)
 		return
 	}
-
+	defer conn.Close()
 	payload := []byte("ff\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00 CKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\x00\x00!\x00\x01")
 	reply, _ := utils.SocketSend(conn, payload, 1024)
 	if len(reply) > 58 {
