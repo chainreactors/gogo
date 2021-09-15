@@ -12,21 +12,6 @@ import (
 	"time"
 )
 
-//func Ip2int(ipmask string) uint {
-//	Ip := strings.Split(ipmask, "/")
-//	s2ip := net.ParseIP(Ip[0]).To4()
-//	return uint(s2ip[3]) | uint(s2ip[2])<<8 | uint(s2ip[1])<<16 | uint(s2ip[0])<<24
-//}
-//
-//func Int2ip(ipint uint) string {
-//	ip := make(net.IP, net.IPv4len)
-//	ip[0] = byte(ipint >> 24)
-//	ip[1] = byte(ipint >> 16)
-//	ip[2] = byte(ipint >> 8)
-//	ip[3] = byte(ipint)
-//	return ip.String()
-//}
-
 //获取当前时间
 func GetCurtime() string {
 	h := strconv.Itoa(time.Now().Hour())
@@ -178,6 +163,23 @@ func MaptoString(m map[string]interface{}) string {
 	return s
 	// todo fix bug
 }
+
+func ToStringMap(i interface{}) map[string]interface{} {
+	var m = map[string]interface{}{}
+
+	switch v := i.(type) {
+	case map[interface{}]interface{}:
+		for k, val := range v {
+			m[ToString(k)] = val
+		}
+		return m
+	case map[string]interface{}:
+		return v
+	default:
+		return nil
+	}
+}
+
 func LoadResult(filename string) []Result {
 	content, err := ioutil.ReadFile(filename)
 	if err != nil {

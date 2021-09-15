@@ -47,10 +47,31 @@ func execute_templates(titles []string, url string, opt nuclei.Options) []utils.
 
 func choiceTemplates(titles []string) []*nuclei.Template {
 	var templates []*nuclei.Template
-	for _, t := range titles {
-		if tmp_templates, ok := utils.TemplateMap[t]; ok {
+	if titles[0] == "all" {
+		for _, tmp_templates := range utils.TemplateMap {
 			templates = append(templates, tmp_templates...)
 		}
+
+	} else {
+		for _, t := range titles {
+			if tmp_templates, ok := utils.TemplateMap[t]; ok {
+				templates = append(templates, tmp_templates...)
+			}
+		}
 	}
-	return templates
+	return uniqueTemplates(templates)
+}
+
+func uniqueTemplates(templates []*nuclei.Template) []*nuclei.Template {
+	tmp_templates := make(map[*nuclei.Template]bool)
+	for _, template := range templates {
+		tmp_templates[template] = true
+	}
+	uniquetemplates := make([]*nuclei.Template, len(tmp_templates))
+	i := 0
+	for template, _ := range tmp_templates {
+		uniquetemplates[i] = template
+		i++
+	}
+	return uniquetemplates
 }
