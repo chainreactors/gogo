@@ -19,7 +19,7 @@ type Result struct {
 	Language   string         `json:"l"` // language
 	Frameworks Frameworks     `json:"f"` // framework
 	Protocol   string         `json:"r"` // protocol
-	Vulns      Vulns          `json:"vs"`
+	Vulns      Vulns          `json:"v"`
 	Open       bool           `json:"-"`
 	TcpCon     *net.Conn      `json:"-"`
 	Httpresp   *http.Response `json:"-"`
@@ -100,7 +100,7 @@ func (result *Result) AddNTLMInfo(m map[string]string) {
 }
 
 type Vuln struct {
-	Id      string                 `json:"v"`
+	Id      string                 `json:"vn"`
 	Payload map[string]interface{} `json:"vp"`
 	Detail  map[string]interface{} `json:"vd"`
 }

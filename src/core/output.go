@@ -158,11 +158,9 @@ func FormatOutput(filename string, outputfile string) {
 			if !(p.Port == "135" || p.Port == "137" || p.Port == "icmp") {
 				if Output == "c" {
 					// 颜色输出
-					s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s\t%s\t[%s] %s", p.Protocol, ip, pint, p.Midware, p.Language, blue(p.Frameworks.ToString()), p.Host, yellow(p.Stat), blue(p.Title))
-					s += red(p.Vulns.ToString())
+					s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s\t%s\t[%s] %s %s", p.Protocol, ip, pint, p.Midware, p.Language, blue(p.Frameworks.ToString()), p.Host, yellow(p.Stat), blue(p.Title), red(p.Vulns.ToString()))
 				} else {
-					s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s\t%s\t[%s] %s", p.Protocol, ip, pint, p.Midware, p.Language, p.Frameworks.ToString(), p.Host, p.Stat, p.Title)
-					s += p.Vulns.ToString()
+					s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s\t%s\t[%s] %s %s", p.Protocol, ip, pint, p.Midware, p.Language, p.Frameworks.ToString(), p.Host, p.Stat, p.Title, p.Vulns.ToString())
 				}
 				s += "\n"
 			}
