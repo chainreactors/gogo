@@ -24,7 +24,7 @@ func getHttpCMS(result *utils.Result) {
 			return
 		}
 		httpFingerMatch(result, finger)
-		if result.Framework != "" {
+		if !result.NoFramework() {
 			return
 		}
 
@@ -52,12 +52,12 @@ func httpFingerMatch(result *utils.Result, finger utils.Finger) {
 			res := utils.CompileMatch(reg, content)
 			if res == "matched" {
 				//println("[*] " + res)
-				result.Framework = finger.Name
+				result.AddFramework(utils.Framework{Title: finger.Name})
 				result.AddVuln(utils.Vuln{Id: finger.Vuln})
 				return
 			} else if res != "" {
 				result.HttpStat = "tcp"
-				result.Framework = finger.Name + " " + strings.TrimSpace(res)
+				result.AddFramework(utils.Framework{finger.Name, res})
 				result.AddVuln(utils.Vuln{Id: finger.Vuln})
 				//result.Title = res
 				return
@@ -66,7 +66,7 @@ func httpFingerMatch(result *utils.Result, finger utils.Finger) {
 	} else if finger.Regexps.HTML != nil {
 		for _, html := range finger.Regexps.HTML {
 			if strings.Contains(content, html) {
-				result.Framework = finger.Name
+				result.AddFramework(utils.Framework{Title: finger.Name})
 				return
 			}
 		}
@@ -75,10 +75,10 @@ func httpFingerMatch(result *utils.Result, finger utils.Finger) {
 			res := utils.CompileMatch(reg, content)
 			if res == "matched" {
 				//println("[*] " + res)
-				result.Framework = finger.Name
+				result.AddFramework(utils.Framework{Title: finger.Name})
 				return
 			} else if res != "" {
-				result.Framework = finger.Name + res
+				result.AddFramework(utils.Framework{finger.Name, res})
 				//result.Title = res
 				return
 			}
@@ -87,13 +87,13 @@ func httpFingerMatch(result *utils.Result, finger utils.Finger) {
 		for _, header := range finger.Regexps.Header {
 			if resp == nil {
 				if strings.Contains(content, header) {
-					result.Framework = finger.Name
+					result.AddFramework(utils.Framework{Title: finger.Name})
 					return
 				}
 			} else {
 				headers := utils.GetHeaderstr(resp)
 				if strings.Contains(headers, header) {
-					result.Framework = finger.Name
+					result.AddFramework(utils.Framework{Title: finger.Name})
 					return
 				}
 			}
@@ -102,11 +102,11 @@ func httpFingerMatch(result *utils.Result, finger utils.Finger) {
 		//	for _, cookie := range finger.Regexps.Cookie {
 		//		if resp == nil {
 		//			if strings.Contains(content, cookie) {
-		//				result.Framework = finger.Name
+		//				result.Frameworks = finger.Name
 		//				return
 		//			}
 		//		} else if cookies[cookie] != "" {
-		//			result.Framework = finger.Name
+		//			result.Frameworks = finger.Name
 		//			return
 		//		}
 		//	}
@@ -114,7 +114,7 @@ func httpFingerMatch(result *utils.Result, finger utils.Finger) {
 		for _, md5s := range finger.Regexps.MD5 {
 			m := md5.Sum([]byte(content))
 			if md5s == hex.EncodeToString(m[:]) {
-				result.Framework = finger.Name
+				result.AddFramework(utils.Framework{Title: finger.Name})
 				return
 			}
 		}
@@ -126,7 +126,7 @@ func getTCPFrameWork(result *utils.Result) {
 	// 优先匹配默认端口,第一遍循环只匹配默认端口
 	for _, finger := range utils.Tcpfingers[result.Port] {
 		tcpFingerMatch(result, finger)
-		if result.Framework != "" {
+		if !result.NoFramework() {
 			return
 		}
 	}
@@ -137,7 +137,7 @@ func getTCPFrameWork(result *utils.Result) {
 			if port != result.Port {
 				tcpFingerMatch(result, finger)
 			}
-			if result.Framework != "" {
+			if !result.NoFramework() {
 				return
 			}
 		}
@@ -189,11 +189,11 @@ func tcpFingerMatch(result *utils.Result, finger utils.Finger) {
 		res := utils.CompileMatch(reg, content)
 		if res == "matched" {
 			//println("[*] " + res)
-			result.Framework = finger.Name
+			result.AddFramework(utils.Framework{Title: finger.Name})
 			return
 		} else if res != "" {
 			result.HttpStat = finger.Protocol
-			result.Framework = finger.Name + " " + strings.TrimSpace(res)
+			result.AddFramework(utils.Framework{finger.Name, res})
 			//result.Title = res
 			return
 		}
@@ -203,12 +203,12 @@ func tcpFingerMatch(result *utils.Result, finger utils.Finger) {
 		res := utils.CompileMatch(reg, content)
 		if res == "matched" {
 			//println("[*] " + res)
-			result.Framework = finger.Name
+			result.AddFramework(utils.Framework{Title: finger.Name})
 			result.AddVuln(utils.Vuln{Id: finger.Vuln})
 			return
 		} else if res != "" {
 			result.HttpStat = "tcp"
-			result.Framework = finger.Name + " " + strings.TrimSpace(res)
+			result.AddFramework(utils.Framework{finger.Name, res})
 			result.AddVuln(utils.Vuln{Id: finger.Vuln})
 			//result.Title = res
 			return

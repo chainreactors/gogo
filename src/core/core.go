@@ -16,7 +16,7 @@ var Alivesum int
 type targetConfig struct {
 	ip     string
 	port   string
-	finger string
+	finger utils.Frameworks
 }
 
 //直接扫描

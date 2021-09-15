@@ -14,7 +14,7 @@ func getTitle(content string) string {
 }
 
 func getMidware(resp *http.Response, content string) string {
-	var server string = ""
+	var server string
 	if resp == nil {
 		server = CompileMatch(CommonCompiled["server"], content)
 	} else {

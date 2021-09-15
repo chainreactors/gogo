@@ -11,15 +11,15 @@ import (
 var first = true
 
 type portformat struct {
-	Port      string `json:"p"`
-	Stat      string `json:"s"`
-	Title     string `json:"t"`
-	Host      string `json:"h"`
-	Midware   string `json:"m"`
-	Language  string `json:"l"`
-	Framework string `json:"f"`
-	Vuln      string `json:"v"`
-	Protocol  string `json:"r"`
+	Port       string           `json:"p"`
+	Stat       string           `json:"s"`
+	Title      string           `json:"t"`
+	Host       string           `json:"h"`
+	Midware    string           `json:"m"`
+	Language   string           `json:"l"`
+	Frameworks utils.Frameworks `json:"f"`
+	Vulns      utils.Vulns      `json:"v"`
+	Protocol   string           `json:"r"`
 }
 
 func output(result *utils.Result, outType string) string {
@@ -45,15 +45,15 @@ func output(result *utils.Result, outType string) string {
 }
 
 func colorOutput(result *utils.Result) string {
-	s := fmt.Sprintf("[+] %s://%s:%s\t%s\t%s\t%s\t%s\t[%s] %s ", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, blue(result.Framework), result.Host, yellow(result.HttpStat), blue(result.Title))
-	s += red(vulnOutput(result.Vulns))
+	s := fmt.Sprintf("[+] %s://%s:%s\t%s\t%s\t%s\t%s\t[%s] %s ", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, blue(result.Frameworks.ToString()), result.Host, yellow(result.HttpStat), blue(result.Title))
+	s += red(result.Vulns.ToString())
 	s += "\n"
 	return s
 }
 
 func fullOutput(result *utils.Result) string {
-	s := fmt.Sprintf("[+] %s://%s:%s%s\t%s\t%s\t%s\t%s\t[%s] %s ", result.Protocol, result.Ip, result.Port, result.Uri, result.Midware, result.Language, result.Framework, result.Host, result.HttpStat, result.Title)
-	s += vulnOutput(result.Vulns)
+	s := fmt.Sprintf("[+] %s://%s:%s%s\t%s\t%s\t%s\t%s\t[%s] %s ", result.Protocol, result.Ip, result.Port, result.Uri, result.Midware, result.Language, result.Frameworks.ToString(), result.Host, result.HttpStat, result.Title)
+	s += result.Vulns.ToString()
 	s += "\n"
 	return s
 }
@@ -82,9 +82,9 @@ func jsonFile(result *utils.Result) string {
 
 //func HtmlOutput(result *utils.result) (s string) {
 //	if strings.HasPrefix(result.Protocol, "http") {
-//		s = fmt.Sprintf("[+] <a>%s://%s:%s</a>\t%s\t%s\t%s\t%s\t[%s] %s", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, result.Framework, result.Host, result.HttpStat, result.Title)
+//		s = fmt.Sprintf("[+] <a>%s://%s:%s</a>\t%s\t%s\t%s\t%s\t[%s] %s", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, result.Frameworks, result.Host, result.HttpStat, result.Title)
 //	} else {
-//		s = fmt.Sprintf("[+] %s://%s:%s\t%s\t%s\t%s\t%s\t[%s] %s", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, result.Framework, result.Host, result.HttpStat, result.Title)
+//		s = fmt.Sprintf("[+] %s://%s:%s\t%s\t%s\t%s\t%s\t[%s] %s", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, result.Frameworks, result.Host, result.HttpStat, result.Title)
 //	}
 //	vulnstr := vulnOutput(result.Vuln)
 //	if vulnstr != "" {
@@ -96,13 +96,13 @@ func jsonFile(result *utils.Result) string {
 //
 //}
 
-func vulnOutput(vulns []utils.Vuln) string {
-	var s string
-	for _, vuln := range vulns {
-		s += fmt.Sprintf("[ Find Vuln: %s ] ", vuln.ToString())
-	}
-	return s
-}
+//func vulnOutput(vulns []utils.Vuln) string {
+//	var s string
+//	for _, vuln := range vulns {
+//		s += fmt.Sprintf("[ Find Vuln: %s ] ", vuln.ToString())
+//	}
+//	return s
+//}
 
 func FormatOutput(filename string, outputfile string) {
 	results := utils.LoadResult(filename)
@@ -110,15 +110,15 @@ func FormatOutput(filename string, outputfile string) {
 	//ipfs := make(map[string]ipformat)
 	for _, result := range results {
 		pf := portformat{
-			Port:      result.Port,
-			Stat:      result.HttpStat,
-			Title:     result.Title,
-			Host:      result.Host,
-			Midware:   result.Midware,
-			Language:  result.Language,
-			Framework: result.Framework,
-			Vuln:      vulnOutput(result.Vulns),
-			Protocol:  result.Protocol,
+			Port:       result.Port,
+			Stat:       result.HttpStat,
+			Title:      result.Title,
+			Host:       result.Host,
+			Midware:    result.Midware,
+			Language:   result.Language,
+			Frameworks: result.Frameworks,
+			Vulns:      result.Vulns,
+			Protocol:   result.Protocol,
 		}
 		if pfs[result.Ip] == nil {
 			pfs[result.Ip] = make(map[string]portformat)
@@ -158,11 +158,11 @@ func FormatOutput(filename string, outputfile string) {
 			if !(p.Port == "135" || p.Port == "137" || p.Port == "icmp") {
 				if Output == "c" {
 					// 颜色输出
-					s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s\t%s\t[%s] %s", p.Protocol, ip, pint, p.Midware, p.Language, blue(p.Framework), p.Host, yellow(p.Stat), blue(p.Title))
-					s += red(p.Vuln)
+					s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s\t%s\t[%s] %s", p.Protocol, ip, pint, p.Midware, p.Language, blue(p.Frameworks.ToString()), p.Host, yellow(p.Stat), blue(p.Title))
+					s += red(p.Vulns.ToString())
 				} else {
-					s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s\t%s\t[%s] %s", p.Protocol, ip, pint, p.Midware, p.Language, p.Framework, p.Host, p.Stat, p.Title)
-					s += p.Vuln
+					s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s\t%s\t[%s] %s", p.Protocol, ip, pint, p.Midware, p.Language, p.Frameworks.ToString(), p.Host, p.Stat, p.Title)
+					s += p.Vulns.ToString()
 				}
 				s += "\n"
 			}

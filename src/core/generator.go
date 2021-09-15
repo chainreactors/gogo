@@ -212,7 +212,7 @@ func generator(config Config) chan targetConfig {
 
 func genFromResults(config Config, tcch *chan targetConfig) {
 	for _, result := range config.Results {
-		*tcch <- targetConfig{result.Ip, result.Port, result.Framework}
+		*tcch <- targetConfig{result.Ip, result.Port, result.Frameworks}
 	}
 }
 
@@ -224,14 +224,14 @@ func genFromSpray(config Config, tcch *chan targetConfig) {
 			for _, cidr := range config.IPlist {
 				ch = goDefaultIpGenerator(cidr)
 				for ip := range ch {
-					*tcch <- targetConfig{ip, port, ""}
+					*tcch <- targetConfig{ip, port, nil}
 				}
 				_ = FileHandle.Sync()
 			}
 		} else {
 			ch = goDefaultIpGenerator(config.IP)
 			for ip := range ch {
-				*tcch <- targetConfig{ip, port, ""}
+				*tcch <- targetConfig{ip, port, nil}
 			}
 		}
 	}
@@ -248,7 +248,7 @@ func genFromDefault(config Config, tcch *chan targetConfig) {
 	}
 	for ip := range ch {
 		for _, port := range config.Portlist {
-			*tcch <- targetConfig{ip, port, ""}
+			*tcch <- targetConfig{ip, port, nil}
 		}
 	}
 }

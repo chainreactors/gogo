@@ -8,23 +8,23 @@ import (
 )
 
 type Result struct {
-	Ip        string         `json:"i"` // ip
-	Port      string         `json:"p"` // port
-	Uri       string         `json:"u"` // uri
-	Os        string         `json:"o"` // os
-	Host      string         `json:"h"` // host
-	Title     string         `json:"t"` // title
-	Midware   string         `json:"m"` // midware
-	HttpStat  string         `json:"s"` // http_stat
-	Language  string         `json:"l"` // language
-	Framework string         `json:"f"` // framework
-	Protocol  string         `json:"r"` // protocol
-	Vulns     []Vuln         `json:"vs"`
-	Open      bool           `json:"-"`
-	TcpCon    *net.Conn      `json:"-"`
-	Httpresp  *http.Response `json:"-"`
-	Error     string         `json:"-"`
-	Content   string         `json:"-"`
+	Ip         string         `json:"i"` // ip
+	Port       string         `json:"p"` // port
+	Uri        string         `json:"u"` // uri
+	Os         string         `json:"o"` // os
+	Host       string         `json:"h"` // host
+	Title      string         `json:"t"` // title
+	Midware    string         `json:"m"` // midware
+	HttpStat   string         `json:"s"` // http_stat
+	Language   string         `json:"l"` // language
+	Frameworks Frameworks     `json:"f"` // framework
+	Protocol   string         `json:"r"` // protocol
+	Vulns      Vulns          `json:"vs"`
+	Open       bool           `json:"-"`
+	TcpCon     *net.Conn      `json:"-"`
+	Httpresp   *http.Response `json:"-"`
+	Error      string         `json:"-"`
+	Content    string         `json:"-"`
 }
 
 func (result *Result) InfoFilter() {
@@ -44,6 +44,17 @@ func (result *Result) InfoFilter() {
 
 func (result *Result) AddVuln(vuln Vuln) {
 	result.Vulns = append(result.Vulns, vuln)
+}
+
+func (result *Result) AddFramework(f Framework) {
+	result.Frameworks = append(result.Frameworks, f)
+}
+
+func (result *Result) NoFramework() bool {
+	if len(result.Frameworks) == 0 {
+		return true
+	}
+	return false
 }
 
 func (result Result) IsHttp() bool {
@@ -85,8 +96,7 @@ func (result *Result) GetTarget() string {
 func (result *Result) AddNTLMInfo(m map[string]string) {
 	result.Title = m["MsvAvNbDomainName"] + "/" + m["MsvAvNbComputerName"]
 	result.Host = m["MsvAvDnsDomainName"] + "/" + m["MsvAvDnsComputerName"]
-	result.Framework = m["Version"]
-
+	result.AddFramework(Framework{m["Version"], ""})
 }
 
 type Vuln struct {
@@ -112,4 +122,41 @@ func (v *Vuln) ToString() string {
 		s += fmt.Sprintf(" payloads:%s", detail)
 	}
 	return s
+}
+
+type Vulns []Vuln
+
+func (vs Vulns) ToString() string {
+	var s string
+	for _, vuln := range vs {
+		s += fmt.Sprintf("[ Find Vuln: %s ] ", vuln.ToString())
+	}
+	return s
+}
+
+type Framework struct {
+	Title   string `json:"ft"`
+	Version string `json:"fv"`
+}
+
+func (f Framework) ToString() string {
+	return fmt.Sprintf("%s%s", f.Title, f.Version)
+}
+
+type Frameworks []Framework
+
+func (fs Frameworks) ToString() string {
+	framework_strs := make([]string, len(fs))
+	for i, f := range fs {
+		framework_strs[i] = f.ToString()
+	}
+	return strings.Join(framework_strs, "||")
+}
+
+func (fs Frameworks) GetTitles() []string {
+	titles := make([]string, len(fs))
+	for i, f := range fs {
+		titles[i] = f.Title
+	}
+	return titles
 }

@@ -60,7 +60,7 @@ func Dispatch(result *utils.Result) {
 		//主动信息收集
 		// 因为正则匹配耗时较长,如果没有-v参数则字节不进行服务识别
 		if VersionLevel > 0 {
-			if result.Framework == "" && strings.HasPrefix(result.Protocol, "http") {
+			if !result.NoFramework() && strings.HasPrefix(result.Protocol, "http") {
 				faviconScan(result)
 			}
 		}
@@ -85,7 +85,7 @@ func ExploitDispatch(result *utils.Result) {
 	//if strings.Contains(result.Content, "-ERR wrong") {
 	//	RedisScan(target, result)
 	//}
-	if (result.Framework != "" || Exploit != "auto") && result.IsHttp() {
+	if (!result.NoFramework() || Exploit != "auto") && result.IsHttp() {
 		Nuclei(result.GetURL(), result)
 	}
 
