@@ -49,13 +49,12 @@ func GetBody(resp *http.Response) []byte {
 }
 
 func EncodeTitle(s string) string {
+	if len(s) >= 13 {
+		s = s[:13]
+	}
 	s = strings.Replace(s, "\r", "\\0x13", -1)
 	s = strings.Replace(s, "\n", "\\0x10", -1)
-	if len(s) >= 13 {
-		return s[:13]
-	} else {
-		return s
-	}
+	return s
 }
 
 func Match(regexpstr string, s string) string {

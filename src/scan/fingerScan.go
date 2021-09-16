@@ -49,16 +49,8 @@ func httpFingerMatch(result *utils.Result, finger utils.Finger) {
 	// 漏洞匹配优先
 	for _, reg := range utils.Compiled[finger.Name+"_vuln"] {
 		res := utils.CompileMatch(reg, content)
-		if res == "matched" {
-			//println("[*] " + res)
-			result.AddFramework(utils.Framework{Title: finger.Name})
-			result.AddVuln(utils.Vuln{Id: finger.Vuln})
-			return
-		} else if res != "" {
-			result.HttpStat = "tcp"
-			result.AddFramework(utils.Framework{finger.Name, res})
-			result.AddVuln(utils.Vuln{Id: finger.Vuln})
-			//result.Title = res
+		if res != "" {
+			handlerMatchedResult(result, finger, res, content)
 			return
 		}
 	}
@@ -73,13 +65,8 @@ func httpFingerMatch(result *utils.Result, finger utils.Finger) {
 	// 正则匹配
 	for _, reg := range utils.Compiled[finger.Name] {
 		res := utils.CompileMatch(reg, content)
-		if res == "matched" {
-			//println("[*] " + res)
-			result.AddFramework(utils.Framework{Title: finger.Name})
-			return
-		} else if res != "" {
-			result.AddFramework(utils.Framework{finger.Name, res})
-			//result.Title = res
+		if res != "" {
+			handlerMatchedResult(result, finger, res, content)
 			return
 		}
 	}
@@ -186,17 +173,8 @@ func tcpFingerMatch(result *utils.Result, finger utils.Finger) {
 	// 遍历漏洞正则
 	for _, reg := range utils.Compiled[finger.Name+"_vuln"] {
 		res := utils.CompileMatch(reg, content)
-		if res == "matched" {
-			//println("[*] " + res)
-			result.AddFramework(utils.Framework{Title: finger.Name})
-			result.AddVuln(utils.Vuln{Id: finger.Vuln})
-			result.Title = utils.EncodeTitle(content)
-			return
-		} else if res != "" {
-			result.HttpStat = "tcp"
-			result.AddFramework(utils.Framework{finger.Name, res})
-			result.AddVuln(utils.Vuln{Id: finger.Vuln})
-			result.Title = utils.EncodeTitle(content)
+		if res != "" {
+			handlerMatchedResult(result, finger, res, content)
 			return
 		}
 	}
@@ -204,19 +182,30 @@ func tcpFingerMatch(result *utils.Result, finger utils.Finger) {
 	//遍历指纹正则
 	for _, reg := range utils.Compiled[finger.Name] {
 		res := utils.CompileMatch(reg, content)
-		if res == "matched" {
-			//println("[*] " + res)
-			result.AddFramework(utils.Framework{Title: finger.Name})
-			result.Title = utils.EncodeTitle(content)
-			return
-		} else if res != "" {
-			result.HttpStat = finger.Protocol
-			result.AddFramework(utils.Framework{finger.Name, res})
-			result.Title = utils.EncodeTitle(content)
+		if res != "" {
+			handlerMatchedResult(result, finger, res, content)
 			return
 		}
 	}
 	return
 }
 
-//func matchHTML()
+func handlerMatchedResult(result *utils.Result, finger utils.Finger, res, content string) {
+	result.HttpStat = finger.Protocol
+	res = getRes(res)
+	result.AddFramework(utils.Framework{finger.Name, res})
+	if finger.Vuln != "" {
+		result.AddVuln(utils.Vuln{Id: finger.Vuln})
+	}
+	if finger.Level >= 1 && content != "" {
+		result.Title = utils.EncodeTitle(content)
+	}
+}
+
+func getRes(res string) string {
+	if res == "matched" {
+		return ""
+	} else {
+		return res
+	}
+}
