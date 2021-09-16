@@ -48,10 +48,14 @@ func GetBody(resp *http.Response) []byte {
 	return body
 }
 
-func Encode(s string) string {
-	s = strings.Replace(s, "\r", "%13", -1)
-	s = strings.Replace(s, "\n", "%10", -1)
-	return s
+func EncodeTitle(s string) string {
+	s = strings.Replace(s, "\r", "\\0x13", -1)
+	s = strings.Replace(s, "\n", "\\0x10", -1)
+	if len(s) >= 13 {
+		return s[:13]
+	} else {
+		return s
+	}
 }
 
 func Match(regexpstr string, s string) string {
@@ -73,7 +77,7 @@ func CompileMatch(reg regexp.Regexp, s string) string {
 	if len(res) == 1 {
 		return "matched"
 	} else if len(res) == 2 {
-		return res[1]
+		return strings.TrimSpace(res[1])
 	}
 	return ""
 }

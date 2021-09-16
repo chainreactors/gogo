@@ -45,16 +45,12 @@ func output(result *utils.Result, outType string) string {
 }
 
 func colorOutput(result *utils.Result) string {
-	s := fmt.Sprintf("[+] %s://%s:%s\t%s\t%s\t%s\t%s\t[%s] %s ", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, blue(result.Frameworks.ToString()), result.Host, yellow(result.HttpStat), blue(result.Title))
-	s += red(result.Vulns.ToString())
-	s += "\n"
+	s := fmt.Sprintf("[+] %s://%s:%s\t%s\t%s\t%s\t%s\t[%s] %s %s\n", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, blue(result.Frameworks.ToString()), result.Host, yellow(result.HttpStat), blue(result.Title), red(result.Vulns.ToString()))
 	return s
 }
 
 func fullOutput(result *utils.Result) string {
-	s := fmt.Sprintf("[+] %s://%s:%s%s\t%s\t%s\t%s\t%s\t[%s] %s ", result.Protocol, result.Ip, result.Port, result.Uri, result.Midware, result.Language, result.Frameworks.ToString(), result.Host, result.HttpStat, result.Title)
-	s += result.Vulns.ToString()
-	s += "\n"
+	s := fmt.Sprintf("[+] %s://%s:%s%s\t%s\t%s\t%s\t%s\t[%s] %s %s\n", result.Protocol, result.Ip, result.Port, result.Uri, result.Midware, result.Language, result.Frameworks.ToString(), result.Host, result.HttpStat, result.Title, result.Vulns.ToString())
 	return s
 }
 

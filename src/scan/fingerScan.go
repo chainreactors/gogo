@@ -27,7 +27,6 @@ func getHttpCMS(result *utils.Result) {
 		if !result.NoFramework() {
 			return
 		}
-
 	}
 	return
 }
@@ -44,79 +43,80 @@ func httpFingerMatch(result *utils.Result, finger utils.Finger) {
 			return
 		}
 		content = string(utils.GetBody(resp))
-		resp.Body.Close()
+		_ = resp.Body.Close()
 	}
 
-	if finger.Regexps.Vuln != nil {
-		for _, reg := range utils.Compiled[finger.Name+"_vuln"] {
-			res := utils.CompileMatch(reg, content)
-			if res == "matched" {
-				//println("[*] " + res)
-				result.AddFramework(utils.Framework{Title: finger.Name})
-				result.AddVuln(utils.Vuln{Id: finger.Vuln})
-				return
-			} else if res != "" {
-				result.HttpStat = "tcp"
-				result.AddFramework(utils.Framework{finger.Name, res})
-				result.AddVuln(utils.Vuln{Id: finger.Vuln})
-				//result.Title = res
-				return
-			}
+	// 漏洞匹配优先
+	for _, reg := range utils.Compiled[finger.Name+"_vuln"] {
+		res := utils.CompileMatch(reg, content)
+		if res == "matched" {
+			//println("[*] " + res)
+			result.AddFramework(utils.Framework{Title: finger.Name})
+			result.AddVuln(utils.Vuln{Id: finger.Vuln})
+			return
+		} else if res != "" {
+			result.HttpStat = "tcp"
+			result.AddFramework(utils.Framework{finger.Name, res})
+			result.AddVuln(utils.Vuln{Id: finger.Vuln})
+			//result.Title = res
+			return
 		}
-	} else if finger.Regexps.HTML != nil {
-		for _, html := range finger.Regexps.HTML {
-			if strings.Contains(content, html) {
-				result.AddFramework(utils.Framework{Title: finger.Name})
-				return
-			}
+	}
+	// html匹配
+	for _, html := range finger.Regexps.HTML {
+		if strings.Contains(content, html) {
+			result.AddFramework(utils.Framework{Title: finger.Name})
+			return
 		}
-	} else if finger.Regexps.Regexp != nil {
-		for _, reg := range utils.Compiled[finger.Name] {
-			res := utils.CompileMatch(reg, content)
-			if res == "matched" {
-				//println("[*] " + res)
-				result.AddFramework(utils.Framework{Title: finger.Name})
-				return
-			} else if res != "" {
-				result.AddFramework(utils.Framework{finger.Name, res})
-				//result.Title = res
-				return
-			}
+	}
+
+	// 正则匹配
+	for _, reg := range utils.Compiled[finger.Name] {
+		res := utils.CompileMatch(reg, content)
+		if res == "matched" {
+			//println("[*] " + res)
+			result.AddFramework(utils.Framework{Title: finger.Name})
+			return
+		} else if res != "" {
+			result.AddFramework(utils.Framework{finger.Name, res})
+			//result.Title = res
+			return
 		}
-	} else if finger.Regexps.Header != nil {
-		for _, header := range finger.Regexps.Header {
-			if resp == nil {
-				if strings.Contains(content, header) {
-					result.AddFramework(utils.Framework{Title: finger.Name})
-					return
-				}
-			} else {
-				headers := utils.GetHeaderstr(resp)
-				if strings.Contains(headers, header) {
-					result.AddFramework(utils.Framework{Title: finger.Name})
-					return
-				}
-			}
-		}
-		//} else if finger.Regexps.Cookie != nil {
-		//	for _, cookie := range finger.Regexps.Cookie {
-		//		if resp == nil {
-		//			if strings.Contains(content, cookie) {
-		//				result.Frameworks = finger.Name
-		//				return
-		//			}
-		//		} else if cookies[cookie] != "" {
-		//			result.Frameworks = finger.Name
-		//			return
-		//		}
-		//	}
-	} else if finger.Regexps.MD5 != nil {
-		for _, md5s := range finger.Regexps.MD5 {
-			m := md5.Sum([]byte(content))
-			if md5s == hex.EncodeToString(m[:]) {
+	}
+	// http头匹配
+	for _, header := range finger.Regexps.Header {
+		if resp == nil {
+			if strings.Contains(content, header) {
 				result.AddFramework(utils.Framework{Title: finger.Name})
 				return
 			}
+		} else {
+			headers := utils.GetHeaderstr(resp)
+			if strings.Contains(headers, header) {
+				result.AddFramework(utils.Framework{Title: finger.Name})
+				return
+			}
+		}
+	}
+
+	//} else if finger.Regexps.Cookie != nil {
+	//	for _, cookie := range finger.Regexps.Cookie {
+	//		if resp == nil {
+	//			if strings.Contains(content, cookie) {
+	//				result.Frameworks = finger.Name
+	//				return
+	//			}
+	//		} else if cookies[cookie] != "" {
+	//			result.Frameworks = finger.Name
+	//			return
+	//		}
+	//	}/
+	// MD5 匹配
+	for _, md5s := range finger.Regexps.MD5 {
+		m := md5.Sum([]byte(content))
+		if md5s == hex.EncodeToString(m[:]) {
+			result.AddFramework(utils.Framework{Title: finger.Name})
+			return
 		}
 	}
 }
@@ -179,8 +179,26 @@ func tcpFingerMatch(result *utils.Result, finger utils.Finger) {
 		}
 	}
 	// 如果主动探测有回包,则正则匹配回包内容, 若主动探测没有返回内容,则直接跳过该规则
-	if string(data) != "" {
+	if len(data) != 0 {
 		content = string(data)
+	}
+
+	// 遍历漏洞正则
+	for _, reg := range utils.Compiled[finger.Name+"_vuln"] {
+		res := utils.CompileMatch(reg, content)
+		if res == "matched" {
+			//println("[*] " + res)
+			result.AddFramework(utils.Framework{Title: finger.Name})
+			result.AddVuln(utils.Vuln{Id: finger.Vuln})
+			result.Title = utils.EncodeTitle(content)
+			return
+		} else if res != "" {
+			result.HttpStat = "tcp"
+			result.AddFramework(utils.Framework{finger.Name, res})
+			result.AddVuln(utils.Vuln{Id: finger.Vuln})
+			result.Title = utils.EncodeTitle(content)
+			return
+		}
 	}
 
 	//遍历指纹正则
@@ -189,31 +207,15 @@ func tcpFingerMatch(result *utils.Result, finger utils.Finger) {
 		if res == "matched" {
 			//println("[*] " + res)
 			result.AddFramework(utils.Framework{Title: finger.Name})
+			result.Title = utils.EncodeTitle(content)
 			return
 		} else if res != "" {
 			result.HttpStat = finger.Protocol
 			result.AddFramework(utils.Framework{finger.Name, res})
-			//result.Title = res
+			result.Title = utils.EncodeTitle(content)
 			return
 		}
 	}
-	// 遍历漏洞正则
-	for _, reg := range utils.Compiled[finger.Name+"_vuln"] {
-		res := utils.CompileMatch(reg, content)
-		if res == "matched" {
-			//println("[*] " + res)
-			result.AddFramework(utils.Framework{Title: finger.Name})
-			result.AddVuln(utils.Vuln{Id: finger.Vuln})
-			return
-		} else if res != "" {
-			result.HttpStat = "tcp"
-			result.AddFramework(utils.Framework{finger.Name, res})
-			result.AddVuln(utils.Vuln{Id: finger.Vuln})
-			//result.Title = res
-			return
-		}
-	}
-
 	return
 }
 

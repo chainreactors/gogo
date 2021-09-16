@@ -6,11 +6,15 @@ import (
 )
 
 func getTitle(content string) string {
+	if content == "" {
+		return ""
+	}
 	title := CompileMatch(CommonCompiled["title"], content)
 	if title != "" {
 		return title
+	} else {
+		return EncodeTitle(content)
 	}
-	return Encode(string([]byte(content)[:13]))
 }
 
 func getMidware(resp *http.Response, content string) string {

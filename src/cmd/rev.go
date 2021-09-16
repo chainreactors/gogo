@@ -41,7 +41,7 @@ import (
 //func rev() {
 //	u, _ := url.Parse("http://wechatoss-api.oss-cn-beijing.aliyuncs.com/favicon.ico")
 //	q := u.Query()
-//	u.RawQuery = q.Encode()
+//	u.RawQuery = q.EncodeTitle()
 //	res, err := http.Get(u.String())
 //	if err != nil {
 //		return

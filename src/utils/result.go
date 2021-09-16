@@ -28,17 +28,11 @@ type Result struct {
 }
 
 func (result *Result) InfoFilter() {
+	//result.errHandler()
+	result.Title = getTitle(result.Content)
 	if result.IsHttp() {
-		result.Title = getTitle(result.Content)
 		result.Language = getLanguage(result.Httpresp, result.Content)
 		result.Midware = getMidware(result.Httpresp, result.Content)
-
-	} else {
-		result.Title = getTitle(result.Content)
-	}
-	//处理错误信息
-	if result.Content != "" {
-		result.errHandler()
 	}
 }
 
@@ -73,7 +67,9 @@ func (result Result) IsHttps() bool {
 
 //从错误中收集信息
 func (result *Result) errHandler() {
-
+	if result.Error == "" {
+		return
+	}
 	if strings.Contains(result.Error, "wsasend") || strings.Contains(result.Error, "wsarecv") {
 		result.HttpStat = "reset"
 	} else if result.Error == "EOF" {
