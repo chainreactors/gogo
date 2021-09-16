@@ -159,7 +159,6 @@ func tcpFingerMatch(result *utils.Result, finger utils.Finger) {
 			return
 		}
 		data, err = utils.SocketSend(conn, finger.SendData, 1024)
-
 		// 如果报错为EOF,则需要重新建立tcp连接
 		if err != nil {
 			return

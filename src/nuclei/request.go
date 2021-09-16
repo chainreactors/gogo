@@ -8,7 +8,7 @@ import (
 
 type Request struct {
 	// operators for the current request go here.
-	operators `yaml:",inline"`
+	operators `json:",inline"`
 	// Path contains the path/s for the request
 	Path []string `json:"path"`
 	// Raw contains raw requests
