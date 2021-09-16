@@ -37,9 +37,9 @@ func httpFingerMatch(result *utils.Result, finger utils.Finger) {
 	resp := result.Httpresp
 	content := result.Content
 	//var cookies map[string]string
-	if finger.SendData != "" {
+	if finger.SendData_str != "" {
 		conn := utils.HttpConn(2)
-		resp, err := conn.Get(result.GetURL() + finger.SendData)
+		resp, err := conn.Get(result.GetURL() + finger.SendData_str)
 		if err != nil {
 			return
 		}
@@ -152,13 +152,13 @@ func tcpFingerMatch(result *utils.Result, finger utils.Finger) {
 	var err error
 
 	// 某些规则需要主动发送一个数据包探测
-	if finger.SendData != "" && VersionLevel >= finger.Level {
+	if finger.SendData_str != "" && VersionLevel >= finger.Level {
 		var conn net.Conn
 		conn, err = utils.TcpSocketConn(result.GetTarget(), 2)
 		if err != nil {
 			return
 		}
-		data, err = utils.SocketSend(conn, []byte(finger.SendData), 1024)
+		data, err = utils.SocketSend(conn, finger.SendData, 1024)
 
 		// 如果报错为EOF,则需要重新建立tcp连接
 		if err != nil {
@@ -170,7 +170,7 @@ func tcpFingerMatch(result *utils.Result, finger utils.Finger) {
 			//if err != nil {
 			//	return
 			//}
-			//data, err = SocketSend(*result.TcpCon, []byte(finger.SendData), 1024)
+			//data, err = SocketSend(*result.TcpCon, []byte(finger.SendData_str), 1024)
 			//
 			//// 重新建立链接后再次报错,则跳过该规则匹配
 			//if err != nil {

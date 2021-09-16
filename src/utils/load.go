@@ -76,7 +76,7 @@ func loadVersionFingers() (map[string][]Finger, []Finger) {
 	//初步处理tcp指纹
 
 	for _, finger := range tmptcpfingers {
-		// 预编译指纹
+		finger.Decode() // 防止\xff \x00编码解码影响结果
 
 		// 普通指纹
 		for _, regstr := range finger.Regexps.Regexp {

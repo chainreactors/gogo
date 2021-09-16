@@ -22,7 +22,6 @@ func socketHttp(target string, result *utils.Result) {
 		result.Error = err.Error()
 		return
 	}
-
 	result.Open = true
 
 	// 启发式扫描探测直接返回不需要后续处理
