@@ -76,30 +76,6 @@ func jsonFile(result *utils.Result) string {
 
 }
 
-//func HtmlOutput(result *utils.result) (s string) {
-//	if strings.HasPrefix(result.Protocol, "http") {
-//		s = fmt.Sprintf("[+] <a>%s://%s:%s</a>\t%s\t%s\t%s\t%s\t[%s] %s", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, result.Frameworks, result.Host, result.HttpStat, result.Title)
-//	} else {
-//		s = fmt.Sprintf("[+] %s://%s:%s\t%s\t%s\t%s\t%s\t[%s] %s", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, result.Frameworks, result.Host, result.HttpStat, result.Title)
-//	}
-//	vulnstr := vulnOutput(result.Vuln)
-//	if vulnstr != "" {
-//		s += "<b style=\"color:red;\">" + vulnstr + "</b>"
-//	}
-//	s += "\n"
-//
-//	return s
-//
-//}
-
-//func vulnOutput(vulns []utils.Vuln) string {
-//	var s string
-//	for _, vuln := range vulns {
-//		s += fmt.Sprintf("[ Find Vuln: %s ] ", vuln.ToString())
-//	}
-//	return s
-//}
-
 func FormatOutput(filename string, outputfile string) {
 	results := utils.LoadResult(filename)
 	pfs := make(map[string]map[string]portformat)

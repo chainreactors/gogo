@@ -102,6 +102,6 @@ func smbGhostScan(result *utils.Result) {
 	//	return
 	//}
 	//if bytes.Contains(buff, []byte("Public")){
-	//	result.AddVuln(utils.Vuln{Id: "CVE-2020-0796"})
+	//	result.AddVuln(utils.Vuln{Name: "CVE-2020-0796"})
 	//}
 }

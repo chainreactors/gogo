@@ -57,7 +57,7 @@ func httpFingerMatch(result *utils.Result, finger utils.Finger) {
 	// html匹配
 	for _, html := range finger.Regexps.HTML {
 		if strings.Contains(content, html) {
-			result.AddFramework(utils.Framework{Title: finger.Name})
+			result.AddFramework(utils.Framework{Name: finger.Name})
 			return
 		}
 	}
@@ -74,13 +74,13 @@ func httpFingerMatch(result *utils.Result, finger utils.Finger) {
 	for _, header := range finger.Regexps.Header {
 		if resp == nil {
 			if strings.Contains(content, header) {
-				result.AddFramework(utils.Framework{Title: finger.Name})
+				result.AddFramework(utils.Framework{Name: finger.Name})
 				return
 			}
 		} else {
 			headers := utils.GetHeaderstr(resp)
 			if strings.Contains(headers, header) {
-				result.AddFramework(utils.Framework{Title: finger.Name})
+				result.AddFramework(utils.Framework{Name: finger.Name})
 				return
 			}
 		}
@@ -102,7 +102,7 @@ func httpFingerMatch(result *utils.Result, finger utils.Finger) {
 	for _, md5s := range finger.Regexps.MD5 {
 		m := md5.Sum([]byte(content))
 		if md5s == hex.EncodeToString(m[:]) {
-			result.AddFramework(utils.Framework{Title: finger.Name})
+			result.AddFramework(utils.Framework{Name: finger.Name})
 			return
 		}
 	}
@@ -195,7 +195,7 @@ func handlerMatchedResult(result *utils.Result, finger utils.Finger, res, conten
 	res = getRes(res)
 	result.AddFramework(utils.Framework{finger.Name, res})
 	if finger.Vuln != "" {
-		result.AddVuln(utils.Vuln{Id: finger.Vuln})
+		result.AddVuln(utils.Vuln{Name: finger.Vuln})
 	}
 	if finger.Level >= 1 && content != "" {
 		result.Title = utils.EncodeTitle(content)

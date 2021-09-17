@@ -96,7 +96,7 @@ func (result *Result) AddNTLMInfo(m map[string]string) {
 }
 
 type Vuln struct {
-	Id      string                 `json:"vn"`
+	Name    string                 `json:"vn"`
 	Payload map[string]interface{} `json:"vp"`
 	Detail  map[string]interface{} `json:"vd"`
 }
@@ -110,7 +110,7 @@ func (v *Vuln) GetDetail() string {
 }
 
 func (v *Vuln) ToString() string {
-	s := v.Id
+	s := v.Name
 	if payload := v.GetPayload(); payload != "" {
 		s += fmt.Sprintf(" payloads:%s", payload)
 	}
@@ -131,12 +131,12 @@ func (vs Vulns) ToString() string {
 }
 
 type Framework struct {
-	Title   string `json:"ft"`
+	Name    string `json:"ft"`
 	Version string `json:"fv"`
 }
 
 func (f Framework) ToString() string {
-	return fmt.Sprintf("%s%s", f.Title, f.Version)
+	return fmt.Sprintf("%s%s", f.Name, f.Version)
 }
 
 type Frameworks []Framework
@@ -152,7 +152,7 @@ func (fs Frameworks) ToString() string {
 func (fs Frameworks) GetTitles() []string {
 	titles := make([]string, len(fs))
 	for i, f := range fs {
-		titles[i] = f.Title
+		titles[i] = f.Name
 	}
 	return titles
 }
