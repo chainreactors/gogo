@@ -108,7 +108,7 @@ func getFramework(result *utils.Result, fingermap *utils.FingerMapper, matcher f
 	for port, fingers := range *fingermap {
 		for _, finger := range fingers {
 			if port != result.Port {
-				tcpFingerMatch(result, finger)
+				matcher(result, finger)
 			}
 			if !result.NoFramework() {
 				return
