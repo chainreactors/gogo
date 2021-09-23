@@ -178,7 +178,7 @@ func Printportconfig() {
 		fmt.Println("	", k, ": ", strings.Join(v, ","))
 	}
 	fmt.Println("当前已有端口配置: (根据服务分类)")
-	for k, v := range utils.Typemap {
+	for k, v := range utils.Tagmap {
 		fmt.Println("	", k, ": ", strings.Join(v, ","))
 	}
 }

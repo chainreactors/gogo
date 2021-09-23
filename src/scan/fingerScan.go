@@ -196,7 +196,7 @@ func handlerMatchedResult(result *utils.Result, finger utils.Finger, res, conten
 	}
 
 	res = getRes(res)
-	result.AddFramework(utils.Framework{finger.Name, res})
+	result.AddFramework(utils.Framework{Name: finger.Name, Version: res})
 	if finger.Vuln != "" {
 		result.AddVuln(utils.Vuln{Name: finger.Vuln})
 	}

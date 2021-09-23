@@ -64,9 +64,16 @@ func Dispatch(result *utils.Result) {
 
 		//主动信息收集
 		// 因为正则匹配耗时较长,如果没有-v参数则字节不进行服务识别
-		if VersionLevel > 0 {
+		if VersionLevel == 1 {
 			if result.NoFramework() && strings.HasPrefix(result.Protocol, "http") {
 				faviconScan(result)
+			}
+		} else if VersionLevel == 2 {
+			faviconScan(result)
+		} else {
+			if !result.IsHttp() && result.NoFramework() {
+				// 通过默认端口号猜测服务,不具备准确性
+				result.GuessFramework()
 			}
 		}
 
@@ -81,6 +88,7 @@ func Dispatch(result *utils.Result) {
 		}
 		result.Title = strings.TrimSpace(result.Title)
 		result.Title = strings.Trim(result.Title, "\x00")
+
 		return
 	}
 

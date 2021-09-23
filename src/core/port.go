@@ -31,8 +31,8 @@ func choiceports(portname string) []string {
 	if utils.Namemap[portname] != nil {
 		ports = append(ports, utils.Namemap[portname]...)
 		return ports
-	} else if utils.Typemap[portname] != nil {
-		ports = append(ports, utils.Typemap[portname]...)
+	} else if utils.Tagmap[portname] != nil {
+		ports = append(ports, utils.Tagmap[portname]...)
 		return ports
 	} else {
 		return []string{portname}

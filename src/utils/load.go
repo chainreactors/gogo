@@ -11,7 +11,7 @@ import (
 
 var Mmh3fingers, Md5fingers = loadHashFinger()
 var Tcpfingers, Httpfingers = loadVersionFingers()
-var Namemap, Typemap, Portmap = loadPortConfig()
+var Tagmap, Namemap, Portmap = loadPortConfig()
 var Compiled = make(map[string][]regexp.Regexp)
 var CommonCompiled = initregexp()
 var TemplateMap = loadTemplates()
@@ -37,7 +37,7 @@ func loadTemplates() map[string][]*nuclei.Template {
 	}
 	return templatemap
 }
-func loadPortConfig() (map[string][]string, map[string][]string, map[string][]string) {
+func loadPortConfig() (PortMapper, PortMapper, PortMapper) {
 	var portfingers []PortFinger
 	err := json.Unmarshal([]byte(LoadConfig("port")), &portfingers)
 
@@ -45,22 +45,22 @@ func loadPortConfig() (map[string][]string, map[string][]string, map[string][]st
 		fmt.Println("[-] port config load FAIL!")
 		os.Exit(0)
 	}
-	typemap := make(map[string][]string)
-	namemap := make(map[string][]string)
-	portmap := make(map[string][]string)
+	tagmap := make(PortMapper)  // 以服务名归类
+	namemap := make(PortMapper) // 以tag归类
+	portmap := make(PortMapper) // 以端口号归类
 
 	for _, v := range portfingers {
 		v.Ports = Ports2PortSlice(v.Ports)
 		namemap[v.Name] = append(namemap[v.Name], v.Ports...)
 		for _, t := range v.Type {
-			typemap[t] = append(typemap[t], v.Ports...)
+			tagmap[t] = append(tagmap[t], v.Ports...)
 		}
 		for _, p := range v.Ports {
 			portmap[p] = append(portmap[p], v.Name)
 		}
 	}
 
-	return typemap, namemap, portmap
+	return tagmap, namemap, portmap
 }
 
 //加载指纹到全局变量

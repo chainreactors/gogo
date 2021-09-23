@@ -61,3 +61,5 @@ type PortFinger struct {
 	Ports []string `json:"ports"`
 	Type  []string `json:"type"`
 }
+
+type PortMapper map[string][]string

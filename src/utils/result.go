@@ -55,6 +55,14 @@ func (result *Result) NoFramework() bool {
 	return false
 }
 
+func (result *Result) GuessFramework() {
+	for _, v := range Portmap[result.Port] {
+		if Tagmap[v] == nil && !SliceContains([]string{"top1", "top2", "top3", "win", "other"}, v) {
+			result.AddFramework(Framework{Name: v, IsGuess: true})
+		}
+	}
+}
+
 func (result Result) IsHttp() bool {
 	if strings.HasPrefix(result.Protocol, "http") {
 		return true
@@ -96,7 +104,7 @@ func (result *Result) GetTarget() string {
 func (result *Result) AddNTLMInfo(m map[string]string) {
 	result.Title = m["MsvAvNbDomainName"] + "/" + m["MsvAvNbComputerName"]
 	result.Host = m["MsvAvDnsDomainName"] + "/" + m["MsvAvDnsComputerName"]
-	result.AddFramework(Framework{m["Version"], ""})
+	result.AddFramework(Framework{Name: m["Version"], Version: ""})
 }
 
 type Vuln struct {
@@ -137,10 +145,16 @@ func (vs Vulns) ToString() string {
 type Framework struct {
 	Name    string `json:"ft"`
 	Version string `json:"fv"`
+	IsGuess bool   `json:"fg"`
 }
 
 func (f Framework) ToString() string {
-	return fmt.Sprintf("%s%s", f.Name, f.Version)
+	if f.IsGuess {
+		return fmt.Sprintf("*%s%s", f.Name, f.Version)
+	} else {
+		return fmt.Sprintf("%s%s", f.Name, f.Version)
+	}
+
 }
 
 type Frameworks []Framework
@@ -154,9 +168,12 @@ func (fs Frameworks) ToString() string {
 }
 
 func (fs Frameworks) GetTitles() []string {
-	titles := make([]string, len(fs))
-	for i, f := range fs {
-		titles[i] = f.Name
+	var titles []string
+	//titles := []string{}
+	for _, f := range fs {
+		if !f.IsGuess {
+			titles = append(titles, f.Name)
+		}
 	}
 	return titles
 }
