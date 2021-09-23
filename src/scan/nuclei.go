@@ -23,7 +23,7 @@ func Nuclei(url string, result *utils.Result) {
 		vulns = execute_templates([]string{Exploit}, url, opt)
 	}
 	if len(vulns) > 0 {
-		result.Vulns = vulns
+		result.AddVulns(vulns)
 	}
 }
 
@@ -34,7 +34,7 @@ func execute_templates(titles []string, url string, opt nuclei.Options) []utils.
 		for _, request := range template.Requests { // 逐个执行requests,每个poc获取返回值后退出
 			res, err := request.ExecuteRequestWithResults(url, opt)
 			if err != nil {
-				println(err.Error())
+				continue
 			}
 			if res != nil && res.Matched {
 				vulns = append(vulns, utils.Vuln{template.Id, res.PayloadValues, res.DynamicValues})

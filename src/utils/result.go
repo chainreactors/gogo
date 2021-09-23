@@ -40,6 +40,10 @@ func (result *Result) AddVuln(vuln Vuln) {
 	result.Vulns = append(result.Vulns, vuln)
 }
 
+func (result *Result) AddVulns(vulns []Vuln) {
+	result.Vulns = append(result.Vulns, vulns...)
+}
+
 func (result *Result) AddFramework(f Framework) {
 	result.Frameworks = append(result.Frameworks, f)
 }
