@@ -10,7 +10,8 @@ import (
 )
 
 var Mmh3fingers, Md5fingers = loadHashFinger()
-var Tcpfingers, Httpfingers = loadVersionFingers()
+var Tcpfingers = loadFingers("tcp")
+var Httpfingers = loadFingers("http")
 var Tagmap, Namemap, Portmap = loadPortConfig()
 var Compiled = make(map[string][]regexp.Regexp)
 var CommonCompiled = initregexp()
@@ -64,19 +65,18 @@ func loadPortConfig() (PortMapper, PortMapper, PortMapper) {
 }
 
 //加载指纹到全局变量
-func loadVersionFingers() (map[string][]Finger, []Finger) {
-
-	var tmptcpfingers, httpfingers []Finger
-	var tcpfingers = make(map[string][]Finger)
+func loadFingers(t string) *FingerMapper {
+	var tmpfingers []Finger
+	var fingermap = make(FingerMapper)
 	// 根据权重排序在python脚本中已经实现
-	err := json.Unmarshal([]byte(LoadConfig("tcp")), &tmptcpfingers)
+	err := json.Unmarshal([]byte(LoadConfig(t)), &tmpfingers)
 	if err != nil {
-		fmt.Println("[-] tcpfingers load FAIL!")
+		fmt.Println("[-] finger load FAIL!")
 		os.Exit(0)
 	}
-	//初步处理tcp指纹
 
-	for _, finger := range tmptcpfingers {
+	//初步处理tcp指纹
+	for _, finger := range tmpfingers {
 		finger.Decode() // 防止\xff \x00编码解码影响结果
 
 		// 普通指纹
@@ -88,30 +88,20 @@ func loadVersionFingers() (map[string][]Finger, []Finger) {
 			Compiled[finger.Name+"_vuln"] = append(Compiled[finger.Name], compile("(?im)"+regstr))
 		}
 
+		// http默认为80
+		if finger.Defaultport == nil && finger.Protocol == "http" {
+			finger.Defaultport = []string{"80"}
+		}
+
 		// 根据端口分类指纹
 		for _, ports := range finger.Defaultport {
 			for _, port := range port2PortSlice(ports) {
-				tcpfingers[port] = []Finger{finger}
+				fingermap[port] = append(fingermap[port], finger)
 			}
 		}
-	}
 
-	err = json.Unmarshal([]byte(LoadConfig("http")), &httpfingers)
-	if err != nil {
-		fmt.Println("[-] httpfingers load FAIL!")
-		os.Exit(0)
 	}
-
-	for _, finger := range httpfingers {
-		// 预编译指纹
-		for _, regstr := range finger.Regexps.Regexp {
-			Compiled[finger.Name] = append(Compiled[finger.Name], compile("(?im)"+regstr))
-		}
-		for _, regstr := range finger.Regexps.Vuln {
-			Compiled[finger.Name+"_vuln"] = append(Compiled[finger.Name], compile("(?im)"+regstr))
-		}
-	}
-	return tcpfingers, httpfingers
+	return &fingermap
 }
 
 func loadHashFinger() (map[string]string, map[string]string) {

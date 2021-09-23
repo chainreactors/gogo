@@ -63,3 +63,9 @@ type PortFinger struct {
 }
 
 type PortMapper map[string][]string
+
+type FingerMapper map[string][]Finger
+
+func (fm FingerMapper) GetFingers(k string) []Finger {
+	return fm[k]
+}

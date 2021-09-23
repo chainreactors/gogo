@@ -11,22 +11,9 @@ import (
 func fingerScan(result *utils.Result) {
 	//如果是http协议,则判断cms,如果是tcp则匹配规则库.暂时不考虑udp
 	if strings.HasPrefix(result.Protocol, "http") {
-		getHttpCMS(result)
+		getFramework(result, utils.Httpfingers, httpFingerMatch)
 	} else {
-		getTCPFrameWork(result)
-	}
-	return
-}
-
-func getHttpCMS(result *utils.Result) {
-	for _, finger := range utils.Httpfingers {
-		if VersionLevel < finger.Level {
-			return
-		}
-		httpFingerMatch(result, finger)
-		if !result.NoFramework() {
-			return
-		}
+		getFramework(result, utils.Tcpfingers, tcpFingerMatch)
 	}
 	return
 }
@@ -108,18 +95,17 @@ func httpFingerMatch(result *utils.Result, finger utils.Finger) {
 	}
 }
 
-//第一个返回值为详细的版本信息,第二个返回值为规则名字
-func getTCPFrameWork(result *utils.Result) {
+func getFramework(result *utils.Result, fingermap *utils.FingerMapper, matcher func(*utils.Result, utils.Finger)) {
 	// 优先匹配默认端口,第一遍循环只匹配默认端口
-	for _, finger := range utils.Tcpfingers[result.Port] {
-		tcpFingerMatch(result, finger)
+	for _, finger := range fingermap.GetFingers(result.Port) {
+		matcher(result, finger)
 		if !result.NoFramework() {
 			return
 		}
 	}
 
 	// 若默认端口未匹配到结果,则匹配全部
-	for port, fingers := range utils.Tcpfingers {
+	for port, fingers := range *fingermap {
 		for _, finger := range fingers {
 			if port != result.Port {
 				tcpFingerMatch(result, finger)
