@@ -79,7 +79,7 @@ func getCookies(resp *http.Response) map[string]string {
 
 //从socket中获取htt状态码
 func GetStatusCode(content string) (bool, string) {
-	if len(content) > 12 && strings.Contains(content, "HTTP") {
+	if len(content) > 12 && strings.HasPrefix(content, "HTTP") {
 		return true, content[9:12]
 	}
 	return false, "tcp"
