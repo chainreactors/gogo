@@ -6,6 +6,7 @@ import (
 	"getitle/src/nuclei"
 	"os"
 	"regexp"
+	"strings"
 )
 
 var Mmh3fingers, Md5fingers = loadHashFinger()
@@ -26,7 +27,7 @@ func loadTemplates() map[string][]*nuclei.Template {
 	for index, template := range templates {
 		// 以指纹归类
 		if template.Finger != "" {
-			templatemap[template.Finger] = append(templatemap[template.Finger], &templates[index])
+			templatemap[strings.ToLower(template.Finger)] = append(templatemap[template.Finger], &templates[index])
 		}
 
 		// 以tag归类

@@ -3,6 +3,7 @@ package scan
 import (
 	"getitle/src/nuclei"
 	"getitle/src/utils"
+	"strings"
 )
 
 //tamplate =
@@ -54,7 +55,7 @@ func choiceTemplates(titles []string) []*nuclei.Template {
 
 	} else {
 		for _, t := range titles {
-			if tmp_templates, ok := utils.TemplateMap[t]; ok {
+			if tmp_templates, ok := utils.TemplateMap[strings.ToLower(t)]; ok {
 				templates = append(templates, tmp_templates...)
 			}
 		}

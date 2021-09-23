@@ -65,7 +65,7 @@ func Dispatch(result *utils.Result) {
 		//主动信息收集
 		// 因为正则匹配耗时较长,如果没有-v参数则字节不进行服务识别
 		if VersionLevel > 0 {
-			if !result.NoFramework() && strings.HasPrefix(result.Protocol, "http") {
+			if result.NoFramework() && strings.HasPrefix(result.Protocol, "http") {
 				faviconScan(result)
 			}
 		}
