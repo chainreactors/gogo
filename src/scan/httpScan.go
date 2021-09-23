@@ -39,11 +39,9 @@ func socketHttp(target string, result *utils.Result) {
 		result.Error = err.Error()
 	}
 
-	content := string(data)
-
 	//获取状态码
-	result.Content = content
-	ishttp, statuscode = utils.GetStatusCode(content)
+	result.Content = string(data)
+	ishttp, statuscode = utils.GetStatusCode(result.Content)
 	if ishttp {
 		result.HttpStat = statuscode
 		result.Protocol = "http"

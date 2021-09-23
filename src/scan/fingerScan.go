@@ -191,7 +191,10 @@ func tcpFingerMatch(result *utils.Result, finger utils.Finger) {
 }
 
 func handlerMatchedResult(result *utils.Result, finger utils.Finger, res, content string) {
-	result.HttpStat = finger.Protocol
+	if result.Protocol == "tcp" {
+		result.HttpStat = finger.Protocol
+	}
+
 	res = getRes(res)
 	result.AddFramework(utils.Framework{finger.Name, res})
 	if finger.Vuln != "" {
