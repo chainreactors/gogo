@@ -90,7 +90,7 @@ class GetitleResult:
 
     def dict2string(self, l):
         if l:
-            return "|".join(["".join(i.values()) for i in l]).lower()
+            return "|".join(["".join(map(str,i.values())) for i in l]).lower()
         else:
             return ""
 

@@ -28,7 +28,7 @@ func createClient(opt Options) *http.Client {
 			Renegotiation:      tls.RenegotiateOnceAsClient,
 			InsecureSkipVerify: true,
 		},
-		DisableKeepAlives: false,
+		DisableKeepAlives: true,
 	}
 	var jar *cookiejar.Jar
 	if opt.CookieReuse {
