@@ -88,7 +88,7 @@ func Init(config Config) Config {
 	} else {
 		if config.Mod == "s" {
 			config.SmartPortList = []string{"80"}
-		} else if config.Mod == "ss" || config.Mod == "f" {
+		} else if utils.SliceContains([]string{"ss", "sc", "f"}, config.Mod) {
 			config.SmartPortList = []string{"icmp"}
 		}
 	}
@@ -173,7 +173,7 @@ func RunTask(config Config) {
 	}
 
 	// 如果指定端口超过100,则自动启用spray
-	if len(config.Portlist) > 100 && !config.NoSpray {
+	if len(config.Portlist) > 150 && !config.NoSpray {
 		config.Spray = true
 	}
 	// 输出任务的基本信息
@@ -184,7 +184,7 @@ func RunTask(config Config) {
 		StraightMod(config)
 	case "a", "auto":
 		autoScan(config)
-	case "s", "f", "ss":
+	case "s", "f", "ss", "sc":
 		mask := getMask(config.IP)
 		if mask >= 24 {
 			config.Mod = "default"

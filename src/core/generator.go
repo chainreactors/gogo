@@ -224,7 +224,7 @@ func genFromSpray(config Config, tcch *chan targetConfig) {
 			for _, cidr := range config.IPlist {
 				ch = goDefaultIpGenerator(cidr)
 				for ip := range ch {
-					*tcch <- targetConfig{ip, port, nil}
+					*tcch <- targetConfig{ip, port, nil} // finger适配
 				}
 				_ = FileHandle.Sync()
 			}

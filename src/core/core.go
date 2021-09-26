@@ -105,7 +105,7 @@ func SmartMod(config Config) {
 	temp.Range(func(key, value interface{}) bool {
 		if config.Mod == "ss" {
 			iplist = append(iplist, key.(string)+"/16")
-		} else {
+		} else if config.Mod == "s" {
 			iplist = append(iplist, key.(string)+"/24")
 		}
 		return true
@@ -115,8 +115,10 @@ func SmartMod(config Config) {
 	}
 	sort.Strings(iplist)
 	// 启发式扫描逐步降级,从喷洒B段到喷洒C段到默认扫描
-	if config.Mod == "ss" {
-		config.Mod = "s"
+	if config.Mod == "ss" || config.Mod == "sc" {
+		if config.Mod == "ss" {
+			config.Mod = "s"
+		}
 		for _, ip := range iplist {
 			config.IP = ip
 			processLog("[*] Spraying B class IP:" + ip)
@@ -125,7 +127,7 @@ func SmartMod(config Config) {
 			}
 			SmartMod(config)
 		}
-	} else {
+	} else if config.Mod == "s" {
 		config.Mod = "default"
 		config.IPlist = iplist
 		StraightMod(config)
@@ -165,18 +167,34 @@ func b_alived(ip string, temp *sync.Map) {
 	}
 }
 
+//func alived(ip string, temp *sync.Map){
+//	s2ip := net.ParseIP(ip).To4()
+//	s2ip[3] = 0
+//	s2ip[2] = 0
+//	aliveB := s2ip.String()
+//
+//	_, ok := temp.Load(aliveB)
+//	if !ok {
+//		temp.Store(aliveB, 1)
+//		fmt.Println("[*] Found " + ip + "/16")
+//		Alivesum++
+//		if FileHandle != nil && Noscan {
+//			Datach <- ip + "/16\n"
+//		}
+//	}
+//}
+
 func smartScan(tc targetConfig, temp *sync.Map, mod string) {
 	var result = new(utils.Result)
 	result.Ip = tc.ip
 	result.Port = tc.port
-	result.HttpStat = "s"
 
 	scan.Dispatch(result)
 
 	if result.Open {
 		if mod == "ss" {
 			b_alived(result.Ip, temp)
-		} else {
+		} else if mod == "s" {
 			c_alived(result.Ip, temp)
 		}
 	}
