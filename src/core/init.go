@@ -110,7 +110,7 @@ func Init(config Config) Config {
 	//	os.Exit(0)
 	//}
 	// 文件操作
-	initFile(config.Filename)
+	initFile(config.Filename, config.Mod)
 
 	return config
 }
@@ -129,7 +129,6 @@ func checkCommand(config Config) {
 			fmt.Println("[warn] json input can not config scan Mod,default scanning")
 		}
 	}
-
 }
 
 func printTaskInfo(config Config, taskname string) {

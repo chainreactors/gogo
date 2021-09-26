@@ -23,6 +23,15 @@ func int2ip(ipint uint) string {
 	return ip.String()
 }
 
+func mask2ipuint(mask int) uint {
+	return ((4294967296 >> uint(32-mask)) - 1) << uint(32-mask)
+}
+
+func ip2superip(ip string, mask int) string {
+	ipint := ip2int(ip)
+	return int2ip(ipint & mask2ipuint(mask))
+}
+
 func getMaskRange(mask int) (before uint, after uint) {
 
 	before = uint(math.Pow(2, 32) - math.Pow(2, float64(32-mask)))
@@ -155,22 +164,23 @@ func firstIpGenerator(CIDR string, ch chan string) chan string {
 	return ch
 }
 
-func ipGenerator(config Config, temp *sync.Map) chan string {
+func ipGenerator(ip, mod string, ipl []uint, temp *sync.Map) chan string {
 	ch := make(chan string)
-	mask := getMask(config.IP)
+	mask := getMask(ip)
 	go func() {
-		if config.Mod == "s" {
-			ch = smartIpGenerator(config.IP, ch, temp)
-		} else if config.Mod == "ss" {
+		switch mod {
+		case "s", "sb":
+			ch = smartIpGenerator(ip, ch, temp)
+		case "ss", "sc":
 			if mask < 16 {
-				ch = aIpGenerator(config.IP, config.IpProbeList, ch, temp)
+				ch = aIpGenerator(ip, ipl, ch, temp)
 			} else {
-				ch = smartIpGenerator(config.IP, ch, temp)
+				ch = smartIpGenerator(ip, ch, temp)
 			}
-		} else if config.Mod == "f" {
-			ch = firstIpGenerator(config.IP, ch)
-		} else {
-			ch = defaultIpGenerator(config.IP, ch)
+		case "f":
+			ch = firstIpGenerator(ip, ch)
+		default:
+			ch = defaultIpGenerator(ip, ch)
 		}
 		close(ch)
 	}()

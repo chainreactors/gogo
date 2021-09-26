@@ -80,7 +80,7 @@ func FormatOutput(filename string, outputfile string) {
 	var outfunc func(s string)
 
 	if outputfile != "" {
-		fileHandle, _ := initFileHandle(outputfile)
+		fileHandle := initFileHandle(outputfile)
 		defer fileHandle.Close()
 		outfunc = func(s string) {
 			_, _ = fileHandle.WriteString(s)

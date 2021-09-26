@@ -26,13 +26,13 @@ func readTargetFile(targetfile string) []string {
 	return targets
 }
 
-func initFileHandle(filename string) (*os.File, bool) {
+func initFileHandle(filename string) *os.File {
 	var err error
 	var filehandle *os.File
 	if checkFileIsExist(filename) { //如果文件存在
 		//FileHandle, err = os.OpenFile(filename, os.O_APPEND|os.O_WRONLY, os.ModeAppend) //打开文件
 		fmt.Println("[-] File already exists")
-		return nil, false
+		os.Exit(0)
 	} else {
 		filehandle, err = os.Create(filename) //创建文件
 		if err != nil {
@@ -40,7 +40,7 @@ func initFileHandle(filename string) (*os.File, bool) {
 			os.Exit(0)
 		}
 	}
-	return filehandle, true
+	return filehandle
 }
 
 func checkFileIsExist(filename string) bool {
@@ -51,18 +51,15 @@ func checkFileIsExist(filename string) bool {
 	return exist
 }
 
-func initFile(filename string) {
+func initFile(filename, mod string) {
 	// 挂起两个文件操作的goroutine
-
 	// 存在文件输出则停止命令行输出
 	if filename != "" {
 		Clean = !Clean
 		// 创建output的filehandle
-		FileHandle, ok := initFileHandle(filename)
-		if !ok {
-			os.Exit(0)
-		}
-		if FileOutput == "json" && !Noscan {
+		FileHandle = initFileHandle(filename)
+
+		if FileOutput == "json" && !Noscan && mod != "sc" {
 			_, _ = FileHandle.WriteString("[")
 		}
 
@@ -71,10 +68,10 @@ func initFile(filename string) {
 	if !checkFileIsExist(".sock.lock") {
 		tmpfilename = ".sock.lock"
 	} else {
-		tmpfilename = ".sock.lock" + utils.ToString(time.Now().Unix())
+		tmpfilename = fmt.Sprintf(".%s.unix", utils.ToString(time.Now().Unix()))
 	}
 	_ = os.Remove(".sock.lock")
-	LogFileHandle, _ := initFileHandle(tmpfilename)
+	LogFileHandle = initFileHandle(tmpfilename)
 
 	//go write2File(FileHandle, Datach)
 	if FileHandle != nil {
@@ -82,7 +79,7 @@ func initFile(filename string) {
 			for res := range Datach {
 				_, _ = FileHandle.WriteString(res)
 			}
-			if FileOutput == "json" && !Noscan {
+			if FileOutput == "json" && !Noscan && mod != "sc" {
 				_, _ = FileHandle.WriteString("]")
 			}
 			_ = FileHandle.Close()
