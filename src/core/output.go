@@ -77,6 +77,19 @@ func jsonFile(result *utils.Result) string {
 }
 
 func FormatOutput(filename string, outputfile string) {
+	var outfunc func(s string)
+
+	if outputfile != "" {
+		fileHandle, _ := initFileHandle(outputfile)
+		defer fileHandle.Close()
+		outfunc = func(s string) {
+			_, _ = fileHandle.WriteString(s)
+		}
+	} else {
+		outfunc = func(s string) {
+			fmt.Print(s)
+		}
+	}
 	results := utils.LoadResult(filename)
 	pfs := make(map[string]map[string]portformat)
 	//ipfs := make(map[string]ipformat)
@@ -137,7 +150,7 @@ func FormatOutput(filename string, outputfile string) {
 				s += "\n"
 			}
 		}
-		fmt.Print(s)
+		outfunc(s)
 	}
 	//fmt.Println(string(content))
 }

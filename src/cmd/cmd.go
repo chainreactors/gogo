@@ -56,9 +56,8 @@ func CMD(k string) {
 		os.Exit(0)
 	}
 
-	// 输出Port config
+	// 输出 config
 	printConfigs(*printType)
-
 	// 格式化
 	if *formatoutput != "" {
 		core.FormatOutput(*formatoutput, config.Filename)

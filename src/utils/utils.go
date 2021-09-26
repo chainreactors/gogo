@@ -201,7 +201,7 @@ func LoadResult(filename string) []Result {
 	var results []Result
 	err = json.Unmarshal(content, &results)
 	if err != nil {
-		fmt.Println("json error")
+		fmt.Println("[-] json error, " + err.Error())
 		os.Exit(0)
 	}
 	return results
