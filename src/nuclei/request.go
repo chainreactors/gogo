@@ -83,12 +83,12 @@ func (r *Request) Compile(opt Options) error {
 	r.httpClient = client
 
 	if r.Body != "" && !strings.Contains(r.Body, "\r\n") {
-		r.Body = strings.ReplaceAll(r.Body, "\n", "\r\n")
+		r.Body = strings.Replace(r.Body, "\n", "\r\n", -1)
 	}
 	if len(r.Raw) > 0 {
 		for i, raw := range r.Raw {
 			if !strings.Contains(raw, "\r\n") {
-				r.Raw[i] = strings.ReplaceAll(raw, "\n", "\r\n")
+				r.Raw[i] = strings.Replace(raw, "\n", "\r\n", -1)
 			}
 		}
 	}
@@ -219,7 +219,7 @@ func respToMap(resp *http.Response, req *http.Request) map[string]interface{} {
 		data[strings.ToLower(cookie.Name)] = cookie.Value
 	}
 	for k, v := range resp.Header {
-		k = strings.ToLower(strings.ReplaceAll(strings.TrimSpace(k), "-", "_"))
+		k = strings.ToLower(strings.Replace(strings.TrimSpace(k), "-", "_", -1))
 		data[k] = strings.Join(v, " ")
 	}
 	resp.Body.Close()

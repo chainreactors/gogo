@@ -140,7 +140,7 @@ func baseURLWithTemplatePrefs(data string, parsed *url.URL) (string, *url.URL) {
 	}
 	port := matches[0][1]
 	parsed.Host = net.JoinHostPort(parsed.Hostname(), port)
-	data = strings.ReplaceAll(data, ":"+port, "")
+	data = strings.Replace(data, ":"+port, "", -1)
 	if parsed.Path == "" {
 		parsed.Path = "/"
 	}

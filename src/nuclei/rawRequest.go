@@ -27,9 +27,9 @@ func parseRaw(request, baseURL string, unsafe bool) (*rawRequest, error) {
 		Headers: make(map[string]string),
 	}
 	if unsafe {
-		request = strings.ReplaceAll(request, "\\0", "\x00")
-		request = strings.ReplaceAll(request, "\\r", "\r")
-		request = strings.ReplaceAll(request, "\\n", "\n")
+		request = strings.Replace(request, "\\0", "\x00", -1)
+		request = strings.Replace(request, "\\r", "\r", -1)
+		request = strings.Replace(request, "\\n", "\n", -1)
 		rawRequest.UnsafeRawBytes = []byte(request)
 	}
 	reader := bufio.NewReader(strings.NewReader(request))
