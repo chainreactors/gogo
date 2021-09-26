@@ -2,10 +2,14 @@ package core
 
 import (
 	"fmt"
+	"getitle/src/utils"
 	"io/ioutil"
 	"os"
 	"strings"
+	"time"
 )
+
+var tmpfilename string
 
 func readTargetFile(targetfile string) []string {
 
@@ -22,20 +26,21 @@ func readTargetFile(targetfile string) []string {
 	return targets
 }
 
-func initFileHandle(filename string) *os.File {
+func initFileHandle(filename string) (*os.File, bool) {
 	var err error
 	var filehandle *os.File
 	if checkFileIsExist(filename) { //如果文件存在
 		//FileHandle, err = os.OpenFile(filename, os.O_APPEND|os.O_WRONLY, os.ModeAppend) //打开文件
 		fmt.Println("[-] File already exists")
-		os.Exit(0)
+		return nil, false
 	} else {
 		filehandle, err = os.Create(filename) //创建文件
 		if err != nil {
+			fmt.Println("[-] create file error," + err.Error())
 			os.Exit(0)
 		}
 	}
-	return filehandle
+	return filehandle, true
 }
 
 func checkFileIsExist(filename string) bool {
@@ -53,15 +58,24 @@ func initFile(filename string) {
 	if filename != "" {
 		Clean = !Clean
 		// 创建output的filehandle
-		FileHandle = initFileHandle(filename)
+		FileHandle, ok := initFileHandle(filename)
+		if !ok {
+			os.Exit(0)
+		}
 		if FileOutput == "json" && !Noscan {
 			_, _ = FileHandle.WriteString("[")
 		}
 
 	}
 
+	if !checkFileIsExist(".sock.lock") {
+		tmpfilename = ".sock.lock"
+	} else {
+		tmpfilename = ".sock.lock" + utils.ToString(time.Now().Unix())
+	}
 	_ = os.Remove(".sock.lock")
-	LogFileHandle = initFileHandle(".sock.lock")
+	LogFileHandle, _ := initFileHandle(tmpfilename)
+
 	//go write2File(FileHandle, Datach)
 	if FileHandle != nil {
 		go func() {
@@ -82,6 +96,6 @@ func initFile(filename string) {
 			_ = LogFileHandle.Sync()
 		}
 		_ = LogFileHandle.Close()
-		_ = os.Remove(".sock.lock")
+		_ = os.Remove(tmpfilename)
 	}()
 }

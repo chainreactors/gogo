@@ -142,7 +142,8 @@ class GetitleResults:
         "elasticsearch": "ELASTICSEARCH",
         "postgreSQL": "POSTGRESQL",
         "mongo": "MONGO",
-        "SSH": "SSH"
+        "SSH": "SSH",
+        "ssh": "SSH"
     }
 
     def __init__(self, results: list):
