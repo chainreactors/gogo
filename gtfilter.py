@@ -131,19 +131,19 @@ class GetitleResults:
     }
 
     brutable = {
-        "MariaDB": "MYSQL",
-        "MySQL": "MYSQL",
+        "mariadb": "MYSQL",
+        "mysql": "MYSQL",
         "microsoft rdp": "RDP",
         # "oracle database": "ORACLE",
         "microsoft sqlserver": "MSSQL",
         "smb": "SMB",
         "redis": "REDIS",
-        "VNC": "VNC",
+        "vnc": "VNC",
         "elasticsearch": "ELASTICSEARCH",
         "postgreSQL": "POSTGRESQL",
         "mongo": "MONGO",
-        "SSH": "SSH",
-        "ssh": "SSH"
+        "ssh": "SSH",
+        "ftp": "FTP"
     }
 
     def __init__(self, results: list):
@@ -210,13 +210,13 @@ class GetitleResults:
 
     @property
     def brute(self):
-        return self.exprs([f"frameworks::{k.lower()}" for k in self.brutable.keys()], True)
+        return self.exprs([f"frameworks::{k}" for k in self.brutable.keys()], True)
 
     @property
     def zombie(self):
         return json.dumps([{"IP": result.ip,
                             "Port": int(result.port),
-                            "Server": self.brutable[result.first_framework_name()]
+                            "Server": self.brutable[result.first_framework_name().lower()]
                             }
                            for result in self.brute])
 

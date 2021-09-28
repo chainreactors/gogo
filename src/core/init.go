@@ -69,9 +69,16 @@ func Init(config Config) Config {
 
 	//windows系统默认协程数为2000
 	OS := runtime.GOOS
-	if config.Threads == 4000 && OS == "windows" {
-		config.Threads = 2000
+	if config.Threads == 4000 { // if 默认线程
+		if OS == "windows" {
+			config.Threads = 1000
+		} else if config.JsonFile != "" {
+			config.Threads = 1000
+		}
 	}
+
+	// 初始化文件操作
+	initFile(config.Filename, config.Mod)
 
 	// 如果输入的json不为空,则从json中加载result,并返回结果
 	if config.JsonFile != "" {
@@ -79,10 +86,12 @@ func Init(config Config) Config {
 		return config
 	}
 
-	if config.IP == "" && config.ListFile == "" && config.Mod != "a" {
+	if config.IP == "" && config.ListFile == "" && config.Mod != "a" { // 一些导致报错的参数组合
+		fmt.Println("[-] mod AUTO can not define IP or IPlist")
 		os.Exit(0)
 	}
-	// 初始化启发式扫描的端口
+
+	// 初始化启发式扫描的端口探针
 	if config.SmartPort != "default" {
 		config.SmartPortList = portHandler(config.SmartPort)
 	} else {
@@ -92,12 +101,14 @@ func Init(config Config) Config {
 			config.SmartPortList = []string{"icmp"}
 		}
 	}
-	// 默认ss默认只探测ip为1的c段,可以通过-ipp参数指定,例如-ipp 1,254,253
+
+	// 初始化ss模式ip探针,默认ss默认只探测ip为1的c段,可以通过-ipp参数指定,例如-ipp 1,254,253
 	if config.IpProbe != "default" {
 		config.IpProbeList = utils.Str2uintlist(config.IpProbe)
 	} else {
 		config.IpProbeList = []uint{1}
 	}
+
 	// 初始化端口配置
 	config.Portlist = portHandler(config.Ports)
 	// 如果从文件中读,初始化IP列表配置
@@ -110,7 +121,6 @@ func Init(config Config) Config {
 	//	os.Exit(0)
 	//}
 	// 文件操作
-	initFile(config.Filename, config.Mod)
 
 	return config
 }
