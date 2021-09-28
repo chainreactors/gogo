@@ -77,7 +77,7 @@ func SmartMod(config Config) {
 		mask = 24
 	}
 
-	processLog(fmt.Sprintf("[*] SmartScan %s, Mod: %s", taskname, config.Mod))
+	processLogln(fmt.Sprintf("[*] SmartScan %s, Mod: %s", taskname, config.Mod))
 	var wg sync.WaitGroup
 	var temp sync.Map
 
@@ -92,7 +92,7 @@ func SmartMod(config Config) {
 	if config.Mod == "ss" {
 		probeconfig += "Smart IP probe: " + config.IpProbe
 	}
-	processLog(probeconfig)
+	processLogln(probeconfig)
 
 	tcChannel = tcGenerator(ipChannel, config.SmartPortList)
 	scanPool, _ := ants.NewPoolWithFunc(config.Threads, func(i interface{}) {
@@ -126,7 +126,7 @@ func SmartMod(config Config) {
 		config.Mod = "s"
 		for _, ip := range iplist {
 			config.IP = ip
-			processLog("[*] Spraying B class IP:" + ip)
+			processLogln("[*] Spraying B class IP:" + ip)
 			if config.SmartPort == "default" {
 				config.SmartPortList = []string{"80"}
 			}
@@ -136,7 +136,7 @@ func SmartMod(config Config) {
 		config.Mod = "sb"
 		for _, ip := range iplist {
 			config.IP = ip
-			processLog("[*] Spraying B class IP:" + ip)
+			processLogln("[*] Spraying B class IP:" + ip)
 			if config.SmartPort == "default" {
 				config.SmartPortList = []string{"80"}
 			}

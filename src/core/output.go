@@ -155,7 +155,7 @@ func FormatOutput(filename string, outputfile string) {
 	//fmt.Println(string(content))
 }
 
-func processLog(s string) {
+func processLogln(s string) {
 	s = s + " , " + utils.GetCurtime() + "\n"
 	fmt.Print(s)
 	if LogFileHandle != nil {

@@ -86,11 +86,6 @@ func Init(config Config) Config {
 		return config
 	}
 
-	if config.IP == "" && config.ListFile == "" && config.Mod != "a" { // 一些导致报错的参数组合
-		fmt.Println("[-] mod AUTO can not define IP or IPlist")
-		os.Exit(0)
-	}
-
 	// 初始化启发式扫描的端口探针
 	if config.SmartPort != "default" {
 		config.SmartPortList = portHandler(config.SmartPort)
@@ -139,6 +134,10 @@ func checkCommand(config Config) {
 			fmt.Println("[warn] json input can not config scan Mod,default scanning")
 		}
 	}
+	if config.IP == "" && config.ListFile == "" && config.Mod != "a" { // 一些导致报错的参数组合
+		fmt.Println("[-] mod AUTO can not define IP or IPlist")
+		os.Exit(0)
+	}
 }
 
 func printTaskInfo(config Config, taskname string) {
@@ -146,18 +145,18 @@ func printTaskInfo(config Config, taskname string) {
 
 	fmt.Printf("[*] Current goroutines: %d, Version Level: %d,Exploit Target: %s, Spray Scan: %t\n", config.Threads, scan.VersionLevel, scan.Exploit, config.Spray)
 	if config.JsonFile == "" {
-		processLog(fmt.Sprintf("[*] Start scan task %s ,total ports: %d , mod: %s", taskname, len(config.Portlist), config.Mod))
+		processLogln(fmt.Sprintf("[*] Start scan task %s ,total ports: %d , mod: %s", taskname, len(config.Portlist), config.Mod))
 		if len(config.Portlist) > 500 {
 			fmt.Println("[*] too much ports , only show top 500 ports: " + strings.Join(config.Portlist[:500], ",") + "......")
 		} else {
 			fmt.Println("[*] ports: " + strings.Join(config.Portlist, ","))
 		}
 		if config.Mod == "default" {
-			processLog(fmt.Sprintf("[*] Estimated to take about %d seconds", guesstime(config)))
+			processLogln(fmt.Sprintf("[*] Estimated to take about %d seconds", guesstime(config)))
 		}
 	} else {
-		processLog(fmt.Sprintf("[*] Start scan task %s ,total target: %d", taskname, len(config.Results)))
-		processLog(fmt.Sprintf("[*] Estimated to take about %d seconds", (len(config.Results)/config.Threads)*4+4))
+		processLogln(fmt.Sprintf("[*] Start scan task %s ,total target: %d", taskname, len(config.Results)))
+		processLogln(fmt.Sprintf("[*] Estimated to take about %d seconds", (len(config.Results)/config.Threads)*4+4))
 	}
 }
 
@@ -296,7 +295,7 @@ func countip(ip string) int {
 
 func autoScan(config Config) {
 	for cidr, st := range InterConfig {
-		processLog("[*] Spraying : " + cidr)
+		processLogln("[*] Spraying : " + cidr)
 		SmartMod(createSmartTask(config, cidr, st))
 	}
 }

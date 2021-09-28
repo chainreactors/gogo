@@ -59,7 +59,7 @@ func defaultIpGenerator(CIDR string, ch chan string) chan string {
 			ch <- int2ip(i)
 		}
 		if i%65535 == 0 {
-			processLog(fmt.Sprintf("[*] Processing CIDR: %s/16", int2ip(i)))
+			processLogln(fmt.Sprintf("[*] Processing CIDR: %s/16", int2ip(i)))
 		}
 	}
 	return ch
@@ -101,8 +101,9 @@ func goIPsGenerator(config Config) chan string {
 	var ch = make(chan string)
 	go func() {
 		for _, cidr := range config.IPlist {
-			processLog("[*] Processing CIDR:" + cidr)
+			tmpalive := Alivesum
 			ch = defaultIpGenerator(cidr, ch)
+			processLogln(fmt.Sprintf("[*] Processed CIDR: %s, found %d ports", cidr, Alivesum-tmpalive))
 			// 每个c段同步数据到文件
 			_ = FileHandle.Sync()
 		}
@@ -229,7 +230,7 @@ func genFromResults(config Config, tcch *chan targetConfig) {
 func genFromSpray(config Config, tcch *chan targetConfig) {
 	var ch chan string
 	for _, port := range config.Portlist {
-		processLog("[*] Processing port:" + port)
+		tmpalive := Alivesum
 		if config.IPlist != nil {
 			for _, cidr := range config.IPlist {
 				ch = goDefaultIpGenerator(cidr)
@@ -244,6 +245,7 @@ func genFromSpray(config Config, tcch *chan targetConfig) {
 				*tcch <- targetConfig{ip, port, nil}
 			}
 		}
+		processLogln(fmt.Sprintf("[*] Processed Port: %s, found %d ports", port, Alivesum-tmpalive))
 	}
 }
 
