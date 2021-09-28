@@ -28,7 +28,7 @@ func Dispatch(result *utils.Result) {
 	} else if result.Port == "icmp" {
 		icmpScan(result)
 		return
-	} else if result.Port == "snmp" {
+	} else if result.Port == "snmp" || result.Port == "161" {
 		snmpScan(result.Ip, result)
 		return
 	} else if result.Port == "445" || result.Port == "smb" {

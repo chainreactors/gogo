@@ -23,13 +23,13 @@ func int2ip(ipint uint) string {
 	return ip.String()
 }
 
-func mask2ipuint(mask int) uint {
-	return ((4294967296 >> uint(32-mask)) - 1) << uint(32-mask)
+func mask2ipuint(mask int) uint64 {
+	return ((uint64(4294967296) >> uint(32-mask)) - 1) << uint(32-mask)
 }
 
 func ip2superip(ip string, mask int) string {
 	ipint := ip2int(ip)
-	return int2ip(ipint & mask2ipuint(mask))
+	return int2ip(ipint & uint(mask2ipuint(mask)))
 }
 
 func getMaskRange(mask int) (before uint, after uint) {

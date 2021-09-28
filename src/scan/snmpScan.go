@@ -17,9 +17,10 @@ func snmpScan(target string, result *utils.Result) {
 		return
 	}
 	result.Open = true
-	result.Protocol = "udp"
+	result.Protocol = "snmp"
 	result.HttpStat = "snmp"
 	if len(resp.Variables) > 0 {
-		result.Midware = resp.Variables[0].Value.(string)
+		result.AddVuln(utils.Vuln{Name: "snmp_default_auth", Payload: map[string]interface{}{"auth": "public"}})
+		result.Title = resp.Variables[0].Value.(string)
 	}
 }
