@@ -91,9 +91,17 @@ func FormatOutput(filename string, outputfile string) {
 			fmt.Print(s)
 		}
 	}
-	results := utils.LoadResult(filename)
+	resultsdata := utils.LoadResult(filename)
+	// 输出配置信息
+	configstr := fmt.Sprintf("[*] Scan Target: %s, Ports: %s, Mod: %s", resultsdata.Config.IP, resultsdata.Config.Ports, resultsdata.Config.Mod)
+	if resultsdata.IP != "" {
+		configstr += " Internet IP: " + resultsdata.IP
+	}
+	fmt.Println(configstr)
+
 	pfs := make(map[string]map[string]portformat)
 	//ipfs := make(map[string]ipformat)
+	results := resultsdata.Data
 	for _, result := range results {
 		pf := portformat{
 			Port:       result.Port,
@@ -123,12 +131,6 @@ func FormatOutput(filename string, outputfile string) {
 	for _, ipi := range keys {
 		ip := int2ip(uint(ipi))
 
-		//if len(pfs[ip]) == 1 {
-		//	for pint, p := range pfs[ip] {
-		//		fmt.Printf("[+] %s://%s:%s\t%s\t%s\t%s\t%s\t[%s] %s\n", p.protocol, ip, pint, p.midware, p.language, p.framework, p.host, p.stat, p.title)
-		//		continue
-		//	}
-		//}
 		var hostname, network, netbiosstat string
 
 		if _, k := pfs[ip]["135"]; k {
@@ -147,7 +149,7 @@ func FormatOutput(filename string, outputfile string) {
 					// 颜色输出
 					s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s\t%s\t%s [%s] %s %s", p.Protocol, ip, pint, p.Midware, p.Language, blue(p.Frameworks.ToString()), p.Host, p.Hash, yellow(p.Stat), blue(p.Title), red(p.Vulns.ToString()))
 				} else {
-					s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s\t%s\t[%s] %s %s", p.Protocol, ip, pint, p.Midware, p.Language, p.Frameworks.ToString(), p.Host, p.Hash, p.Stat, p.Title, p.Vulns.ToString())
+					s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s\t%s\t%s [%s] %s %s", p.Protocol, ip, pint, p.Midware, p.Language, p.Frameworks.ToString(), p.Host, p.Hash, p.Stat, p.Title, p.Vulns.ToString())
 				}
 				s += "\n"
 			}

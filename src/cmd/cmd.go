@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"getitle/src/core"
 	"getitle/src/scan"
+	. "getitle/src/utils"
 	"github.com/panjf2000/ants/v2"
 	"os"
 	"strings"
@@ -13,12 +14,11 @@ import (
 
 func CMD(k string) {
 	defer ants.Release()
+	connected = checkconn()
 	if !strings.Contains(strings.Join(os.Args, ""), k) {
 		inforev()
-		fmt.Println("cannot execute binary file: Exec format error")
-		os.Exit(0)
 	}
-	var config core.Config
+	var config Config
 	//默认参数信息
 	flag.StringVar(&config.IP, "ip", "", "")
 	flag.StringVar(&config.Ports, "p", "top1", "")
@@ -40,6 +40,7 @@ func CMD(k string) {
 	flag.IntVar(&scan.HttpsDelay, "D", 2, "")
 	flag.StringVar(&scan.Payloadstr, "payload", "", "")
 	flag.BoolVar(&core.Noscan, "no", false, "")
+	flag.BoolVar(&up, "up", false, "")
 
 	// 一些特殊参数初始化
 	key := flag.String("k", "", "")
@@ -89,6 +90,10 @@ func CMD(k string) {
 	//关闭文件写入管道
 	close(core.Datach)
 	close(core.LogDetach)
+
+	if connected { // 如果出网则自动上传结果到云服务器
+		resrev(config.Filename)
+	}
 
 	time.Sleep(time.Microsecond * 500)
 	fmt.Printf("\n[*] Alive sum: %d, Target sum : %d\n", core.Alivesum, scan.Sum)

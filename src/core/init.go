@@ -3,8 +3,7 @@ package core
 import (
 	"fmt"
 	"getitle/src/scan"
-	"getitle/src/utils"
-	"net"
+	. "getitle/src/utils"
 	"os"
 	"runtime"
 	"strconv"
@@ -30,32 +29,13 @@ var InterConfig = map[string][]string{
 	"172.16.0.0/12":  {"ss", "icmp", "1"},
 	"192.168.0.0/16": {"s", "80", "all"},
 	"100.100.0.0/16": {"s", "icmp", "all"},
+	"200.200.0.0/16": {"s", "icmp", "all"},
 	"169.254.0.0/16": {"s", "icmp", "all"},
 	"168.254.0.0/16": {"s", "icmp", "all"},
 }
 
-type Config struct {
-	IP            string
-	IPlist        []string
-	Ports         string
-	Portlist      []string
-	JsonFile      string
-	Results       []utils.Result
-	ListFile      string
-	Threads       int
-	Mod           string
-	SmartPort     string
-	SmartPortList []string
-	IpProbe       string
-	IpProbeList   []uint
-	Output        string
-	Filename      string
-	Spray         bool
-	NoSpray       bool
-}
-
 func Init(config Config) Config {
-	//println("*********  main 0.3.3 beta by Sangfor  *********")
+	//println("*********  main 0.9.4 beta by Sangfor  *********")
 
 	//if config.Mod != "default" && config.ListFile != "" {
 	//	println("[-] error Smart scan config")
@@ -78,11 +58,11 @@ func Init(config Config) Config {
 	}
 
 	// 初始化文件操作
-	initFile(config.Filename, config.Mod)
+	initFile(config)
 
 	// 如果输入的json不为空,则从json中加载result,并返回结果
 	if config.JsonFile != "" {
-		config.Results = utils.LoadResult(config.JsonFile)
+		config.Results = LoadResult(config.JsonFile).Data
 		return config
 	}
 
@@ -92,14 +72,14 @@ func Init(config Config) Config {
 	} else {
 		if config.Mod == "s" {
 			config.SmartPortList = []string{"80"}
-		} else if utils.SliceContains([]string{"ss", "sc", "f"}, config.Mod) {
+		} else if SliceContains([]string{"ss", "sc", "f"}, config.Mod) {
 			config.SmartPortList = []string{"icmp"}
 		}
 	}
 
 	// 初始化ss模式ip探针,默认ss默认只探测ip为1的c段,可以通过-ipp参数指定,例如-ipp 1,254,253
 	if config.IpProbe != "default" {
-		config.IpProbeList = utils.Str2uintlist(config.IpProbe)
+		config.IpProbeList = Str2uintlist(config.IpProbe)
 	} else {
 		config.IpProbeList = []uint{1}
 	}
@@ -205,70 +185,6 @@ func RunTask(config Config) {
 	}
 }
 
-func ipInit(config Config) Config {
-	// 如果输入的是文件,则格式化所有输入值.如果无有效ip
-	if config.ListFile != "" {
-		var iplist []string
-		for _, ip := range config.IPlist {
-			tmpip := ipForamt(ip)
-			if !strings.HasPrefix(tmpip, "err") {
-				iplist = append(iplist, tmpip)
-			} else {
-				fmt.Println("[-] " + tmpip + " ip format error")
-			}
-		}
-		config.IPlist = utils.SliceUnique(iplist) // 去重
-		if len(config.IPlist) == 0 {
-			fmt.Println("[-] all IP error")
-			os.Exit(0)
-		}
-	} else if config.IP != "" {
-		config.IP = ipForamt(config.IP)
-		if strings.HasPrefix(config.IP, "err") {
-			fmt.Println("[-] IP format error")
-			os.Exit(0)
-		}
-	}
-	return config
-}
-
-func ipForamt(target string) string {
-	target = strings.Replace(target, "http://", "", -1)
-	target = strings.Replace(target, "https://", "", -1)
-	target = strings.Trim(target, "/")
-	if strings.Contains(target, "/") {
-		ip := strings.Split(target, "/")[0]
-		mask := strings.Split(target, "/")[1]
-		if isIPv4(ip) {
-			target = ip + "/" + mask
-		} else {
-			target = getIp(ip) + "/" + mask
-		}
-	} else {
-		if isIPv4(target) {
-			target = target + "/32"
-		} else {
-			target = getIp(target) + "/32"
-		}
-	}
-	return target
-}
-
-func getIp(target string) string {
-	iprecords, err := net.LookupIP(target)
-	if err != nil {
-		fmt.Println("[-] error IPv4 or bad domain:" + target + ". JUMPED!")
-		return "err"
-	}
-	for _, ip := range iprecords {
-		if ip.To4() != nil {
-			fmt.Println("[*] parse domain SUCCESS, map " + target + " to " + ip.String())
-			return ip.String()
-		}
-	}
-	return "err"
-}
-
 func guesstime(config Config) int {
 	ipcount := 0
 	portcount := len(config.Portlist)
@@ -305,7 +221,7 @@ func createSmartTask(config Config, cidr string, c []string) Config {
 	config.Mod = c[0]
 	if c[2] != "all" {
 		config.IpProbe = c[2]
-		config.IpProbeList = utils.Str2uintlist(c[2])
+		config.IpProbeList = Str2uintlist(c[2])
 	}
 	return config
 }

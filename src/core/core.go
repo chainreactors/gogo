@@ -3,7 +3,7 @@ package core
 import (
 	"fmt"
 	"getitle/src/scan"
-	"getitle/src/utils"
+	. "getitle/src/utils"
 	"github.com/panjf2000/ants/v2"
 	"sort"
 	"strings"
@@ -15,7 +15,7 @@ var Alivesum int
 type targetConfig struct {
 	ip     string
 	port   string
-	finger utils.Frameworks
+	finger Frameworks
 }
 
 //直接扫描
@@ -40,7 +40,7 @@ func StraightMod(config Config) {
 
 func defaultScan(tc targetConfig) {
 	//fmt.Println(ip)
-	var result = new(utils.Result)
+	var result = new(Result)
 	result.Ip = tc.ip
 	result.Port = tc.port
 	scan.Dispatch(result)
@@ -159,14 +159,14 @@ func alived(ip string, temp *sync.Map, mask int, mod string) {
 		cidr := fmt.Sprintf("%s/%d\n", ip, mask)
 		fmt.Print("[*] Found " + cidr)
 		Alivesum++
-		if FileHandle != nil && utils.SliceContains([]string{"ss", "s", "sb"}, mod) {
+		if FileHandle != nil && SliceContains([]string{"ss", "s", "sb"}, mod) {
 			Datach <- cidr
 		}
 	}
 }
 
 func smartScan(tc targetConfig, temp *sync.Map, mask int, mod string) {
-	result := utils.Result{Ip: tc.ip, Port: tc.port}
+	result := Result{Ip: tc.ip, Port: tc.port}
 	scan.Dispatch(&result)
 
 	if result.Open {

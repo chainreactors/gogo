@@ -188,28 +188,28 @@ func ToStringMap(i interface{}) map[string]interface{} {
 	}
 }
 
-func LoadResult(filename string) []Result {
+func LoadResult(filename string) ResultsData {
 	content, err := ioutil.ReadFile(filename)
 	if err != nil {
 		print(err.Error())
 		os.Exit(0)
 	}
 	// 自动修复未完成任务的json
-	laststr := string(content[len(content)-1:])
-	if laststr != "]" {
-		content = append(content, "]"...)
+	laststr := string(content[len(content)-2:])
+	if laststr != "]}" {
+		content = append(content, "]}"...)
 		fmt.Println("[*] Task has not been completed,auto fix json")
 		fmt.Println("[*] Task has not been completed,auto fix json")
 		fmt.Println("[*] Task has not been completed,auto fix json")
 
 	}
-	var results []Result
-	err = json.Unmarshal(content, &results)
+	var resultsdata ResultsData
+	err = json.Unmarshal(content, &resultsdata)
 	if err != nil {
 		fmt.Println("[-] json error, " + err.Error())
 		os.Exit(0)
 	}
-	return results
+	return resultsdata
 }
 
 func compile(s string) regexp.Regexp {

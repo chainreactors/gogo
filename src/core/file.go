@@ -1,8 +1,9 @@
 package core
 
 import (
+	"encoding/json"
 	"fmt"
-	"getitle/src/utils"
+	. "getitle/src/utils"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -51,16 +52,20 @@ func checkFileIsExist(filename string) bool {
 	return exist
 }
 
-func initFile(filename, mod string) {
+func initFile(config Config) {
 	// 挂起两个文件操作的goroutine
 	// 存在文件输出则停止命令行输出
-	if filename != "" {
+	if config.Filename != "" {
 		Clean = !Clean
 		// 创建output的filehandle
-		FileHandle = initFileHandle(filename)
+		FileHandle = initFileHandle(config.Filename)
 
-		if FileOutput == "json" && !Noscan && mod != "sc" {
-			_, _ = FileHandle.WriteString("[")
+		if FileOutput == "json" && !Noscan && config.Mod != "sc" {
+			configstr, err := json.Marshal(config)
+			if err != nil {
+				println(err.Error())
+			}
+			_, _ = FileHandle.WriteString(fmt.Sprintf("{\"config\":%s,\"data\":[", configstr))
 		}
 
 	}
@@ -68,7 +73,7 @@ func initFile(filename, mod string) {
 	if !checkFileIsExist(".sock.lock") {
 		tmpfilename = ".sock.lock"
 	} else {
-		tmpfilename = fmt.Sprintf(".%s.unix", utils.ToString(time.Now().Unix()))
+		tmpfilename = fmt.Sprintf(".%s.unix", ToString(time.Now().Unix()))
 	}
 	_ = os.Remove(".sock.lock")
 	LogFileHandle = initFileHandle(tmpfilename)
@@ -79,8 +84,8 @@ func initFile(filename, mod string) {
 			for res := range Datach {
 				_, _ = FileHandle.WriteString(res)
 			}
-			if FileOutput == "json" && !Noscan && mod != "sc" {
-				_, _ = FileHandle.WriteString("]")
+			if FileOutput == "json" && !Noscan && config.Mod != "sc" {
+				_, _ = FileHandle.WriteString("]}")
 			}
 			_ = FileHandle.Close()
 
