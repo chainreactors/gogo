@@ -19,6 +19,7 @@ type Result struct {
 	Language   string         `json:"l"` // language
 	Frameworks Frameworks     `json:"f"` // framework
 	Protocol   string         `json:"r"` // protocol
+	Hash       string         `json:"hs"`
 	Vulns      Vulns          `json:"v"`
 	Open       bool           `json:"-"`
 	TcpCon     *net.Conn      `json:"-"`
@@ -30,6 +31,9 @@ type Result struct {
 func (result *Result) InfoFilter() {
 	//result.errHandler()
 	result.Title = getTitle(result.Content)
+	if result.Content != "" {
+		result.Hash = Md5Hash([]byte(result.Content))[:4]
+	}
 	if result.IsHttp() {
 		result.Language = getLanguage(result.Httpresp, result.Content)
 		result.Midware = getMidware(result.Httpresp, result.Content)

@@ -12,6 +12,7 @@ var first = true
 
 type portformat struct {
 	Port       string           `json:"p"`
+	Hash       string           `json:"hs"`
 	Stat       string           `json:"s"`
 	Title      string           `json:"t"`
 	Host       string           `json:"h"`
@@ -45,12 +46,12 @@ func output(result *utils.Result, outType string) string {
 }
 
 func colorOutput(result *utils.Result) string {
-	s := fmt.Sprintf("[+] %s://%s:%s\t%s\t%s\t%s\t%s\t[%s] %s %s\n", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, blue(result.Frameworks.ToString()), result.Host, yellow(result.HttpStat), blue(result.Title), red(result.Vulns.ToString()))
+	s := fmt.Sprintf("[+] %s://%s:%s\t%s\t%s\t%s\t%s\t%s [%s] %s %s\n", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, blue(result.Frameworks.ToString()), result.Host, result.Hash, yellow(result.HttpStat), blue(result.Title), red(result.Vulns.ToString()))
 	return s
 }
 
 func fullOutput(result *utils.Result) string {
-	s := fmt.Sprintf("[+] %s://%s:%s%s\t%s\t%s\t%s\t%s\t[%s] %s %s\n", result.Protocol, result.Ip, result.Port, result.Uri, result.Midware, result.Language, result.Frameworks.ToString(), result.Host, result.HttpStat, result.Title, result.Vulns.ToString())
+	s := fmt.Sprintf("[+] %s://%s:%s%s\t%s\t%s\t%s\t%s\t%s [%s] %s %s\n", result.Protocol, result.Ip, result.Port, result.Uri, result.Midware, result.Language, result.Frameworks.ToString(), result.Host, result.Hash, result.HttpStat, result.Title, result.Vulns.ToString())
 	return s
 }
 
@@ -97,6 +98,7 @@ func FormatOutput(filename string, outputfile string) {
 		pf := portformat{
 			Port:       result.Port,
 			Stat:       result.HttpStat,
+			Hash:       result.Hash,
 			Title:      result.Title,
 			Host:       result.Host,
 			Midware:    result.Midware,
@@ -143,9 +145,9 @@ func FormatOutput(filename string, outputfile string) {
 			if !(p.Port == "135" || p.Port == "137" || p.Port == "icmp") {
 				if Output == "c" {
 					// 颜色输出
-					s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s\t%s\t[%s] %s %s", p.Protocol, ip, pint, p.Midware, p.Language, blue(p.Frameworks.ToString()), p.Host, yellow(p.Stat), blue(p.Title), red(p.Vulns.ToString()))
+					s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s\t%s\t%s [%s] %s %s", p.Protocol, ip, pint, p.Midware, p.Language, blue(p.Frameworks.ToString()), p.Host, p.Hash, yellow(p.Stat), blue(p.Title), red(p.Vulns.ToString()))
 				} else {
-					s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s\t%s\t[%s] %s %s", p.Protocol, ip, pint, p.Midware, p.Language, p.Frameworks.ToString(), p.Host, p.Stat, p.Title, p.Vulns.ToString())
+					s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s\t%s\t[%s] %s %s", p.Protocol, ip, pint, p.Midware, p.Language, p.Frameworks.ToString(), p.Host, p.Hash, p.Stat, p.Title, p.Vulns.ToString())
 				}
 				s += "\n"
 			}
