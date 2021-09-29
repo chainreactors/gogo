@@ -50,6 +50,7 @@ func CMD(k string) {
 	exploitConfig := flag.String("E", "none", "")
 	printType := flag.String("P", "no", "")
 	formatoutput := flag.String("F", "", "")
+	nofilename := flag.Bool("nf", false, "")
 	flag.Parse()
 	// 密钥
 	if *key != k {
@@ -67,22 +68,9 @@ func CMD(k string) {
 
 	starttime := time.Now()
 
-	//初始化全局变量
-	if *version {
-		scan.VersionLevel = 1
-	} else if *version2 {
-		scan.VersionLevel = 2
-	} else {
-		scan.VersionLevel = 0
-	}
-	// 配置exploit
-	if *exploit {
-		scan.Exploit = "auto"
-	} else if !*exploit && *exploitConfig != "none" {
-		scan.Exploit = *exploitConfig
-	} else {
-		scan.Exploit = *exploitConfig
-	}
+	parseVersion(*version, *version2)
+	parseExploit(*exploit, *exploitConfig)
+	parseFilename(*nofilename, &config)
 
 	config = core.Init(config)
 	core.RunTask(config)

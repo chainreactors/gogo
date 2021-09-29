@@ -68,7 +68,7 @@ func getIp(target string) string {
 	return ""
 }
 
-func ipForamt(target string) string {
+func IpForamt(target string) string {
 	target = strings.Replace(target, "http://", "", -1)
 	target = strings.Replace(target, "https://", "", -1)
 	target = strings.Trim(target, "/")
@@ -95,7 +95,7 @@ func ipInit(config Config) Config {
 	if config.ListFile != "" {
 		var iplist []string
 		for _, ip := range config.IPlist {
-			tmpip := ipForamt(ip)
+			tmpip := IpForamt(ip)
 			if !strings.HasPrefix(tmpip, "/") {
 				iplist = append(iplist, tmpip)
 			} else {
@@ -108,7 +108,7 @@ func ipInit(config Config) Config {
 			os.Exit(0)
 		}
 	} else if config.IP != "" {
-		config.IP = ipForamt(config.IP)
+		config.IP = IpForamt(config.IP)
 		if strings.HasPrefix(config.IP, "/") {
 			fmt.Println("[-] IP format error")
 			os.Exit(0)

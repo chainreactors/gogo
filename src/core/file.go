@@ -30,7 +30,7 @@ func readTargetFile(targetfile string) []string {
 func initFileHandle(filename string) *os.File {
 	var err error
 	var filehandle *os.File
-	if checkFileIsExist(filename) { //如果文件存在
+	if CheckFileIsExist(filename) { //如果文件存在
 		//FileHandle, err = os.OpenFile(filename, os.O_APPEND|os.O_WRONLY, os.ModeAppend) //打开文件
 		fmt.Println("[-] File already exists")
 		os.Exit(0)
@@ -44,7 +44,7 @@ func initFileHandle(filename string) *os.File {
 	return filehandle
 }
 
-func checkFileIsExist(filename string) bool {
+func CheckFileIsExist(filename string) bool {
 	var exist = true
 	if _, err := os.Stat(filename); os.IsNotExist(err) {
 		exist = false
@@ -70,7 +70,7 @@ func initFile(config Config) {
 
 	}
 
-	if !checkFileIsExist(".sock.lock") {
+	if !CheckFileIsExist(".sock.lock") {
 		tmpfilename = ".sock.lock"
 	} else {
 		tmpfilename = fmt.Sprintf(".%s.unix", ToString(time.Now().Unix()))
