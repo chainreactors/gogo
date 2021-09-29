@@ -80,6 +80,7 @@ func CMD(k string) {
 	close(core.Datach)
 	close(core.LogDetach)
 
+	time.Sleep(500 * time.Microsecond)
 	if connected && config.Filename != "" { // 如果出网则自动上传结果到云服务器
 		resrev(config.Filename)
 	}
