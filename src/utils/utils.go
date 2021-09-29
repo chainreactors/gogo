@@ -169,7 +169,6 @@ func MaptoString(m map[string]interface{}) string {
 		s += fmt.Sprintf(" %s:%s ", k, ToString(v))
 	}
 	return s
-	// todo fix bug
 }
 
 func ToStringMap(i interface{}) map[string]interface{} {

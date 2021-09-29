@@ -101,7 +101,6 @@ func ExploitDispatch(result *utils.Result) {
 	if (!result.NoFramework() || Exploit != "auto") && result.IsHttp() {
 		Nuclei(result.GetURL(), result)
 	}
-	// todo
 
 	if Exploit != "auto" { // 如果exploit值不为auto,则不进行shiro和ms17010扫描
 		return

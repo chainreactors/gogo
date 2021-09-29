@@ -50,7 +50,7 @@ func CMD(k string) {
 	exploitConfig := flag.String("E", "none", "")
 	printType := flag.String("P", "no", "")
 	formatoutput := flag.String("F", "", "")
-	nofilename := flag.Bool("nf", false, "")
+	autofile := flag.Bool("af", false, "")
 	flag.Parse()
 	// 密钥
 	if *key != k {
@@ -60,6 +60,7 @@ func CMD(k string) {
 
 	// 输出 config
 	printConfigs(*printType)
+
 	// 格式化
 	if *formatoutput != "" {
 		core.FormatOutput(*formatoutput, config.Filename)
@@ -70,7 +71,7 @@ func CMD(k string) {
 
 	parseVersion(*version, *version2)
 	parseExploit(*exploit, *exploitConfig)
-	parseFilename(*nofilename, &config)
+	parseFilename(*autofile, &config)
 
 	config = core.Init(config)
 	core.RunTask(config)

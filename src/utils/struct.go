@@ -95,3 +95,10 @@ type Config struct {
 	Spray         bool     `json:"-"`
 	NoSpray       bool     `json:"-"`
 }
+
+func (config Config) IsScan() bool {
+	if config.IP != "" || config.ListFile != "" || config.JsonFile != "" || config.Mod == "a" {
+		return true
+	}
+	return false
+}

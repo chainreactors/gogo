@@ -5,6 +5,9 @@ from base64 import b64encode
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer,encoding='utf8')
 
 
+def loadnuclei():
+	pass
+
 
 def fingerload(filename):
     tcpfinger = open("src/config/%s"%filename,"r",encoding="utf-8")

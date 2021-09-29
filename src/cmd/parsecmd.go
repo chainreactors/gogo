@@ -31,7 +31,7 @@ func parseExploit(exploit bool, exploitConfig string) {
 }
 
 func parseFilename(nofilename bool, config *utils.Config) {
-	if !nofilename && config.Filename == "" {
+	if nofilename && config.Filename == "" {
 		basefilename := joinFilename(*config)
 		i := 1
 		for core.CheckFileIsExist(basefilename + utils.ToString(i) + ".json") {
