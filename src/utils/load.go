@@ -85,7 +85,7 @@ func loadFingers(t string) *FingerMapper {
 		}
 		// 漏洞指纹,指纹名称后接 "_vuln"
 		for _, regstr := range finger.Regexps.Vuln {
-			Compiled[finger.Name+"_vuln"] = append(Compiled[finger.Name], compile("(?im)"+regstr))
+			Compiled[finger.Name+"_vuln"] = append(Compiled[finger.Name+"_vuln"], compile("(?im)"+regstr))
 		}
 
 		// http默认为80

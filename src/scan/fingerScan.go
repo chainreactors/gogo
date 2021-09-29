@@ -38,6 +38,7 @@ func httpFingerMatch(result *utils.Result, finger utils.Finger) {
 		res := utils.CompileMatch(reg, content)
 		if res != "" {
 			handlerMatchedResult(result, finger, res, content)
+			result.AddVuln(utils.Vuln{Name: finger.Vuln})
 			return
 		}
 	}
@@ -161,6 +162,9 @@ func tcpFingerMatch(result *utils.Result, finger utils.Finger) {
 		res := utils.CompileMatch(reg, content)
 		if res != "" {
 			handlerMatchedResult(result, finger, res, content)
+			if finger.Vuln != "" {
+				result.AddVuln(utils.Vuln{Name: finger.Vuln})
+			}
 			return
 		}
 	}
@@ -183,10 +187,8 @@ func handlerMatchedResult(result *utils.Result, finger utils.Finger, res, conten
 
 	res = getRes(res)
 	result.AddFramework(utils.Framework{Name: finger.Name, Version: res})
-	if finger.Vuln != "" {
-		result.AddVuln(utils.Vuln{Name: finger.Vuln})
-	}
-	if finger.Level >= 1 && content != "" {
+
+	if finger.Level >= 1 && content != "" { // 需要主动发包的指纹重新收集title
 		result.Title = utils.EncodeTitle(content)
 	}
 }
