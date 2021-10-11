@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"getitle/src/structutils"
 	"net"
 	"net/http"
 	"strings"
@@ -32,7 +33,7 @@ func (result *Result) InfoFilter() {
 	//result.errHandler()
 	result.Title = getTitle(result.Content)
 	if result.Content != "" {
-		result.Hash = Md5Hash([]byte(result.Content))[:4]
+		result.Hash = structutils.Md5Hash([]byte(result.Content))[:4]
 	}
 	if result.IsHttp() {
 		result.Language = getLanguage(result.Httpresp, result.Content)
@@ -61,7 +62,7 @@ func (result *Result) NoFramework() bool {
 
 func (result *Result) GuessFramework() {
 	for _, v := range Portmap[result.Port] {
-		if Tagmap[v] == nil && !SliceContains([]string{"top1", "top2", "top3", "other", "windows"}, v) {
+		if Tagmap[v] == nil && !structutils.SliceContains([]string{"top1", "top2", "top3", "other", "windows"}, v) {
 			result.AddFramework(Framework{Name: v, IsGuess: true})
 		}
 	}
@@ -118,11 +119,11 @@ type Vuln struct {
 }
 
 func (v *Vuln) GetPayload() string {
-	return MaptoString(v.Payload)
+	return structutils.MaptoString(v.Payload)
 }
 
 func (v *Vuln) GetDetail() string {
-	return MaptoString(v.Detail)
+	return structutils.MaptoString(v.Detail)
 }
 
 func (v *Vuln) ToString() string {

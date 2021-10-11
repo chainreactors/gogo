@@ -1,4 +1,4 @@
-package nuclei
+package http
 
 // operators contains the operators that can be applied on protocols
 type operators struct {

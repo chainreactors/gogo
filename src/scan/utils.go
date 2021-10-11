@@ -2,7 +2,7 @@ package scan
 
 import (
 	"fmt"
-	"getitle/src/utils"
+	"getitle/src/structutils"
 	"github.com/JKme/go-ntlmssp"
 	"strings"
 )
@@ -35,7 +35,7 @@ func NTLMInfo(ret []byte) map[string]string {
 	ver, _ := ntlmssp.ReadVersionStruct(version)
 	tinfo["Version"] = fmt.Sprintf("Windows %d.%d.%d", ver.ProductMajorVersion, ver.ProductMinorVersion, ver.ProductBuild)
 	for k, v := range tinfo {
-		res[k] = utils.ToString(v)
+		res[k] = structutils.ToString(v)
 	}
 	return res
 }

@@ -1,6 +1,7 @@
 package scan
 
 import (
+	"getitle/src/structutils"
 	"getitle/src/utils"
 	"strconv"
 )
@@ -17,7 +18,7 @@ func payloadScan(result *utils.Result) {
 	}
 	result.Protocol = resp.Request.URL.Scheme
 	result.HttpStat = strconv.Itoa(resp.StatusCode)
-	result.Content = string(utils.GetBody(resp))
+	result.Content = string(structutils.GetBody(resp))
 	result.Httpresp = resp
 	_ = resp.Body.Close()
 

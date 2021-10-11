@@ -1,6 +1,9 @@
-package nuclei
+package templates
 
-import "strings"
+import (
+	"getitle/src/nuclei/http"
+	"strings"
+)
 
 type Template struct {
 	Id     string `json:"id"`
@@ -13,7 +16,8 @@ type Template struct {
 		Vendor    string `json:"vendor"`
 		Tags      string `json:"tags"`
 	} `json:"info"`
-	Requests []Request `json:"requests"`
+	RequestsHttp []http.Request `json:"requests"`
+	//RequestsTCP []tcp.Request `json:"network"`
 }
 
 func (t *Template) GetTags() []string {

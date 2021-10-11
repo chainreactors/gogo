@@ -3,6 +3,7 @@ package scan
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"getitle/src/structutils"
 	"getitle/src/utils"
 	"net"
 	"strings"
@@ -29,13 +30,13 @@ func httpFingerMatch(result *utils.Result, finger utils.Finger) {
 		if err != nil {
 			return
 		}
-		content = string(utils.GetBody(resp))
+		content = string(structutils.GetBody(resp))
 		_ = resp.Body.Close()
 	}
 
 	// 漏洞匹配优先
 	for _, reg := range utils.Compiled[finger.Name+"_vuln"] {
-		res := utils.CompileMatch(reg, content)
+		res := structutils.CompileMatch(reg, content)
 		if res != "" {
 			handlerMatchedResult(result, finger, res, content)
 			result.AddVuln(utils.Vuln{Name: finger.Vuln})
@@ -52,7 +53,7 @@ func httpFingerMatch(result *utils.Result, finger utils.Finger) {
 
 	// 正则匹配
 	for _, reg := range utils.Compiled[finger.Name] {
-		res := utils.CompileMatch(reg, content)
+		res := structutils.CompileMatch(reg, content)
 		if res != "" {
 			handlerMatchedResult(result, finger, res, content)
 			return
@@ -66,7 +67,7 @@ func httpFingerMatch(result *utils.Result, finger utils.Finger) {
 				return
 			}
 		} else {
-			headers := utils.GetHeaderstr(resp)
+			headers := structutils.GetHeaderstr(resp)
 			if strings.Contains(headers, header) {
 				result.AddFramework(utils.Framework{Name: finger.Name})
 				return
@@ -159,7 +160,7 @@ func tcpFingerMatch(result *utils.Result, finger utils.Finger) {
 
 	// 遍历漏洞正则
 	for _, reg := range utils.Compiled[finger.Name+"_vuln"] {
-		res := utils.CompileMatch(reg, content)
+		res := structutils.CompileMatch(reg, content)
 		if res != "" {
 			handlerMatchedResult(result, finger, res, content)
 			if finger.Vuln != "" {
@@ -171,7 +172,7 @@ func tcpFingerMatch(result *utils.Result, finger utils.Finger) {
 
 	//遍历指纹正则
 	for _, reg := range utils.Compiled[finger.Name] {
-		res := utils.CompileMatch(reg, content)
+		res := structutils.CompileMatch(reg, content)
 		if res != "" {
 			handlerMatchedResult(result, finger, res, content)
 			return
@@ -189,7 +190,7 @@ func handlerMatchedResult(result *utils.Result, finger utils.Finger, res, conten
 	result.AddFramework(utils.Framework{Name: finger.Name, Version: res})
 
 	if finger.Level >= 1 && content != "" { // 需要主动发包的指纹重新收集title
-		result.Title = utils.EncodeTitle(content)
+		result.Title = structutils.EncodeTitle(content)
 	}
 }
 

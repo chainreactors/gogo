@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"getitle/src/core"
 	"getitle/src/scan"
+	"getitle/src/structutils"
 	"getitle/src/utils"
 	"strings"
 )
@@ -34,10 +35,10 @@ func parseFilename(nofilename bool, config *utils.Config) {
 	if nofilename && config.Filename == "" {
 		basefilename := joinFilename(*config)
 		i := 1
-		for core.CheckFileIsExist(basefilename + utils.ToString(i) + ".json") {
+		for core.CheckFileIsExist(basefilename + structutils.ToString(i) + ".json") {
 			i++
 		}
-		config.Filename = basefilename + utils.ToString(i) + ".json"
+		config.Filename = basefilename + structutils.ToString(i) + ".json"
 	}
 }
 

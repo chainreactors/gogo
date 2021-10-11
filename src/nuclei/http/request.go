@@ -1,6 +1,7 @@
-package nuclei
+package http
 
 import (
+	. "getitle/src/structutils"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -198,15 +199,15 @@ func getMatchPart(part string, data map[string]interface{}) (string, bool) {
 
 	if part == "all" {
 		builder := &strings.Builder{}
-		builder.WriteString(toString(data["body"]))
-		builder.WriteString(toString(data["all_headers"]))
+		builder.WriteString(ToString(data["body"]))
+		builder.WriteString(ToString(data["all_headers"]))
 		itemStr = builder.String()
 	} else {
 		item, ok := data[part]
 		if !ok {
 			return "", false
 		}
-		itemStr = toString(item)
+		itemStr = ToString(item)
 	}
 	return itemStr, true
 }

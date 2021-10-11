@@ -3,9 +3,11 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
-	"getitle/src/nuclei"
+	. "getitle/src/nuclei/templates"
+	"getitle/src/structutils"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -17,9 +19,9 @@ var Compiled = make(map[string][]regexp.Regexp)
 var CommonCompiled = initregexp()
 var TemplateMap = loadTemplates()
 
-func loadTemplates() map[string][]*nuclei.Template {
-	var templates []nuclei.Template
-	var templatemap = make(map[string][]*nuclei.Template)
+func loadTemplates() map[string][]*Template {
+	var templates []Template
+	var templatemap = make(map[string][]*Template)
 	err := json.Unmarshal([]byte(LoadConfig("nuclei")), &templates)
 	if err != nil {
 		fmt.Println("[-] nuclei config load FAIL!")
@@ -38,6 +40,31 @@ func loadTemplates() map[string][]*nuclei.Template {
 	}
 	return templatemap
 }
+
+func Ports2PortSlice(ports []string) []string {
+	var tmpports []string
+	//生成端口列表 支持,和-
+	for _, pr := range ports {
+		tmpports = append(tmpports, port2PortSlice(pr)...)
+	}
+	return tmpports
+}
+
+func port2PortSlice(port string) []string {
+	var tmpports []string
+	if strings.Contains(port, "-") {
+		sf := strings.Split(port, "-")
+		start, _ := strconv.Atoi(sf[0])
+		fin, _ := strconv.Atoi(sf[1])
+		for port := start; port <= fin; port++ {
+			tmpports = append(tmpports, strconv.Itoa(port))
+		}
+	} else {
+		tmpports = append(tmpports, port)
+	}
+	return tmpports
+}
+
 func loadPortConfig() (PortMapper, PortMapper, PortMapper) {
 	var portfingers []PortFinger
 	err := json.Unmarshal([]byte(LoadConfig("port")), &portfingers)
@@ -81,11 +108,11 @@ func loadFingers(t string) *FingerMapper {
 
 		// 普通指纹
 		for _, regstr := range finger.Regexps.Regexp {
-			Compiled[finger.Name] = append(Compiled[finger.Name], compile("(?im)"+regstr))
+			Compiled[finger.Name] = append(Compiled[finger.Name], structutils.CompileRegexp("(?im)"+regstr))
 		}
 		// 漏洞指纹,指纹名称后接 "_vuln"
 		for _, regstr := range finger.Regexps.Vuln {
-			Compiled[finger.Name+"_vuln"] = append(Compiled[finger.Name+"_vuln"], compile("(?im)"+regstr))
+			Compiled[finger.Name+"_vuln"] = append(Compiled[finger.Name+"_vuln"], structutils.CompileRegexp("(?im)"+regstr))
 		}
 
 		// http默认为80
@@ -123,9 +150,9 @@ func loadHashFinger() (map[string]string, map[string]string) {
 
 func initregexp() map[string]regexp.Regexp {
 	comp := make(map[string]regexp.Regexp)
-	comp["title"] = compile("(?Uis)<title>(.*)</title>")
-	comp["server"] = compile("(?i)Server: ([\x20-\x7e]+)")
-	comp["xpb"] = compile("(?i)X-Powered-By: ([\x20-\x7e]+)")
-	comp["sessionid"] = compile("(?i) (.*SESS.*?ID)")
+	comp["title"] = structutils.CompileRegexp("(?Uis)<title>(.*)</title>")
+	comp["server"] = structutils.CompileRegexp("(?i)Server: ([\x20-\x7e]+)")
+	comp["xpb"] = structutils.CompileRegexp("(?i)X-Powered-By: ([\x20-\x7e]+)")
+	comp["sessionid"] = structutils.CompileRegexp("(?i) (.*SESS.*?ID)")
 	return comp
 }

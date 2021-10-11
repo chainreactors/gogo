@@ -3,6 +3,7 @@ package core
 import (
 	"encoding/json"
 	"fmt"
+	. "getitle/src/structutils"
 	. "getitle/src/utils"
 	"io/ioutil"
 	"os"

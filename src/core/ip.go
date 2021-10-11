@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+	. "getitle/src/structutils"
 	. "getitle/src/utils"
 	"math"
 	"net"

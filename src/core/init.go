@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 	"getitle/src/scan"
+	. "getitle/src/structutils"
 	. "getitle/src/utils"
 	"os"
 	"runtime"

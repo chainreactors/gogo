@@ -1,6 +1,8 @@
-package nuclei
+package http
 
 import (
+	"getitle/src/nuclei"
+	. "getitle/src/structutils"
 	"io"
 	"io/ioutil"
 	"net"
@@ -110,7 +112,7 @@ func (r *requestGenerator) Make(baseURL string, dynamicValues map[string]interfa
 	}
 
 	data, parsed = baseURLWithTemplatePrefs(data, parsed)
-	values := mergeMaps(dynamicValues, map[string]interface{}{
+	values := MergeMaps(dynamicValues, map[string]interface{}{
 		"Hostname": parsed.Host,
 	})
 
@@ -120,7 +122,7 @@ func (r *requestGenerator) Make(baseURL string, dynamicValues map[string]interfa
 	}
 	parsedString := parsed.String()
 	values["BaseURL"] = parsedString
-	values = mergeMaps(payloads, values)
+	values = MergeMaps(payloads, values)
 
 	// If data contains \n it's a raw request, process it like raw. Else
 	// continue with the template based request flow.
@@ -152,7 +154,7 @@ func baseURLWithTemplatePrefs(data string, parsed *url.URL) (string, *url.URL) {
 
 // MakeHTTPRequestFromModel creates a *http.Request from a request template
 func (r *requestGenerator) makeHTTPRequestFromModel(data string, values map[string]interface{}) (*generatedRequest, error) {
-	final := replace(data, values)
+	final := nuclei.Replace(data, values)
 
 	// Build a request on the specified URL
 	req, err := http.NewRequest(r.request.Method, final, nil)
@@ -174,7 +176,7 @@ func (r *requestGenerator) handleRawWithPayloads(rawRequest, baseURL string, val
 	// Combine the template payloads along with base
 	// request values.
 	var request *http.Request
-	rawRequest = replace(rawRequest, values)
+	rawRequest = nuclei.Replace(rawRequest, values)
 	rawRequestData, err := parseRaw(rawRequest, baseURL, r.request.Unsafe)
 	if err != nil {
 		return nil, err
@@ -211,9 +213,9 @@ func (r *requestGenerator) handleRawWithPayloads(rawRequest, baseURL string, val
 func (r *requestGenerator) fillRequest(req *http.Request, values map[string]interface{}) *http.Request {
 	// Set the header values requested
 	for header, value := range r.request.Headers {
-		req.Header[header] = []string{replace(value, values)}
+		req.Header[header] = []string{nuclei.Replace(value, values)}
 		if header == "Host" {
-			req.Host = replace(value, values)
+			req.Host = nuclei.Replace(value, values)
 		}
 	}
 
@@ -224,7 +226,7 @@ func (r *requestGenerator) fillRequest(req *http.Request, values map[string]inte
 
 	// Check if the user requested a request body
 	if r.request.Body != "" {
-		body := replace(r.request.Body, values)
+		body := nuclei.Replace(r.request.Body, values)
 		req.Body = ioutil.NopCloser(strings.NewReader(body))
 	}
 

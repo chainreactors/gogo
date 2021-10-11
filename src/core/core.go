@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 	"getitle/src/scan"
+	. "getitle/src/structutils"
 	. "getitle/src/utils"
 	"github.com/panjf2000/ants/v2"
 	"sort"

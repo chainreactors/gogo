@@ -1,4 +1,4 @@
-package nuclei
+package http
 
 // header represents a HTTP header.
 type header struct {
