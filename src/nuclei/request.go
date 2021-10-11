@@ -77,9 +77,15 @@ func (r *Request) requests() int {
 	return len(r.Path)
 }
 
-func (r *Request) Compile(opt Options) error {
+func (r *Request) Compile() error {
 	var err error
-	client := createClient(opt)
+	connectionConfiguration := &Configuration{
+		//Threads:         r.Threads,
+		MaxRedirects:    r.MaxRedirects,
+		FollowRedirects: r.Redirects,
+		CookieReuse:     r.CookieReuse,
+	}
+	client := createClient(connectionConfiguration)
 	r.httpClient = client
 
 	if r.Body != "" && !strings.Contains(r.Body, "\r\n") {
@@ -117,9 +123,9 @@ func (r *Request) Compile(opt Options) error {
 	return nil
 }
 
-func (r *Request) ExecuteRequestWithResults(url string, opt Options) (*Result, error) {
+func (r *Request) ExecuteRequestWithResults(url string) (*Result, error) {
 	var err error
-	err = r.Compile(opt)
+	err = r.Compile()
 	if err != nil {
 		print(err.Error())
 	}

@@ -5,7 +5,7 @@ import (
 )
 
 func main() {
-	k := "niuzi" // debug
+	k := "ybb" // debug
 	//f, _ := os.Create("cpu.txt")
 	//pprof.StartCPUProfile(f)
 	//defer pprof.StopCPUProfile()

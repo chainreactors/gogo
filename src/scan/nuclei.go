@@ -27,12 +27,12 @@ func Nuclei(url string, result *utils.Result) {
 	}
 }
 
-func execute_templates(titles []string, url string, opt nuclei.Options) []utils.Vuln {
+func execute_templates(titles []string, url string, opt nuclei.Configuration) []utils.Vuln {
 	var vulns []utils.Vuln
 	templates := choiceTemplates(titles)
 	for _, template := range templates { // 遍历所有poc
 		for _, request := range template.Requests { // 逐个执行requests,每个poc获取返回值后退出
-			res, _ := request.ExecuteRequestWithResults(url, opt)
+			res, _ := request.ExecuteRequestWithResults(url)
 			if res != nil && res.Matched {
 				vulns = append(vulns, utils.Vuln{template.Id, res.PayloadValues, res.DynamicValues})
 				break

@@ -7,21 +7,21 @@ import (
 	"time"
 )
 
-type Options struct {
+type Configuration struct {
 	Timeout         int
-	followRedirects bool
-	maxRedirects    int
+	FollowRedirects bool
+	MaxRedirects    int
 	CookieReuse     bool
 }
 
-var Defaultoption = Options{
+var Defaultoption = Configuration{
 	2,
-	false,
+	true,
 	3,
 	false,
 }
 
-func createClient(opt Options) *http.Client {
+func createClient(opt *Configuration) *http.Client {
 	tr := &http.Transport{
 		//TLSHandshakeTimeout : delay * time.Second,
 		TLSClientConfig: &tls.Config{
@@ -37,7 +37,7 @@ func createClient(opt Options) *http.Client {
 	client := &http.Client{
 		Transport:     tr,
 		Timeout:       time.Duration(opt.Timeout) * time.Second,
-		CheckRedirect: makeCheckRedirectFunc(opt.followRedirects, opt.maxRedirects),
+		CheckRedirect: makeCheckRedirectFunc(opt.FollowRedirects, opt.MaxRedirects),
 	}
 	if jar != nil {
 		client.Jar = jar
