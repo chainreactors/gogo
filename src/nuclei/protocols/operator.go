@@ -1,10 +1,10 @@
-package http
+package protocols
 
 // operators contains the operators that can be applied on protocols
-type operators struct {
+type Operators struct {
 	// Matchers contains the detection mechanism for the request to identify
 	// whether the request was successful
-	Matchers []*matcher `json:"matchers,omitempty"`
+	Matchers []*Matcher `json:"matchers,omitempty"`
 	// Extractors contains the extraction mechanism for the request to identify
 	// and extract parts of the response.
 	//Extractors []*extractors.Extractor `yaml:"extractors,omitempty"`
@@ -12,7 +12,7 @@ type operators struct {
 	// whether to use AND or OR. Default is OR.
 	MatchersCondition string `json:"matchers-condition,omitempty"`
 	// cached variables that may be used along with request.
-	matchersCondition conditionType
+	matchersCondition ConditionType
 }
 
 // Result is a result structure created from operators running on data.
@@ -33,7 +33,7 @@ type Result struct {
 	PayloadValues map[string]interface{}
 }
 
-func (r *operators) compile() error {
+func (r *Operators) Compile() error {
 	if r.MatchersCondition != "" {
 		r.matchersCondition = conditionTypes[r.MatchersCondition]
 	} else {
@@ -48,15 +48,15 @@ func (r *operators) compile() error {
 }
 
 // getMatchersCondition returns the condition for the matchers
-func (r *operators) getMatchersCondition() conditionType {
+func (r *Operators) GetMatchersCondition() ConditionType {
 	return r.matchersCondition
 }
 
-type matchFunc func(data map[string]interface{}, matcher *matcher) bool
+type matchFunc func(data map[string]interface{}, matcher *Matcher) bool
 
 // Execute executes the operators on data and returns a result structure
-func (r *operators) Execute(data map[string]interface{}, match matchFunc) (*Result, bool) {
-	matcherCondition := r.getMatchersCondition()
+func (r *Operators) Execute(data map[string]interface{}, match matchFunc) (*Result, bool) {
+	matcherCondition := r.GetMatchersCondition()
 
 	var matches bool
 	result := &Result{

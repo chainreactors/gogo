@@ -1,4 +1,4 @@
-package http
+package protocols
 
 import (
 	"encoding/hex"
@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-type matcher struct {
+type Matcher struct {
 	// Type is the type of the matcher
 	Type string `json:"type"`
 	// Condition is the optional condition between two matcher variables
@@ -40,58 +40,58 @@ type matcher struct {
 	Encoding string `json:"encoding,omitempty"`
 
 	MatchersCondition string `json:"matchers-condition"`
-	Matchers          []matcher
-	condition         conditionType
-	matcherType       matcherType
+	Matchers          []Matcher
+	condition         ConditionType
+	matcherType       MatcherType
 	regexCompiled     []*regexp.Regexp
 }
 
-// matcherType is the type of the matcher specified
-type matcherType = int
+// MatcherType is the type of the matcher specified
+type MatcherType = int
 
 const (
-	// wordsMatcher matches responses with words
-	wordsMatcher matcherType = iota + 1
-	// regexMatcher matches responses with regexes
-	regexMatcher
-	// binaryMatcher matches responses with words
-	binaryMatcher
-	// statusMatcher matches responses with status codes
-	statusMatcher
-	// sizeMatcher matches responses with response size
-	sizeMatcher
-	// dSLMatcher matches based upon dsl syntax
-	dSLMatcher
+	// WordsMatcher matches responses with words
+	WordsMatcher MatcherType = iota + 1
+	// RegexMatcher matches responses with regexes
+	RegexMatcher
+	// BinaryMatcher matches responses with words
+	BinaryMatcher
+	// StatusMatcher matches responses with status codes
+	StatusMatcher
+	// SizeMatcher matches responses with response size
+	SizeMatcher
+	// DSLMatcher matches based upon dsl syntax
+	DSLMatcher
 )
 
 // matcherTypes is an table for conversion of matcher type from string.
-var matcherTypes = map[string]matcherType{
-	"status": statusMatcher,
-	"size":   sizeMatcher,
-	"word":   wordsMatcher,
-	"regex":  regexMatcher,
-	"binary": binaryMatcher,
-	"dsl":    dSLMatcher,
+var matcherTypes = map[string]MatcherType{
+	"status": StatusMatcher,
+	"size":   SizeMatcher,
+	"word":   WordsMatcher,
+	"regex":  RegexMatcher,
+	"binary": BinaryMatcher,
+	"dsl":    DSLMatcher,
 }
 
 // conditionType is the type of condition for matcher
-type conditionType int
+type ConditionType int
 
 const (
 	// andCondition matches responses with AND condition in arguments.
-	andCondition conditionType = iota + 1
+	andCondition ConditionType = iota + 1
 	// orCondition matches responses with AND condition in arguments.
 	orCondition
 )
 
 // conditionTypes is an table for conversion of condition type from string.
-var conditionTypes = map[string]conditionType{
+var conditionTypes = map[string]ConditionType{
 	"and": andCondition,
 	"or":  orCondition,
 }
 
 // Result reverts the results of the match if the matcher is of type negative.
-func (m *matcher) result(data bool) bool {
+func (m *Matcher) Result(data bool) bool {
 	if m.Negative {
 		return !data
 	}
@@ -99,12 +99,12 @@ func (m *matcher) result(data bool) bool {
 }
 
 // getType returns the type of the matcher
-func (m *matcher) getType() matcherType {
+func (m *Matcher) GetType() MatcherType {
 	return m.matcherType
 }
 
 // CompileMatchers performs the initial setup operation on a matcher
-func (m *matcher) CompileMatchers() error {
+func (m *Matcher) CompileMatchers() error {
 	var ok bool
 
 	// Support hexadecimal encoding for matchers too.
@@ -130,7 +130,7 @@ func (m *matcher) CompileMatchers() error {
 	for _, regex := range m.Regex {
 		compiled, err := regexp.Compile(regex)
 		if err != nil {
-			return fmt.Errorf("could not compile regex: %s", regex)
+			return fmt.Errorf("could not Compile regex: %s", regex)
 		}
 		m.regexCompiled = append(m.regexCompiled, compiled)
 	}
@@ -150,8 +150,8 @@ func (m *matcher) CompileMatchers() error {
 	return nil
 }
 
-// matchStatusCode matches a status code check against a corpus
-func (m *matcher) matchStatusCode(statusCode int) bool {
+// MatchStatusCode matches a status code check against a corpus
+func (m *Matcher) MatchStatusCode(statusCode int) bool {
 	// Iterate over all the status codes accepted as valid
 	//
 	// Status codes don't support AND conditions.
@@ -166,8 +166,8 @@ func (m *matcher) matchStatusCode(statusCode int) bool {
 	return false
 }
 
-// matchSize matches a size check against a corpus
-func (m *matcher) matchSize(length int) bool {
+// MatchSize matches a size check against a corpus
+func (m *Matcher) MatchSize(length int) bool {
 	// Iterate over all the sizes accepted as valid
 	//
 	// Sizes codes don't support AND conditions.
@@ -182,8 +182,8 @@ func (m *matcher) matchSize(length int) bool {
 	return false
 }
 
-// matchWords matches a word check against a corpus.
-func (m *matcher) matchWords(corpus string) bool {
+// MatchWords matches a word check against a corpus.
+func (m *Matcher) MatchWords(corpus string) bool {
 	// Iterate over all the words accepted as valid
 	for i, word := range m.Words {
 		// Continue if the word doesn't match
@@ -210,8 +210,8 @@ func (m *matcher) matchWords(corpus string) bool {
 	return false
 }
 
-// matchRegex matches a regex check against a corpus
-func (m *matcher) matchRegex(corpus string) bool {
+// MatchRegex matches a regex check against a corpus
+func (m *Matcher) MatchRegex(corpus string) bool {
 	// Iterate over all the regexes accepted as valid
 	for i, regex := range m.regexCompiled {
 		// Continue if the regex doesn't match
@@ -238,8 +238,8 @@ func (m *matcher) matchRegex(corpus string) bool {
 	return false
 }
 
-// matchBinary matches a binary check against a corpus
-func (m *matcher) matchBinary(corpus string) bool {
+// MatchBinary matches a binary check against a corpus
+func (m *Matcher) MatchBinary(corpus string) bool {
 	// Iterate over all the words accepted as valid
 	for i, binary := range m.Binary {
 		// Continue if the word doesn't match

@@ -20,22 +20,27 @@ var CommonCompiled = initregexp()
 var TemplateMap = loadTemplates()
 
 func loadTemplates() map[string][]*Template {
-	var templates []Template
+	var templates []*Template
 	var templatemap = make(map[string][]*Template)
 	err := json.Unmarshal([]byte(LoadConfig("nuclei")), &templates)
 	if err != nil {
 		fmt.Println("[-] nuclei config load FAIL!")
 		os.Exit(0)
 	}
-	for index, template := range templates {
+	for _, template := range templates {
 		// 以指纹归类
+		err = template.Compile()
+		if err != nil {
+			println(err.Error())
+			os.Exit(0)
+		}
 		if template.Finger != "" {
-			templatemap[strings.ToLower(template.Finger)] = append(templatemap[template.Finger], &templates[index])
+			templatemap[strings.ToLower(template.Finger)] = append(templatemap[template.Finger], template)
 		}
 
 		// 以tag归类
 		for _, tag := range template.GetTags() {
-			templatemap[tag] = append(templatemap[tag], &templates[index])
+			templatemap[tag] = append(templatemap[tag], template)
 		}
 	}
 	return templatemap
