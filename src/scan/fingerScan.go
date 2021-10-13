@@ -20,7 +20,6 @@ func fingerScan(result *utils.Result) {
 }
 
 func httpFingerMatch(result *utils.Result, finger utils.Finger) {
-
 	resp := result.Httpresp
 	content := result.Content
 	//var cookies map[string]string
@@ -44,8 +43,8 @@ func httpFingerMatch(result *utils.Result, finger utils.Finger) {
 		}
 	}
 	// html匹配
-	for _, html := range finger.Regexps.HTML {
-		if strings.Contains(content, html) {
+	for _, body := range finger.Regexps.Body {
+		if strings.Contains(content, body) {
 			result.AddFramework(utils.Framework{Name: finger.Name})
 			return
 		}
@@ -61,17 +60,16 @@ func httpFingerMatch(result *utils.Result, finger utils.Finger) {
 	}
 	// http头匹配
 	for _, header := range finger.Regexps.Header {
+		var headerstr string
 		if resp == nil {
-			if strings.Contains(content, header) {
-				result.AddFramework(utils.Framework{Name: finger.Name})
-				return
-			}
+			headerstr = strings.ToLower(strings.Split(content, "\r\n\r\n")[0])
 		} else {
-			headers := structutils.GetHeaderstr(resp)
-			if strings.Contains(headers, header) {
-				result.AddFramework(utils.Framework{Name: finger.Name})
-				return
-			}
+			headerstr = strings.ToLower(structutils.GetHeaderstr(resp))
+		}
+
+		if strings.Contains(headerstr, strings.ToLower(header)) {
+			result.AddFramework(utils.Framework{Name: finger.Name})
+			return
 		}
 	}
 

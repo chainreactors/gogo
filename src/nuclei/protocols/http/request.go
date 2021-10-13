@@ -204,9 +204,10 @@ func (r *Request) executeRequest(request *generatedRequest, dynamicValues map[st
 		if ok && event.OperatorsResult != nil {
 			event.OperatorsResult.PayloadValues = request.meta
 			event.Results = r.MakeResultEvent(event)
-			//return true, err
+			callback(event)
+			return true, err
 		}
-		callback(event)
+
 	}
 	return false, err
 }

@@ -99,7 +99,7 @@ func ExploitDispatch(result *utils.Result) {
 	//	RedisScan(target, result)
 	//}
 	if (!result.NoFramework() || Exploit != "auto") && result.IsHttp() {
-		Nuclei(result.GetTarget(), result)
+		Nuclei(result.GetURL(), result)
 	}
 
 	if Exploit != "auto" { // 如果exploit值不为auto,则不进行shiro和ms17010扫描

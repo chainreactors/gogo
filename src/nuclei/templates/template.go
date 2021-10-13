@@ -63,7 +63,7 @@ func (t *Template) Compile() error {
 
 func (t *Template) Execute(url string) (*protocols.Result, bool) {
 	res, err := t.Executor.Execute(url)
-	if err != nil {
+	if err != nil || res == nil {
 		return nil, false
 	}
 	return res, true

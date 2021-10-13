@@ -48,7 +48,7 @@ func (d senddata) IsNull() bool {
 }
 
 type Regexps struct {
-	HTML   []string `json:"html"`
+	Body   []string `json:"body"`
 	MD5    []string `json:"md5"`
 	Regexp []string `json:"regexp"`
 	Cookie []string `json:"cookie"`
