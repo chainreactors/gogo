@@ -1,4 +1,4 @@
-package http
+package protocols
 
 import (
 	"errors"
@@ -30,7 +30,7 @@ func loadPayloads(payloads map[string]interface{}) (map[string][]string, error) 
 }
 
 // generator is the generator struct for generating payloads
-type generator struct {
+type Generator struct {
 	Type     Type
 	payloads map[string][]string
 }
@@ -55,8 +55,8 @@ var StringToType = map[string]Type{
 }
 
 // New creates a new generator structure for payload generation
-func New(payloads map[string]interface{}, payloadType Type) (*generator, error) {
-	generator := &generator{}
+func New(payloads map[string]interface{}, payloadType Type) (*Generator, error) {
+	generator := &Generator{}
 	//if err := generator.validate(payloads, templatePath); err != nil {
 	//	return nil, err
 	//}
@@ -91,7 +91,7 @@ type Iterator struct {
 }
 
 // NewIterator creates a new iterator for the payloads generator
-func (g *generator) NewIterator() *Iterator {
+func (g *Generator) NewIterator() *Iterator {
 	var payloads []*payloadIterator
 
 	for name, values := range g.payloads {

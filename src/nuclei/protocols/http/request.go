@@ -54,11 +54,11 @@ type Request struct {
 	//MatchersCondition string `json:"matchers-condition,omitempty"`
 	//matchersCondition conditionType
 
-	generator         *generator // optional, only enabled when using payloads
+	generator         *protocols.Generator // optional, only enabled when using payloads
 	httpClient        *http.Client
 	httpresp          *http.Response
 	CompiledOperators *protocols.Operators
-	attackType        Type
+	attackType        protocols.Type
 	totalRequests     int
 	//Result            *protocols.Result
 }
@@ -159,8 +159,8 @@ func (r *Request) Compile() error {
 		if attackType == "" {
 			attackType = "sniper"
 		}
-		r.attackType = StringToType[attackType]
-		r.generator, err = New(r.Payloads, r.attackType)
+		r.attackType = protocols.StringToType[attackType]
+		r.generator, err = protocols.New(r.Payloads, r.attackType)
 		if err != nil {
 			return err
 		}
@@ -204,9 +204,9 @@ func (r *Request) executeRequest(request *generatedRequest, dynamicValues map[st
 		if ok && event.OperatorsResult != nil {
 			event.OperatorsResult.PayloadValues = request.meta
 			event.Results = r.MakeResultEvent(event)
-			callback(event)
-			return true, err
+			//return true, err
 		}
+		callback(event)
 	}
 	return false, err
 }

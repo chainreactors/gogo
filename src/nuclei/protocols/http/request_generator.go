@@ -2,6 +2,7 @@ package http
 
 import (
 	"getitle/src/nuclei"
+	"getitle/src/nuclei/protocols"
 	. "getitle/src/structutils"
 	"io"
 	"io/ioutil"
@@ -14,7 +15,7 @@ import (
 type requestGenerator struct {
 	currentIndex    int
 	request         *Request
-	payloadIterator *Iterator
+	payloadIterator *protocols.Iterator
 	rawRequest      *rawRequest
 }
 

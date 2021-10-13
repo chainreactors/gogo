@@ -1,12 +1,16 @@
-import json
-import sys,io
+import json,yaml
+import sys,io,os
 from base64 import b64encode
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer,encoding='utf8')
 
 
 def loadnuclei():
-	pass
+    pocs = []
+    for root, _, files in os.walk("src/config/nuclei"):
+        for file in files:
+            pocs.append(yaml.load(open(os.path.join(root, file), encoding="utf-8")))
+    return pocs
 
 
 def fingerload(filename):
@@ -24,7 +28,7 @@ if __name__ == "__main__":
 	md5fingers = json.loads(open("src/config/md5fingers.json","r",encoding="utf-8").read())
 	port = json.loads(open("src/config/port.json","r",encoding="utf-8").read())
 	mmh3fingers = json.loads(open("src/config/mmh3fingers.json","r",encoding="utf-8").read())
-	nuclei = json.loads(open("src/config/nuclei.json","r",encoding="utf-8").read())
+	nuclei = loadnuclei()
 	f = open("src/utils/finger.go","w",encoding="utf-8")
 	base = '''package utils
 
@@ -46,6 +50,11 @@ func LoadConfig(typ string)string  {
 }
 	'''
 
-	f.write(base%(json.dumps(tcpfingers),json.dumps(httpfingers),json.dumps(md5fingers),json.dumps(port),json.dumps(mmh3fingers),json.dumps(nuclei)))
+	f.write(base%(json.dumps(tcpfingers),
+	json.dumps(httpfingers),
+	json.dumps(md5fingers),
+	json.dumps(port),
+	json.dumps(mmh3fingers),
+	json.dumps(nuclei)))
 	print("fingerprint update success")
 

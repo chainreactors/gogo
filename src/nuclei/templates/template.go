@@ -4,6 +4,7 @@ import (
 	"getitle/src/nuclei/protocols"
 	"getitle/src/nuclei/protocols/executer"
 	"getitle/src/nuclei/protocols/http"
+	"getitle/src/nuclei/protocols/network"
 	"strings"
 )
 
@@ -18,7 +19,8 @@ type Template struct {
 		Vendor    string `json:"vendor"`
 		Tags      string `json:"tags"`
 	} `json:"info"`
-	RequestsHttp []http.Request `json:"requests"`
+	RequestsHTTP    []http.Request    `json:"requests"`
+	RequestsNetwork []network.Request `json:"network"`
 	//RequestsTCP []tcp.Request `json:"network"`
 	// TotalRequests is the total number of requests for the template.
 	TotalRequests int `yaml:"-" json:"-"`
@@ -37,8 +39,14 @@ func (t *Template) Compile() error {
 	options := protocols.ExecuterOptions{}
 	var requests []protocols.Request
 	var err error
-	if len(t.RequestsHttp) > 0 {
-		for _, req := range t.RequestsHttp {
+	if len(t.RequestsHTTP) > 0 {
+		for _, req := range t.RequestsHTTP {
+			requests = append(requests, &req)
+		}
+		t.Executor = executer.NewExecuter(requests, &options)
+	}
+	if len(t.RequestsNetwork) > 0 {
+		for _, req := range t.RequestsNetwork {
 			requests = append(requests, &req)
 		}
 		t.Executor = executer.NewExecuter(requests, &options)

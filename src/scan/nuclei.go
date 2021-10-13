@@ -7,24 +7,24 @@ import (
 )
 
 //tamplate =
-func Nuclei(url string, result *utils.Result) {
+func Nuclei(target string, result *utils.Result) {
 	var vulns []utils.Vuln
 
 	if Exploit == "auto" {
-		vulns = execute_templates(result.Frameworks.GetTitles(), url)
+		vulns = execute_templates(result.Frameworks.GetTitles(), target)
 	} else {
-		vulns = execute_templates([]string{Exploit}, url)
+		vulns = execute_templates([]string{Exploit}, target)
 	}
 	if len(vulns) > 0 {
 		result.AddVulns(vulns)
 	}
 }
 
-func execute_templates(titles []string, url string) []utils.Vuln {
+func execute_templates(titles []string, target string) []utils.Vuln {
 	var vulns []utils.Vuln
 	templates := choiceTemplates(titles)
 	for _, template := range templates { // 遍历所有poc
-		res, ok := template.Execute(url)
+		res, ok := template.Execute(target)
 		if ok {
 			vulns = append(vulns, utils.Vuln{template.Id, res.PayloadValues, res.DynamicValues})
 		}
