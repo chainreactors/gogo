@@ -51,7 +51,15 @@ func HttpConn(delay int) http.Client {
 			Renegotiation:      tls.RenegotiateOnceAsClient,
 			InsecureSkipVerify: true,
 		},
-		DisableKeepAlives: false,
+		DialContext: (&net.Dialer{
+			Timeout:   time.Duration(delay) * time.Second,
+			KeepAlive: time.Duration(delay) * time.Second,
+			DualStack: true,
+		}).DialContext,
+		MaxIdleConnsPerHost: 1,
+		MaxIdleConns:        4000,
+		IdleConnTimeout:     time.Duration(delay) * time.Second,
+		DisableKeepAlives:   false,
 	}
 
 	conn := &http.Client{

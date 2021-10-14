@@ -23,7 +23,7 @@ func httpFingerMatch(result *utils.Result, finger utils.Finger) {
 	resp := result.Httpresp
 	content := result.Content
 	//var cookies map[string]string
-	if finger.SendData_str != "" {
+	if finger.SendData_str != "" && VersionLevel >= 1 {
 		conn := utils.HttpConn(2)
 		resp, err := conn.Get(result.GetURL() + finger.SendData_str)
 		if err != nil {

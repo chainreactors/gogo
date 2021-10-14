@@ -34,7 +34,7 @@ func socketHttp(target string, result *utils.Result) {
 	result.TcpCon = &conn
 
 	//发送内容
-	senddata := []byte("GET / HTTP/1.1\r\nHost: " + target + "\r\n\r\n")
+	senddata := []byte("GET / HTTP/1.1\r\nHost: " + target + "\r\nConnection: Keep-Alive\r\n\r\n")
 	data, err := utils.SocketSend(*result.TcpCon, senddata, 4096)
 	if err != nil {
 		result.Error = err.Error()
