@@ -1,7 +1,7 @@
 # Getitle
 一个资产探测扫描器. 
 
-README Version 0.3.11`
+README Version 1.0.0
 
 ## Usage
 
@@ -13,15 +13,19 @@ Usage of ./getitle:
   -p string    ports (default "top1")
   -sp string   smart probe,启发式扫描端口探针,默认icmp
   -ipp string  ip probe,-ss模式ip探针,默认1
+  -s bool 	   喷洒模式扫描,ip生成器将端口为优先,端口数量大于100将自动启用
+  -ns bool	   强制关闭spray扫描
   -t int       threads (default 4000)
   -o string    输出格式:clean,full(default) or json
   -f string    输出文件名,默认为空,请用相对路径(./)或绝对路径
+  -af bool	   自动生成文件名,格式为 ".IP_port_number.json"
   -v bool      扫描详细指纹.默认为打开状态,存在-v参数则关闭.
-  -e bool      启用漏洞插件扫描,目前有ms17-010与shiro(默认key)
-  -k string    启动密码(必须输入)为puaking  
+  -e bool      启用漏洞插件扫描,目前有ms17-010与shiro(默认key),以及nuclei的poc,将会自动选用
+  -E string    强制指定poc的tag,name
+  -k string    启动密码(必须输入)为ybb  
   -l string    从文件中读取任务,例如:-l ip.txt
   -j string	   从输出的json中读取任务,例如:-j 1.json
-  -P bool      查看端口预设
+  -P string    查看配置预设  port|nuclei|inter 
   -F file      格式化json
   -no bool	   高级扫描模式只探测存活网段不进行端口扫描
 
@@ -32,8 +36,6 @@ Usage of ./getitle:
 ## 参数解释
 
 所有用法都需输入-k [密钥]
-
-
 
 
 
@@ -279,14 +281,14 @@ snmp
  * make release VERSION=VERSION to bulid getitle to all platform
 
  * Windows build muli releases
-  
+
 ### windows requirement:
  * upxs 自定义修改版的upx壳,可以在gox.bat中替换成原版
  * limelighter 签名伪造工具
  * tar.exe 压缩打包工具
  * gox go语言快捷编译工具
  * go-strip go语言编译信息去除工具
- 
+
    ```
    gox.bat [version] # .e.g gox.bat 0.3.0
    ```

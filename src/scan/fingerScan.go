@@ -99,7 +99,7 @@ func getFramework(result *utils.Result, fingermap *utils.FingerMapper, matcher f
 	// 优先匹配默认端口,第一遍循环只匹配默认端口
 	for _, finger := range fingermap.GetFingers(result.Port) {
 		matcher(result, finger)
-		if !result.NoFramework() {
+		if !result.NoFramework() && VersionLevel == 0 {
 			return
 		}
 	}
