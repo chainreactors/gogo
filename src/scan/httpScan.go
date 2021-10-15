@@ -8,6 +8,10 @@ import (
 	"strings"
 )
 
+var headers = http.Header{
+	"User-Agent": []string{"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4577.82 Safari/537.36"},
+}
+
 // -defalut
 //socket进行对网站的连接
 func socketHttp(target string, result *utils.Result) {
@@ -75,7 +79,10 @@ func SystemHttp(target string, result *utils.Result) {
 		delay = Delay + HttpsDelay
 	}
 	conn = utils.HttpConn(delay)
-	resp, err := conn.Get(target)
+	req, _ := http.NewRequest("GET", target, nil)
+	req.Header = headers
+	resp, err := conn.Do(req)
+
 	//resp, err := conn.Get(target+"/servlet/bsh.servlet.BshServlet")
 	if resp != nil && resp.TLS != nil {
 		result.Protocol = "https"

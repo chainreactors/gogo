@@ -59,12 +59,38 @@ func HttpConn(delay int) http.Client {
 		MaxIdleConnsPerHost: 1,
 		MaxIdleConns:        4000,
 		IdleConnTimeout:     time.Duration(delay) * time.Second,
-		DisableKeepAlives:   false,
+		DisableKeepAlives:   true,
 	}
 
 	conn := &http.Client{
-		Transport: tr,
-		Timeout:   time.Duration(delay) * time.Second,
+		Transport:     tr,
+		Timeout:       time.Duration(delay) * time.Second,
+		CheckRedirect: makeCheckRedirectFunc(true, 3),
 	}
 	return *conn
+}
+
+type checkRedirectFunc func(req *http.Request, via []*http.Request) error
+
+func makeCheckRedirectFunc(followRedirects bool, maxRedirects int) checkRedirectFunc {
+	return func(req *http.Request, via []*http.Request) error {
+		if !followRedirects {
+			return http.ErrUseLastResponse
+		}
+		if req.Header.Get("Referer") != "" {
+			delete(req.Header, "Referer")
+		}
+		if maxRedirects == 0 {
+			if len(via) > 3 {
+				return http.ErrUseLastResponse
+			}
+			return nil
+		}
+
+		if len(via) > maxRedirects {
+			return http.ErrUseLastResponse
+		}
+
+		return nil
+	}
 }
