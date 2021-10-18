@@ -115,7 +115,7 @@ func checkCommand(config Config) {
 			fmt.Println("[warn] json input can not config scan Mod,default scanning")
 		}
 	}
-	if config.IP == "" && config.ListFile == "" && config.Mod != "a" { // 一些导致报错的参数组合
+	if config.IP == "" && config.ListFile == "" && config.JsonFile == "" && config.Mod != "a" { // 一些导致报错的参数组合
 		fmt.Println("[-] mod AUTO can not define IP or IPlist")
 		os.Exit(0)
 	}

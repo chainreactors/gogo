@@ -8,6 +8,28 @@ import (
 	"time"
 )
 
+var maxRedirects = 3
+var checkRedirect = func(req *http.Request, via []*http.Request) error {
+	//if !followRedirects {
+	//	return http.ErrUseLastResponse
+	//}
+	if req.Header.Get("Referer") != "" {
+		delete(req.Header, "Referer")
+	}
+	if maxRedirects == 0 {
+		if len(via) > 3 {
+			return http.ErrUseLastResponse
+		}
+		return nil
+	}
+
+	if len(via) > maxRedirects {
+		return http.ErrUseLastResponse
+	}
+
+	return nil
+}
+
 func TcpSocketConn(target string, delay int) (net.Conn, error) {
 	conn, err := net.DialTimeout("tcp", target, time.Duration(delay)*time.Second)
 	if err != nil {
@@ -65,32 +87,7 @@ func HttpConn(delay int) http.Client {
 	conn := &http.Client{
 		Transport:     tr,
 		Timeout:       time.Duration(delay) * time.Second,
-		CheckRedirect: makeCheckRedirectFunc(true, 3),
+		CheckRedirect: checkRedirect,
 	}
 	return *conn
-}
-
-type checkRedirectFunc func(req *http.Request, via []*http.Request) error
-
-func makeCheckRedirectFunc(followRedirects bool, maxRedirects int) checkRedirectFunc {
-	return func(req *http.Request, via []*http.Request) error {
-		if !followRedirects {
-			return http.ErrUseLastResponse
-		}
-		if req.Header.Get("Referer") != "" {
-			delete(req.Header, "Referer")
-		}
-		if maxRedirects == 0 {
-			if len(via) > 3 {
-				return http.ErrUseLastResponse
-			}
-			return nil
-		}
-
-		if len(via) > maxRedirects {
-			return http.ErrUseLastResponse
-		}
-
-		return nil
-	}
 }
