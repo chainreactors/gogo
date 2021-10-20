@@ -1,5 +1,10 @@
 ## Change Note
 
+* 1.0.1
+  * 修复-j参数无法使用的bug
+  * 优化http逻辑,删除自动添加的referer头,隐藏user-agent
+  * 优化-v参数逻辑,修复http主动扫描指纹在所有verison-level下都会生效的bug.现在-v参数会强制扫描所有指纹,以及favicon.
+  * 
 * 1.0.0
   * 使用nuclei的poc系统,目前已经实装tcp与http协议的poc,部分参数被删除,详情见readme.
   * 新增-e参数,现在会自动启用nuclei中的poc
@@ -23,6 +28,7 @@
     * -P nuclei 输出nuclei tag与poc列表
     * -P port 输出端口配置
     * -P inter 内网配置
+  * 新增hash字段,用来判断是否时同一个系统
   * 修复大量bug,提高稳定性,速度,性能.
 * 0.3.12
   - 更新readme与更新日志稳定

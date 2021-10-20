@@ -96,11 +96,12 @@ func FormatOutput(filename string, outputfile string) {
 	}
 	resultsdata := LoadResult(filename)
 	// 输出配置信息
-	configstr := fmt.Sprintf("[*] Scan Target: %s, Ports: %s, Mod: %s", resultsdata.Config.IP, resultsdata.Config.Ports, resultsdata.Config.Mod)
+	configstr := fmt.Sprintf("[*] Scan Target: %s, Ports: %s, Mod: %s\n", resultsdata.Config.IP, resultsdata.Config.Ports, resultsdata.Config.Mod)
+	configstr += fmt.Sprintf("[*] Exploit: %s, Version level: %s\n", resultsdata.Config.Exploit, resultsdata.Config.VerisonLevel)
 	if resultsdata.IP != "" {
-		configstr += " Internet IP: " + resultsdata.IP
+		configstr += fmt.Sprintf("[*] Internet IP: %s", resultsdata.IP)
 	}
-	fmt.Println(configstr)
+	fmt.Print(configstr)
 
 	pfs := make(map[string]map[string]portformat)
 	//ipfs := make(map[string]ipformat)

@@ -47,7 +47,8 @@ func Init(config Config) Config {
 	checkCommand(config)
 
 	// 初始化
-
+	config.Exploit = scan.Exploit
+	config.VerisonLevel = scan.VersionLevel
 	//windows系统默认协程数为2000
 	OS := runtime.GOOS
 	if config.Threads == 4000 { // if 默认线程
