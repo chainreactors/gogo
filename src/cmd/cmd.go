@@ -52,6 +52,7 @@ func CMD(k string) {
 	autofile := flag.Bool("af", false, "")
 	noup := flag.Bool("nu", false, "")
 	uploadfile := flag.String("uf", "", "")
+	pocfile := flag.String("ef", "", "")
 	flag.Parse()
 	// 密钥
 	if *key != k {
@@ -71,7 +72,7 @@ func CMD(k string) {
 	}
 
 	starttime := time.Now()
-
+	LoadNuclei(*pocfile)
 	parseVersion(*version, *version2)
 	parseExploit(*exploit, *exploitConfig)
 	parseFilename(*autofile, &config)

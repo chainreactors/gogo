@@ -5,6 +5,7 @@ import (
 	"fmt"
 	. "getitle/src/nuclei/templates"
 	"getitle/src/structutils"
+	"io/ioutil"
 	"os"
 	"regexp"
 	"strconv"
@@ -17,12 +18,25 @@ var Httpfingers = loadFingers("http")
 var Tagmap, Namemap, Portmap = loadPortConfig()
 var Compiled = make(map[string][]regexp.Regexp)
 var CommonCompiled = initregexp()
-var TemplateMap = loadTemplates()
+var TemplateMap map[string][]*Template
 
-func loadTemplates() map[string][]*Template {
+func LoadNuclei(filename string) {
+	if filename == "" {
+		TemplateMap = loadTemplates([]byte(LoadConfig("nuclei")))
+	} else {
+		content, err := ioutil.ReadFile(filename)
+		if err != nil {
+			fmt.Println(err.Error())
+			os.Exit(0)
+		}
+		TemplateMap = loadTemplates(content)
+	}
+}
+
+func loadTemplates(content []byte) map[string][]*Template {
 	var templates []*Template
 	var templatemap = make(map[string][]*Template)
-	err := json.Unmarshal([]byte(LoadConfig("nuclei")), &templates)
+	err := json.Unmarshal(content, &templates)
 	if err != nil {
 		fmt.Println("[-] nuclei config load FAIL!")
 		os.Exit(0)
