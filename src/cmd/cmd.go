@@ -40,7 +40,6 @@ func CMD(k string) {
 	flag.IntVar(&scan.HttpsDelay, "D", 2, "")
 	flag.StringVar(&scan.Payloadstr, "payload", "", "")
 	flag.BoolVar(&core.Noscan, "no", false, "")
-	flag.BoolVar(&up, "up", false, "")
 
 	// 一些特殊参数初始化
 	key := flag.String("k", "", "")
@@ -51,6 +50,8 @@ func CMD(k string) {
 	printType := flag.String("P", "no", "")
 	formatoutput := flag.String("F", "", "")
 	autofile := flag.Bool("af", false, "")
+	noup := flag.Bool("nu", false, "")
+	uploadfile := flag.String("uf", "", "")
 	flag.Parse()
 	// 密钥
 	if *key != k {
@@ -65,6 +66,8 @@ func CMD(k string) {
 	if *formatoutput != "" {
 		core.FormatOutput(*formatoutput, config.Filename)
 		os.Exit(0)
+	} else if *uploadfile != "" {
+		uploadfiles([]string{*uploadfile})
 	}
 
 	starttime := time.Now()
@@ -81,8 +84,8 @@ func CMD(k string) {
 	close(core.LogDetach)
 
 	time.Sleep(500 * time.Microsecond)
-	if connected && config.Filename != "" { // 如果出网则自动上传结果到云服务器
-		resrev(config.Filename)
+	if connected && !*noup && config.Filename != "" { // 如果出网则自动上传结果到云服务器
+		uploadfiles([]string{config.Filename, config.SmartFilename})
 	}
 
 	time.Sleep(time.Microsecond * 500)

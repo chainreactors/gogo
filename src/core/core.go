@@ -122,6 +122,8 @@ func SmartMod(config Config) {
 		return
 	}
 	sort.Strings(iplist)
+	iplists = append(iplists, iplist...)
+
 	// 启发式扫描逐步降级,从喷洒B段到喷洒C段到默认扫描
 	if config.Mod == "ss" {
 		config.Mod = "s"
@@ -160,7 +162,7 @@ func alived(ip string, temp *sync.Map, mask int, mod string) {
 		cidr := fmt.Sprintf("%s/%d\n", ip, mask)
 		fmt.Print("[*] Found " + cidr)
 		Alivesum++
-		if FileHandle != nil && SliceContains([]string{"ss", "s", "sb"}, mod) {
+		if FileHandle != nil && SliceContains([]string{"ss", "s", "sb"}, mod) && (Noscan || mod == "sb") {
 			Datach <- cidr
 		}
 	}

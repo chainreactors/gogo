@@ -77,7 +77,6 @@ func jsonFile(result *utils.Result) string {
 	} else {
 		return "," + string(jsons)
 	}
-
 }
 
 func FormatOutput(filename string, outputfile string) {

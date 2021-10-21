@@ -31,25 +31,36 @@ func parseExploit(exploit bool, exploitConfig string) {
 	}
 }
 
-func parseFilename(nofilename bool, config *utils.Config) {
-	if nofilename && config.Filename == "" {
-		basefilename := joinFilename(*config)
+func parseFilename(autofilename bool, config *utils.Config) {
+	if autofilename && config.Filename == "" {
+		basefilename := fmt.Sprintf("%s_%s_", parseTarget(config), config.Ports)
 		i := 1
 		for core.CheckFileIsExist(basefilename + structutils.ToString(i) + ".json") {
 			i++
 		}
 		config.Filename = basefilename + structutils.ToString(i) + ".json"
+
+		if config.IsSmart() {
+			i := 1
+			smartbasename := fmt.Sprintf("%s_%s_", parseTarget(config), config.Mod)
+			for core.CheckFileIsExist(smartbasename + structutils.ToString(i) + ".json") {
+				i++
+			}
+			config.SmartFilename = smartbasename + structutils.ToString(i) + ".json"
+		}
 	}
 }
 
-func joinFilename(config utils.Config) string {
+func parseTarget(config *utils.Config) string {
 	var target string
 	if config.IP != "" {
 		target = strings.Replace(core.IpForamt(config.IP), "/", "_", -1)
 	} else if config.ListFile != "" {
 		target = config.ListFile
+	} else if config.JsonFile != "" {
+		target = config.JsonFile
 	} else if config.Mod == "a" {
 		target = "auto"
 	}
-	return fmt.Sprintf(".%s_%s_", target, config.Ports)
+	return target
 }

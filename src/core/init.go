@@ -11,17 +11,6 @@ import (
 	"strings"
 )
 
-//文件输出
-var Datach = make(chan string, 100)
-var FileHandle *os.File // 输出文件 handle
-
-var Output string     // 命令行输出格式
-var FileOutput string // 文件输出格式
-
-//进度tmp文件
-var LogDetach = make(chan string, 100)
-var LogFileHandle *os.File
-
 var Clean bool
 var Noscan bool
 
