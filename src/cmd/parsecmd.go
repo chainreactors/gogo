@@ -33,7 +33,7 @@ func parseExploit(exploit bool, exploitConfig string) {
 
 func parseFilename(autofilename bool, config *utils.Config) {
 	if autofilename && config.Filename == "" {
-		basefilename := fmt.Sprintf("%s_%s_", parseTarget(config), config.Ports)
+		basefilename := fmt.Sprintf(".%s_%s_", parseTarget(config), config.Ports)
 		i := 1
 		for core.CheckFileIsExist(basefilename + structutils.ToString(i) + ".json") {
 			i++
@@ -42,7 +42,7 @@ func parseFilename(autofilename bool, config *utils.Config) {
 
 		if config.IsSmart() {
 			i := 1
-			smartbasename := fmt.Sprintf("%s_%s_", parseTarget(config), config.Mod)
+			smartbasename := fmt.Sprintf(".%s_%s_", parseTarget(config), config.Mod)
 			for core.CheckFileIsExist(smartbasename + structutils.ToString(i) + ".json") {
 				i++
 			}
