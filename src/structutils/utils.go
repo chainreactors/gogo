@@ -2,6 +2,7 @@ package structutils
 
 import (
 	"bytes"
+	"compress/gzip"
 	"crypto/md5"
 	"encoding/base64"
 	"encoding/hex"
@@ -170,4 +171,34 @@ func standBase64(braw []byte) []byte {
 	}
 	buffer.WriteByte('\n')
 	return buffer.Bytes()
+}
+
+func Zip(input []byte) string {
+	var b bytes.Buffer
+	gz := gzip.NewWriter(&b)
+	if _, err := gz.Write(input); err != nil {
+		println(err.Error())
+		return ""
+	}
+	if err := gz.Flush(); err != nil {
+		println(err.Error())
+		return ""
+	}
+	if err := gz.Close(); err != nil {
+		println(err.Error())
+		return ""
+	}
+	return base64.StdEncoding.EncodeToString(b.Bytes())
+}
+
+func Unzip(input string) []byte {
+	data, err := base64.StdEncoding.DecodeString(input)
+	if err != nil {
+		println(err.Error())
+		return nil
+	}
+	rdata := bytes.NewReader(data)
+	r, _ := gzip.NewReader(rdata)
+	s, _ := ioutil.ReadAll(r)
+	return s
 }
