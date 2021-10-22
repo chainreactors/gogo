@@ -6,7 +6,6 @@ import (
 	. "getitle/src/structutils"
 	. "getitle/src/utils"
 	"github.com/panjf2000/ants/v2"
-	"sort"
 	"strings"
 	"sync"
 )
@@ -118,11 +117,15 @@ func SmartMod(config Config) {
 		iplist = append(iplist, fmt.Sprintf("%s/%d", ip.(string), mask))
 		return true
 	})
+
 	if iplist == nil {
 		return
 	}
-	sort.Strings(iplist)
-	iplists = append(iplists, iplist...)
+
+	sort_cidr(iplist)
+	if SmartFileHandle != nil {
+		sync_smartips(iplist)
+	}
 
 	// 启发式扫描逐步降级,从喷洒B段到喷洒C段到默认扫描
 	if config.Mod == "ss" {

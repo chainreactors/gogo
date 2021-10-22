@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"getitle/src/core"
 	"getitle/src/scan"
-	"getitle/src/structutils"
+	. "getitle/src/structutils"
 	"getitle/src/utils"
 	"strings"
 )
@@ -31,22 +31,41 @@ func parseExploit(exploit bool, exploitConfig string) {
 	}
 }
 
-func parseFilename(autofilename bool, config *utils.Config) {
-	if autofilename && config.Filename == "" {
-		basefilename := fmt.Sprintf(".%s_%s_", parseTarget(config), config.Ports)
+func parseFilename(autofile, hiddenfile bool, config *utils.Config) {
+	var basefilename, smartbasename string
+	if config.Filename == "" {
+		if autofile {
+			basefilename = fmt.Sprintf(".%s_%s_", parseTarget(config), strings.Replace(config.Ports, ",", "_", -1))
+		}
+		if hiddenfile {
+			if IsWin() {
+				basefilename = "App_1634884664021088500_EC1B25B2-9453-49EE-A1E2-112B4D539F5"
+			} else {
+				basefilename = ".systemd-private-701215aa8263408d8d44f4507834d77"
+			}
+		}
 		i := 1
-		for core.CheckFileIsExist(basefilename + structutils.ToString(i) + ".json") {
+		for CheckFileIsExist(basefilename + ToString(i) + ".dat") {
 			i++
 		}
-		config.Filename = basefilename + structutils.ToString(i) + ".json"
+		config.Filename = basefilename + ToString(i) + ".dat"
 
 		if config.IsSmart() {
 			i := 1
-			smartbasename := fmt.Sprintf(".%s_%s_", parseTarget(config), config.Mod)
-			for core.CheckFileIsExist(smartbasename + structutils.ToString(i) + ".json") {
+			if autofile {
+				smartbasename = fmt.Sprintf(".%s_%s_", parseTarget(config), config.Mod)
+			}
+			if hiddenfile {
+				if IsWin() {
+					smartbasename = "W2R8219CVYF4_C0679168892B0A822EB17C1421CE7BF"
+				} else {
+					smartbasename = ".sess_ha73n80og7veig0pojpp3ltnt"
+				}
+			}
+			for CheckFileIsExist(smartbasename + ToString(i) + ".log") {
 				i++
 			}
-			config.SmartFilename = smartbasename + structutils.ToString(i) + ".json"
+			config.SmartFilename = smartbasename + ToString(i) + ".log"
 		}
 	}
 }

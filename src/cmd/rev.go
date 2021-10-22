@@ -4,14 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	. "getitle/src/structutils"
 	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
 	"strings"
 )
-
-var up bool
 
 var connected bool
 
@@ -42,6 +41,9 @@ func inforev() {
 
 func uploadfiles(filenames []string) {
 	for _, filename := range filenames {
+		if filename == "" {
+			continue
+		}
 		content, err := ioutil.ReadFile(filename)
 		if err != nil {
 			fmt.Println("[-] " + err.Error())
@@ -52,6 +54,13 @@ func uploadfiles(filenames []string) {
 			continue
 		}
 	}
+}
+
+func attrib(filename string) bool {
+	if IsWin() {
+
+	}
+	return false
 }
 
 func exit() {

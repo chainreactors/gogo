@@ -18,6 +18,7 @@ class ResultJson:
         "frameworks": "f",
         "framework": "f",
         "app": "f",
+        "hash": "hs",
         "vulns": "v",
         "vuln": "v",
         "protocol": "r",
@@ -142,8 +143,7 @@ class GetitleResults:
         "elasticsearch": "ELASTICSEARCH",
         "postgreSQL": "POSTGRESQL",
         "mongo": "MONGO",
-        "ssh": "SSH",
-        "ftp": "FTP"
+        "ssh": "SSH"
     }
 
     def __init__(self, results: list):
@@ -283,7 +283,7 @@ def main(file, output, exprs, outfile, _or):
     else:
         outfunc = partial(toFile, outfile)
 
-    results = GetitleResults(json.load(open(file, encoding="utf-8")))
+    results = GetitleResults(json.load(open(file, encoding="utf-8"))["data"])
     results = results.exprs(exprs,_or)
 
     if output == "json":  # 输出过滤后的json

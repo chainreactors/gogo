@@ -23,8 +23,6 @@ var LogDetach = make(chan string, 100)
 var LogFileHandle *os.File
 var tmpfilename string
 
-var iplists []string
-
 func readTargetFile(targetfile string) []string {
 
 	file, err := os.Open(targetfile)
@@ -55,14 +53,6 @@ func initFileHandle(filename string) *os.File {
 		}
 	}
 	return filehandle
-}
-
-func CheckFileIsExist(filename string) bool {
-	var exist = true
-	if _, err := os.Stat(filename); os.IsNotExist(err) {
-		exist = false
-	}
-	return exist
 }
 
 func initFile(config Config) {
@@ -125,17 +115,26 @@ func initFile(config Config) {
 			}
 
 			if SmartFileHandle != nil {
-				for i, ip := range iplists {
-					iplists[i] = "\"" + ip + "\""
-				}
-				_, _ = SmartFileHandle.WriteString(strings.Join(iplists, ","))
 				_, _ = SmartFileHandle.WriteString("]}")
+				_ = SmartFileHandle.Close()
 			}
-
-			_ = SmartFileHandle.Close()
 			_ = FileHandle.Close()
-
 		}()
 	}
 
+}
+
+var flag1 bool = false
+
+func sync_smartips(ips []string) {
+	iplists := make([]string, len(ips))
+	for i, ip := range ips {
+		iplists[i] = "\"" + ip + "\""
+	}
+	if flag1 {
+		_, _ = SmartFileHandle.WriteString(",")
+	}
+	_, _ = SmartFileHandle.WriteString(strings.Join(iplists, ","))
+	flag1 = true
+	_ = SmartFileHandle.Sync()
 }

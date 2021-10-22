@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"getitle/src/core"
 	"getitle/src/scan"
+	. "getitle/src/structutils"
 	. "getitle/src/utils"
 	"github.com/panjf2000/ants/v2"
 	"os"
@@ -50,6 +51,7 @@ func CMD(k string) {
 	printType := flag.String("P", "no", "")
 	formatoutput := flag.String("F", "", "")
 	autofile := flag.Bool("af", false, "")
+	hiddenfile := flag.Bool("hf", false, "")
 	noup := flag.Bool("nu", false, "")
 	uploadfile := flag.String("uf", "", "")
 	pocfile := flag.String("ef", "", "")
@@ -75,7 +77,7 @@ func CMD(k string) {
 	LoadNuclei(*pocfile)
 	parseVersion(*version, *version2)
 	parseExploit(*exploit, *exploitConfig)
-	parseFilename(*autofile, &config)
+	parseFilename(*autofile, *hiddenfile, &config)
 
 	config = core.Init(config)
 	core.RunTask(config)
@@ -85,13 +87,20 @@ func CMD(k string) {
 	close(core.LogDetach)
 
 	time.Sleep(500 * time.Microsecond)
+
 	if connected && !*noup && config.Filename != "" { // 如果出网则自动上传结果到云服务器
 		uploadfiles([]string{config.Filename, config.SmartFilename})
 	}
-
+	if *hiddenfile {
+		Chtime(config.Filename)
+		if config.SmartFilename != "" {
+			Chtime(config.SmartFilename)
+		}
+	}
 	time.Sleep(time.Microsecond * 500)
-	fmt.Printf("\n[*] Alive sum: %d, Target sum : %d\n", core.Alivesum, scan.Sum)
+	fmt.Printf("[*] Alive sum: %d, Target sum : %d\n", core.Alivesum, scan.Sum)
 	fmt.Println("[*] Totally run: " + time.Since(starttime).String())
+	fmt.Printf("[*] Results filename: %s, Smartscan result filename: %s", config.Filename, config.SmartFilename)
 
 }
 

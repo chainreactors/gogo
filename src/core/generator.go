@@ -3,8 +3,6 @@ package core
 import (
 	"fmt"
 	. "getitle/src/utils"
-	"strconv"
-	"strings"
 	"sync"
 )
 
@@ -73,11 +71,6 @@ func goIPsGenerator(config Config) chan string {
 func isnotAlive(ip string, temp *sync.Map) bool {
 	_, ok := temp.Load(ip)
 	return !ok
-}
-
-func getMask(cidr string) int {
-	mask, _ := strconv.Atoi(strings.Split(cidr, "/")[1])
-	return mask
 }
 
 func aIpGenerator(CIDR string, ipps []uint, ch chan string, temp *sync.Map) chan string {

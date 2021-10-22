@@ -6,7 +6,6 @@ import (
 	. "getitle/src/structutils"
 	. "getitle/src/utils"
 	"os"
-	"runtime"
 	"strconv"
 	"strings"
 )
@@ -39,12 +38,14 @@ func Init(config Config) Config {
 	config.Exploit = scan.Exploit
 	config.VerisonLevel = scan.VersionLevel
 	//windows系统默认协程数为2000
-	OS := runtime.GOOS
 	if config.Threads == 4000 { // if 默认线程
-		if OS == "windows" {
+		if IsWin() {
 			config.Threads = 1000
 		} else if config.JsonFile != "" {
 			config.Threads = 1000
+		}
+		if config.JsonFile != "" {
+			config.Threads = 50
 		}
 	}
 

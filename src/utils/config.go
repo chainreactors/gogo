@@ -33,7 +33,7 @@ func (config Config) IsScan() bool {
 }
 
 func (config Config) IsSmart() bool {
-	if structutils.SliceContains([]string{"ss", "s", "sb"}, config.Mod) {
+	if structutils.SliceContains([]string{"ss", "s", "sc"}, config.Mod) {
 		return true
 	}
 	return false

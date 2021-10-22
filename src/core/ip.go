@@ -7,6 +7,8 @@ import (
 	"math"
 	"net"
 	"os"
+	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -31,6 +33,17 @@ func mask2ipuint(mask int) uint64 {
 func ip2superip(ip string, mask int) string {
 	ipint := ip2int(ip)
 	return int2ip(ipint & uint(mask2ipuint(mask)))
+}
+
+func splitCIDR(cidr string) (string, int) {
+	tmp := strings.Split(cidr, "/")
+	mask, _ := strconv.Atoi(tmp[1])
+	return tmp[0], mask
+}
+
+func getMask(cidr string) int {
+	_, mask := splitCIDR(cidr)
+	return mask
 }
 
 func getMaskRange(mask int) (before uint, after uint) {
@@ -116,4 +129,20 @@ func ipInit(config Config) Config {
 		}
 	}
 	return config
+}
+
+func sort_cidr(cidrs []string) []string {
+	sort.Slice(cidrs, func(i, j int) bool {
+		ip_i, _ := splitCIDR(cidrs[i])
+		ip_j, _ := splitCIDR(cidrs[j])
+		return ip2int(ip_i) < ip2int(ip_j)
+	})
+	return cidrs
+}
+
+func sort_ip(ips []string) []string {
+	sort.Slice(ips, func(i, j int) bool {
+		return ip2int(ips[i]) < ip2int(ips[j])
+	})
+	return ips
 }

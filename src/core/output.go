@@ -7,7 +7,6 @@ import (
 	"getitle/src/utils"
 	"io/ioutil"
 	"os"
-	"sort"
 	"strings"
 )
 
@@ -125,14 +124,12 @@ func FormatOutput(filename string, outputfile string) {
 	}
 
 	// 排序
-	var keys []int
+	var ips []string
 	for ip, _ := range pfs {
-		keys = append(keys, int(ip2int(ip)))
+		ips = append(ips, ip)
 	}
-	sort.Ints(keys)
 
-	for _, ipi := range keys {
-		ip := int2ip(uint(ipi))
+	for _, ip := range sort_ip(ips) {
 
 		var hostname, network, netbiosstat string
 
