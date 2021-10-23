@@ -36,13 +36,14 @@ func parseFilename(autofile, hiddenfile bool, config *utils.Config) {
 	if config.Filename == "" {
 		if autofile {
 			basefilename = fmt.Sprintf(".%s_%s_", parseTarget(config), strings.Replace(config.Ports, ",", "_", -1))
-		}
-		if hiddenfile {
+		} else if hiddenfile {
 			if IsWin() {
 				basefilename = "App_1634884664021088500_EC1B25B2-9453-49EE-A1E2-112B4D539F5"
 			} else {
 				basefilename = ".systemd-private-701215aa8263408d8d44f4507834d77"
 			}
+		} else {
+			return
 		}
 		i := 1
 		for CheckFileIsExist(basefilename + ToString(i) + ".dat") {

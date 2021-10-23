@@ -100,7 +100,9 @@ func CMD(k string) {
 	time.Sleep(time.Microsecond * 500)
 	fmt.Printf("[*] Alive sum: %d, Target sum : %d\n", core.Alivesum, scan.Sum)
 	fmt.Println("[*] Totally run: " + time.Since(starttime).String())
-	fmt.Printf("[*] Results filename: %s, Smartscan result filename: %s", config.Filename, config.SmartFilename)
+	if config.Filename != "" {
+		fmt.Printf("[*] Results filename: %s, Smartscan result filename: %s\n", config.Filename, config.SmartFilename)
+	}
 
 }
 
