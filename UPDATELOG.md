@@ -1,10 +1,18 @@
 ## Change Note
 
+* 1.0.2
+  * 修改-j 参数默认线程为50
+  * 修复-j upload 显示错误的bug
+  * 启发式扫描的cidr现在可以正确的排序了
+  * 优化代码结构
+  * gtfilter适配最新版gt
+  * 新增-hf参数,会自动隐藏文件名,并修改文件时间
+  * 压缩加密ms17010的字节码,防止被杀软静态查杀
+  * 添加-ef参数,可以从文件中读取nuclei poc,格式必须为poc,可以使用脚本将yaml转为poc使用
 * 1.0.1
   * 修复-j参数无法使用的bug
   * 优化http逻辑,删除自动添加的referer头,隐藏user-agent
   * 优化-v参数逻辑,修复http主动扫描指纹在所有verison-level下都会生效的bug.现在-v参数会强制扫描所有指纹,以及favicon.
-  * 
 * 1.0.0
   * 使用nuclei的poc系统,目前已经实装tcp与http协议的poc,部分参数被删除,详情见readme.
   * 新增-e参数,现在会自动启用nuclei中的poc

@@ -203,9 +203,7 @@ func genFromSpray(config Config, tcch *chan targetConfig) {
 func genFromDefault(config Config, tcch *chan targetConfig) {
 	var ch chan string
 	if config.IPlist != nil {
-		if config.IPlist != nil {
-			ch = goIPsGenerator(config)
-		}
+		ch = goIPsGenerator(config)
 	} else {
 		ch = goDefaultIpGenerator(config.IP)
 	}

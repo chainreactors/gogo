@@ -6,7 +6,6 @@ import (
 	. "getitle/src/structutils"
 	. "getitle/src/utils"
 	"os"
-	"strconv"
 	"strings"
 )
 
@@ -118,17 +117,21 @@ func printTaskInfo(config Config, taskname string) {
 	fmt.Printf("[*] Current goroutines: %d, Version Level: %d,Exploit Target: %s, Spray Scan: %t\n", config.Threads, scan.VersionLevel, scan.Exploit, config.Spray)
 	if config.JsonFile == "" {
 		processLogln(fmt.Sprintf("[*] Start scan task %s ,total ports: %d , mod: %s", taskname, len(config.Portlist), config.Mod))
+		// 输出端口信息
 		if len(config.Portlist) > 500 {
 			fmt.Println("[*] too much ports , only show top 500 ports: " + strings.Join(config.Portlist[:500], ",") + "......")
 		} else {
 			fmt.Println("[*] ports: " + strings.Join(config.Portlist, ","))
 		}
+		// 输出预估时间
 		if config.Mod == "default" {
-			processLogln(fmt.Sprintf("[*] Estimated to take about %d seconds", guesstime(config)))
+			processLogln(fmt.Sprintf("[*] Scan task time is about %d seconds", guessTime(config)))
+		} else if config.IsSmart() {
+			processLogln(fmt.Sprintf("[*] Smart scan task time is about %d seconds", guessSmarttime(config)))
 		}
 	} else {
 		processLogln(fmt.Sprintf("[*] Start scan task %s ,total target: %d", taskname, len(config.Results)))
-		processLogln(fmt.Sprintf("[*] Estimated to take about %d seconds", (len(config.Results)/config.Threads)*4+4))
+		processLogln(fmt.Sprintf("[*] Json scan task time is about %d seconds", (len(config.Results)/config.Threads)*4+4))
 	}
 }
 
@@ -177,26 +180,41 @@ func RunTask(config Config) {
 	}
 }
 
-func guesstime(config Config) int {
+func guessTime(config Config) int {
 	ipcount := 0
+
 	portcount := len(config.Portlist)
 	if config.IPlist != nil {
 		for _, ip := range config.IPlist {
-			ipcount += countip(ip)
+			mask := getMask(ip)
+			ipcount += countip(mask)
 		}
 	} else {
-		ipcount = countip(config.IP)
+		mask := getMask(config.IP)
+		ipcount = countip(mask)
 	}
 	return (portcount*ipcount/config.Threads)*4 + 4
 }
 
-func countip(ip string) int {
+func guessSmarttime(config Config) int {
+	spc := len(config.SmartPortList)
+	ippc := len(config.IpProbeList)
+	mask := getMask(config.IP)
+	var count int
+	if config.Mod == "s" || config.Mod == "sb" {
+		count = 2 << uint((32-mask)-8)
+	} else {
+		count = 2 << uint((32-mask)-16)
+	}
+	return ((spc*ippc*count)/(config.Threads*2) + 2)
+}
+
+func countip(mask int) int {
 	count := 0
-	c, _ := strconv.Atoi(strings.Split(ip, "/")[1])
-	if c == 32 {
+	if mask == 32 {
 		count++
 	} else {
-		count += 2 << (31 - uint(c))
+		count += 2 << (31 - uint(mask))
 	}
 	return count
 }
@@ -207,6 +225,7 @@ func autoScan(config Config) {
 		SmartMod(createSmartTask(config, cidr, st))
 	}
 }
+
 func createSmartTask(config Config, cidr string, c []string) Config {
 	config.IP = cidr
 	config.SmartPortList = portHandler(c[1])

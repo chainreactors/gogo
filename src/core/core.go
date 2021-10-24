@@ -87,7 +87,7 @@ func SmartMod(config Config) {
 
 	var tcChannel chan targetConfig
 
-	// 配置启发式扫描探针
+	// 输出启发式扫描探针
 	probeconfig := "[*] Smart probe ports:" + strings.Join(config.SmartPortList, ",") + ", "
 	if config.Mod == "ss" {
 		probeconfig += "Smart IP probe: " + config.IpProbe
@@ -130,28 +130,14 @@ func SmartMod(config Config) {
 	// 启发式扫描逐步降级,从喷洒B段到喷洒C段到默认扫描
 	if config.Mod == "ss" {
 		config.Mod = "s"
-		for _, ip := range iplist {
-			config.IP = ip
-			processLogln("[*] Spraying B class IP:" + ip)
-			if config.SmartPort == "default" {
-				config.SmartPortList = []string{"80"}
-			}
-			SmartMod(config)
-		}
+		declineScan(config, iplist)
 	} else if config.Mod == "sc" {
 		config.Mod = "sb"
-		for _, ip := range iplist {
-			config.IP = ip
-			processLogln("[*] Spraying B class IP:" + ip)
-			if config.SmartPort == "default" {
-				config.SmartPortList = []string{"80"}
-			}
-			SmartMod(config)
-			_ = FileHandle.Sync()
-		}
+		declineScan(config, iplist)
 	} else if config.Mod == "s" {
 		config.Mod = "default"
 		config.IPlist = iplist
+		processLogln(fmt.Sprintf("[*] Scan all task time is about %d seconds, Total found %d C class CIDRs ", guessTime(config), len(iplist)))
 		StraightMod(config)
 	}
 }
@@ -177,5 +163,21 @@ func smartScan(tc targetConfig, temp *sync.Map, mask int, mod string) {
 
 	if result.Open {
 		alived(result.Ip, temp, mask, mod)
+	}
+}
+
+func declineScan(config Config, iplist []string) {
+	t := guessSmarttime(config)
+	processLogln(fmt.Sprintf("[*] Every Sub smartscan task time is about %d seconds, Total found %d B Class CIDRs", t, len(iplist)))
+	for _, ip := range iplist {
+		config.IP = ip
+		tmpalive := Alivesum
+		processLogln(fmt.Sprintf("[*] Spraying B class IP: %s, Estimated to take %d seconds", ip, t))
+		if config.SmartPort == "default" {
+			config.SmartPortList = []string{"80"}
+		}
+		SmartMod(config)
+		processLogln(fmt.Sprintf("[*] Found %d ports from CIDR %s", Alivesum-tmpalive, ip))
+		_ = FileHandle.Sync()
 	}
 }
