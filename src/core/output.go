@@ -92,7 +92,7 @@ func FormatOutput(filename string, outputfile string) {
 			fmt.Print(s)
 		}
 	}
-	resultsdata := LoadResult(filename)
+	resultsdata := loadResult(filename)
 	// 输出配置信息
 	configstr := fmt.Sprintf("[*] Scan Target: %s, Ports: %s, Mod: %s\n", resultsdata.Config.IP, resultsdata.Config.Ports, resultsdata.Config.Mod)
 	configstr += fmt.Sprintf("[*] Exploit: %s, Version level: %s\n", resultsdata.Config.Exploit, resultsdata.Config.VerisonLevel)
@@ -235,7 +235,7 @@ func blue(s string) string {
 	return "\033[1;34m" + s + "\033[0m"
 }
 
-func LoadResult(filename string) utils.ResultsData {
+func loadResult(filename string) utils.ResultsData {
 	content, err := ioutil.ReadFile(filename)
 	if err != nil {
 		print(err.Error())
@@ -250,11 +250,13 @@ func LoadResult(filename string) utils.ResultsData {
 		fmt.Println("[*] Task has not been completed,auto fix json")
 
 	}
+
 	var resultsdata utils.ResultsData
 	err = json.Unmarshal(content, &resultsdata)
 	if err != nil {
 		fmt.Println("[-] json error, " + err.Error())
 		os.Exit(0)
 	}
+
 	return resultsdata
 }

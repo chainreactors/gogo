@@ -53,7 +53,7 @@ func Init(config Config) Config {
 
 	// 如果输入的json不为空,则从json中加载result,并返回结果
 	if config.JsonFile != "" {
-		config.Results = LoadResult(config.JsonFile).Data
+		config.Results = loadResult(config.JsonFile).Data
 		return config
 	}
 
@@ -79,7 +79,7 @@ func Init(config Config) Config {
 	config.Portlist = portHandler(config.Ports)
 	// 如果从文件中读,初始化IP列表配置
 	if config.ListFile != "" {
-		config.IPlist = readTargetFile(config.ListFile)
+		config.IPlist = loadFile(config.ListFile)
 	}
 
 	//if config.Spray && config.Mod != "default" {
