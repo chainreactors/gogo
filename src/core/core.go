@@ -88,7 +88,7 @@ func SmartMod(config Config) {
 	var tcChannel chan targetConfig
 
 	// 输出启发式扫描探针
-	probeconfig := "[*] Smart probe ports:" + strings.Join(config.SmartPortList, ",") + ", "
+	probeconfig := fmt.Sprintf("[*] Smart probe ports: %s , ", strings.Join(config.SmartPortList, ","))
 	if config.Mod == "ss" {
 		probeconfig += "Smart IP probe: " + config.IpProbe
 	}
