@@ -157,7 +157,9 @@ func RunTask(config Config) {
 
 	// 如果指定端口超过100,则自动启用spray
 	if len(config.Portlist) > 150 && !config.NoSpray {
-		config.Spray = true
+		if getMask(config.IP) != 32 {
+			config.Spray = true
+		}
 	}
 	// 输出任务的基本信息
 	printTaskInfo(config, taskname)
