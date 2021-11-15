@@ -65,6 +65,7 @@ func getIpRange(target string) (start uint, fin uint) {
 }
 
 func getIp(target string) string {
+	target = strings.TrimSpace(target)
 	if isIPv4(target) {
 		return target
 	}
@@ -83,6 +84,7 @@ func getIp(target string) string {
 }
 
 func IpForamt(target string) string {
+	target = strings.TrimSpace(target)
 	target = strings.Replace(target, "http://", "", -1)
 	target = strings.Replace(target, "https://", "", -1)
 	target = strings.Trim(target, "/")

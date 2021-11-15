@@ -59,7 +59,9 @@ func goIPsGenerator(config Config) chan string {
 		for _, cidr := range config.IPlist {
 			tmpalive := Alivesum
 			ch = defaultIpGenerator(cidr, ch)
-			processLogln(fmt.Sprintf("[*] Processed CIDR: %s, found %d ports", cidr, Alivesum-tmpalive))
+			if getMask(cidr) != 32 {
+				processLogln(fmt.Sprintf("[*] Processed CIDR: %s, found %d ports", cidr, Alivesum-tmpalive))
+			}
 			// 每个c段同步数据到文件
 			_ = FileHandle.Sync()
 		}
