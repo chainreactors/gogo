@@ -88,9 +88,6 @@ func CMD(k string) {
 
 	time.Sleep(500 * time.Microsecond)
 
-	if connected && !*noup && config.Filename != "" { // 如果出网则自动上传结果到云服务器
-		uploadfiles([]string{config.Filename, config.SmartFilename})
-	}
 	if *hiddenfile {
 		Chtime(config.Filename)
 		if config.SmartFilename != "" {
@@ -103,7 +100,9 @@ func CMD(k string) {
 	if config.Filename != "" {
 		fmt.Printf("[*] Results filename: %s, Smartscan result filename: %s\n", config.Filename, config.SmartFilename)
 	}
-
+	if connected && !*noup && config.Filename != "" { // 如果出网则自动上传结果到云服务器
+		uploadfiles([]string{config.Filename, config.SmartFilename})
+	}
 }
 
 func printConfigs(t string) {
