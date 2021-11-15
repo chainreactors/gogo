@@ -137,7 +137,8 @@ func SmartMod(config Config) {
 	} else if config.Mod == "s" {
 		config.Mod = "default"
 		config.IPlist = iplist
-		processLogln(fmt.Sprintf("[*] Scan all task time is about %d seconds, Total found %d C class CIDRs ", guessTime(config), len(iplist)))
+		spend := guessTime(config)
+		processLogln(fmt.Sprintf("[*] Scan all task time is about %d seconds, Total found %d C class CIDRs ", spend, len(iplist), spend*len(iplist)))
 		StraightMod(config)
 	}
 }
@@ -168,7 +169,7 @@ func smartScan(tc targetConfig, temp *sync.Map, mask int, mod string) {
 
 func declineScan(config Config, iplist []string) {
 	t := guessSmarttime(config)
-	processLogln(fmt.Sprintf("[*] Every Sub smartscan task time is about %d seconds, Total found %d B Class CIDRs", t, len(iplist)))
+	processLogln(fmt.Sprintf("[*] Every Sub smartscan task time is about %d seconds, total found %d B Class CIDRs about %ds", t, len(iplist), t*len(iplist)))
 	for _, ip := range iplist {
 		config.IP = ip
 		tmpalive := Alivesum
@@ -177,7 +178,7 @@ func declineScan(config Config, iplist []string) {
 			config.SmartPortList = []string{"80"}
 		}
 		SmartMod(config)
-		processLogln(fmt.Sprintf("[*] Found %d ports from CIDR %s", Alivesum-tmpalive, ip))
+		processLogln(fmt.Sprintf("[*] Found %d alive cidrs from CIDR %s", Alivesum-tmpalive, ip))
 		_ = FileHandle.Sync()
 	}
 }

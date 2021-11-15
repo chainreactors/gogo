@@ -105,8 +105,21 @@ func isIPv4(ip string) bool {
 }
 
 func ipInit(config Config) Config {
+	// 优先处理ip
+	if config.IP != "" {
+		if strings.Contains(config.IP, ",") {
+			config.IPlist = strings.Split(config.IP, ",")
+		} else {
+			config.IP = IpForamt(config.IP)
+			if strings.HasPrefix(config.IP, "/") {
+				fmt.Println("[-] IP format error")
+				os.Exit(0)
+			}
+		}
+	}
+
 	// 如果输入的是文件,则格式化所有输入值.如果无有效ip
-	if config.ListFile != "" {
+	if config.IPlist != nil {
 		var iplist []string
 		for _, ip := range config.IPlist {
 			tmpip := IpForamt(ip)
@@ -119,12 +132,6 @@ func ipInit(config Config) Config {
 		config.IPlist = SliceUnique(iplist) // 去重
 		if len(config.IPlist) == 0 {
 			fmt.Println("[-] all IP error")
-			os.Exit(0)
-		}
-	} else if config.IP != "" {
-		config.IP = IpForamt(config.IP)
-		if strings.HasPrefix(config.IP, "/") {
-			fmt.Println("[-] IP format error")
 			os.Exit(0)
 		}
 	}

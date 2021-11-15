@@ -36,6 +36,7 @@ func Init(config Config) Config {
 	// 初始化
 	config.Exploit = scan.Exploit
 	config.VerisonLevel = scan.VersionLevel
+
 	//windows系统默认协程数为2000
 	if config.Threads == 4000 { // if 默认线程
 		if IsWin() {
@@ -102,7 +103,7 @@ func checkCommand(config Config) {
 			fmt.Println("[warn] json input can not config ports")
 		}
 		if config.Mod != "default" {
-			fmt.Println("[warn] json input can not config scan Mod,default scanning")
+			fmt.Println("[warn] input json can not config scan Mod,default scanning")
 		}
 	}
 	if config.IP == "" && config.ListFile == "" && config.JsonFile == "" && config.Mod != "a" { // 一些导致报错的参数组合
@@ -157,7 +158,9 @@ func RunTask(config Config) {
 
 	// 如果指定端口超过100,则自动启用spray
 	if len(config.Portlist) > 150 && !config.NoSpray {
-		if getMask(config.IP) != 32 {
+		if config.IPlist == nil && getMask(config.IP) == 32 {
+			config.Spray = false
+		} else {
 			config.Spray = true
 		}
 	}
@@ -204,9 +207,9 @@ func guessSmarttime(config Config) int {
 	mask := getMask(config.IP)
 	var count int
 	if config.Mod == "s" || config.Mod == "sb" {
-		count = 2 << uint((32-mask)-8)
+		count = 2 << uint((32-mask)-1)
 	} else {
-		count = 2 << uint((32-mask)-16)
+		count = 2 << uint((32-mask)-9)
 	}
 	return ((spc*ippc*count)/(config.Threads*2) + 2)
 }

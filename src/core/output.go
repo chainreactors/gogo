@@ -95,7 +95,7 @@ func FormatOutput(filename string, outputfile string) {
 	resultsdata := loadResult(filename)
 	// 输出配置信息
 	configstr := fmt.Sprintf("[*] Scan Target: %s, Ports: %s, Mod: %s\n", resultsdata.Config.IP, resultsdata.Config.Ports, resultsdata.Config.Mod)
-	configstr += fmt.Sprintf("[*] Exploit: %s, Version level: %s\n", resultsdata.Config.Exploit, resultsdata.Config.VerisonLevel)
+	configstr += fmt.Sprintf("[*] Exploit: %s, Version level: %d\n", resultsdata.Config.Exploit, resultsdata.Config.VerisonLevel)
 	if resultsdata.IP != "" {
 		configstr += fmt.Sprintf("[*] Internet IP: %s", resultsdata.IP)
 	}
