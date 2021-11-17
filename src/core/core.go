@@ -178,7 +178,7 @@ func declineScan(config Config, iplist []string) {
 			config.SmartPortList = []string{"80"}
 		}
 		SmartMod(config)
-		processLogln(fmt.Sprintf("[*] Found %d alive cidrs from CIDR %s", Alivesum-tmpalive, ip))
+		processLogln(fmt.Sprintf("[*] Found %d alive assets from CIDR %s", Alivesum-tmpalive, ip))
 		_ = FileHandle.Sync()
 	}
 }

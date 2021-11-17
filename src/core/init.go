@@ -211,7 +211,7 @@ func guessSmarttime(config Config) int {
 	} else {
 		count = 2 << uint((32-mask)-9)
 	}
-	return ((spc*ippc*count)/(config.Threads*2) + 2)
+	return ((spc*ippc*count)/(config.Threads)*2 + 2)
 }
 
 func countip(mask int) int {
