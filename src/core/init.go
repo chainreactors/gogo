@@ -202,8 +202,13 @@ func guessTime(config Config) int {
 }
 
 func guessSmarttime(config Config) int {
-	spc := len(config.SmartPortList)
-	ippc := len(config.IpProbeList)
+	var spc, ippc int
+	spc = len(config.SmartPortList)
+	if config.IsSmart1() {
+		ippc = 1
+	} else {
+		ippc = len(config.IpProbeList)
+	}
 	mask := getMask(config.IP)
 	var count int
 	if config.Mod == "s" || config.Mod == "sb" {
@@ -211,6 +216,7 @@ func guessSmarttime(config Config) int {
 	} else {
 		count = 2 << uint((32-mask)-9)
 	}
+
 	return ((spc*ippc*count)/(config.Threads)*2 + 2)
 }
 

@@ -188,5 +188,9 @@ func smb2Scan(target string) ([]byte, error) {
 
 	ret, _ := utils.SocketSend(conn, NTLMSSPNegotiatev2Data, 4096)
 	ntlmOff := bytes.Index(ret, []byte("NTLMSSP"))
-	return ret[ntlmOff:], err
+	if ntlmOff >= len(ret) {
+		return ret[ntlmOff:], err
+	} else {
+		return nil, err
+	}
 }

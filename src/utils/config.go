@@ -38,3 +38,17 @@ func (config Config) IsSmart() bool {
 	}
 	return false
 }
+
+func (config Config) IsSSmart2() bool {
+	if structutils.SliceContains([]string{"ss", "sc"}, config.Mod) {
+		return true
+	}
+	return false
+}
+
+func (config Config) IsSmart1() bool {
+	if structutils.SliceContains([]string{"s", "sb"}, config.Mod) {
+		return true
+	}
+	return false
+}

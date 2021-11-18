@@ -168,6 +168,7 @@ func smartScan(tc targetConfig, temp *sync.Map, mask int, mod string) {
 }
 
 func declineScan(config Config, iplist []string) {
+	//config.IpProbeList = []uint{1} // ipp 只在ss与sc模式中生效,为了防止时间计算错误,reset ipp 数值
 	t := guessSmarttime(config)
 	processLogln(fmt.Sprintf("[*] Every Sub smartscan task time is about %d seconds, total found %d B Class CIDRs about %ds", t, len(iplist), t*len(iplist)))
 	for _, ip := range iplist {

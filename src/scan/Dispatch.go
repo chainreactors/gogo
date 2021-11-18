@@ -101,6 +101,7 @@ func ExploitDispatch(result *utils.Result) {
 	if Exploit != "auto" { // 如果exploit值不为auto,则不进行shiro和ms17010扫描
 		return
 	}
+	// todo 将shiro改造成nuclei poc
 	if result.IsHttp() {
 		shiroScan(result)
 	}
