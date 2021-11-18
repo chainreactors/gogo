@@ -113,7 +113,7 @@ func smbScan(result *utils.Result) {
 		smbver = "SMB2"
 	}
 
-	if len(ret) > 0 {
+	if ret != nil && len(ret) > 0 {
 		tinfo := NTLMInfo(ret)
 		result.Open = true
 		result.Protocol = "smb"
