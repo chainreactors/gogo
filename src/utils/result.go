@@ -109,7 +109,7 @@ func (result *Result) GetTarget() string {
 func (result *Result) AddNTLMInfo(m map[string]string) {
 	result.Title = m["MsvAvNbDomainName"] + "/" + m["MsvAvNbComputerName"]
 	result.Host = m["MsvAvDnsDomainName"] + "/" + m["MsvAvDnsComputerName"]
-	result.AddFramework(Framework{Name: m["Version"], Version: ""})
+	result.AddFramework(Framework{Name: "smb", Version: m["Version"]})
 }
 
 type Vuln struct {
