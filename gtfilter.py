@@ -137,13 +137,15 @@ class GetitleResults:
         "microsoft rdp": "RDP",
         # "oracle database": "ORACLE",
         "microsoft sqlserver": "MSSQL",
+        "mssql": "MSSQL",
         "smb": "SMB",
         "redis": "REDIS",
         "vnc": "VNC",
         "elasticsearch": "ELASTICSEARCH",
         "postgreSQL": "POSTGRESQL",
         "mongo": "MONGO",
-        "ssh": "SSH"
+        "ssh": "SSH",
+        "ftp": "FTP"
     }
 
     def __init__(self, results: list):
@@ -232,6 +234,13 @@ def toFile(filename, content: str):
         f.write(content)
 
 
+def fixjson(content:str):
+    if content.startswith("{") and not content.endswith("]}"):
+        print("auto fix json!!!")
+        return content + "]}"
+    return content
+
+
 @click.command()
 @click.argument("file")
 @click.option('--output', '-o', default="target", help='Output format.')
@@ -283,7 +292,12 @@ def main(file, output, exprs, outfile, _or):
     else:
         outfunc = partial(toFile, outfile)
 
-    results = GetitleResults(json.load(open(file, encoding="utf-8"))["data"])
+    content = fixjson(open(file, encoding="utf-8").read())
+    results = json.loads(content)
+    if "data" in results:
+        results = GetitleResults(results["data"])
+    else:
+        results = GetitleResults(results)
     results = results.exprs(exprs,_or)
 
     if output == "json":  # 输出过滤后的json

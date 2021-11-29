@@ -138,7 +138,7 @@ func SmartMod(config Config) {
 		config.Mod = "default"
 		config.IPlist = iplist
 		spend := guessTime(config)
-		processLogln(fmt.Sprintf("[*] Scan all task time is about %d seconds, Total found %d C class CIDRs ", spend, len(iplist), spend*len(iplist)))
+		processLogln(fmt.Sprintf("[*] Scan all task time is about %d seconds, Total found %d C class CIDRs take about %d ", spend, len(iplist), spend*len(iplist)))
 		StraightMod(config)
 	}
 }
@@ -170,7 +170,7 @@ func smartScan(tc targetConfig, temp *sync.Map, mask int, mod string) {
 func declineScan(config Config, iplist []string) {
 	//config.IpProbeList = []uint{1} // ipp 只在ss与sc模式中生效,为了防止时间计算错误,reset ipp 数值
 	t := guessSmarttime(config)
-	processLogln(fmt.Sprintf("[*] Every Sub smartscan task time is about %d seconds, total found %d B Class CIDRs about %ds", t, len(iplist), t*len(iplist)))
+	processLogln(fmt.Sprintf("[*] Every Sub smartscan task time is about %d seconds, total found %d B Class CIDRs about %d s", t, len(iplist), t*len(iplist)))
 	for _, ip := range iplist {
 		config.IP = ip
 		tmpalive := Alivesum

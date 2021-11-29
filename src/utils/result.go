@@ -106,10 +106,10 @@ func (result *Result) GetTarget() string {
 	return fmt.Sprintf("%s:%s", result.Ip, result.Port)
 }
 
-func (result *Result) AddNTLMInfo(m map[string]string) {
+func (result *Result) AddNTLMInfo(m map[string]string, t string) {
 	result.Title = m["MsvAvNbDomainName"] + "/" + m["MsvAvNbComputerName"]
 	result.Host = m["MsvAvDnsDomainName"] + "/" + m["MsvAvDnsComputerName"]
-	result.AddFramework(Framework{Name: "smb", Version: m["Version"]})
+	result.AddFramework(Framework{Name: t, Version: m["Version"]})
 }
 
 type Vuln struct {
@@ -155,9 +155,13 @@ type Framework struct {
 
 func (f Framework) ToString() string {
 	if f.IsGuess {
-		return fmt.Sprintf("*%s%s", f.Name, f.Version)
+		return fmt.Sprintf("*%s", f.Name)
 	} else {
-		return fmt.Sprintf("%s%s", f.Name, f.Version)
+		if f.Version == "" {
+			return fmt.Sprintf("%s", f.Name)
+		} else {
+			return fmt.Sprintf("%s:%s", f.Name, f.Version)
+		}
 	}
 
 }

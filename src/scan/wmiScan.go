@@ -25,6 +25,6 @@ func wmiScan(result *utils.Result) {
 		result.Protocol = "wmi"
 		result.HttpStat = "WMI"
 		tinfo := NTLMInfo(ret[off_ntlm:])
-		result.AddNTLMInfo(tinfo)
+		result.AddNTLMInfo(tinfo, "wmi")
 	}
 }

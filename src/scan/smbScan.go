@@ -118,7 +118,7 @@ func smbScan(result *utils.Result) {
 		result.Open = true
 		result.Protocol = "smb"
 		result.HttpStat = smbver
-		result.AddNTLMInfo(tinfo)
+		result.AddNTLMInfo(tinfo, "smb")
 	}
 }
 
