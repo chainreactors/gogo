@@ -54,7 +54,11 @@ func Init(config Config) Config {
 
 	// 如果输入的json不为空,则从json中加载result,并返回结果
 	if config.JsonFile != "" {
-		config.Results = loadResult(config.JsonFile).Data
+		taskresult, err := loadResult(config.JsonFile)
+		if err != nil {
+			os.Exit(0)
+		}
+		config.Results = taskresult.Data
 		return config
 	}
 

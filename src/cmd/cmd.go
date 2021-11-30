@@ -49,7 +49,7 @@ func CMD(k string) {
 	exploit := flag.Bool("e", false, "")
 	exploitConfig := flag.String("E", "none", "")
 	printType := flag.String("P", "no", "")
-	formatoutput := flag.String("F", "", "")
+	resultfilename := flag.String("F", "", "")
 	autofile := flag.Bool("af", false, "")
 	hiddenfile := flag.Bool("hf", false, "")
 	noup := flag.Bool("nu", false, "")
@@ -66,8 +66,8 @@ func CMD(k string) {
 	printConfigs(*printType)
 
 	// 格式化
-	if *formatoutput != "" {
-		core.FormatOutput(*formatoutput, config.Filename)
+	if *resultfilename != "" {
+		core.FormatOutput(*resultfilename, config.Filename)
 		os.Exit(0)
 	} else if *uploadfile != "" {
 		uploadfiles([]string{*uploadfile})

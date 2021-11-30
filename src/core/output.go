@@ -1,12 +1,12 @@
 package core
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"getitle/src/structutils"
 	"getitle/src/utils"
 	"io/ioutil"
-	"os"
 	"strings"
 )
 
@@ -81,6 +81,10 @@ func jsonFile(result *utils.Result) string {
 func FormatOutput(filename string, outputfile string) {
 	var outfunc func(s string)
 
+	resultsdata, err := loadResult(filename)
+	if err != nil {
+		return
+	}
 	if outputfile != "" {
 		fileHandle := initFileHandle(outputfile)
 		defer fileHandle.Close()
@@ -92,9 +96,9 @@ func FormatOutput(filename string, outputfile string) {
 			fmt.Print(s)
 		}
 	}
-	resultsdata := loadResult(filename)
+
 	// 输出配置信息
-	configstr := fmt.Sprintf("[*] Scan Target: %s, Ports: %s, Mod: %s \n", resultsdata.Config.IP, resultsdata.Config.Ports, resultsdata.Config.Mod)
+	configstr := fmt.Sprintf("[*] Scan Target: %s, Ports: %s, Mod: %s \n", resultsdata.Config.GetTarget(), resultsdata.Config.Ports, resultsdata.Config.Mod)
 	configstr += fmt.Sprintf("[*] Exploit: %s, Version level: %d \n", resultsdata.Config.Exploit, resultsdata.Config.VerisonLevel)
 	if resultsdata.IP != "" {
 		configstr += fmt.Sprintf("[*] Internet IP: %s", resultsdata.IP)
@@ -235,12 +239,12 @@ func blue(s string) string {
 	return "\033[1;34m" + s + "\033[0m"
 }
 
-func loadResult(filename string) utils.ResultsData {
+func loadResult(filename string) (*utils.ResultsData, error) {
 	content, err := ioutil.ReadFile(filename)
 	if err != nil {
-		print(err.Error())
-		os.Exit(0)
+		return nil, err
 	}
+	content = bytes.TrimSpace(content)
 	// 自动修复未完成任务的json
 	laststr := string(content[len(content)-2:])
 	if laststr != "]}" {
@@ -248,15 +252,14 @@ func loadResult(filename string) utils.ResultsData {
 		fmt.Println("[*] Task has not been completed,auto fix json")
 		fmt.Println("[*] Task has not been completed,auto fix json")
 		fmt.Println("[*] Task has not been completed,auto fix json")
-
 	}
 
-	var resultsdata utils.ResultsData
+	var resultsdata *utils.ResultsData
 	err = json.Unmarshal(content, &resultsdata)
 	if err != nil {
 		fmt.Println("[-] json error, " + err.Error())
-		os.Exit(0)
+		return nil, err
 	}
 
-	return resultsdata
+	return resultsdata, err
 }

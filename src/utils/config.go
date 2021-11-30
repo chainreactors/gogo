@@ -1,6 +1,9 @@
 package utils
 
-import "getitle/src/structutils"
+import (
+	"getitle/src/structutils"
+	"strings"
+)
 
 type Config struct {
 	IP            string   `json:"ip"`
@@ -51,4 +54,16 @@ func (config Config) IsSmart1() bool {
 		return true
 	}
 	return false
+}
+
+func (config Config) GetTarget() string {
+	if config.IP != "" {
+		return config.IP
+	} else if config.ListFile != "" {
+		return strings.Join(config.IPlist, ",")
+	} else if config.JsonFile != "" {
+		return config.JsonFile
+	} else {
+		return ""
+	}
 }
