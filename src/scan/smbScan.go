@@ -5,10 +5,7 @@ import (
 	"bytes"
 	"encoding/hex"
 	"errors"
-	"fmt"
-	"getitle/src/structutils"
 	"getitle/src/utils"
-	"github.com/JKme/go-ntlmssp"
 )
 
 var NegotiateSMBv1Data1 = []byte{
@@ -178,15 +175,4 @@ func smb2Scan(target string) ([]byte, error) {
 	} else {
 		return nil, err
 	}
-}
-
-func NTLMInfo(ret []byte) map[string]string {
-	flags := ntlmssp.NewChallengeMsg(ret)
-	tinfo := ntlmssp.ParseAVPair(flags.TargetInfo())
-	delete(tinfo, "MsvAvTimestamp")
-	offset_version := 48
-	version := ret[offset_version : offset_version+8]
-	ver, _ := ntlmssp.ReadVersionStruct(version)
-	tinfo["Version"] = fmt.Sprintf("Windows %d.%d.%d", ver.ProductMajorVersion, ver.ProductMinorVersion, ver.ProductBuild)
-	return structutils.ToStringMap(tinfo)
 }
