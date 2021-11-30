@@ -94,7 +94,6 @@ func smbScan(result *utils.Result) {
 	target := result.GetTarget()
 	var err error
 	var ret []byte
-	var smbver string
 	//ff534d42 SMBv1的标示
 	//fe534d42 SMBv2的标示
 	//先发送探测SMBv1的payload，不支持的SMBv1的时候返回为空，然后尝试发送SMBv2的探测数据包
@@ -107,18 +106,18 @@ func smbScan(result *utils.Result) {
 		}
 		result.Open = true
 		if ret, err = smb2Scan(target); err != nil || ret == nil {
+			result.HttpStat = "tcp"
 			return
 		} else {
-			smbver = "SMB2"
+			result.HttpStat = "SMB2"
 		}
 	} else {
 		result.Open = true
-		smbver = "SMB1"
+		result.HttpStat = "SMB1"
 	}
 
 	result.Protocol = "smb"
 	result.AddNTLMInfo(NTLMInfo(ret), "smb")
-	result.HttpStat = smbver
 }
 
 func smb1Scan(target string) ([]byte, error) {

@@ -121,17 +121,17 @@ func initFile(config Config) {
 
 }
 
-var flag1 bool = false
+var commaflag bool = false
 
 func sync_smartips(ips []string) {
 	iplists := make([]string, len(ips))
 	for i, ip := range ips {
 		iplists[i] = "\"" + ip + "\""
 	}
-	if flag1 {
+	if commaflag {
 		_, _ = SmartFileHandle.WriteString(",")
 	}
 	_, _ = SmartFileHandle.WriteString(strings.Join(iplists, ","))
-	flag1 = true
+	commaflag = true
 	_ = SmartFileHandle.Sync()
 }
