@@ -155,7 +155,7 @@ func FormatOutput(filename string, outputfile string) {
 
 		netbiosstat = pfs[ip]["137"].Stat
 		networks = pfs[ip]["135 (oxid)"].Title
-		s := fmt.Sprintf("[+] %s %s %s [%s] %s\n", ip, winver, hostname, netbiosstat, networks)
+		s := fmt.Sprintf("[+] %s %s %s %s %s\n", ip, winver, hostname, netbiosstat, networks)
 		for port, p := range pfs[ip] {
 			// 跳过OXID与NetBois
 			if !(p.Port == "135 (oxid)" || p.Port == "137" || p.Port == "icmp") {
