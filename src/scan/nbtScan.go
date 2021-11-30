@@ -108,7 +108,7 @@ func nbtScan(result *utils.Result) {
 	}
 	msg := group + "\\" + unique
 	msg = strings.Replace(msg, "\x00", "", -1)
-
+	result.HttpStat = ""
 	if Share {
 		result.HttpStat += "sharing"
 	}

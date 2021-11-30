@@ -135,25 +135,35 @@ func FormatOutput(filename string, outputfile string) {
 
 	for _, ip := range sort_ip(ips) {
 
-		var hostname, network, netbiosstat string
+		var hostname, networks, netbiosstat, winver string
 
-		if _, k := pfs[ip]["135"]; k {
-			hostname = pfs[ip]["135"].Host
-			network = pfs[ip]["135"].Title
+		if len(pfs[ip]["445"].Vulns) != 0 {
+			winver = pfs[ip]["445"].Title
+		} else if pfs[ip]["445"].Frameworks != nil {
+			winver = pfs[ip]["445"].Frameworks[0].Version
+		} else if pfs[ip]["135"].Frameworks != nil {
+			winver = pfs[ip]["135"].Frameworks[0].Version
 		}
-		if _, k := pfs[ip]["137"]; k {
+
+		if pfs[ip]["445"].Host != "" {
+			hostname = pfs[ip]["445"].Host
+		} else if pfs[ip]["135"].Host != "" {
+			hostname = pfs[ip]["445"].Host
+		} else {
 			hostname = pfs[ip]["137"].Host
-			netbiosstat = pfs[ip]["137"].Stat
 		}
-		s := fmt.Sprintf("[+] %s %s %s %s\n", ip, hostname, netbiosstat, network)
-		for pint, p := range pfs[ip] {
+
+		netbiosstat = pfs[ip]["137"].Stat
+		networks = pfs[ip]["135 (oxid)"].Title
+		s := fmt.Sprintf("[+] %s %s %s [%s] %s\n", ip, winver, hostname, netbiosstat, networks)
+		for port, p := range pfs[ip] {
 			// 跳过OXID与NetBois
-			if !(p.Port == "135" || p.Port == "137" || p.Port == "icmp") {
+			if !(p.Port == "135 (oxid)" || p.Port == "137" || p.Port == "icmp") {
 				if Output == "c" {
 					// 颜色输出
-					s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s\t%s\t%s [%s] %s %s", p.Protocol, ip, pint, p.Midware, p.Language, blue(p.Frameworks.ToString()), p.Host, p.Hash, yellow(p.Stat), blue(p.Title), red(p.Vulns.ToString()))
+					s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s\t%s\t%s [%s] %s %s", p.Protocol, ip, port, p.Midware, p.Language, blue(p.Frameworks.ToString()), p.Host, p.Hash, yellow(p.Stat), blue(p.Title), red(p.Vulns.ToString()))
 				} else {
-					s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s\t%s\t%s [%s] %s %s", p.Protocol, ip, pint, p.Midware, p.Language, p.Frameworks.ToString(), p.Host, p.Hash, p.Stat, p.Title, p.Vulns.ToString())
+					s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s\t%s\t%s [%s] %s %s", p.Protocol, ip, port, p.Midware, p.Language, p.Frameworks.ToString(), p.Host, p.Hash, p.Stat, p.Title, p.Vulns.ToString())
 				}
 				s += "\n"
 			}

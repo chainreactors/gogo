@@ -23,7 +23,7 @@ func ms17010Scan(result *utils.Result) {
 		result.Error = err.Error()
 		return
 	}
-	result.Protocol = "SMB"
+	result.Protocol = "smb"
 	result.Open = true
 	defer conn.Close()
 	_, err = conn.Write(negotiateProtocolRequest)

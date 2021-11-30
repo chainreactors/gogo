@@ -40,6 +40,7 @@ func oxidScan(result *utils.Result) {
 	result.Host = hostname_list[0]
 	result.Title += strings.Join(hostname_list[1:], ",")
 	result.HttpStat = "OXID"
+	result.Port = "135 (oxid)"
 	result.Protocol = "wmi"
 	return
 }
