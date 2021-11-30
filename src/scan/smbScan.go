@@ -1,11 +1,14 @@
 package scan
 
+// from https://github.com/JKme/cube/blob/cb84da1f305f1f6a92ae3011c7be9c0f998c3571/plugins/probe/ntlm_smb.go
 import (
 	"bytes"
 	"encoding/hex"
+	"errors"
 	"fmt"
+	"getitle/src/structutils"
 	"getitle/src/utils"
-	"strings"
+	"github.com/JKme/go-ntlmssp"
 )
 
 var NegotiateSMBv1Data1 = []byte{
@@ -96,67 +99,51 @@ func smbScan(result *utils.Result) {
 	//fe534d42 SMBv2的标示
 	//先发送探测SMBv1的payload，不支持的SMBv1的时候返回为空，然后尝试发送SMBv2的探测数据包
 	//if hex.EncodeToString(r1[4:8]) == "ff534d42" {
-	var os, lm string
-	ret, os, lm, err = smb1Scan(target)
-	if bytes.Equal(ret, []byte{0x01}) { //
-		return
-	}
-	if err == nil {
-		smbver = "SMB1"
-		result.Midware = fmt.Sprintf("%s(%s)", os, lm)
+	//ret, err = smb1Scan(target)
 
-	} else { // 如果smb1报错,则使用smb2
-		ret, err = smb2Scan(target)
-		if err != nil {
+	if ret, err = smb1Scan(target); err != nil || ret == nil {
+		if err.Error() == "conn failed" {
 			return
 		}
-		smbver = "SMB2"
+		result.Open = true
+		if ret, err = smb2Scan(target); err != nil || ret == nil {
+			return
+		} else {
+			smbver = "SMB2"
+		}
+	} else {
+		result.Open = true
+		smbver = "SMB1"
 	}
 
-	if ret != nil && len(ret) > 0 {
-		tinfo := NTLMInfo(ret)
-		result.Open = true
-		result.Protocol = "smb"
-		result.HttpStat = smbver
-		result.AddNTLMInfo(tinfo, "smb")
-	}
+	result.Protocol = "smb"
+	result.AddNTLMInfo(NTLMInfo(ret), "smb")
+	result.HttpStat = smbver
 }
 
-func smb1Scan(target string) ([]byte, string, string, error) {
+func smb1Scan(target string) ([]byte, error) {
 	var err error
 	conn, err := utils.TcpSocketConn(target, Delay)
 	if err != nil {
-		return []byte{0x01}, "", "", err
+		return nil, errors.New("conn failed")
 	}
 	defer conn.Close()
 	_, err = utils.SocketSend(conn, NegotiateSMBv1Data1, 4096)
 	if err != nil {
-		return nil, "", "", err
+		return nil, err
 	}
 
 	r2, err := utils.SocketSend(conn, NegotiateSMBv1Data2, 4096)
-	if err != nil {
-		return nil, "", "", err
+	//if err != nil || len(r2) < 47 {
+	//	return nil, err
+	//}
+	//gss_native := r2[47:]
+
+	off_ntlm := bytes.Index(r2, []byte("NTLMSSP"))
+	if off_ntlm != -1 {
+		return r2[off_ntlm:], err
 	}
-
-	if err != nil || len(r2) < 45 {
-		return nil, "", "", err
-	}
-
-	blob_length := uint16(bytes2Uint(r2[43:45], '<'))
-	blob_count := uint16(bytes2Uint(r2[45:47], '<'))
-
-	gss_native := r2[47:]
-	off_ntlm := bytes.Index(gss_native, []byte("NTLMSSP"))
-
-	native := gss_native[int(blob_length):blob_count]
-	ss := strings.Split(string(native), "\x00\x00")
-	//fmt.Println(ss)
-	bs := gss_native[off_ntlm:blob_length]
-
-	NativeOS := trimName(ss[0])
-	NativeLM := trimName(ss[1])
-	return bs, NativeOS, NativeLM, err
+	return nil, err
 }
 
 func smb2Scan(target string) ([]byte, error) {
@@ -174,11 +161,9 @@ func smb2Scan(target string) ([]byte, error) {
 
 	var NTLMSSPNegotiatev2Data []byte
 	if hex.EncodeToString(r2[70:71]) == "03" {
-		flags := []byte{0x15, 0x82, 0x08, 0xa0}
-		NTLMSSPNegotiatev2Data = getNTLMSSPNegotiateData(flags)
+		NTLMSSPNegotiatev2Data = getNTLMSSPNegotiateData([]byte{0x15, 0x82, 0x08, 0xa0})
 	} else {
-		flags := []byte{0x05, 0x80, 0x08, 0xa0}
-		NTLMSSPNegotiatev2Data = getNTLMSSPNegotiateData(flags)
+		NTLMSSPNegotiatev2Data = getNTLMSSPNegotiateData([]byte{0x05, 0x80, 0x08, 0xa0})
 	}
 
 	_, err = utils.SocketSend(conn, NegotiateSMBv2Data2, 4096)
@@ -188,9 +173,20 @@ func smb2Scan(target string) ([]byte, error) {
 
 	ret, _ := utils.SocketSend(conn, NTLMSSPNegotiatev2Data, 4096)
 	ntlmOff := bytes.Index(ret, []byte("NTLMSSP"))
-	if ntlmOff <= len(ret) {
+	if ntlmOff != -1 {
 		return ret[ntlmOff:], err
 	} else {
 		return nil, err
 	}
+}
+
+func NTLMInfo(ret []byte) map[string]string {
+	flags := ntlmssp.NewChallengeMsg(ret)
+	tinfo := ntlmssp.ParseAVPair(flags.TargetInfo())
+	delete(tinfo, "MsvAvTimestamp")
+	offset_version := 48
+	version := ret[offset_version : offset_version+8]
+	ver, _ := ntlmssp.ReadVersionStruct(version)
+	tinfo["Version"] = fmt.Sprintf("Windows %d.%d.%d", ver.ProductMajorVersion, ver.ProductMinorVersion, ver.ProductBuild)
+	return structutils.ToStringMap(tinfo)
 }

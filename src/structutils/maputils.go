@@ -25,17 +25,20 @@ func MaptoString(m map[string]interface{}) string {
 	return s
 }
 
-func ToStringMap(i interface{}) map[string]interface{} {
-	var m = map[string]interface{}{}
+func ToStringMap(i interface{}) map[string]string {
+	var m = map[string]string{}
 
 	switch v := i.(type) {
 	case map[interface{}]interface{}:
 		for k, val := range v {
-			m[ToString(k)] = val
+			m[ToString(k)] = ToString(val)
 		}
 		return m
 	case map[string]interface{}:
-		return v
+		for k, val := range v {
+			m[k] = ToString(val)
+		}
+		return m
 	default:
 		return nil
 	}
