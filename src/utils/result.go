@@ -29,6 +29,15 @@ type Result struct {
 	Content    string         `json:"-"`
 }
 
+func NewResult(ip, port string) *Result {
+	var result = Result{
+		Ip:       ip,
+		Port:     port,
+		Protocol: "tcp",
+		HttpStat: "tcp",
+	}
+	return &result
+}
 func (result *Result) InfoFilter() {
 	//result.errHandler()
 	result.Title = getTitle(result.Content)

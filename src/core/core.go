@@ -39,12 +39,8 @@ func StraightMod(config Config) {
 }
 
 func defaultScan(tc targetConfig) {
-	//fmt.Println(ip)
-	var result = new(Result)
-	result.Ip = tc.ip
-	result.Port = tc.port
+	result := NewResult(tc.ip, tc.port)
 	scan.Dispatch(result)
-	//res := scan.SystemHttp(ip)
 
 	if result.Open {
 		Alivesum++
@@ -159,8 +155,8 @@ func alived(ip string, temp *sync.Map, mask int, mod string) {
 }
 
 func smartScan(tc targetConfig, temp *sync.Map, mask int, mod string) {
-	result := Result{Ip: tc.ip, Port: tc.port}
-	scan.Dispatch(&result)
+	result := NewResult(tc.ip, tc.port)
+	scan.Dispatch(result)
 
 	if result.Open {
 		alived(result.Ip, temp, mask, mod)
