@@ -105,11 +105,12 @@ func smbScan(result *utils.Result) {
 			return
 		}
 		result.Open = true
-		if ret, err = smb2Scan(target); err != nil || ret == nil {
+		if ret, err = smb2Scan(target); ret != nil {
+			result.HttpStat = "SMB2"
+		} else {
+			result.Protocol = "tcp"
 			result.HttpStat = "tcp"
 			return
-		} else {
-			result.HttpStat = "SMB2"
 		}
 	} else {
 		result.Open = true
