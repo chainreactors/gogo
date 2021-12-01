@@ -86,8 +86,13 @@ func FormatOutput(filename string, outputfile string) {
 		iscolor = true
 	}
 
-	outfunc(resultsdata.ToConfig())
-	outfunc(resultsdata.ToFormat(iscolor))
+	if Output == "cs" {
+		outfunc(resultsdata.ToCobaltStrike())
+		return
+	} else {
+		outfunc(resultsdata.ToConfig())
+		outfunc(resultsdata.ToFormat(iscolor))
+	}
 }
 
 func processLogln(s string) {
