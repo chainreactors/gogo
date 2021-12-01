@@ -151,10 +151,3 @@ func sort_cidr(cidrs []string) []string {
 	})
 	return cidrs
 }
-
-func sort_ip(ips []string) []string {
-	sort.Slice(ips, func(i, j int) bool {
-		return ip2int(ips[i]) < ip2int(ips[j])
-	})
-	return ips
-}

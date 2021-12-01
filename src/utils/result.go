@@ -62,7 +62,7 @@ func (result *Result) AddFramework(f Framework) {
 	result.Frameworks = append(result.Frameworks, f)
 }
 
-func (result *Result) NoFramework() bool {
+func (result Result) NoFramework() bool {
 	if len(result.Frameworks) == 0 {
 		return true
 	}

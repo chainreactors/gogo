@@ -69,9 +69,3 @@ type FingerMapper map[string][]Finger
 func (fm FingerMapper) GetFingers(k string) []Finger {
 	return fm[k]
 }
-
-type ResultsData struct {
-	Config Config   `json:"config"`
-	Data   []Result `json:"data"`
-	IP     string   `json:"ip"`
-}

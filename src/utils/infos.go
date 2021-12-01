@@ -2,7 +2,9 @@ package utils
 
 import (
 	"getitle/src/structutils"
+	"net"
 	"net/http"
+	"sort"
 	"strings"
 )
 
@@ -99,4 +101,25 @@ func FilterCertDomain(domins []string) string {
 		}
 	}
 	return res[:len(res)-1]
+}
+
+func ip2int(ip string) uint {
+	s2ip := net.ParseIP(ip).To4()
+	return uint(s2ip[3]) | uint(s2ip[2])<<8 | uint(s2ip[1])<<16 | uint(s2ip[0])<<24
+}
+
+func int2ip(ipint uint) string {
+	ip := make(net.IP, net.IPv4len)
+	ip[0] = byte(ipint >> 24)
+	ip[1] = byte(ipint >> 16)
+	ip[2] = byte(ipint >> 8)
+	ip[3] = byte(ipint)
+	return ip.String()
+}
+
+func sort_ip(ips []string) []string {
+	sort.Slice(ips, func(i, j int) bool {
+		return ip2int(ips[i]) < ip2int(ips[j])
+	})
+	return ips
 }

@@ -10,19 +10,6 @@ import (
 
 var first = true
 
-type portformat struct {
-	Port       string     `json:"p"`
-	Hash       string     `json:"hs"`
-	Stat       string     `json:"s"`
-	Title      string     `json:"t"`
-	Host       string     `json:"h"`
-	Midware    string     `json:"m"`
-	Language   string     `json:"l"`
-	Frameworks Frameworks `json:"f"`
-	Vulns      Vulns      `json:"v"`
-	Protocol   string     `json:"r"`
-}
-
 func output(result *Result, outType string) string {
 	var out string
 
@@ -46,7 +33,7 @@ func output(result *Result, outType string) string {
 }
 
 func colorOutput(result *Result) string {
-	s := fmt.Sprintf("[+] %s://%s:%s\t%s\t%s\t%s\t%s\t%s [%s] %s %s\n", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, blue(result.Frameworks.ToString()), result.Host, result.Hash, yellow(result.HttpStat), blue(result.Title), red(result.Vulns.ToString()))
+	s := fmt.Sprintf("[+] %s://%s:%s\t%s\t%s\t%s\t%s\t%s [%s] %s %s\n", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, Blue(result.Frameworks.ToString()), result.Host, result.Hash, Yellow(result.HttpStat), Blue(result.Title), Red(result.Vulns.ToString()))
 	return s
 }
 
@@ -78,7 +65,7 @@ func jsonFile(result *Result) string {
 
 func FormatOutput(filename string, outputfile string) {
 	var outfunc func(s string)
-
+	var iscolor bool
 	resultsdata, err := LoadResult(filename)
 	if err != nil {
 		return
@@ -95,80 +82,12 @@ func FormatOutput(filename string, outputfile string) {
 		}
 	}
 
-	// 输出配置信息
-	configstr := fmt.Sprintf("[*] Scan Target: %s, Ports: %s, Mod: %s \n", resultsdata.Config.GetTarget(), resultsdata.Config.Ports, resultsdata.Config.Mod)
-	configstr += fmt.Sprintf("[*] Exploit: %s, Version level: %d \n", resultsdata.Config.Exploit, resultsdata.Config.VerisonLevel)
-	if resultsdata.IP != "" {
-		configstr += fmt.Sprintf("[*] Internet IP: %s", resultsdata.IP)
-	}
-	fmt.Print(configstr)
-
-	pfs := make(map[string]map[string]portformat)
-	//ipfs := make(map[string]ipformat)
-	results := resultsdata.Data
-	for _, result := range results {
-		pf := portformat{
-			Port:       result.Port,
-			Stat:       result.HttpStat,
-			Hash:       result.Hash,
-			Title:      result.Title,
-			Host:       result.Host,
-			Midware:    result.Midware,
-			Language:   result.Language,
-			Frameworks: result.Frameworks,
-			Vulns:      result.Vulns,
-			Protocol:   result.Protocol,
-		}
-		if pfs[result.Ip] == nil {
-			pfs[result.Ip] = make(map[string]portformat)
-		}
-		pfs[result.Ip][result.Port] = pf
+	if Output == "c" {
+		iscolor = true
 	}
 
-	// 排序
-	var ips []string
-	for ip, _ := range pfs {
-		ips = append(ips, ip)
-	}
-
-	for _, ip := range sort_ip(ips) {
-
-		var hostname, networks, netbiosstat, winver string
-
-		if len(pfs[ip]["445"].Vulns) != 0 {
-			winver = pfs[ip]["445"].Title
-		} else if pfs[ip]["445"].Frameworks != nil {
-			winver = pfs[ip]["445"].Frameworks[0].Version
-		} else if pfs[ip]["135"].Frameworks != nil {
-			winver = pfs[ip]["135"].Frameworks[0].Version
-		}
-
-		if pfs[ip]["445"].Host != "" {
-			hostname = pfs[ip]["445"].Host
-		} else if pfs[ip]["135"].Host != "" {
-			hostname = pfs[ip]["445"].Host
-		} else {
-			hostname = pfs[ip]["137"].Host
-		}
-
-		netbiosstat = pfs[ip]["137"].Stat
-		networks = pfs[ip]["135 (oxid)"].Title
-		s := fmt.Sprintf("[+] %s %s %s %s %s\n", ip, winver, hostname, netbiosstat, networks)
-		for port, p := range pfs[ip] {
-			// 跳过OXID与NetBois
-			if !(p.Port == "135 (oxid)" || p.Port == "137" || p.Port == "icmp") {
-				if Output == "c" {
-					// 颜色输出
-					s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s\t%s\t%s [%s] %s %s", p.Protocol, ip, port, p.Midware, p.Language, blue(p.Frameworks.ToString()), p.Host, p.Hash, yellow(p.Stat), blue(p.Title), red(p.Vulns.ToString()))
-				} else {
-					s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s\t%s\t%s [%s] %s %s", p.Protocol, ip, port, p.Midware, p.Language, p.Frameworks.ToString(), p.Host, p.Hash, p.Stat, p.Title, p.Vulns.ToString())
-				}
-				s += "\n"
-			}
-		}
-		outfunc(s)
-	}
-	//fmt.Println(string(content))
+	outfunc(resultsdata.ToConfig())
+	outfunc(resultsdata.ToFormat(iscolor))
 }
 
 func processLogln(s string) {
@@ -229,20 +148,4 @@ func PrintInterConfig() {
 	for k, v := range InterConfig {
 		fmt.Printf("%s\t\t%s\n", k, strings.Join(v, "\t"))
 	}
-}
-
-func red(s string) string {
-	return "\033[1;31m" + s + "\033[0m"
-}
-
-func green(s string) string {
-	return "\033[1;32m" + s + "\033[0m"
-}
-
-func yellow(s string) string {
-	return "\033[4;33m" + s + "\033[0m"
-}
-
-func blue(s string) string {
-	return "\033[1;34m" + s + "\033[0m"
 }
