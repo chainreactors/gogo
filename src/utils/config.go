@@ -68,3 +68,17 @@ func (config Config) GetTarget() string {
 		return ""
 	}
 }
+
+func (config Config) GetTargetName() string {
+	var target string
+	if config.IP != "" {
+		target = config.IP
+	} else if config.ListFile != "" {
+		target = config.ListFile
+	} else if config.JsonFile != "" {
+		target = config.JsonFile
+	} else if config.Mod == "a" {
+		target = "auto"
+	}
+	return target
+}

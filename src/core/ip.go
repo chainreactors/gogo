@@ -112,7 +112,7 @@ func isIPv4(ip string) bool {
 	return false
 }
 
-func ipInit(config Config) (Config, error) {
+func ipInit(config *Config) error {
 	// 优先处理ip
 	if config.IP != "" {
 		if strings.Contains(config.IP, ",") {
@@ -121,7 +121,7 @@ func ipInit(config Config) (Config, error) {
 			config.IP = IpFormat(config.IP)
 			if config.IP == "" {
 				//fmt.Println("[-] IP format error")
-				return config, errors.New("format error")
+				return errors.New("format error")
 			}
 		}
 	}
@@ -137,10 +137,10 @@ func ipInit(config Config) (Config, error) {
 		}
 		config.IPlist = SliceUnique(iplist) // 去重
 		if len(config.IPlist) == 0 {
-			return config, errors.New("all target error")
+			return errors.New("all target error")
 		}
 	}
-	return config, nil
+	return nil
 }
 
 func sort_cidr(cidrs []string) []string {

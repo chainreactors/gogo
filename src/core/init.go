@@ -145,21 +145,15 @@ func RunTask(config Config) {
 	var taskname string
 	if config.Mod == "a" {
 		// 内网探测默认使用icmp扫描
-		taskname = "Reserved interIP addresses"
+		taskname = "preset internet IP addresses"
 	} else {
-		config, err := ipInit(config)
+		err := ipInit(&config)
 		if err != nil {
 			fmt.Println("[-] " + err.Error())
 			fmt.Println("[-] init target failed!")
 			os.Exit(0)
 		}
-		if config.IP != "" {
-			taskname = config.IP
-		} else if config.ListFile != "" {
-			taskname = config.ListFile
-		} else if config.JsonFile != "" {
-			taskname = config.JsonFile
-		}
+		taskname = config.GetTargetName()
 	}
 	if taskname == "" {
 		fmt.Println("[-] No Task")

@@ -35,7 +35,9 @@ func parseFilename(autofile, hiddenfile bool, config *utils.Config) {
 	var basefilename, smartbasename string
 	if config.Filename == "" {
 		if autofile {
-			basefilename = fmt.Sprintf(".%s_%s_", parseTarget(config), strings.Replace(config.Ports, ",", "_", -1))
+			target := strings.Replace(config.GetTargetName(), "/", "_", -1)
+			ports := strings.Replace(config.Ports, ",", "_", -1)
+			basefilename = fmt.Sprintf(".%s_%s_", target, ports)
 		} else if hiddenfile {
 			if IsWin() {
 				basefilename = "App_1634884664021088500_EC1B25B2-9453-49EE-A1E2-112B4D539F5"
@@ -54,7 +56,9 @@ func parseFilename(autofile, hiddenfile bool, config *utils.Config) {
 		if config.IsSmart() {
 			i := 1
 			if autofile {
-				smartbasename = fmt.Sprintf(".%s_%s_", parseTarget(config), config.Mod)
+				target := strings.Replace(config.GetTargetName(), "/", "_", -1)
+				ports := strings.Replace(config.Ports, ",", "_", -1)
+				smartbasename = fmt.Sprintf(".%s_%s_", target, ports)
 			}
 			if hiddenfile {
 				if IsWin() {
