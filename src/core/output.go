@@ -1,31 +1,29 @@
 package core
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"getitle/src/structutils"
-	"getitle/src/utils"
-	"io/ioutil"
+	. "getitle/src/utils"
 	"strings"
 )
 
 var first = true
 
 type portformat struct {
-	Port       string           `json:"p"`
-	Hash       string           `json:"hs"`
-	Stat       string           `json:"s"`
-	Title      string           `json:"t"`
-	Host       string           `json:"h"`
-	Midware    string           `json:"m"`
-	Language   string           `json:"l"`
-	Frameworks utils.Frameworks `json:"f"`
-	Vulns      utils.Vulns      `json:"v"`
-	Protocol   string           `json:"r"`
+	Port       string     `json:"p"`
+	Hash       string     `json:"hs"`
+	Stat       string     `json:"s"`
+	Title      string     `json:"t"`
+	Host       string     `json:"h"`
+	Midware    string     `json:"m"`
+	Language   string     `json:"l"`
+	Frameworks Frameworks `json:"f"`
+	Vulns      Vulns      `json:"v"`
+	Protocol   string     `json:"r"`
 }
 
-func output(result *utils.Result, outType string) string {
+func output(result *Result, outType string) string {
 	var out string
 
 	switch outType {
@@ -47,17 +45,17 @@ func output(result *utils.Result, outType string) string {
 
 }
 
-func colorOutput(result *utils.Result) string {
+func colorOutput(result *Result) string {
 	s := fmt.Sprintf("[+] %s://%s:%s\t%s\t%s\t%s\t%s\t%s [%s] %s %s\n", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, blue(result.Frameworks.ToString()), result.Host, result.Hash, yellow(result.HttpStat), blue(result.Title), red(result.Vulns.ToString()))
 	return s
 }
 
-func fullOutput(result *utils.Result) string {
+func fullOutput(result *Result) string {
 	s := fmt.Sprintf("[+] %s://%s:%s%s\t%s\t%s\t%s\t%s\t%s [%s] %s %s\n", result.Protocol, result.Ip, result.Port, result.Uri, result.Midware, result.Language, result.Frameworks.ToString(), result.Host, result.Hash, result.HttpStat, result.Title, result.Vulns.ToString())
 	return s
 }
 
-func jsonOutput(result *utils.Result) string {
+func jsonOutput(result *Result) string {
 	jsons, err := json.Marshal(result)
 	if err != nil {
 		return ""
@@ -65,7 +63,7 @@ func jsonOutput(result *utils.Result) string {
 	return string(jsons) + "\n"
 }
 
-func jsonFile(result *utils.Result) string {
+func jsonFile(result *Result) string {
 	jsons, err := json.Marshal(result)
 	if err != nil {
 		return ""
@@ -81,7 +79,7 @@ func jsonFile(result *utils.Result) string {
 func FormatOutput(filename string, outputfile string) {
 	var outfunc func(s string)
 
-	resultsdata, err := loadResult(filename)
+	resultsdata, err := LoadResult(filename)
 	if err != nil {
 		return
 	}
@@ -205,18 +203,18 @@ func Banner() {
 
 func Printportconfig() {
 	fmt.Println("当前已有端口配置: (根据端口类型分类)")
-	for k, v := range utils.Namemap {
+	for k, v := range Namemap {
 		fmt.Println("	", k, ": ", strings.Join(v, ","))
 	}
 	fmt.Println("当前已有端口配置: (根据服务分类)")
-	for k, v := range utils.Tagmap {
+	for k, v := range Tagmap {
 		fmt.Println("	", k, ": ", strings.Join(v, ","))
 	}
 }
 
 func PrintNucleiPoc() {
 	fmt.Println("Nuclei Pocs")
-	for k, v := range utils.TemplateMap {
+	for k, v := range TemplateMap {
 		fmt.Println(k + ":")
 		for _, t := range v {
 			fmt.Println("\t" + t.Info.Name)
@@ -247,29 +245,4 @@ func yellow(s string) string {
 
 func blue(s string) string {
 	return "\033[1;34m" + s + "\033[0m"
-}
-
-func loadResult(filename string) (*utils.ResultsData, error) {
-	content, err := ioutil.ReadFile(filename)
-	if err != nil {
-		return nil, err
-	}
-	content = bytes.TrimSpace(content)
-	// 自动修复未完成任务的json
-	laststr := string(content[len(content)-2:])
-	if laststr != "]}" {
-		content = append(content, "]}"...)
-		fmt.Println("[*] Task has not been completed,auto fix json")
-		fmt.Println("[*] Task has not been completed,auto fix json")
-		fmt.Println("[*] Task has not been completed,auto fix json")
-	}
-
-	var resultsdata *utils.ResultsData
-	err = json.Unmarshal(content, &resultsdata)
-	if err != nil {
-		fmt.Println("[-] json error, " + err.Error())
-		return nil, err
-	}
-
-	return resultsdata, err
 }

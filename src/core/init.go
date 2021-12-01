@@ -63,7 +63,7 @@ func Init(config Config) Config {
 		config.IPlist = loadFile(f)
 	} else if config.JsonFile != "" {
 		// 如果输入的json不为空,则从json中加载result,并返回结果
-		taskresult, err := loadResult(config.JsonFile)
+		taskresult, err := LoadResult(config.JsonFile)
 		if err != nil {
 			os.Exit(0)
 		}
