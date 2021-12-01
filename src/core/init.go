@@ -29,6 +29,7 @@ func Init(config Config) Config {
 	//	println("[-] error Smart scan config")
 	//	os.Exit(0)
 	//}
+	config.Stdin = hasStdin()
 
 	// check命令行参数
 	checkCommand(config)
@@ -52,14 +53,24 @@ func Init(config Config) Config {
 	// 初始化文件操作
 	initFile(config)
 
-	// 如果输入的json不为空,则从json中加载result,并返回结果
-	if config.JsonFile != "" {
+	if config.ListFile != "" {
+		// 如果从文件中读,初始化IP列表配置
+		f, err := os.Open(config.ListFile)
+		if err != nil {
+			fmt.Println("[-] " + err.Error())
+			os.Exit(0)
+		}
+		config.IPlist = loadFile(f)
+	} else if config.JsonFile != "" {
+		// 如果输入的json不为空,则从json中加载result,并返回结果
 		taskresult, err := loadResult(config.JsonFile)
 		if err != nil {
 			os.Exit(0)
 		}
 		config.Results = taskresult.Data
 		return config
+	} else if config.IP == "" {
+		config.IPlist = loadFile(os.Stdin)
 	}
 
 	// 初始化启发式扫描的端口探针
@@ -82,16 +93,6 @@ func Init(config Config) Config {
 
 	// 初始化端口配置
 	config.Portlist = portHandler(config.Ports)
-	// 如果从文件中读,初始化IP列表配置
-	if config.ListFile != "" {
-		config.IPlist = loadFile(config.ListFile)
-	}
-
-	//if config.Spray && config.Mod != "default" {
-	//	println("[-] error Spray scan config")
-	//	os.Exit(0)
-	//}
-	// 文件操作
 
 	return config
 }
@@ -110,8 +111,8 @@ func checkCommand(config Config) {
 			fmt.Println("[warn] input json can not config scan Mod,default scanning")
 		}
 	}
-	if config.IP == "" && config.ListFile == "" && config.JsonFile == "" && config.Mod != "a" { // 一些导致报错的参数组合
-		fmt.Println("[-] mod AUTO can not define IP or IPlist")
+	if config.IP == "" && config.ListFile == "" && config.JsonFile == "" && config.Mod != "a" && !config.Stdin { // 一些导致报错的参数组合
+		fmt.Println("[-] cannot found target, please set -ip or -l or -j -or -a or stdin")
 		os.Exit(0)
 	}
 }
@@ -146,7 +147,12 @@ func RunTask(config Config) {
 		// 内网探测默认使用icmp扫描
 		taskname = "Reserved interIP addresses"
 	} else {
-		config = ipInit(config)
+		config, err := ipInit(config)
+		if err != nil {
+			fmt.Println("[-] " + err.Error())
+			fmt.Println("[-] init target failed!")
+			os.Exit(0)
+		}
 		if config.IP != "" {
 			taskname = config.IP
 		} else if config.ListFile != "" {
@@ -250,4 +256,16 @@ func createSmartTask(config Config, cidr string, c []string) Config {
 		config.IpProbeList = Str2uintlist(c[2])
 	}
 	return config
+}
+
+func hasStdin() bool {
+	stat, err := os.Stdin.Stat()
+	if err != nil {
+		return false
+	}
+
+	isPipedFromChrDev := (stat.Mode() & os.ModeCharDevice) == 0
+	isPipedFromFIFO := (stat.Mode() & os.ModeNamedPipe) != 0
+
+	return isPipedFromChrDev || isPipedFromFIFO
 }

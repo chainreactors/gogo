@@ -63,7 +63,9 @@ func CMD(k string) {
 	}
 
 	// 输出 config
-	printConfigs(*printType)
+	if *printType != "" {
+		printConfigs(*printType)
+	}
 
 	// 格式化
 	if *resultfilename != "" {
@@ -73,8 +75,12 @@ func CMD(k string) {
 		uploadfiles([]string{*uploadfile})
 	}
 
+	// 从文件中加载poc
+	if *pocfile != "" {
+		LoadNuclei(*pocfile)
+	}
+
 	starttime := time.Now()
-	LoadNuclei(*pocfile)
 	parseVersion(*version, *version2)
 	parseExploit(*exploit, *exploitConfig)
 	parseFilename(*autofile, *hiddenfile, &config)
@@ -95,8 +101,12 @@ func CMD(k string) {
 		}
 	}
 	time.Sleep(time.Microsecond * 500)
+
+	// 任务统计
 	fmt.Printf("[*] Alive sum: %d, Target sum : %d\n", core.Alivesum, scan.Sum)
 	fmt.Println("[*] Totally run: " + time.Since(starttime).String())
+
+	// 扫描结果文件自动上传
 	if config.Filename != "" {
 		fmt.Printf("[*] Results filename: %s, Smartscan result filename: %s\n", config.Filename, config.SmartFilename)
 	}

@@ -1,12 +1,12 @@
 package core
 
 import (
+	"errors"
 	"fmt"
 	. "getitle/src/structutils"
 	. "getitle/src/utils"
 	"math"
 	"net"
-	"os"
 	"sort"
 	"strconv"
 	"strings"
@@ -71,7 +71,7 @@ func getIp(target string) string {
 	}
 	iprecords, err := net.LookupIP(target)
 	if err != nil {
-		fmt.Println("[-] error IPv4 or bad domain:" + target + ". JUMPED!")
+		fmt.Println("[-] Unable to resolve domain name:" + target + ". JUMPED!")
 		return ""
 	}
 	for _, ip := range iprecords {
@@ -83,19 +83,25 @@ func getIp(target string) string {
 	return ""
 }
 
-func IpForamt(target string) string {
+func IpFormat(target string) string {
+	var ip, mask string
 	target = strings.TrimSpace(target)
 	target = strings.Replace(target, "http://", "", -1)
 	target = strings.Replace(target, "https://", "", -1)
 	target = strings.Trim(target, "/")
 	if strings.Contains(target, "/") {
-		ip := strings.Split(target, "/")[0]
-		mask := strings.Split(target, "/")[1]
-		target = getIp(ip) + "/" + mask
+		ip = strings.Split(target, "/")[0]
+		mask = strings.Split(target, "/")[1]
 	} else {
-		target = getIp(target) + "/32"
+		ip = target
+		mask = "32"
 	}
-	return target
+
+	if ip = getIp(ip); ip != "" {
+		return ip + "/" + mask
+	} else {
+		return ""
+	}
 }
 
 func isIPv4(ip string) bool {
@@ -106,16 +112,16 @@ func isIPv4(ip string) bool {
 	return false
 }
 
-func ipInit(config Config) Config {
+func ipInit(config Config) (Config, error) {
 	// 优先处理ip
 	if config.IP != "" {
 		if strings.Contains(config.IP, ",") {
 			config.IPlist = strings.Split(config.IP, ",")
 		} else {
-			config.IP = IpForamt(config.IP)
-			if strings.HasPrefix(config.IP, "/") {
-				fmt.Println("[-] IP format error")
-				os.Exit(0)
+			config.IP = IpFormat(config.IP)
+			if config.IP == "" {
+				//fmt.Println("[-] IP format error")
+				return config, errors.New("format error")
 			}
 		}
 	}
@@ -124,20 +130,17 @@ func ipInit(config Config) Config {
 	if config.IPlist != nil {
 		var iplist []string
 		for _, ip := range config.IPlist {
-			tmpip := IpForamt(ip)
-			if !strings.HasPrefix(tmpip, "/") {
+			tmpip := IpFormat(ip)
+			if tmpip != "" {
 				iplist = append(iplist, tmpip)
-			} else {
-				fmt.Println("[-] " + tmpip + " ip format error")
 			}
 		}
 		config.IPlist = SliceUnique(iplist) // 去重
 		if len(config.IPlist) == 0 {
-			fmt.Println("[-] all IP error")
-			os.Exit(0)
+			return config, errors.New("all target error")
 		}
 	}
-	return config
+	return config, nil
 }
 
 func sort_cidr(cidrs []string) []string {

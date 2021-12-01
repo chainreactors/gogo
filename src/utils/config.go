@@ -8,6 +8,7 @@ import (
 type Config struct {
 	IP            string   `json:"ip"`
 	IPlist        []string `json:"ips"`
+	Stdin         bool     `json:"-"`
 	Ports         string   `json:"ports"`   // 预设字符串
 	Portlist      []string `json:"-"`       // 处理完的端口列表
 	JsonFile      string   `json:"-"`       // gt的结果json文件,可以再次读入扫描

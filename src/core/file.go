@@ -23,8 +23,9 @@ var LogDetach = make(chan string, 100)
 var LogFileHandle *os.File
 var tmpfilename string
 
-func loadFile(filename string) []string {
-	content, err := ioutil.ReadFile(filename)
+func loadFile(file *os.File) []string {
+	defer file.Close()
+	content, err := ioutil.ReadAll(file)
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(0)
@@ -32,6 +33,9 @@ func loadFile(filename string) []string {
 	text := string(content)
 	text = strings.TrimSpace(text)
 	return strings.Split(text, "\n")
+}
+
+func loadList() {
 
 }
 

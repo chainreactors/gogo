@@ -74,7 +74,7 @@ func parseFilename(autofile, hiddenfile bool, config *utils.Config) {
 func parseTarget(config *utils.Config) string {
 	var target string
 	if config.IP != "" {
-		target = strings.Replace(core.IpForamt(config.IP), "/", "_", -1)
+		target = strings.Replace(core.IpFormat(config.IP), "/", "_", -1)
 	} else if config.ListFile != "" {
 		target = config.ListFile
 	} else if config.JsonFile != "" {
