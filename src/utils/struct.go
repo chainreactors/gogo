@@ -66,6 +66,24 @@ type PortMapper map[string][]string
 
 type FingerMapper map[string][]*Finger
 
-func (fm FingerMapper) GetFingers(k string) []*Finger {
-	return fm[k]
+func (fm FingerMapper) GetFingers(port string) []*Finger {
+	return fm[port]
+}
+
+func (fm FingerMapper) GetOthersFingers(port string) []*Finger {
+	var tmpfingers []*Finger
+	for _, fingers := range fm {
+		for _, finger := range fingers {
+			isrepeat := false
+			for _, tmpfinger := range tmpfingers {
+				if finger == tmpfinger {
+					isrepeat = true
+				}
+			}
+			if !isrepeat {
+				tmpfingers = append(tmpfingers, finger)
+			}
+		}
+	}
+	return tmpfingers
 }

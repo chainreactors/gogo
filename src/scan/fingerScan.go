@@ -102,14 +102,9 @@ func getFramework(result *utils.Result, fingermap *utils.FingerMapper, matcher f
 	}
 
 	// 若默认端口未匹配到结果,则匹配全部
-	for port, fingers := range *fingermap {
-		for _, finger := range fingers {
-			if port != result.Port {
-				matcher(result, finger)
-			}
-		}
+	for _, finger := range fingermap.GetOthersFingers(result.Port) {
+		matcher(result, finger)
 	}
-
 	return
 }
 
