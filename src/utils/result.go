@@ -5,6 +5,7 @@ import (
 	"getitle/src/structutils"
 	"net"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -147,16 +148,17 @@ func (result *Result) AddNTLMInfo(m map[string]string, t string) {
 }
 
 func (result Result) toZombie() zombiemeta {
+	port, _ := strconv.Atoi(result.Port)
 	return zombiemeta{
 		IP:     result.Ip,
-		Port:   result.Port,
+		Port:   port,
 		Server: zombiemap[result.GetFirstFramework()],
 	}
 }
 
 type zombiemeta struct {
 	IP     string `json:"IP"`
-	Port   string `json:"Port"`
+	Port   int    `json:"Port"`
 	Server string `json:"Server"`
 }
 

@@ -26,15 +26,17 @@ func httpFingerMatch(result *utils.Result, finger *utils.Finger) {
 
 	if finger.SendData_str != "" && VersionLevel >= 1 {
 		conn := utils.HttpConn(2)
-		resp, _ := conn.Get(result.GetURL() + finger.SendData_str)
-		content = string(structutils.GetBody(resp))
-		_ = resp.Body.Close()
+		resp, err := conn.Get(result.GetURL() + finger.SendData_str)
+		if err == nil {
+			content = string(structutils.GetBody(resp))
+			_ = resp.Body.Close()
+		}
 	}
 
 	// 漏洞匹配优先
 	for _, reg := range utils.Compiled[finger.Name+"_vuln"] {
-		res := structutils.CompileMatch(reg, content)
-		if res != "" {
+		res, ok := structutils.CompileMatch(reg, content)
+		if ok {
 			handlerMatchedResult(result, finger, res, content)
 			result.AddVuln(utils.Vuln{Name: finger.Vuln})
 			return
@@ -50,8 +52,8 @@ func httpFingerMatch(result *utils.Result, finger *utils.Finger) {
 
 	// 正则匹配
 	for _, reg := range utils.Compiled[finger.Name] {
-		res := structutils.CompileMatch(reg, content)
-		if res != "" {
+		res, ok := structutils.CompileMatch(reg, content)
+		if ok {
 			handlerMatchedResult(result, finger, res, content)
 			return
 		}
@@ -150,8 +152,8 @@ func tcpFingerMatch(result *utils.Result, finger *utils.Finger) {
 
 	// 遍历漏洞正则
 	for _, reg := range utils.Compiled[finger.Name+"_vuln"] {
-		res := structutils.CompileMatch(reg, content)
-		if res != "" {
+		res, ok := structutils.CompileMatch(reg, content)
+		if ok {
 			handlerMatchedResult(result, finger, res, content)
 			if finger.Vuln != "" {
 				result.AddVuln(utils.Vuln{Name: finger.Vuln})
@@ -162,8 +164,8 @@ func tcpFingerMatch(result *utils.Result, finger *utils.Finger) {
 
 	//遍历指纹正则
 	for _, reg := range utils.Compiled[finger.Name] {
-		res := structutils.CompileMatch(reg, content)
-		if res != "" {
+		res, ok := structutils.CompileMatch(reg, content)
+		if ok {
 			handlerMatchedResult(result, finger, res, content)
 			return
 		}
@@ -176,18 +178,9 @@ func handlerMatchedResult(result *utils.Result, finger *utils.Finger, res, conte
 		result.HttpStat = finger.Protocol
 	}
 
-	res = getRes(res)
 	result.AddFramework(utils.Framework{Name: finger.Name, Version: res})
 
 	if finger.Level >= 1 && content != "" { // 需要主动发包的指纹重新收集title
 		result.Title = structutils.EncodeTitle(content)
-	}
-}
-
-func getRes(res string) string {
-	if res == "matched" {
-		return ""
-	} else {
-		return res
 	}
 }

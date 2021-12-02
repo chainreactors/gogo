@@ -17,7 +17,12 @@ var Tcpfingers = loadFingers("tcp")
 var Httpfingers = loadFingers("http")
 var Tagmap, Namemap, Portmap = loadPortConfig()
 var Compiled = make(map[string][]regexp.Regexp)
-var CommonCompiled = initregexp()
+var CommonCompiled = map[string]regexp.Regexp{
+	"title":     structutils.CompileRegexp("(?Uis)<title>(.*)</title>"),
+	"server":    structutils.CompileRegexp("(?i)Server: ([\x20-\x7e]+)"),
+	"xpb":       structutils.CompileRegexp("(?i)X-Powered-By: ([\x20-\x7e]+)"),
+	"sessionid": structutils.CompileRegexp("(?i) (.*SESS.*?ID)"),
+}
 var TemplateMap map[string][]*Template
 
 func LoadNuclei(filename string) {
@@ -165,13 +170,4 @@ func loadHashFinger() (map[string]string, map[string]string) {
 		os.Exit(0)
 	}
 	return mmh3fingers, md5fingers
-}
-
-func initregexp() map[string]regexp.Regexp {
-	comp := make(map[string]regexp.Regexp)
-	comp["title"] = structutils.CompileRegexp("(?Uis)<title>(.*)</title>")
-	comp["server"] = structutils.CompileRegexp("(?i)Server: ([\x20-\x7e]+)")
-	comp["xpb"] = structutils.CompileRegexp("(?i)X-Powered-By: ([\x20-\x7e]+)")
-	comp["sessionid"] = structutils.CompileRegexp("(?i) (.*SESS.*?ID)")
-	return comp
 }

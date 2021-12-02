@@ -62,28 +62,28 @@ func EncodeTitle(s string) string {
 	return s
 }
 
-func Match(regexpstr string, s string) string {
+func Match(regexpstr string, s string) (string, bool) {
 	reg, err := regexp.Compile(regexpstr)
 	if err != nil {
-		return ""
+		return "", false
 	}
 	res := reg.FindStringSubmatch(s)
 	if len(res) == 1 {
-		return "matched"
+		return "", true
 	} else if len(res) == 2 {
-		return res[1]
+		return res[1], true
 	}
-	return ""
+	return "", false
 }
 
-func CompileMatch(reg regexp.Regexp, s string) string {
+func CompileMatch(reg regexp.Regexp, s string) (string, bool) {
 	res := reg.FindStringSubmatch(s)
 	if len(res) == 1 {
-		return "matched"
+		return "", true
 	} else if len(res) == 2 {
-		return strings.TrimSpace(res[1])
+		return strings.TrimSpace(res[1]), true
 	}
-	return ""
+	return "", false
 }
 
 func GetHeaderstr(resp *http.Response) string {

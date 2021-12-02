@@ -12,8 +12,8 @@ func getTitle(content string) string {
 	if content == "" {
 		return ""
 	}
-	title := structutils.CompileMatch(CommonCompiled["title"], content)
-	if title != "" {
+	title, ok := structutils.CompileMatch(CommonCompiled["title"], content)
+	if ok {
 		return title
 	} else {
 		return structutils.EncodeTitle(content)
@@ -23,7 +23,7 @@ func getTitle(content string) string {
 func getMidware(resp *http.Response, content string) string {
 	var server string
 	if resp == nil {
-		server = structutils.CompileMatch(CommonCompiled["server"], content)
+		server, _ = structutils.CompileMatch(CommonCompiled["server"], content)
 	} else {
 		server = resp.Header.Get("Server")
 	}
@@ -34,14 +34,13 @@ func getMidware(resp *http.Response, content string) string {
 func getLanguage(resp *http.Response, content string) string {
 	var powered string
 	if resp == nil {
-		powered = structutils.CompileMatch(CommonCompiled["xpb"], content)
-		if powered != "" {
+		powered, ok := structutils.CompileMatch(CommonCompiled["xpb"], content)
+		if ok {
 			return powered
 		}
 
-		sessionid := structutils.CompileMatch(CommonCompiled["sessionid"], content)
-
-		if sessionid != "" {
+		sessionid, ok := structutils.CompileMatch(CommonCompiled["sessionid"], content)
+		if ok {
 			switch sessionid {
 			case "JSESSIONID":
 				return "JAVA"
@@ -51,6 +50,7 @@ func getLanguage(resp *http.Response, content string) string {
 				return "PHP"
 			}
 		}
+
 	} else {
 		powered = resp.Header.Get("X-Powered-By")
 		if powered != "" {
