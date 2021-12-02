@@ -7,14 +7,13 @@ import (
 	"strings"
 )
 
-var (
-	negotiateProtocolRequest = Unzip("H4sIAAAAAAAA/2JgYGj9H+zrVMTAwMAgEXyAAQX8/8fA4MDAkMTAFOCs4OcaEu4f5K0QEOTvHuToq2CoZ8DA5OPo5+voB2aGZ+al5JcXK6TlFymE5xdlpxfllxYUKxjrGSYyMPn4GuoZRRgYGMG0GOkZMjD5hSj4+CoY6BkaMQAAAAD//wEAAP//1eOKXIkAAAA=")
-	sessionSetupRequest      = Unzip("H4sIAAAAAAAA/2JgYOj4H+zrVMzAwMAgwX6AAQX8/8fA4MDA+5+hg4FFkAsqyAilrzAwMHhDmOEMmQx5DCkM+QzlDMUMCgxGDAZgCGIZMlgymOJVY8qgx2DAwMAAAAAA//8BAAD//5V7xReMAAAA")
-	treeConnectRequest       = Unzip("H4sIAAAAAAAA/1TFsQkCMQAAwBMEM4IDWAsJRGOlaGUhCLYpsoT7/WSf59P9NYfWf5/nH46HyUafhYd91wQ7maqKbpKz6KKMr/I4Kaq3r5cT7isLAAAA//8BAAD///L5u6lkAAAA")
-	transNamedPipeRequest    = Unzip("H4sIAAAAAAAA/2JgYPD6H+zrpMrAwMAgwajBgAw4+hYzcgTNEACx/////x9ZzguMmRiUGRgY2BliAjwDXGMYAAAAAP//AQAA//+OaounTgAAAA==")
-)
-
 func ms17010Scan(result *utils.Result) {
+	var (
+		negotiateProtocolRequest = Unzip("H4sIAAAAAAAA/2JgYGj9H+zrVMTAwMAgEXyAAQX8/8fA4MDAkMTAFOCs4OcaEu4f5K0QEOTvHuToq2CoZ8DA5OPo5+voB2aGZ+al5JcXK6TlFymE5xdlpxfllxYUKxjrGSYyMPn4GuoZRRgYGMG0GOkZMjD5hSj4+CoY6BkaMQAAAAD//wEAAP//1eOKXIkAAAA=")
+		sessionSetupRequest      = Unzip("H4sIAAAAAAAA/2JgYOj4H+zrVMzAwMAgwX6AAQX8/8fA4MDA+5+hg4FFkAsqyAilrzAwMHhDmOEMmQx5DCkM+QzlDMUMCgxGDAZgCGIZMlgymOJVY8qgx2DAwMAAAAAA//8BAAD//5V7xReMAAAA")
+		treeConnectRequest       = Unzip("H4sIAAAAAAAA/1TFsQkCMQAAwBMEM4IDWAsJRGOlaGUhCLYpsoT7/WSf59P9NYfWf5/nH46HyUafhYd91wQ7maqKbpKz6KKMr/I4Kaq3r5cT7isLAAAA//8BAAD///L5u6lkAAAA")
+		transNamedPipeRequest    = Unzip("H4sIAAAAAAAA/2JgYPD6H+zrpMrAwMAgwajBgAw4+hYzcgTNEACx/////x9ZzguMmRiUGRgY2BliAjwDXGMYAAAAAP//AQAA//+OaounTgAAAA==")
+	)
 	// connecting to a host in LAN if reachable should be very quick
 	result.Port = "445"
 	target := result.GetTarget()
