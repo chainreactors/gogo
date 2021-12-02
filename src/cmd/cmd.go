@@ -76,9 +76,8 @@ func CMD(k string) {
 	}
 
 	// 从文件中加载poc
-	if *pocfile != "" {
-		LoadNuclei(*pocfile)
-	}
+
+	LoadNuclei(*pocfile)
 
 	starttime := time.Now()
 	parseVersion(*version, *version2)

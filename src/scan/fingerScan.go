@@ -23,7 +23,6 @@ func httpFingerMatch(result *utils.Result, finger *utils.Finger) {
 	resp := result.Httpresp
 	content := result.Content
 	//var cookies map[string]string
-
 	if finger.SendData_str != "" && VersionLevel >= 1 {
 		conn := utils.HttpConn(2)
 		resp, err := conn.Get(result.GetURL() + finger.SendData_str)
@@ -99,6 +98,10 @@ func getFramework(result *utils.Result, fingermap *utils.FingerMapper, matcher f
 	// 优先匹配默认端口,第一遍循环只匹配默认端口
 	for _, finger := range fingermap.GetFingers(result.Port) {
 		matcher(result, finger)
+	}
+
+	if !result.NoFramework() && VersionLevel == 0 {
+		return
 	}
 
 	// 若默认端口未匹配到结果,则匹配全部

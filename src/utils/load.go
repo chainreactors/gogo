@@ -54,7 +54,7 @@ func loadTemplates(content []byte) map[string][]*Template {
 			os.Exit(0)
 		}
 		if template.Finger != "" {
-			templatemap[strings.ToLower(template.Finger)] = append(templatemap[template.Finger], template)
+			templatemap[strings.ToLower(template.Finger)] = append(templatemap[strings.ToLower(template.Finger)], template)
 		}
 
 		// 以tag归类
