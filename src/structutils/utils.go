@@ -19,11 +19,7 @@ import (
 
 //获取当前时间
 func GetCurtime() string {
-	h := strconv.Itoa(time.Now().Hour())
-	m := strconv.Itoa(time.Now().Minute())
-	s := strconv.Itoa(time.Now().Second())
-
-	curtime := h + ":" + m + ":" + s
+	curtime := time.Now().Format("2006-01-02 15:04:05")
 	return curtime
 }
 
