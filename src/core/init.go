@@ -74,7 +74,7 @@ func Init(config Config) Config {
 			config.IPlist = data.(SmartData).Data
 		}
 		return config
-	} else if config.IP == "" {
+	} else if config.Stdin {
 		config.IPlist = loadFile(os.Stdin)
 	}
 
