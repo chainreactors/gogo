@@ -18,6 +18,7 @@ var windowsVer = map[string]string{
 	"6.0.6000":   "Vista",
 	"6.0.6001":   "Vista SP1/Server2008",
 	"6.0.6002":   "Vista SP2/Server2008 SP2",
+	"6.1.0":      "7/Server2008 R2",
 	"6.1.7600":   "7/Server2008 R2",
 	"6.1.7601":   "7 SP1/Server2008 R2 SP1",
 	"6.2.9200":   "8/Server2012",

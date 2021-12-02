@@ -1,6 +1,7 @@
 package scan
 
 import (
+	"getitle/src/structutils"
 	"getitle/src/utils"
 	"strings"
 )
@@ -82,8 +83,7 @@ func Dispatch(result *utils.Result) {
 		if (result.TcpCon) != nil {
 			(*result.TcpCon).Close()
 		}
-		result.Title = strings.TrimSpace(result.Title)
-		result.Title = strings.Trim(result.Title, "\x00")
+		result.Title = structutils.EncodeTitle(result.Title)
 
 		return
 	}

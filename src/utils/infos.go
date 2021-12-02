@@ -16,7 +16,7 @@ func getTitle(content string) string {
 	if ok {
 		return title
 	} else {
-		return structutils.EncodeTitle(content)
+		return content
 	}
 }
 

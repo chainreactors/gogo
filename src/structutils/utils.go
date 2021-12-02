@@ -57,8 +57,9 @@ func EncodeTitle(s string) string {
 	if len(s) >= 13 {
 		s = s[:13]
 	}
-	s = strings.Replace(s, "\r", "\\0x13", -1)
-	s = strings.Replace(s, "\n", "\\0x10", -1)
+	s = strings.TrimSpace(s)
+	s = fmt.Sprintf("%q", s)
+	s = strings.Trim(s, "\"")
 	return s
 }
 
