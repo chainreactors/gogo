@@ -66,7 +66,8 @@ func jsonFile(result *Result) string {
 func FormatOutput(filename string, outputfile string) {
 	var outfunc func(s string)
 	var iscolor bool
-	resultsdata := LoadResultFile(filename).(ResultsData)
+	var resultsdata ResultsData
+	var smartdata SmartData
 
 	if outputfile != "" {
 		fileHandle := initFileHandle(outputfile)
@@ -78,6 +79,18 @@ func FormatOutput(filename string, outputfile string) {
 		outfunc = func(s string) {
 			fmt.Print(s)
 		}
+	}
+
+	data := LoadResultFile(filename)
+	switch data.(type) {
+	case ResultsData:
+		resultsdata = data.(ResultsData)
+	case SmartData:
+		smartdata = data.(SmartData)
+		outfunc(strings.Join(smartdata.Data, "\n"))
+		return
+	default:
+		return
 	}
 
 	if Output == "c" {

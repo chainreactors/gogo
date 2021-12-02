@@ -160,7 +160,7 @@ func tcGenerator(ch chan string, portlist []string) chan targetConfig {
 func generator(config Config) chan targetConfig {
 	targetChannel := make(chan targetConfig)
 	go func() {
-		if config.JsonFile != "" {
+		if config.Results != nil {
 			genFromResults(config, &targetChannel)
 		} else {
 			if config.Spray { // 端口喷洒
