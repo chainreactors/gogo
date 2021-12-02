@@ -112,7 +112,7 @@ func loadPortConfig() (PortMapper, PortMapper, PortMapper) {
 
 //加载指纹到全局变量
 func loadFingers(t string) *FingerMapper {
-	var tmpfingers []Finger
+	var tmpfingers []*Finger
 	var fingermap = make(FingerMapper)
 	// 根据权重排序在python脚本中已经实现
 	err := json.Unmarshal([]byte(LoadConfig(t)), &tmpfingers)

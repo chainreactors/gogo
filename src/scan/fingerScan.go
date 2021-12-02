@@ -19,16 +19,14 @@ func fingerScan(result *utils.Result) {
 	return
 }
 
-func httpFingerMatch(result *utils.Result, finger utils.Finger) {
+func httpFingerMatch(result *utils.Result, finger *utils.Finger) {
 	resp := result.Httpresp
 	content := result.Content
 	//var cookies map[string]string
+
 	if finger.SendData_str != "" && VersionLevel >= 1 {
 		conn := utils.HttpConn(2)
-		resp, err := conn.Get(result.GetURL() + finger.SendData_str)
-		if err != nil {
-			return
-		}
+		resp, _ := conn.Get(result.GetURL() + finger.SendData_str)
 		content = string(structutils.GetBody(resp))
 		_ = resp.Body.Close()
 	}
@@ -95,13 +93,10 @@ func httpFingerMatch(result *utils.Result, finger utils.Finger) {
 	}
 }
 
-func getFramework(result *utils.Result, fingermap *utils.FingerMapper, matcher func(*utils.Result, utils.Finger)) {
+func getFramework(result *utils.Result, fingermap *utils.FingerMapper, matcher func(*utils.Result, *utils.Finger)) {
 	// 优先匹配默认端口,第一遍循环只匹配默认端口
 	for _, finger := range fingermap.GetFingers(result.Port) {
 		matcher(result, finger)
-		if !result.NoFramework() && VersionLevel == 0 {
-			return
-		}
 	}
 
 	// 若默认端口未匹配到结果,则匹配全部
@@ -110,16 +105,13 @@ func getFramework(result *utils.Result, fingermap *utils.FingerMapper, matcher f
 			if port != result.Port {
 				matcher(result, finger)
 			}
-			if !result.NoFramework() {
-				return
-			}
 		}
 	}
 
 	return
 }
 
-func tcpFingerMatch(result *utils.Result, finger utils.Finger) {
+func tcpFingerMatch(result *utils.Result, finger *utils.Finger) {
 	content := result.Content
 	var data []byte
 	var err error
@@ -179,7 +171,7 @@ func tcpFingerMatch(result *utils.Result, finger utils.Finger) {
 	return
 }
 
-func handlerMatchedResult(result *utils.Result, finger utils.Finger, res, content string) {
+func handlerMatchedResult(result *utils.Result, finger *utils.Finger, res, content string) {
 	if result.Protocol == "tcp" {
 		result.HttpStat = finger.Protocol
 	}
