@@ -53,6 +53,9 @@ func Init(config Config) Config {
 	// 初始化文件操作
 	initFile(config)
 
+	// 初始化端口配置
+	config.Portlist = portHandler(config.Ports)
+
 	if config.ListFile != "" {
 		// 如果从文件中读,初始化IP列表配置
 		f, err := os.Open(config.ListFile)
@@ -63,11 +66,13 @@ func Init(config Config) Config {
 		config.IPlist = loadFile(f)
 	} else if config.JsonFile != "" {
 		// 如果输入的json不为空,则从json中加载result,并返回结果
-		taskresult, err := LoadResult(config.JsonFile)
-		if err != nil {
-			os.Exit(0)
+		data := LoadResultFile(config.JsonFile)
+		switch data.(type) {
+		case ResultsData:
+			config.Results = data.(ResultsData).Data
+		case SmartData:
+			config.IPlist = data.(SmartData).Data
 		}
-		config.Results = taskresult.Data
 		return config
 	} else if config.IP == "" {
 		config.IPlist = loadFile(os.Stdin)
@@ -90,9 +95,6 @@ func Init(config Config) Config {
 	} else {
 		config.IpProbeList = []uint{1}
 	}
-
-	// 初始化端口配置
-	config.Portlist = portHandler(config.Ports)
 
 	return config
 }
@@ -208,7 +210,7 @@ func guessTime(config Config) int {
 func guessSmarttime(config Config) int {
 	var spc, ippc int
 	spc = len(config.SmartPortList)
-	if config.IsSmart1() {
+	if config.IsBSmart() {
 		ippc = 1
 	} else {
 		ippc = len(config.IpProbeList)

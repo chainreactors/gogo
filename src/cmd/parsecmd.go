@@ -53,12 +53,12 @@ func parseFilename(autofile, hiddenfile bool, config *utils.Config) {
 		}
 		config.Filename = basefilename + ToString(i) + ".dat"
 
-		if config.IsSmart() {
+		if config.IsSmartScan() {
 			i := 1
 			if autofile {
 				target := strings.Replace(config.GetTargetName(), "/", "_", -1)
 				ports := strings.Replace(config.Ports, ",", "_", -1)
-				smartbasename = fmt.Sprintf(".%s_%s_", target, ports)
+				smartbasename = fmt.Sprintf(".%s_%s_%s_", target, ports, config.Mod)
 			}
 			if hiddenfile {
 				if IsWin() {

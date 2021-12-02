@@ -91,6 +91,25 @@ func (result Result) IsHttps() bool {
 	return false
 }
 
+func (result Result) Get(key string) string {
+	switch key {
+	case "ip":
+		return result.Ip
+	case "port":
+		return result.Port
+	case "frameworks":
+		return result.Frameworks.ToString()
+	case "vulns":
+		return result.Vulns.ToString()
+	case "host":
+		return result.Host
+	case "title":
+		return result.Title
+	default:
+		return ""
+	}
+}
+
 //从错误中收集信息
 func (result *Result) errHandler() {
 	if result.Error == "" {
@@ -107,18 +126,57 @@ func (result *Result) errHandler() {
 	}
 }
 
-func (result *Result) GetURL() string {
+func (result Result) GetURL() string {
 	return fmt.Sprintf("%s://%s:%s", result.Protocol, result.Ip, result.Port)
 }
 
-func (result *Result) GetTarget() string {
+func (result Result) GetTarget() string {
 	return fmt.Sprintf("%s:%s", result.Ip, result.Port)
 }
 
+func (result Result) GetFirstFramework() string {
+	if !result.NoFramework() {
+		return result.Frameworks[0].Name
+	}
+	return ""
+}
 func (result *Result) AddNTLMInfo(m map[string]string, t string) {
 	result.Title = m["MsvAvNbDomainName"] + "/" + m["MsvAvNbComputerName"]
 	result.Host = m["MsvAvDnsDomainName"] + "/" + m["MsvAvDnsComputerName"]
 	result.AddFramework(Framework{Name: t, Version: m["Version"]})
+}
+
+func (result Result) toZombie() zombiemeta {
+	return zombiemeta{
+		IP:     result.Ip,
+		Port:   result.Port,
+		Server: zombiemap[result.GetFirstFramework()],
+	}
+}
+
+type zombiemeta struct {
+	IP     string `json:"IP"`
+	Port   string `json:"Port"`
+	Server string `json:"Server"`
+}
+
+type Results []Result
+
+func (rs Results) Filter(k, v, op string) Results {
+	var filtedres Results
+	var matchfunc func(string, string) bool
+	if op == "::" {
+		matchfunc = strings.Contains
+	} else {
+		matchfunc = strings.EqualFold
+	}
+
+	for _, result := range rs {
+		if matchfunc(result.Get(k), v) {
+			filtedres = append(filtedres, result)
+		}
+	}
+	return filtedres
 }
 
 type Vuln struct {

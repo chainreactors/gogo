@@ -1,7 +1,6 @@
 package core
 
 import (
-	"encoding/json"
 	"fmt"
 	. "getitle/src/structutils"
 	. "getitle/src/utils"
@@ -58,13 +57,6 @@ func initFileHandle(filename string) *os.File {
 
 func initFile(config Config) {
 	// 挂起两个文件操作的goroutine
-	// 存在文件输出则停止命令行输出
-
-	configstr, err := json.Marshal(config)
-	if err != nil {
-		println(err.Error())
-		os.Exit(0)
-	}
 
 	// 初始化res文件handler
 	if config.Filename != "" {
@@ -73,7 +65,7 @@ func initFile(config Config) {
 		FileHandle = initFileHandle(config.Filename)
 
 		if FileOutput == "json" && !(Noscan || config.Mod == "sc") {
-			_, _ = FileHandle.WriteString(fmt.Sprintf("{\"config\":%s,\"data\":[", configstr))
+			_, _ = FileHandle.WriteString(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("scan")))
 		}
 
 	}
@@ -81,7 +73,7 @@ func initFile(config Config) {
 	// -af 参数下的启发式扫描结果handler初始化
 	if config.SmartFilename != "" {
 		SmartFileHandle = initFileHandle(config.SmartFilename)
-		_, _ = SmartFileHandle.WriteString(fmt.Sprintf("{\"config\":%s,\"data\":[", configstr))
+		_, _ = SmartFileHandle.WriteString(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("smartr")))
 	}
 
 	// 初始化进度文件

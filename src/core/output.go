@@ -66,10 +66,8 @@ func jsonFile(result *Result) string {
 func FormatOutput(filename string, outputfile string) {
 	var outfunc func(s string)
 	var iscolor bool
-	resultsdata, err := LoadResult(filename)
-	if err != nil {
-		return
-	}
+	resultsdata := LoadResultFile(filename).(ResultsData)
+
 	if outputfile != "" {
 		fileHandle := initFileHandle(outputfile)
 		defer fileHandle.Close()
@@ -89,9 +87,14 @@ func FormatOutput(filename string, outputfile string) {
 	if Output == "cs" {
 		outfunc(resultsdata.ToCobaltStrike())
 		return
-	} else {
+	} else if Output == "zombie" {
+		outfunc(resultsdata.ToZombie())
+		return
+	} else if Output == "c" || Output == "full" {
 		outfunc(resultsdata.ToConfig())
 		outfunc(resultsdata.ToFormat(iscolor))
+	} else {
+		outfunc(resultsdata.GetValue(Output))
 	}
 }
 

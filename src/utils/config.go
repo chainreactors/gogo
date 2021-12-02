@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"encoding/json"
 	"getitle/src/structutils"
 	"strings"
 )
@@ -12,7 +13,7 @@ type Config struct {
 	Ports         string   `json:"ports"`   // 预设字符串
 	Portlist      []string `json:"-"`       // 处理完的端口列表
 	JsonFile      string   `json:"-"`       // gt的结果json文件,可以再次读入扫描
-	Results       []Result `json:"-"`       // json反序列化后的内网,保存在内存中
+	Results       Results  `json:"-"`       // json反序列化后的内网,保存在内存中
 	ListFile      string   `json:"-"`       // 目标ip列表
 	Threads       int      `json:"threads"` // 线程数
 	Mod           string   `json:"mod"`     // 扫描模式
@@ -27,6 +28,7 @@ type Config struct {
 	NoSpray       bool     `json:"-"`
 	Exploit       string   `json:"exploit"`
 	VerisonLevel  int      `json:"version_level"`
+	JsonType      string   `json:"json_type"`
 }
 
 func (config Config) IsScan() bool {
@@ -43,14 +45,21 @@ func (config Config) IsSmart() bool {
 	return false
 }
 
-func (config Config) IsSSmart2() bool {
+func (config Config) IsSmartScan() bool {
+	if structutils.SliceContains([]string{"ss", "s"}, config.Mod) {
+		return true
+	}
+	return false
+}
+
+func (config Config) IsASmart() bool {
 	if structutils.SliceContains([]string{"ss", "sc"}, config.Mod) {
 		return true
 	}
 	return false
 }
 
-func (config Config) IsSmart1() bool {
+func (config Config) IsBSmart() bool {
 	if structutils.SliceContains([]string{"s", "sb"}, config.Mod) {
 		return true
 	}
@@ -81,4 +90,13 @@ func (config Config) GetTargetName() string {
 		target = "auto"
 	}
 	return target
+}
+
+func (config Config) ToJson(json_type string) string {
+	config.JsonType = json_type
+	s, err := json.Marshal(config)
+	if err != nil {
+		return err.Error()
+	}
+	return string(s)
 }

@@ -5,10 +5,27 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"strings"
 )
 
 var winport = []string{"445", "135", "137"}
+var zombiemap = map[string]string{
+	"mariadb":             "MYSQL",
+	"mysql":               "MYSQL",
+	"microsoft rdp":       "RDP",
+	"oracle database":     "ORACLE",
+	"microsoft sqlserver": "MSSQL",
+	"mssql":               "MSSQL",
+	"smb":                 "SMB",
+	"redis":               "REDIS",
+	"vnc":                 "VNC",
+	//"elasticsearch": "ELASTICSEARCH",
+	"postgreSQL": "POSTGRESQL",
+	"mongo":      "MONGO",
+	"ssh":        "SSH",
+	"ftp":        "FTP",
+}
 
 type windowsInfo struct {
 	hostname    string
@@ -56,9 +73,9 @@ func (imap IPMapResult) isWin() bool {
 }
 
 type ResultsData struct {
-	Config Config   `json:"config"`
-	Data   []Result `json:"data"`
-	IP     string   `json:"ip"`
+	Config Config  `json:"config"`
+	Data   Results `json:"data"`
+	IP     string  `json:"ip"`
 }
 
 func (rd ResultsData) groupByIP() map[string]IPMapResult {
@@ -119,6 +136,14 @@ func (rd ResultsData) ToFormat(isColor bool) string {
 	return s
 }
 
+func (rd ResultsData) GetValue(key string) string {
+	values := make([]string, len(rd.Data))
+	for i, result := range rd.Data {
+		values[i] = result.Get(key)
+	}
+	return strings.Join(values, "\n")
+}
+
 func (rd ResultsData) ToCobaltStrike() string {
 	var s string
 	pfs := rd.groupByIP()
@@ -130,27 +155,80 @@ func (rd ResultsData) ToCobaltStrike() string {
 	return s
 }
 
-func LoadResult(filename string) (*ResultsData, error) {
-	content, err := ioutil.ReadFile(filename)
-	if err != nil {
-		return nil, err
+func (rd ResultsData) ToZombie() string {
+	var filtedres Results
+
+	for k, _ := range zombiemap {
+		filtedres = append(filtedres, rd.Data.Filter("frameworks", k, "::")...)
 	}
-	content = bytes.TrimSpace(content)
-	// 自动修复未完成任务的json
-	laststr := string(content[len(content)-2:])
-	if laststr != "]}" {
+	zms := make([]zombiemeta, len(filtedres))
+
+	for i, result := range filtedres {
+		zms[i] = result.toZombie()
+	}
+	s, err := json.Marshal(zms)
+	if err != nil {
+		fmt.Println("[-] " + err.Error())
+		os.Exit(0)
+	}
+	return string(s)
+}
+
+func autofixjson(content []byte) []byte {
+	if string(content[len(content)-2:]) != "]}" {
 		content = append(content, "]}"...)
 		fmt.Println("[*] Task has not been completed,auto fix json")
 		fmt.Println("[*] Task has not been completed,auto fix json")
 		fmt.Println("[*] Task has not been completed,auto fix json")
 	}
+	return content
+}
 
-	var resultsdata *ResultsData
+func LoadResult(content []byte) (ResultsData, error) {
+	// 自动修复未完成任务的json
+	var err error
+
+	var resultsdata ResultsData
 	err = json.Unmarshal(content, &resultsdata)
 	if err != nil {
-		fmt.Println("[-] json error, " + err.Error())
-		return nil, err
+		return resultsdata, err
+		//os.Exit(0)
 	}
+	return resultsdata, nil
+}
 
-	return resultsdata, err
+type SmartData struct {
+	Config Config   `json:"config"`
+	Data   []string `json:"data"`
+	IP     string   `json:"ip"`
+}
+
+func loadSmartResult(content []byte) (SmartData, error) {
+	var err error
+	var smartdata SmartData
+	err = json.Unmarshal(content, &smartdata)
+	if err != nil {
+		return smartdata, err
+	}
+	return smartdata, nil
+}
+
+func LoadResultFile(filename string) interface{} {
+	var data interface{}
+	content, err := ioutil.ReadFile(filename)
+	if err != nil {
+		os.Exit(0)
+	}
+	content = bytes.TrimSpace(content)
+	content = autofixjson(content)
+	if bytes.Contains(content, []byte("'\"json_type\":\"smart\"'")) {
+		data, err = loadSmartResult(content)
+	} else {
+		data, err = LoadResult(content)
+	}
+	if err != nil {
+		fmt.Println("[-] json error, " + err.Error())
+		os.Exit(0)
+	}
+	return data
 }
