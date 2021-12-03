@@ -185,18 +185,27 @@ func Zip(input []byte) string {
 		println(err.Error())
 		return ""
 	}
-	return base64.StdEncoding.EncodeToString(b.Bytes())
+	return Base64Encode(b.Bytes())
 }
 
 func Unzip(input string) []byte {
-	data, err := base64.StdEncoding.DecodeString(input)
-	if err != nil {
-		println(err.Error())
-		return nil
-	}
+	data := Base64Decode(input)
 	rdata := bytes.NewReader(data)
 	r, _ := gzip.NewReader(rdata)
 
 	s, _ := ioutil.ReadAll(r)
 	return s
+}
+
+func Base64Decode(s string) []byte {
+	data, err := base64.StdEncoding.DecodeString(s)
+	if err != nil {
+		println(err.Error())
+		os.Exit(0)
+	}
+	return data
+}
+
+func Base64Encode(b []byte) string {
+	return base64.StdEncoding.EncodeToString(b)
 }

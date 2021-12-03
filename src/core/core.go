@@ -44,7 +44,7 @@ func defaultScan(tc targetConfig) {
 	if result.Open {
 		Alivesum++
 		if !Clean {
-			fmt.Println(output(result, Output))
+			fmt.Print(output(result, Output))
 		}
 		if FileHandle != nil {
 			Datach <- output(result, FileOutput)
