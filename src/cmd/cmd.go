@@ -34,13 +34,13 @@ func CMD(k string) {
 	flag.BoolVar(&config.NoSpray, "ns", false, "")
 
 	//全局变量初始化
-	flag.StringVar(&Output, "o", "full", "")
-	flag.BoolVar(&Clean, "c", false, "")
-	flag.StringVar(&FileOutput, "O", "json", "")
+	flag.StringVar(&core.Output, "o", "full", "")
+	flag.BoolVar(&core.Clean, "c", false, "")
+	flag.StringVar(&core.FileOutput, "O", "json", "")
 	flag.IntVar(&scan.Delay, "d", 2, "")
 	flag.IntVar(&scan.HttpsDelay, "D", 2, "")
 	flag.StringVar(&scan.Payloadstr, "payload", "", "")
-	flag.BoolVar(&Noscan, "no", false, "")
+	flag.BoolVar(&core.Noscan, "no", false, "")
 
 	// 一些特殊参数初始化
 	key := flag.String("k", "", "")
@@ -55,6 +55,8 @@ func CMD(k string) {
 	noup := flag.Bool("nu", false, "")
 	uploadfile := flag.String("uf", "", "")
 	pocfile := flag.String("ef", "", "")
+	com := flag.Bool("C", false, "")
+
 	flag.Parse()
 	// 密钥
 	if *key != k {
@@ -84,12 +86,15 @@ func CMD(k string) {
 	parseExploit(*exploit, *exploitConfig)
 	parseFilename(*autofile, *hiddenfile, &config)
 
+	if *com {
+		core.Compress = !core.Compress
+	}
 	config = core.Init(config)
 	core.RunTask(config)
 
 	//关闭文件写入管道
-	close(Datach)
-	close(LogDetach)
+	close(core.Datach)
+	close(core.LogDetach)
 
 	time.Sleep(500 * time.Microsecond)
 

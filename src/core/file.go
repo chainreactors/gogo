@@ -1,16 +1,18 @@
-package utils
+package core
 
 import (
 	"fmt"
 	. "getitle/src/structutils"
+	"getitle/src/utils"
 	"io/ioutil"
 	"os"
 	"strings"
 	"time"
 )
 
-var Clean bool
-var Noscan bool
+var Clean = false
+var Noscan = false
+var Compress = true
 
 //文件输出
 var Datach = make(chan string, 100)
@@ -53,7 +55,7 @@ func InitFileHandle(filename string) *os.File {
 	return filehandle
 }
 
-func InitFile(config Config) {
+func InitFile(config utils.Config) {
 	// 挂起两个文件操作的goroutine
 
 	// 初始化res文件handler
@@ -63,7 +65,7 @@ func InitFile(config Config) {
 		FileHandle = InitFileHandle(config.Filename)
 
 		if FileOutput == "json" && !(Noscan || config.Mod == "sc") {
-			_, _ = FileHandle.WriteString(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("scan")))
+			writefile(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("scan")))
 		}
 
 	}
@@ -71,7 +73,7 @@ func InitFile(config Config) {
 	// -af 参数下的启发式扫描结果handler初始化
 	if config.SmartFilename != "" {
 		SmartFileHandle = InitFileHandle(config.SmartFilename)
-		_, _ = SmartFileHandle.WriteString(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("smartr")))
+		writefile(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("smartr")))
 	}
 
 	// 初始化进度文件
@@ -107,7 +109,7 @@ func InitFile(config Config) {
 					// 如果json格式输出,则除了第一次输出,之后都会带上逗号
 					commaflag2 = true
 				}
-				_, _ = FileHandle.WriteString(res)
+				writefile(res)
 			}
 		}()
 	}
@@ -115,7 +117,7 @@ func InitFile(config Config) {
 
 func fileclose() {
 	if FileOutput == "json" && !Noscan {
-		_, _ = FileHandle.WriteString("]}")
+		writefile("]}")
 	}
 
 	if SmartFileHandle != nil {
@@ -125,11 +127,11 @@ func fileclose() {
 	_ = FileHandle.Close()
 }
 
-func writefile(res, iscompress bool) {
-	//resb := []byte(res)
-	if iscompress {
-		//Zip(resb)
+func writefile(res string) {
+	if Compress {
+		res = Zip(res)
 	}
+	_, _ = FileHandle.WriteString(res)
 }
 
 var commaflag bool = false
@@ -140,9 +142,9 @@ func WriteSmartResult(ips []string) {
 		iplists[i] = "\"" + ip + "\""
 	}
 	if commaflag {
-		_, _ = SmartFileHandle.WriteString(",")
+		writefile(",")
 	}
-	_, _ = SmartFileHandle.WriteString(strings.Join(iplists, ","))
+	writefile(strings.Join(iplists, ","))
 	commaflag = true
 	_ = SmartFileHandle.Sync()
 }

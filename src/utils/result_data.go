@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"getitle/src/structutils"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -216,6 +217,10 @@ func loadSmartResult(content []byte) (SmartData, error) {
 func LoadResultFile(filename string) interface{} {
 	var data interface{}
 	content, err := ioutil.ReadFile(filename)
+	if !bytes.Equal(content[0:10], []byte("{\"config\"")) {
+		content = structutils.UnFlate(content)
+	}
+
 	if err != nil {
 		os.Exit(0)
 	}

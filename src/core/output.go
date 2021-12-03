@@ -23,7 +23,6 @@ func output(result *Result, outType string) string {
 
 	}
 	return out
-
 }
 
 func colorOutput(result *Result) string {
@@ -46,7 +45,6 @@ func FormatOutput(filename string, outputfile string) {
 	var iscolor bool
 	var resultsdata ResultsData
 	var smartdata SmartData
-
 	if outputfile != "" {
 		fileHandle := InitFileHandle(outputfile)
 		defer fileHandle.Close()
