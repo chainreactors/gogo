@@ -8,8 +8,6 @@ import (
 	"strings"
 )
 
-var first = true
-
 func output(result *Result, outType string) string {
 	var out string
 
@@ -43,19 +41,6 @@ func jsonOutput(result *Result) string {
 	return string(jsons)
 }
 
-func jsonFile(result *Result) string {
-	jsons, err := json.Marshal(result)
-	if err != nil {
-		return ""
-	}
-	if first {
-		first = false
-		return string(jsons)
-	} else {
-		return "," + string(jsons)
-	}
-}
-
 func FormatOutput(filename string, outputfile string) {
 	var outfunc func(s string)
 	var iscolor bool
@@ -63,7 +48,7 @@ func FormatOutput(filename string, outputfile string) {
 	var smartdata SmartData
 
 	if outputfile != "" {
-		fileHandle := initFileHandle(outputfile)
+		fileHandle := InitFileHandle(outputfile)
 		defer fileHandle.Close()
 		outfunc = func(s string) {
 			_, _ = fileHandle.WriteString(s)

@@ -1,14 +1,16 @@
-package core
+package utils
 
 import (
 	"fmt"
 	. "getitle/src/structutils"
-	. "getitle/src/utils"
 	"io/ioutil"
 	"os"
 	"strings"
 	"time"
 )
+
+var Clean bool
+var Noscan bool
 
 //文件输出
 var Datach = make(chan string, 100)
@@ -22,7 +24,7 @@ var LogDetach = make(chan string, 100)
 var LogFileHandle *os.File
 var tmpfilename string
 
-func loadFile(file *os.File) []string {
+func LoadFile(file *os.File) []string {
 	defer file.Close()
 	content, err := ioutil.ReadAll(file)
 	if err != nil {
@@ -34,7 +36,7 @@ func loadFile(file *os.File) []string {
 	return strings.Split(text, "\n")
 }
 
-func initFileHandle(filename string) *os.File {
+func InitFileHandle(filename string) *os.File {
 	var err error
 	var filehandle *os.File
 	if CheckFileIsExist(filename) { //如果文件存在
@@ -51,14 +53,14 @@ func initFileHandle(filename string) *os.File {
 	return filehandle
 }
 
-func initFile(config Config) {
+func InitFile(config Config) {
 	// 挂起两个文件操作的goroutine
 
 	// 初始化res文件handler
 	if config.Filename != "" {
 		Clean = !Clean
 		// 创建output的filehandle
-		FileHandle = initFileHandle(config.Filename)
+		FileHandle = InitFileHandle(config.Filename)
 
 		if FileOutput == "json" && !(Noscan || config.Mod == "sc") {
 			_, _ = FileHandle.WriteString(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("scan")))
@@ -68,7 +70,7 @@ func initFile(config Config) {
 
 	// -af 参数下的启发式扫描结果handler初始化
 	if config.SmartFilename != "" {
-		SmartFileHandle = initFileHandle(config.SmartFilename)
+		SmartFileHandle = InitFileHandle(config.SmartFilename)
 		_, _ = SmartFileHandle.WriteString(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("smartr")))
 	}
 
@@ -79,7 +81,7 @@ func initFile(config Config) {
 		tmpfilename = fmt.Sprintf(".%s.unix", ToString(time.Now().Unix()))
 	}
 	_ = os.Remove(".sock.lock")
-	LogFileHandle = initFileHandle(tmpfilename)
+	LogFileHandle = InitFileHandle(tmpfilename)
 
 	//挂起文件相关协程
 
@@ -124,12 +126,15 @@ func fileclose() {
 }
 
 func writefile(res, iscompress bool) {
-
+	//resb := []byte(res)
+	if iscompress {
+		//Zip(resb)
+	}
 }
 
 var commaflag bool = false
 
-func sync_smartips(ips []string) {
+func WriteSmartResult(ips []string) {
 	iplists := make([]string, len(ips))
 	for i, ip := range ips {
 		iplists[i] = "\"" + ip + "\""

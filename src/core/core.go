@@ -34,7 +34,6 @@ func StraightMod(config Config) {
 	}
 
 	wgs.Wait()
-
 }
 
 func defaultScan(tc targetConfig) {
@@ -119,7 +118,7 @@ func SmartMod(config Config) {
 
 	sort_cidr(iplist)
 	if SmartFileHandle != nil {
-		sync_smartips(iplist)
+		WriteSmartResult(iplist)
 	}
 
 	// 启发式扫描逐步降级,从喷洒B段到喷洒C段到默认扫描

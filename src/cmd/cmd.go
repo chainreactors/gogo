@@ -34,13 +34,13 @@ func CMD(k string) {
 	flag.BoolVar(&config.NoSpray, "ns", false, "")
 
 	//全局变量初始化
-	flag.StringVar(&core.Output, "o", "full", "")
-	flag.BoolVar(&core.Clean, "c", false, "")
-	flag.StringVar(&core.FileOutput, "O", "json", "")
+	flag.StringVar(&Output, "o", "full", "")
+	flag.BoolVar(&Clean, "c", false, "")
+	flag.StringVar(&FileOutput, "O", "json", "")
 	flag.IntVar(&scan.Delay, "d", 2, "")
 	flag.IntVar(&scan.HttpsDelay, "D", 2, "")
 	flag.StringVar(&scan.Payloadstr, "payload", "", "")
-	flag.BoolVar(&core.Noscan, "no", false, "")
+	flag.BoolVar(&Noscan, "no", false, "")
 
 	// 一些特殊参数初始化
 	key := flag.String("k", "", "")
@@ -88,8 +88,8 @@ func CMD(k string) {
 	core.RunTask(config)
 
 	//关闭文件写入管道
-	close(core.Datach)
-	close(core.LogDetach)
+	close(Datach)
+	close(LogDetach)
 
 	time.Sleep(500 * time.Microsecond)
 

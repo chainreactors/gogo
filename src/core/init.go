@@ -9,9 +9,6 @@ import (
 	"strings"
 )
 
-var Clean bool
-var Noscan bool
-
 var InterConfig = map[string][]string{
 	"10.0.0.0/8":     {"ss", "icmp", "1"},
 	"172.16.0.0/12":  {"ss", "icmp", "1"},
@@ -51,7 +48,7 @@ func Init(config Config) Config {
 	}
 
 	// 初始化文件操作
-	initFile(config)
+	InitFile(config)
 
 	// 初始化端口配置
 	config.Portlist = portHandler(config.Ports)
@@ -63,7 +60,7 @@ func Init(config Config) Config {
 			fmt.Println("[-] " + err.Error())
 			os.Exit(0)
 		}
-		config.IPlist = loadFile(f)
+		config.IPlist = LoadFile(f)
 	} else if config.JsonFile != "" {
 		// 如果输入的json不为空,则从json中加载result,并返回结果
 		data := LoadResultFile(config.JsonFile)
@@ -75,7 +72,7 @@ func Init(config Config) Config {
 		}
 		return config
 	} else if config.Stdin {
-		config.IPlist = loadFile(os.Stdin)
+		config.IPlist = LoadFile(os.Stdin)
 	}
 
 	// 初始化启发式扫描的端口探针
