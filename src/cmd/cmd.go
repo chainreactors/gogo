@@ -71,10 +71,14 @@ func CMD(k string) {
 
 	// 格式化
 	if *resultfilename != "" {
-		core.FormatOutput(*resultfilename, config.Filename)
+		core.FormatOutput(*resultfilename, config.Filename, *autofile)
 		os.Exit(0)
-	} else if *uploadfile != "" {
+	}
+
+	if *uploadfile != "" {
+		// 自动上传文件
 		uploadfiles([]string{*uploadfile})
+		os.Exit(0)
 	}
 
 	// 从文件中加载poc
@@ -85,10 +89,10 @@ func CMD(k string) {
 	parseVersion(*version, *version2)
 	parseExploit(*exploit, *exploitConfig)
 	parseFilename(*autofile, *hiddenfile, &config)
-
 	if *com {
 		core.Compress = !core.Compress
 	}
+
 	config = core.Init(config)
 	core.RunTask(config)
 

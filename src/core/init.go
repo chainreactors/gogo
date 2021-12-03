@@ -29,7 +29,7 @@ func Init(config Config) Config {
 	config.Stdin = hasStdin()
 
 	// check命令行参数
-	checkCommand(config)
+	CheckCommand(config)
 
 	// 初始化
 	config.Exploit = scan.Exploit
@@ -96,12 +96,12 @@ func Init(config Config) Config {
 	return config
 }
 
-func checkCommand(config Config) {
+func CheckCommand(config Config) {
 	// 一些命令行参数错误处理,如果check没过直接退出程序或输出警告
-	if config.Mod == "ss" && config.ListFile != "" {
-		fmt.Println("[-] error Smart scan can not use File input")
-		os.Exit(0)
-	}
+	//if config.Mod == "ss" && config.ListFile != "" {
+	//	fmt.Println("[-] error Smart scan can not use File input")
+	//	os.Exit(0)
+	//}
 	if config.JsonFile != "" {
 		if config.Ports != "top1" {
 			fmt.Println("[warn] json input can not config ports")
@@ -110,6 +110,7 @@ func checkCommand(config Config) {
 			fmt.Println("[warn] input json can not config scan Mod,default scanning")
 		}
 	}
+
 	if config.IP == "" && config.ListFile == "" && config.JsonFile == "" && config.Mod != "a" && !config.Stdin { // 一些导致报错的参数组合
 		fmt.Println("[-] cannot found target, please set -ip or -l or -j -or -a or stdin")
 		os.Exit(0)

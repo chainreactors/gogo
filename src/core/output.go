@@ -40,22 +40,11 @@ func jsonOutput(result *Result) string {
 	return string(jsons)
 }
 
-func FormatOutput(filename string, outputfile string) {
+func FormatOutput(filename string, outputfile string, autofile bool) {
 	var outfunc func(s string)
 	var iscolor bool
 	var resultsdata ResultsData
 	var smartdata SmartData
-	if outputfile != "" {
-		fileHandle := InitFileHandle(outputfile)
-		defer fileHandle.Close()
-		outfunc = func(s string) {
-			_, _ = fileHandle.WriteString(s)
-		}
-	} else {
-		outfunc = func(s string) {
-			fmt.Print(s)
-		}
-	}
 
 	data := LoadResultFile(filename)
 	switch data.(type) {
@@ -67,6 +56,24 @@ func FormatOutput(filename string, outputfile string) {
 		return
 	default:
 		return
+	}
+
+	if outputfile != "" {
+		fileHandle := InitFileHandle(outputfile)
+		defer fileHandle.Close()
+		outfunc = func(s string) {
+			_, _ = fileHandle.WriteString(s)
+		}
+	} else if autofile {
+		fileHandle := InitFileHandle(GetResultFilename(autofile, false, resultsdata.Config))
+		defer fileHandle.Close()
+		outfunc = func(s string) {
+			_, _ = fileHandle.WriteString(s)
+		}
+	} else {
+		outfunc = func(s string) {
+			fmt.Print(s)
+		}
 	}
 
 	if Output == "c" {
