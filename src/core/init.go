@@ -124,7 +124,7 @@ func printTaskInfo(config Config, taskname string) {
 
 	fmt.Printf("[*] Current goroutines: %d, Version Level: %d,Exploit Target: %s, Spray Scan: %t\n", config.Threads, scan.VersionLevel, scan.Exploit, config.Spray)
 	if config.JsonFile == "" {
-		processLogln(fmt.Sprintf("[*] Start scan task %s ,total ports: %d , mod: %s", taskname, len(config.Portlist), config.Mod))
+		progressLogln(fmt.Sprintf("[*] Start scan task %s ,total ports: %d , mod: %s", taskname, len(config.Portlist), config.Mod))
 		// 输出端口信息
 		if len(config.Portlist) > 500 {
 			fmt.Println("[*] too much ports , only show top 500 ports: " + strings.Join(config.Portlist[:500], ",") + "......")
@@ -133,13 +133,13 @@ func printTaskInfo(config Config, taskname string) {
 		}
 		// 输出预估时间
 		if config.Mod == "default" {
-			processLogln(fmt.Sprintf("[*] Scan task time is about %d seconds", guessTime(config)))
+			progressLogln(fmt.Sprintf("[*] Scan task time is about %d seconds", guessTime(config)))
 		} else if config.IsSmart() {
-			processLogln(fmt.Sprintf("[*] Smart scan task time is about %d seconds", guessSmarttime(config)))
+			progressLogln(fmt.Sprintf("[*] Smart scan task time is about %d seconds", guessSmarttime(config)))
 		}
 	} else {
-		processLogln(fmt.Sprintf("[*] Start scan task %s ,total target: %d", taskname, len(config.Results)))
-		processLogln(fmt.Sprintf("[*] Json scan task time is about %d seconds", (len(config.Results)/config.Threads)*4+4))
+		progressLogln(fmt.Sprintf("[*] Start scan task %s ,total target: %d", taskname, len(config.Results)))
+		progressLogln(fmt.Sprintf("[*] Json scan task time is about %d seconds", (len(config.Results)/config.Threads)*4+4))
 	}
 }
 
@@ -238,7 +238,7 @@ func countip(mask int) int {
 
 func autoScan(config Config) {
 	for cidr, st := range InterConfig {
-		processLogln("[*] Spraying : " + cidr)
+		progressLogln("[*] Spraying : " + cidr)
 		SmartMod(createSmartTask(config, cidr, st))
 	}
 }

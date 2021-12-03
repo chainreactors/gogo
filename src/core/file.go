@@ -34,10 +34,6 @@ func loadFile(file *os.File) []string {
 	return strings.Split(text, "\n")
 }
 
-func loadList() {
-
-}
-
 func initFileHandle(filename string) *os.File {
 	var err error
 	var filehandle *os.File
@@ -100,20 +96,34 @@ func initFile(config Config) {
 	// res文件
 	if FileHandle != nil {
 		go func() {
+			defer fileclose()
+			var commaflag2 bool
 			for res := range Datach {
+				if commaflag2 {
+					res = "," + res
+				} else if FileOutput == "json" && !Noscan {
+					// 如果json格式输出,则除了第一次输出,之后都会带上逗号
+					commaflag2 = true
+				}
 				_, _ = FileHandle.WriteString(res)
 			}
-			if FileOutput == "json" && !(Noscan || config.Mod == "sc") {
-				_, _ = FileHandle.WriteString("]}")
-			}
-
-			if SmartFileHandle != nil {
-				_, _ = SmartFileHandle.WriteString("]}")
-				_ = SmartFileHandle.Close()
-			}
-			_ = FileHandle.Close()
 		}()
 	}
+}
+
+func fileclose() {
+	if FileOutput == "json" && !Noscan {
+		_, _ = FileHandle.WriteString("]}")
+	}
+
+	if SmartFileHandle != nil {
+		_, _ = SmartFileHandle.WriteString("]}")
+		_ = SmartFileHandle.Close()
+	}
+	_ = FileHandle.Close()
+}
+
+func writefile(res, iscompress bool) {
 
 }
 

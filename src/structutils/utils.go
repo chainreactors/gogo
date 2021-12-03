@@ -172,7 +172,7 @@ func standBase64(braw []byte) []byte {
 
 func Zip(input []byte) string {
 	var b bytes.Buffer
-	gz := gzip.NewWriter(&b)
+	gz, _ := gzip.NewWriterLevel(&b, gzip.BestCompression)
 	if _, err := gz.Write(input); err != nil {
 		println(err.Error())
 		return ""
@@ -196,6 +196,7 @@ func Unzip(input string) []byte {
 	}
 	rdata := bytes.NewReader(data)
 	r, _ := gzip.NewReader(rdata)
+
 	s, _ := ioutil.ReadAll(r)
 	return s
 }

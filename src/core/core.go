@@ -3,7 +3,6 @@ package core
 import (
 	"fmt"
 	"getitle/src/scan"
-	. "getitle/src/structutils"
 	. "getitle/src/utils"
 	"github.com/panjf2000/ants/v2"
 	"strings"
@@ -45,7 +44,7 @@ func defaultScan(tc targetConfig) {
 	if result.Open {
 		Alivesum++
 		if !Clean {
-			fmt.Print(output(result, Output))
+			fmt.Println(output(result, Output))
 		}
 		if FileHandle != nil {
 			Datach <- output(result, FileOutput)
@@ -73,7 +72,7 @@ func SmartMod(config Config) {
 		mask = 24
 	}
 
-	processLogln(fmt.Sprintf("[*] SmartScan %s, Mod: %s", taskname, config.Mod))
+	progressLogln(fmt.Sprintf("[*] SmartScan %s, Mod: %s", taskname, config.Mod))
 	var wg sync.WaitGroup
 	var temp sync.Map
 
@@ -88,7 +87,7 @@ func SmartMod(config Config) {
 	if config.Mod == "ss" {
 		probeconfig += "Smart IP probe: " + config.IpProbe
 	}
-	processLogln(probeconfig)
+	progressLogln(probeconfig)
 
 	tcChannel = tcGenerator(ipChannel, config.SmartPortList)
 	scanPool, _ := ants.NewPoolWithFunc(config.Threads, func(i interface{}) {
@@ -134,7 +133,7 @@ func SmartMod(config Config) {
 		config.Mod = "default"
 		config.IPlist = iplist
 		spend := guessTime(config)
-		processLogln(fmt.Sprintf("[*] Scan all task time is about %d seconds, Total found %d C class CIDRs take about %d ", spend, len(iplist), spend*len(iplist)))
+		progressLogln(fmt.Sprintf("[*] Scan all task time is about %d seconds, Total found %d C class CIDRs take about %d ", spend, len(iplist), spend*len(iplist)))
 		StraightMod(config)
 	}
 }
@@ -148,7 +147,8 @@ func alived(ip string, temp *sync.Map, mask int, mod string) {
 		cidr := fmt.Sprintf("%s/%d\n", ip, mask)
 		fmt.Print("[*] Found " + cidr)
 		Alivesum++
-		if FileHandle != nil && SliceContains([]string{"ss", "s", "sb"}, mod) && (Noscan || mod == "sb") {
+		if FileHandle != nil && mod != "sc" && (Noscan || mod == "sb") {
+			// 模式为sc时,b段将不会输出到文件
 			Datach <- cidr
 		}
 	}
@@ -166,16 +166,16 @@ func smartScan(tc targetConfig, temp *sync.Map, mask int, mod string) {
 func declineScan(config Config, iplist []string) {
 	//config.IpProbeList = []uint{1} // ipp 只在ss与sc模式中生效,为了防止时间计算错误,reset ipp 数值
 	t := guessSmarttime(config)
-	processLogln(fmt.Sprintf("[*] Every Sub smartscan task time is about %d seconds, total found %d B Class CIDRs about %d s", t, len(iplist), t*len(iplist)))
+	progressLogln(fmt.Sprintf("[*] Every Sub smartscan task time is about %d seconds, total found %d B Class CIDRs about %d s", t, len(iplist), t*len(iplist)))
 	for _, ip := range iplist {
 		config.IP = ip
 		tmpalive := Alivesum
-		processLogln(fmt.Sprintf("[*] Spraying B class IP: %s, Estimated to take %d seconds", ip, t))
+		progressLogln(fmt.Sprintf("[*] Spraying B class IP: %s, Estimated to take %d seconds", ip, t))
 		if config.SmartPort == "default" {
 			config.SmartPortList = []string{"80"}
 		}
 		SmartMod(config)
-		processLogln(fmt.Sprintf("[*] Found %d alive assets from CIDR %s", Alivesum-tmpalive, ip))
+		progressLogln(fmt.Sprintf("[*] Found %d alive assets from CIDR %s", Alivesum-tmpalive, ip))
 		_ = FileHandle.Sync()
 	}
 }

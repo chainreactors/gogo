@@ -17,11 +17,7 @@ func output(result *Result, outType string) string {
 	case "color", "c":
 		out = colorOutput(result)
 	case "json", "j":
-		if FileHandle != nil {
-			out = jsonFile(result)
-		} else {
-			out = jsonOutput(result)
-		}
+		out = jsonOutput(result)
 	//case "html":
 	//	out = HtmlOutput(result)
 	default:
@@ -43,11 +39,8 @@ func fullOutput(result *Result) string {
 }
 
 func jsonOutput(result *Result) string {
-	jsons, err := json.Marshal(result)
-	if err != nil {
-		return ""
-	}
-	return string(jsons) + "\n"
+	jsons, _ := json.Marshal(result)
+	return string(jsons)
 }
 
 func jsonFile(result *Result) string {
@@ -111,12 +104,16 @@ func FormatOutput(filename string, outputfile string) {
 	}
 }
 
-func processLogln(s string) {
+func progressLogln(s string) {
 	s = s + " , " + structutils.GetCurtime() + "\n"
 	fmt.Print(s)
 	if LogFileHandle != nil {
 		LogDetach <- s
 	}
+}
+
+func consoleLog(s string) {
+
 }
 
 func Banner() {
