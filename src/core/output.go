@@ -50,22 +50,22 @@ func FormatOutput(filename string, outputfile string, autofile bool) {
 	switch data.(type) {
 	case ResultsData:
 		resultsdata = data.(ResultsData)
+		fmt.Println(resultsdata.ToConfig())
+		if outputfile == "" {
+			outputfile = GetFilename(resultsdata.Config, autofile, false, Output)
+		}
 	case SmartData:
 		smartdata = data.(SmartData)
-		outfunc(strings.Join(smartdata.Data, "\n"))
-		return
+		if outputfile == "" {
+			outputfile = GetFilename(smartdata.Config, autofile, false, "cidr")
+		}
 	default:
 		return
 	}
 
 	if outputfile != "" {
 		fileHandle := InitFileHandle(outputfile)
-		defer fileHandle.Close()
-		outfunc = func(s string) {
-			_, _ = fileHandle.WriteString(s)
-		}
-	} else if autofile {
-		fileHandle := InitFileHandle(GetResultFilename(autofile, false, resultsdata.Config))
+		fmt.Println("[*] Output filename: " + outputfile)
 		defer fileHandle.Close()
 		outfunc = func(s string) {
 			_, _ = fileHandle.WriteString(s)
@@ -74,6 +74,11 @@ func FormatOutput(filename string, outputfile string, autofile bool) {
 		outfunc = func(s string) {
 			fmt.Print(s)
 		}
+	}
+
+	if smartdata.Data != nil {
+		outfunc(strings.Join(smartdata.Data, "\n"))
+		return
 	}
 
 	if Output == "c" {

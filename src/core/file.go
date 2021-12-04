@@ -149,54 +149,39 @@ func WriteSmartResult(ips []string) {
 	_ = SmartFileHandle.Sync()
 }
 
-func GetResultFilename(autofile, hiddenfile bool, config utils.Config) string {
-	var basefilename string
-	if config.Filename == "" {
-		if autofile {
-			target := strings.Replace(config.GetTargetName(), "/", "_", -1)
-			ports := strings.Replace(config.Ports, ",", "_", -1)
-			basefilename = fmt.Sprintf(".%s_%s_", target, ports)
-		} else if hiddenfile {
-			if IsWin() {
-				basefilename = "App_1634884664021088500_EC1B25B2-9453-49EE-A1E2-112B4D539F5"
-			} else {
-				basefilename = ".systemd-private-701215aa8263408d8d44f4507834d77"
-			}
-		} else {
-			return ""
-		}
-		i := 1
-		for CheckFileIsExist(basefilename + ToString(i) + ".dat") {
-			i++
-		}
-		return basefilename + ToString(i) + ".dat"
-	} else {
-		return config.Filename
-	}
-}
+//var winfile = []string{
+//	"App_1634884664021088500_EC1B25B2-9453-49EE-A1E2-112B4D539F5",
+//	"W2R8219CVYF4_C0679168892B0A822EB17C1421CE7BF",
+//}
+//var linuxfile = []string{
+//	".sess_ha73n80og7veig0pojpp3ltnt",
+//	".systemd-private-701215aa8263408d8d44f4507834d77",
+//}
+var fileint = 1
 
-func GetSmartFilename(autofile, hiddenfile bool, config utils.Config) string {
-	var smartbasename string
-	if config.IsSmartScan() {
-		i := 1
-		if autofile {
-			target := strings.Replace(config.GetTargetName(), "/", "_", -1)
-			ports := strings.Replace(config.Ports, ",", "_", -1)
-			smartbasename = fmt.Sprintf(".%s_%s_%s_", target, ports, config.Mod)
-		} else if hiddenfile {
-			if IsWin() {
-				smartbasename = "W2R8219CVYF4_C0679168892B0A822EB17C1421CE7BF"
-			} else {
-				smartbasename = ".sess_ha73n80og7veig0pojpp3ltnt"
-			}
+func GetFilename(config utils.Config, autofile, hiddenfile bool, outtype string) string {
+	var basename string
+	if autofile {
+		basename = getAutofile(config, outtype)
+	} else if hiddenfile {
+		if IsWin() {
+			basename = "App_1634884664021088500_EC1B25B2-9453-49EE-A1E2-112B4D539F5"
 		} else {
-			return ""
+			basename = ".systemd-private-701215aa8263408d8d44f4507834d77"
 		}
-		for CheckFileIsExist(smartbasename + ToString(i) + ".log") {
-			i++
-		}
-		return smartbasename + ToString(i) + ".log"
 	} else {
 		return ""
 	}
+	for CheckFileIsExist(basename + ToString(fileint) + ".dat") {
+		fileint++
+	}
+	return basename + ToString(fileint) + ".dat"
+}
+
+func getAutofile(config utils.Config, outtype string) string {
+	var basename string
+	target := strings.Replace(config.GetTargetName(), "/", "_", -1)
+	ports := strings.Replace(config.Ports, ",", "_", -1)
+	basename = fmt.Sprintf(".%s_%s_%s_%s_", target, ports, config.Mod, outtype)
+	return basename
 }

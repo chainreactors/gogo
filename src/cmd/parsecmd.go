@@ -29,6 +29,10 @@ func parseExploit(exploit bool, exploitConfig string) {
 }
 
 func parseFilename(autofile, hiddenfile bool, config *utils.Config) {
-	config.Filename = core.GetResultFilename(autofile, hiddenfile, *config)
-	config.Filename = core.GetSmartFilename(autofile, hiddenfile, *config)
+	if config.Filename != "" {
+		config.Filename = core.GetFilename(*config, autofile, hiddenfile, core.FileOutput)
+	}
+	if config.IsSmartScan() {
+		config.SmartFilename = core.GetFilename(*config, autofile, hiddenfile, "cidr")
+	}
 }

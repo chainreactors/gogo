@@ -116,7 +116,11 @@ func CMD(k string) {
 
 	// 扫描结果文件自动上传
 	if config.Filename != "" {
-		fmt.Printf("[*] Results filename: %s, Smartscan result filename: %s\n", config.Filename, config.SmartFilename)
+		s := fmt.Sprintf("[*] Results filename: %s, ", config.Filename)
+		if config.SmartFilename != "" {
+			s += "Smartscan result filename: " + config.SmartFilename
+		}
+		fmt.Println()
 	}
 	if connected && !*noup && config.Filename != "" { // 如果出网则自动上传结果到云服务器
 		uploadfiles([]string{config.Filename, config.SmartFilename})
