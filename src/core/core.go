@@ -52,17 +52,11 @@ func defaultScan(tc targetConfig) {
 	}
 }
 
-func SmartMod(config Config) {
-	var taskname string
+func SmartMod(target string, config Config) {
 	var mask int
 
 	// 初始化ip目标
-	if config.IP != "" {
-		taskname = config.IP
-	} else if config.IPlist != nil {
-		taskname = fmt.Sprintf("%d cidrs", len(config.IPlist))
-	}
-
+	progressLogln(fmt.Sprintf("[*] SmartScan %s, Mod: %s", target, config.Mod))
 	// 初始化mask
 	switch config.Mod {
 	case "ss", "sc":
@@ -71,13 +65,12 @@ func SmartMod(config Config) {
 		mask = 24
 	}
 
-	progressLogln(fmt.Sprintf("[*] SmartScan %s, Mod: %s", taskname, config.Mod))
 	var wg sync.WaitGroup
 	var temp sync.Map
 
 	//go safeMap(&temp, aliveC)
 	//var ipChannel chan string
-	ipChannel := ipGenerator(config.IP, config.Mod, config.IpProbeList, &temp)
+	ipChannel := ipGenerator(target, config.Mod, config.IpProbeList, &temp)
 
 	var tcChannel chan targetConfig
 
@@ -167,13 +160,12 @@ func declineScan(config Config, iplist []string) {
 	t := guessSmarttime(config)
 	progressLogln(fmt.Sprintf("[*] Every Sub smartscan task time is about %d seconds, total found %d B Class CIDRs about %d s", t, len(iplist), t*len(iplist)))
 	for _, ip := range iplist {
-		config.IP = ip
 		tmpalive := Alivesum
 		progressLogln(fmt.Sprintf("[*] Spraying B class IP: %s, Estimated to take %d seconds", ip, t))
 		if config.SmartPort == "default" {
 			config.SmartPortList = []string{"80"}
 		}
-		SmartMod(config)
+		SmartMod(ip, config)
 		progressLogln(fmt.Sprintf("[*] Found %d alive assets from CIDR %s", Alivesum-tmpalive, ip))
 		_ = FileHandle.Sync()
 	}

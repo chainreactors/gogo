@@ -185,3 +185,15 @@ func getAutofile(config utils.Config, outtype string) string {
 	basename = fmt.Sprintf(".%s_%s_%s_%s_", target, ports, config.Mod, outtype)
 	return basename
 }
+
+func hasStdin() bool {
+	stat, err := os.Stdin.Stat()
+	if err != nil {
+		return false
+	}
+
+	isPipedFromChrDev := (stat.Mode() & os.ModeCharDevice) == 0
+	isPipedFromFIFO := (stat.Mode() & os.ModeNamedPipe) != 0
+
+	return isPipedFromChrDev || isPipedFromFIFO
+}

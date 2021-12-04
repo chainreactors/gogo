@@ -15,8 +15,8 @@ var InterConfig = map[string][]string{
 	"192.168.0.0/16": {"s", "80", "all"},
 	"100.100.0.0/16": {"s", "icmp", "all"},
 	"200.200.0.0/16": {"s", "icmp", "all"},
-	"169.254.0.0/16": {"s", "icmp", "all"},
-	"168.254.0.0/16": {"s", "icmp", "all"},
+	//"169.254.0.0/16": {"s", "icmp", "all"},
+	//"168.254.0.0/16": {"s", "icmp", "all"},
 }
 
 func Init(config Config) Config {
@@ -177,13 +177,14 @@ func RunTask(config Config) {
 	case "a", "auto":
 		autoScan(config)
 	case "s", "f", "ss", "sc":
-		mask := getMask(config.IP)
-		if mask >= 24 {
-			config.Mod = "default"
-			StraightMod(config)
+		if config.IPlist != nil {
+			for _, ip := range config.IPlist {
+				createSmartScan(ip, config)
+			}
 		} else {
-			SmartMod(config)
+			createSmartScan(config.IP, config)
 		}
+
 	default:
 		StraightMod(config)
 	}
@@ -237,29 +238,26 @@ func countip(mask int) int {
 func autoScan(config Config) {
 	for cidr, st := range InterConfig {
 		progressLogln("[*] Spraying : " + cidr)
-		SmartMod(createSmartTask(config, cidr, st))
+		createAutoTask(config, cidr, st)
 	}
 }
 
-func createSmartTask(config Config, cidr string, c []string) Config {
-	config.IP = cidr
+func createAutoTask(config Config, cidr string, c []string) {
 	config.SmartPortList = portHandler(c[1])
 	config.Mod = c[0]
 	if c[2] != "all" {
 		config.IpProbe = c[2]
 		config.IpProbeList = Str2uintlist(c[2])
 	}
-	return config
+	SmartMod(cidr, config)
 }
 
-func hasStdin() bool {
-	stat, err := os.Stdin.Stat()
-	if err != nil {
-		return false
+func createSmartScan(ip string, config Config) {
+	mask := getMask(config.IP)
+	if mask >= 24 {
+		config.Mod = "default"
+		StraightMod(config)
+	} else {
+		SmartMod(ip, config)
 	}
-
-	isPipedFromChrDev := (stat.Mode() & os.ModeCharDevice) == 0
-	isPipedFromFIFO := (stat.Mode() & os.ModeNamedPipe) != 0
-
-	return isPipedFromChrDev || isPipedFromFIFO
 }
