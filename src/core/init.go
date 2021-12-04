@@ -52,6 +52,14 @@ func Init(config Config) Config {
 
 	// 初始化端口配置
 	config.Portlist = portHandler(config.Ports)
+	// 如果指定端口超过100,则自动启用spray
+	if len(config.Portlist) > 150 && !config.NoSpray {
+		if config.IPlist == nil && getMask(config.IP) == 32 {
+			config.Spray = false
+		} else {
+			config.Spray = true
+		}
+	}
 
 	if config.ListFile != "" {
 		// 如果从文件中读,初始化IP列表配置
@@ -93,6 +101,14 @@ func Init(config Config) Config {
 		config.IpProbeList = []uint{1}
 	}
 
+	// 初始已完成,输出任务基本信息
+	var taskname string
+	if config.Mod != "a" {
+		ipInit(&config)
+	}
+	taskname = config.GetTargetName()
+	// 输出任务的基本信息
+	printTaskInfo(config, taskname)
 	return config
 }
 
@@ -142,35 +158,6 @@ func printTaskInfo(config Config, taskname string) {
 }
 
 func RunTask(config Config) {
-	var taskname string
-	if config.Mod == "a" {
-		// 内网探测默认使用icmp扫描
-		taskname = "preset internet IP addresses"
-	} else {
-		err := ipInit(&config)
-		if err != nil {
-			fmt.Println("[-] " + err.Error())
-			fmt.Println("[-] init target failed!")
-			os.Exit(0)
-		}
-		taskname = config.GetTargetName()
-	}
-	if taskname == "" {
-		fmt.Println("[-] No Task")
-		os.Exit(0)
-	}
-
-	// 如果指定端口超过100,则自动启用spray
-	if len(config.Portlist) > 150 && !config.NoSpray {
-		if config.IPlist == nil && getMask(config.IP) == 32 {
-			config.Spray = false
-		} else {
-			config.Spray = true
-		}
-	}
-	// 输出任务的基本信息
-	printTaskInfo(config, taskname)
-
 	switch config.Mod {
 	case "default":
 		StraightMod(config)
@@ -179,6 +166,7 @@ func RunTask(config Config) {
 	case "s", "f", "ss", "sc":
 		if config.IPlist != nil {
 			for _, ip := range config.IPlist {
+				progressLogln("[*] Spraying : " + ip)
 				createSmartScan(ip, config)
 			}
 		} else {
