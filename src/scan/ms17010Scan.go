@@ -9,10 +9,10 @@ import (
 
 func ms17010Scan(result *utils.Result) {
 	var (
-		negotiateProtocolRequest = Unzip("H4sIAAAAAAAA/2JgYGj9H+zrVMTAwMAgEXyAAQX8/8fA4MDAkMTAFOCs4OcaEu4f5K0QEOTvHuToq2CoZ8DA5OPo5+voB2aGZ+al5JcXK6TlFymE5xdlpxfllxYUKxjrGSYyMPn4GuoZRRgYGMG0GOkZMjD5hSj4+CoY6BkaMQAAAAD//wEAAP//1eOKXIkAAAA=")
-		sessionSetupRequest      = Unzip("H4sIAAAAAAAA/2JgYOj4H+zrVMzAwMAgwX6AAQX8/8fA4MDA+5+hg4FFkAsqyAilrzAwMHhDmOEMmQx5DCkM+QzlDMUMCgxGDAZgCGIZMlgymOJVY8qgx2DAwMAAAAAA//8BAAD//5V7xReMAAAA")
-		treeConnectRequest       = Unzip("H4sIAAAAAAAA/1TFsQkCMQAAwBMEM4IDWAsJRGOlaGUhCLYpsoT7/WSf59P9NYfWf5/nH46HyUafhYd91wQ7maqKbpKz6KKMr/I4Kaq3r5cT7isLAAAA//8BAAD///L5u6lkAAAA")
-		transNamedPipeRequest    = Unzip("H4sIAAAAAAAA/2JgYPD6H+zrpMrAwMAgwajBgAw4+hYzcgTNEACx/////x9ZzguMmRiUGRgY2BliAjwDXGMYAAAAAP//AQAA//+OaounTgAAAA==")
+		negotiateProtocolRequest = Decode("YmBgaP0f7OtUxMDAwCARfIABBfz/x8DgwMCQxMAU4Kzg5xoS7h/krRAQ5O8e5OirYKhnwMDk4+jn6+gHZoZn5qXklxcrpOUXKYTnF2WnF+WXFhQrGOsZJjIw+fga6hlFGBgYwbQY6RkyMPmFKPj4KhjoGRoxAAAAAP//")
+		sessionSetupRequest      = Decode("YmBg6Pgf7OtUzMDAwCDBfoABBfz/x8DgwMD7n6GDgUWQCyrICKWvMDAweEOY4QyZDHkMKQz5DOUMxQwKDEYMBmAIYhkyWDKY4lVjyqDHYMDAwAAAAAD//w==")
+		treeConnectRequest       = Decode("VMWxCQIxAADAEwQzggNYCwlEY6VoZSEItimyhPv9ZJ/n0/01h9Z/n+cfjofJRp+Fh33XBDuZqopukrPoooyv8jgpqrevlxPuKwsAAAD//w==")
+		transNamedPipeRequest    = Decode("YmBg8Pof7OukysDAwCDBqMGADDj6FjNyBM0QALH/////H1nOC4yZGJQZGBjYGWICPANcYxgAAAAA//8=")
 	)
 	// connecting to a host in LAN if reachable should be very quick
 	result.Port = "445"

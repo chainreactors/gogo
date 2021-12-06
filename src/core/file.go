@@ -129,7 +129,7 @@ func fileclose() {
 
 func writefile(res string) {
 	if Compress {
-		res = Zip(res)
+		res = string(Flate([]byte(res)))
 	}
 	_, _ = FileHandle.WriteString(res)
 }

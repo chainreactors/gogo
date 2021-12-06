@@ -3,7 +3,6 @@ package structutils
 import (
 	"bytes"
 	"compress/flate"
-	"compress/gzip"
 	"crypto/md5"
 	"encoding/base64"
 	"encoding/hex"
@@ -174,32 +173,33 @@ func standBase64(braw []byte) []byte {
 //var flatedict = `{"i":"`+`","p":"`+`","u":"`+`","o":"`+`","h":"`+`","t":"`+`","m":"` + `","s":"` + `","l":"` + `","f":` + `null` + `","v":` + `"r":"`
 var flatedict = `,":`
 
-func Zip(input string) string {
+func Flate(input []byte) []byte {
 	var bf = bytes.NewBuffer([]byte{})
 	var flater, _ = flate.NewWriterDict(bf, flate.BestCompression, []byte(flatedict))
 	defer flater.Close()
-	if _, err := flater.Write([]byte(input)); err != nil {
+	if _, err := flater.Write(input); err != nil {
 		println(err.Error())
-		return ""
+		return []byte{}
 	}
 	if err := flater.Flush(); err != nil {
 		println(err.Error())
-		return ""
+		return []byte{}
 	}
-	return bf.String()
+	return bf.Bytes()
 }
 
-func Unzip(input string) []byte {
-	data := Base64Decode(input)
-	rdata := bytes.NewReader(data)
-	r, _ := gzip.NewReader(rdata)
-	s, _ := ioutil.ReadAll(r)
-	return s
+func Decode(input string) []byte {
+	b := Base64Decode(input)
+	return UnFlate(b)
+}
+
+func Encode(input []byte) string {
+	s := Flate(input)
+	return Base64Encode(s)
 }
 
 func UnFlate(input []byte) []byte {
-	//data := Base64Decode(input)
-	rdata := bytes.NewReader(input)
+	rdata := bytes.NewReader([]byte(input))
 	r := flate.NewReaderDict(rdata, []byte(flatedict))
 	s, _ := ioutil.ReadAll(r)
 	return s
