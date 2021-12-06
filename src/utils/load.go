@@ -27,7 +27,7 @@ var TemplateMap map[string][]*Template
 
 func LoadNuclei(filename string) {
 	if filename == "" {
-		TemplateMap = loadTemplates([]byte(LoadConfig("nuclei")))
+		TemplateMap = loadTemplates(LoadConfig("nuclei"))
 	} else {
 		content, err := ioutil.ReadFile(filename)
 		if err != nil {
@@ -91,7 +91,7 @@ func port2PortSlice(port string) []string {
 
 func loadPortConfig() (PortMapper, PortMapper, PortMapper) {
 	var portfingers []PortFinger
-	err := json.Unmarshal([]byte(LoadConfig("port")), &portfingers)
+	err := json.Unmarshal(LoadConfig("port"), &portfingers)
 
 	if err != nil {
 		fmt.Println("[-] port config load FAIL!")
@@ -120,7 +120,7 @@ func loadFingers(t string) *FingerMapper {
 	var tmpfingers []*Finger
 	var fingermap = make(FingerMapper)
 	// 根据权重排序在python脚本中已经实现
-	err := json.Unmarshal([]byte(LoadConfig(t)), &tmpfingers)
+	err := json.Unmarshal(LoadConfig(t), &tmpfingers)
 	if err != nil {
 		fmt.Println("[-] finger load FAIL!")
 		os.Exit(0)
@@ -158,13 +158,13 @@ func loadFingers(t string) *FingerMapper {
 func loadHashFinger() (map[string]string, map[string]string) {
 	var mmh3fingers, md5fingers map[string]string
 	var err error
-	err = json.Unmarshal([]byte(LoadConfig("mmh3")), &mmh3fingers)
+	err = json.Unmarshal(LoadConfig("mmh3"), &mmh3fingers)
 	if err != nil {
 		fmt.Println("[-] mmh3 load FAIL!")
 		os.Exit(0)
 	}
 
-	err = json.Unmarshal([]byte(LoadConfig("md5")), &md5fingers)
+	err = json.Unmarshal(LoadConfig("md5"), &md5fingers)
 	if err != nil {
 		fmt.Println("[-] mmh3 load FAIL!")
 		os.Exit(0)

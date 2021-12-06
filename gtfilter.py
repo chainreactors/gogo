@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
+import zlib
+
 import click
 from functools import partial
 
@@ -240,6 +242,10 @@ def fixjson(content:str):
         return content + "]}"
     return content
 
+def decompress(bs):
+    flatedict = bytes(', ":'.encode())
+    com = zlib.decompressobj(-15,zdict=flatedict)
+    return com.decompress(bs).decode()
 
 @click.command()
 @click.argument("file")
@@ -292,7 +298,11 @@ def main(file, output, exprs, outfile, _or):
     else:
         outfunc = partial(toFile, outfile)
 
-    content = fixjson(open(file, encoding="utf-8").read())
+    content = open(file, "rb").read()
+    if content[:10] != '{"config"':
+        content = decompress(content)
+
+    content = fixjson(content)
     results = json.loads(content)
     if "data" in results:
         results = GetitleResults(results["data"])

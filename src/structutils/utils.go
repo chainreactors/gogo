@@ -188,6 +188,13 @@ func Flate(input []byte) []byte {
 	return bf.Bytes()
 }
 
+func UnFlate(input []byte) []byte {
+	rdata := bytes.NewReader([]byte(input))
+	r := flate.NewReaderDict(rdata, []byte(flatedict))
+	s, _ := ioutil.ReadAll(r)
+	return s
+}
+
 func Decode(input string) []byte {
 	b := Base64Decode(input)
 	return UnFlate(b)
@@ -196,13 +203,6 @@ func Decode(input string) []byte {
 func Encode(input []byte) string {
 	s := Flate(input)
 	return Base64Encode(s)
-}
-
-func UnFlate(input []byte) []byte {
-	rdata := bytes.NewReader([]byte(input))
-	r := flate.NewReaderDict(rdata, []byte(flatedict))
-	s, _ := ioutil.ReadAll(r)
-	return s
 }
 
 func Base64Decode(s string) []byte {
