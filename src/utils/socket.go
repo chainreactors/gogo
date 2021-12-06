@@ -1,33 +1,46 @@
 package utils
 
 import (
-	"bytes"
 	"crypto/tls"
 	"net"
 	"net/http"
 	"time"
 )
 
-var maxRedirects = 3
-var checkRedirect = func(req *http.Request, via []*http.Request) error {
-	//if !followRedirects {
-	//	return http.ErrUseLastResponse
-	//}
-	if req.Header.Get("Referer") != "" {
-		delete(req.Header, "Referer")
+func NewSocket(target string, delay int, t string) Socket {
+	s := Socket{}
+	var conn net.Conn
+	if t == "tcp" {
+		conn, _ = net.DialTimeout("tcp", target, time.Duration(delay)*time.Second)
+	} else if t == "udp" {
+		conn, _ = net.DialTimeout("udp", target, time.Duration(delay)*time.Second)
+	} else {
+		return s
 	}
-	if maxRedirects == 0 {
-		if len(via) > 3 {
-			return http.ErrUseLastResponse
-		}
-		return nil
-	}
+	s.Conn = conn
+	return s
+}
 
-	if len(via) > maxRedirects {
-		return http.ErrUseLastResponse
-	}
+type Socket struct {
+	Conn  net.Conn
+	Count int
+}
 
-	return nil
+func (s *Socket) Request(data []byte, max int) ([]byte, error) {
+	_ = s.Conn.SetDeadline(time.Now().Add(time.Duration(2) * time.Second))
+	var err error
+	_, err = s.Conn.Write(data)
+	if err != nil {
+		return []byte{}, err
+	}
+	s.Count++
+	buf := make([]byte, max)
+	time.Sleep(time.Duration(200) * time.Millisecond)
+	n, err := s.Conn.Read(buf)
+	if err != nil {
+		return []byte{}, err
+	}
+	return buf[:n], err
 }
 
 func TcpSocketConn(target string, delay int) (net.Conn, error) {
@@ -40,7 +53,6 @@ func TcpSocketConn(target string, delay int) (net.Conn, error) {
 }
 
 func UdpSocketConn(target string, delay int) (net.Conn, error) {
-
 	conn, err := net.DialTimeout("udp", target, time.Duration(delay)*time.Second)
 	if err != nil {
 		return nil, err
@@ -59,11 +71,11 @@ func SocketSend(conn net.Conn, data []byte, max int) ([]byte, error) {
 
 	buf := make([]byte, max)
 	time.Sleep(time.Duration(200) * time.Millisecond)
-	_, err = conn.Read(buf)
+	n, err := conn.Read(buf)
 	if err != nil {
 		return []byte{}, err
 	}
-	return bytes.TrimRight(buf, "\x00"), err
+	return buf[:n], err
 }
 
 func HttpConn(delay int) http.Client {
@@ -90,4 +102,26 @@ func HttpConn(delay int) http.Client {
 		CheckRedirect: checkRedirect,
 	}
 	return *conn
+}
+
+var maxRedirects = 3
+var checkRedirect = func(req *http.Request, via []*http.Request) error {
+	//if !followRedirects {
+	//	return http.ErrUseLastResponse
+	//}
+	if req.Header.Get("Referer") != "" {
+		delete(req.Header, "Referer")
+	}
+	if maxRedirects == 0 {
+		if len(via) > 3 {
+			return http.ErrUseLastResponse
+		}
+		return nil
+	}
+
+	if len(via) > maxRedirects {
+		return http.ErrUseLastResponse
+	}
+
+	return nil
 }

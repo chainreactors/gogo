@@ -54,8 +54,6 @@ func nbtScan(result *utils.Result) {
 	target := result.GetTarget()
 	conn, err := utils.UdpSocketConn(target, Delay*2)
 	if err != nil {
-
-		//fmt.Println(err)
 		return
 	}
 	defer conn.Close()
