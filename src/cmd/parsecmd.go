@@ -29,7 +29,7 @@ func parseExploit(exploit bool, exploitConfig string) {
 }
 
 func parseFilename(autofile, hiddenfile bool, config *utils.Config) {
-	if config.Filename != "" {
+	if config.Filename == "" {
 		config.Filename = core.GetFilename(*config, autofile, hiddenfile, core.FileOutput)
 	}
 	if config.IsSmartScan() {

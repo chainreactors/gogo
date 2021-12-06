@@ -67,7 +67,6 @@ func InitFile(config utils.Config) {
 		if FileOutput == "json" && !(Noscan || config.Mod == "sc") {
 			writefile(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("scan")))
 		}
-
 	}
 
 	// -af 参数下的启发式扫描结果handler初始化
