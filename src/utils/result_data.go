@@ -151,7 +151,7 @@ func (rd ResultsData) ToCobaltStrike() string {
 	for ip, imap := range pfs {
 		if imap.isWin() {
 			wininfo := imap.getWindowsInfo()
-			s += fmt.Sprintf("%s||%s||%s", ip, wininfo.hostname, strings.Split(wininfo.version, "_"))
+			s += fmt.Sprintf("%s||%s||%s\n", ip, wininfo.hostname, strings.Split(wininfo.version, "_")[0])
 		}
 	}
 	return s
