@@ -189,7 +189,7 @@ func Flate(input []byte) []byte {
 }
 
 func UnFlate(input []byte) []byte {
-	rdata := bytes.NewReader([]byte(input))
+	rdata := bytes.NewReader(input)
 	r := flate.NewReaderDict(rdata, []byte(flatedict))
 	s, _ := ioutil.ReadAll(r)
 	return s

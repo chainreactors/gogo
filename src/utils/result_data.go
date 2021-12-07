@@ -218,17 +218,24 @@ func loadSmartResult(content []byte) (SmartData, error) {
 	return smartdata, nil
 }
 
-func LoadResultFile(file *os.File) interface{} {
+func LoadResultFile(file *os.File, isbase64 bool) interface{} {
 	var data interface{}
 	content, err := ioutil.ReadAll(file)
 	if err != nil {
 		os.Exit(0)
 	}
-	if !bytes.Equal(content[0:10], []byte("{\"config\"")) {
+	if isbase64 && !checkClearResult(content) {
+		// stdin输入二进制文件支持base64编码之后的. base64 result.txt|gt -F stdin
+		// 如果直接输入解压缩之后的json文件,则跳过这个步骤
+		content = structutils.Base64Decode(string(content))
+	}
+	if !checkClearResult(content) {
+		// base64解码之后,可能还是deflate压缩的数据,还需要解压缩
 		content = structutils.UnFlate(content)
 	}
-	content = bytes.TrimSpace(content)
-	content = autofixjson(content)
+
+	content = bytes.TrimSpace(content) // 去除前后空格
+	content = autofixjson(content)     // 修复未扫完的json文件
 	if bytes.Contains(content, []byte("'\"json_type\":\"smart\"'")) {
 		data, err = loadSmartResult(content)
 	} else {
@@ -239,4 +246,11 @@ func LoadResultFile(file *os.File) interface{} {
 		os.Exit(0)
 	}
 	return data
+}
+
+func checkClearResult(content []byte) bool {
+	if bytes.Equal(content[0:10], []byte("{\"config\"")) {
+		return true
+	}
+	return false
 }

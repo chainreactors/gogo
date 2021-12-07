@@ -41,13 +41,21 @@ func jsonOutput(result *Result) string {
 	return string(jsons)
 }
 
-func FormatOutput(file *os.File, outputfile string, autofile bool) {
+func FormatOutput(filename string, outputfile string, autofile bool) {
 	var outfunc func(s string)
 	var iscolor bool
 	var resultsdata ResultsData
 	var smartdata SmartData
+	var file *os.File
+	var isbase64 bool
+	if filename == "stdin" {
+		file = os.Stdin
+		isbase64 = true
+	} else {
+		file = Open(filename)
+	}
 
-	data := LoadResultFile(file)
+	data := LoadResultFile(file, isbase64)
 	switch data.(type) {
 	case ResultsData:
 		resultsdata = data.(ResultsData)
@@ -88,12 +96,9 @@ func FormatOutput(file *os.File, outputfile string, autofile bool) {
 
 	if Output == "cs" {
 		outfunc(resultsdata.ToCobaltStrike())
-		return
 	} else if Output == "zombie" {
 		outfunc(resultsdata.ToZombie())
-		return
 	} else if Output == "c" || Output == "full" {
-		outfunc(resultsdata.ToConfig())
 		outfunc(resultsdata.ToFormat(iscolor))
 	} else {
 		outfunc(resultsdata.GetValue(Output))

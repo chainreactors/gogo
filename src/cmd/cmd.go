@@ -50,7 +50,7 @@ func CMD(k string) {
 	version2 := flag.Bool("vv", false, "")
 	exploit := flag.Bool("e", false, "")
 	exploitConfig := flag.String("E", "none", "")
-	printType := flag.String("P", "no", "")
+	printType := flag.String("P", "", "")
 	resultfilename := flag.String("F", "", "")
 	autofile := flag.Bool("af", false, "")
 	hiddenfile := flag.Bool("hf", false, "")
@@ -69,14 +69,12 @@ func CMD(k string) {
 	// 输出 config
 	if *printType != "" {
 		printConfigs(*printType)
+		os.Exit(0)
 	}
 
 	// 格式化
 	if *resultfilename != "" {
-		core.FormatOutput(core.Open(*resultfilename), config.Filename, *autofile)
-		os.Exit(0)
-	} else if core.HasStdin() {
-		core.FormatOutput(os.Stdin, config.Filename, *autofile)
+		core.FormatOutput(*resultfilename, config.Filename, *autofile)
 		os.Exit(0)
 	}
 
@@ -133,9 +131,6 @@ func CMD(k string) {
 }
 
 func printConfigs(t string) {
-	if t == "no" {
-		return
-	}
 	if t == "port" {
 		core.Printportconfig()
 	} else if t == "nuclei" {
@@ -145,5 +140,4 @@ func printConfigs(t string) {
 	} else {
 		fmt.Println("choice port|nuclei|inter")
 	}
-	os.Exit(0)
 }
