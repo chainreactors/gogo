@@ -150,7 +150,8 @@ func (rd ResultsData) ToCobaltStrike() string {
 	pfs := rd.groupByIP()
 	for ip, imap := range pfs {
 		if imap.isWin() {
-			s += fmt.Sprintf("%s %s", ip, imap.getWindowsInfo().toString())
+			wininfo := imap.getWindowsInfo()
+			s += fmt.Sprintf("%s||%s||%s", ip, wininfo.hostname, strings.Split(wininfo.version, "_"))
 		}
 	}
 	return s

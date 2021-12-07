@@ -65,6 +65,6 @@ func NTLMInfo(ret []byte) map[string]string {
 	version := ret[offset_version : offset_version+8]
 	ver, _ := ntlmssp.ReadVersionStruct(version)
 	build := fmt.Sprintf("%d.%d.%d", ver.ProductMajorVersion, ver.ProductMinorVersion, ver.ProductBuild)
-	tinfo["Version"] = fmt.Sprintf("Windows %s (%s)", windowsVer[build], build)
+	tinfo["Version"] = fmt.Sprintf("Windows %s_(%s)", windowsVer[build], build)
 	return structutils.ToStringMap(tinfo)
 }
