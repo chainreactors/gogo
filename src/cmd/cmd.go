@@ -25,6 +25,8 @@ func CMD(k string) {
 	flag.StringVar(&config.Ports, "p", "top1", "")
 	flag.StringVar(&config.ListFile, "l", "", "")
 	flag.StringVar(&config.JsonFile, "j", "", "")
+	flag.BoolVar(&config.IsListInput, "L", false, "")
+	flag.BoolVar(&config.IsJsonInput, "J", false, "")
 	flag.IntVar(&config.Threads, "t", 4000, "")
 	flag.StringVar(&config.Mod, "m", "default", "")
 	flag.StringVar(&config.SmartPort, "sp", "default", "")
@@ -71,7 +73,10 @@ func CMD(k string) {
 
 	// 格式化
 	if *resultfilename != "" {
-		core.FormatOutput(*resultfilename, config.Filename, *autofile)
+		core.FormatOutput(core.Open(*resultfilename), config.Filename, *autofile)
+		os.Exit(0)
+	} else if core.HasStdin() {
+		core.FormatOutput(os.Stdin, config.Filename, *autofile)
 		os.Exit(0)
 	}
 

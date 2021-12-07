@@ -38,10 +38,18 @@ func LoadFile(file *os.File) []string {
 	return strings.Split(text, "\n")
 }
 
+func IsExist(filename string) bool {
+	var exist = true
+	if _, err := os.Stat(filename); os.IsNotExist(err) {
+		exist = false
+	}
+	return exist
+}
+
 func InitFileHandle(filename string) *os.File {
 	var err error
 	var filehandle *os.File
-	if CheckFileIsExist(filename) { //如果文件存在
+	if IsExist(filename) { //如果文件存在
 		//FileHandle, err = os.OpenFile(filename, os.O_APPEND|os.O_WRONLY, os.ModeAppend) //打开文件
 		fmt.Println("[-] File already exists")
 		os.Exit(0)
@@ -76,7 +84,7 @@ func InitFile(config utils.Config) {
 	}
 
 	// 初始化进度文件
-	if !CheckFileIsExist(".sock.lock") {
+	if !IsExist(".sock.lock") {
 		tmpfilename = ".sock.lock"
 	} else {
 		tmpfilename = fmt.Sprintf(".%s.unix", ToString(time.Now().Unix()))
@@ -171,7 +179,7 @@ func GetFilename(config utils.Config, autofile, hiddenfile bool, outtype string)
 	} else {
 		return ""
 	}
-	for CheckFileIsExist(basename + ToString(fileint) + ".dat") {
+	for IsExist(basename + ToString(fileint) + ".dat") {
 		fileint++
 	}
 	return basename + ToString(fileint) + ".dat"
@@ -185,7 +193,7 @@ func getAutofile(config utils.Config, outtype string) string {
 	return basename
 }
 
-func hasStdin() bool {
+func HasStdin() bool {
 	stat, err := os.Stdin.Stat()
 	if err != nil {
 		return false
@@ -195,4 +203,13 @@ func hasStdin() bool {
 	isPipedFromFIFO := (stat.Mode() & os.ModeNamedPipe) != 0
 
 	return isPipedFromChrDev || isPipedFromFIFO
+}
+
+func Open(filename string) *os.File {
+	f, err := os.Open(filename)
+	if err != nil {
+		fmt.Println("[-] " + err.Error())
+		os.Exit(0)
+	}
+	return f
 }

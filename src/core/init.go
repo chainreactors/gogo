@@ -20,13 +20,12 @@ var InterConfig = map[string][]string{
 }
 
 func Init(config Config) Config {
-	//println("*********  main 0.9.4 beta by Sangfor  *********")
+	//println("*********  main 1.0.7 beta by Sangfor  *********")
 
 	//if config.Mod != "default" && config.ListFile != "" {
 	//	println("[-] error Smart scan config")
 	//	os.Exit(0)
 	//}
-	config.Stdin = hasStdin()
 
 	// check命令行参数
 	CheckCommand(config)
@@ -47,6 +46,15 @@ func Init(config Config) Config {
 		}
 	}
 
+	var file *os.File
+	if config.ListFile != "" {
+		file = Open(config.ListFile)
+	} else if config.JsonFile != "" {
+		file = Open(config.JsonFile)
+	} else if HasStdin() {
+		file = os.Stdin
+	}
+
 	// 初始化文件操作
 	InitFile(config)
 
@@ -61,17 +69,12 @@ func Init(config Config) Config {
 		}
 	}
 
-	if config.ListFile != "" {
+	if config.ListFile != "" || config.IsListInput {
 		// 如果从文件中读,初始化IP列表配置
-		f, err := os.Open(config.ListFile)
-		if err != nil {
-			fmt.Println("[-] " + err.Error())
-			os.Exit(0)
-		}
-		config.IPlist = LoadFile(f)
-	} else if config.JsonFile != "" {
+		config.IPlist = LoadFile(file)
+	} else if config.JsonFile != "" || config.IsJsonInput {
 		// 如果输入的json不为空,则从json中加载result,并返回结果
-		data := LoadResultFile(config.JsonFile)
+		data := LoadResultFile(file)
 		switch data.(type) {
 		case ResultsData:
 			config.Results = data.(ResultsData).Data
@@ -79,8 +82,6 @@ func Init(config Config) Config {
 			config.IPlist = data.(SmartData).Data
 		}
 		return config
-	} else if config.Stdin {
-		config.IPlist = LoadFile(os.Stdin)
 	}
 
 	// 初始化启发式扫描的端口探针
@@ -127,7 +128,7 @@ func CheckCommand(config Config) {
 		}
 	}
 
-	if config.IP == "" && config.ListFile == "" && config.JsonFile == "" && config.Mod != "a" && !config.Stdin { // 一些导致报错的参数组合
+	if config.IP == "" && config.ListFile == "" && config.JsonFile == "" && config.Mod != "a" && !HasStdin() { // 一些导致报错的参数组合
 		fmt.Println("[-] cannot found target, please set -ip or -l or -j -or -a or stdin")
 		os.Exit(0)
 	}

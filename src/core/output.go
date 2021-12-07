@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"getitle/src/structutils"
 	. "getitle/src/utils"
+	"os"
 	"strings"
 )
 
@@ -40,13 +41,13 @@ func jsonOutput(result *Result) string {
 	return string(jsons)
 }
 
-func FormatOutput(filename string, outputfile string, autofile bool) {
+func FormatOutput(file *os.File, outputfile string, autofile bool) {
 	var outfunc func(s string)
 	var iscolor bool
 	var resultsdata ResultsData
 	var smartdata SmartData
 
-	data := LoadResultFile(filename)
+	data := LoadResultFile(file)
 	switch data.(type) {
 	case ResultsData:
 		resultsdata = data.(ResultsData)

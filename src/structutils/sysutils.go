@@ -17,14 +17,6 @@ func IsWin() bool {
 	return false
 }
 
-func CheckFileIsExist(filename string) bool {
-	var exist = true
-	if _, err := os.Stat(filename); os.IsNotExist(err) {
-		exist = false
-	}
-	return exist
-}
-
 func getcwtime() time.Time {
 	dir, _ := os.Getwd()
 	dirinfo, _ := os.Stat(dir)

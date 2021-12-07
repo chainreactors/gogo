@@ -218,15 +218,14 @@ func loadSmartResult(content []byte) (SmartData, error) {
 	return smartdata, nil
 }
 
-func LoadResultFile(filename string) interface{} {
+func LoadResultFile(file *os.File) interface{} {
 	var data interface{}
-	content, err := ioutil.ReadFile(filename)
-	if !bytes.Equal(content[0:10], []byte("{\"config\"")) {
-		content = structutils.UnFlate(content)
-	}
-
+	content, err := ioutil.ReadAll(file)
 	if err != nil {
 		os.Exit(0)
+	}
+	if !bytes.Equal(content[0:10], []byte("{\"config\"")) {
+		content = structutils.UnFlate(content)
 	}
 	content = bytes.TrimSpace(content)
 	content = autofixjson(content)
