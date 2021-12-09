@@ -47,15 +47,13 @@ func FormatOutput(filename string, outputfile string, autofile bool) {
 	var resultsdata ResultsData
 	var smartdata SmartData
 	var file *os.File
-	var isbase64 bool
 	if filename == "stdin" {
 		file = os.Stdin
-		isbase64 = true
 	} else {
 		file = Open(filename)
 	}
 
-	data := LoadResultFile(file, isbase64)
+	data := LoadResultFile(file)
 	switch data.(type) {
 	case ResultsData:
 		resultsdata = data.(ResultsData)

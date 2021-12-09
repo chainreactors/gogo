@@ -218,19 +218,19 @@ func loadSmartResult(content []byte) (SmartData, error) {
 	return smartdata, nil
 }
 
-func LoadResultFile(file *os.File, isbase64 bool) interface{} {
+func LoadResultFile(file *os.File) interface{} {
 	var data interface{}
 	content, err := ioutil.ReadAll(file)
 	if err != nil {
 		os.Exit(0)
 	}
-	if isbase64 && !checkClearResult(content) {
+
+	if isBase64(content) {
 		// stdin输入二进制文件支持base64编码之后的. base64 result.txt|gt -F stdin
 		// 如果直接输入解压缩之后的json文件,则跳过这个步骤
 		content = structutils.Base64Decode(string(content))
 	}
-	if !checkClearResult(content) {
-		// base64解码之后,可能还是deflate压缩的数据,还需要解压缩
+	if !isClearResult(content) {
 		content = structutils.UnFlate(content)
 	}
 
@@ -248,9 +248,28 @@ func LoadResultFile(file *os.File, isbase64 bool) interface{} {
 	return data
 }
 
-func checkClearResult(content []byte) bool {
-	if bytes.Equal(content[0:10], []byte("{\"config\"")) {
+func isClearResult(content []byte) bool {
+	if bytes.Equal(content[0:9], []byte("{\"config\"")) {
 		return true
+	}
+	return false
+}
+
+func isBase64(content []byte) bool {
+	b64bytes := []byte("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=")
+	for _, i := range content {
+		if !bytes.Contains(b64bytes, []byte{i}) {
+			return false
+		}
+	}
+	return true
+}
+
+func isBin(content []byte) bool {
+	for _, i := range content {
+		if i <= 31 {
+			return true
+		}
 	}
 	return false
 }

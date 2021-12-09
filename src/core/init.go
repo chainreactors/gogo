@@ -47,14 +47,12 @@ func Init(config Config) Config {
 	}
 
 	var file *os.File
-	var isbase64 bool
 	if config.ListFile != "" {
 		file = Open(config.ListFile)
 	} else if config.JsonFile != "" {
 		file = Open(config.JsonFile)
 	} else if HasStdin() {
 		file = os.Stdin
-		isbase64 = true
 	}
 
 	// 初始化文件操作
@@ -76,7 +74,7 @@ func Init(config Config) Config {
 		config.IPlist = LoadFile(file)
 	} else if config.JsonFile != "" || config.IsJsonInput {
 		// 如果输入的json不为空,则从json中加载result,并返回结果
-		data := LoadResultFile(file, isbase64)
+		data := LoadResultFile(file)
 		switch data.(type) {
 		case ResultsData:
 			config.Results = data.(ResultsData).Data
