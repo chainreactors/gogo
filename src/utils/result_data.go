@@ -152,9 +152,14 @@ func (rd ResultsData) ToCobaltStrike() string {
 		if imap.isWin() {
 			wininfo := imap.getWindowsInfo()
 			winver := strings.Split(wininfo.version, "_")
-			ver, build := winver[0], strings.TrimRight(strings.TrimLeft(winver[1], "("), ")")
+
+			ver := winver[0]
+			var build string
+			if len(winver) == 2 && len(winver[1]) > 2 {
+				build = winver[1][1 : len(winver[1])-2]
+			}
 			note := fmt.Sprintf("%s %s", wininfo.netbiosstat, strings.Join(wininfo.networks, ","))
-			s += fmt.Sprintf("%s||%s||%s||%s||%s\n", ip, wininfo.hostname, ver, build, note)
+			s += fmt.Sprintf("%s||%s||%s||%s||%s\n", ip, strings.TrimSpace(wininfo.hostname), ver, build, note)
 		}
 	}
 	return s
