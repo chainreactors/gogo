@@ -240,10 +240,10 @@ func LoadResultFile(file *os.File) interface{} {
 	}
 
 	content = bytes.TrimSpace(content) // 去除前后空格
-	if bytes.Contains(content, []byte("'\"json_type\":\"smart\"'")) {
+	if bytes.Contains(content, []byte("\"json_type\":\"smart\"")) {
 		content = autofixjson(content)
 		data, err = loadSmartResult(content)
-	} else if bytes.Contains(content, []byte("'\"json_type\":\"scan\"'")) {
+	} else if bytes.Contains(content, []byte("\"json_type\":\"scan\"")) {
 		content = autofixjson(content)
 		data, err = LoadResult(content)
 	} else {

@@ -85,14 +85,14 @@ func InitFile(config utils.Config) {
 		FileHandle = InitFileHandle(config.Filename)
 
 		if FileOutput == "json" && !(Noscan || config.Mod == "sc") {
-			writefile(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("scan")))
+			writefile(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("scan")), FileHandle)
 		}
 	}
 
 	// -af 参数下的启发式扫描结果handler初始化
 	if config.SmartFilename != "" {
 		SmartFileHandle = InitFileHandle(config.SmartFilename)
-		writefile(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("smart")))
+		writefile(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("smart")), SmartFileHandle)
 	}
 
 	// 初始化进度文件
@@ -128,7 +128,7 @@ func InitFile(config utils.Config) {
 					// 如果json格式输出,则除了第一次输出,之后都会带上逗号
 					commaflag2 = true
 				}
-				writefile(res)
+				writefile(res, FileHandle)
 			}
 		}()
 	}
@@ -136,21 +136,21 @@ func InitFile(config utils.Config) {
 
 func fileclose() {
 	if FileOutput == "json" && !Noscan {
-		writefile("]}")
+		writefile("]}", FileHandle)
 	}
 
 	if SmartFileHandle != nil {
-		_, _ = SmartFileHandle.WriteString("]}")
+		writefile("]}", SmartFileHandle)
 		_ = SmartFileHandle.Close()
 	}
 	_ = FileHandle.Close()
 }
 
-func writefile(res string) {
+func writefile(res string, filehandler *os.File) {
 	if Compress {
 		res = string(Flate([]byte(res)))
 	}
-	_, _ = FileHandle.WriteString(res)
+	_, _ = filehandler.WriteString(res)
 }
 
 var commaflag bool = false
@@ -161,9 +161,9 @@ func WriteSmartResult(ips []string) {
 		iplists[i] = "\"" + ip + "\""
 	}
 	if commaflag {
-		writefile(",")
+		writefile(",", SmartFileHandle)
 	}
-	writefile(strings.Join(iplists, ","))
+	writefile(strings.Join(iplists, ","), SmartFileHandle)
 	commaflag = true
 	_ = SmartFileHandle.Sync()
 }
