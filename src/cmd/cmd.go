@@ -117,14 +117,17 @@ func CMD(k string) {
 	fmt.Printf("[*] Alive sum: %d, Target sum : %d\n", core.Alivesum, scan.Sum)
 	fmt.Println("[*] Totally run: " + time.Since(starttime).String())
 
-	// 扫描结果文件自动上传
+	var filenamelog string
+	// 输出
 	if config.Filename != "" {
-		s := fmt.Sprintf("[*] Results filename: %s, ", config.Filename)
+		filenamelog = fmt.Sprintf("[*] Results filename: %s, ", config.Filename)
 		if config.SmartFilename != "" {
-			s += "Smartscan result filename: " + config.SmartFilename
+			filenamelog += "Smartscan result filename: " + config.SmartFilename
 		}
-		fmt.Println()
+		fmt.Println(filenamelog)
 	}
+
+	// 扫描结果文件自动上传
 	if connected && !*noup && config.Filename != "" { // 如果出网则自动上传结果到云服务器
 		uploadfiles([]string{config.Filename, config.SmartFilename})
 	}
