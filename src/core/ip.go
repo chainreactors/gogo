@@ -36,8 +36,13 @@ func ip2superip(ip string, mask int) string {
 }
 
 func splitCIDR(cidr string) (string, int) {
+	var mask int
 	tmp := strings.Split(cidr, "/")
-	mask, _ := strconv.Atoi(tmp[1])
+	if len(tmp) == 2 {
+		mask, _ = strconv.Atoi(tmp[1])
+	} else {
+		mask = 32
+	}
 	return tmp[0], mask
 }
 

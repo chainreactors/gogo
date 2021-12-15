@@ -19,6 +19,8 @@ type targetConfig struct {
 
 //直接扫描
 func StraightMod(config Config) {
+	// 输出预估时间
+	progressLogln(fmt.Sprintf("[*] Scan task time is about %d seconds", guessTime(config)))
 	var wgs sync.WaitGroup
 	targetChannel := generator(config)
 
@@ -53,11 +55,14 @@ func defaultScan(tc targetConfig) {
 }
 
 func SmartMod(target string, config Config) {
-	var mask int
+	// 输出预估时间
+	spended := guessSmarttime(target, config)
+	progressLogln(fmt.Sprintf("[*] Spraying B class IP: %s, Estimated to take %d seconds", target, spended))
 
 	// 初始化ip目标
 	progressLogln(fmt.Sprintf("[*] SmartScan %s, Mod: %s", target, config.Mod))
 	// 初始化mask
+	var mask int
 	switch config.Mod {
 	case "ss", "sc":
 		mask = 16
@@ -124,8 +129,6 @@ func SmartMod(target string, config Config) {
 	} else if config.Mod == "s" {
 		config.Mod = "default"
 		config.IPlist = iplist
-		spend := guessTime(config)
-		progressLogln(fmt.Sprintf("[*] Scan all task time is about %d seconds, Total found %d C class CIDRs take about %d ", spend, len(iplist), spend*len(iplist)))
 		StraightMod(config)
 	}
 }
@@ -157,11 +160,13 @@ func smartScan(tc targetConfig, temp *sync.Map, mask int, mod string) {
 
 func declineScan(config Config, iplist []string) {
 	//config.IpProbeList = []uint{1} // ipp 只在ss与sc模式中生效,为了防止时间计算错误,reset ipp 数值
-	t := guessSmarttime(config)
-	progressLogln(fmt.Sprintf("[*] Every Sub smartscan task time is about %d seconds, total found %d B Class CIDRs about %d s", t, len(iplist), t*len(iplist)))
+	if len(iplist) > 0 {
+		spended := guessSmarttime(iplist[0], config)
+		progressLogln(fmt.Sprintf("[*] Every Sub smartscan task time is about %d seconds, total found %d B Class CIDRs about %d s", spended, len(iplist), spended*len(iplist)))
+	}
 	for _, ip := range iplist {
 		tmpalive := Alivesum
-		progressLogln(fmt.Sprintf("[*] Spraying B class IP: %s, Estimated to take %d seconds", ip, t))
+		//progressLogln(fmt.Sprintf("[*] Spraying B class IP: %s, Estimated to take %d seconds", ip, t))
 		if config.SmartPort == "default" {
 			config.SmartPortList = []string{"80"}
 		}

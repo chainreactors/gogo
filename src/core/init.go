@@ -148,12 +148,6 @@ func printTaskInfo(config Config, taskname string) {
 		} else {
 			fmt.Println("[*] ports: " + strings.Join(config.Portlist, ","))
 		}
-		// 输出预估时间
-		if config.Mod == "default" {
-			progressLogln(fmt.Sprintf("[*] Scan task time is about %d seconds", guessTime(config)))
-		} else if config.IsSmart() {
-			progressLogln(fmt.Sprintf("[*] Smart scan task time is about %d seconds", guessSmarttime(config)))
-		}
 	} else {
 		progressLogln(fmt.Sprintf("[*] Start scan task %s ,total target: %d", taskname, len(config.Results)))
 		progressLogln(fmt.Sprintf("[*] Json scan task time is about %d seconds", (len(config.Results)/config.Threads)*4+4))
@@ -197,7 +191,7 @@ func guessTime(config Config) int {
 	return (portcount*ipcount/config.Threads)*4 + 4
 }
 
-func guessSmarttime(config Config) int {
+func guessSmarttime(target string, config Config) int {
 	var spc, ippc int
 	var mask int
 	spc = len(config.SmartPortList)
@@ -206,11 +200,7 @@ func guessSmarttime(config Config) int {
 	} else {
 		ippc = len(config.IpProbeList)
 	}
-	if config.IP != "" {
-		mask = getMask(config.IP)
-	} else {
-		mask = 32
-	}
+	mask = getMask(target)
 
 	var count int
 	if config.Mod == "s" || config.Mod == "sb" {
