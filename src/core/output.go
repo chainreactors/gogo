@@ -46,6 +46,7 @@ func FormatOutput(filename string, outputfile string, autofile bool) {
 	var iscolor bool
 	var resultsdata ResultsData
 	var smartdata SmartData
+	var textdata string
 	var file *os.File
 	if filename == "stdin" {
 		file = os.Stdin
@@ -66,6 +67,8 @@ func FormatOutput(filename string, outputfile string, autofile bool) {
 		if outputfile == "" {
 			outputfile = GetFilename(smartdata.Config, autofile, false, "cidr")
 		}
+	case []byte:
+		textdata = string(data.([]byte))
 	default:
 		return
 	}
@@ -83,23 +86,27 @@ func FormatOutput(filename string, outputfile string, autofile bool) {
 		}
 	}
 
-	if smartdata.Data != nil {
-		outfunc(strings.Join(smartdata.Data, "\n"))
-		return
-	}
-
 	if Output == "c" {
 		iscolor = true
 	}
 
-	if Output == "cs" {
-		outfunc(resultsdata.ToCobaltStrike())
-	} else if Output == "zombie" {
-		outfunc(resultsdata.ToZombie())
-	} else if Output == "c" || Output == "full" {
-		outfunc(resultsdata.ToFormat(iscolor))
-	} else {
-		outfunc(resultsdata.GetValue(Output))
+	if smartdata.Data != nil {
+		outfunc(strings.Join(smartdata.Data, "\n"))
+		return
+	}
+	if resultsdata.Data != nil {
+		if Output == "cs" {
+			outfunc(resultsdata.ToCobaltStrike())
+		} else if Output == "zombie" {
+			outfunc(resultsdata.ToZombie())
+		} else if Output == "c" || Output == "full" {
+			outfunc(resultsdata.ToFormat(iscolor))
+		} else {
+			outfunc(resultsdata.GetValue(Output))
+		}
+	}
+	if textdata != "" {
+		outfunc(textdata)
 	}
 }
 

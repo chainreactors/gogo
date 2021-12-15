@@ -240,11 +240,14 @@ func LoadResultFile(file *os.File) interface{} {
 	}
 
 	content = bytes.TrimSpace(content) // 去除前后空格
-	content = autofixjson(content)     // 修复未扫完的json文件
 	if bytes.Contains(content, []byte("'\"json_type\":\"smart\"'")) {
+		content = autofixjson(content)
 		data, err = loadSmartResult(content)
-	} else {
+	} else if bytes.Contains(content, []byte("'\"json_type\":\"scan\"'")) {
+		content = autofixjson(content)
 		data, err = LoadResult(content)
+	} else {
+		data = content
 	}
 	if err != nil {
 		fmt.Println("[-] json error, " + err.Error())
@@ -268,13 +271,4 @@ func isBase64(content []byte) bool {
 		}
 	}
 	return true
-}
-
-func isBin(content []byte) bool {
-	for _, i := range content {
-		if i <= 31 {
-			return true
-		}
-	}
-	return false
 }

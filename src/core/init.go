@@ -80,6 +80,8 @@ func Init(config Config) Config {
 			config.Results = data.(ResultsData).Data
 		case SmartData:
 			config.IPlist = data.(SmartData).Data
+		default:
+			fmt.Println("[-] not support result, maybe use -l")
 		}
 		return config
 	}
@@ -197,13 +199,19 @@ func guessTime(config Config) int {
 
 func guessSmarttime(config Config) int {
 	var spc, ippc int
+	var mask int
 	spc = len(config.SmartPortList)
 	if config.IsBSmart() {
 		ippc = 1
 	} else {
 		ippc = len(config.IpProbeList)
 	}
-	mask := getMask(config.IP)
+	if config.IP != "" {
+		mask = getMask(config.IP)
+	} else {
+		mask = 32
+	}
+
 	var count int
 	if config.Mod == "s" || config.Mod == "sb" {
 		count = 2 << uint((32-mask)-1)
@@ -242,7 +250,7 @@ func createAutoTask(config Config, cidr string, c []string) {
 }
 
 func createSmartScan(ip string, config Config) {
-	mask := getMask(config.IP)
+	mask := getMask(ip)
 	if mask >= 24 {
 		config.Mod = "default"
 		StraightMod(config)

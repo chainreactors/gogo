@@ -32,7 +32,7 @@ func parseFilename(autofile, hiddenfile bool, config *utils.Config) {
 	if config.Filename == "" {
 		config.Filename = core.GetFilename(*config, autofile, hiddenfile, core.FileOutput)
 	}
-	if config.IsSmartScan() {
+	if config.IsSmartScan() && !core.Noscan {
 		config.SmartFilename = core.GetFilename(*config, autofile, hiddenfile, "cidr")
 	}
 }

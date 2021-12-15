@@ -33,12 +33,24 @@ func LoadFile(file *os.File) []string {
 		fmt.Println(err.Error())
 		os.Exit(0)
 	}
+	if isBin(content) {
+		content = UnFlate(content)
+	}
 	text := string(content)
 	text = strings.TrimSpace(text)
 	return strings.Split(text, "\n")
 }
 
-func IsExist(filename string) bool {
+func isBin(content []byte) bool {
+	for _, i := range content {
+		if i < 10 {
+			return true
+		}
+	}
+	return false
+}
+
+func isExist(filename string) bool {
 	var exist = true
 	if _, err := os.Stat(filename); os.IsNotExist(err) {
 		exist = false
@@ -49,7 +61,7 @@ func IsExist(filename string) bool {
 func InitFileHandle(filename string) *os.File {
 	var err error
 	var filehandle *os.File
-	if IsExist(filename) { //如果文件存在
+	if isExist(filename) { //如果文件存在
 		//FileHandle, err = os.OpenFile(filename, os.O_APPEND|os.O_WRONLY, os.ModeAppend) //打开文件
 		fmt.Println("[-] File already exists")
 		os.Exit(0)
@@ -80,11 +92,11 @@ func InitFile(config utils.Config) {
 	// -af 参数下的启发式扫描结果handler初始化
 	if config.SmartFilename != "" {
 		SmartFileHandle = InitFileHandle(config.SmartFilename)
-		writefile(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("smartr")))
+		writefile(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("smart")))
 	}
 
 	// 初始化进度文件
-	if !IsExist(".sock.lock") {
+	if !isExist(".sock.lock") {
 		tmpfilename = ".sock.lock"
 	} else {
 		tmpfilename = fmt.Sprintf(".%s.unix", ToString(time.Now().Unix()))
@@ -179,7 +191,7 @@ func GetFilename(config utils.Config, autofile, hiddenfile bool, outtype string)
 	} else {
 		return ""
 	}
-	for IsExist(basename + ToString(fileint) + ".dat") {
+	for isExist(basename + ToString(fileint) + ".dat") {
 		fileint++
 	}
 	return basename + ToString(fileint) + ".dat"
