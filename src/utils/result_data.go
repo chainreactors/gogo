@@ -251,7 +251,7 @@ func LoadResultFile(file *os.File) interface{} {
 	}
 	if err != nil {
 		fmt.Println("[-] json error, " + err.Error())
-		os.Exit(0)
+		return content
 	}
 	return data
 }
