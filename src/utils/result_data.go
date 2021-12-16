@@ -235,7 +235,7 @@ func LoadResultFile(file *os.File) interface{} {
 		// 如果直接输入解压缩之后的json文件,则跳过这个步骤
 		content = structutils.Base64Decode(string(content))
 	}
-	if !isClearResult(content) {
+	if IsBin(content) {
 		content = structutils.UnFlate(content)
 	}
 
@@ -271,4 +271,13 @@ func isBase64(content []byte) bool {
 		}
 	}
 	return true
+}
+
+func IsBin(content []byte) bool {
+	for _, i := range content {
+		if i < 10 {
+			return true
+		}
+	}
+	return false
 }

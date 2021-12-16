@@ -33,21 +33,12 @@ func LoadFile(file *os.File) []string {
 		fmt.Println(err.Error())
 		os.Exit(0)
 	}
-	if isBin(content) {
+	if utils.IsBin(content) {
 		content = UnFlate(content)
 	}
 	text := string(content)
 	text = strings.TrimSpace(text)
 	return strings.Split(text, "\n")
-}
-
-func isBin(content []byte) bool {
-	for _, i := range content {
-		if i < 10 {
-			return true
-		}
-	}
-	return false
 }
 
 func isExist(filename string) bool {

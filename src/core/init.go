@@ -58,17 +58,6 @@ func Init(config Config) Config {
 	// 初始化文件操作
 	InitFile(config)
 
-	// 初始化端口配置
-	config.Portlist = portHandler(config.Ports)
-	// 如果指定端口超过100,则自动启用spray
-	if len(config.Portlist) > 150 && !config.NoSpray {
-		if config.IPlist == nil && getMask(config.IP) == 32 {
-			config.Spray = false
-		} else {
-			config.Spray = true
-		}
-	}
-
 	if config.ListFile != "" || config.IsListInput {
 		// 如果从文件中读,初始化IP列表配置
 		config.IPlist = LoadFile(file)
@@ -82,8 +71,22 @@ func Init(config Config) Config {
 			config.IPlist = data.(SmartData).Data
 		default:
 			fmt.Println("[-] not support result, maybe use -l")
+			os.Exit(0)
 		}
 		return config
+	}
+
+	ipInit(&config)
+	// 初始化端口配置
+	config.Portlist = portHandler(config.Ports)
+
+	// 如果指定端口超过100,则自动启用spray
+	if len(config.Portlist) > 150 && !config.NoSpray {
+		if config.IPlist == nil && getMask(config.IP) == 32 {
+			config.Spray = false
+		} else {
+			config.Spray = true
+		}
 	}
 
 	// 初始化启发式扫描的端口探针
@@ -105,11 +108,7 @@ func Init(config Config) Config {
 	}
 
 	// 初始已完成,输出任务基本信息
-	var taskname string
-	if config.Mod != "a" {
-		ipInit(&config)
-	}
-	taskname = config.GetTargetName()
+	taskname := config.GetTargetName()
 	// 输出任务的基本信息
 	printTaskInfo(config, taskname)
 	return config

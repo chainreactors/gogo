@@ -106,6 +106,7 @@ func FormatOutput(filename string, outputfile string, autofile bool) {
 		}
 	}
 	if textdata != "" {
+		fmt.Println("[*] print clear output")
 		outfunc(textdata)
 	}
 }
