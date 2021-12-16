@@ -9,10 +9,11 @@ import (
 
 func ms17010Scan(result *utils.Result) {
 	var (
-		negotiateProtocolRequest = Decode("YmBgaP0f7OtUxMDAwCARfIABBfz/x8DgwMCQxMAU4Kzg5xoS7h/krRAQ5O8e5OirYKhnwMDk4+jn6+gHZoZn5qXklxcrpOUXKYTnF2WnF+WXFhQrGOsZJjIw+fga6hlFGBgYwbQY6RkyMPmFKPj4KhjoGRoxAAAAAP//")
-		sessionSetupRequest      = Decode("YmBg6Pgf7OtUzMDAwCDBfoABBfz/x8DgwMD7n6GDgUWQCyrICKWvMDAweEOY4QyZDHkMKQz5DOUMxQwKDEYMBmAIYhkyWDKY4lVjyqDHYMDAwAAAAAD//w==")
-		treeConnectRequest       = Decode("VMWxCQIxAADAEwQzggNYCwlEY6VoZSEItimyhPv9ZJ/n0/01h9Z/n+cfjofJRp+Fh33XBDuZqopukrPoooyv8jgpqrevlxPuKwsAAAD//w==")
-		transNamedPipeRequest    = Decode("YmBg8Pof7OukysDAwCDBqMGADDj6FjNyBM0QALH/////H1nOC4yZGJQZGBjYGWICPANcYxgAAAAA//8=")
+		negotiateProtocolRequest  = Decode("YmBgaP0f7OtUxMDAwCARfIABBfz/x8DgwMCQxMAU4Kzg5xoS7h/krRAQ5O8e5OirYKhnwMDk4+jn6+gHZoZn5qXklxcrpOUXKYTnF2WnF+WXFhQrGOsZJjIw+fga6hlFGBgYwbQY6RkyMPmFKPj4KhjoGRoxAAAAAP//")
+		sessionSetupRequest       = Decode("YmBg6Pgf7OtUzMDAwCDBfoABBfz/x8DgwMD7n6GDgUWQCyrICKWvMDAweEOY4QyZDHkMKQz5DOUMxQwKDEYMBmAIYhkyWDKY4lVjyqDHYMDAwAAAAAD//w==")
+		treeConnectRequest        = Decode("VMWxCQIxAADAEwQzggNYCwlEY6VoZSEItimyhPv9ZJ/n0/01h9Z/n+cfjofJRp+Fh33XBDuZqopukrPoooyv8jgpqrevlxPuKwsAAAD//w==")
+		transNamedPipeRequest     = Decode("YmBg8Pof7OukysDAwCDBqMGADDj6FjNyBM0QALH/////H1nOC4yZGJQZGBjYGWICPANcYxgAAAAA//8=")
+		trans2SessionSetupRequest = Decode("YmBg8Psf7OtkxMDAwCDBfoABGXD8/8fA4cjAz8PAwMAIFVt2cwkDAwMPgxNIJwMjAx8DL4oeBgAAAAD//w==")
 	)
 	// connecting to a host in LAN if reachable should be very quick
 	result.Port = "445"
@@ -91,13 +92,24 @@ func ms17010Scan(result *utils.Result) {
 		result.Error = err.Error()
 		return
 	}
-
 	if reply[9] == 0x05 && reply[10] == 0x02 && reply[11] == 0x00 && reply[12] == 0xc0 {
 		result.Title = strings.Replace(os, "\x00", "", -1)
 		result.AddVuln(utils.Vuln{Name: "MS17-010"})
+
+		trans2SessionSetupRequest[28] = treeID[0]
+		trans2SessionSetupRequest[29] = treeID[1]
+		trans2SessionSetupRequest[32] = userID[0]
+		trans2SessionSetupRequest[33] = userID[1]
+
+		_, _ = conn.Write(trans2SessionSetupRequest)
+
+		if n, err := conn.Read(reply); err != nil || n < 36 {
+			return
+		}
 		if reply[34] == 0x51 {
 			result.AddVuln(utils.Vuln{Name: "DOUBLEPULSAR"})
 		}
 	}
+
 	return
 }
