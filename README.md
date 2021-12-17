@@ -31,13 +31,33 @@ Usage of ./getitle:
 
 ```
 
+## 使用
+最简使用
+
+`gt -k [key] -ip 192.168.1.1/24 -p top2,top3 `
+
+进阶扫描
+
+`gt -k [key] -ip 192.168.1.1/24 -p top2,win -e -v`
+
+网段发现
+
+B段启发式扫描
+
+`gt -k [key] -ip 10.0.0.0/16 -m s -p top2,win -e -v`
+
+A段启发式扫描
+
+`gt -k [key] -ip 10.0.0.0/8 -m ss -p top2,win -e -v`
+
+内网存活主机启发式探测
+
+`gt -k [key] -ip 10.0.0.0/8 -m ss -p icmp`
 
 
 ## 参数解释
 
 所有用法都需输入-k [密钥]
-
-
 
 ### IP输入
 
