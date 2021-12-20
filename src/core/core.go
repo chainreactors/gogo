@@ -101,6 +101,7 @@ func SmartMod(target string, config Config) {
 	wg.Wait()
 
 	if Noscan {
+		// -no 被设置的时候停止后续扫描
 		return
 	}
 
@@ -112,9 +113,10 @@ func SmartMod(target string, config Config) {
 
 	if iplist == nil {
 		return
+	} else {
+		sort_cidr(iplist)
 	}
 
-	sort_cidr(iplist)
 	if SmartFileHandle != nil {
 		WriteSmartResult(iplist)
 	}

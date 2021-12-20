@@ -56,7 +56,7 @@ func Init(config Config) Config {
 	}
 
 	// 初始化文件操作
-	InitFile(config)
+	initFile(config)
 
 	if config.ListFile != "" || config.IsListInput {
 		// 如果从文件中读,初始化IP列表配置
@@ -76,7 +76,7 @@ func Init(config Config) Config {
 		return config
 	}
 
-	ipInit(&config)
+	initIP(&config)
 	// 初始化端口配置
 	config.Portlist = portHandler(config.Ports)
 

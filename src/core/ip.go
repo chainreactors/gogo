@@ -117,7 +117,7 @@ func isIPv4(ip string) bool {
 	return false
 }
 
-func ipInit(config *Config) {
+func initIP(config *Config) {
 	// 优先处理ip
 	if config.IP != "" {
 		if strings.Contains(config.IP, ",") {

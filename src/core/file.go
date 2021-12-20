@@ -66,7 +66,7 @@ func InitFileHandle(filename string) *os.File {
 	return filehandle
 }
 
-func InitFile(config utils.Config) {
+func initFile(config utils.Config) {
 	// 挂起两个文件操作的goroutine
 
 	// 初始化res文件handler
