@@ -9,15 +9,15 @@ import (
 type Config struct {
 	IP            string   `json:"ip"`
 	IPlist        []string `json:"ips"`
-	Ports         string   `json:"ports"`   // 预设字符串
-	Portlist      []string `json:"-"`       // 处理完的端口列表
-	JsonFile      string   `json:"-"`       // gt的结果json文件,可以再次读入扫描
-	Results       Results  `json:"-"`       // json反序列化后的内网,保存在内存中
-	ListFile      string   `json:"-"`       // 目标ip列表
-	Threads       int      `json:"threads"` // 线程数
-	Mod           string   `json:"mod"`     // 扫描模式
-	SmartPort     string   `json:"-"`       // 启发式扫描预设探针
-	SmartPortList []string `json:"-"`       // 启发式扫描预设探针
+	Ports         string   `json:"ports"`     // 预设字符串
+	Portlist      []string `json:"-"`         // 处理完的端口列表
+	JsonFile      string   `json:"json_file"` // gt的结果json文件,可以再次读入扫描
+	Results       Results  `json:"-"`         // json反序列化后的内网,保存在内存中
+	ListFile      string   `json:"list_file"` // 目标ip列表
+	Threads       int      `json:"threads"`   // 线程数
+	Mod           string   `json:"mod"`       // 扫描模式
+	SmartPort     string   `json:"-"`         // 启发式扫描预设探针
+	SmartPortList []string `json:"-"`         // 启发式扫描预设探针
 	IpProbe       string   `json:"-"`
 	IpProbeList   []uint   `json:"-"`
 	Output        string   `json:"-"`
@@ -81,14 +81,14 @@ func (config Config) GetTarget() string {
 
 func (config Config) GetTargetName() string {
 	var target string
-	if config.IP != "" {
-		target = config.IP
-	} else if config.ListFile != "" {
+	if config.ListFile != "" {
 		target = config.ListFile
 	} else if config.JsonFile != "" {
 		target = config.JsonFile
 	} else if config.Mod == "a" {
 		target = "auto"
+	} else if config.IP != "" {
+		target = config.IP
 	}
 	return target
 }
