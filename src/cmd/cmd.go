@@ -44,6 +44,7 @@ func CMD(k string) {
 	flag.IntVar(&scan.HttpsDelay, "D", 2, "")
 	flag.StringVar(&scan.Payloadstr, "payload", "", "")
 	flag.BoolVar(&core.Noscan, "no", false, "")
+	flag.BoolVar(&core.Quiet, "q", false, "")
 
 	// 一些特殊参数初始化
 	key := flag.String("k", "", "")
