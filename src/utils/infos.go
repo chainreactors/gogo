@@ -15,6 +15,8 @@ func getTitle(content string) string {
 	title, ok := structutils.CompileMatch(CommonCompiled["title"], content)
 	if ok {
 		return title
+	} else if len(content) > 13 {
+		return content[0:13]
 	} else {
 		return content
 	}

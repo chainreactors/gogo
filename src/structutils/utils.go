@@ -50,9 +50,9 @@ func GetBody(resp *http.Response) []byte {
 }
 
 func EncodeTitle(s string) string {
-	if len(s) >= 13 {
-		s = s[:13]
-	}
+	//if len(s) >= 13 {
+	//	s = s[:13]
+	//}
 	s = strings.TrimSpace(s)
 	s = fmt.Sprintf("%q", s)
 	s = strings.Trim(s, "\"")
