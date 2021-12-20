@@ -12,33 +12,28 @@ import (
 	"strings"
 )
 
-var Mmh3fingers, Md5fingers = loadHashFinger()
-var Tcpfingers = loadFingers("tcp")
-var Httpfingers = loadFingers("http")
-var Tagmap, Namemap, Portmap = loadPortConfig()
-var Compiled = make(map[string][]regexp.Regexp)
-var CommonCompiled = map[string]regexp.Regexp{
-	"title":     structutils.CompileRegexp("(?Uis)<title>(.*)</title>"),
-	"server":    structutils.CompileRegexp("(?i)Server: ([\x20-\x7e]+)"),
-	"xpb":       structutils.CompileRegexp("(?i)X-Powered-By: ([\x20-\x7e]+)"),
-	"sessionid": structutils.CompileRegexp("(?i) (.*SESS.*?ID)"),
-}
+var Mmh3fingers, Md5fingers map[string]string
+var Tcpfingers *FingerMapper
+var Httpfingers *FingerMapper
+var Tagmap, Namemap, Portmap PortMapper
+var Compiled map[string][]regexp.Regexp
 var TemplateMap map[string][]*Template
+var CommonCompiled map[string]regexp.Regexp
 
 func LoadNuclei(filename string) {
 	if filename == "" {
-		TemplateMap = loadTemplates(LoadConfig("nuclei"))
+		TemplateMap = LoadTemplates(LoadConfig("nuclei"))
 	} else {
 		content, err := ioutil.ReadFile(filename)
 		if err != nil {
 			fmt.Println(err.Error())
 			os.Exit(0)
 		}
-		TemplateMap = loadTemplates(content)
+		TemplateMap = LoadTemplates(content)
 	}
 }
 
-func loadTemplates(content []byte) map[string][]*Template {
+func LoadTemplates(content []byte) map[string][]*Template {
 	var templates []*Template
 	var templatemap = make(map[string][]*Template)
 	err := json.Unmarshal(content, &templates)
@@ -89,7 +84,7 @@ func port2PortSlice(port string) []string {
 	return tmpports
 }
 
-func loadPortConfig() (PortMapper, PortMapper, PortMapper) {
+func LoadPortConfig() (PortMapper, PortMapper, PortMapper) {
 	var portfingers []PortFinger
 	err := json.Unmarshal(LoadConfig("port"), &portfingers)
 
@@ -116,7 +111,7 @@ func loadPortConfig() (PortMapper, PortMapper, PortMapper) {
 }
 
 //加载指纹到全局变量
-func loadFingers(t string) *FingerMapper {
+func LoadFingers(t string) *FingerMapper {
 	var tmpfingers []*Finger
 	var fingermap = make(FingerMapper)
 	// 根据权重排序在python脚本中已经实现
@@ -155,7 +150,7 @@ func loadFingers(t string) *FingerMapper {
 	return &fingermap
 }
 
-func loadHashFinger() (map[string]string, map[string]string) {
+func LoadHashFinger() (map[string]string, map[string]string) {
 	var mmh3fingers, md5fingers map[string]string
 	var err error
 	err = json.Unmarshal(LoadConfig("mmh3"), &mmh3fingers)

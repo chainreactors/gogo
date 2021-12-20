@@ -9,6 +9,7 @@ import (
 	. "getitle/src/utils"
 	"github.com/panjf2000/ants/v2"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -79,23 +80,24 @@ func CMD(k string) {
 	}
 
 	if *uploadfile != "" {
-		// 自动上传文件
+		// 指定上传文件
 		uploadfiles([]string{*uploadfile})
 		os.Exit(0)
 	}
 
-	// 从文件中加载poc
+	// 加载配置文件中的全局变量
+	configloader(*pocfile)
 
-	LoadNuclei(*pocfile)
-
-	starttime := time.Now()
+	// 加载命令行中的参数配置
 	parseVersion(*version, *version2)
 	parseExploit(*exploit, *exploitConfig)
 	parseFilename(*autofile, *hiddenfile, &config)
+
 	if *com {
 		core.Compress = !core.Compress
 	}
 
+	starttime := time.Now()
 	config = core.Init(config)
 	core.RunTask(config)
 
@@ -143,4 +145,19 @@ func printConfigs(t string) {
 	} else {
 		fmt.Println("choice port|nuclei|inter")
 	}
+}
+
+func configloader(pocfile string) {
+	Compiled = make(map[string][]regexp.Regexp)
+	Mmh3fingers, Md5fingers = LoadHashFinger()
+	Tcpfingers = LoadFingers("tcp")
+	Httpfingers = LoadFingers("http")
+	Tagmap, Namemap, Portmap = LoadPortConfig()
+	CommonCompiled = map[string]regexp.Regexp{
+		"title":     CompileRegexp("(?Uis)<title>(.*)</title>"),
+		"server":    CompileRegexp("(?i)Server: ([\x20-\x7e]+)"),
+		"xpb":       CompileRegexp("(?i)X-Powered-By: ([\x20-\x7e]+)"),
+		"sessionid": CompileRegexp("(?i) (.*SESS.*?ID)"),
+	}
+	LoadNuclei(pocfile)
 }
