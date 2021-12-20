@@ -12,11 +12,11 @@ gox.exe -osarch="linux/amd64 linux/arm64 linux/386 windows/amd64 linux/mips64 wi
 @REM go-strip -f ./bin/%name%_darwin_amd64_v%1 -a -output ./bin/%name%_darwin_amd64_v%1 > nul
 
 @REM upx 加壳
-upxs -1 -k -o ./bin/%name%_windows_386_v%1_upx.exe ./bin/%name%_windows_386_v%1.exe
-upxs -1 -k -o ./bin/%name%_windows_amd64_v%1_upx.exe ./bin/%name%_windows_amd64_v%1.exe
-upxs -1 -k -o ./bin/%name%_linux_386_v%1_upx ./bin/%name%_linux_386_v%1
-upxs -1 -k -o ./bin/%name%_linux_amd64_v%1_upx ./bin/%name%_linux_amd64_v%1
-upxs -1 -k -o ./bin/%name%_linux_arm64_v%1_upx ./bin/%name%_linux_arm64_v%1
+upxs  -k -o ./bin/%name%_windows_386_v%1_upx.exe ./bin/%name%_windows_386_v%1.exe
+upxs  -k -o ./bin/%name%_windows_amd64_v%1_upx.exe ./bin/%name%_windows_amd64_v%1.exe
+upxs  -k -o ./bin/%name%_linux_386_v%1_upx ./bin/%name%_linux_386_v%1
+upxs  -k -o ./bin/%name%_linux_amd64_v%1_upx ./bin/%name%_linux_amd64_v%1
+upxs  -k -o ./bin/%name%_linux_arm64_v%1_upx ./bin/%name%_linux_arm64_v%1
 
 @REM 伪造证书
 limelighter -I ./bin/%name%_windows_amd64_v%1.exe -O ./bin/%name%_windows_amd64_sangfor_v%1.exe -Domain www.sangfor.com
