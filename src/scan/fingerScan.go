@@ -99,14 +99,29 @@ func getFramework(result *utils.Result, fingermap *utils.FingerMapper, matcher f
 		matcher(result, finger)
 	}
 
-	if !result.NoFramework() && VersionLevel == 0 {
+	if result.Protocol == "tcp" && !result.NoFramework() {
+		// 如果是tcp协议,并且以及发现了指纹,则退出.
+		// 如果是http协议,可能存在多个指纹,则进行扫描
 		return
 	}
 
-	// 若默认端口未匹配到结果,则匹配全部
-	for _, finger := range fingermap.GetOthersFingers(result.Port) {
-		matcher(result, finger)
+	for port, fingers := range *fingermap {
+		if port == result.Port {
+			continue
+		}
+		for _, finger := range fingers {
+			matcher(result, finger)
+		}
 	}
+	// 如果找到至少一个指纹并且versionlevel为0
+	//if !result.NoFramework() && VersionLevel == 0 {
+	//	return
+	//}
+
+	// 若默认端口未匹配到结果,则匹配全部
+	//for _, finger := range fingermap.GetOthersFingers(result.Port) {
+	//	matcher(result, finger)
+	//}
 	return
 }
 
