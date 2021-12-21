@@ -46,6 +46,7 @@ func GetBody(resp *http.Response) []byte {
 	if err != nil {
 		return []byte{}
 	}
+	_ = resp.Body.Close()
 	return body
 }
 

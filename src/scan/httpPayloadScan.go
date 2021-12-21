@@ -20,7 +20,6 @@ func payloadScan(result *utils.Result) {
 	result.HttpStat = strconv.Itoa(resp.StatusCode)
 	result.Content = string(structutils.GetBody(resp))
 	result.Httpresp = resp
-	_ = resp.Body.Close()
 
 	return
 }

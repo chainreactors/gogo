@@ -35,11 +35,10 @@ func socketHttp(target string, result *utils.Result) {
 	}
 
 	result.HttpStat = "tcp"
-	result.TcpCon = &conn
 
 	//发送内容
 	senddata := []byte("GET / HTTP/1.1\r\nHost: " + target + "\r\nConnection: Keep-Alive\r\n\r\n")
-	data, err := utils.SocketSend(*result.TcpCon, senddata, 4096)
+	data, err := utils.SocketSend(conn, senddata, 4096)
 	if err != nil {
 		result.Error = err.Error()
 	}
@@ -57,6 +56,7 @@ func socketHttp(target string, result *utils.Result) {
 		//return SystemHttp(target, result)
 		SystemHttp(target, result)
 	}
+	conn.Close()
 	return
 
 }
@@ -98,7 +98,6 @@ func SystemHttp(target string, result *utils.Result) {
 	result.HttpStat = strconv.Itoa(resp.StatusCode)
 	result.Content = string(structutils.GetBody(resp))
 	result.Httpresp = resp
-	_ = resp.Body.Close()
 
 	return
 }

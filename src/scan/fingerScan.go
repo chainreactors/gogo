@@ -28,7 +28,6 @@ func httpFingerMatch(result *utils.Result, finger *utils.Finger) {
 		resp, err := conn.Get(result.GetURL() + finger.SendData_str)
 		if err == nil {
 			content = string(structutils.GetBody(resp))
-			_ = resp.Body.Close()
 		}
 	}
 

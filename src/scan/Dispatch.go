@@ -79,12 +79,7 @@ func Dispatch(result *utils.Result) {
 			ExploitDispatch(result)
 		}
 
-		// 输出前处理
-		if (result.TcpCon) != nil {
-			(*result.TcpCon).Close()
-		}
 		result.Title = structutils.EncodeTitle(result.Title)
-
 		return
 	}
 

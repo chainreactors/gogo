@@ -93,7 +93,7 @@ func HttpConn(delay int) http.Client {
 		MaxIdleConnsPerHost: 1,
 		MaxIdleConns:        4000,
 		IdleConnTimeout:     time.Duration(delay) * time.Second,
-		DisableKeepAlives:   true,
+		DisableKeepAlives:   false,
 	}
 
 	conn := &http.Client{
