@@ -19,8 +19,16 @@ upxs  -k -o ./bin/%name%_linux_amd64_v%1_upx ./bin/%name%_linux_amd64_v%1
 upxs  -k -o ./bin/%name%_linux_arm64_v%1_upx ./bin/%name%_linux_arm64_v%1
 
 @REM 伪造证书
-limelighter -I ./bin/%name%_windows_amd64_v%1.exe -O ./bin/%name%_windows_amd64_sangfor_v%1.exe -Domain www.sangfor.com
+limelighter -I ./bin/%name%_windows_amd64_v%1.exe -O ./bin/%name%_windows_amd64_v%1s.exe -Domain www.sangfor.com
+limelighter -I ./bin/%name%_windows_amd64_v%1_upx.exe -O ./bin/%name%_windows_amd64_upx_v%1s.exe -Domain www.sangfor.com
+limelighter -I ./bin/%name%_windows_386_v%1_upx.exe -O ./bin/%name%_windows_386_v%1_upxs.exe -Domain www.sangfor.com
+limelighter -I ./bin/%name%_windows_386_v%1.exe -O ./bin/%name%_windows_386_v%1s.exe -Domain www.sangfor.com
+
 rm *.sangfor.*
+rm ./bin/%name%_windows_amd64_v%1.exe
+rm ./bin/%name%_windows_amd64_v%1_upx.exe
+rm ./bin/%name%_windows_386_v%1.exe
+rm ./bin/%name%_windows_386_v%1_upx.exe
 
 @REM 打包
 tar cvf release/%name%v%1.tar bin/* README.md gtfilter.py UPDATELOG.md
