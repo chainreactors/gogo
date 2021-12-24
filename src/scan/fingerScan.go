@@ -113,15 +113,6 @@ func getFramework(result *utils.Result, fingermap *utils.FingerMapper, matcher f
 			matcher(result, finger)
 		}
 	}
-	// 如果找到至少一个指纹并且versionlevel为0
-	//if !result.NoFramework() && VersionLevel == 0 {
-	//	return
-	//}
-
-	// 若默认端口未匹配到结果,则匹配全部
-	//for _, finger := range fingermap.GetOthersFingers(result.Port) {
-	//	matcher(result, finger)
-	//}
 	return
 }
 

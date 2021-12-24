@@ -31,4 +31,4 @@ rm ./bin/%name%_windows_386_v%1.exe
 rm ./bin/%name%_windows_386_v%1_upx.exe
 
 @REM 打包
-tar cvf release/%name%v%1.tar bin/* README.md gtfilter.py UPDATELOG.md
+tar -zcvf release/%name%v%1.tar.gz bin/* README.md gtfilter.py UPDATELOG.md
