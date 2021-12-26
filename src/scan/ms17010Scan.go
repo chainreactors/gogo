@@ -2,18 +2,17 @@ package scan
 
 import (
 	"encoding/binary"
-	. "getitle/src/structutils"
 	"getitle/src/utils"
 	"strings"
 )
 
 func ms17010Scan(result *utils.Result) {
 	var (
-		negotiateProtocolRequest  = Decode("YmBgaP0f7OtUxMDAwCARfIABBfz/x8DgwMCQxMAU4Kzg5xoS7h/krRAQ5O8e5OirYKhnwMDk4+jn6+gHZoZn5qXklxcrpOUXKYTnF2WnF+WXFhQrGOsZJjIw+fga6hlFGBgYwbQY6RkyMPmFKPj4KhjoGRoxAAAAAP//")
-		sessionSetupRequest       = Decode("YmBg6Pgf7OtUzMDAwCDBfoABBfz/x8DgwMD7n6GDgUWQCyrICKWvMDAweEOY4QyZDHkMKQz5DOUMxQwKDEYMBmAIYhkyWDKY4lVjyqDHYMDAwAAAAAD//w==")
-		treeConnectRequest        = Decode("VMWxCQIxAADAEwQzggNYCwlEY6VoZSEItimyhPv9ZJ/n0/01h9Z/n+cfjofJRp+Fh33XBDuZqopukrPoooyv8jgpqrevlxPuKwsAAAD//w==")
-		transNamedPipeRequest     = Decode("YmBg8Pof7OukysDAwCDBqMGADDj6FjNyBM0QALH/////H1nOC4yZGJQZGBjYGWICPANcYxgAAAAA//8=")
-		trans2SessionSetupRequest = Decode("YmBg8Psf7OtkxMDAwCDBfoABGXD8/8fA4cjAz8PAwMAIFVt2cwkDAwMPgxNIJwMjAx8DL4oeBgAAAAD//w==")
+		negotiateProtocolRequest  = utils.Decode("YmBgaP0f7OtUxMDAwCARfIABBfz/x8DgwMCQxMAU4Kzg5xoS7h/krRAQ5O8e5OirYKhnwMDk4+jn6+gHZoZn5qXklxcrpOUXKYTnF2WnF+WXFhQrGOsZJjIw+fga6hlFGBgYwbQY6RkyMPmFKPj4KhjoGRoxAAAAAP//")
+		sessionSetupRequest       = utils.Decode("YmBg6Pgf7OtUzMDAwCDBfoABBfz/x8DgwMD7n6GDgUWQCyrICKWvMDAweEOY4QyZDHkMKQz5DOUMxQwKDEYMBmAIYhkyWDKY4lVjyqDHYMDAwAAAAAD//w==")
+		treeConnectRequest        = utils.Decode("VMWxCQIxAADAEwQzggNYCwlEY6VoZSEItimyhPv9ZJ/n0/01h9Z/n+cfjofJRp+Fh33XBDuZqopukrPoooyv8jgpqrevlxPuKwsAAAD//w==")
+		transNamedPipeRequest     = utils.Decode("YmBg8Pof7OukysDAwCDBqMGADDj6FjNyBM0QALH/////H1nOC4yZGJQZGBjYGWICPANcYxgAAAAA//8=")
+		trans2SessionSetupRequest = utils.Decode("YmBg8Psf7OtkxMDAwCDBfoABGXD8/8fA4cjAz8PAwMAIFVt2cwkDAwMPgxNIJwMjAx8DL4oeBgAAAAD//w==")
 	)
 	// connecting to a host in LAN if reachable should be very quick
 	result.Port = "445"

@@ -34,7 +34,7 @@ func LoadFile(file *os.File) []string {
 		os.Exit(0)
 	}
 	if utils.IsBin(content) {
-		content = UnFlate(content)
+		content = utils.UnFlate(content)
 	}
 	text := string(content)
 	text = strings.TrimSpace(text)
@@ -139,7 +139,7 @@ func fileclose() {
 
 func writefile(res string, filehandler *os.File) {
 	if Compress {
-		res = string(Flate([]byte(res)))
+		res = string(utils.Flate([]byte(res)))
 	}
 	_, _ = filehandler.WriteString(res)
 }

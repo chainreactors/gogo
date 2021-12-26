@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"getitle/src/structutils"
 	"net"
 	"net/http"
 	"sort"
@@ -12,7 +11,7 @@ func getTitle(content string) string {
 	if content == "" {
 		return ""
 	}
-	title, ok := structutils.CompileMatch(CommonCompiled["title"], content)
+	title, ok := CompileMatch(CommonCompiled["title"], content)
 	if ok {
 		return title
 	} else if len(content) > 13 {
@@ -25,7 +24,7 @@ func getTitle(content string) string {
 func getMidware(resp *http.Response, content string) string {
 	var server string
 	if resp == nil {
-		server, _ = structutils.CompileMatch(CommonCompiled["server"], content)
+		server, _ = CompileMatch(CommonCompiled["server"], content)
 	} else {
 		server = resp.Header.Get("Server")
 	}
@@ -36,12 +35,12 @@ func getMidware(resp *http.Response, content string) string {
 func getLanguage(resp *http.Response, content string) string {
 	var powered string
 	if resp == nil {
-		powered, ok := structutils.CompileMatch(CommonCompiled["xpb"], content)
+		powered, ok := CompileMatch(CommonCompiled["xpb"], content)
 		if ok {
 			return powered
 		}
 
-		sessionid, ok := structutils.CompileMatch(CommonCompiled["sessionid"], content)
+		sessionid, ok := CompileMatch(CommonCompiled["sessionid"], content)
 		if ok {
 			switch sessionid {
 			case "JSESSIONID":

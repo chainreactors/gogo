@@ -1,7 +1,6 @@
 package scan
 
 import (
-	"getitle/src/structutils"
 	"getitle/src/utils"
 	"net/http"
 	"strconv"
@@ -96,7 +95,7 @@ func SystemHttp(target string, result *utils.Result) {
 	result.Error = ""
 	result.Protocol = resp.Request.URL.Scheme
 	result.HttpStat = strconv.Itoa(resp.StatusCode)
-	result.Content = string(structutils.GetBody(resp))
+	result.Content = string(utils.GetBody(resp))
 	result.Httpresp = resp
 
 	return

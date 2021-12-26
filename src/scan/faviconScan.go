@@ -1,7 +1,6 @@
 package scan
 
 import (
-	"getitle/src/structutils"
 	"getitle/src/utils"
 )
 
@@ -18,17 +17,17 @@ func faviconScan(result *utils.Result) {
 	if resp.StatusCode != 200 {
 		return
 	}
-	content := structutils.GetBody(resp)
+	content := utils.GetBody(resp)
 
 	// MD5 hash匹配
-	md5h := structutils.Md5Hash(content)
+	md5h := utils.Md5Hash(content)
 	if utils.Md5fingers[md5h] != "" {
 		result.AddFramework(utils.Framework{Name: utils.Md5fingers[md5h], Version: "ico"})
 		return
 	}
 
 	// mmh3 hash匹配,指纹来自kscan
-	mmh3h := structutils.Mmh3Hash32(content)
+	mmh3h := utils.Mmh3Hash32(content)
 	if utils.Mmh3fingers[mmh3h] != "" {
 		result.AddFramework(utils.Framework{Name: utils.Mmh3fingers[mmh3h], Version: "ico"})
 		return

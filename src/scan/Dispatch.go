@@ -1,7 +1,6 @@
 package scan
 
 import (
-	"getitle/src/structutils"
 	"getitle/src/utils"
 	"strings"
 )
@@ -79,7 +78,7 @@ func Dispatch(result *utils.Result) {
 			ExploitDispatch(result)
 		}
 
-		result.Title = structutils.EncodeTitle(result.Title)
+		result.Title = utils.EncodeTitle(result.Title)
 		return
 	}
 

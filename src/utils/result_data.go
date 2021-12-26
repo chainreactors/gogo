@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"getitle/src/structutils"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -233,10 +232,10 @@ func LoadResultFile(file *os.File) interface{} {
 	if isBase64(content) {
 		// stdin输入二进制文件支持base64编码之后的. base64 result.txt|gt -F stdin
 		// 如果直接输入解压缩之后的json文件,则跳过这个步骤
-		content = structutils.Base64Decode(string(content))
+		content = Base64Decode(string(content))
 	}
 	if IsBin(content) {
-		content = structutils.UnFlate(content)
+		content = UnFlate(content)
 	}
 
 	content = bytes.TrimSpace(content) // 去除前后空格

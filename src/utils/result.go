@@ -43,7 +43,7 @@ func (result *Result) InfoFilter() {
 	//result.errHandler()
 	result.Title = getTitle(result.Content)
 	if result.Content != "" {
-		result.Hash = structutils.Md5Hash([]byte(result.Content))[:4]
+		result.Hash = Md5Hash([]byte(result.Content))[:4]
 	}
 	if result.IsHttp() {
 		result.Language = getLanguage(result.Httpresp, result.Content)

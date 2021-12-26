@@ -3,7 +3,6 @@ package scan
 import (
 	"crypto/md5"
 	"encoding/hex"
-	"getitle/src/structutils"
 	"getitle/src/utils"
 	"net"
 	"strings"
@@ -27,13 +26,13 @@ func httpFingerMatch(result *utils.Result, finger *utils.Finger) {
 		conn := utils.HttpConn(2)
 		resp, err := conn.Get(result.GetURL() + finger.SendData_str)
 		if err == nil {
-			content = string(structutils.GetBody(resp))
+			content = string(utils.GetBody(resp))
 		}
 	}
 
 	// 漏洞匹配优先
 	for _, reg := range utils.Compiled[finger.Name+"_vuln"] {
-		res, ok := structutils.CompileMatch(reg, content)
+		res, ok := utils.CompileMatch(reg, content)
 		if ok {
 			handlerMatchedResult(result, finger, res, content)
 			result.AddVuln(utils.Vuln{Name: finger.Vuln})
@@ -50,7 +49,7 @@ func httpFingerMatch(result *utils.Result, finger *utils.Finger) {
 
 	// 正则匹配
 	for _, reg := range utils.Compiled[finger.Name] {
-		res, ok := structutils.CompileMatch(reg, content)
+		res, ok := utils.CompileMatch(reg, content)
 		if ok {
 			handlerMatchedResult(result, finger, res, content)
 			return
@@ -62,7 +61,7 @@ func httpFingerMatch(result *utils.Result, finger *utils.Finger) {
 		if resp == nil {
 			headerstr = strings.ToLower(strings.Split(content, "\r\n\r\n")[0])
 		} else {
-			headerstr = strings.ToLower(structutils.GetHeaderstr(resp))
+			headerstr = strings.ToLower(utils.GetHeaderstr(resp))
 		}
 
 		if strings.Contains(headerstr, strings.ToLower(header)) {
@@ -155,7 +154,7 @@ func tcpFingerMatch(result *utils.Result, finger *utils.Finger) {
 
 	// 遍历漏洞正则
 	for _, reg := range utils.Compiled[finger.Name+"_vuln"] {
-		res, ok := structutils.CompileMatch(reg, content)
+		res, ok := utils.CompileMatch(reg, content)
 		if ok {
 			handlerMatchedResult(result, finger, res, content)
 			if finger.Vuln != "" {
@@ -167,7 +166,7 @@ func tcpFingerMatch(result *utils.Result, finger *utils.Finger) {
 
 	//遍历指纹正则
 	for _, reg := range utils.Compiled[finger.Name] {
-		res, ok := structutils.CompileMatch(reg, content)
+		res, ok := utils.CompileMatch(reg, content)
 		if ok {
 			handlerMatchedResult(result, finger, res, content)
 			return

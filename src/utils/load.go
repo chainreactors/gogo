@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	. "getitle/src/nuclei/templates"
-	"getitle/src/structutils"
 	"io/ioutil"
 	"os"
 	"regexp"
@@ -127,11 +126,11 @@ func LoadFingers(t string) *FingerMapper {
 
 		// 普通指纹
 		for _, regstr := range finger.Regexps.Regexp {
-			Compiled[finger.Name] = append(Compiled[finger.Name], structutils.CompileRegexp("(?im)"+regstr))
+			Compiled[finger.Name] = append(Compiled[finger.Name], CompileRegexp("(?im)"+regstr))
 		}
 		// 漏洞指纹,指纹名称后接 "_vuln"
 		for _, regstr := range finger.Regexps.Vuln {
-			Compiled[finger.Name+"_vuln"] = append(Compiled[finger.Name+"_vuln"], structutils.CompileRegexp("(?im)"+regstr))
+			Compiled[finger.Name+"_vuln"] = append(Compiled[finger.Name+"_vuln"], CompileRegexp("(?im)"+regstr))
 		}
 
 		// http默认为80
