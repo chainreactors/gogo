@@ -5,7 +5,9 @@ import (
 	"bytes"
 	"encoding/hex"
 	"errors"
+	"getitle/src/structutils"
 	"getitle/src/utils"
+	"github.com/M09ic/go-ntlmssp"
 )
 
 var NegotiateSMBv1Data1 = []byte{
@@ -115,7 +117,7 @@ func smbScan(result *utils.Result) {
 	}
 
 	result.Protocol = "smb"
-	result.AddNTLMInfo(NTLMInfo(ret), "smb")
+	result.AddNTLMInfo(structutils.ToStringMap(ntlmssp.NTLMInfo(ret)), "smb")
 }
 
 func smb1Scan(target string) ([]byte, error) {
