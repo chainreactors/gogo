@@ -23,7 +23,6 @@ func StraightMod(targets interface{}, config Config) {
 	progressLogln(fmt.Sprintf("[*] Scan task time is about %d seconds", guessTime(config)))
 	var wgs sync.WaitGroup
 	targetChannel := generator(targets, config)
-
 	scanPool, _ := ants.NewPoolWithFunc(config.Threads, func(i interface{}) {
 		defaultScan(i.(targetConfig))
 		wgs.Done()
@@ -33,6 +32,7 @@ func StraightMod(targets interface{}, config Config) {
 	for t := range targetChannel {
 		wgs.Add(1)
 		_ = scanPool.Invoke(t)
+
 	}
 
 	wgs.Wait()
@@ -50,7 +50,6 @@ func defaultScan(tc targetConfig) {
 		if FileHandle != nil {
 			Datach <- output(result, FileOutput)
 		}
-
 	}
 }
 
@@ -124,10 +123,10 @@ func SmartMod(target string, config Config) {
 	// 启发式扫描逐步降级,从喷洒B段到喷洒C段到默认扫描
 	if config.Mod == "ss" {
 		config.Mod = "s"
-		declineScan(config, iplist)
+		declineScan(iplist, config)
 	} else if config.Mod == "sc" {
 		config.Mod = "sb"
-		declineScan(config, iplist)
+		declineScan(iplist, config)
 	} else if config.Mod == "s" {
 		StraightMod(iplist, config)
 	}
@@ -135,10 +134,8 @@ func SmartMod(target string, config Config) {
 
 func alived(ip string, temp *sync.Map, mask int, mod string) {
 	alivecidr := ip2superip(ip, mask)
-
-	_, ok := temp.Load(alivecidr)
-	if !ok {
-		temp.Store(alivecidr, 1)
+	_, ok := temp.LoadOrStore(alivecidr, 1)
+	if ok {
 		cidr := fmt.Sprintf("%s/%d\n", ip, mask)
 		fmt.Print("[*] Found " + cidr)
 		Alivesum++
@@ -158,7 +155,7 @@ func smartScan(tc targetConfig, temp *sync.Map, mask int, mod string) {
 	}
 }
 
-func declineScan(config Config, iplist []string) {
+func declineScan(iplist []string, config Config) {
 	//config.IpProbeList = []uint{1} // ipp 只在ss与sc模式中生效,为了防止时间计算错误,reset ipp 数值
 	if len(iplist) > 0 && len(config.Portlist) >= 3 {
 		spended := guessSmarttime(iplist[0], config)
@@ -172,7 +169,6 @@ func declineScan(config Config, iplist []string) {
 			SmartMod(ip, config)
 		}
 		progressLogln(fmt.Sprintf("[*] Found %d alive assets from CIDR %s", Alivesum-tmpalive, ip))
-
 		_ = FileHandle.Sync()
 	}
 }
