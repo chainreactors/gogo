@@ -2,6 +2,7 @@ package core
 
 import (
 	"bufio"
+	"bytes"
 	"errors"
 	"fmt"
 	. "getitle/src/structutils"
@@ -22,6 +23,7 @@ var LogDataCh = make(chan string, 100)
 
 var fileHandle, smartFileHandle, logFileHandle *os.File // 输出文件 handler
 var fileWriter, smartfileWriter *bufio.Writer
+var comBuf, smartComBuf *bytes.Buffer
 var Output string     // 命令行输出格式
 var FileOutput string // 文件输出格式
 
@@ -67,7 +69,10 @@ func InitFileHandle(filename string) (*os.File, error) {
 
 func initFile(config utils.Config) error {
 	var err error
-
+	if Compress {
+		comBuf = bytes.NewBuffer([]byte{})
+		smartComBuf = bytes.NewBuffer([]byte{})
+	}
 	// 初始化res文件handler
 	if config.Filename != "" {
 		Clean = !Clean
@@ -78,7 +83,7 @@ func initFile(config utils.Config) error {
 		}
 		fileWriter = bufio.NewWriter(fileHandle)
 		if FileOutput == "json" && !(Noscan || config.Mod == "sc") {
-			writefile(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("scan")), fileWriter)
+			writeFile(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("scan")), false)
 		}
 	}
 
@@ -89,7 +94,8 @@ func initFile(config utils.Config) error {
 			return err
 		}
 		smartfileWriter = bufio.NewWriter(smartFileHandle)
-		writefile(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("smart")), smartfileWriter)
+		writeFile(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("smart")), true)
+		smartFileFlush()
 	}
 
 	// 初始化进度文件
@@ -134,7 +140,7 @@ func handler() {
 					// 如果json格式输出,则除了第一次输出,之后都会带上逗号
 					commaflag2 = true
 				}
-				writefile(res, fileWriter)
+				writeFile(res, false)
 			}
 		}()
 	}
@@ -142,23 +148,64 @@ func handler() {
 
 func fileCloser() {
 	if FileOutput == "json" && !Noscan {
-		writefile("]}", fileWriter)
+		writeFile("]}", false)
 	}
+	fileFlush()
+	_ = fileHandle.Close()
 
-	_ = fileWriter.Flush()
 	if smartFileHandle != nil {
-		writefile("]}", smartfileWriter)
-		_ = smartfileWriter.Flush()
+		writeFile("]}", true)
+		smartFileFlush()
 		_ = smartFileHandle.Close()
 	}
-	_ = fileHandle.Close()
+
 }
 
-func writefile(res string, file *bufio.Writer) {
+func write(res string, file *bufio.Writer, buf *bytes.Buffer) {
 	if Compress {
-		res = string(utils.Flate([]byte(res)))
+		//res = string(utils.Flate([]byte(res)))
+		_, err := buf.WriteString(res)
+		if err != nil {
+			println(err.Error())
+			os.Exit(0)
+		}
+		if buf.Len() > 4096 {
+			_, _ = file.Write(utils.Flate(buf.Bytes()))
+			buf.Reset()
+		}
+		return
+	} else {
+		_, _ = file.WriteString(res)
+		return
 	}
-	_, _ = file.WriteString(res)
+}
+
+func writeFile(res string, isSmart bool) {
+	if isSmart {
+		write(res, smartfileWriter, smartComBuf)
+	} else {
+		write(res, fileWriter, comBuf)
+	}
+}
+
+func fileFlush() {
+	if fileWriter != nil {
+		if comBuf != nil {
+			_, _ = fileWriter.Write(utils.Flate(comBuf.Bytes()))
+			comBuf.Reset()
+		}
+		_ = fileWriter.Flush()
+	}
+}
+
+func smartFileFlush() {
+	if smartfileWriter != nil {
+		if smartComBuf != nil {
+			_, _ = smartfileWriter.Write(utils.Flate(smartComBuf.Bytes()))
+			smartComBuf.Reset()
+		}
+		_ = smartfileWriter.Flush()
+	}
 }
 
 var commaflag bool = false
@@ -169,11 +216,11 @@ func writeSmartResult(ips []string) {
 		iplists[i] = "\"" + ip + "\""
 	}
 	if commaflag {
-		writefile(",", smartfileWriter)
+		writeFile(",", true)
 	}
-	writefile(strings.Join(iplists, ","), smartfileWriter)
+	writeFile(strings.Join(iplists, ","), true)
 	commaflag = true
-	_ = fileWriter.Flush()
+	smartFileFlush()
 }
 
 //var winfile = []string{

@@ -170,6 +170,6 @@ func declineScan(iplist []string, config Config) {
 			SmartMod(ip, config)
 		}
 		progressLogln(fmt.Sprintf("[*] Found %d alive assets from CIDR %s", Alivesum-tmpalive, ip))
-		_ = fileWriter.Flush()
+		fileFlush()
 	}
 }

@@ -63,7 +63,7 @@ func goIPsGenerator(iplist []string) chan string {
 				progressLogln(fmt.Sprintf("[*] Processed CIDR: %s, found %d ports", cidr, Alivesum-tmpalive))
 			}
 			// 每个c段同步数据到文件
-			_ = fileWriter.Flush()
+			fileFlush()
 		}
 		close(ch)
 	}()
@@ -192,7 +192,7 @@ func genFromSpray(targets interface{}, portlist []string, tcch *chan targetConfi
 				for ip := range ch {
 					*tcch <- targetConfig{ip, port, nil} // finger适配
 				}
-				_ = fileWriter.Flush()
+				fileFlush()
 			}
 		default:
 			ch = goDefaultIpGenerator(targets.(string))
