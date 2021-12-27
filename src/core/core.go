@@ -18,11 +18,11 @@ type targetConfig struct {
 }
 
 //直接扫描
-func StraightMod(config Config) {
+func StraightMod(targets interface{}, config Config) {
 	// 输出预估时间
 	progressLogln(fmt.Sprintf("[*] Scan task time is about %d seconds", guessTime(config)))
 	var wgs sync.WaitGroup
-	targetChannel := generator(config)
+	targetChannel := generator(targets, config)
 
 	scanPool, _ := ants.NewPoolWithFunc(config.Threads, func(i interface{}) {
 		defaultScan(i.(targetConfig))
@@ -129,9 +129,7 @@ func SmartMod(target string, config Config) {
 		config.Mod = "sb"
 		declineScan(config, iplist)
 	} else if config.Mod == "s" {
-		config.Mod = "default"
-		config.IPlist = iplist
-		StraightMod(config)
+		StraightMod(iplist, config)
 	}
 }
 
@@ -169,11 +167,13 @@ func declineScan(config Config, iplist []string) {
 	for _, ip := range iplist {
 		tmpalive := Alivesum
 		//progressLogln(fmt.Sprintf("[*] Spraying B class IP: %s, Estimated to take %d seconds", ip, t))
-		if config.SmartPort == "default" {
-			config.SmartPortList = []string{"80"}
+		if len(config.Portlist) < 3 {
+			StraightMod(ip, config)
+		} else {
+			SmartMod(ip, config)
+			progressLogln(fmt.Sprintf("[*] Found %d alive assets from CIDR %s", Alivesum-tmpalive, ip))
 		}
-		SmartMod(ip, config)
-		progressLogln(fmt.Sprintf("[*] Found %d alive assets from CIDR %s", Alivesum-tmpalive, ip))
+
 		_ = FileHandle.Sync()
 	}
 }

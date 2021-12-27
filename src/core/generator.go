@@ -53,10 +53,10 @@ func smartIpGenerator(CIDR string, ch chan string, temp *sync.Map) chan string {
 	return ch
 }
 
-func goIPsGenerator(config Config) chan string {
+func goIPsGenerator(iplist []string) chan string {
 	var ch = make(chan string)
 	go func() {
-		for _, cidr := range config.IPlist {
+		for _, cidr := range iplist {
 			tmpalive := Alivesum
 			ch = defaultIpGenerator(cidr, ch)
 			if getMask(cidr) != 32 {
@@ -157,16 +157,17 @@ func tcGenerator(ch chan string, portlist []string) chan targetConfig {
 	return targetChannel
 }
 
-func generator(config Config) chan targetConfig {
+func generator(targets interface{}, config Config) chan targetConfig {
 	targetChannel := make(chan targetConfig)
 	go func() {
-		if config.Results != nil {
-			genFromResults(config, &targetChannel)
-		} else {
+		switch targets.(type) {
+		case Results:
+			genFromResults(targets.(Results), &targetChannel)
+		default:
 			if config.Spray { // 端口喷洒
-				genFromSpray(config, &targetChannel)
+				genFromSpray(targets, config.Portlist, &targetChannel)
 			} else { // 默认模式 批量处理
-				genFromDefault(config, &targetChannel)
+				genFromDefault(targets, config.Portlist, &targetChannel)
 			}
 		}
 		close(targetChannel)
@@ -174,26 +175,27 @@ func generator(config Config) chan targetConfig {
 	return targetChannel
 }
 
-func genFromResults(config Config, tcch *chan targetConfig) {
-	for _, result := range config.Results {
+func genFromResults(results Results, tcch *chan targetConfig) {
+	for _, result := range results {
 		*tcch <- targetConfig{result.Ip, result.Port, result.Frameworks}
 	}
 }
 
-func genFromSpray(config Config, tcch *chan targetConfig) {
+func genFromSpray(targets interface{}, portlist []string, tcch *chan targetConfig) {
 	var ch chan string
-	for _, port := range config.Portlist {
+	for _, port := range portlist {
 		tmpalive := Alivesum
-		if config.IPlist != nil {
-			for _, cidr := range config.IPlist {
+		switch targets.(type) {
+		case []string:
+			for _, cidr := range targets.([]string) {
 				ch = goDefaultIpGenerator(cidr)
 				for ip := range ch {
 					*tcch <- targetConfig{ip, port, nil} // finger适配
 				}
 				_ = FileHandle.Sync()
 			}
-		} else {
-			ch = goDefaultIpGenerator(config.IP)
+		default:
+			ch = goDefaultIpGenerator(targets.(string))
 			for ip := range ch {
 				*tcch <- targetConfig{ip, port, nil}
 			}
@@ -202,15 +204,16 @@ func genFromSpray(config Config, tcch *chan targetConfig) {
 	}
 }
 
-func genFromDefault(config Config, tcch *chan targetConfig) {
+func genFromDefault(targets interface{}, portlist []string, tcch *chan targetConfig) {
 	var ch chan string
-	if config.IPlist != nil {
-		ch = goIPsGenerator(config)
-	} else {
-		ch = goDefaultIpGenerator(config.IP)
+	switch targets.(type) {
+	case []string:
+		ch = goIPsGenerator(targets.([]string))
+	default:
+		ch = goDefaultIpGenerator(targets.(string))
 	}
 	for ip := range ch {
-		for _, port := range config.Portlist {
+		for _, port := range portlist {
 			*tcch <- targetConfig{ip, port, nil}
 		}
 	}

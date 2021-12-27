@@ -1,6 +1,7 @@
 package core
 
 import (
+	"errors"
 	"fmt"
 	"getitle/src/scan"
 	. "getitle/src/structutils"
@@ -28,8 +29,11 @@ func Init(config Config) Config {
 	//}
 
 	// check命令行参数
-	CheckCommand(config)
-
+	err := CheckCommand(config)
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(0)
+	}
 	// 初始化
 	config.Exploit = scan.Exploit
 	config.VerisonLevel = scan.VersionLevel
@@ -122,12 +126,13 @@ func Init(config Config) Config {
 	return config
 }
 
-func CheckCommand(config Config) {
+func CheckCommand(config Config) error {
 	// 一些命令行参数错误处理,如果check没过直接退出程序或输出警告
 	//if config.Mod == "ss" && config.ListFile != "" {
 	//	fmt.Println("[-] error Smart scan can not use File input")
 	//	os.Exit(0)
 	//}
+	var err error
 	if config.JsonFile != "" {
 		if config.Ports != "top1" {
 			fmt.Println("[warn] json input can not config ports")
@@ -138,9 +143,14 @@ func CheckCommand(config Config) {
 	}
 
 	if config.IP == "" && config.ListFile == "" && config.JsonFile == "" && config.Mod != "a" && !HasStdin() { // 一些导致报错的参数组合
-		fmt.Println("[-] cannot found target, please set -ip or -l or -j -or -a or stdin")
-		os.Exit(0)
+		err = errors.New("[-] cannot found target, please set -ip or -l or -j -or -a or stdin")
 	}
+
+	if config.JsonFile != "" && config.ListFile != "" {
+		err = errors.New("[-] cannot set -j and -l flags at same time")
+	}
+
+	return err
 }
 
 func printTaskInfo(config Config, taskname string) {
@@ -164,7 +174,7 @@ func printTaskInfo(config Config, taskname string) {
 func RunTask(config Config) {
 	switch config.Mod {
 	case "default":
-		StraightMod(config)
+		createStraightScan(config)
 	case "a", "auto":
 		autoScan(config)
 	case "s", "f", "ss", "sc":
@@ -178,7 +188,7 @@ func RunTask(config Config) {
 		}
 
 	default:
-		StraightMod(config)
+		createStraightScan(config)
 	}
 }
 
@@ -250,8 +260,18 @@ func createSmartScan(ip string, config Config) {
 	mask := getMask(ip)
 	if mask >= 24 {
 		config.Mod = "default"
-		StraightMod(config)
+		StraightMod(ip, config)
 	} else {
 		SmartMod(ip, config)
+	}
+}
+
+func createStraightScan(config Config) {
+	if config.Results != nil {
+		StraightMod(config.Results, config)
+	} else if config.IPlist != nil {
+		StraightMod(config.IPlist, config)
+	} else if config.IP != "" {
+		StraightMod(config.IP, config)
 	}
 }
