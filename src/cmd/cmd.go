@@ -103,8 +103,8 @@ func CMD(k string) {
 	core.RunTask(config)
 
 	//关闭文件写入管道
-	close(core.Datach)
-	close(core.LogDetach)
+	close(core.DataCh)
+	close(core.LogDataCh)
 
 	time.Sleep(500 * time.Microsecond)
 

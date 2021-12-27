@@ -73,7 +73,11 @@ func FormatOutput(filename string, outputfile string, autofile bool) {
 	}
 
 	if outputfile != "" {
-		fileHandle := InitFileHandle(outputfile)
+		fileHandle, err := InitFileHandle(outputfile)
+		if err != nil {
+			fmt.Println("[-] " + err.Error())
+			os.Exit(0)
+		}
 		fmt.Println("[*] Output filename: " + outputfile)
 		defer fileHandle.Close()
 		outfunc = func(s string) {
@@ -120,8 +124,8 @@ func progressLogln(s string) {
 		return
 	}
 
-	if LogFileHandle != nil {
-		LogDetach <- s
+	if logFileHandle != nil {
+		LogDataCh <- s
 	}
 }
 

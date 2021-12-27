@@ -31,7 +31,7 @@ func Init(config Config) Config {
 	// check命令行参数
 	err := CheckCommand(config)
 	if err != nil {
-		fmt.Println(err.Error())
+		fmt.Println("[-]" + err.Error())
 		os.Exit(0)
 	}
 	// 初始化
@@ -68,7 +68,11 @@ func Init(config Config) Config {
 	}
 
 	// 初始化文件操作
-	initFile(config)
+	err = initFile(config)
+	if err != nil {
+		fmt.Println("[-]" + err.Error())
+		os.Exit(0)
+	}
 
 	if config.ListFile != "" || config.IsListInput {
 		// 如果从文件中读,初始化IP列表配置
@@ -143,11 +147,11 @@ func CheckCommand(config Config) error {
 	}
 
 	if config.IP == "" && config.ListFile == "" && config.JsonFile == "" && config.Mod != "a" && !HasStdin() { // 一些导致报错的参数组合
-		err = errors.New("[-] cannot found target, please set -ip or -l or -j -or -a or stdin")
+		err = errors.New("cannot found target, please set -ip or -l or -j -or -a or stdin")
 	}
 
 	if config.JsonFile != "" && config.ListFile != "" {
-		err = errors.New("[-] cannot set -j and -l flags at same time")
+		err = errors.New("cannot set -j and -l flags at same time")
 	}
 
 	return err

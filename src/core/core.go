@@ -47,8 +47,8 @@ func defaultScan(tc targetConfig) {
 		if !Clean {
 			fmt.Print(output(result, Output))
 		}
-		if FileHandle != nil {
-			Datach <- output(result, FileOutput)
+		if fileHandle != nil {
+			DataCh <- output(result, FileOutput)
 		}
 	}
 }
@@ -116,8 +116,8 @@ func SmartMod(target string, config Config) {
 		sort_cidr(iplist)
 	}
 
-	if SmartFileHandle != nil {
-		WriteSmartResult(iplist)
+	if smartFileHandle != nil {
+		writeSmartResult(iplist)
 	}
 
 	// 启发式扫描逐步降级,从喷洒B段到喷洒C段到默认扫描
@@ -139,9 +139,10 @@ func alived(ip string, temp *sync.Map, mask int, mod string) {
 		cidr := fmt.Sprintf("%s/%d\n", ip, mask)
 		fmt.Print("[*] Found " + cidr)
 		Alivesum++
-		if FileHandle != nil && mod != "sc" && (Noscan || mod == "sb") {
-			// 模式为sc时,b段将不会输出到文件
-			Datach <- cidr
+		if fileHandle != nil && mod != "sc" && (Noscan || mod == "sb") {
+			// 只有-no 或 -m sc下,才会将网段信息输出到文件.
+			// 模式为sc时,b段将不会输出到文件,只输出c段
+			DataCh <- cidr
 		}
 	}
 }
@@ -169,6 +170,6 @@ func declineScan(iplist []string, config Config) {
 			SmartMod(ip, config)
 		}
 		progressLogln(fmt.Sprintf("[*] Found %d alive assets from CIDR %s", Alivesum-tmpalive, ip))
-		_ = FileHandle.Sync()
+		_ = fileWriter.Flush()
 	}
 }

@@ -1,6 +1,8 @@
 package core
 
 import (
+	"bufio"
+	"errors"
 	"fmt"
 	. "getitle/src/structutils"
 	"getitle/src/utils"
@@ -15,15 +17,15 @@ var Noscan = false
 var Compress = true
 
 //文件输出
-var Datach = make(chan string, 100)
-var FileHandle, SmartFileHandle *os.File // 输出文件 handle
+var DataCh = make(chan string, 100)
+var LogDataCh = make(chan string, 100)
 
+var fileHandle, smartFileHandle, logFileHandle *os.File // 输出文件 handler
+var fileWriter, smartfileWriter *bufio.Writer
 var Output string     // 命令行输出格式
 var FileOutput string // 文件输出格式
 
 //进度tmp文件
-var LogDetach = make(chan string, 100)
-var LogFileHandle *os.File
 var tmpfilename string
 
 func LoadFile(file *os.File) []string {
@@ -49,41 +51,45 @@ func isExist(filename string) bool {
 	return exist
 }
 
-func InitFileHandle(filename string) *os.File {
+func InitFileHandle(filename string) (*os.File, error) {
 	var err error
 	var filehandle *os.File
 	if isExist(filename) { //如果文件存在
-		//FileHandle, err = os.OpenFile(filename, os.O_APPEND|os.O_WRONLY, os.ModeAppend) //打开文件
-		fmt.Println("[-] File already exists")
-		os.Exit(0)
+		return nil, errors.New("File already exists")
 	} else {
 		filehandle, err = os.Create(filename) //创建文件
 		if err != nil {
-			fmt.Println("[-] create file error," + err.Error())
-			os.Exit(0)
+			return nil, err
 		}
 	}
-	return filehandle
+	return filehandle, err
 }
 
-func initFile(config utils.Config) {
-	// 挂起两个文件操作的goroutine
+func initFile(config utils.Config) error {
+	var err error
 
 	// 初始化res文件handler
 	if config.Filename != "" {
 		Clean = !Clean
 		// 创建output的filehandle
-		FileHandle = InitFileHandle(config.Filename)
-
+		fileHandle, err = InitFileHandle(config.Filename)
+		if err != nil {
+			return err
+		}
+		fileWriter = bufio.NewWriter(fileHandle)
 		if FileOutput == "json" && !(Noscan || config.Mod == "sc") {
-			writefile(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("scan")), FileHandle)
+			writefile(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("scan")), fileWriter)
 		}
 	}
 
 	// -af 参数下的启发式扫描结果handler初始化
 	if config.SmartFilename != "" {
-		SmartFileHandle = InitFileHandle(config.SmartFilename)
-		writefile(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("smart")), SmartFileHandle)
+		smartFileHandle, err = InitFileHandle(config.SmartFilename)
+		if err != nil {
+			return err
+		}
+		smartfileWriter = bufio.NewWriter(smartFileHandle)
+		writefile(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("smart")), smartfileWriter)
 	}
 
 	// 初始化进度文件
@@ -93,70 +99,81 @@ func initFile(config utils.Config) {
 		tmpfilename = fmt.Sprintf(".%s.unix", ToString(time.Now().Unix()))
 	}
 	_ = os.Remove(".sock.lock")
-	LogFileHandle = InitFileHandle(tmpfilename)
 
+	logFileHandle, err = InitFileHandle(tmpfilename)
+	if err != nil {
+		return err
+	}
+
+	handler()
+	return nil
+}
+
+func handler() {
 	//挂起文件相关协程
 
 	// 进度文件
 	go func() {
-		for res := range LogDetach {
-			_, _ = LogFileHandle.WriteString(res)
-			_ = LogFileHandle.Sync()
+		for res := range LogDataCh {
+			_, _ = logFileHandle.WriteString(res)
+			_ = logFileHandle.Sync()
 		}
-		_ = LogFileHandle.Close()
+		_ = logFileHandle.Close()
 		_ = os.Remove(tmpfilename)
 	}()
 
 	// res文件
-	if FileHandle != nil {
+	if fileHandle != nil {
 		go func() {
-			defer fileclose()
+			defer fileCloser()
 			var commaflag2 bool
-			for res := range Datach {
+			for res := range DataCh {
 				if commaflag2 {
 					res = "," + res
 				} else if FileOutput == "json" && !Noscan {
 					// 如果json格式输出,则除了第一次输出,之后都会带上逗号
 					commaflag2 = true
 				}
-				writefile(res, FileHandle)
+				writefile(res, fileWriter)
 			}
 		}()
 	}
 }
 
-func fileclose() {
+func fileCloser() {
 	if FileOutput == "json" && !Noscan {
-		writefile("]}", FileHandle)
+		writefile("]}", fileWriter)
 	}
 
-	if SmartFileHandle != nil {
-		writefile("]}", SmartFileHandle)
-		_ = SmartFileHandle.Close()
+	_ = fileWriter.Flush()
+	if smartFileHandle != nil {
+		writefile("]}", smartfileWriter)
+		_ = smartfileWriter.Flush()
+		_ = smartFileHandle.Close()
 	}
-	_ = FileHandle.Close()
+	_ = fileHandle.Close()
 }
 
-func writefile(res string, filehandler *os.File) {
+func writefile(res string, file *bufio.Writer) {
 	if Compress {
 		res = string(utils.Flate([]byte(res)))
 	}
-	_, _ = filehandler.WriteString(res)
+	_, _ = file.WriteString(res)
 }
 
 var commaflag bool = false
 
-func WriteSmartResult(ips []string) {
+func writeSmartResult(ips []string) {
 	iplists := make([]string, len(ips))
 	for i, ip := range ips {
 		iplists[i] = "\"" + ip + "\""
 	}
 	if commaflag {
-		writefile(",", SmartFileHandle)
+		writefile(",", smartfileWriter)
 	}
-	writefile(strings.Join(iplists, ","), SmartFileHandle)
+	writefile(strings.Join(iplists, ","), smartfileWriter)
 	commaflag = true
-	_ = SmartFileHandle.Sync()
+	_ = fileWriter.Flush()
 }
 
 //var winfile = []string{
