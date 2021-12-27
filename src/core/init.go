@@ -34,13 +34,21 @@ func Init(config Config) Config {
 	config.Exploit = scan.Exploit
 	config.VerisonLevel = scan.VersionLevel
 
-	//windows系统默认协程数为2000
 	if config.Threads == 4000 { // if 默认线程
 		if IsWin() {
+			//windows系统默认协程数为1000
 			config.Threads = 1000
-		} else if config.JsonFile != "" {
-			config.Threads = 1000
+		} else {
+			// linux系统判断fd限制, 如果-t 大于fd限制,则将-t 设置到fd-100
+			if fdlimit := GetFdLimit(); config.Threads > fdlimit {
+				fmt.Printf("[Warn] System fd limit: %d , Please exec 'ulimit -n 65535'\n", fdlimit)
+				fmt.Printf("[Warn] System fd limit: %d , Please exec 'ulimit -n 65535'\n", fdlimit)
+				fmt.Printf("[Warn] System fd limit: %d , Please exec 'ulimit -n 65535'\n", fdlimit)
+				fmt.Printf("[Warn] Now set threads to %d\n", fdlimit-100)
+				config.Threads = fdlimit - 100
+			}
 		}
+
 		if config.JsonFile != "" {
 			config.Threads = 50
 		}

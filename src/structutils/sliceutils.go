@@ -1,7 +1,6 @@
 package structutils
 
 import (
-	"strconv"
 	"strings"
 )
 
@@ -31,8 +30,7 @@ func Str2uintlist(s string) []uint {
 	var ipps []uint
 	ss := strings.Split(s, ",")
 	for _, ipp := range ss {
-		intipp, _ := strconv.Atoi(ipp)
-		ipps = append(ipps, uint(intipp))
+		ipps = append(ipps, uint(ToInt(ipp)))
 	}
 	return ipps
 }

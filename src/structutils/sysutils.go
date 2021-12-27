@@ -3,7 +3,9 @@ package structutils
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"runtime"
+	"strings"
 	"time"
 )
 
@@ -32,3 +34,32 @@ func Chtime(filename string) bool {
 	}
 	return true
 }
+
+func IsRoot() bool {
+	if os.Getuid() == 0 {
+		return true
+	}
+	return false
+}
+
+func GetFdLimit() int {
+	cmd := exec.Command("sh", "-c", "ulimit -n")
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		println(err.Error())
+		return -1
+	}
+	s := strings.TrimSpace(string(out))
+	return ToInt(s)
+}
+
+//func SetFdLimit(i int)bool{
+//	//cmd := exec.Command("sh", "-c","ulimit -n " + ToString(i))
+//	cmd := exec.Command("ulimit","-n", ToString(i))
+//	_,err := cmd.CombinedOutput()
+//	if err != nil{
+//		println(err.Error())
+//		return false
+//	}
+//	return true
+//}
