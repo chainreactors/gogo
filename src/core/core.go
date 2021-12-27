@@ -160,19 +160,18 @@ func smartScan(tc targetConfig, temp *sync.Map, mask int, mod string) {
 
 func declineScan(config Config, iplist []string) {
 	//config.IpProbeList = []uint{1} // ipp 只在ss与sc模式中生效,为了防止时间计算错误,reset ipp 数值
-	if len(iplist) > 0 {
+	if len(iplist) > 0 && len(config.Portlist) >= 3 {
 		spended := guessSmarttime(iplist[0], config)
 		progressLogln(fmt.Sprintf("[*] Every Sub smartscan task time is about %d seconds, total found %d B Class CIDRs about %d s", spended, len(iplist), spended*len(iplist)))
 	}
 	for _, ip := range iplist {
 		tmpalive := Alivesum
-		//progressLogln(fmt.Sprintf("[*] Spraying B class IP: %s, Estimated to take %d seconds", ip, t))
 		if len(config.Portlist) < 3 {
 			StraightMod(ip, config)
 		} else {
 			SmartMod(ip, config)
-			progressLogln(fmt.Sprintf("[*] Found %d alive assets from CIDR %s", Alivesum-tmpalive, ip))
 		}
+		progressLogln(fmt.Sprintf("[*] Found %d alive assets from CIDR %s", Alivesum-tmpalive, ip))
 
 		_ = FileHandle.Sync()
 	}

@@ -114,7 +114,7 @@ var Quiet bool
 
 func progressLogln(s string) {
 	s = s + " , " + GetCurtime() + "\n"
-	if Quiet {
+	if !Quiet {
 		// 如果指定了-q参数,则不在命令行输出进度
 		fmt.Print(s)
 		return
