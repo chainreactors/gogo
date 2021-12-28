@@ -137,7 +137,7 @@ func alived(ip string, temp *sync.Map, mask int, mod string) {
 	_, ok := temp.LoadOrStore(alivecidr, 1)
 	if ok {
 		cidr := fmt.Sprintf("%s/%d\n", ip, mask)
-		fmt.Print("[*] Found " + cidr)
+		ConsoleLog("[*] Found " + cidr)
 		Alivesum++
 		if fileHandle != nil && mod != "sc" && (Noscan || mod == "sb") {
 			// 只有-no 或 -m sc下,才会将网段信息输出到文件.

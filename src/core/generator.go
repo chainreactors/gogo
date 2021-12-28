@@ -101,11 +101,11 @@ func aIpGenerator(CIDR string, ipps []uint, ch chan string, temp *sync.Map) chan
 }
 
 func firstInterGenerator(ch chan string) chan string {
-	fmt.Println("[*] Spraying : 10.0.0.0/8")
+	progressLogln("[*] Spraying : 10.0.0.0/8")
 	ch = firstIpGenerator("10.0.0.0/8", ch)
-	fmt.Println("[*] Spraying : 172.16.0.0/12")
+	progressLogln("[*] Spraying : 172.16.0.0/12")
 	ch = firstIpGenerator("172.16.0.0/12", ch)
-	fmt.Println("[*] Spraying : 192.168.0.0/16")
+	progressLogln("[*] Spraying : 192.168.0.0/16")
 	ch = firstIpGenerator("192.168.0.0/16", ch)
 	return ch
 }

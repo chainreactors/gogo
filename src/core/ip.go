@@ -76,12 +76,12 @@ func getIp(target string) string {
 	}
 	iprecords, err := net.LookupIP(target)
 	if err != nil {
-		fmt.Println("[-] Unable to resolve domain name:" + target + ". JUMPED!")
+		ConsoleLog("[-] Unable to resolve domain name:" + target + ". JUMPED!")
 		return ""
 	}
 	for _, ip := range iprecords {
 		if ip.To4() != nil {
-			fmt.Println("[*] parse domain SUCCESS, map " + target + " to " + ip.String())
+			ConsoleLog("[*] parse domain SUCCESS, map " + target + " to " + ip.String())
 			return ip.String()
 		}
 	}

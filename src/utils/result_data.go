@@ -136,14 +136,6 @@ func (rd ResultsData) ToFormat(isColor bool) string {
 	return s
 }
 
-func (rd ResultsData) GetValue(key string) string {
-	values := make([]string, len(rd.Data))
-	for i, result := range rd.Data {
-		values[i] = result.Get(key)
-	}
-	return strings.Join(values, "\n")
-}
-
 func (rd ResultsData) ToCobaltStrike() string {
 	var s string
 	pfs := rd.groupByIP()

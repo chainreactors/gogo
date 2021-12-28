@@ -117,8 +117,8 @@ func CMD(k string) {
 	time.Sleep(time.Microsecond * 500)
 
 	// 任务统计
-	fmt.Printf("[*] Alive sum: %d, Target sum : %d\n", core.Alivesum, scan.Sum)
-	fmt.Println("[*] Totally run: " + time.Since(starttime).String())
+	core.ConsoleLog(fmt.Sprintf("\n[*] Alive sum: %d, Target sum : %d", core.Alivesum, scan.Sum))
+	core.ConsoleLog("[*] Totally run: " + time.Since(starttime).String())
 
 	var filenamelog string
 	// 输出
@@ -127,7 +127,7 @@ func CMD(k string) {
 		if config.SmartFilename != "" {
 			filenamelog += "Smartscan result filename: " + config.SmartFilename
 		}
-		fmt.Println(filenamelog)
+		core.ConsoleLog(filenamelog)
 	}
 
 	// 扫描结果文件自动上传

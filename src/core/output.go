@@ -16,15 +16,22 @@ func output(result *Result, outType string) string {
 		out = colorOutput(result)
 	case "json", "j":
 		out = jsonOutput(result)
-	//case "html":
-	//	out = HtmlOutput(result)
-	default:
+	case "full":
 		out = fullOutput(result)
+	default:
+		out = valuesOutput(result, outType)
 
 	}
 	return out
 }
 
+func valuesOutput(result *Result, outType string) string {
+	outs := strings.Split(outType, ",")
+	for i, out := range outs {
+		outs[i] = result.Get(out)
+	}
+	return strings.Join(outs, "\t") + "\n"
+}
 func colorOutput(result *Result) string {
 	s := fmt.Sprintf("[+] %s://%s:%s\t%s\t%s\t%s\t%s\t%s [%s] %s %s\n", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, Blue(result.Frameworks.ToString()), result.Host, result.Hash, Yellow(result.HttpStat), Blue(result.Title), Red(result.Vulns.ToString()))
 	return s
@@ -105,7 +112,7 @@ func FormatOutput(filename string, outputfile string, autofile bool) {
 		} else if Output == "c" || Output == "full" {
 			outfunc(resultsdata.ToFormat(iscolor))
 		} else {
-			outfunc(resultsdata.GetValue(Output))
+			outfunc(resultsdata.Data.GetValue(Output))
 		}
 	}
 	if textdata != "" {
@@ -117,10 +124,10 @@ func FormatOutput(filename string, outputfile string, autofile bool) {
 var Quiet bool
 
 func progressLogln(s string) {
-	s = s + " , " + GetCurtime() + "\n"
+	s = fmt.Sprintf("%s , %s", s, GetCurtime())
 	if !Quiet {
 		// 如果指定了-q参数,则不在命令行输出进度
-		fmt.Print(s)
+		fmt.Println(s)
 		return
 	}
 
@@ -129,8 +136,10 @@ func progressLogln(s string) {
 	}
 }
 
-func consoleLog(s string) {
-
+func ConsoleLog(s string) {
+	if !Quiet {
+		fmt.Println(s)
+	}
 }
 
 func Banner() {

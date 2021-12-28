@@ -6,7 +6,7 @@ README Version 1.0.0
 ## Usage
 
 ```
-Usage of ./getitle:
+Usage of ./getitlpe:
   -d int       超时,默认2s (default 2)
   -ip string   IP地址 like 192.168.1.1/24
   -m string    扫描模式：default ,s(启发式),f(每个C段第一个ip) ,a(auto,内网三个网段,默认为icmp扫描,如要启用socket请指定-n socket)(每次只能选择一个生效)
@@ -31,7 +31,7 @@ Usage of ./getitle:
 
 ```
 
-## 使用
+## QuickStart
 最简使用
 
 `gt -k [key] -ip 192.168.1.1/24 -p top2,top3 `
@@ -296,29 +296,23 @@ snmp
 
 * 请注意数组元素间的逗号,否则可能导致json报错
 
-## Makefile
-
- * make release VERSION=VERSION to bulid getitle to all platform
-
- * Windows build muli releases
+## Make
 
 ### windows requirement:
  * upxs 自定义修改版的upx壳,可以在gox.bat中替换成原版
  * limelighter 签名伪造工具
  * tar.exe 压缩打包工具
  * gox go语言快捷编译工具
- * go-strip go语言编译信息去除工具
-
+ * python3 用到了python处理编译前的代码
    ```
    gox.bat [version] # .e.g gox.bat 0.3.0
    ```
 
-   
+ 
 
 ## THANKS
 
 * https://github.com/Tylous/Limelighter
-* https://github.com/boy-hack/go-strip
 * https://github.com/k8gege/LadonGo
 
     

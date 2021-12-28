@@ -45,10 +45,10 @@ func Init(config Config) Config {
 		} else {
 			// linux系统判断fd限制, 如果-t 大于fd限制,则将-t 设置到fd-100
 			if fdlimit := GetFdLimit(); config.Threads > fdlimit {
-				fmt.Printf("[Warn] System fd limit: %d , Please exec 'ulimit -n 65535'\n", fdlimit)
-				fmt.Printf("[Warn] System fd limit: %d , Please exec 'ulimit -n 65535'\n", fdlimit)
-				fmt.Printf("[Warn] System fd limit: %d , Please exec 'ulimit -n 65535'\n", fdlimit)
-				fmt.Printf("[Warn] Now set threads to %d\n", fdlimit-100)
+				ConsoleLog(fmt.Sprintf("[Warn] System fd limit: %d , Please exec 'ulimit -n 65535'", fdlimit))
+				ConsoleLog(fmt.Sprintf("[Warn] System fd limit: %d , Please exec 'ulimit -n 65535'", fdlimit))
+				ConsoleLog(fmt.Sprintf("[Warn] System fd limit: %d , Please exec 'ulimit -n 65535'", fdlimit))
+				ConsoleLog(fmt.Sprintf("[Warn] Now set threads to %d", fdlimit-100))
 				config.Threads = fdlimit - 100
 			}
 		}
@@ -139,10 +139,10 @@ func CheckCommand(config Config) error {
 	var err error
 	if config.JsonFile != "" {
 		if config.Ports != "top1" {
-			fmt.Println("[warn] json input can not config ports")
+			ConsoleLog("[warn] json input can not config ports")
 		}
 		if config.Mod != "default" {
-			fmt.Println("[warn] input json can not config scan Mod,default scanning")
+			ConsoleLog("[warn] input json can not config scan Mod,default scanning")
 		}
 	}
 
@@ -160,14 +160,14 @@ func CheckCommand(config Config) error {
 func printTaskInfo(config Config, taskname string) {
 	// 输出任务的基本信息
 
-	fmt.Printf("[*] Current goroutines: %d, Version Level: %d,Exploit Target: %s, Spray Scan: %t\n", config.Threads, scan.VersionLevel, scan.Exploit, config.Spray)
+	progressLogln(fmt.Sprintf("[*] Current goroutines: %d, Version Level: %d,Exploit Target: %s, Spray Scan: %t", config.Threads, scan.VersionLevel, scan.Exploit, config.Spray))
 	if config.JsonFile == "" {
 		progressLogln(fmt.Sprintf("[*] Start scan task %s ,total ports: %d , mod: %s", taskname, len(config.Portlist), config.Mod))
 		// 输出端口信息
 		if len(config.Portlist) > 500 {
-			fmt.Println("[*] too much ports , only show top 500 ports: " + strings.Join(config.Portlist[:500], ",") + "......")
+			progressLogln("[*] too much ports , only show top 500 ports: " + strings.Join(config.Portlist[:500], ",") + "......")
 		} else {
-			fmt.Println("[*] ports: " + strings.Join(config.Portlist, ","))
+			progressLogln("[*] ports: " + strings.Join(config.Portlist, ","))
 		}
 	} else {
 		progressLogln(fmt.Sprintf("[*] Start scan task %s ,total target: %d", taskname, len(config.Results)))

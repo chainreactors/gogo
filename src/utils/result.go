@@ -106,6 +106,10 @@ func (result Result) Get(key string) string {
 		return result.Host
 	case "title":
 		return result.Title
+	case "target":
+		return result.GetTarget()
+	case "url":
+		return result.GetURL()
 	default:
 		return ""
 	}
@@ -179,6 +183,14 @@ func (rs Results) Filter(k, v, op string) Results {
 		}
 	}
 	return filtedres
+}
+
+func (results Results) GetValue(key string) string {
+	values := make([]string, len(results))
+	for i, result := range results {
+		values[i] = result.Get(key)
+	}
+	return strings.Join(values, "\n")
 }
 
 type Vuln struct {
