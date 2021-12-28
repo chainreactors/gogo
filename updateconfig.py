@@ -38,8 +38,6 @@ if __name__ == "__main__":
     f = open("src/utils/finger.go", "w", encoding="utf-8")
     base = '''package utils
 
-import . "getitle/src/structutils"
-
 func LoadConfig(typ string)[]byte  {
 	if typ == "tcp" {
 		return Decode(`%s`)

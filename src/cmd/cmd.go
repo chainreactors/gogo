@@ -3,15 +3,17 @@ package cmd
 import (
 	"flag"
 	"fmt"
-	. "getitle/src/core"
-	. "getitle/src/scan"
-	. "getitle/src/structutils"
-	. "getitle/src/utils"
-	"github.com/panjf2000/ants/v2"
 	"os"
 	"regexp"
 	"strings"
 	"time"
+
+	. "getitle/src/core"
+	. "getitle/src/scan"
+	. "getitle/src/structutils"
+	. "getitle/src/utils"
+
+	"github.com/panjf2000/ants/v2"
 )
 
 func CMD(k string) {
