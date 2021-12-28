@@ -13,20 +13,6 @@ import (
 	"time"
 )
 
-var Clean = false
-var Noscan = false
-var Compress = true
-
-//文件输出
-var DataCh = make(chan string, 100)
-var LogDataCh = make(chan string, 100)
-
-var fileHandle, smartFileHandle, logFileHandle *os.File // 输出文件 handler
-var fileWriter, smartfileWriter *bufio.Writer
-var comBuf, smartComBuf *bytes.Buffer
-var Output string     // 命令行输出格式
-var FileOutput string // 文件输出格式
-
 //进度tmp文件
 var tmpfilename string
 
@@ -69,31 +55,31 @@ func InitFileHandle(filename string) (*os.File, error) {
 
 func initFile(config utils.Config) error {
 	var err error
-	if Compress {
-		comBuf = bytes.NewBuffer([]byte{})
-		smartComBuf = bytes.NewBuffer([]byte{})
+	if Opt.Compress {
+		Opt.comBuf = bytes.NewBuffer([]byte{})
+		Opt.smartComBuf = bytes.NewBuffer([]byte{})
 	}
 	// 初始化res文件handler
 	if config.Filename != "" {
-		Clean = !Clean
+		Opt.Clean = !Opt.Clean
 		// 创建output的filehandle
-		fileHandle, err = InitFileHandle(config.Filename)
+		Opt.fileHandle, err = InitFileHandle(config.Filename)
 		if err != nil {
 			return err
 		}
-		fileWriter = bufio.NewWriter(fileHandle)
-		if FileOutput == "json" && !(Noscan || config.Mod == "sc") {
+		Opt.fileWriter = bufio.NewWriter(Opt.fileHandle)
+		if Opt.FileOutput == "json" && !(Opt.Noscan || config.Mod == "sc") {
 			writeFile(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("scan")), false)
 		}
 	}
 
 	// -af 参数下的启发式扫描结果handler初始化
 	if config.SmartFilename != "" {
-		smartFileHandle, err = InitFileHandle(config.SmartFilename)
+		Opt.smartFileHandle, err = InitFileHandle(config.SmartFilename)
 		if err != nil {
 			return err
 		}
-		smartfileWriter = bufio.NewWriter(smartFileHandle)
+		Opt.smartfileWriter = bufio.NewWriter(Opt.smartFileHandle)
 		writeFile(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("smart")), true)
 		smartFileFlush()
 	}
@@ -106,7 +92,7 @@ func initFile(config utils.Config) error {
 	}
 	_ = os.Remove(".sock.lock")
 
-	logFileHandle, err = InitFileHandle(tmpfilename)
+	Opt.logFileHandle, err = InitFileHandle(tmpfilename)
 	if err != nil {
 		return err
 	}
@@ -120,23 +106,23 @@ func handler() {
 
 	// 进度文件
 	go func() {
-		for res := range LogDataCh {
-			_, _ = logFileHandle.WriteString(res)
-			_ = logFileHandle.Sync()
+		for res := range Opt.LogDataCh {
+			_, _ = Opt.logFileHandle.WriteString(res)
+			_ = Opt.logFileHandle.Sync()
 		}
-		_ = logFileHandle.Close()
+		_ = Opt.logFileHandle.Close()
 		_ = os.Remove(tmpfilename)
 	}()
 
 	// res文件
-	if fileHandle != nil {
+	if Opt.fileHandle != nil {
 		go func() {
 			defer fileCloser()
 			var commaflag2 bool
-			for res := range DataCh {
+			for res := range Opt.DataCh {
 				if commaflag2 {
 					res = "," + res
-				} else if FileOutput == "json" && !Noscan {
+				} else if Opt.FileOutput == "json" && !Opt.Noscan {
 					// 如果json格式输出,则除了第一次输出,之后都会带上逗号
 					commaflag2 = true
 				}
@@ -147,22 +133,22 @@ func handler() {
 }
 
 func fileCloser() {
-	if FileOutput == "json" && !Noscan {
+	if Opt.FileOutput == "json" && !Opt.Noscan {
 		writeFile("]}", false)
 	}
 	fileFlush()
-	_ = fileHandle.Close()
+	_ = Opt.fileHandle.Close()
 
-	if smartFileHandle != nil {
+	if Opt.smartFileHandle != nil {
 		writeFile("]}", true)
 		smartFileFlush()
-		_ = smartFileHandle.Close()
+		_ = Opt.smartFileHandle.Close()
 	}
 
 }
 
 func write(res string, file *bufio.Writer, buf *bytes.Buffer) {
-	if Compress {
+	if Opt.Compress {
 		//res = string(utils.Flate([]byte(res)))
 		_, err := buf.WriteString(res)
 		if err != nil {
@@ -182,29 +168,29 @@ func write(res string, file *bufio.Writer, buf *bytes.Buffer) {
 
 func writeFile(res string, isSmart bool) {
 	if isSmart {
-		write(res, smartfileWriter, smartComBuf)
+		write(res, Opt.smartfileWriter, Opt.smartComBuf)
 	} else {
-		write(res, fileWriter, comBuf)
+		write(res, Opt.fileWriter, Opt.comBuf)
 	}
 }
 
 func fileFlush() {
-	if fileWriter != nil {
-		if comBuf != nil {
-			_, _ = fileWriter.Write(utils.Flate(comBuf.Bytes()))
-			comBuf.Reset()
+	if Opt.fileWriter != nil {
+		if Opt.comBuf != nil {
+			_, _ = Opt.fileWriter.Write(utils.Flate(Opt.comBuf.Bytes()))
+			Opt.comBuf.Reset()
 		}
-		_ = fileWriter.Flush()
+		_ = Opt.fileWriter.Flush()
 	}
 }
 
 func smartFileFlush() {
-	if smartfileWriter != nil {
-		if smartComBuf != nil {
-			_, _ = smartfileWriter.Write(utils.Flate(smartComBuf.Bytes()))
-			smartComBuf.Reset()
+	if Opt.smartfileWriter != nil {
+		if Opt.smartComBuf != nil {
+			_, _ = Opt.smartfileWriter.Write(utils.Flate(Opt.smartComBuf.Bytes()))
+			Opt.smartComBuf.Reset()
 		}
-		_ = smartfileWriter.Flush()
+		_ = Opt.smartfileWriter.Flush()
 	}
 }
 

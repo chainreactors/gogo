@@ -1,6 +1,8 @@
 package core
 
 import (
+	"bufio"
+	"bytes"
 	"errors"
 	"fmt"
 	"getitle/src/scan"
@@ -18,6 +20,35 @@ var InterConfig = map[string][]string{
 	"200.200.0.0/16": {"s", "icmp", "all"},
 	//"169.254.0.0/16": {"s", "icmp", "all"},
 	//"168.254.0.0/16": {"s", "icmp", "all"},
+}
+
+type Options struct {
+	AliveSum        int
+	Clean           bool
+	Noscan          bool
+	Compress        bool
+	Quiet           bool
+	fileHandle      *os.File
+	smartFileHandle *os.File
+	logFileHandle   *os.File
+	fileWriter      *bufio.Writer
+	smartfileWriter *bufio.Writer
+	DataCh          chan string
+	LogDataCh       chan string
+	comBuf          *bytes.Buffer
+	smartComBuf     *bytes.Buffer
+	Output          string
+	FileOutput      string
+}
+
+var Opt = Options{
+	AliveSum:  0,
+	Clean:     false,
+	Noscan:    false,
+	Compress:  true,
+	Quiet:     false,
+	DataCh:    make(chan string, 100),
+	LogDataCh: make(chan string, 100),
 }
 
 func Init(config Config) Config {

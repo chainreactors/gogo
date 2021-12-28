@@ -66,7 +66,7 @@ func FormatOutput(filename string, outputfile string, autofile bool) {
 		resultsdata = data.(ResultsData)
 		fmt.Println(resultsdata.ToConfig())
 		if outputfile == "" {
-			outputfile = GetFilename(resultsdata.Config, autofile, false, Output)
+			outputfile = GetFilename(resultsdata.Config, autofile, false, Opt.Output)
 		}
 	case SmartData:
 		smartdata = data.(SmartData)
@@ -96,7 +96,7 @@ func FormatOutput(filename string, outputfile string, autofile bool) {
 		}
 	}
 
-	if Output == "c" {
+	if Opt.Output == "c" {
 		iscolor = true
 	}
 
@@ -105,14 +105,14 @@ func FormatOutput(filename string, outputfile string, autofile bool) {
 		return
 	}
 	if resultsdata.Data != nil {
-		if Output == "cs" {
+		if Opt.Output == "cs" {
 			outfunc(resultsdata.ToCobaltStrike())
-		} else if Output == "zombie" {
+		} else if Opt.Output == "zombie" {
 			outfunc(resultsdata.ToZombie())
-		} else if Output == "c" || Output == "full" {
+		} else if Opt.Output == "c" || Opt.Output == "full" {
 			outfunc(resultsdata.ToFormat(iscolor))
 		} else {
-			outfunc(resultsdata.Data.GetValue(Output))
+			outfunc(resultsdata.Data.GetValue(Opt.Output))
 		}
 	}
 	if textdata != "" {
@@ -131,8 +131,8 @@ func progressLogln(s string) {
 		return
 	}
 
-	if logFileHandle != nil {
-		LogDataCh <- s
+	if Opt.logFileHandle != nil {
+		Opt.LogDataCh <- s
 	}
 }
 

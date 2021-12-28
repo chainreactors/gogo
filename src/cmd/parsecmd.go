@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"getitle/src/core"
+	. "getitle/src/core"
 	"getitle/src/scan"
 	"getitle/src/utils"
 )
@@ -30,9 +30,9 @@ func parseExploit(exploit bool, exploitConfig string) {
 
 func parseFilename(autofile, hiddenfile bool, config *utils.Config) {
 	if config.Filename == "" {
-		config.Filename = core.GetFilename(*config, autofile, hiddenfile, core.FileOutput)
+		config.Filename = GetFilename(*config, autofile, hiddenfile, Opt.FileOutput)
 	}
-	if config.IsSmartScan() && !core.Noscan {
-		config.SmartFilename = core.GetFilename(*config, autofile, hiddenfile, "cidr")
+	if config.IsSmartScan() && !Opt.Noscan {
+		config.SmartFilename = GetFilename(*config, autofile, hiddenfile, "cidr")
 	}
 }

@@ -3,7 +3,7 @@ package cmd
 import (
 	"flag"
 	"fmt"
-	"getitle/src/core"
+	. "getitle/src/core"
 	"getitle/src/scan"
 	. "getitle/src/structutils"
 	. "getitle/src/utils"
@@ -37,14 +37,14 @@ func CMD(k string) {
 	flag.BoolVar(&config.NoSpray, "ns", false, "")
 
 	//全局变量初始化
-	flag.StringVar(&core.Output, "o", "full", "")
-	flag.BoolVar(&core.Clean, "c", false, "")
-	flag.StringVar(&core.FileOutput, "O", "json", "")
+	flag.StringVar(&Opt.Output, "o", "full", "")
+	flag.BoolVar(&Opt.Clean, "c", false, "")
+	flag.StringVar(&Opt.FileOutput, "O", "json", "")
+	flag.BoolVar(&Opt.Noscan, "no", false, "")
+	flag.BoolVar(&Opt.Quiet, "q", false, "")
 	flag.IntVar(&scan.Delay, "d", 2, "")
 	flag.IntVar(&scan.HttpsDelay, "D", 2, "")
 	flag.StringVar(&scan.Payloadstr, "payload", "", "")
-	flag.BoolVar(&core.Noscan, "no", false, "")
-	flag.BoolVar(&core.Quiet, "q", false, "")
 
 	// 一些特殊参数初始化
 	key := flag.String("k", "", "")
@@ -59,7 +59,7 @@ func CMD(k string) {
 	noup := flag.Bool("nu", false, "")
 	uploadfile := flag.String("uf", "", "")
 	pocfile := flag.String("ef", "", "")
-	com := flag.Bool("C", false, "")
+	compress := flag.Bool("C", false, "")
 
 	flag.Parse()
 	// 密钥
@@ -76,7 +76,7 @@ func CMD(k string) {
 
 	// 格式化
 	if *resultfilename != "" {
-		core.FormatOutput(*resultfilename, config.Filename, *autofile)
+		FormatOutput(*resultfilename, config.Filename, *autofile)
 		os.Exit(0)
 	}
 
@@ -94,17 +94,17 @@ func CMD(k string) {
 	parseExploit(*exploit, *exploitConfig)
 	parseFilename(*autofile, *hiddenfile, &config)
 
-	if *com {
-		core.Compress = !core.Compress
+	if *compress {
+		Opt.Compress = !Opt.Compress
 	}
 
 	starttime := time.Now()
-	config = core.Init(config)
-	core.RunTask(config)
+	config = Init(config)
+	RunTask(config)
 
 	//关闭文件写入管道
-	close(core.DataCh)
-	close(core.LogDataCh)
+	close(Opt.DataCh)
+	close(Opt.LogDataCh)
 
 	time.Sleep(500 * time.Microsecond)
 
@@ -117,8 +117,8 @@ func CMD(k string) {
 	time.Sleep(time.Microsecond * 500)
 
 	// 任务统计
-	core.ConsoleLog(fmt.Sprintf("\n[*] Alive sum: %d, Target sum : %d", core.Alivesum, scan.Sum))
-	core.ConsoleLog("[*] Totally run: " + time.Since(starttime).String())
+	ConsoleLog(fmt.Sprintf("\n[*] Alive sum: %d, Target sum : %d", Opt.AliveSum, scan.Sum))
+	ConsoleLog("[*] Totally run: " + time.Since(starttime).String())
 
 	var filenamelog string
 	// 输出
@@ -127,7 +127,7 @@ func CMD(k string) {
 		if config.SmartFilename != "" {
 			filenamelog += "Smartscan result filename: " + config.SmartFilename
 		}
-		core.ConsoleLog(filenamelog)
+		ConsoleLog(filenamelog)
 	}
 
 	// 扫描结果文件自动上传
@@ -138,11 +138,11 @@ func CMD(k string) {
 
 func printConfigs(t string) {
 	if t == "port" {
-		core.Printportconfig()
+		Printportconfig()
 	} else if t == "nuclei" {
-		core.PrintNucleiPoc()
+		PrintNucleiPoc()
 	} else if t == "inter" {
-		core.PrintInterConfig()
+		PrintInterConfig()
 	} else {
 		fmt.Println("choice port|nuclei|inter")
 	}

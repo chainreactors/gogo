@@ -9,8 +9,6 @@ import (
 	"sync"
 )
 
-var Alivesum int
-
 type targetConfig struct {
 	ip     string
 	port   string
@@ -43,12 +41,12 @@ func defaultScan(tc targetConfig) {
 	scan.Dispatch(result)
 
 	if result.Open {
-		Alivesum++
-		if !Clean {
-			fmt.Print(output(result, Output))
+		Opt.AliveSum++
+		if !Opt.Clean {
+			fmt.Print(output(result, Opt.Output))
 		}
-		if fileHandle != nil {
-			DataCh <- output(result, FileOutput)
+		if Opt.fileHandle != nil {
+			Opt.DataCh <- output(result, Opt.FileOutput)
 		}
 	}
 }
@@ -99,7 +97,7 @@ func SmartMod(target string, config Config) {
 	}
 	wg.Wait()
 
-	if Noscan {
+	if Opt.Noscan {
 		// -no 被设置的时候停止后续扫描
 		return
 	}
@@ -116,7 +114,7 @@ func SmartMod(target string, config Config) {
 		sort_cidr(iplist)
 	}
 
-	if smartFileHandle != nil {
+	if Opt.smartFileHandle != nil {
 		writeSmartResult(iplist)
 	}
 
@@ -138,11 +136,11 @@ func alived(ip string, temp *sync.Map, mask int, mod string) {
 	if ok {
 		cidr := fmt.Sprintf("%s/%d\n", ip, mask)
 		ConsoleLog("[*] Found " + cidr)
-		Alivesum++
-		if fileHandle != nil && mod != "sc" && (Noscan || mod == "sb") {
+		Opt.AliveSum++
+		if Opt.fileHandle != nil && mod != "sc" && (Opt.Noscan || mod == "sb") {
 			// 只有-no 或 -m sc下,才会将网段信息输出到文件.
 			// 模式为sc时,b段将不会输出到文件,只输出c段
-			DataCh <- cidr
+			Opt.DataCh <- cidr
 		}
 	}
 }
@@ -163,13 +161,13 @@ func declineScan(iplist []string, config Config) {
 		progressLogln(fmt.Sprintf("[*] Every Sub smartscan task time is about %d seconds, total found %d B Class CIDRs about %d s", spended, len(iplist), spended*len(iplist)))
 	}
 	for _, ip := range iplist {
-		tmpalive := Alivesum
+		tmpalive := Opt.AliveSum
 		if len(config.Portlist) < 3 {
 			StraightMod(ip, config)
 		} else {
 			SmartMod(ip, config)
 		}
-		progressLogln(fmt.Sprintf("[*] Found %d alive assets from CIDR %s", Alivesum-tmpalive, ip))
+		progressLogln(fmt.Sprintf("[*] Found %d alive assets from CIDR %s", Opt.AliveSum-tmpalive, ip))
 		fileFlush()
 	}
 }

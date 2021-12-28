@@ -57,10 +57,10 @@ func goIPsGenerator(iplist []string) chan string {
 	var ch = make(chan string)
 	go func() {
 		for _, cidr := range iplist {
-			tmpalive := Alivesum
+			tmpalive := Opt.AliveSum
 			ch = defaultIpGenerator(cidr, ch)
 			if getMask(cidr) != 32 {
-				progressLogln(fmt.Sprintf("[*] Processed CIDR: %s, found %d ports", cidr, Alivesum-tmpalive))
+				progressLogln(fmt.Sprintf("[*] Processed CIDR: %s, found %d ports", cidr, Opt.AliveSum-tmpalive))
 			}
 			// 每个c段同步数据到文件
 			fileFlush()
@@ -184,7 +184,7 @@ func genFromResults(results Results, tcch *chan targetConfig) {
 func genFromSpray(targets interface{}, portlist []string, tcch *chan targetConfig) {
 	var ch chan string
 	for _, port := range portlist {
-		tmpalive := Alivesum
+		tmpalive := Opt.AliveSum
 		switch targets.(type) {
 		case []string:
 			for _, cidr := range targets.([]string) {
@@ -200,7 +200,7 @@ func genFromSpray(targets interface{}, portlist []string, tcch *chan targetConfi
 				*tcch <- targetConfig{ip, port, nil}
 			}
 		}
-		progressLogln(fmt.Sprintf("[*] Processed Port: %s, found %d ports", port, Alivesum-tmpalive))
+		progressLogln(fmt.Sprintf("[*] Processed Port: %s, found %d ports", port, Opt.AliveSum-tmpalive))
 	}
 }
 
