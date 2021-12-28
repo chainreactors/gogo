@@ -17,7 +17,7 @@ func ms17010Scan(result *utils.Result) {
 	// connecting to a host in LAN if reachable should be very quick
 	result.Port = "445"
 	target := result.GetTarget()
-	conn, err := utils.TcpSocketConn(target, Delay)
+	conn, err := utils.TcpSocketConn(target, RunOpt.Delay)
 	if err != nil {
 		result.Error = err.Error()
 		return

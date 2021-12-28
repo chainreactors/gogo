@@ -12,7 +12,7 @@ var sendData2 = "\x05\x00\x00\x03\x10\x00\x00\x00\x18\x00\x00\x00\x01\x00\x00\x0
 func oxidScan(result *utils.Result) {
 	result.Port = "135"
 	target := result.GetTarget()
-	conn, err := utils.TcpSocketConn(target, Delay)
+	conn, err := utils.TcpSocketConn(target, RunOpt.Delay)
 	if err != nil {
 
 		//fmt.Println(err)

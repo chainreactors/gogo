@@ -5,16 +5,22 @@ import (
 	"strings"
 )
 
-var Sum int
-var Exploit string
-var VersionLevel int
-var Delay int
-var HttpsDelay int
-var Payloadstr string
+type RunnerOpts struct {
+	Sum          int
+	Exploit      string
+	VersionLevel int
+	Delay        int
+	HttpsDelay   int
+	Payloadstr   string
+}
+
+var RunOpt = RunnerOpts{
+	Sum: 0,
+}
 
 func Dispatch(result *utils.Result) {
 	target := result.GetTarget()
-	Sum++
+	RunOpt.Sum++
 	//println(result.Ip)
 	if result.Port == "137" || result.Port == "nbt" {
 		nbtScan(result)
@@ -33,11 +39,11 @@ func Dispatch(result *utils.Result) {
 		return
 	} else if result.Port == "445" || result.Port == "smb" {
 		smbScan(result)
-		if Exploit == "ms17010" {
+		if RunOpt.Exploit == "ms17010" {
 			ms17010Scan(result)
-		} else if Exploit == "smbghost" || Exploit == "cve-2020-0796" {
+		} else if RunOpt.Exploit == "smbghost" || RunOpt.Exploit == "cve-2020-0796" {
 			smbGhostScan(result)
-		} else if Exploit == "auto" || Exploit == "smb" {
+		} else if RunOpt.Exploit == "auto" || RunOpt.Exploit == "smb" {
 			ms17010Scan(result)
 			smbGhostScan(result)
 		}
@@ -57,14 +63,14 @@ func Dispatch(result *utils.Result) {
 		result.InfoFilter()
 		fingerScan(result)
 		// 指定payload扫描
-		if result.IsHttp() && Payloadstr != "" {
+		if result.IsHttp() && RunOpt.Payloadstr != "" {
 			payloadScan(result)
 			return
 		}
 
 		//主动信息收集
 		// 因为正则匹配耗时较长,如果没有-v参数则字节不进行服务识别
-		if VersionLevel >= 1 && strings.HasPrefix(result.Protocol, "http") {
+		if RunOpt.VersionLevel >= 1 && strings.HasPrefix(result.Protocol, "http") {
 			faviconScan(result)
 		} else {
 			if !result.IsHttp() && result.NoFramework() {
@@ -74,7 +80,7 @@ func Dispatch(result *utils.Result) {
 		}
 
 		// 如果-e参数为true,则进行漏洞探测
-		if Exploit != "none" {
+		if RunOpt.Exploit != "none" {
 			ExploitDispatch(result)
 		}
 
@@ -88,11 +94,11 @@ func ExploitDispatch(result *utils.Result) {
 	//if strings.Contains(result.Content, "-ERR wrong") {
 	//	RedisScan(target, result)
 	//}
-	if (!result.NoFramework() || Exploit != "auto") && result.IsHttp() {
+	if (!result.NoFramework() || RunOpt.Exploit != "auto") && result.IsHttp() {
 		Nuclei(result.GetURL(), result)
 	}
 
-	if Exploit != "auto" { // 如果exploit值不为auto,则不进行shiro和ms17010扫描
+	if RunOpt.Exploit != "auto" { // 如果exploit值不为auto,则不进行shiro和ms17010扫描
 		return
 	}
 	// todo 将shiro改造成nuclei poc

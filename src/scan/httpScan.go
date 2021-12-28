@@ -20,7 +20,7 @@ func socketHttp(target string, result *utils.Result) {
 	var ishttp = false
 	var statuscode = ""
 	result.Protocol = "tcp"
-	conn, err := utils.TcpSocketConn(target, Delay)
+	conn, err := utils.TcpSocketConn(target, RunOpt.Delay)
 	if err != nil {
 		//fmt.Println(err)
 		result.Error = err.Error()
@@ -75,7 +75,7 @@ func SystemHttp(target string, result *utils.Result) {
 
 	//如果是https或者30x跳转,则增加超时时间
 	if ishttps || strings.HasPrefix(result.HttpStat, "3") {
-		delay = Delay + HttpsDelay
+		delay = RunOpt.Delay + RunOpt.HttpsDelay
 	}
 	conn = utils.HttpConn(delay)
 	req, _ := http.NewRequest("GET", target, nil)

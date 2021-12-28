@@ -10,10 +10,10 @@ import (
 func Nuclei(target string, result *utils.Result) {
 	var vulns []utils.Vuln
 
-	if Exploit == "auto" {
+	if RunOpt.Exploit == "auto" {
 		vulns = execute_templates(result.Frameworks.GetTitles(), target)
 	} else {
-		vulns = execute_templates([]string{Exploit}, target)
+		vulns = execute_templates([]string{RunOpt.Exploit}, target)
 	}
 	if len(vulns) > 0 {
 		result.AddVulns(vulns)

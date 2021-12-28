@@ -8,9 +8,9 @@ import (
 func payloadScan(result *utils.Result) {
 	url := result.GetURL()
 	//println(url+Payloadstr)
-	result.Uri = Payloadstr
-	conn := utils.HttpConn(Delay)
-	resp, err := conn.Get(url + Payloadstr)
+	result.Uri = RunOpt.Payloadstr
+	conn := utils.HttpConn(RunOpt.Delay)
+	resp, err := conn.Get(url + RunOpt.Payloadstr)
 	if err != nil {
 		result.Error = err.Error()
 		return

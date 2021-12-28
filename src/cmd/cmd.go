@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 	. "getitle/src/core"
-	"getitle/src/scan"
+	. "getitle/src/scan"
 	. "getitle/src/structutils"
 	. "getitle/src/utils"
 	"github.com/panjf2000/ants/v2"
@@ -42,9 +42,9 @@ func CMD(k string) {
 	flag.StringVar(&Opt.FileOutput, "O", "json", "")
 	flag.BoolVar(&Opt.Noscan, "no", false, "")
 	flag.BoolVar(&Opt.Quiet, "q", false, "")
-	flag.IntVar(&scan.Delay, "d", 2, "")
-	flag.IntVar(&scan.HttpsDelay, "D", 2, "")
-	flag.StringVar(&scan.Payloadstr, "payload", "", "")
+	flag.IntVar(&RunOpt.Delay, "d", 2, "")
+	flag.IntVar(&RunOpt.HttpsDelay, "D", 2, "")
+	flag.StringVar(&RunOpt.Payloadstr, "payload", "", "")
 
 	// 一些特殊参数初始化
 	key := flag.String("k", "", "")
@@ -117,7 +117,7 @@ func CMD(k string) {
 	time.Sleep(time.Microsecond * 500)
 
 	// 任务统计
-	ConsoleLog(fmt.Sprintf("\n[*] Alive sum: %d, Target sum : %d", Opt.AliveSum, scan.Sum))
+	ConsoleLog(fmt.Sprintf("\n[*] Alive sum: %d, Target sum : %d", Opt.AliveSum, RunOpt.Sum))
 	ConsoleLog("[*] Totally run: " + time.Since(starttime).String())
 
 	var filenamelog string

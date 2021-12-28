@@ -11,7 +11,7 @@ import (
 func snmpScan(result *utils.Result) {
 	var err error
 	result.Port = "161"
-	s, err := gosnmp.NewGoSNMP(result.GetTarget(), "public", gosnmp.Version2c, int64(Delay+2))
+	s, err := gosnmp.NewGoSNMP(result.GetTarget(), "public", gosnmp.Version2c, int64(RunOpt.Delay+2))
 	if err != nil {
 		//log.Fatal(err)
 		return

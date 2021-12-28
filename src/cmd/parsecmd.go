@@ -2,29 +2,29 @@ package cmd
 
 import (
 	. "getitle/src/core"
-	"getitle/src/scan"
+	. "getitle/src/scan"
 	"getitle/src/utils"
 )
 
 func parseVersion(version, version2 bool) {
 	//初始化全局变量
 	if version {
-		scan.VersionLevel = 1
+		RunOpt.VersionLevel = 1
 	} else if version2 {
-		scan.VersionLevel = 2
+		RunOpt.VersionLevel = 2
 	} else {
-		scan.VersionLevel = 0
+		RunOpt.VersionLevel = 0
 	}
 }
 
 func parseExploit(exploit bool, exploitConfig string) {
 	// 配置exploit
 	if exploit {
-		scan.Exploit = "auto"
+		RunOpt.Exploit = "auto"
 	} else if !exploit && exploitConfig != "none" {
-		scan.Exploit = exploitConfig
+		RunOpt.Exploit = exploitConfig
 	} else {
-		scan.Exploit = exploitConfig
+		RunOpt.Exploit = exploitConfig
 	}
 }
 

@@ -12,7 +12,7 @@ var payload = []byte{5, 0, 11, 3, 16, 0, 0, 0, 120, 0, 40, 0, 3, 0, 0, 0, 184, 1
 func wmiScan(result *utils.Result) {
 	result.Port = "135"
 	target := result.GetTarget()
-	conn, err := utils.TcpSocketConn(target, Delay)
+	conn, err := utils.TcpSocketConn(target, RunOpt.Delay)
 	if err != nil {
 		return
 	}

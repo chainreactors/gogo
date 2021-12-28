@@ -5,7 +5,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"getitle/src/scan"
+	. "getitle/src/scan"
 	. "getitle/src/structutils"
 	. "getitle/src/utils"
 	"os"
@@ -55,7 +55,7 @@ func Init(config Config) Config {
 	//println("*********  main 1.0.7 beta by Sangfor  *********")
 
 	//if config.Mod != "default" && config.ListFile != "" {
-	//	println("[-] error Smart scan config")
+	//	println("[-] error Smart . config")
 	//	os.Exit(0)
 	//}
 
@@ -66,8 +66,8 @@ func Init(config Config) Config {
 		os.Exit(0)
 	}
 	// 初始化
-	config.Exploit = scan.Exploit
-	config.VerisonLevel = scan.VersionLevel
+	config.Exploit = RunOpt.Exploit
+	config.VerisonLevel = RunOpt.VersionLevel
 
 	if config.Threads == 4000 { // if 默认线程
 		if IsWin() {
@@ -164,7 +164,7 @@ func Init(config Config) Config {
 func CheckCommand(config Config) error {
 	// 一些命令行参数错误处理,如果check没过直接退出程序或输出警告
 	//if config.Mod == "ss" && config.ListFile != "" {
-	//	fmt.Println("[-] error Smart scan can not use File input")
+	//	fmt.Println("[-] error Smart . can not use File input")
 	//	os.Exit(0)
 	//}
 	var err error
@@ -173,7 +173,7 @@ func CheckCommand(config Config) error {
 			ConsoleLog("[warn] json input can not config ports")
 		}
 		if config.Mod != "default" {
-			ConsoleLog("[warn] input json can not config scan Mod,default scanning")
+			ConsoleLog("[warn] input json can not config . Mod,default scanning")
 		}
 	}
 
@@ -191,9 +191,9 @@ func CheckCommand(config Config) error {
 func printTaskInfo(config Config, taskname string) {
 	// 输出任务的基本信息
 
-	progressLogln(fmt.Sprintf("[*] Current goroutines: %d, Version Level: %d,Exploit Target: %s, Spray Scan: %t", config.Threads, scan.VersionLevel, scan.Exploit, config.Spray))
+	progressLogln(fmt.Sprintf("[*] Current goroutines: %d, Version Level: %d,Exploit Target: %s, Spray Scan: %t", config.Threads, RunOpt.VersionLevel, RunOpt.Exploit, config.Spray))
 	if config.JsonFile == "" {
-		progressLogln(fmt.Sprintf("[*] Start scan task %s ,total ports: %d , mod: %s", taskname, len(config.Portlist), config.Mod))
+		progressLogln(fmt.Sprintf("[*] Start . task %s ,total ports: %d , mod: %s", taskname, len(config.Portlist), config.Mod))
 		// 输出端口信息
 		if len(config.Portlist) > 500 {
 			progressLogln("[*] too much ports , only show top 500 ports: " + strings.Join(config.Portlist[:500], ",") + "......")
@@ -201,8 +201,8 @@ func printTaskInfo(config Config, taskname string) {
 			progressLogln("[*] ports: " + strings.Join(config.Portlist, ","))
 		}
 	} else {
-		progressLogln(fmt.Sprintf("[*] Start scan task %s ,total target: %d", taskname, len(config.Results)))
-		progressLogln(fmt.Sprintf("[*] Json scan task time is about %d seconds", (len(config.Results)/config.Threads)*4+4))
+		progressLogln(fmt.Sprintf("[*] Start . task %s ,total target: %d", taskname, len(config.Results)))
+		progressLogln(fmt.Sprintf("[*] Json . task time is about %d seconds", (len(config.Results)/config.Threads)*4+4))
 	}
 }
 

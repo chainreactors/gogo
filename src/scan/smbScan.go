@@ -122,7 +122,7 @@ func smbScan(result *utils.Result) {
 
 func smb1Scan(target string) ([]byte, error) {
 	var err error
-	conn, err := utils.TcpSocketConn(target, Delay)
+	conn, err := utils.TcpSocketConn(target, RunOpt.Delay)
 	if err != nil {
 		return nil, errors.New("conn failed")
 	}
@@ -147,7 +147,7 @@ func smb1Scan(target string) ([]byte, error) {
 
 func smb2Scan(target string) ([]byte, error) {
 	var err error
-	conn, err := utils.TcpSocketConn(target, Delay)
+	conn, err := utils.TcpSocketConn(target, RunOpt.Delay)
 	if err != nil {
 		return nil, err
 	}

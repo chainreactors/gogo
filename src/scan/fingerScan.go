@@ -22,7 +22,7 @@ func httpFingerMatch(result *utils.Result, finger *utils.Finger) {
 	resp := result.Httpresp
 	content := result.Content
 	//var cookies map[string]string
-	if finger.SendData_str != "" && VersionLevel >= 1 {
+	if finger.SendData_str != "" && RunOpt.VersionLevel >= 1 {
 		conn := utils.HttpConn(2)
 		resp, err := conn.Get(result.GetURL() + finger.SendData_str)
 		if err == nil {
@@ -121,7 +121,7 @@ func tcpFingerMatch(result *utils.Result, finger *utils.Finger) {
 	var err error
 
 	// 某些规则需要主动发送一个数据包探测
-	if finger.SendData_str != "" && VersionLevel >= finger.Level {
+	if finger.SendData_str != "" && RunOpt.VersionLevel >= finger.Level {
 		var conn net.Conn
 		conn, err = utils.TcpSocketConn(result.GetTarget(), 2)
 		if err != nil {

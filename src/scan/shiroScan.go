@@ -10,7 +10,7 @@ import (
 func shiroScan(result *utils.Result) {
 	var isshiro = false
 	target := result.GetURL()
-	conn := utils.HttpConn(Delay)
+	conn := utils.HttpConn(RunOpt.Delay)
 	req := setshirocookie(target, "1")
 	resp, err := conn.Do(req)
 	if err != nil {
