@@ -185,12 +185,12 @@ func (rs Results) Filter(k, v, op string) Results {
 	return filtedres
 }
 
-func (results Results) GetValue(key string) string {
+func (results Results) GetValues(key string) []string {
 	values := make([]string, len(results))
 	for i, result := range results {
 		values[i] = result.Get(key)
 	}
-	return strings.Join(values, "\n")
+	return values
 }
 
 type Vuln struct {

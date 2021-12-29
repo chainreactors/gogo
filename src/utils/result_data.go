@@ -112,6 +112,23 @@ func (rd ResultsData) ToConfig() string {
 	return configstr
 }
 
+func (rd ResultsData) ToValues(outType string) string {
+	outs := strings.Split(outType, ",")
+	outvalues := make([][]string, len(outs))
+	ss := make([]string, len(rd.Data))
+	for i, out := range outs {
+		outvalues[i] = rd.Data.GetValues(out)
+	}
+
+	for i := 0; i < len(ss); i++ {
+		for j := 0; j < len(outvalues); j++ {
+			ss[i] += outvalues[j][i] + "\t"
+		}
+	}
+
+	return strings.Join(ss, "\n")
+}
+
 func (rd ResultsData) ToFormat(isColor bool) string {
 	var s string
 
@@ -231,10 +248,10 @@ func LoadResultFile(file *os.File) interface{} {
 	}
 
 	content = bytes.TrimSpace(content) // 去除前后空格
-	if bytes.Contains(content, []byte("\"json_type\":\"smart\"")) {
+	if bytes.Contains(content, []byte("\"smart\"}")) {
 		content = autofixjson(content)
 		data, err = loadSmartResult(content)
-	} else if bytes.Contains(content, []byte("\"json_type\":\"scan\"")) {
+	} else if bytes.Contains(content, []byte("\"scan\"}")) {
 		content = autofixjson(content)
 		data, err = LoadResult(content)
 	} else {
