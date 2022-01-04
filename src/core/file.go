@@ -92,10 +92,7 @@ func initFile(config utils.Config) error {
 	}
 	_ = os.Remove(".sock.lock")
 
-	Opt.logFileHandle, err = InitFileHandle(tmpfilename)
-	if err != nil {
-		return err
-	}
+	Opt.logFileHandle, _ = InitFileHandle(tmpfilename)
 
 	handler()
 	return nil
