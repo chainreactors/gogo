@@ -1,7 +1,7 @@
 # Getitle
 一个资产探测扫描器. 
 
-README Version 1.0.0
+README Version 1.0.9
 
 ## Usage
 
