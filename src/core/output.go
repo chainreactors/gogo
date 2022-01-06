@@ -117,7 +117,6 @@ func FormatOutput(filename string, outputfile string, autofile bool) {
 		}
 	}
 	if textdata != "" {
-		ConsoleLog("[*] print clear output")
 		outfunc(textdata)
 	}
 }

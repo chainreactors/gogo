@@ -54,7 +54,6 @@ func makeCheckRedirectFunc(followRedirects bool, maxRedirects int) checkRedirect
 		if !followRedirects {
 			return http.ErrUseLastResponse
 		}
-
 		if maxRedirects == 0 {
 			if len(via) > defaultMaxRedirects {
 				return http.ErrUseLastResponse

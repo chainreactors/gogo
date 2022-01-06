@@ -134,7 +134,7 @@ func alived(ip string, temp *sync.Map, mask int, mod string) {
 	alivecidr := ip2superip(ip, mask)
 	_, ok := temp.LoadOrStore(alivecidr, 1)
 	if ok {
-		cidr := fmt.Sprintf("%s/%d\n", ip, mask)
+		cidr := fmt.Sprintf("%s/%d", ip, mask)
 		ConsoleLog("[*] Found " + cidr)
 		Opt.AliveSum++
 		if Opt.fileHandle != nil && mod != "sc" && (Opt.Noscan || mod == "sb") {
