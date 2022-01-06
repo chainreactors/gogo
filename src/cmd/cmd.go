@@ -62,12 +62,12 @@ func CMD(k string) {
 	uploadfile := flag.String("uf", "", "")
 	pocfile := flag.String("ef", "", "")
 	compress := flag.Bool("C", false, "")
-
+	flag.Usage = func() { exit() }
 	flag.Parse()
 	// 密钥
 	if *key != k {
 		//rev()
-		os.Exit(0)
+		exit()
 	}
 
 	// 输出 config
