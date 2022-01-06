@@ -139,6 +139,7 @@ func CMD(k string) {
 }
 
 func printConfigs(t string) {
+	Tagmap, Namemap, Portmap = LoadPortConfig()
 	if t == "port" {
 		Printportconfig()
 	} else if t == "nuclei" {
