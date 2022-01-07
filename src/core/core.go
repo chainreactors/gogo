@@ -20,17 +20,18 @@ func StraightMod(targets interface{}, config Config) {
 	// 输出预估时间
 	progressLogln(fmt.Sprintf("[*] Scan task time is about %d seconds", guessTime(config)))
 	var wgs sync.WaitGroup
-	targetChannel := generator(targets, config)
+	targetGen := NewTargetGenerator(config)
+	targetCh := targetGen.generator(targets, config.Portlist)
+	//targetChannel := generator(targets, config)
 	scanPool, _ := ants.NewPoolWithFunc(config.Threads, func(i interface{}) {
 		defaultScan(i.(targetConfig))
 		wgs.Done()
 	})
 	defer scanPool.Release()
 
-	for t := range targetChannel {
+	for t := range targetCh {
 		wgs.Add(1)
 		_ = scanPool.Invoke(t)
-
 	}
 
 	wgs.Wait()
@@ -68,13 +69,10 @@ func SmartMod(target string, config Config) {
 	}
 
 	var wg sync.WaitGroup
-	var temp sync.Map
 
-	//go safeMap(&temp, aliveC)
 	//var ipChannel chan string
-	ipChannel := ipGenerator(target, config.Mod, config.IpProbeList, &temp)
-
-	var tcChannel chan targetConfig
+	targetGen := NewTargetGenerator(config)
+	temp := targetGen.ip_generator.alivedmap
 
 	// 输出启发式扫描探针
 	probeconfig := fmt.Sprintf("[*] Smart probe ports: %s , ", strings.Join(config.SmartPortList, ","))
@@ -83,10 +81,11 @@ func SmartMod(target string, config Config) {
 	}
 	progressLogln(probeconfig)
 
-	tcChannel = tcGenerator(ipChannel, config.SmartPortList)
+	tcChannel := targetGen.smartGenerator(target, config.SmartPortList, config.Mod)
+
 	scanPool, _ := ants.NewPoolWithFunc(config.Threads, func(i interface{}) {
 		tc := i.(targetConfig)
-		smartScan(tc, &temp, mask, config.Mod)
+		smartScan(tc, temp, mask, config.Mod)
 		wg.Done()
 	})
 
@@ -132,8 +131,9 @@ func SmartMod(target string, config Config) {
 
 func alived(ip string, temp *sync.Map, mask int, mod string) {
 	alivecidr := ip2superip(ip, mask)
-	_, ok := temp.LoadOrStore(alivecidr, 1)
-	if ok {
+	_, ok := temp.Load(alivecidr)
+	if !ok {
+		temp.Store(alivecidr, 1)
 		cidr := fmt.Sprintf("%s/%d", ip, mask)
 		ConsoleLog("[*] Found " + cidr)
 		Opt.AliveSum++
