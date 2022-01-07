@@ -187,52 +187,6 @@ func isnotAlive(ip string, temp *sync.Map) bool {
 	return !ok
 }
 
-//func aIpGenerator(CIDR string, ipps []uint, ch chan string, temp *sync.Map) chan string {
-//	start, fin := getIpRange(CIDR)
-//	//ch := make(chan string)
-//	startb := start / 65536 % 256
-//	finb := fin / 65536 % 256
-//	var c, b uint
-//	//go func() {
-//	for c = 0; c < 255; c++ {
-//		for b = 0; b <= finb-startb; b++ {
-//			//println(int2ip(start + b*65536 + c*256 + 1))
-//			//ip := int2ip(start + b*65536 + c + 1)
-//			if isnotAlive(int2ip(start+b*65536+256), temp) {
-//				//println(int2ip(start + b*65536 + c*256 + 1))
-//				for _, p := range ipps {
-//					ch <- int2ip(start + b*65536 + c*256 + p)
-//				}
-//			}
-//		}
-//	}
-//	//	close(ch)
-//	//}()
-//
-//	return ch
-//}
-//
-//func ipGenerator(ip, mod string, ipl []uint, temp *sync.Map) chan string {
-//	ch := make(chan string)
-//	mask := getMask(ip)
-//	go func() {
-//		switch mod {
-//		case "s", "sb":
-//			ch = smartIpGenerator(ip, ch, temp)
-//		case "ss", "sc":
-//			if mask < 16 {
-//				ch = aIpGenerator(ip, ipl, ch, temp)
-//			} else {
-//				ch = smartIpGenerator(ip, ch, temp)
-//			}
-//		default:
-//			ch = defaultIpGenerator(ip, ch)
-//		}
-//		close(ch)
-//	}()
-//	return ch
-//}
-
 func NewTargetGenerator(config Config) *targetGenerator {
 	gen := targetGenerator{
 		ip_generator: NewIpGenerator(config),
@@ -280,12 +234,18 @@ func (gen *targetGenerator) genFromSpray(targets interface{}, portlist []string)
 	}
 }
 
+func (gen *targetGenerator) genFromResult(results Results) {
+	for _, result := range results {
+		gen.ch <- targetConfig{result.Ip, result.Port, result.Frameworks}
+	}
+}
+
 func (gen *targetGenerator) generator(targets interface{}, portlist []string) chan targetConfig {
 	gen.ch = make(chan targetConfig)
 	go func() {
 		switch targets.(type) {
 		case Results:
-			//genFromResults(targets.(Results), &targetChannel)
+			gen.genFromResult(targets.(Results))
 		default:
 			if gen.spray { // 端口喷洒
 				gen.genFromSpray(targets, portlist)
