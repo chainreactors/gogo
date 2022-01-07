@@ -132,8 +132,9 @@ func SmartMod(target string, config Config) {
 
 func alived(ip string, temp *sync.Map, mask int, mod string) {
 	alivecidr := ip2superip(ip, mask)
-	_, ok := temp.LoadOrStore(alivecidr, 1)
-	if ok {
+	_, ok := temp.Load(alivecidr)
+	if !ok {
+		temp.Store(alivecidr, 1)
 		cidr := fmt.Sprintf("%s/%d", ip, mask)
 		ConsoleLog("[*] Found " + cidr)
 		Opt.AliveSum++
