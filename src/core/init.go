@@ -209,7 +209,7 @@ func printTaskInfo(config Config, taskname string) {
 func RunTask(config Config) {
 	switch config.Mod {
 	case "default":
-		createStraightScan(config)
+		createDefaultScan(config)
 	case "a", "auto":
 		autoScan(config)
 	case "s", "f", "ss", "sc":
@@ -223,7 +223,7 @@ func RunTask(config Config) {
 		}
 
 	default:
-		createStraightScan(config)
+		createDefaultScan(config)
 	}
 }
 
@@ -295,18 +295,28 @@ func createSmartScan(ip string, config Config) {
 	mask := getMask(ip)
 	if mask >= 24 {
 		config.Mod = "default"
-		StraightMod(ip, config)
+		DefaultMod(ip, config)
 	} else {
 		SmartMod(ip, config)
 	}
 }
 
-func createStraightScan(config Config) {
+func createDefaultScan(config Config) {
 	if config.Results != nil {
-		StraightMod(config.Results, config)
-	} else if config.IPlist != nil {
-		StraightMod(config.IPlist, config)
-	} else if config.IP != "" {
-		StraightMod(config.IP, config)
+		DefaultMod(config.Results, config)
+	} else {
+		if config.Ping {
+			if config.IPlist != nil {
+				PingMod(config.IPlist, config)
+			} else if config.IP != "" {
+				PingMod(config.IP, config)
+			}
+		} else {
+			if config.IPlist != nil {
+				DefaultMod(config.IPlist, config)
+			} else if config.IP != "" {
+				DefaultMod(config.IP, config)
+			}
+		}
 	}
 }

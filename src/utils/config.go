@@ -23,7 +23,8 @@ type Config struct {
 	Output        string   `json:"-"`
 	Filename      string   `json:"-"`
 	SmartFilename string   `json:"-"`
-	Spray         bool     `json:"-"`
+	Spray         bool     `json:"spray"`
+	Ping          bool     `json:"ping"`
 	NoSpray       bool     `json:"-"`
 	Exploit       string   `json:"exploit"`
 	VerisonLevel  int      `json:"version_level"`

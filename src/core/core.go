@@ -16,7 +16,7 @@ type targetConfig struct {
 }
 
 //直接扫描
-func StraightMod(targets interface{}, config Config) {
+func DefaultMod(targets interface{}, config Config) {
 	// 输出预估时间
 	progressLogln(fmt.Sprintf("[*] Scan task time is about %d seconds", guessTime(config)))
 	var wgs sync.WaitGroup
@@ -125,11 +125,15 @@ func SmartMod(target string, config Config) {
 		config.Mod = "sb"
 		declineScan(iplist, config)
 	} else if config.Mod == "s" {
-		StraightMod(iplist, config)
+		if config.Ping {
+			PingMod(iplist, config)
+		} else {
+			DefaultMod(iplist, config)
+		}
 	}
 }
 
-func alived(ip string, temp *sync.Map, mask int, mod string) {
+func cidr_alived(ip string, temp *sync.Map, mask int, mod string) {
 	alivecidr := ip2superip(ip, mask)
 	_, ok := temp.Load(alivecidr)
 	if !ok {
@@ -150,24 +154,70 @@ func smartScan(tc targetConfig, temp *sync.Map, mask int, mod string) {
 	scan.Dispatch(result)
 
 	if result.Open {
-		alived(result.Ip, temp, mask, mod)
+		cidr_alived(result.Ip, temp, mask, mod)
 	}
 }
 
 func declineScan(iplist []string, config Config) {
 	//config.IpProbeList = []uint{1} // ipp 只在ss与sc模式中生效,为了防止时间计算错误,reset ipp 数值
-	if len(iplist) > 0 && len(config.Portlist) >= 3 {
+
+	if len(config.Portlist) < 3 {
+		if config.Ping {
+			PingMod(iplist, config)
+		} else {
+			DefaultMod(iplist, config)
+		}
+	} else {
 		spended := guessSmarttime(iplist[0], config)
 		progressLogln(fmt.Sprintf("[*] Every Sub smartscan task time is about %d seconds, total found %d B Class CIDRs about %d s", spended, len(iplist), spended*len(iplist)))
-	}
-	for _, ip := range iplist {
-		tmpalive := Opt.AliveSum
-		if len(config.Portlist) < 3 {
-			StraightMod(ip, config)
-		} else {
+
+		for _, ip := range iplist {
+			tmpalive := Opt.AliveSum
 			SmartMod(ip, config)
+			progressLogln(fmt.Sprintf("[*] Found %d alive assets from CIDR %s", Opt.AliveSum-tmpalive, ip))
+			fileFlush()
 		}
-		progressLogln(fmt.Sprintf("[*] Found %d alive assets from CIDR %s", Opt.AliveSum-tmpalive, ip))
-		fileFlush()
+	}
+}
+
+func PingMod(targets interface{}, config Config) {
+	var wgs sync.WaitGroup
+	targetGen := NewTargetGenerator(config)
+	alivedmap := targetGen.ip_generator.alivedmap
+	targetCh := targetGen.generator(targets, []string{"icmp"})
+	//targetChannel := generator(targets, config)
+	scanPool, _ := ants.NewPoolWithFunc(config.Threads, func(i interface{}) {
+		pingScan(i.(targetConfig), alivedmap)
+		wgs.Done()
+	})
+	defer scanPool.Release()
+
+	for t := range targetCh {
+		wgs.Add(1)
+		_ = scanPool.Invoke(t)
+	}
+
+	wgs.Wait()
+
+	var iplist []string
+	alivedmap.Range(func(ip, _ interface{}) bool {
+		iplist = append(iplist, ip.(string)+"/32")
+		return true
+	})
+
+	if len(iplist) == 0 {
+		return
+	}
+	progressLogln(fmt.Sprintf("[*] found %d ips", len(iplist)))
+	DefaultMod(iplist, config)
+}
+
+func pingScan(tc targetConfig, temp *sync.Map) {
+	result := NewResult(tc.ip, tc.port)
+	scan.Dispatch(result)
+
+	if result.Open {
+		temp.Store(result.Ip, true)
+		Opt.AliveSum++
 	}
 }

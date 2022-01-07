@@ -35,10 +35,6 @@ func (gen *IpGenerator) defaultIpGenerator(CIDR string) {
 	}
 }
 
-func (gen *IpGenerator) goDefaultIpGenerator(cidr string) {
-	go gen.defaultIpGenerator(cidr)
-}
-
 func (gen *IpGenerator) smartIpGenerator(cidr string) {
 	start, fin := getIpRange(cidr)
 	var outIP string
@@ -52,10 +48,6 @@ func (gen *IpGenerator) smartIpGenerator(cidr string) {
 			}
 		}
 	}
-}
-
-func (gen *IpGenerator) goSmartIpGenerator(cidr string) {
-	go gen.defaultIpGenerator(cidr)
 }
 
 func (gen *IpGenerator) IPsGenerator(ips []string) {

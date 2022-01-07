@@ -35,9 +35,9 @@ func CMD(k string) {
 	flag.StringVar(&config.SmartPort, "sp", "default", "")
 	flag.StringVar(&config.IpProbe, "ipp", "default", "")
 	flag.BoolVar(&config.Spray, "s", false, "")
+	flag.BoolVar(&config.Ping, "ping", false, "")
 	flag.StringVar(&config.Filename, "f", "", "")
 	flag.BoolVar(&config.NoSpray, "ns", false, "")
-
 	//全局变量初始化
 	flag.StringVar(&Opt.Output, "o", "full", "")
 	flag.BoolVar(&Opt.Clean, "c", false, "")
