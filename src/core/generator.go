@@ -62,7 +62,7 @@ func (gen *IpGenerator) IPsGenerator(ips []string) {
 	}
 }
 
-func (gen *IpGenerator) aIPgenerator(cidr string) {
+func (gen *IpGenerator) sSmartGenerator(cidr string) {
 	start, fin := getIpRange(cidr)
 	//ch := make(chan string)
 	startb := start / 65536 % 256
@@ -83,7 +83,7 @@ func (gen *IpGenerator) aIPgenerator(cidr string) {
 	}
 }
 
-func (gen *IpGenerator) Generate(target interface{}, mod string) chan string {
+func (gen *IpGenerator) generate(target interface{}, mod string) chan string {
 	gen.ch = make(chan string)
 
 	go func() {
@@ -103,7 +103,7 @@ func (gen *IpGenerator) Generate(target interface{}, mod string) chan string {
 				}
 			case "ss", "sc":
 				if mask < 16 {
-					gen.aIPgenerator(cidr)
+					gen.sSmartGenerator(cidr)
 				} else if mask >= 16 && mask < 24 {
 					gen.smartIpGenerator(cidr)
 				} else {
@@ -203,7 +203,7 @@ type targetGenerator struct {
 }
 
 func (gen *targetGenerator) genFromDefault(targets interface{}, portlist []string) {
-	ch := gen.ip_generator.Generate(targets, "default")
+	ch := gen.ip_generator.generate(targets, "default")
 	for ip := range ch {
 		for _, port := range portlist {
 			gen.ch <- targetConfig{ip, port, nil}
@@ -218,14 +218,14 @@ func (gen *targetGenerator) genFromSpray(targets interface{}, portlist []string)
 		switch targets.(type) {
 		case []string:
 			for _, cidr := range targets.([]string) {
-				ch = gen.ip_generator.Generate(cidr, "default")
+				ch = gen.ip_generator.generate(cidr, "default")
 				for ip := range ch {
 					gen.ch <- targetConfig{ip, port, nil} // finger适配
 				}
 				fileFlush()
 			}
 		default:
-			ch = gen.ip_generator.Generate(targets.(string), "default")
+			ch = gen.ip_generator.generate(targets.(string), "default")
 			for ip := range ch {
 				gen.ch <- targetConfig{ip, port, nil}
 			}
@@ -263,7 +263,7 @@ func (gen *targetGenerator) smartGenerator(targets string, portlist []string, mo
 	gen.ch = make(chan targetConfig)
 
 	go func() {
-		ch := gen.ip_generator.Generate(targets, mod)
+		ch := gen.ip_generator.generate(targets, mod)
 		for ip := range ch {
 			for _, port := range portlist {
 				gen.ch <- targetConfig{ip: ip, port: port}
@@ -306,7 +306,7 @@ func (gen *targetGenerator) smartGenerator(targets string, portlist []string, mo
 //		}
 //	}
 //ipgen := NewIpGenerator(config)
-//ipgen.Generate(config.IP, config.Mod)
+//ipgen.generate(config.IP, config.Mod)
 //for ip := range ipgen.ch {
 //	for _, port := range config.Portlist {
 //		targetChannel <- targetConfig{ip, port, nil}
