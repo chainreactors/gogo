@@ -230,20 +230,23 @@ func RunTask(config Config) {
 	}
 }
 
-func guessTime(config Config) int {
+func guessTime(targets interface{}, portlist []string, thread int) int {
 	ipcount := 0
 
-	portcount := len(config.Portlist)
-	if config.IPlist != nil {
-		for _, ip := range config.IPlist {
+	portcount := len(portlist)
+
+	switch targets.(type) {
+	case []string:
+		for _, ip := range targets.([]string) {
 			mask := getMask(ip)
 			ipcount += countip(mask)
 		}
-	} else {
-		mask := getMask(config.IP)
+	default:
+		mask := getMask(targets.(string))
 		ipcount = countip(mask)
 	}
-	return (portcount*ipcount/config.Threads)*4 + 4
+
+	return (portcount*ipcount/thread)*4 + 4
 }
 
 func guessSmarttime(target string, config Config) int {

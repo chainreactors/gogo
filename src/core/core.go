@@ -18,7 +18,7 @@ type targetConfig struct {
 //直接扫描
 func DefaultMod(targets interface{}, config Config) {
 	// 输出预估时间
-	progressLogln(fmt.Sprintf("[*] Scan task time is about %d seconds", guessTime(config)))
+	progressLogln(fmt.Sprintf("[*] Scan task time is about %d seconds", guessTime(targets, config.Portlist, config.Threads)))
 	var wgs sync.WaitGroup
 	targetGen := NewTargetGenerator(config)
 	targetCh := targetGen.generator(targets, config.Portlist)
@@ -182,6 +182,7 @@ func declineScan(iplist []string, config Config) {
 
 func PingMod(targets interface{}, config Config) {
 	var wgs sync.WaitGroup
+	progressLogln(fmt.Sprintf("[*] Ping spray task time is about %d seconds", guessTime(targets, config.Portlist, guessTime(targets, []string{"icmp"}, config.Threads))))
 	targetGen := NewTargetGenerator(config)
 	alivedmap := targetGen.ip_generator.alivedMap
 	targetCh := targetGen.generator(targets, []string{"icmp"})
@@ -208,7 +209,7 @@ func PingMod(targets interface{}, config Config) {
 	if len(iplist) == 0 {
 		return
 	}
-	progressLogln(fmt.Sprintf("[*] found %d ips", len(iplist)))
+	progressLogln(fmt.Sprintf("[*] found %d alived ips", len(iplist)))
 	DefaultMod(iplist, config)
 }
 
