@@ -37,6 +37,7 @@ func CMD(k string) {
 	flag.BoolVar(&config.Spray, "s", false, "")
 	flag.BoolVar(&config.Ping, "ping", false, "")
 	flag.StringVar(&config.Filename, "f", "", "")
+	flag.StringVar(&config.ExcludeIPs, "eip", "", "")
 	flag.BoolVar(&config.NoSpray, "ns", false, "")
 
 	//全局变量初始化

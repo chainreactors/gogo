@@ -72,7 +72,7 @@ func SmartMod(target string, config Config) {
 
 	//var ipChannel chan string
 	targetGen := NewTargetGenerator(config)
-	temp := targetGen.ip_generator.alivedmap
+	temp := targetGen.ip_generator.alivedMap
 
 	// 输出启发式扫描探针
 	probeconfig := fmt.Sprintf("[*] Smart probe ports: %s , ", strings.Join(config.SmartPortList, ","))
@@ -183,7 +183,7 @@ func declineScan(iplist []string, config Config) {
 func PingMod(targets interface{}, config Config) {
 	var wgs sync.WaitGroup
 	targetGen := NewTargetGenerator(config)
-	alivedmap := targetGen.ip_generator.alivedmap
+	alivedmap := targetGen.ip_generator.alivedMap
 	targetCh := targetGen.generator(targets, []string{"icmp"})
 	//targetChannel := generator(targets, config)
 	scanPool, _ := ants.NewPoolWithFunc(config.Threads, func(i interface{}) {

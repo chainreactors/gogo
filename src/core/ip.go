@@ -52,7 +52,6 @@ func getMask(cidr string) int {
 }
 
 func getMaskRange(mask int) (before uint, after uint) {
-
 	before = uint(math.Pow(2, 32) - math.Pow(2, float64(32-mask)))
 	after = uint(math.Pow(2, float64(32-mask)) - 1)
 	return before, after
@@ -88,7 +87,7 @@ func getIp(target string) string {
 	return ""
 }
 
-func IpFormat(target string) string {
+func cidrFormat(target string) string {
 	var ip, mask string
 	target = strings.TrimSpace(target)
 	target = strings.Replace(target, "http://", "", -1)
@@ -123,7 +122,7 @@ func initIP(config *Config) {
 		if strings.Contains(config.IP, ",") {
 			config.IPlist = strings.Split(config.IP, ",")
 		} else {
-			config.IP = IpFormat(config.IP)
+			config.IP = cidrFormat(config.IP)
 			if config.IP == "" {
 				fmt.Println("[-] IP format error")
 				os.Exit(0)
@@ -135,7 +134,7 @@ func initIP(config *Config) {
 	if config.IPlist != nil {
 		var iplist []string
 		for _, ip := range config.IPlist {
-			tmpip := IpFormat(ip)
+			tmpip := cidrFormat(ip)
 			if tmpip != "" {
 				iplist = append(iplist, tmpip)
 			}

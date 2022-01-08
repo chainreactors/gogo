@@ -52,15 +52,8 @@ var Opt = Options{
 }
 
 func Init(config Config) Config {
-	//println("*********  main 1.0.7 beta by Sangfor  *********")
 
-	//if config.Mod != "default" && config.ListFile != "" {
-	//	println("[-] error Smart . config")
-	//	os.Exit(0)
-	//}
-
-	// check命令行参数
-	err := CheckCommand(config)
+	err := validate(config)
 	if err != nil {
 		fmt.Println("[-]" + err.Error())
 		os.Exit(0)
@@ -154,6 +147,16 @@ func Init(config Config) Config {
 		config.IpProbeList = []uint{1}
 	}
 
+	if config.ExcludeIPs != "" {
+		config.ExcludeMap = make(map[uint]bool)
+		for _, ip := range strings.Split(config.ExcludeIPs, ",") {
+			start, end := getIpRange(cidrFormat(ip))
+			for i := start; i <= end; i++ {
+				config.ExcludeMap[i] = true
+			}
+		}
+	}
+
 	// 初始已完成,输出任务基本信息
 	taskname := config.GetTargetName()
 	// 输出任务的基本信息
@@ -161,7 +164,7 @@ func Init(config Config) Config {
 	return config
 }
 
-func CheckCommand(config Config) error {
+func validate(config Config) error {
 	// 一些命令行参数错误处理,如果check没过直接退出程序或输出警告
 	//if config.Mod == "ss" && config.ListFile != "" {
 	//	fmt.Println("[-] error Smart . can not use File input")
