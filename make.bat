@@ -1,4 +1,5 @@
 python updateconfig.py
+rm ./bin/*
 set name=getitle
 gox.exe -osarch="linux/amd64 linux/arm64 linux/386 windows/amd64 linux/mips64 windows/386 darwin/amd64" -ldflags="-s -w" -gcflags="-trimpath=$GOPATH" -asmflags="-trimpath=$GOPATH" -output=".\bin\%name%_{{.OS}}_{{.Arch}}" .
 
@@ -31,4 +32,4 @@ rm ./bin/%name%_windows_386.exe
 rm ./bin/%name%_windows_386_upx.exe
 
 @REM 打包
-tar -zcvf release/%name%v%1.tar.gz bin/* README.md gtfilter.py UPDATELOG.md
+tar -zcvf release/%name%v%1.tar.gz bin/* doc/* README.md gtfilter.py UPDATELOG.md
