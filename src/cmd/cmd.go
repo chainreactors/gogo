@@ -38,6 +38,7 @@ func CMD(k string) {
 	flag.BoolVar(&config.Ping, "ping", false, "")
 	flag.StringVar(&config.Filename, "f", "", "")
 	flag.BoolVar(&config.NoSpray, "ns", false, "")
+
 	//全局变量初始化
 	flag.StringVar(&Opt.Output, "o", "full", "")
 	flag.BoolVar(&Opt.Clean, "c", false, "")
@@ -62,6 +63,7 @@ func CMD(k string) {
 	uploadfile := flag.String("uf", "", "")
 	pocfile := flag.String("ef", "", "")
 	compress := flag.Bool("C", false, "")
+	gtversion := flag.Bool("version", false, "")
 	flag.Usage = func() { exit() }
 	flag.Parse()
 	// 密钥
@@ -69,7 +71,9 @@ func CMD(k string) {
 		//rev()
 		exit()
 	}
-
+	if *gtversion {
+		fmt.Println("v1.1.0")
+	}
 	// 输出 config
 	if *printType != "" {
 		printConfigs(*printType)

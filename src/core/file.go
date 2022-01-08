@@ -9,6 +9,8 @@ import (
 	"getitle/src/utils"
 	"io/ioutil"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -218,28 +220,29 @@ var fileint = 1
 
 func GetFilename(config utils.Config, autofile, hiddenfile bool, outtype string) string {
 	var basename string
+	abspath := getExcPath()
 	if autofile {
-		basename = getAutofile(config, outtype)
+		basename = abspath + getAutofile(config, outtype) + ".dat"
 	} else if hiddenfile {
 		if IsWin() {
-			basename = "App_1634884664021088500_EC1B25B2-9453-49EE-A1E2-112B4D539F5"
+			basename = abspath + "App_1634884664021088500_EC1B25B2-9453-49EE-A1E2-112B4D539F5.dat"
 		} else {
-			basename = ".systemd-private-701215aa8263408d8d44f4507834d77"
+			basename = abspath + ".systemd-private-701215aa8263408d8d44f4507834d77"
 		}
 	} else {
 		return ""
 	}
-	for isExist(basename + ToString(fileint) + ".dat") {
+	for isExist(basename + ToString(fileint)) {
 		fileint++
 	}
-	return basename + ToString(fileint) + ".dat"
+	return basename + ToString(fileint)
 }
 
 func getAutofile(config utils.Config, outtype string) string {
 	var basename string
 	target := strings.Replace(config.GetTargetName(), "/", "_", -1)
 	ports := strings.Replace(config.Ports, ",", "_", -1)
-	basename = fmt.Sprintf(".%s_%s_%s_%s_", target, ports, config.Mod, outtype)
+	basename = fmt.Sprintf(".%s_%s_%s_%s", target, ports, config.Mod, outtype)
 	return basename
 }
 
@@ -262,4 +265,14 @@ func Open(filename string) *os.File {
 		os.Exit(0)
 	}
 	return f
+}
+
+func getExcPath() string {
+	file, _ := exec.LookPath(os.Args[0])
+	// 获取包含可执行文件名称的路径
+	path, _ := filepath.Abs(file)
+	// 获取可执行文件所在目录
+	index := strings.LastIndex(path, string(os.PathSeparator))
+	ret := path[:index]
+	return strings.Replace(ret, "\\", "/", -1) + "/"
 }
