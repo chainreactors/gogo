@@ -73,6 +73,7 @@ func CMD(k string) {
 	}
 	if *gtversion {
 		fmt.Println("v1.1.0")
+		os.Exit(0)
 	}
 	// 输出 config
 	if *printType != "" {
