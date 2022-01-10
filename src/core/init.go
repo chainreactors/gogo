@@ -1,8 +1,6 @@
 package core
 
 import (
-	"bufio"
-	"bytes"
 	"errors"
 	"fmt"
 	. "getitle/src/scan"
@@ -23,25 +21,19 @@ var InterConfig = map[string][]string{
 }
 
 type Options struct {
-	AliveSum        int
-	Clean           bool
-	Noscan          bool
-	Compress        bool
-	Quiet           bool
-	fileHandle      *os.File
-	smartFileHandle *os.File
-	pingFileHandle  *os.File
-	logFileHandle   *os.File
-	fileWriter      *bufio.Writer
-	pingFileWriter  *bufio.Writer
-	smartFileWriter *bufio.Writer
-	DataCh          chan string
-	LogDataCh       chan string
-	comBuf          *bytes.Buffer
-	smartComBuf     *bytes.Buffer
-	pingComBuf      *bytes.Buffer
-	Output          string
-	FileOutput      string
+	AliveSum   int
+	Clean      bool
+	Noscan     bool
+	Compress   bool
+	Quiet      bool
+	file       *File
+	smartFile  *File
+	pingFile   *File
+	logFile    *File
+	DataCh     chan string
+	LogDataCh  chan string
+	Output     string
+	FileOutput string
 }
 
 var Opt = Options{

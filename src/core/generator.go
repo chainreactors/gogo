@@ -60,7 +60,7 @@ func (gen *IpGenerator) IPsGenerator(ips []string) {
 			progressLogln(fmt.Sprintf("[*] Processed CIDR: %s, found %d ports", cidr, Opt.AliveSum-tmpalive))
 		}
 		// 每个c段同步数据到文件
-		fileFlush()
+		Opt.file.sync()
 	}
 }
 
@@ -162,7 +162,7 @@ func (gen *targetGenerator) genFromSpray(targets interface{}, portlist []string)
 				for ip := range ch {
 					gen.ch <- targetConfig{ip, port, nil} // finger适配
 				}
-				fileFlush()
+				Opt.file.sync()
 			}
 		default:
 			ch = gen.ip_generator.generate(targets.(string), "default")

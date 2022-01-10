@@ -129,7 +129,7 @@ func progressLogln(s string) {
 		return
 	}
 
-	if Opt.logFileHandle != nil {
+	if Opt.logFile != nil {
 		Opt.LogDataCh <- s
 	}
 }

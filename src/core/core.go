@@ -46,7 +46,7 @@ func defaultScan(tc targetConfig) {
 		if !Opt.Clean {
 			fmt.Print(output(result, Opt.Output))
 		}
-		if Opt.fileHandle != nil {
+		if Opt.file != nil {
 			Opt.DataCh <- output(result, Opt.FileOutput)
 		}
 	}
@@ -113,7 +113,7 @@ func SmartMod(target string, config Config) {
 		sort_cidr(iplist)
 	}
 
-	if Opt.smartFileHandle != nil {
+	if Opt.smartFile != nil {
 		writeSmartResult(iplist)
 	}
 
@@ -141,7 +141,7 @@ func cidr_alived(ip string, temp *sync.Map, mask int, mod string) {
 		cidr := fmt.Sprintf("%s/%d", ip, mask)
 		ConsoleLog("[*] Found " + cidr)
 		Opt.AliveSum++
-		if Opt.fileHandle != nil && mod != "sc" && (Opt.Noscan || mod == "sb") {
+		if Opt.file != nil && mod != "sc" && (Opt.Noscan || mod == "sb") {
 			// 只有-no 或 -m sc下,才会将网段信息输出到文件.
 			// 模式为sc时,b段将不会输出到文件,只输出c段
 			Opt.DataCh <- cidr
@@ -175,7 +175,7 @@ func declineScan(iplist []string, config Config) {
 			tmpalive := Opt.AliveSum
 			SmartMod(ip, config)
 			progressLogln(fmt.Sprintf("[*] Found %d alive assets from CIDR %s", Opt.AliveSum-tmpalive, ip))
-			fileFlush()
+			Opt.file.sync()
 		}
 	}
 }
@@ -207,6 +207,7 @@ func PingMod(targets interface{}, config Config) {
 	})
 
 	if len(iplist) == 0 {
+		progressLogln(fmt.Sprintf("[*] not found any alived ip"))
 		return
 	}
 	progressLogln(fmt.Sprintf("[*] found %d alived ips", len(iplist)))
