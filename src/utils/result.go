@@ -160,6 +160,20 @@ func (result Result) toZombie() zombiemeta {
 	}
 }
 
+func (result Result) Filter(k, v, op string) bool {
+	var matchfunc func(string, string) bool
+	if op == "::" {
+		matchfunc = strings.Contains
+	} else {
+		matchfunc = strings.EqualFold
+	}
+
+	if matchfunc(strings.ToLower(result.Get(k)), v) {
+		return true
+	}
+	return false
+}
+
 type zombiemeta struct {
 	IP     string `json:"IP"`
 	Port   int    `json:"Port"`
@@ -170,15 +184,9 @@ type Results []Result
 
 func (rs Results) Filter(k, v, op string) Results {
 	var filtedres Results
-	var matchfunc func(string, string) bool
-	if op == "::" {
-		matchfunc = strings.Contains
-	} else {
-		matchfunc = strings.EqualFold
-	}
 
 	for _, result := range rs {
-		if matchfunc(result.Get(k), v) {
+		if result.Filter(k, v, op) {
 			filtedres = append(filtedres, result)
 		}
 	}
