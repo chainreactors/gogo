@@ -18,7 +18,7 @@ func icmpScan(result *utils.Result) {
 	const ECHO_REQUEST_HEAD_LEN = 8
 	host := result.Ip
 	size = 32
-	delay := time.Duration(800)
+	delay := time.Duration(RunOpt.Delay / 2)
 	conn, err := net.DialTimeout("ip4:icmp", host, delay*time.Millisecond)
 	if err != nil {
 		result.Error = err.Error()
