@@ -156,7 +156,7 @@ func (result Result) toZombie() zombiemeta {
 	return zombiemeta{
 		IP:     result.Ip,
 		Port:   port,
-		Server: zombiemap[result.GetFirstFramework()],
+		Server: zombiemap[strings.ToLower(result.GetFirstFramework())],
 	}
 }
 
