@@ -183,6 +183,6 @@ func handlerMatchedResult(result *utils.Result, finger *utils.Finger, res, conte
 	result.AddFramework(utils.Framework{Name: finger.Name, Version: res})
 
 	if finger.Level >= 1 && content != "" { // 需要主动发包的指纹重新收集title
-		result.Title = content
+		result.Title = utils.EncodeTitle(result.Title)
 	}
 }

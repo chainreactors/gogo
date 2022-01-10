@@ -180,6 +180,7 @@ func fileFlush() {
 			Opt.comBuf.Reset()
 		}
 		_ = Opt.fileWriter.Flush()
+		_ = Opt.fileHandle.Sync()
 	}
 }
 
