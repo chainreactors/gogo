@@ -41,7 +41,7 @@ func isExist(filename string) bool {
 	return exist
 }
 
-func InitFileHandle(filename string) (*os.File, error) {
+func initFileHandle(filename string) (*os.File, error) {
 	var err error
 	var filehandle *os.File
 	if isExist(filename) { //如果文件存在
@@ -60,30 +60,41 @@ func initFile(config utils.Config) error {
 	if Opt.Compress {
 		Opt.comBuf = bytes.NewBuffer([]byte{})
 		Opt.smartComBuf = bytes.NewBuffer([]byte{})
+		Opt.pingComBuf = bytes.NewBuffer([]byte{})
 	}
 	// 初始化res文件handler
 	if config.Filename != "" {
 		Opt.Clean = !Opt.Clean
 		// 创建output的filehandle
-		Opt.fileHandle, err = InitFileHandle(config.Filename)
+		Opt.fileHandle, err = initFileHandle(config.Filename)
 		if err != nil {
 			return err
 		}
 		Opt.fileWriter = bufio.NewWriter(Opt.fileHandle)
 		if Opt.FileOutput == "json" && !(Opt.Noscan || config.Mod == "sc") {
-			writeFile(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("scan")), false)
+			write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("scan")), Opt.fileWriter, Opt.comBuf)
 		}
 	}
 
 	// -af 参数下的启发式扫描结果handler初始化
 	if config.SmartFilename != "" {
-		Opt.smartFileHandle, err = InitFileHandle(config.SmartFilename)
+		Opt.smartFileHandle, err = initFileHandle(config.SmartFilename)
 		if err != nil {
 			return err
 		}
-		Opt.smartfileWriter = bufio.NewWriter(Opt.smartFileHandle)
-		writeFile(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("smart")), true)
+		Opt.smartFileWriter = bufio.NewWriter(Opt.smartFileHandle)
+		write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("smart")), Opt.smartFileWriter, Opt.smartComBuf)
 		smartFileFlush()
+	}
+
+	if config.PingFilename != "" {
+		Opt.pingFileHandle, err = initFileHandle(config.PingFilename)
+		if err != nil {
+			return err
+		}
+		Opt.pingFileWriter = bufio.NewWriter(Opt.pingFileHandle)
+		write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("ping")), Opt.pingFileWriter, Opt.pingComBuf)
+		pingFileFlush()
 	}
 
 	// 初始化进度文件
@@ -94,7 +105,7 @@ func initFile(config utils.Config) error {
 	}
 	_ = os.Remove(".sock.lock")
 
-	Opt.logFileHandle, _ = InitFileHandle(tmpfilename)
+	Opt.logFileHandle, _ = initFileHandle(tmpfilename)
 
 	handler()
 	return nil
@@ -144,6 +155,12 @@ func fileCloser() {
 		_ = Opt.smartFileHandle.Close()
 	}
 
+	if Opt.pingFileHandle != nil {
+		write("]}", Opt.pingFileWriter, Opt.pingComBuf)
+		pingFileFlush()
+		_ = Opt.pingFileHandle.Close()
+	}
+
 }
 
 func write(res string, file *bufio.Writer, buf *bytes.Buffer) {
@@ -167,7 +184,7 @@ func write(res string, file *bufio.Writer, buf *bytes.Buffer) {
 
 func writeFile(res string, isSmart bool) {
 	if isSmart {
-		write(res, Opt.smartfileWriter, Opt.smartComBuf)
+		write(res, Opt.smartFileWriter, Opt.smartComBuf)
 	} else {
 		write(res, Opt.fileWriter, Opt.comBuf)
 	}
@@ -185,12 +202,22 @@ func fileFlush() {
 }
 
 func smartFileFlush() {
-	if Opt.smartfileWriter != nil {
+	if Opt.smartFileWriter != nil {
 		if Opt.smartComBuf != nil {
-			_, _ = Opt.smartfileWriter.Write(utils.Flate(Opt.smartComBuf.Bytes()))
+			_, _ = Opt.smartFileWriter.Write(utils.Flate(Opt.smartComBuf.Bytes()))
 			Opt.smartComBuf.Reset()
 		}
-		_ = Opt.smartfileWriter.Flush()
+		_ = Opt.smartFileWriter.Flush()
+	}
+}
+
+func pingFileFlush() {
+	if Opt.pingFileWriter != nil {
+		if Opt.pingComBuf != nil {
+			_, _ = Opt.pingFileWriter.Write(utils.Flate(Opt.pingComBuf.Bytes()))
+			Opt.pingComBuf.Reset()
+		}
+		_ = Opt.pingFileWriter.Flush()
 	}
 }
 
@@ -207,6 +234,24 @@ func writeSmartResult(ips []string) {
 	writeFile(strings.Join(iplists, ","), true)
 	commaflag = true
 	smartFileFlush()
+	_ = Opt.smartFileHandle.Sync()
+}
+
+var commaflag2 bool = false
+
+func writePingResult(ips []string) {
+	iplists := make([]string, len(ips))
+	for i, ip := range ips {
+		iplists[i] = "\"" + getIP(ip) + "\""
+	}
+
+	if commaflag2 {
+		write(",", Opt.pingFileWriter, Opt.pingComBuf)
+	}
+	write(strings.Join(iplists, ","), Opt.pingFileWriter, Opt.pingComBuf)
+	commaflag2 = true
+	pingFileFlush()
+	_ = Opt.pingFileHandle.Sync()
 }
 
 //var winfile = []string{

@@ -248,7 +248,7 @@ func LoadResultFile(file *os.File) interface{} {
 	}
 
 	content = bytes.TrimSpace(content) // 去除前后空格
-	if bytes.Contains(content, []byte("\"smart\"}")) {
+	if bytes.Contains(content, []byte("\"smart\"}")) || bytes.Contains(content, []byte("\"ping\"}")) {
 		content = autofixjson(content)
 		data, err = loadSmartResult(content)
 	} else if bytes.Contains(content, []byte("\"scan\"}")) {

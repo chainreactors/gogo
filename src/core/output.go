@@ -81,7 +81,7 @@ func FormatOutput(filename string, outputfile string, autofile bool) {
 	}
 
 	if outputfile != "" {
-		fileHandle, err := InitFileHandle(outputfile)
+		fileHandle, err := initFileHandle(outputfile)
 		if err != nil {
 			fmt.Println("[-] " + err.Error())
 			os.Exit(0)

@@ -131,9 +131,12 @@ func CMD(k string) {
 	var filenamelog string
 	// 输出
 	if config.Filename != "" {
-		filenamelog = fmt.Sprintf("[*] Results filename: %s, ", config.Filename)
+		filenamelog = fmt.Sprintf("[*] Results filename: %s , ", config.Filename)
 		if config.SmartFilename != "" {
-			filenamelog += "Smartscan result filename: " + config.SmartFilename
+			filenamelog += "Smartscan result filename: " + config.SmartFilename + " , "
+		}
+		if config.PingFilename != "" {
+			filenamelog += "Pingscan result filename: " + config.PingFilename
 		}
 		ConsoleLog(filenamelog)
 	}

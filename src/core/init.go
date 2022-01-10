@@ -30,13 +30,16 @@ type Options struct {
 	Quiet           bool
 	fileHandle      *os.File
 	smartFileHandle *os.File
+	pingFileHandle  *os.File
 	logFileHandle   *os.File
 	fileWriter      *bufio.Writer
-	smartfileWriter *bufio.Writer
+	pingFileWriter  *bufio.Writer
+	smartFileWriter *bufio.Writer
 	DataCh          chan string
 	LogDataCh       chan string
 	comBuf          *bytes.Buffer
 	smartComBuf     *bytes.Buffer
+	pingComBuf      *bytes.Buffer
 	Output          string
 	FileOutput      string
 }

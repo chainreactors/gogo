@@ -8,7 +8,6 @@ import (
 	"net"
 	"os"
 	"sort"
-	"strconv"
 	"strings"
 )
 
@@ -36,19 +35,22 @@ func ip2superip(ip string, mask int) string {
 }
 
 func splitCIDR(cidr string) (string, int) {
-	var mask int
 	tmp := strings.Split(cidr, "/")
 	if len(tmp) == 2 {
-		mask, _ = strconv.Atoi(tmp[1])
+		return tmp[0], ToInt(tmp[1])
 	} else {
-		mask = 32
+		return tmp[0], 32
 	}
-	return tmp[0], mask
 }
 
 func getMask(cidr string) int {
 	_, mask := splitCIDR(cidr)
 	return mask
+}
+
+func getIP(cidr string) string {
+	ip, _ := splitCIDR(cidr)
+	return ip
 }
 
 func getMaskRange(mask int) (before uint, after uint) {
@@ -68,7 +70,7 @@ func getIpRange(target string) (start uint, fin uint) {
 	return start, fin
 }
 
-func getIp(target string) string {
+func parseIP(target string) string {
 	target = strings.TrimSpace(target)
 	if isIPv4(target) {
 		return target
@@ -101,7 +103,7 @@ func cidrFormat(target string) string {
 		mask = "32"
 	}
 
-	if ip = getIp(ip); ip != "" {
+	if ip = parseIP(ip); ip != "" {
 		return ip + "/" + mask
 	} else {
 		return ""

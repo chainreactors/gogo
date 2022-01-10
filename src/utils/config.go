@@ -25,6 +25,7 @@ type Config struct {
 	Output        string        `json:"-"`
 	Filename      string        `json:"-"`
 	SmartFilename string        `json:"-"`
+	PingFilename  string        `json:"-"`
 	Spray         bool          `json:"spray"`
 	Ping          bool          `json:"ping"`
 	NoSpray       bool          `json:"-"`

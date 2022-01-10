@@ -35,4 +35,8 @@ func parseFilename(autofile, hiddenfile bool, config *utils.Config) {
 	if config.IsSmartScan() && !Opt.Noscan {
 		config.SmartFilename = GetFilename(*config, autofile, hiddenfile, "cidr")
 	}
+
+	if config.Ping {
+		config.PingFilename = GetFilename(*config, autofile, hiddenfile, "ping")
+	}
 }
