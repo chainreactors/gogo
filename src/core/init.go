@@ -113,7 +113,6 @@ func Init(config Config) Config {
 			fmt.Println("[-] not support result, maybe use -l")
 			os.Exit(0)
 		}
-		return config
 	}
 
 	initIP(&config)
@@ -196,7 +195,7 @@ func printTaskInfo(config Config, taskname string) {
 
 	progressLogln(fmt.Sprintf("[*] Current goroutines: %d, Version Level: %d,Exploit Target: %s, Spray Scan: %t", config.Threads, RunOpt.VersionLevel, RunOpt.Exploit, config.Spray))
 	if config.JsonFile == "" {
-		progressLogln(fmt.Sprintf("[*] Start . task %s ,total ports: %d , mod: %s", taskname, len(config.Portlist), config.Mod))
+		progressLogln(fmt.Sprintf("[*] Starting task %s ,total ports: %d , mod: %s", taskname, len(config.Portlist), config.Mod))
 		// 输出端口信息
 		if len(config.Portlist) > 500 {
 			progressLogln("[*] too much ports , only show top 500 ports: " + strings.Join(config.Portlist[:500], ",") + "......")
@@ -204,8 +203,8 @@ func printTaskInfo(config Config, taskname string) {
 			progressLogln("[*] ports: " + strings.Join(config.Portlist, ","))
 		}
 	} else {
-		progressLogln(fmt.Sprintf("[*] Start . task %s ,total target: %d", taskname, len(config.Results)))
-		progressLogln(fmt.Sprintf("[*] Json . task time is about %d seconds", (len(config.Results)/config.Threads)*4+4))
+		progressLogln(fmt.Sprintf("[*] Starting results task: %s ,total target: %d", taskname, len(config.Results)))
+		//progressLogln(fmt.Sprintf("[*] Json . task time is about %d seconds", (len(config.Results)/config.Threads)*4+4))
 	}
 }
 
@@ -241,6 +240,9 @@ func guessTime(targets interface{}, portlist []string, thread int) int {
 			mask := getMask(ip)
 			ipcount += countip(mask)
 		}
+	case Results:
+		ipcount = len(targets.(Results))
+		portcount = 1
 	default:
 		mask := getMask(targets.(string))
 		ipcount = countip(mask)
