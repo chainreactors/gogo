@@ -232,7 +232,7 @@ class GetitleResults:
 
 
 def toFile(filename, content: str):
-    with open(filename,"w", encoding="utf-8") as f:
+    with open(filename, "a+", encoding="utf-8") as f:
         f.write(content)
 
 
@@ -242,27 +242,41 @@ def fixjson(content:str):
         return content + "]}"
     return content
 
+
 def decompress(bs):
     flatedict = bytes(', ":'.encode())
     com = zlib.decompressobj(-15,zdict=flatedict)
     return com.decompress(bs).decode()
 
+
+def loadResult(file):
+    try:
+        content = file.read()
+        if content[:10] != '{"config"':
+            content = decompress(content)
+
+        content = fixjson(content)
+        return json.loads(content)["data"]
+    except:
+        return []
+
+
 @click.command()
-@click.argument("file")
+@click.argument("files", nargs=-1, type=click.File("rb"))
 @click.option('--output', '-o', default="target", help='Output format.')
 @click.option('--expr', '-e', "exprs", multiple=True, help='filter rules')
 @click.option('--outfile', '-f', help='output file')
 @click.option('--or', '-or', "_or", default=False, is_flag=True)
-def main(file, output, exprs, outfile, _or):
+def main(files, output, exprs, outfile, _or):
     """    使用帮助:
 
     \b
-    过滤规则-f e.g: !!!请使用小写字母!!!
+    过滤规则-e e.g: !!!请使用小写字母!!!
     全等匹配: port==443
     模糊匹配: title::系统
     排除: protocol!=tcp
     模糊排除: protocol!:tcp
-    允许使用多个filter器,例如 -f port==443 -f title::系统
+    允许使用多个filter器,例如 -e port==443 -e title::系统
 
     \b
     开启增量匹配 -or
@@ -298,21 +312,16 @@ def main(file, output, exprs, outfile, _or):
     else:
         outfunc = partial(toFile, outfile)
 
-    content = open(file, "rb").read()
-    if content[:10] != '{"config"':
-        content = decompress(content)
+    results = []
+    for file in files:
+        results += loadResult(file)
 
-    content = fixjson(content)
-    results = json.loads(content)
-    if "data" in results:
-        results = GetitleResults(results["data"])
-    else:
-        results = GetitleResults(results)
+    results = GetitleResults(results)
     results = results.exprs(exprs,_or)
 
     if output == "json":  # 输出过滤后的json
         outfunc(results.raw_json)
-    elif output == "zombie": # 输出结果到zombie
+    elif output == "zombie":  # 输出结果到zombie
         outfunc(results.zombie)
     else:
         outputs = output.split(",")
