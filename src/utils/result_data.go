@@ -124,6 +124,7 @@ func (rd ResultsData) ToValues(outType string) string {
 		for j := 0; j < len(outvalues); j++ {
 			ss[i] += outvalues[j][i] + "\t"
 		}
+		strings.TrimSpace(ss[i])
 	}
 
 	return strings.Join(ss, "\n")
@@ -283,7 +284,7 @@ func isBase64(content []byte) bool {
 
 func IsBin(content []byte) bool {
 	for _, i := range content {
-		if i < 10 {
+		if i < 9 {
 			return true
 		}
 	}

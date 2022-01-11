@@ -211,7 +211,9 @@ func PingMod(targets interface{}, config Config) {
 		return
 	}
 	progressLogln(fmt.Sprintf("[*] found %d alived ips", len(iplist)))
-	writePingResult(iplist)
+	if Opt.pingFile != nil {
+		writePingResult(iplist)
+	}
 	DefaultMod(iplist, config)
 }
 

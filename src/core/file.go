@@ -78,6 +78,9 @@ func (f *File) writeBytes(bs []byte) {
 }
 
 func (f *File) sync() {
+	if f == nil {
+		return
+	}
 	if f.compress && f.fileWriter != nil && f.buf != nil && f.buf.Len() != 0 {
 		_, _ = f.fileWriter.Write(utils.Flate(f.buf.Bytes()))
 		f.buf.Reset()
