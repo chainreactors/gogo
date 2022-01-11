@@ -199,13 +199,13 @@ func handler() {
 	if Opt.file != nil {
 		go func() {
 			defer fileCloser()
-			var commaflag2 bool
+			var commaflag3 bool
 			for res := range Opt.DataCh {
-				if commaflag2 {
+				if commaflag3 {
 					res = "," + res
 				} else if Opt.FileOutput == "json" && !Opt.Noscan {
 					// 如果json格式输出,则除了第一次输出,之后都会带上逗号
-					commaflag2 = true
+					commaflag3 = true
 				}
 				Opt.file.write(res)
 			}

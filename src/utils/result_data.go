@@ -249,10 +249,10 @@ func LoadResultFile(file *os.File) interface{} {
 	}
 
 	content = bytes.TrimSpace(content) // 去除前后空格
-	if bytes.Contains(content, []byte("\"smart\"}")) || bytes.Contains(content, []byte("\"ping\"}")) {
+	if bytes.Contains(content, []byte("\"smart\",")) || bytes.Contains(content, []byte("\"ping\",")) {
 		content = autofixjson(content)
 		data, err = loadSmartResult(content)
-	} else if bytes.Contains(content, []byte("\"scan\"}")) {
+	} else if bytes.Contains(content, []byte("\"scan\",")) {
 		content = autofixjson(content)
 		data, err = LoadResult(content)
 	} else {

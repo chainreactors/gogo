@@ -30,8 +30,8 @@ type Config struct {
 	Ping          bool          `json:"ping"`
 	NoSpray       bool          `json:"-"`
 	Exploit       string        `json:"exploit"`
-	VerisonLevel  int           `json:"version_level"`
 	JsonType      string        `json:"json_type"`
+	VerisonLevel  int           `json:"version_level"`
 	IsListInput   bool          `json:"-"`
 	IsJsonInput   bool          `json:"-"`
 }
