@@ -90,6 +90,9 @@ func CMD(k string) {
 		os.Exit(0)
 	}
 
+	if *compress {
+		Opt.Compress = !Opt.Compress
+	}
 	// 格式化
 	if *resultfilename != "" {
 		FormatOutput(*resultfilename, config.Filename, *autofile, filters)
@@ -109,10 +112,6 @@ func CMD(k string) {
 	parseVersion(*version, *version2)
 	parseExploit(*exploit, *exploitConfig)
 	parseFilename(*autofile, *hiddenfile, &config)
-
-	if *compress {
-		Opt.Compress = !Opt.Compress
-	}
 
 	starttime := time.Now()
 	config = Init(config)
