@@ -45,7 +45,7 @@ func CMD(k string) {
 	flag.BoolVar(&Opt.Clean, "c", false, "")
 	flag.StringVar(&Opt.FileOutput, "O", "json", "")
 	flag.BoolVar(&Opt.Quiet, "q", false, "")
-
+	filter := flag.String("filter", "", "")
 	resultfilename := flag.String("F", "", "")
 	autofile := flag.Bool("af", false, "")
 	hiddenfile := flag.Bool("hf", false, "")
@@ -91,7 +91,7 @@ func CMD(k string) {
 
 	// 格式化
 	if *resultfilename != "" {
-		FormatOutput(*resultfilename, config.Filename, *autofile)
+		FormatOutput(*resultfilename, config.Filename, *autofile, *filter)
 		os.Exit(0)
 	}
 
@@ -180,4 +180,23 @@ func configloader(pocfile string) {
 		"sessionid": CompileRegexp("(?i) (.*SESS.*?ID)"),
 	}
 	LoadNuclei(pocfile)
+}
+
+type Value interface {
+	String() string
+	Set(string) error
+}
+
+type arrayFlags []string
+
+// Value ...
+func (i *arrayFlags) String() string {
+	return fmt.Sprint(*i)
+}
+
+// Set 方法是flag.Value接口, 设置flag Value的方法.
+// 通过多个flag指定的值， 所以我们追加到最终的数组上.
+func (i *arrayFlags) Set(value string) error {
+	*i = append(*i, value)
+	return nil
 }
