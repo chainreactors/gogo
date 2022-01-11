@@ -23,6 +23,7 @@ func CMD(k string) {
 		inforev()
 	}
 	var config Config
+	var filters arrayFlags
 	//默认参数信息
 	// INPUT
 	flag.StringVar(&config.IP, "ip", "", "")
@@ -45,7 +46,7 @@ func CMD(k string) {
 	flag.BoolVar(&Opt.Clean, "c", false, "")
 	flag.StringVar(&Opt.FileOutput, "O", "json", "")
 	flag.BoolVar(&Opt.Quiet, "q", false, "")
-	filter := flag.String("filter", "", "")
+	flag.Var(&filters, "filter", "")
 	resultfilename := flag.String("F", "", "")
 	autofile := flag.Bool("af", false, "")
 	hiddenfile := flag.Bool("hf", false, "")
@@ -91,7 +92,7 @@ func CMD(k string) {
 
 	// 格式化
 	if *resultfilename != "" {
-		FormatOutput(*resultfilename, config.Filename, *autofile, *filter)
+		FormatOutput(*resultfilename, config.Filename, *autofile, filters)
 		os.Exit(0)
 	}
 

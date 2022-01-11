@@ -48,7 +48,7 @@ func jsonOutput(result *Result) string {
 	return string(jsons)
 }
 
-func FormatOutput(filename string, outputfile string, autofile bool, filter string) {
+func FormatOutput(filename string, outputfile string, autofile bool, filters []string) {
 	var outfunc func(s string)
 	var iscolor bool
 	var resultsdata ResultsData
@@ -107,12 +107,14 @@ func FormatOutput(filename string, outputfile string, autofile bool, filter stri
 	}
 
 	if resultsdata.Data != nil {
-		if strings.Contains(filter, "::") {
-			kv := strings.Split(filter, "::")
-			resultsdata.Data = resultsdata.Data.Filter(kv[0], kv[1], "::")
-		} else if strings.Contains(filter, "==") {
-			kv := strings.Split(filter, "==")
-			resultsdata.Data = resultsdata.Data.Filter(kv[0], kv[1], "==")
+		for _, filter := range filters {
+			if strings.Contains(filter, "::") {
+				kv := strings.Split(filter, "::")
+				resultsdata.Data = resultsdata.Data.Filter(kv[0], kv[1], "::")
+			} else if strings.Contains(filter, "==") {
+				kv := strings.Split(filter, "==")
+				resultsdata.Data = resultsdata.Data.Filter(kv[0], kv[1], "==")
+			}
 		}
 
 		if Opt.Output == "cs" {
