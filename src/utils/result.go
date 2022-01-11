@@ -20,9 +20,9 @@ type Result struct {
 	HttpStat   string         `json:"s"` // http_stat
 	Language   string         `json:"l"` // language
 	Frameworks Frameworks     `json:"f"` // framework
+	Vulns      Vulns          `json:"v"`
 	Protocol   string         `json:"r"` // protocol
 	Hash       string         `json:"hs"`
-	Vulns      Vulns          `json:"v"`
 	Open       bool           `json:"-"`
 	TcpCon     *net.Conn      `json:"-"`
 	Httpresp   *http.Response `json:"-"`
