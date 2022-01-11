@@ -24,47 +24,54 @@ func CMD(k string) {
 	}
 	var config Config
 	//默认参数信息
+	// INPUT
 	flag.StringVar(&config.IP, "ip", "", "")
 	flag.StringVar(&config.Ports, "p", "top1", "")
 	flag.StringVar(&config.ListFile, "l", "", "")
 	flag.StringVar(&config.JsonFile, "j", "", "")
 	flag.BoolVar(&config.IsListInput, "L", false, "")
 	flag.BoolVar(&config.IsJsonInput, "J", false, "")
-	flag.IntVar(&config.Threads, "t", 4000, "")
-	flag.StringVar(&config.Mod, "m", "default", "")
+
+	// SMART
 	flag.StringVar(&config.SmartPort, "sp", "default", "")
 	flag.StringVar(&config.IpProbe, "ipp", "default", "")
-	flag.BoolVar(&config.Spray, "s", false, "")
-	flag.BoolVar(&config.Ping, "ping", false, "")
+	flag.BoolVar(&config.NoSpray, "ns", false, "")
+	flag.BoolVar(&Opt.Noscan, "no", false, "")
+
+	// OUTPUT
 	flag.StringVar(&config.Filename, "f", "", "")
 	flag.StringVar(&config.ExcludeIPs, "eip", "", "")
-	flag.BoolVar(&config.NoSpray, "ns", false, "")
-
-	//全局变量初始化
 	flag.StringVar(&Opt.Output, "o", "full", "")
 	flag.BoolVar(&Opt.Clean, "c", false, "")
 	flag.StringVar(&Opt.FileOutput, "O", "json", "")
-	flag.BoolVar(&Opt.Noscan, "no", false, "")
 	flag.BoolVar(&Opt.Quiet, "q", false, "")
+
+	resultfilename := flag.String("F", "", "")
+	autofile := flag.Bool("af", false, "")
+	hiddenfile := flag.Bool("hf", false, "")
+	compress := flag.Bool("C", false, "")
+
+	// CONFIG
+	flag.IntVar(&config.Threads, "t", 4000, "")
+	flag.StringVar(&config.Mod, "m", "default", "")
+	flag.BoolVar(&config.Spray, "s", false, "")
+	flag.BoolVar(&config.Ping, "ping", false, "")
 	flag.IntVar(&RunOpt.Delay, "d", 2, "")
 	flag.IntVar(&RunOpt.HttpsDelay, "D", 2, "")
 	flag.StringVar(&RunOpt.Payloadstr, "payload", "", "")
-
-	// 一些特殊参数初始化
-	key := flag.String("k", "", "")
 	version := flag.Bool("v", false, "")
 	version2 := flag.Bool("vv", false, "")
 	exploit := flag.Bool("e", false, "")
 	exploitConfig := flag.String("E", "none", "")
+	pocfile := flag.String("ef", "", "")
+
+	// OTHER
+	key := flag.String("k", "", "")
 	printType := flag.String("P", "", "")
-	resultfilename := flag.String("F", "", "")
-	autofile := flag.Bool("af", false, "")
-	hiddenfile := flag.Bool("hf", false, "")
 	noup := flag.Bool("nu", false, "")
 	uploadfile := flag.String("uf", "", "")
-	pocfile := flag.String("ef", "", "")
-	compress := flag.Bool("C", false, "")
 	gtversion := flag.Bool("version", false, "")
+
 	flag.Usage = func() { exit() }
 	flag.Parse()
 	// 密钥
