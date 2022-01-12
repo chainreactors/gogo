@@ -84,19 +84,21 @@ func CMD(k string) {
 		fmt.Println("v1.1.0")
 		os.Exit(0)
 	}
+
 	// 输出 config
 	if *printType != "" {
 		printConfigs(*printType)
 		os.Exit(0)
 	}
 
-	if *compress {
-		Opt.Compress = !Opt.Compress
-	}
 	// 格式化
 	if *resultfilename != "" {
 		FormatOutput(*resultfilename, config.Filename, *autofile, filters)
 		os.Exit(0)
+	}
+
+	if *compress {
+		Opt.Compress = !Opt.Compress
 	}
 
 	if *uploadfile != "" {
@@ -155,10 +157,11 @@ func CMD(k string) {
 }
 
 func printConfigs(t string) {
-	Tagmap, Namemap, Portmap = LoadPortConfig()
 	if t == "port" {
+		Tagmap, Namemap, Portmap = LoadPortConfig()
 		Printportconfig()
 	} else if t == "nuclei" {
+		LoadNuclei("")
 		PrintNucleiPoc()
 	} else if t == "inter" {
 		PrintInterConfig()
