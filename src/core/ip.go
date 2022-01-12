@@ -6,6 +6,7 @@ import (
 	. "getitle/src/utils"
 	"math"
 	"net"
+	"net/url"
 	"os"
 	"sort"
 	"strings"
@@ -92,8 +93,14 @@ func parseIP(target string) string {
 func cidrFormat(target string) string {
 	var ip, mask string
 	target = strings.TrimSpace(target)
-	target = strings.Replace(target, "http://", "", -1)
-	target = strings.Replace(target, "https://", "", -1)
+	if strings.Contains(target, "http") {
+		u, err := url.Parse(target)
+		if err != nil {
+			progressLogln("[-] " + err.Error())
+			return ""
+		}
+		target = u.Hostname()
+	}
 	target = strings.Trim(target, "/")
 	if strings.Contains(target, "/") {
 		ip = strings.Split(target, "/")[0]
