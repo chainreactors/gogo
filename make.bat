@@ -34,4 +34,4 @@ rm ./bin/%name%_windows_386.exe
 rm ./bin/%name%_windows_386_upx.exe
 
 @REM 打包
-tar -zcvf release/%name%v%1.tar.gz bin/* doc/* README.md gtfilter.py UPDATELOG.md
+tar -zcvf release/%name%v%1.tar.gz bin/* doc/* README.md gtfilter.py nuclei2pocs.py UPDATELOG.md
