@@ -31,7 +31,7 @@ func (gen *IpGenerator) defaultIpGenerator(CIDR string) {
 		if (i)%256 != 255 && (i)%256 != 0 && !gen.excludeIP[i] {
 			gen.ch <- int2ip(i)
 		}
-		if i%65535 == 0 {
+		if i%65536 == 0 {
 			progressLogln(fmt.Sprintf("[*] Processing CIDR: %s/16", int2ip(i)))
 		}
 	}

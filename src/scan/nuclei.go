@@ -13,7 +13,7 @@ func Nuclei(target string, result *utils.Result) {
 	if RunOpt.Exploit == "auto" {
 		vulns = execute_templates(result.Frameworks.GetTitles(), target)
 	} else {
-		vulns = execute_templates([]string{RunOpt.Exploit}, target)
+		vulns = execute_templates(strings.Split(RunOpt.Exploit, ","), target)
 	}
 	if len(vulns) > 0 {
 		result.AddVulns(vulns)
@@ -39,7 +39,6 @@ func choiceTemplates(titles []string) []*Template {
 		for _, tmp_templates := range utils.TemplateMap {
 			templates = append(templates, tmp_templates...)
 		}
-
 	} else {
 		for _, t := range titles {
 			if tmp_templates, ok := utils.TemplateMap[strings.ToLower(t)]; ok {
