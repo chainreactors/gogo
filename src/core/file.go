@@ -17,7 +17,7 @@ import (
 
 func NewFile(filename string, compress bool) (*File, error) {
 	var file = &File{}
-	filehandler, err := initFileHandle(filename)
+	filehandler, err := fileInitialize(filename)
 	if err != nil {
 		return nil, err
 	}
@@ -122,7 +122,7 @@ func isExist(filename string) bool {
 	return exist
 }
 
-func initFileHandle(filename string) (*os.File, error) {
+func fileInitialize(filename string) (*os.File, error) {
 	var err error
 	var filehandle *os.File
 	if isExist(filename) { //如果文件存在
