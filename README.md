@@ -262,8 +262,9 @@ SMB
 
 ## Make
 
-### windows requirement:
- * upxs 自定义修改版的upx壳,可以在gox.bat中替换成原版
+### make.bat:
+windows下需要以下依赖
+ * upxs 自定义修改版的upx壳,可以在make.bat中替换成原版
  * limelighter 签名伪造工具
  * tar.exe 压缩打包工具
  * gox go语言快捷编译工具
@@ -275,5 +276,6 @@ SMB
 ## THANKS
 
 * https://github.com/k8gege/LadonGo
-
+* https://github.com/projectdiscovery/nuclei-templates
+* https://github.com/projectdiscovery/nuclei
     
