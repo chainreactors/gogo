@@ -47,6 +47,7 @@ Usage of ./getitle:
          inter  auto模式的内网探测配置
 
    CONFIGURATIONS params:
+      -version     输出版本号
       -d int       超时,默认2s (default 2)
       -D int       https协议单独配置的超时, 默认4s
       -s bool 	   喷洒模式扫描,ip生成器将端口为优先,端口数量大于100将自动启用
@@ -63,26 +64,33 @@ Usage of ./getitle:
 ## QuickStart
 最简使用
 
-`gt -k [key] -ip 192.168.1.1/24 -p top2,top3 `
+`gt -k [key] -ip 192.168.1.1/24 -p win,db,top2 `
 
-进阶扫描
+一行全冲
 
-`gt -k [key] -ip 192.168.1.1/24 -p top2,win -e -v`
+`gt -k [key] -m a -e -v -af`
 
-网段发现
+一行A段乱冲
 
-B段启发式扫描
+`gt -k [key] -ip 10.1.1.1/8 -m ss -p all -e -v -af`
 
-`gt -k [key] -ip 10.0.0.0/16 -m s -p top2,win`
+一行B段乱冲
 
-A段启发式扫描
+`gt -k [key] -ip 172.16.1.1/16 -m s -p all -e -v -af`
 
-`gt -k [key] -ip 10.0.0.0/8 -m ss -p top2,win`
+**网段发现** :
 
-内网存活主机启发式探测
+喷洒存活C段
 
-`gt -k [key] -ip 10.0.0.0/8 -m ss -p icmp`
+`gt -k [key] -ip 172.16.0.0/16 -m s -no -af`
 
+喷洒存活B段
+
+`gt -k [key] -ip 10.0.0.0/8 -m ss -no -af`
+
+梯度下降喷洒C段(在A段中喷洒C段)
+
+`gt -k [key] -ip 10.0.0.0/8 -m sc -af`
 
 ## 参数解释
 
@@ -281,7 +289,7 @@ windows下需要以下依赖
  * gox go语言快捷编译工具
  * python3 用到了python处理编译前的代码
    ```
-   make.bat [version] # .e.g gox.bat 0.3.0
+   make.bat [version] # .e.g make.bat 0.3.0
    ```
 
 ## THANKS
