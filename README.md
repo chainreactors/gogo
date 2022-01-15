@@ -211,17 +211,23 @@ gt支持非常灵活的端口配置
 
 #### 漏洞探测
 
-getitle并非漏扫工具,因此不会支持sql注入,xss之类的漏洞探测功能.
-
-当前漏洞只能针对简单的http或tcp连接交互实习.
+getitle并非漏扫工具,因此不会支持sql注入,xss之类的通用漏洞探测功能.
 
 当前支持漏洞:
 
-shiro(默认key)
+* shiro(默认key)
 
-ms17-010
+* ms17-010
 
-`./gt.exe -ip 192.168.1.1/24 -p top2 -e`
+* snmp弱口令
+
+以及nuclei生态中的poc 
+ 
+因为nuclei的中poc往往攻击性比较强, 因此需要手动修改适应红队环境
+
+目前已集成的pocs见/src/config/nuclei
+
+`./gt.exe -ip 192.168.1.1/24 -p top2 -v -e`
 
 #### 高级启发式扫描
 
