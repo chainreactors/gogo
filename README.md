@@ -281,7 +281,7 @@ windows下需要以下依赖
  * gox go语言快捷编译工具
  * python3 用到了python处理编译前的代码
    ```
-   gox.bat [version] # .e.g gox.bat 0.3.0
+   make.bat [version] # .e.g gox.bat 0.3.0
    ```
 
 ## THANKS
