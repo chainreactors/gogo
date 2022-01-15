@@ -47,6 +47,7 @@ Usage of ./getitle:
          inter  auto模式的内网探测配置
 
    CONFIGURATIONS params:
+      -version     输出版本号
       -d int       超时,默认2s (default 2)
       -D int       https协议单独配置的超时, 默认4s
       -s bool 	   喷洒模式扫描,ip生成器将端口为优先,端口数量大于100将自动启用
@@ -63,26 +64,33 @@ Usage of ./getitle:
 ## QuickStart
 最简使用
 
-`gt -k [key] -ip 192.168.1.1/24 -p top2,top3 `
+`gt -k [key] -ip 192.168.1.1/24 -p win,db,top2 `
 
-进阶扫描
+一行全冲
 
-`gt -k [key] -ip 192.168.1.1/24 -p top2,win -e -v`
+`gt -k [key] -m a -e -v -af`
 
-网段发现
+一行A段乱冲
 
-B段启发式扫描
+`gt -k [key] -ip 10.1.1.1/8 -m ss -p all -e -v -af`
 
-`gt -k [key] -ip 10.0.0.0/16 -m s -p top2,win`
+一行B段乱冲
 
-A段启发式扫描
+`gt -k [key] -ip 172.16.1.1/16 -m s -p all -e -v -af`
 
-`gt -k [key] -ip 10.0.0.0/8 -m ss -p top2,win`
+**网段发现** :
 
-内网存活主机启发式探测
+喷洒存活C段
 
-`gt -k [key] -ip 10.0.0.0/8 -m ss -p icmp`
+`gt -k [key] -ip 172.16.0.0/16 -m s -no -af`
 
+喷洒存活B段
+
+`gt -k [key] -ip 10.0.0.0/8 -m ss -no -af`
+
+梯度下降喷洒C段(在A段中喷洒C段)
+
+`gt -k [key] -ip 10.0.0.0/8 -m sc -af`
 
 ## 参数解释
 
@@ -211,17 +219,23 @@ gt支持非常灵活的端口配置
 
 #### 漏洞探测
 
-getitle并非漏扫工具,因此不会支持sql注入,xss之类的漏洞探测功能.
-
-当前漏洞只能针对简单的http或tcp连接交互实习.
+getitle并非漏扫工具,因此不会支持sql注入,xss之类的通用漏洞探测功能.
 
 当前支持漏洞:
 
-shiro(默认key)
+* shiro(默认key)
 
-ms17-010
+* ms17-010
 
-`./gt.exe -ip 192.168.1.1/24 -p top2 -e`
+* snmp弱口令
+
+以及nuclei生态中的poc 
+ 
+因为nuclei的中poc往往攻击性比较强, 因此需要手动修改适应红队环境
+
+目前已集成的pocs见/src/config/nuclei
+
+`./gt.exe -ip 192.168.1.1/24 -p top2 -v -e`
 
 #### 高级启发式扫描
 
@@ -275,7 +289,7 @@ windows下需要以下依赖
  * gox go语言快捷编译工具
  * python3 用到了python处理编译前的代码
    ```
-   gox.bat [version] # .e.g gox.bat 0.3.0
+   make.bat [version] # .e.g make.bat 0.3.0
    ```
 
 ## THANKS

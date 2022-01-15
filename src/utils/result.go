@@ -27,6 +27,7 @@ type Result struct {
 	TcpCon     *net.Conn      `json:"-"`
 	Httpresp   *http.Response `json:"-"`
 	Error      string         `json:"-"`
+	ErrStat    int            `json:"-"`
 	Content    string         `json:"-"`
 }
 
