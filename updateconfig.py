@@ -19,21 +19,32 @@ def loadnuclei():
     return pocs
 
 
-def fingerload(filename):
-    tcpfinger = open("src/config/%s" % filename, "r", encoding="utf-8")
-    tcpjsonstr = tcpfinger.read()
-    tcpjsonstr = tcpjsonstr.replace("\\0", "\\u0000").replace("\\x", "\\u00")
-    j = json.loads(tcpjsonstr)
-    j = sorted(j, key=lambda x: x["level"])
-    return j
+def yaml2json(content, com=True):
+    y = yaml.load(content)
+    if com:
+        return compress(json.dumps(y))
+    else:
+        return json.dumps(y)
+
+
+def json2yaml(content):
+    j = json.loads(content)
+    return yaml.dump(content)
+
+
+def read(filename):
+    with open("src/config/"+filename, "r", encoding="utf-8") as f:
+        return f.read()
+
 
 
 if __name__ == "__main__":
-    tcpfingers = fingerload("tcpfingers.json")
-    httpfingers = fingerload("httpfingers.json")
-    md5fingers = json.loads(open("src/config/md5fingers.json", "r", encoding="utf-8").read())
-    port = json.loads(open("src/config/port.json", "r", encoding="utf-8").read())
-    mmh3fingers = json.loads(open("src/config/mmh3fingers.json", "r", encoding="utf-8").read())
+    tcpfingers = read("tcpfingers.yaml")
+    httpfingers = read("httpfingers.yaml")
+    md5fingers = read("md5fingers.yaml")
+
+    port = read("port.yaml")
+    mmh3fingers = read("mmh3fingers.yaml")
     nuclei = loadnuclei()
     f = open("src/utils/finger.go", "w", encoding="utf-8")
     base = '''package utils
@@ -55,12 +66,12 @@ func LoadConfig(typ string)[]byte  {
 	return []byte{}
 }
 	'''
-
-    f.write(base % (compress(json.dumps(tcpfingers)),
-                    compress(json.dumps(httpfingers)),
-                    compress(json.dumps(md5fingers)),
-                    compress(json.dumps(port)),
-                    compress(json.dumps(mmh3fingers)),
+#     print(yaml2json(tcpfingers))
+    f.write(base % (yaml2json(tcpfingers),
+                    yaml2json(httpfingers),
+                    yaml2json(md5fingers),
+                    yaml2json(port),
+                    yaml2json(mmh3fingers),
                     compress(json.dumps(nuclei))))
 #     print(compress(json.dumps(tcpfingers)))
     print("fingerprint update success")

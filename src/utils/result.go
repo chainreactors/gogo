@@ -20,9 +20,9 @@ type Result struct {
 	HttpStat   string         `json:"s"` // http_stat
 	Language   string         `json:"l"` // language
 	Frameworks Frameworks     `json:"f"` // framework
+	Vulns      Vulns          `json:"v"`
 	Protocol   string         `json:"r"` // protocol
 	Hash       string         `json:"hs"`
-	Vulns      Vulns          `json:"v"`
 	Open       bool           `json:"-"`
 	TcpCon     *net.Conn      `json:"-"`
 	Httpresp   *http.Response `json:"-"`
@@ -156,8 +156,22 @@ func (result Result) toZombie() zombiemeta {
 	return zombiemeta{
 		IP:     result.Ip,
 		Port:   port,
-		Server: zombiemap[result.GetFirstFramework()],
+		Server: zombiemap[strings.ToLower(result.GetFirstFramework())],
 	}
+}
+
+func (result Result) Filter(k, v, op string) bool {
+	var matchfunc func(string, string) bool
+	if op == "::" {
+		matchfunc = strings.Contains
+	} else {
+		matchfunc = strings.EqualFold
+	}
+
+	if matchfunc(strings.ToLower(result.Get(k)), v) {
+		return true
+	}
+	return false
 }
 
 type zombiemeta struct {
@@ -170,15 +184,9 @@ type Results []Result
 
 func (rs Results) Filter(k, v, op string) Results {
 	var filtedres Results
-	var matchfunc func(string, string) bool
-	if op == "::" {
-		matchfunc = strings.Contains
-	} else {
-		matchfunc = strings.EqualFold
-	}
 
 	for _, result := range rs {
-		if matchfunc(result.Get(k), v) {
+		if result.Filter(k, v, op) {
 			filtedres = append(filtedres, result)
 		}
 	}

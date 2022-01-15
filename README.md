@@ -1,7 +1,7 @@
 # Getitle
 一个资产探测扫描器. 
 
-README Version 1.0.0
+README Version 1.1.3
 
 ## Usage
 
@@ -11,7 +11,8 @@ Usage of ./getitle:
    -k string    启动密码(必须输入)为ybb  
    
    INPUT params:
-      -ip string   IP地址 like 192.168.1.1/24
+      -ip string   IP地址, 支持逗号分割的输入 like 192.168.1.1/24,172.16.1.1/24
+      -eip string  排除指定的ip地址,支持cidr, 支持逗号分割 -eip 192.168.1.1/28,192.168.1.199 
       -p string    ports (default "top1")
       -m string    扫描模式：(每次只能选择一个生效)
             default (默认值, 资产扫描),
@@ -25,15 +26,25 @@ Usage of ./getitle:
       -J bool     从管道中读数据的时候, 指定数据为前一次的扫描结果, 从传入管道前请base64, 否则可能因为EOF字符被截断
       -F file      格式化扫描结果
       
+   SMART CONFIGS
+      -sp string   smart probe,启发式扫描端口探针,-m s 下默认为80, -m ss下默认为icmp
+      -ipp string  ip probe,-ss模式ip探针,默认1
+      -no bool	   (依赖-m s/ss) 高级扫描模式只探测存活网段不进行端口扫描
+      -ping bool   在端口扫描前插入一次ping 喷洒, 存活的ip才会被加入端口扫描.
+ 
    OUTPUT params:
       -o string    输出格式:clean,full(default) or json, 以及ip, url, target, zombie, cs 等多种输出格式
-      -c string    在指定了-f的情况下强制打开命令行输出扫描结果
-      -q bool      不在命令行输出进度日志
-      -P string    查看配置预设  port|nuclei|inter 
       -f string    输出文件名,默认为空
       -af bool	   自动生成文件名,格式为 ".IP_port_number.json"
       -hf bool     自动生成隐藏文件名.
+      -C bool      强制关闭输出文件压缩, 变成明文输出
 
+      -c string    在指定了-f的情况下强制打开命令行输出扫描结果
+      -q bool      不在命令行输出进度日志
+      -P string    查看配置预设  port|nuclei|inter 
+         port 端口预设
+         nuclei 可以选用的poc
+         inter  auto模式的内网探测配置
 
    CONFIGURATIONS params:
       -d int       超时,默认2s (default 2)
@@ -47,13 +58,7 @@ Usage of ./getitle:
       -ef string   指定json文件为nucleipoc
       -up string   指定文件上传到云服务器
       -np bool     关闭自动上传扫描结果到云服务器
-      -C bool      强制关闭输出文件压缩, 变成明文输出
-   
-   SMART CONFIGS
-      -sp string   smart probe,启发式扫描端口探针,-m s 下默认为80, -m ss下默认为icmp
-      -ipp string  ip probe,-ss模式ip探针,默认1
-      -no bool	   (依赖-m s/ss) 高级扫描模式只探测存活网段不进行端口扫描
-```
+   ```
 
 ## QuickStart
 最简使用
@@ -262,8 +267,9 @@ SMB
 
 ## Make
 
-### windows requirement:
- * upxs 自定义修改版的upx壳,可以在gox.bat中替换成原版
+### make.bat:
+windows下需要以下依赖
+ * upxs 自定义修改版的upx壳,可以在make.bat中替换成原版
  * limelighter 签名伪造工具
  * tar.exe 压缩打包工具
  * gox go语言快捷编译工具
@@ -275,5 +281,7 @@ SMB
 ## THANKS
 
 * https://github.com/k8gege/LadonGo
-
+* https://github.com/projectdiscovery/nuclei-templates
+* https://github.com/projectdiscovery/nuclei
+* https://github.com/JKme/cube
     

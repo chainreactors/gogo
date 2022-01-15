@@ -1,8 +1,6 @@
 package core
 
 import (
-	"bufio"
-	"bytes"
 	"errors"
 	"fmt"
 	. "getitle/src/scan"
@@ -23,22 +21,19 @@ var InterConfig = map[string][]string{
 }
 
 type Options struct {
-	AliveSum        int
-	Clean           bool
-	Noscan          bool
-	Compress        bool
-	Quiet           bool
-	fileHandle      *os.File
-	smartFileHandle *os.File
-	logFileHandle   *os.File
-	fileWriter      *bufio.Writer
-	smartfileWriter *bufio.Writer
-	DataCh          chan string
-	LogDataCh       chan string
-	comBuf          *bytes.Buffer
-	smartComBuf     *bytes.Buffer
-	Output          string
-	FileOutput      string
+	AliveSum   int
+	Clean      bool
+	Noscan     bool
+	Compress   bool
+	Quiet      bool
+	file       *File
+	smartFile  *File
+	pingFile   *File
+	logFile    *File
+	DataCh     chan string
+	LogDataCh  chan string
+	Output     string
+	FileOutput string
 }
 
 var Opt = Options{
@@ -52,15 +47,8 @@ var Opt = Options{
 }
 
 func Init(config Config) Config {
-	//println("*********  main 1.0.7 beta by Sangfor  *********")
 
-	//if config.Mod != "default" && config.ListFile != "" {
-	//	println("[-] error Smart . config")
-	//	os.Exit(0)
-	//}
-
-	// check命令行参数
-	err := CheckCommand(config)
+	err := validate(config)
 	if err != nil {
 		fmt.Println("[-]" + err.Error())
 		os.Exit(0)
@@ -120,7 +108,6 @@ func Init(config Config) Config {
 			fmt.Println("[-] not support result, maybe use -l")
 			os.Exit(0)
 		}
-		return config
 	}
 
 	initIP(&config)
@@ -154,6 +141,16 @@ func Init(config Config) Config {
 		config.IpProbeList = []uint{1}
 	}
 
+	if config.ExcludeIPs != "" {
+		config.ExcludeMap = make(map[uint]bool)
+		for _, ip := range strings.Split(config.ExcludeIPs, ",") {
+			start, end := getIpRange(cidrFormat(ip))
+			for i := start; i <= end; i++ {
+				config.ExcludeMap[i] = true
+			}
+		}
+	}
+
 	// 初始已完成,输出任务基本信息
 	taskname := config.GetTargetName()
 	// 输出任务的基本信息
@@ -161,7 +158,7 @@ func Init(config Config) Config {
 	return config
 }
 
-func CheckCommand(config Config) error {
+func validate(config Config) error {
 	// 一些命令行参数错误处理,如果check没过直接退出程序或输出警告
 	//if config.Mod == "ss" && config.ListFile != "" {
 	//	fmt.Println("[-] error Smart . can not use File input")
@@ -193,7 +190,7 @@ func printTaskInfo(config Config, taskname string) {
 
 	progressLogln(fmt.Sprintf("[*] Current goroutines: %d, Version Level: %d,Exploit Target: %s, Spray Scan: %t", config.Threads, RunOpt.VersionLevel, RunOpt.Exploit, config.Spray))
 	if config.JsonFile == "" {
-		progressLogln(fmt.Sprintf("[*] Start . task %s ,total ports: %d , mod: %s", taskname, len(config.Portlist), config.Mod))
+		progressLogln(fmt.Sprintf("[*] Starting task %s ,total ports: %d , mod: %s", taskname, len(config.Portlist), config.Mod))
 		// 输出端口信息
 		if len(config.Portlist) > 500 {
 			progressLogln("[*] too much ports , only show top 500 ports: " + strings.Join(config.Portlist[:500], ",") + "......")
@@ -201,15 +198,15 @@ func printTaskInfo(config Config, taskname string) {
 			progressLogln("[*] ports: " + strings.Join(config.Portlist, ","))
 		}
 	} else {
-		progressLogln(fmt.Sprintf("[*] Start . task %s ,total target: %d", taskname, len(config.Results)))
-		progressLogln(fmt.Sprintf("[*] Json . task time is about %d seconds", (len(config.Results)/config.Threads)*4+4))
+		progressLogln(fmt.Sprintf("[*] Starting results task: %s ,total target: %d", taskname, len(config.Results)))
+		//progressLogln(fmt.Sprintf("[*] Json . task time is about %d seconds", (len(config.Results)/config.Threads)*4+4))
 	}
 }
 
 func RunTask(config Config) {
 	switch config.Mod {
 	case "default":
-		createStraightScan(config)
+		createDefaultScan(config)
 	case "a", "auto":
 		autoScan(config)
 	case "s", "f", "ss", "sc":
@@ -223,24 +220,30 @@ func RunTask(config Config) {
 		}
 
 	default:
-		createStraightScan(config)
+		createDefaultScan(config)
 	}
 }
 
-func guessTime(config Config) int {
+func guessTime(targets interface{}, portlist []string, thread int) int {
 	ipcount := 0
 
-	portcount := len(config.Portlist)
-	if config.IPlist != nil {
-		for _, ip := range config.IPlist {
+	portcount := len(portlist)
+
+	switch targets.(type) {
+	case []string:
+		for _, ip := range targets.([]string) {
 			mask := getMask(ip)
 			ipcount += countip(mask)
 		}
-	} else {
-		mask := getMask(config.IP)
+	case Results:
+		ipcount = len(targets.(Results))
+		portcount = 1
+	default:
+		mask := getMask(targets.(string))
 		ipcount = countip(mask)
 	}
-	return (portcount*ipcount/config.Threads)*4 + 4
+
+	return (portcount*ipcount/thread)*4 + 4
 }
 
 func guessSmarttime(target string, config Config) int {
@@ -295,18 +298,28 @@ func createSmartScan(ip string, config Config) {
 	mask := getMask(ip)
 	if mask >= 24 {
 		config.Mod = "default"
-		StraightMod(ip, config)
+		DefaultMod(ip, config)
 	} else {
 		SmartMod(ip, config)
 	}
 }
 
-func createStraightScan(config Config) {
+func createDefaultScan(config Config) {
 	if config.Results != nil {
-		StraightMod(config.Results, config)
-	} else if config.IPlist != nil {
-		StraightMod(config.IPlist, config)
-	} else if config.IP != "" {
-		StraightMod(config.IP, config)
+		DefaultMod(config.Results, config)
+	} else {
+		if config.Ping {
+			if config.IPlist != nil {
+				PingMod(config.IPlist, config)
+			} else if config.IP != "" {
+				PingMod(config.IP, config)
+			}
+		} else {
+			if config.IPlist != nil {
+				DefaultMod(config.IPlist, config)
+			} else if config.IP != "" {
+				DefaultMod(config.IP, config)
+			}
+		}
 	}
 }

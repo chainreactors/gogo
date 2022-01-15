@@ -6,9 +6,9 @@ import (
 	. "getitle/src/utils"
 	"math"
 	"net"
+	"net/url"
 	"os"
 	"sort"
-	"strconv"
 	"strings"
 )
 
@@ -36,14 +36,12 @@ func ip2superip(ip string, mask int) string {
 }
 
 func splitCIDR(cidr string) (string, int) {
-	var mask int
 	tmp := strings.Split(cidr, "/")
 	if len(tmp) == 2 {
-		mask, _ = strconv.Atoi(tmp[1])
+		return tmp[0], ToInt(tmp[1])
 	} else {
-		mask = 32
+		return tmp[0], 32
 	}
-	return tmp[0], mask
 }
 
 func getMask(cidr string) int {
@@ -51,8 +49,12 @@ func getMask(cidr string) int {
 	return mask
 }
 
-func getMaskRange(mask int) (before uint, after uint) {
+func getIP(cidr string) string {
+	ip, _ := splitCIDR(cidr)
+	return ip
+}
 
+func getMaskRange(mask int) (before uint, after uint) {
 	before = uint(math.Pow(2, 32) - math.Pow(2, float64(32-mask)))
 	after = uint(math.Pow(2, float64(32-mask)) - 1)
 	return before, after
@@ -69,7 +71,7 @@ func getIpRange(target string) (start uint, fin uint) {
 	return start, fin
 }
 
-func getIp(target string) string {
+func parseIP(target string) string {
 	target = strings.TrimSpace(target)
 	if isIPv4(target) {
 		return target
@@ -88,11 +90,17 @@ func getIp(target string) string {
 	return ""
 }
 
-func IpFormat(target string) string {
+func cidrFormat(target string) string {
 	var ip, mask string
 	target = strings.TrimSpace(target)
-	target = strings.Replace(target, "http://", "", -1)
-	target = strings.Replace(target, "https://", "", -1)
+	if strings.Contains(target, "http") {
+		u, err := url.Parse(target)
+		if err != nil {
+			progressLogln("[-] " + err.Error())
+			return ""
+		}
+		target = u.Hostname()
+	}
 	target = strings.Trim(target, "/")
 	if strings.Contains(target, "/") {
 		ip = strings.Split(target, "/")[0]
@@ -102,7 +110,7 @@ func IpFormat(target string) string {
 		mask = "32"
 	}
 
-	if ip = getIp(ip); ip != "" {
+	if ip = parseIP(ip); ip != "" {
 		return ip + "/" + mask
 	} else {
 		return ""
@@ -123,7 +131,7 @@ func initIP(config *Config) {
 		if strings.Contains(config.IP, ",") {
 			config.IPlist = strings.Split(config.IP, ",")
 		} else {
-			config.IP = IpFormat(config.IP)
+			config.IP = cidrFormat(config.IP)
 			if config.IP == "" {
 				fmt.Println("[-] IP format error")
 				os.Exit(0)
@@ -135,7 +143,7 @@ func initIP(config *Config) {
 	if config.IPlist != nil {
 		var iplist []string
 		for _, ip := range config.IPlist {
-			tmpip := IpFormat(ip)
+			tmpip := cidrFormat(ip)
 			if tmpip != "" {
 				iplist = append(iplist, tmpip)
 			}

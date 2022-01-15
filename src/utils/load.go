@@ -50,10 +50,13 @@ func LoadTemplates(content []byte) map[string][]*Template {
 		if template.Finger != "" {
 			templatemap[strings.ToLower(template.Finger)] = append(templatemap[strings.ToLower(template.Finger)], template)
 		}
+		if template.Id != "" {
+			templatemap[strings.ToLower(template.Id)] = append(templatemap[strings.ToLower(template.Id)], template)
+		}
 
 		// 以tag归类
 		for _, tag := range template.GetTags() {
-			templatemap[tag] = append(templatemap[tag], template)
+			templatemap[strings.ToLower(tag)] = append(templatemap[strings.ToLower(tag)], template)
 		}
 	}
 	return templatemap

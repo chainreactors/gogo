@@ -11,17 +11,17 @@ import (
 
 var winport = []string{"445", "135", "137"}
 var zombiemap = map[string]string{
-	"mariadb":             "MYSQL",
-	"mysql":               "MYSQL",
-	"microsoft rdp":       "RDP",
-	"oracle database":     "ORACLE",
-	"microsoft sqlserver": "MSSQL",
-	"mssql":               "MSSQL",
-	"smb":                 "SMB",
-	"redis":               "REDIS",
-	"vnc":                 "VNC",
+	"mariadb":   "MYSQL",
+	"mysql":     "MYSQL",
+	"rdp":       "RDP",
+	"oracle":    "ORACLE",
+	"sqlserver": "MSSQL",
+	"mssql":     "MSSQL",
+	"smb":       "SMB",
+	"redis":     "REDIS",
+	"vnc":       "VNC",
 	//"elasticsearch": "ELASTICSEARCH",
-	"postgreSQL": "POSTGRESQL",
+	"postgresql": "POSTGRESQL",
 	"mongo":      "MONGO",
 	"ssh":        "SSH",
 	"ftp":        "FTP",
@@ -124,6 +124,7 @@ func (rd ResultsData) ToValues(outType string) string {
 		for j := 0; j < len(outvalues); j++ {
 			ss[i] += outvalues[j][i] + "\t"
 		}
+		strings.TrimSpace(ss[i])
 	}
 
 	return strings.Join(ss, "\n")
@@ -248,10 +249,10 @@ func LoadResultFile(file *os.File) interface{} {
 	}
 
 	content = bytes.TrimSpace(content) // 去除前后空格
-	if bytes.Contains(content, []byte("\"smart\"}")) {
+	if bytes.Contains(content, []byte("\"smart\",")) || bytes.Contains(content, []byte("\"ping\",")) {
 		content = autofixjson(content)
 		data, err = loadSmartResult(content)
-	} else if bytes.Contains(content, []byte("\"scan\"}")) {
+	} else if bytes.Contains(content, []byte("\"scan\",")) {
 		content = autofixjson(content)
 		data, err = LoadResult(content)
 	} else {
@@ -283,7 +284,7 @@ func isBase64(content []byte) bool {
 
 func IsBin(content []byte) bool {
 	for _, i := range content {
-		if i < 10 {
+		if i < 9 {
 			return true
 		}
 	}

@@ -18,14 +18,14 @@ func icmpScan(result *utils.Result) {
 	const ECHO_REQUEST_HEAD_LEN = 8
 	host := result.Ip
 	size = 32
-	delay := time.Duration(800)
-	conn, err := net.DialTimeout("ip4:icmp", host, delay*time.Millisecond)
+	delay := time.Duration(RunOpt.Delay / 2)
+	conn, err := net.DialTimeout("ip4:icmp", host, delay*time.Second)
 	if err != nil {
 		result.Error = err.Error()
 		return
 	}
 	defer conn.Close()
-	conn.SetDeadline(time.Now().Add(delay * time.Millisecond))
+	conn.SetDeadline(time.Now().Add(delay * time.Second))
 	id0, id1 := genidentifier(host)
 
 	var msg []byte = make([]byte, size+ECHO_REQUEST_HEAD_LEN)

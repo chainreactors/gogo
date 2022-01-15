@@ -23,51 +23,66 @@ func CMD(k string) {
 		inforev()
 	}
 	var config Config
+	var filters arrayFlags
 	//默认参数信息
+	// INPUT
 	flag.StringVar(&config.IP, "ip", "", "")
 	flag.StringVar(&config.Ports, "p", "top1", "")
 	flag.StringVar(&config.ListFile, "l", "", "")
 	flag.StringVar(&config.JsonFile, "j", "", "")
 	flag.BoolVar(&config.IsListInput, "L", false, "")
 	flag.BoolVar(&config.IsJsonInput, "J", false, "")
-	flag.IntVar(&config.Threads, "t", 4000, "")
-	flag.StringVar(&config.Mod, "m", "default", "")
+
+	// SMART
 	flag.StringVar(&config.SmartPort, "sp", "default", "")
 	flag.StringVar(&config.IpProbe, "ipp", "default", "")
-	flag.BoolVar(&config.Spray, "s", false, "")
-	flag.StringVar(&config.Filename, "f", "", "")
 	flag.BoolVar(&config.NoSpray, "ns", false, "")
+	flag.BoolVar(&Opt.Noscan, "no", false, "")
 
-	//全局变量初始化
+	// OUTPUT
+	flag.StringVar(&config.Filename, "f", "", "")
+	flag.StringVar(&config.ExcludeIPs, "eip", "", "")
 	flag.StringVar(&Opt.Output, "o", "full", "")
 	flag.BoolVar(&Opt.Clean, "c", false, "")
 	flag.StringVar(&Opt.FileOutput, "O", "json", "")
-	flag.BoolVar(&Opt.Noscan, "no", false, "")
 	flag.BoolVar(&Opt.Quiet, "q", false, "")
+	flag.Var(&filters, "filter", "")
+	resultfilename := flag.String("F", "", "")
+	autofile := flag.Bool("af", false, "")
+	hiddenfile := flag.Bool("hf", false, "")
+	compress := flag.Bool("C", false, "")
+
+	// CONFIG
+	flag.IntVar(&config.Threads, "t", 4000, "")
+	flag.StringVar(&config.Mod, "m", "default", "")
+	flag.BoolVar(&config.Spray, "s", false, "")
+	flag.BoolVar(&config.Ping, "ping", false, "")
 	flag.IntVar(&RunOpt.Delay, "d", 2, "")
 	flag.IntVar(&RunOpt.HttpsDelay, "D", 2, "")
 	flag.StringVar(&RunOpt.Payloadstr, "payload", "", "")
-
-	// 一些特殊参数初始化
-	key := flag.String("k", "", "")
 	version := flag.Bool("v", false, "")
 	version2 := flag.Bool("vv", false, "")
 	exploit := flag.Bool("e", false, "")
 	exploitConfig := flag.String("E", "none", "")
+	pocfile := flag.String("ef", "", "")
+
+	// OTHER
+	key := flag.String("k", "", "")
 	printType := flag.String("P", "", "")
-	resultfilename := flag.String("F", "", "")
-	autofile := flag.Bool("af", false, "")
-	hiddenfile := flag.Bool("hf", false, "")
 	noup := flag.Bool("nu", false, "")
 	uploadfile := flag.String("uf", "", "")
-	pocfile := flag.String("ef", "", "")
-	compress := flag.Bool("C", false, "")
+	gtversion := flag.Bool("version", false, "")
+
 	flag.Usage = func() { exit() }
 	flag.Parse()
 	// 密钥
 	if *key != k {
 		//rev()
 		exit()
+	}
+	if *gtversion {
+		fmt.Println("v1.1.0")
+		os.Exit(0)
 	}
 
 	// 输出 config
@@ -78,8 +93,12 @@ func CMD(k string) {
 
 	// 格式化
 	if *resultfilename != "" {
-		FormatOutput(*resultfilename, config.Filename, *autofile)
+		FormatOutput(*resultfilename, config.Filename, *autofile, filters)
 		os.Exit(0)
+	}
+
+	if *compress {
+		Opt.Compress = !Opt.Compress
 	}
 
 	if *uploadfile != "" {
@@ -95,10 +114,6 @@ func CMD(k string) {
 	parseVersion(*version, *version2)
 	parseExploit(*exploit, *exploitConfig)
 	parseFilename(*autofile, *hiddenfile, &config)
-
-	if *compress {
-		Opt.Compress = !Opt.Compress
-	}
 
 	starttime := time.Now()
 	config = Init(config)
@@ -125,9 +140,12 @@ func CMD(k string) {
 	var filenamelog string
 	// 输出
 	if config.Filename != "" {
-		filenamelog = fmt.Sprintf("[*] Results filename: %s, ", config.Filename)
+		filenamelog = fmt.Sprintf("[*] Results filename: %s , ", config.Filename)
 		if config.SmartFilename != "" {
-			filenamelog += "Smartscan result filename: " + config.SmartFilename
+			filenamelog += "Smartscan result filename: " + config.SmartFilename + " , "
+		}
+		if config.PingFilename != "" {
+			filenamelog += "Pingscan result filename: " + config.PingFilename
 		}
 		ConsoleLog(filenamelog)
 	}
@@ -139,10 +157,11 @@ func CMD(k string) {
 }
 
 func printConfigs(t string) {
-	Tagmap, Namemap, Portmap = LoadPortConfig()
 	if t == "port" {
+		Tagmap, Namemap, Portmap = LoadPortConfig()
 		Printportconfig()
 	} else if t == "nuclei" {
+		LoadNuclei("")
 		PrintNucleiPoc()
 	} else if t == "inter" {
 		PrintInterConfig()
@@ -164,4 +183,23 @@ func configloader(pocfile string) {
 		"sessionid": CompileRegexp("(?i) (.*SESS.*?ID)"),
 	}
 	LoadNuclei(pocfile)
+}
+
+type Value interface {
+	String() string
+	Set(string) error
+}
+
+type arrayFlags []string
+
+// Value ...
+func (i *arrayFlags) String() string {
+	return fmt.Sprint(*i)
+}
+
+// Set 方法是flag.Value接口, 设置flag Value的方法.
+// 通过多个flag指定的值， 所以我们追加到最终的数组上.
+func (i *arrayFlags) Set(value string) error {
+	*i = append(*i, value)
+	return nil
 }

@@ -21,7 +21,6 @@ var RunOpt = RunnerOpts{
 func Dispatch(result *utils.Result) {
 	target := result.GetTarget()
 	RunOpt.Sum++
-	//println(result.Ip)
 	if result.Port == "137" || result.Port == "nbt" {
 		nbtScan(result)
 		return

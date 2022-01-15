@@ -1,6 +1,7 @@
 package http
 
 import (
+	"fmt"
 	"getitle/src/nuclei/protocols"
 	. "getitle/src/structutils"
 	"io/ioutil"
@@ -274,6 +275,13 @@ func respToMap(resp *http.Response, req *http.Request) map[string]interface{} {
 	bodybytes, _ := ioutil.ReadAll(resp.Body)
 	data["body"] = string(bodybytes)
 	data["url"] = req.URL
+
+	for k, v := range resp.Header {
+		for _, i := range v {
+			data["all_headers"] = ToString(data["all_headers"]) + fmt.Sprintf("%s: %s\r\n", k, i)
+		}
+	}
+
 	for _, cookie := range resp.Cookies() {
 		data[strings.ToLower(cookie.Name)] = cookie.Value
 	}
