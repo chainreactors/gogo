@@ -15,6 +15,19 @@ type targetConfig struct {
 	finger Frameworks
 }
 
+// return open: 0, closed: 1, filtered: 2, noroute: 3, denied: 4, down: 5, error_host: 6, unkown: -1
+
+var portstat = map[int]string{
+	0:  "open",
+	1:  "closed",
+	2:  "filtered|closed",
+	3:  "noroute",
+	4:  "denied",
+	5:  "down",
+	6:  "error_host",
+	-1: "unknow",
+}
+
 //直接扫描
 func DefaultMod(targets interface{}, config Config) {
 	// 输出预估时间
@@ -49,6 +62,8 @@ func defaultScan(tc targetConfig) {
 		if Opt.file != nil {
 			Opt.DataCh <- output(result, Opt.FileOutput)
 		}
+	} else if Opt.Debug {
+		fmt.Println("[debug] tcp stat: %d, errmsg: %s", portstat[result.ErrStat], result.Error)
 	}
 }
 
@@ -151,10 +166,13 @@ func cidr_alived(ip string, temp *sync.Map, mask int, mod string) {
 
 func smartScan(tc targetConfig, temp *sync.Map, mask int, mod string) {
 	result := NewResult(tc.ip, tc.port)
+	result.SmartProbe = true
 	scan.Dispatch(result)
 
 	if result.Open {
 		cidr_alived(result.Ip, temp, mask, mod)
+	} else if Opt.Debug {
+		fmt.Println("[debug] tcp stat: %d, errmsg: %s", portstat[result.ErrStat], result.Error)
 	}
 }
 

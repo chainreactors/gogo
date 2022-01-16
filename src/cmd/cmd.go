@@ -57,6 +57,7 @@ func CMD(k string) {
 	flag.StringVar(&config.Mod, "m", "default", "")
 	flag.BoolVar(&config.Spray, "s", false, "")
 	flag.BoolVar(&config.Ping, "ping", false, "")
+	flag.BoolVar(&Opt.Debug, "debug", false, "")
 	flag.IntVar(&RunOpt.Delay, "d", 2, "")
 	flag.IntVar(&RunOpt.HttpsDelay, "D", 2, "")
 	flag.StringVar(&RunOpt.Payloadstr, "payload", "", "")

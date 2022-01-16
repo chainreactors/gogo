@@ -26,6 +26,7 @@ type Options struct {
 	Noscan     bool
 	Compress   bool
 	Quiet      bool
+	Debug      bool
 	file       *File
 	smartFile  *File
 	pingFile   *File

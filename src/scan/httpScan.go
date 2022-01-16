@@ -49,7 +49,7 @@ func socketHttp(target string, result *utils.Result) {
 	result.Open = true
 
 	// 启发式扫描探测直接返回不需要后续处理
-	if result.HttpStat == "s" {
+	if result.SmartProbe {
 		return
 	}
 
