@@ -1,9 +1,9 @@
 package scan
 
 import (
+	"getitle/src/structutils"
 	"getitle/src/utils"
 	"net/http"
-	"strconv"
 	"strings"
 )
 
@@ -46,6 +46,7 @@ func socketHttp(target string, result *utils.Result) {
 		}
 		return
 	}
+	defer conn.Close()
 	result.Open = true
 
 	// 启发式扫描探测直接返回不需要后续处理
@@ -75,7 +76,6 @@ func socketHttp(target string, result *utils.Result) {
 		//return SystemHttp(target, result)
 		SystemHttp(target, result)
 	}
-	conn.Close()
 	return
 
 }
@@ -101,12 +101,10 @@ func SystemHttp(target string, result *utils.Result) {
 	req, _ := http.NewRequest("GET", target, nil)
 	req.Header = headers
 	resp, err := conn.Do(req)
-
-	//resp, err := conn.Get(target+"/servlet/bsh.servlet.BshServlet")
 	if resp != nil && resp.TLS != nil {
+		// 证书在错误处理之前, 因为有可能存在证书,但是服务已关闭
 		result.Protocol = "https"
 		result.Host = strings.Join(resp.TLS.PeerCertificates[0].DNSNames, ",")
-		//result.Host = utils.FilterCertDomain(resp.TLS.PeerCertificates[0].DNSNames)
 	}
 	if err != nil {
 		result.Error = err.Error()
@@ -114,7 +112,7 @@ func SystemHttp(target string, result *utils.Result) {
 	}
 	result.Error = ""
 	result.Protocol = resp.Request.URL.Scheme
-	result.HttpStat = strconv.Itoa(resp.StatusCode)
+	result.HttpStat = structutils.ToString(resp.StatusCode)
 	result.Content = string(utils.GetBody(resp))
 	result.Httpresp = resp
 

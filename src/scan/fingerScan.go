@@ -99,7 +99,7 @@ func getFramework(result *utils.Result, fingermap *utils.FingerMapper, matcher f
 	}
 
 	if result.Protocol == "tcp" && !result.NoFramework() {
-		// 如果是tcp协议,并且以及发现了指纹,则退出.
+		// 如果是tcp协议,并且识别到一个指纹,则退出.
 		// 如果是http协议,可能存在多个指纹,则进行扫描
 		return
 	}
