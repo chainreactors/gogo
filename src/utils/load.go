@@ -127,11 +127,11 @@ func LoadFingers(t string) *FingerMapper {
 	for _, finger := range tmpfingers {
 		finger.Decode() // 防止\xff \x00编码解码影响结果
 
-		// 普通指纹
+		// 普通指纹, 预编译
 		for _, regstr := range finger.Regexps.Regexp {
 			Compiled[finger.Name] = append(Compiled[finger.Name], CompileRegexp("(?im)"+regstr))
 		}
-		// 漏洞指纹,指纹名称后接 "_vuln"
+		// 漏洞指纹预编译,指纹名称后接 "_vuln"
 		for _, regstr := range finger.Regexps.Vuln {
 			Compiled[finger.Name+"_vuln"] = append(Compiled[finger.Name+"_vuln"], CompileRegexp("(?im)"+regstr))
 		}

@@ -52,7 +52,6 @@ type Regexps struct {
 	Body   []string `json:"body"`
 	MD5    []string `json:"md5"`
 	Regexp []string `json:"regexp"`
-	Cookie []string `json:"cookie"`
 	Header []string `json:"header"`
 	Vuln   []string `json:"vuln"`
 }
