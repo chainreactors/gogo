@@ -117,8 +117,9 @@ func CMD(k string) {
 	parseFilename(*autofile, *hiddenfile, &config)
 
 	starttime := time.Now()
+	// 初始化任务
 	config = Init(config)
-	RunTask(config)
+	RunTask(config) // 运行
 
 	//关闭文件写入管道
 	close(Opt.DataCh)
@@ -139,7 +140,7 @@ func CMD(k string) {
 	ConsoleLog("[*] Totally run: " + time.Since(starttime).String())
 
 	var filenamelog string
-	// 输出
+	// 输出文件名
 	if config.Filename != "" {
 		filenamelog = fmt.Sprintf("[*] Results filename: %s , ", config.Filename)
 		if config.SmartFilename != "" {
