@@ -124,6 +124,7 @@ func LoadFingers(t string) *FingerMapper {
 	}
 
 	for _, finger := range tmpfingers {
+		finger.Protocol = t
 		finger.Decode() // 防止\xff \x00编码解码影响结果
 
 		// 普通指纹, 预编译
