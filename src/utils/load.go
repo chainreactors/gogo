@@ -123,7 +123,6 @@ func LoadFingers(t string) *FingerMapper {
 		os.Exit(0)
 	}
 
-	//初步处理tcp指纹
 	for _, finger := range tmpfingers {
 		finger.Decode() // 防止\xff \x00编码解码影响结果
 
