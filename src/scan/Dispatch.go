@@ -2,7 +2,6 @@ package scan
 
 import (
 	"getitle/src/utils"
-	"strings"
 )
 
 type RunnerOpts struct {
@@ -51,62 +50,55 @@ func Dispatch(result *utils.Result) {
 		socketHttp(target, result)
 	}
 
-	// 启发式扫描探测直接返回不需要后续处理
-	if result.HttpStat == "s" {
+	if !result.Open && result.SmartProbe {
+		// 启发式探针或端口未OPEN,则直接退出, 不进行后续扫描
 		return
 	}
 
-	if result.Open {
+	//被动收集基本信息
+	result.InfoFilter()
 
-		//被动收集基本信息
-		result.InfoFilter()
-		fingerScan(result)
-		// 指定payload扫描
-		if result.IsHttp() && RunOpt.Payloadstr != "" {
-			payloadScan(result)
-			return
-		}
+	// 指纹识别, 会根据versionlevel自动选择合适的指纹
+	fingerScan(result)
 
-		//主动信息收集
-		// 因为正则匹配耗时较长,如果没有-v参数则字节不进行服务识别
-		if RunOpt.VersionLevel >= 1 && strings.HasPrefix(result.Protocol, "http") {
-			faviconScan(result)
-		} else {
-			if !result.IsHttp() && result.NoFramework() {
-				// 通过默认端口号猜测服务,不具备准确性
-				result.GuessFramework()
-			}
-		}
-
-		// 如果-e参数为true,则进行漏洞探测
-		if RunOpt.Exploit != "none" {
-			ExploitDispatch(result)
-		}
-
-		result.Title = utils.EncodeTitle(result.Title)
+	// 指定payload扫描
+	if result.IsHttp() && RunOpt.Payloadstr != "" {
+		// 根据指定的payload进行探测, 探测完后即结束
+		payloadScan(result)
 		return
 	}
 
+	//主动信息收集
+	if RunOpt.VersionLevel > 0 && result.IsHttp() {
+		// favicon指纹只有-v大于0并且为http服务才启用
+		faviconScan(result)
+	} else {
+		// 如果versionlevel为0 ,或者非http服务, 则使用默认端口猜测指纹.
+		if !result.IsHttp() && result.NoFramework() {
+			// 通过默认端口号猜测服务,不具备准确性
+			result.GuessFramework()
+		}
+	}
+
+	// 如果exploit参数不为none,则进行漏洞探测
+	if RunOpt.Exploit != "none" {
+		ExploitDispatch(result)
+	}
+
+	// 格式化title编码, 防止输出二进制数据
+	result.Title = utils.EncodeTitle(result.Title)
+	return
 }
 
 func ExploitDispatch(result *utils.Result) {
-	//if strings.Contains(result.Content, "-ERR wrong") {
-	//	RedisScan(target, result)
-	//}
+	if result.IsHttp() && RunOpt.Exploit != "auto" {
+		// todo 将shiro改造成nuclei poc
+		shiroScan(result)
+	}
+
 	if (!result.NoFramework() || RunOpt.Exploit != "auto") && result.IsHttp() {
 		Nuclei(result.GetURL(), result)
 	}
 
-	if RunOpt.Exploit != "auto" { // 如果exploit值不为auto,则不进行shiro和ms17010扫描
-		return
-	}
-	// todo 将shiro改造成nuclei poc
-	if result.IsHttp() {
-		shiroScan(result)
-	}
-
-	//if result.Port == "11211" {
-	//	MemcacheScan(target, result)
-	//}
 	return
 }

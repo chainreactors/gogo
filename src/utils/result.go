@@ -24,6 +24,7 @@ type Result struct {
 	Protocol   string         `json:"r"` // protocol
 	Hash       string         `json:"hs"`
 	Open       bool           `json:"-"`
+	SmartProbe bool           `json:"-"`
 	TcpCon     *net.Conn      `json:"-"`
 	Httpresp   *http.Response `json:"-"`
 	Error      string         `json:"-"`
