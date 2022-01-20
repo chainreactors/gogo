@@ -177,8 +177,10 @@ func initFile(config utils.Config) error {
 	}
 	_ = os.Remove(".sock.lock")
 
-	Opt.logFile, _ = NewFile(tmpfilename, false)
-
+	Opt.logFile, err = NewFile(tmpfilename, false)
+	if err != nil {
+		ConsoleLog("[warn] cannot create logfile, err:" + err.Error())
+	}
 	handler()
 	return nil
 }
@@ -188,11 +190,13 @@ func handler() {
 
 	// 进度文件
 	go func() {
-		for res := range Opt.LogDataCh {
-			Opt.logFile.syncWrite(res)
+		if Opt.logFile != nil {
+			for res := range Opt.LogDataCh {
+				Opt.logFile.syncWrite(res)
+			}
+			Opt.logFile.close()
+			_ = os.Remove(tmpfilename)
 		}
-		Opt.logFile.close()
-		_ = os.Remove(tmpfilename)
 	}()
 
 	// res文件
