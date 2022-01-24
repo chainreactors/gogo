@@ -53,7 +53,7 @@ func CMD(k string) {
 	compress := flag.Bool("C", false, "")
 
 	// CONFIG
-	flag.IntVar(&config.Threads, "t", 4000, "")
+	flag.IntVar(&config.Threads, "t", 0, "")
 	flag.StringVar(&config.Mod, "m", "default", "")
 	flag.BoolVar(&config.Spray, "s", false, "")
 	flag.BoolVar(&config.Ping, "ping", false, "")

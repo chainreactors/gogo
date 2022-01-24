@@ -58,7 +58,7 @@ func Init(config Config) Config {
 	config.Exploit = RunOpt.Exploit
 	config.VerisonLevel = RunOpt.VersionLevel
 
-	if config.Threads == 4000 { // if 默认线程
+	if config.Threads == 0 { // if 默认线程
 		if IsWin() {
 			//windows系统默认协程数为1000
 			config.Threads = 1000
@@ -76,6 +76,8 @@ func Init(config Config) Config {
 		if config.JsonFile != "" {
 			config.Threads = 50
 		}
+	} else {
+		config.Threads = 4000
 	}
 
 	var file *os.File
