@@ -159,7 +159,7 @@ func cidr_alived(ip string, temp *sync.Map, mask int, mod string) {
 		if Opt.file != nil && mod != "sc" && (Opt.Noscan || mod == "sb") {
 			// 只有-no 或 -m sc下,才会将网段信息输出到文件.
 			// 模式为sc时,b段将不会输出到文件,只输出c段
-			Opt.DataCh <- cidr
+			Opt.DataCh <- cidr + "\n"
 		}
 	}
 }

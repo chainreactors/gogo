@@ -189,15 +189,15 @@ func handler() {
 	//挂起文件相关协程
 
 	// 进度文件
-	go func() {
-		if Opt.logFile != nil {
+	if Opt.logFile != nil {
+		go func() {
 			for res := range Opt.LogDataCh {
 				Opt.logFile.syncWrite(res)
 			}
 			Opt.logFile.close()
 			_ = os.Remove(tmpfilename)
-		}
-	}()
+		}()
+	}
 
 	// res文件
 	if Opt.file != nil {
