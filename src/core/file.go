@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"getitle/src/scan"
 	. "getitle/src/structutils"
 	"getitle/src/utils"
 	"io/ioutil"
@@ -16,17 +17,16 @@ import (
 )
 
 func NewFile(filename string, compress bool) (*File, error) {
-	var file = &File{}
 	filehandler, err := fileInitialize(filename)
 	if err != nil {
 		return nil, err
 	}
-	if compress {
-		file.compress = compress
+	var file = &File{
+		compress:    compress,
+		fileHandler: filehandler,
+		fileWriter:  bufio.NewWriter(filehandler),
+		buf:         bytes.NewBuffer([]byte{}),
 	}
-	file.fileHandler = filehandler
-	file.fileWriter = bufio.NewWriter(filehandler)
-	file.buf = bytes.NewBuffer([]byte{})
 	return file, nil
 }
 
@@ -144,6 +144,10 @@ func initFile(config utils.Config) error {
 		Opt.Clean = !Opt.Clean
 		// 创建output的filehandle
 		Opt.file, err = NewFile(config.Filename, Opt.Compress)
+		if err != nil {
+			return err
+		}
+		scan.RunOpt.ExtractorFile, err = fileInitialize(config.Filename + "_extractor.txt")
 		if err != nil {
 			return err
 		}

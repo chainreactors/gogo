@@ -1,6 +1,7 @@
 package scan
 
 import (
+	"fmt"
 	. "getitle/src/nuclei/templates"
 	"getitle/src/utils"
 	"strings"
@@ -26,6 +27,13 @@ func execute_templates(titles []string, target string) []utils.Vuln {
 	for _, template := range templates { // 遍历所有poc
 		res, ok := template.Execute(target)
 		if ok {
+			if res.OutputExtracts != nil && RunOpt.ExtractorFile != nil {
+				_, _ = RunOpt.ExtractorFile.WriteString(fmt.Sprintf("---%s, %s---\n", target, template.Id))
+				for _, outputStr := range res.OutputExtracts {
+					_, _ = RunOpt.ExtractorFile.WriteString(outputStr)
+				}
+				_ = RunOpt.ExtractorFile.Sync()
+			}
 			vulns = append(vulns, utils.Vuln{template.Id, res.PayloadValues, res.DynamicValues})
 		}
 	}
