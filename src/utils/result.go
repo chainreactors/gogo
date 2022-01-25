@@ -182,7 +182,7 @@ type zombiemeta struct {
 	Server string `json:"Server"`
 }
 
-type Results []Result
+type Results []*Result
 
 func (rs Results) Filter(k, v, op string) Results {
 	var filtedres Results

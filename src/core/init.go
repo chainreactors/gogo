@@ -103,6 +103,8 @@ func Init(config Config) Config {
 		// 如果输入的json不为空,则从json中加载result,并返回结果
 		data := LoadResultFile(file)
 		switch data.(type) {
+		case Results:
+			config.Results = data.(Results)
 		case ResultsData:
 			config.Results = data.(ResultsData).Data
 		case SmartData:
