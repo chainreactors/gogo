@@ -23,7 +23,10 @@ type Request struct {
 	// Payload is the payload to send for the network request
 	Inputs []*Input `json:"inputs"`
 	// ReadSize is the size of response to read (1024 if not provided by default)
-	ReadSize            int `json:"read-size"`
+	ReadSize int `json:"read-size"`
+
+	ReadAll bool `json:"read-all"`
+
 	protocols.Operators `json:",inline,omitempty"`
 	// Operators for the current request go here.
 	CompiledOperators *protocols.Operators
@@ -114,7 +117,7 @@ func (r *Request) Compile() error {
 	}
 	r.dialer = client
 
-	if len(r.Matchers) > 0 {
+	if len(r.Matchers) > 0 || len(r.Extractors) > 0 {
 		compiled := &r.Operators
 		if err := compiled.Compile(); err != nil {
 			return err

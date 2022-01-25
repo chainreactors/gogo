@@ -98,7 +98,7 @@ func (r *Request) MakeResultEvent(wrapped *protocols.InternalWrappedEvent) []*pr
 
 func (r *Request) makeResultEventItem(wrapped *protocols.InternalWrappedEvent) *protocols.ResultEvent {
 	data := &protocols.ResultEvent{
-		//TemplateID:       ToString(wrapped.InternalEvent["template-id"]),
+		TemplateID: ToString(wrapped.InternalEvent["template-id"]),
 		//Info:             wrapped.InternalEvent["template-info"].(map[string]interface{}),
 		Type:     "http",
 		Host:     ToString(wrapped.InternalEvent["host"]),
@@ -201,7 +201,7 @@ func (r *Request) executeRequest(request *generatedRequest, dynamicValues map[st
 	event := &protocols.InternalWrappedEvent{InternalEvent: dynamicValues}
 	if r.CompiledOperators != nil {
 		var ok bool
-		event.OperatorsResult, ok = r.CompiledOperators.Execute(data, r.Match)
+		event.OperatorsResult, ok = r.CompiledOperators.Execute(data, r.Match, nil)
 		if ok && event.OperatorsResult != nil {
 			event.OperatorsResult.PayloadValues = request.meta
 			event.Results = r.MakeResultEvent(event)

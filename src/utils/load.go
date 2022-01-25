@@ -37,6 +37,7 @@ func LoadTemplates(content []byte) map[string][]*Template {
 	var templatemap = make(map[string][]*Template)
 	err := json.Unmarshal(content, &templates)
 	if err != nil {
+		fmt.Println("[-] " + err.Error())
 		fmt.Println("[-] nuclei config load FAIL!")
 		os.Exit(0)
 	}

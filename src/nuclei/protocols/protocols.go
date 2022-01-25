@@ -45,8 +45,8 @@ type Request interface {
 //type InternalEvent map[string]interface{}
 
 type ResultEvent struct {
-	// TemplateID is the ID of the template for the result.
-	//TemplateID string `json:"templateID"`
+	//TemplateID is the ID of the template for the result.
+	TemplateID string `json:"templateID"`
 	// Info contains information block of the template for the result.
 	//Info map[string]interface{} `json:"info,inline"`
 	// MatcherName is the name of the matcher matched if any.

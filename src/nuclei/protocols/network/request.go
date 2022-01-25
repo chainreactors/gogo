@@ -15,18 +15,26 @@ import (
 
 var _ protocols.Request = &Request{}
 
-func (r *Request) Match(data map[string]interface{}, matcher *protocols.Matcher) bool {
-	partString := matcher.Part
-	switch partString {
+func (request *Request) getMatchPart(part string, data protocols.InternalEvent) (string, bool) {
+	switch part {
 	case "body", "all", "":
-		partString = "data"
+		part = "data"
 	}
 
-	item, ok := data[partString]
+	item, ok := data[part]
 	if !ok {
-		return false
+		return "", false
 	}
 	itemStr := structutils.ToString(item)
+
+	return itemStr, true
+}
+
+func (r *Request) Match(data map[string]interface{}, matcher *protocols.Matcher) bool {
+	itemStr, ok := r.getMatchPart(matcher.Part, data)
+	if !ok {
+		return ok
+	}
 
 	switch matcher.GetType() {
 	case protocols.SizeMatcher:
@@ -41,13 +49,29 @@ func (r *Request) Match(data map[string]interface{}, matcher *protocols.Matcher)
 	return false
 }
 
+// Extract performs extracting operation for an extractor on model and returns true or false.
+func (request *Request) Extract(data map[string]interface{}, extractor *protocols.Extractor) map[string]struct{} {
+	itemStr, ok := request.getMatchPart(extractor.Part, data)
+	if !ok {
+		return nil
+	}
+
+	switch extractor.GetType() {
+	case protocols.RegexExtractor:
+		return extractor.ExtractRegex(itemStr)
+	case protocols.KValExtractor:
+		return extractor.ExtractKval(data)
+	}
+	return nil
+}
+
 // ExecuteWithResults executes the protocol requests and returns results instead of writing them.
 func (r *Request) ExecuteWithResults(input string, dynamicValues map[string]interface{}, callback protocols.OutputEventCallback) error {
 	address, err := getAddress(input)
 	if err != nil {
 		return err
 	}
-
+	dynamicValues = structutils.MergeMaps(dynamicValues, map[string]interface{}{"Hostname": address})
 	for _, kv := range r.addresses {
 		actualAddress := nuclei.Replace(kv.ip, map[string]interface{}{"Hostname": address})
 		if kv.port != "" {
@@ -71,7 +95,7 @@ func (r *Request) executeAddress(actualAddress, address, input string, shouldUse
 		err := errors.New("no port provided in network protocol request")
 		return err
 	}
-
+	//payloads := map[string]interface{}{}
 	if r.generator != nil {
 		iterator := r.generator.NewIterator()
 
@@ -80,6 +104,7 @@ func (r *Request) executeAddress(actualAddress, address, input string, shouldUse
 			if !ok {
 				break
 			}
+			//value = structutils.MergeMaps(value, payloads)
 			if err := r.executeRequestWithPayloads(actualAddress, address, input, shouldUseTLS, value, dynamicValues, callback); err != nil {
 				return err
 			}
@@ -133,15 +158,15 @@ func (r *Request) executeRequestWithPayloads(actualAddress, address, input strin
 		}
 		reqBuilder.Grow(len(input.Data))
 
-		//finalData, dataErr := expressions.EvaluateByte(data, payloads)
+		finalData := []byte(nuclei.Replace(string(data), payloads))
 		//if dataErr != nil {
 		//	r.options.Output.Request(r.options.TemplateID, address, "network", dataErr)
 		//	r.options.Progress.IncrementFailedRequestsBy(1)
 		//	return errors.Wrap(dataErr, "could not evaluate template expressions")
 		//}
-		reqBuilder.Write(data)
+		reqBuilder.Write(finalData)
 
-		_, err = conn.Write(data)
+		_, err = conn.Write(finalData)
 		if err != nil {
 			return err
 		}
@@ -157,12 +182,12 @@ func (r *Request) executeRequestWithPayloads(actualAddress, address, input strin
 			}
 
 			// Run any internal extractors for the request here and add found values to map.
-			//if r.CompiledOperators != nil {
-			//	values := r.CompiledOperators.ExecuteInternalExtractors(map[string]interface{}{input.Name: bufferStr}, r.Extract)
-			//	for k, v := range values {
-			//		payloads[k] = v
-			//	}
-			//}
+			if r.CompiledOperators != nil {
+				values := r.CompiledOperators.ExecuteInternalExtractors(map[string]interface{}{input.Name: bufferStr}, r.Extract)
+				for k, v := range values {
+					payloads[k] = v
+				}
+			}
 		}
 	}
 	//r.options.Progress.IncrementRequests()
@@ -171,12 +196,49 @@ func (r *Request) executeRequestWithPayloads(actualAddress, address, input strin
 	if r.ReadSize != 0 {
 		bufferSize = r.ReadSize
 	}
-	final := make([]byte, bufferSize)
-	n, err := conn.Read(final)
-	if err != nil && err != io.EOF {
-		return err
+
+	var (
+		final []byte
+		n     int
+	)
+	if r.ReadAll {
+		readInterval := time.NewTimer(time.Second * 1)
+		// stop the timer and drain the channel
+		closeTimer := func(t *time.Timer) {
+			if !t.Stop() {
+				<-t.C
+			}
+		}
+	readSocket:
+		for {
+			select {
+			case <-readInterval.C:
+				closeTimer(readInterval)
+				break readSocket
+			default:
+				buf := make([]byte, bufferSize)
+				nBuf, err := conn.Read(buf)
+				if err != nil {
+					if err == io.EOF {
+						break readSocket
+					} else {
+						return err
+					}
+				}
+				responseBuilder.Write(buf[:nBuf])
+				final = append(final, buf[:nBuf]...)
+				n += nBuf
+			}
+		}
+	} else {
+		final = make([]byte, bufferSize)
+		time.Sleep(time.Duration(r.ReadSize/10) * time.Millisecond)
+		n, err = conn.Read(final)
+		if err != nil && err != io.EOF {
+			return err
+		}
+		responseBuilder.Write(final[:n])
 	}
-	responseBuilder.Write(final[:n])
 
 	//outputEvent := r.responseToDSLMap(reqBuilder.String(), string(final[:n]), responseBuilder.String(), input, actualAddress)
 	//outputEvent["ip"] = r.dialer.GetDialedIP(hostname)
@@ -191,7 +253,7 @@ func (r *Request) executeRequestWithPayloads(actualAddress, address, input strin
 	//}
 	event := &protocols.InternalWrappedEvent{InternalEvent: dynamicValues}
 	if r.CompiledOperators != nil {
-		result, ok := r.CompiledOperators.Execute(map[string]interface{}{"data": responseBuilder.String()}, r.Match)
+		result, ok := r.CompiledOperators.Execute(map[string]interface{}{"data": responseBuilder.String()}, r.Match, r.Extract)
 		if ok && result != nil {
 			event.OperatorsResult = result
 			event.OperatorsResult.PayloadValues = payloads
