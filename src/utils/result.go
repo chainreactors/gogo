@@ -292,6 +292,16 @@ type Extractor struct {
 	ExtractResult []string `json:"extract_result"`
 }
 
+func (e *Extractor) ToString() string {
+	if len(e.ExtractResult) > 0 {
+		if len(e.ExtractResult[0]) > 30 {
+			return fmt.Sprintf("%s:%s ... %dbytes", e.Name, e.ExtractResult[0][:30], len(e.ExtractResult[0]))
+		}
+		return fmt.Sprintf("%s:%s", e.Name, e.ExtractResult[0])
+	}
+	return ""
+}
+
 func NewExtractor(name string, extractResult interface{}) *Extractor {
 	var e = &Extractor{
 		Name: name,
@@ -315,4 +325,12 @@ func (e *Extractors) ToResult() string {
 		return err.Error()
 	}
 	return string(s) + "\n"
+}
+
+func (es Extractors) ToString() string {
+	var s string
+	for _, e := range es {
+		s += fmt.Sprintf("[ extract: %s ] ", e.ToString())
+	}
+	return s
 }
