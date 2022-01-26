@@ -61,6 +61,7 @@ func defaultScan(tc targetConfig) {
 		}
 		if Opt.file != nil {
 			Opt.DataCh <- output(result, Opt.FileOutput)
+			Opt.ExtractorCh <- result.Extractors.ToResult()
 		}
 	} else if Opt.Debug {
 		fmt.Println("[debug] tcp stat: %d, errmsg: %s", portstat[result.ErrStat], result.Error)
@@ -159,7 +160,7 @@ func cidr_alived(ip string, temp *sync.Map, mask int, mod string) {
 		if Opt.file != nil && mod != "sc" && (Opt.Noscan || mod == "sb") {
 			// 只有-no 或 -m sc下,才会将网段信息输出到文件.
 			// 模式为sc时,b段将不会输出到文件,只输出c段
-			Opt.DataCh <- cidr
+			Opt.DataCh <- cidr + "\n"
 		}
 	}
 }
@@ -193,7 +194,7 @@ func declineScan(iplist []string, config Config) {
 			tmpalive := Opt.AliveSum
 			SmartMod(ip, config)
 			progressLogln(fmt.Sprintf("[*] Found %d alive assets from CIDR %s", Opt.AliveSum-tmpalive, ip))
-			Opt.file.sync()
+			Opt.file.Sync()
 		}
 	}
 }

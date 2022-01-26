@@ -1,14 +1,18 @@
 package http
 
 import (
+	"errors"
 	"fmt"
 	"getitle/src/nuclei/protocols"
 	. "getitle/src/structutils"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
 )
+
+var errStopExecution = errors.New("stop execution due to unresolved variables")
 
 type Request struct {
 	// operators for the current request go here.
@@ -61,161 +65,14 @@ type Request struct {
 	CompiledOperators *protocols.Operators
 	attackType        protocols.Type
 	totalRequests     int
+
+	options *protocols.ExecuterOptions
 	//Result            *protocols.Result
-}
-
-//var (
-//	urlWithPortRegex = regexp.MustCompile(`{{BaseURL}}:(\d+)`)
-//)
-// MakeResultEvent creates a result event from internal wrapped event
-func (r *Request) MakeResultEvent(wrapped *protocols.InternalWrappedEvent) []*protocols.ResultEvent {
-	if len(wrapped.OperatorsResult.DynamicValues) > 0 && !wrapped.OperatorsResult.Matched {
-		return nil
-	}
-
-	results := make([]*protocols.ResultEvent, 0, len(wrapped.OperatorsResult.Matches)+1)
-
-	// If we have multiple matchers with names, write each of them separately.
-	if len(wrapped.OperatorsResult.Matches) > 0 {
-		for k := range wrapped.OperatorsResult.Matches {
-			data := r.makeResultEventItem(wrapped)
-			data.MatcherName = k
-			results = append(results, data)
-		}
-		//} else if len(wrapped.OperatorsResult.Extracts) > 0 {
-		//	for k, v := range wrapped.OperatorsResult.Extracts {
-		//		data := r.makeResultEventItem(wrapped)
-		//		data.ExtractedResults = v
-		//		data.ExtractorName = k
-		//		results = append(results, data)
-		//	}
-	} else {
-		data := r.makeResultEventItem(wrapped)
-		results = append(results, data)
-	}
-	return results
-}
-
-func (r *Request) makeResultEventItem(wrapped *protocols.InternalWrappedEvent) *protocols.ResultEvent {
-	data := &protocols.ResultEvent{
-		//TemplateID:       ToString(wrapped.InternalEvent["template-id"]),
-		//Info:             wrapped.InternalEvent["template-info"].(map[string]interface{}),
-		Type:     "http",
-		Host:     ToString(wrapped.InternalEvent["host"]),
-		Matched:  ToString(wrapped.InternalEvent["matched"]),
-		Metadata: wrapped.OperatorsResult.PayloadValues,
-		//ExtractedResults: wrapped.OperatorsResult.OutputExtracts,
-		Timestamp: time.Now(),
-		IP:        ToString(wrapped.InternalEvent["ip"]),
-	}
-	return data
-}
-
-// requests returns the total number of requests the YAML rule will perform
-func (r *Request) Requests() int {
-	if r.generator != nil {
-		payloadRequests := r.generator.NewIterator().Total() * len(r.Raw)
-		return payloadRequests
-	}
-	if len(r.Raw) > 0 {
-		requests := len(r.Raw)
-		return requests
-	}
-	return len(r.Path)
-}
-
-func (r *Request) Compile() error {
-	var err error
-	connectionConfiguration := &Configuration{
-		//Threads:         r.Threads,
-		MaxRedirects:    r.MaxRedirects,
-		FollowRedirects: r.Redirects,
-		CookieReuse:     r.CookieReuse,
-	}
-	client := createClient(connectionConfiguration)
-	r.httpClient = client
-
-	if r.Body != "" && !strings.Contains(r.Body, "\r\n") {
-		r.Body = strings.Replace(r.Body, "\n", "\r\n", -1)
-	}
-	if len(r.Raw) > 0 {
-		for i, raw := range r.Raw {
-			if !strings.Contains(raw, "\r\n") {
-				r.Raw[i] = strings.Replace(raw, "\n", "\r\n", -1)
-			}
-		}
-	}
-
-	// 修改: 只编译一次Matcher
-	if r.CompiledOperators == nil && len(r.Matchers) > 0 { // todo extractor
-		compiled := &r.Operators
-		if compileErr := compiled.Compile(); compileErr != nil {
-			return compileErr
-		}
-		r.CompiledOperators = compiled
-	}
-
-	if len(r.Payloads) > 0 {
-		attackType := r.AttackType
-		if attackType == "" {
-			attackType = "sniper"
-		}
-		r.attackType = protocols.StringToType[attackType]
-		r.generator, err = protocols.New(r.Payloads, r.attackType)
-		if err != nil {
-			return err
-		}
-	}
-	r.totalRequests = r.Requests()
-	return nil
-}
-
-func (r *Request) ExecuteWithResults(input string, dynamicValues map[string]interface{}, callback protocols.OutputEventCallback) error {
-	ok, err := r.ExecuteRequestWithResults(input, dynamicValues, callback)
-	if err != nil && !ok {
-		return err
-	}
-	return nil
-}
-
-func (r *Request) ExecuteRequestWithResults(url string, dynamicValues map[string]interface{}, callback protocols.OutputEventCallback) (bool, error) {
-	generator := r.newGenerator()
-	for {
-		req, err := generator.Make(url, dynamicValues)
-		if err != nil {
-			return false, err
-		}
-		ok, err := r.executeRequest(req, dynamicValues, callback)
-		if ok {
-			return true, err
-		}
-	}
-}
-
-func (r *Request) executeRequest(request *generatedRequest, dynamicValues map[string]interface{}, callback protocols.OutputEventCallback) (bool, error) {
-	resp, err := r.httpClient.Do(request.request)
-	if err != nil {
-		return false, err
-	}
-	data := respToMap(resp, request.request)
-	event := &protocols.InternalWrappedEvent{InternalEvent: dynamicValues}
-	if r.CompiledOperators != nil {
-		var ok bool
-		event.OperatorsResult, ok = r.CompiledOperators.Execute(data, r.Match)
-		if ok && event.OperatorsResult != nil {
-			event.OperatorsResult.PayloadValues = request.meta
-			event.Results = r.MakeResultEvent(event)
-			callback(event)
-			return true, err
-		}
-
-	}
-	return false, err
 }
 
 // Match matches a generic data response again a given matcher
 func (r *Request) Match(data map[string]interface{}, matcher *protocols.Matcher) bool {
-	item, ok := getMatchPart(matcher.Part, data)
+	item, ok := r.getMatchPart(matcher.Part, data)
 	if !ok {
 		return false
 	}
@@ -243,8 +100,26 @@ func (r *Request) Match(data map[string]interface{}, matcher *protocols.Matcher)
 	return false
 }
 
+// Extract performs extracting operation for an extractor on model and returns true or false.
+func (request *Request) Extract(data map[string]interface{}, extractor *protocols.Extractor) map[string]struct{} {
+	item, ok := request.getMatchPart(extractor.Part, data)
+	if !ok {
+		return nil
+	}
+	switch extractor.GetType() {
+	case protocols.RegexExtractor:
+		return extractor.ExtractRegex(item)
+	case protocols.KValExtractor:
+		return extractor.ExtractKval(data)
+	}
+	return nil
+}
+
 // getMatchPart returns the match part honoring "all" matchers + others.
-func getMatchPart(part string, data map[string]interface{}) (string, bool) {
+func (request *Request) getMatchPart(part string, data protocols.InternalEvent) (string, bool) {
+	if part == "" {
+		part = "body"
+	}
 	if part == "header" {
 		part = "all_headers"
 	}
@@ -263,6 +138,221 @@ func getMatchPart(part string, data map[string]interface{}) (string, bool) {
 		itemStr = ToString(item)
 	}
 	return itemStr, true
+}
+
+//var (
+//	urlWithPortRegex = regexp.MustCompile(`{{BaseURL}}:(\d+)`)
+//)
+// MakeResultEvent creates a result event from internal wrapped event
+func (r *Request) MakeResultEvent(wrapped *protocols.InternalWrappedEvent) []*protocols.ResultEvent {
+	if len(wrapped.OperatorsResult.DynamicValues) > 0 && !wrapped.OperatorsResult.Matched {
+		return nil
+	}
+
+	results := make([]*protocols.ResultEvent, 0, len(wrapped.OperatorsResult.Matches)+1)
+
+	// If we have multiple matchers with names, write each of them separately.
+	if len(wrapped.OperatorsResult.Matches) > 0 {
+		for k := range wrapped.OperatorsResult.Matches {
+			data := r.makeResultEventItem(wrapped)
+			data.MatcherName = k
+			results = append(results, data)
+		}
+	} else if len(wrapped.OperatorsResult.Extracts) > 0 {
+		for k, v := range wrapped.OperatorsResult.Extracts {
+			data := r.makeResultEventItem(wrapped)
+			data.ExtractedResults = v
+			data.ExtractorName = k
+			results = append(results, data)
+		}
+	} else {
+		data := r.makeResultEventItem(wrapped)
+		results = append(results, data)
+	}
+	return results
+}
+
+func (r *Request) makeResultEventItem(wrapped *protocols.InternalWrappedEvent) *protocols.ResultEvent {
+	data := &protocols.ResultEvent{
+		TemplateID: ToString(wrapped.InternalEvent["template-id"]),
+		//Info:             wrapped.InternalEvent["template-info"].(map[string]interface{}),
+		Type:             "http",
+		Host:             ToString(wrapped.InternalEvent["host"]),
+		Matched:          ToString(wrapped.InternalEvent["matched"]),
+		Metadata:         wrapped.OperatorsResult.PayloadValues,
+		ExtractedResults: wrapped.OperatorsResult.OutputExtracts,
+		Timestamp:        time.Now(),
+		IP:               ToString(wrapped.InternalEvent["ip"]),
+	}
+	return data
+}
+
+// requests returns the total number of requests the YAML rule will perform
+func (r *Request) Requests() int {
+	if r.generator != nil {
+		payloadRequests := r.generator.NewIterator().Total() * len(r.Raw)
+		return payloadRequests
+	}
+	if len(r.Raw) > 0 {
+		requests := len(r.Raw)
+		return requests
+	}
+	return len(r.Path)
+}
+
+func (r *Request) Compile(options *protocols.ExecuterOptions) error {
+	r.options = options
+	var err error
+	connectionConfiguration := &Configuration{
+		//Threads:         r.Threads,
+		MaxRedirects:    r.MaxRedirects,
+		FollowRedirects: r.Redirects,
+		CookieReuse:     r.CookieReuse,
+	}
+	client := createClient(connectionConfiguration)
+	r.httpClient = client
+
+	if r.Body != "" && !strings.Contains(r.Body, "\r\n") {
+		r.Body = strings.Replace(r.Body, "\n", "\r\n", -1)
+	}
+	if len(r.Raw) > 0 {
+		for i, raw := range r.Raw {
+			if !strings.Contains(raw, "\r\n") {
+				r.Raw[i] = strings.Replace(raw, "\n", "\r\n", -1)
+			}
+		}
+	}
+
+	// 修改: 只编译一次Matcher
+	if len(r.Matchers) > 0 || len(r.Extractors) > 0 {
+		compiled := &r.Operators
+		if compileErr := compiled.Compile(); compileErr != nil {
+			return compileErr
+		}
+		r.CompiledOperators = compiled
+	}
+
+	if len(r.Payloads) > 0 {
+		attackType := r.AttackType
+		if attackType == "" {
+			attackType = "sniper"
+		}
+		r.attackType = protocols.StringToType[attackType]
+		// 允许使用命令行定义对应的参数, 会替换对应的参数, 如果参数的数量对不上可能会报错
+		for k, v := range r.options.Options.VarsPayload {
+			if _, ok := r.Payloads[k]; ok {
+				r.Payloads[k] = v
+			}
+		}
+		r.generator, err = protocols.New(r.Payloads, r.attackType)
+		if err != nil {
+			return err
+		}
+	}
+	r.totalRequests = r.Requests()
+	return nil
+}
+
+func (r *Request) ExecuteWithResults(input string, dynamicValues map[string]interface{}, callback protocols.OutputEventCallback) error {
+	err := r.ExecuteRequestWithResults(input, dynamicValues, callback)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (request *Request) ExecuteRequestWithResults(reqURL string, dynamicValues map[string]interface{}, callback protocols.OutputEventCallback) error {
+	generator := request.newGenerator()
+	requestCount := 1
+	var requestErr error
+	for {
+		// returns two values, error and skip, which skips the execution for the request instance.
+		executeFunc := func(data string, payloads, dynamicValue map[string]interface{}) (bool, error) {
+			generatedHttpRequest, err := generator.Make(reqURL, data, payloads, dynamicValue)
+			if err != nil {
+				if err == io.EOF {
+					return true, nil
+				}
+				return true, err
+			}
+
+			err = request.executeRequest(generatedHttpRequest, dynamicValues, func(event *protocols.InternalWrappedEvent) {
+				// Add the extracts to the dynamic values if any.
+				//if event.OperatorsResult != nil {
+				//	gotOutput = true
+				//	gotDynamicValues := MergeMaps(event.OperatorsResult.DynamicValues, dynamicValues)
+				//	gotDynamicValues = MergeMaps(gotDynamicValues, gotDynamicValues)
+				//}
+				callback(event)
+			})
+
+			// If a variable is unresolved, skip all further requests
+			if err == errStopExecution {
+				return true, nil
+			}
+			if err != nil {
+				requestErr = err
+			}
+			requestCount++
+			//request.options.Progress.IncrementRequests()
+
+			// If this was a match, and we want to stop at first match, skip all further requests.
+			//if (generatedHttpRequest.original.options.Options.StopAtFirstMatch || generatedHttpRequest.original.options.StopAtFirstMatch || request.StopAtFirstMatch) && gotOutput {
+			//	return true, nil
+			//}
+			return false, nil
+		}
+
+		inputData, payloads, ok := generator.nextValue()
+		if !ok {
+			break
+		}
+		var gotErr error
+		var skip bool
+
+		skip, gotErr = executeFunc(inputData, payloads, dynamicValues)
+		if gotErr != nil && requestErr == nil {
+			requestErr = gotErr
+		}
+		if skip || gotErr != nil {
+			break
+		}
+	}
+	return requestErr
+	//for {
+	//	inputData, payloads, ok := generator.nextValue()
+	//	if !ok {
+	//		break
+	//	}
+	//	req, err := generator.Make(url,payloads, dynamicValues)
+	//	if err != nil {
+	//		return false, err
+	//	}
+	//	ok, err := r.executeRequest(req, dynamicValues, callback)
+	//	if ok {
+	//		return true, err
+	//	}
+	//}
+}
+
+func (r *Request) executeRequest(request *generatedRequest, dynamicValues map[string]interface{}, callback protocols.OutputEventCallback) error {
+	resp, err := r.httpClient.Do(request.request)
+	if err != nil {
+		return err
+	}
+	data := respToMap(resp, request.request)
+	event := &protocols.InternalWrappedEvent{InternalEvent: dynamicValues}
+	if r.CompiledOperators != nil {
+		var ok bool
+		event.OperatorsResult, ok = r.CompiledOperators.Execute(data, r.Match, r.Extract)
+		if ok && event.OperatorsResult != nil {
+			event.OperatorsResult.PayloadValues = request.meta
+			event.Results = r.MakeResultEvent(event)
+			callback(event)
+			return nil
+		}
+	}
+	return err
 }
 
 func respToMap(resp *http.Response, req *http.Request) map[string]interface{} {

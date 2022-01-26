@@ -23,7 +23,10 @@ type Request struct {
 	// Payload is the payload to send for the network request
 	Inputs []*Input `json:"inputs"`
 	// ReadSize is the size of response to read (1024 if not provided by default)
-	ReadSize            int `json:"read-size"`
+	ReadSize int `json:"read-size"`
+
+	ReadAll bool `json:"read-all"`
+
 	protocols.Operators `json:",inline,omitempty"`
 	// Operators for the current request go here.
 	CompiledOperators *protocols.Operators
@@ -32,13 +35,12 @@ type Request struct {
 	attackType        protocols.Type
 	// cache any variables that may be needed for operation.
 	//dialer  *fastdialer.Dialer
-	//options *protocols.ExecuterOptions
+	options *protocols.ExecuterOptions
 }
 
 type addressKV struct {
-	ip   string
-	port string
-	tls  bool
+	address string
+	tls     bool
 }
 
 // Input is the input to send on the network
@@ -59,22 +61,17 @@ func (r *Request) GetID() string {
 }
 
 // Compile compiles the protocol request for further execution.
-func (r *Request) Compile() error {
+func (r *Request) Compile(options *protocols.ExecuterOptions) error {
 	var shouldUseTLS bool
 	var err error
-
+	r.options = options
 	for _, address := range r.Address {
 		// check if the connection should be encrypted
 		if strings.HasPrefix(address, "tls://") {
 			shouldUseTLS = true
 			address = strings.TrimPrefix(address, "tls://")
 		}
-		if strings.Contains(address, ":") {
-			addressHost, addressPort, _ := net.SplitHostPort(address)
-			r.addresses = append(r.addresses, addressKV{ip: addressHost, port: addressPort, tls: shouldUseTLS})
-		} else {
-			r.addresses = append(r.addresses, addressKV{ip: address, tls: shouldUseTLS})
-		}
+		r.addresses = append(r.addresses, addressKV{address: address, tls: shouldUseTLS})
 	}
 	// Pre-compile any input dsl functions before executing the request.
 	for _, input := range r.Inputs {
@@ -114,7 +111,7 @@ func (r *Request) Compile() error {
 	}
 	r.dialer = client
 
-	if len(r.Matchers) > 0 {
+	if len(r.Matchers) > 0 || len(r.Extractors) > 0 {
 		compiled := &r.Operators
 		if err := compiled.Compile(); err != nil {
 			return err

@@ -1,12 +1,9 @@
 package core
 
 import (
-	"bufio"
-	"bytes"
-	"errors"
 	"fmt"
 	. "getitle/src/structutils"
-	"getitle/src/utils"
+	. "getitle/src/utils"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -14,87 +11,6 @@ import (
 	"strings"
 	"time"
 )
-
-func NewFile(filename string, compress bool) (*File, error) {
-	var file = &File{}
-	filehandler, err := fileInitialize(filename)
-	if err != nil {
-		return nil, err
-	}
-	if compress {
-		file.compress = compress
-	}
-	file.fileHandler = filehandler
-	file.fileWriter = bufio.NewWriter(filehandler)
-	file.buf = bytes.NewBuffer([]byte{})
-	return file, nil
-}
-
-type File struct {
-	fileHandler *os.File
-	fileWriter  *bufio.Writer
-	buf         *bytes.Buffer
-	compress    bool
-}
-
-func (f *File) write(s string) {
-	if f.compress {
-		_, err := f.buf.WriteString(s)
-		if err != nil {
-			println(err.Error())
-			os.Exit(0)
-		}
-		if f.buf.Len() > 4096 {
-			f.sync()
-		}
-		return
-	} else {
-		_, _ = f.fileHandler.WriteString(s)
-		return
-	}
-}
-
-func (f *File) syncWrite(s string) {
-	f.write(s)
-	f.sync()
-}
-
-func (f *File) writeBytes(bs []byte) {
-	if f.compress {
-		//res = string(utils.Flate([]byte(res)))
-		_, err := f.buf.Write(bs)
-		if err != nil {
-			println(err.Error())
-			os.Exit(0)
-		}
-		if f.buf.Len() > 4096 {
-			f.sync()
-		}
-		return
-	} else {
-		_, _ = f.fileHandler.Write(bs)
-		return
-	}
-}
-
-func (f *File) sync() {
-	if f == nil {
-		return
-	}
-	if f.compress && f.fileWriter != nil && f.buf != nil && f.buf.Len() != 0 {
-		_, _ = f.fileWriter.Write(utils.Flate(f.buf.Bytes()))
-		f.buf.Reset()
-		_ = f.fileWriter.Flush()
-		_ = f.fileHandler.Sync()
-	}
-	_ = f.fileHandler.Sync()
-	return
-}
-
-func (f *File) close() {
-	f.sync()
-	_ = f.fileHandler.Close()
-}
 
 //进度tmp文件
 var tmpfilename string
@@ -106,37 +22,15 @@ func LoadFile(file *os.File) []string {
 		fmt.Println(err.Error())
 		os.Exit(0)
 	}
-	if utils.IsBin(content) {
-		content = utils.UnFlate(content)
+	if IsBin(content) {
+		content = UnFlate(content)
 	}
 	text := string(content)
 	text = strings.TrimSpace(text)
 	return strings.Split(text, "\n")
 }
 
-func isExist(filename string) bool {
-	var exist = true
-	if _, err := os.Stat(filename); os.IsNotExist(err) {
-		exist = false
-	}
-	return exist
-}
-
-func fileInitialize(filename string) (*os.File, error) {
-	var err error
-	var filehandle *os.File
-	if isExist(filename) { //如果文件存在
-		return nil, errors.New("File already exists")
-	} else {
-		filehandle, err = os.Create(filename) //创建文件
-		if err != nil {
-			return nil, err
-		}
-	}
-	return filehandle, err
-}
-
-func initFile(config utils.Config) error {
+func initFile(config Config) error {
 	var err error
 
 	// 初始化res文件handler
@@ -147,8 +41,12 @@ func initFile(config utils.Config) error {
 		if err != nil {
 			return err
 		}
+
+		if err != nil {
+			return err
+		}
 		if Opt.FileOutput == "json" && !(Opt.Noscan || config.Mod == "sc") {
-			Opt.file.write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("scan")))
+			Opt.file.Write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("scan")))
 		}
 	}
 
@@ -158,7 +56,7 @@ func initFile(config utils.Config) error {
 		if err != nil {
 			return err
 		}
-		Opt.smartFile.write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("smart")))
+		Opt.smartFile.Write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("smart")))
 	}
 
 	if config.PingFilename != "" {
@@ -166,19 +64,21 @@ func initFile(config utils.Config) error {
 		if err != nil {
 			return err
 		}
-		Opt.pingFile.write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("ping")))
+		Opt.pingFile.Write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("ping")))
 	}
 
 	// 初始化进度文件
-	if !isExist(".sock.lock") {
+	if !IsExist(".sock.lock") {
 		tmpfilename = ".sock.lock"
 	} else {
 		tmpfilename = fmt.Sprintf(".%s.unix", ToString(time.Now().Unix()))
 	}
 	_ = os.Remove(".sock.lock")
 
-	Opt.logFile, _ = NewFile(tmpfilename, false)
-
+	Opt.logFile, err = NewFile(tmpfilename, false)
+	if err != nil {
+		ConsoleLog("[warn] cannot create logfile, err:" + err.Error())
+	}
 	handler()
 	return nil
 }
@@ -187,13 +87,15 @@ func handler() {
 	//挂起文件相关协程
 
 	// 进度文件
-	go func() {
-		for res := range Opt.LogDataCh {
-			Opt.logFile.syncWrite(res)
-		}
-		Opt.logFile.close()
-		_ = os.Remove(tmpfilename)
-	}()
+	if Opt.logFile != nil {
+		go func() {
+			for res := range Opt.LogDataCh {
+				Opt.logFile.SyncWrite(res)
+			}
+			Opt.logFile.Close()
+			_ = os.Remove(tmpfilename)
+		}()
+	}
 
 	// res文件
 	if Opt.file != nil {
@@ -207,7 +109,24 @@ func handler() {
 					// 如果json格式输出,则除了第一次输出,之后都会带上逗号
 					commaflag3 = true
 				}
-				Opt.file.write(res)
+				Opt.file.Write(res)
+			}
+		}()
+
+		go func() {
+			for res := range Opt.ExtractorCh {
+				if Opt.extractorFile == nil {
+					var err error
+					Opt.extractorFile, err = NewFile(Opt.file.Filename+"_extractor", false)
+					if err != nil {
+						ConsoleLog("[warn] cannot create extractor result file")
+					}
+				}
+				Opt.extractorFile.SyncWrite(res)
+			}
+
+			if Opt.extractorFile != nil {
+				Opt.extractorFile.Close()
 			}
 		}()
 	}
@@ -215,18 +134,18 @@ func handler() {
 
 func fileCloser() {
 	if Opt.FileOutput == "json" && !Opt.Noscan {
-		Opt.file.write("]}")
+		Opt.file.Write("]}")
 	}
-	Opt.file.close()
+	Opt.file.Close()
 
 	if Opt.smartFile != nil {
-		Opt.smartFile.write("]}")
-		Opt.smartFile.close()
+		Opt.smartFile.Write("]}")
+		Opt.smartFile.Close()
 	}
 
 	if Opt.pingFile != nil {
-		Opt.pingFile.write("]}")
-		Opt.pingFile.close()
+		Opt.pingFile.Write("]}")
+		Opt.pingFile.Close()
 	}
 }
 
@@ -238,9 +157,9 @@ func writeSmartResult(ips []string) {
 		iplists[i] = "\"" + ip + "\""
 	}
 	if commaflag {
-		Opt.smartFile.write(",")
+		Opt.smartFile.Write(",")
 	}
-	Opt.smartFile.syncWrite(strings.Join(iplists, ","))
+	Opt.smartFile.SyncWrite(strings.Join(iplists, ","))
 	commaflag = true
 }
 
@@ -253,9 +172,9 @@ func writePingResult(ips []string) {
 	}
 
 	if commaflag2 {
-		Opt.pingFile.write(",")
+		Opt.pingFile.Write(",")
 	}
-	Opt.pingFile.syncWrite(strings.Join(iplists, ","))
+	Opt.pingFile.SyncWrite(strings.Join(iplists, ","))
 	commaflag2 = true
 }
 
@@ -269,7 +188,7 @@ func writePingResult(ips []string) {
 //}
 var fileint = 1
 
-func GetFilename(config utils.Config, autofile, hiddenfile bool, outtype string) string {
+func GetFilename(config Config, autofile, hiddenfile bool, outtype string) string {
 	var basename string
 	abspath := getExcPath()
 	if autofile {
@@ -283,13 +202,13 @@ func GetFilename(config utils.Config, autofile, hiddenfile bool, outtype string)
 	} else {
 		return ""
 	}
-	for isExist(basename + ToString(fileint)) {
+	for IsExist(basename + ToString(fileint)) {
 		fileint++
 	}
 	return basename + ToString(fileint)
 }
 
-func getAutofile(config utils.Config, outtype string) string {
+func getAutofile(config Config, outtype string) string {
 	var basename string
 	target := strings.Replace(config.GetTargetName(), "/", "_", -1)
 	ports := strings.Replace(config.Ports, ",", "_", -1)

@@ -39,7 +39,7 @@ func colorOutput(result *Result) string {
 }
 
 func fullOutput(result *Result) string {
-	s := fmt.Sprintf("[+] %s://%s:%s%s\t%s\t%s\t%s\t%s\t%s [%s] %s %s\n", result.Protocol, result.Ip, result.Port, result.Uri, result.Midware, result.Language, result.Frameworks.ToString(), result.Host, result.Hash, result.HttpStat, result.Title, result.Vulns.ToString())
+	s := fmt.Sprintf("[+] %s://%s:%s%s\t%s\t%s\t%s\t%s\t%s [%s] %s %s %s\n", result.Protocol, result.Ip, result.Port, result.Uri, result.Midware, result.Language, result.Frameworks.ToString(), result.Host, result.Hash, result.HttpStat, result.Title, result.Vulns.ToString(), result.Extractors.ToString())
 	return s
 }
 
@@ -87,9 +87,9 @@ func FormatOutput(filename string, outputfile string, autofile bool, filters []s
 			os.Exit(0)
 		}
 		fmt.Println("[*] Output filename: " + outputfile)
-		defer fileHandle.close()
+		defer fileHandle.Close()
 		outfunc = func(s string) {
-			fileHandle.write(s)
+			fileHandle.Write(s)
 		}
 	} else {
 		outfunc = func(s string) {

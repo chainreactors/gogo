@@ -21,30 +21,33 @@ var InterConfig = map[string][]string{
 }
 
 type Options struct {
-	AliveSum   int
-	Clean      bool
-	Noscan     bool
-	Compress   bool
-	Quiet      bool
-	Debug      bool
-	file       *File
-	smartFile  *File
-	pingFile   *File
-	logFile    *File
-	DataCh     chan string
-	LogDataCh  chan string
-	Output     string
-	FileOutput string
+	AliveSum      int
+	Clean         bool
+	Noscan        bool
+	Compress      bool
+	Quiet         bool
+	Debug         bool
+	file          *File
+	smartFile     *File
+	extractorFile *File
+	pingFile      *File
+	logFile       *File
+	DataCh        chan string
+	ExtractorCh   chan string
+	LogDataCh     chan string
+	Output        string
+	FileOutput    string
 }
 
 var Opt = Options{
-	AliveSum:  0,
-	Clean:     false,
-	Noscan:    false,
-	Compress:  true,
-	Quiet:     false,
-	DataCh:    make(chan string, 100),
-	LogDataCh: make(chan string, 100),
+	AliveSum:    0,
+	Clean:       false,
+	Noscan:      false,
+	Compress:    true,
+	Quiet:       false,
+	DataCh:      make(chan string, 100),
+	LogDataCh:   make(chan string, 100),
+	ExtractorCh: make(chan string, 100),
 }
 
 func Init(config Config) Config {
@@ -58,7 +61,7 @@ func Init(config Config) Config {
 	config.Exploit = RunOpt.Exploit
 	config.VerisonLevel = RunOpt.VersionLevel
 
-	if config.Threads == 4000 { // if 默认线程
+	if config.Threads == 0 { // if 默认线程
 		if IsWin() {
 			//windows系统默认协程数为1000
 			config.Threads = 1000
@@ -76,6 +79,8 @@ func Init(config Config) Config {
 		if config.JsonFile != "" {
 			config.Threads = 50
 		}
+	} else {
+		config.Threads = 4000
 	}
 
 	var file *os.File
@@ -101,6 +106,8 @@ func Init(config Config) Config {
 		// 如果输入的json不为空,则从json中加载result,并返回结果
 		data := LoadResultFile(file)
 		switch data.(type) {
+		case Results:
+			config.Results = data.(Results)
 		case ResultsData:
 			config.Results = data.(ResultsData).Data
 		case SmartData:
@@ -219,10 +226,13 @@ func RunTask(config Config) {
 		} else {
 			createSmartScan(config.IP, config)
 		}
-
 	default:
 		createDefaultScan(config)
 	}
+	// 关闭管道
+	close(Opt.DataCh)
+	close(Opt.LogDataCh)
+	close(Opt.ExtractorCh)
 }
 
 func guessTime(targets interface{}, portlist []string, thread int) int {

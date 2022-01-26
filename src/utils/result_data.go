@@ -85,7 +85,7 @@ func (rd ResultsData) groupByIP() map[string]IPMapResult {
 		if pfs[result.Ip] == nil {
 			pfs[result.Ip] = make(map[string]Result)
 		}
-		pfs[result.Ip][result.Port] = result
+		pfs[result.Ip][result.Port] = *result
 	}
 	return pfs
 }
@@ -256,7 +256,16 @@ func LoadResultFile(file *os.File) interface{} {
 		content = autofixjson(content)
 		data, err = LoadResult(content)
 	} else {
-		data = content
+		var results Results
+		for _, target := range strings.Split(string(content), "\n") {
+			if strings.Contains(target, ":") {
+				targetpair := strings.Split(target, ":")
+				results = append(results, NewResult(targetpair[0], targetpair[1]))
+			} else {
+				return content
+			}
+		}
+		return results
 	}
 	if err != nil {
 		fmt.Println("[-] json error, " + err.Error())
@@ -289,4 +298,13 @@ func IsBin(content []byte) bool {
 		}
 	}
 	return false
+}
+
+func IsJson(content []byte) bool {
+	var tmp interface{}
+	err := json.Unmarshal(content, &tmp)
+	if err != nil {
+		return false
+	}
+	return true
 }

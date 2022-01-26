@@ -35,8 +35,7 @@ func (t *Template) GetTags() []string {
 	return []string{}
 }
 
-func (t *Template) Compile() error {
-	options := protocols.ExecuterOptions{}
+func (t *Template) Compile(options protocols.ExecuterOptions) error {
 	var requests []protocols.Request
 	var err error
 	if len(t.RequestsHTTP) > 0 {

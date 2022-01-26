@@ -8,29 +8,32 @@ import (
 
 //tamplate =
 func Nuclei(target string, result *utils.Result) {
-	var vulns []utils.Vuln
 
 	if RunOpt.Exploit == "auto" {
-		vulns = execute_templates(result.Frameworks.GetTitles(), target)
+		execute_templates(result, result.Frameworks.GetTitles(), target)
 	} else {
-		vulns = execute_templates(strings.Split(RunOpt.Exploit, ","), target)
+		execute_templates(result, strings.Split(RunOpt.Exploit, ","), target)
 	}
-	if len(vulns) > 0 {
-		result.AddVulns(vulns)
-	}
+
 }
 
-func execute_templates(titles []string, target string) []utils.Vuln {
+func execute_templates(result *utils.Result, titles []string, target string) {
 	var vulns []utils.Vuln
 	templates := choiceTemplates(titles)
 	for _, template := range templates { // 遍历所有poc
 		res, ok := template.Execute(target)
 		if ok {
+			for name, extract := range res.Extracts {
+				result.AddExtractor(utils.NewExtractor(name, extract))
+			}
+			//for _, extract := range res.OutputExtracts{
+			//	result.AddExtractor(utils.NewExtractor(template.Id, extract))
+			//}
 			vulns = append(vulns, utils.Vuln{template.Id, res.PayloadValues, res.DynamicValues})
 		}
 	}
 
-	return vulns
+	result.AddVulns(vulns)
 }
 
 func choiceTemplates(titles []string) []*Template {

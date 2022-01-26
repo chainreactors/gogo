@@ -59,6 +59,8 @@ Usage of ./getitle:
       -ef string   指定json文件为nucleipoc
       -up string   指定文件上传到云服务器
       -np bool     关闭自动上传扫描结果到云服务器
+      -suffix string 指定特定的url
+      -payload 用来自定义替换nuclei poc中的参数, 需要nuclei poc预定义占位符
    ```
 
 ## QuickStart

@@ -24,6 +24,7 @@ func CMD(k string) {
 	}
 	var config Config
 	var filters arrayFlags
+	var payloads arrayFlags
 	//默认参数信息
 	// INPUT
 	flag.StringVar(&config.IP, "ip", "", "")
@@ -53,14 +54,15 @@ func CMD(k string) {
 	compress := flag.Bool("C", false, "")
 
 	// CONFIG
-	flag.IntVar(&config.Threads, "t", 4000, "")
+	flag.IntVar(&config.Threads, "t", 0, "")
 	flag.StringVar(&config.Mod, "m", "default", "")
 	flag.BoolVar(&config.Spray, "s", false, "")
 	flag.BoolVar(&config.Ping, "ping", false, "")
 	flag.BoolVar(&Opt.Debug, "debug", false, "")
 	flag.IntVar(&RunOpt.Delay, "d", 2, "")
 	flag.IntVar(&RunOpt.HttpsDelay, "D", 2, "")
-	flag.StringVar(&RunOpt.Payloadstr, "payload", "", "")
+	flag.StringVar(&RunOpt.Payloadstr, "suffix", "", "")
+	flag.Var(&payloads, "payload", "")
 	version := flag.Bool("v", false, "")
 	version2 := flag.Bool("vv", false, "")
 	exploit := flag.Bool("e", false, "")
@@ -109,8 +111,8 @@ func CMD(k string) {
 	}
 
 	// 加载配置文件中的全局变量
-	configloader(*pocfile)
-
+	configloader()
+	nucleiLoader(*pocfile, payloads)
 	// 加载命令行中的参数配置
 	parseVersion(*version, *version2)
 	parseExploit(*exploit, *exploitConfig)
@@ -121,11 +123,7 @@ func CMD(k string) {
 	config = Init(config)
 	RunTask(config) // 运行
 
-	//关闭文件写入管道
-	close(Opt.DataCh)
-	close(Opt.LogDataCh)
-
-	time.Sleep(500 * time.Microsecond)
+	time.Sleep(200 * time.Microsecond)
 
 	if *hiddenfile {
 		Chtime(config.Filename)
@@ -148,6 +146,9 @@ func CMD(k string) {
 		}
 		if config.PingFilename != "" {
 			filenamelog += "Pingscan result filename: " + config.PingFilename
+		}
+		if IsExist(config.Filename + "_extractor") {
+			filenamelog += "extractor result filename: " + config.Filename + "_extractor"
 		}
 		ConsoleLog(filenamelog)
 	}
@@ -172,7 +173,12 @@ func printConfigs(t string) {
 	}
 }
 
-func configloader(pocfile string) {
+func nucleiLoader(pocfile string, payloads arrayFlags) {
+	ExecuterOptions = ParserCmdPayload(payloads)
+	TemplateMap = LoadNuclei(pocfile)
+}
+
+func configloader() {
 	Compiled = make(map[string][]regexp.Regexp)
 	Mmh3fingers, Md5fingers = LoadHashFinger()
 	Tcpfingers = LoadFingers("tcp")
@@ -184,7 +190,7 @@ func configloader(pocfile string) {
 		"xpb":       CompileRegexp("(?i)X-Powered-By: ([\x20-\x7e]+)"),
 		"sessionid": CompileRegexp("(?i) (.*SESS.*?ID)"),
 	}
-	LoadNuclei(pocfile)
+
 }
 
 type Value interface {
