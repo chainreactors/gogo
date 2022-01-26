@@ -15,5 +15,6 @@ type generatedRequest struct {
 	//rawRequest      *raw.Request
 	meta map[string]interface{}
 	//pipelinedClient *rawhttp.PipelineClient
-	request *http.Request
+	request       *http.Request
+	dynamicValues map[string]interface{}
 }

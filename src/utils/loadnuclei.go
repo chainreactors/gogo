@@ -18,13 +18,17 @@ func ParserCmdPayload(payloads []string) *protocols.ExecuterOptions {
 			VarsPayload: map[string]interface{}{},
 		},
 	}
+
+	var vars = make(map[string][]interface{})
 	for _, payload := range payloads {
-		if strings.Contains(payload, ":") {
-			kv := strings.Split(payload, ":")
-			options.Options.VarsPayload[kv[0]] = kv[1]
+		if i := strings.Index(payload, ":"); i != -1 {
+			vars[payload[:i]] = append(vars[payload[:i]], payload[i+1:])
 		} else {
 			fmt.Println("[warn] incorrect format, skip " + payload)
 		}
+	}
+	for k, v := range vars {
+		options.Options.VarsPayload[k] = v
 	}
 	return options
 }

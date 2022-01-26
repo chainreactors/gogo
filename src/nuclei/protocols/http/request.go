@@ -1,14 +1,18 @@
 package http
 
 import (
+	"errors"
 	"fmt"
 	"getitle/src/nuclei/protocols"
 	. "getitle/src/structutils"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
 )
+
+var errStopExecution = errors.New("stop execution due to unresolved variables")
 
 type Request struct {
 	// operators for the current request go here.
@@ -234,6 +238,12 @@ func (r *Request) Compile(options *protocols.ExecuterOptions) error {
 			attackType = "sniper"
 		}
 		r.attackType = protocols.StringToType[attackType]
+		// 允许使用命令行定义对应的参数, 会替换对应的参数, 如果参数的数量对不上可能会报错
+		for k, v := range r.options.Options.VarsPayload {
+			if _, ok := r.Payloads[k]; ok {
+				r.Payloads[k] = v
+			}
+		}
 		r.generator, err = protocols.New(r.Payloads, r.attackType)
 		if err != nil {
 			return err
@@ -244,31 +254,91 @@ func (r *Request) Compile(options *protocols.ExecuterOptions) error {
 }
 
 func (r *Request) ExecuteWithResults(input string, dynamicValues map[string]interface{}, callback protocols.OutputEventCallback) error {
-	ok, err := r.ExecuteRequestWithResults(input, dynamicValues, callback)
-	if err != nil && !ok {
+	err := r.ExecuteRequestWithResults(input, dynamicValues, callback)
+	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (r *Request) ExecuteRequestWithResults(url string, dynamicValues map[string]interface{}, callback protocols.OutputEventCallback) (bool, error) {
-	generator := r.newGenerator()
+func (request *Request) ExecuteRequestWithResults(reqURL string, dynamicValues map[string]interface{}, callback protocols.OutputEventCallback) error {
+	generator := request.newGenerator()
+	requestCount := 1
+	var requestErr error
 	for {
-		req, err := generator.Make(url, dynamicValues)
-		if err != nil {
-			return false, err
+		// returns two values, error and skip, which skips the execution for the request instance.
+		executeFunc := func(data string, payloads, dynamicValue map[string]interface{}) (bool, error) {
+			generatedHttpRequest, err := generator.Make(reqURL, data, payloads, dynamicValue)
+			if err != nil {
+				if err == io.EOF {
+					return true, nil
+				}
+				return true, err
+			}
+
+			err = request.executeRequest(generatedHttpRequest, dynamicValues, func(event *protocols.InternalWrappedEvent) {
+				// Add the extracts to the dynamic values if any.
+				//if event.OperatorsResult != nil {
+				//	gotOutput = true
+				//	gotDynamicValues := MergeMaps(event.OperatorsResult.DynamicValues, dynamicValues)
+				//	gotDynamicValues = MergeMaps(gotDynamicValues, gotDynamicValues)
+				//}
+				callback(event)
+			})
+
+			// If a variable is unresolved, skip all further requests
+			if err == errStopExecution {
+				return true, nil
+			}
+			if err != nil {
+				requestErr = err
+			}
+			requestCount++
+			//request.options.Progress.IncrementRequests()
+
+			// If this was a match, and we want to stop at first match, skip all further requests.
+			//if (generatedHttpRequest.original.options.Options.StopAtFirstMatch || generatedHttpRequest.original.options.StopAtFirstMatch || request.StopAtFirstMatch) && gotOutput {
+			//	return true, nil
+			//}
+			return false, nil
 		}
-		ok, err := r.executeRequest(req, dynamicValues, callback)
-		if ok {
-			return true, err
+
+		inputData, payloads, ok := generator.nextValue()
+		if !ok {
+			break
+		}
+		var gotErr error
+		var skip bool
+
+		skip, gotErr = executeFunc(inputData, payloads, dynamicValues)
+		if gotErr != nil && requestErr == nil {
+			requestErr = gotErr
+		}
+		if skip || gotErr != nil {
+			break
 		}
 	}
+	return requestErr
+	//for {
+	//	inputData, payloads, ok := generator.nextValue()
+	//	if !ok {
+	//		break
+	//	}
+	//	req, err := generator.Make(url,payloads, dynamicValues)
+	//	if err != nil {
+	//		return false, err
+	//	}
+	//	ok, err := r.executeRequest(req, dynamicValues, callback)
+	//	if ok {
+	//		return true, err
+	//	}
+	//}
 }
 
-func (r *Request) executeRequest(request *generatedRequest, dynamicValues map[string]interface{}, callback protocols.OutputEventCallback) (bool, error) {
+func (r *Request) executeRequest(request *generatedRequest, dynamicValues map[string]interface{}, callback protocols.OutputEventCallback) error {
 	resp, err := r.httpClient.Do(request.request)
 	if err != nil {
-		return false, err
+		return err
 	}
 	data := respToMap(resp, request.request)
 	event := &protocols.InternalWrappedEvent{InternalEvent: dynamicValues}
@@ -279,11 +349,10 @@ func (r *Request) executeRequest(request *generatedRequest, dynamicValues map[st
 			event.OperatorsResult.PayloadValues = request.meta
 			event.Results = r.MakeResultEvent(event)
 			callback(event)
-			return true, err
+			return nil
 		}
-
 	}
-	return false, err
+	return err
 }
 
 func respToMap(resp *http.Response, req *http.Request) map[string]interface{} {

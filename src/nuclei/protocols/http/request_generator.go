@@ -1,6 +1,7 @@
 package http
 
 import (
+	"fmt"
 	"getitle/src/nuclei"
 	"getitle/src/nuclei/protocols"
 	. "getitle/src/structutils"
@@ -9,6 +10,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"path"
 	"strings"
 )
 
@@ -22,7 +24,6 @@ type requestGenerator struct {
 // newGenerator creates a New request generator instance
 func (r *Request) newGenerator() *requestGenerator {
 	generator := &requestGenerator{request: r}
-
 	if len(r.Payloads) > 0 {
 		generator.payloadIterator = r.generator.NewIterator()
 	}
@@ -100,11 +101,11 @@ func (r *requestGenerator) Total() int {
 
 // Make creates a http request for the provided input.
 // It returns io.EOF as error when all the requests have been exhausted.
-func (r *requestGenerator) Make(baseURL string, dynamicValues map[string]interface{}) (*generatedRequest, error) {
+func (r *requestGenerator) Make(baseURL, data string, payloads, dynamicValues map[string]interface{}) (*generatedRequest, error) {
 	// We get the next payload for the request.
-	data, payloads, ok := r.nextValue()
-	if !ok {
-		return nil, io.EOF
+
+	for payloadName, payloadValue := range payloads {
+		payloads[payloadName] = ToString(payloadValue)
 	}
 
 	parsed, err := url.Parse(baseURL)
@@ -113,22 +114,19 @@ func (r *requestGenerator) Make(baseURL string, dynamicValues map[string]interfa
 	}
 
 	data, parsed = baseURLWithTemplatePrefs(data, parsed)
-	values := MergeMaps(dynamicValues, map[string]interface{}{
-		"Hostname": parsed.Host,
-	})
-
 	isRawRequest := len(r.request.Raw) > 0
+
+	trailingSlash := false
 	if !isRawRequest && strings.HasSuffix(parsed.Path, "/") && strings.Contains(data, "{{BaseURL}}/") {
-		parsed.Path = strings.TrimSuffix(parsed.Path, "/")
+		trailingSlash = true
 	}
-	parsedString := parsed.String()
-	values["BaseURL"] = parsedString
+	values := nuclei.MergeMaps(dynamicValues, generateVariables(parsed, trailingSlash))
 	values = MergeMaps(payloads, values)
 
 	// If data contains \n it's a raw request, process it like raw. Else
 	// continue with the template based request flow.
 	if isRawRequest {
-		return r.makeHTTPRequestFromRaw(parsedString, data, values, payloads)
+		return r.makeHTTPRequestFromRaw(parsed.String(), data, values, payloads)
 	}
 	return r.makeHTTPRequestFromModel(data, values)
 }
@@ -252,5 +250,46 @@ func setHeader(req *http.Request, name, value string) {
 	}
 	if name == "Host" {
 		req.Host = value
+	}
+}
+
+// generateVariables will create default variables after parsing a url
+func generateVariables(parsed *url.URL, trailingSlash bool) map[string]interface{} {
+	domain := parsed.Host
+	if strings.Contains(parsed.Host, ":") {
+		domain = strings.Split(parsed.Host, ":")[0]
+	}
+
+	port := parsed.Port()
+	if port == "" {
+		if parsed.Scheme == "https" {
+			port = "443"
+		} else if parsed.Scheme == "http" {
+			port = "80"
+		}
+	}
+
+	if trailingSlash {
+		parsed.Path = strings.TrimSuffix(parsed.Path, "/")
+	}
+
+	escapedPath := parsed.EscapedPath()
+	directory := path.Dir(escapedPath)
+	if directory == "." {
+		directory = ""
+	}
+	base := path.Base(escapedPath)
+	if base == "." {
+		base = ""
+	}
+	return map[string]interface{}{
+		"BaseURL":  parsed.String(),
+		"RootURL":  fmt.Sprintf("%s://%s", parsed.Scheme, parsed.Host),
+		"Hostname": parsed.Host,
+		"Host":     domain,
+		"Port":     port,
+		"Path":     directory,
+		"File":     base,
+		"Scheme":   parsed.Scheme,
 	}
 }
