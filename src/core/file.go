@@ -2,7 +2,6 @@ package core
 
 import (
 	"fmt"
-	"getitle/src/scan"
 	. "getitle/src/structutils"
 	. "getitle/src/utils"
 	"io/ioutil"
@@ -42,7 +41,7 @@ func initFile(config Config) error {
 		if err != nil {
 			return err
 		}
-		scan.RunOpt.ExtractorFile, err = FileInitialize(config.Filename + "_extractor.txt")
+
 		if err != nil {
 			return err
 		}
@@ -111,6 +110,23 @@ func handler() {
 					commaflag3 = true
 				}
 				Opt.file.Write(res)
+			}
+		}()
+
+		go func() {
+			for res := range Opt.ExtractorCh {
+				if Opt.extractorFile == nil {
+					var err error
+					Opt.extractorFile, err = NewFile(Opt.file.Filename+"_extractor", false)
+					if err != nil {
+						ConsoleLog("[warn] cannot create extractor result file")
+					}
+				}
+				Opt.extractorFile.SyncWrite(res)
+			}
+
+			if Opt.extractorFile != nil {
+				Opt.extractorFile.Close()
 			}
 		}()
 	}

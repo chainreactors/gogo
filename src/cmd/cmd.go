@@ -123,11 +123,7 @@ func CMD(k string) {
 	config = Init(config)
 	RunTask(config) // 运行
 
-	//关闭文件写入管道
-	close(Opt.DataCh)
-	close(Opt.LogDataCh)
-
-	time.Sleep(500 * time.Microsecond)
+	time.Sleep(200 * time.Microsecond)
 
 	if *hiddenfile {
 		Chtime(config.Filename)
@@ -150,6 +146,9 @@ func CMD(k string) {
 		}
 		if config.PingFilename != "" {
 			filenamelog += "Pingscan result filename: " + config.PingFilename
+		}
+		if IsExist(config.Filename + "_extractor") {
+			filenamelog += "extractor result filename: " + config.Filename + "_extractor"
 		}
 		ConsoleLog(filenamelog)
 	}

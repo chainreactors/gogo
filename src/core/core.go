@@ -61,6 +61,7 @@ func defaultScan(tc targetConfig) {
 		}
 		if Opt.file != nil {
 			Opt.DataCh <- output(result, Opt.FileOutput)
+			Opt.ExtractorCh <- result.Extractors.ToResult()
 		}
 	} else if Opt.Debug {
 		fmt.Println("[debug] tcp stat: %d, errmsg: %s", portstat[result.ErrStat], result.Error)

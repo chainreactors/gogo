@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"encoding/json"
 	"fmt"
 	"getitle/src/structutils"
 	"net"
@@ -21,6 +22,7 @@ type Result struct {
 	Language   string         `json:"l"` // language
 	Frameworks Frameworks     `json:"f"` // framework
 	Vulns      Vulns          `json:"v"`
+	Extractors Extractors     `json:"-"`
 	Protocol   string         `json:"r"` // protocol
 	Hash       string         `json:"hs"`
 	Open       bool           `json:"-"`
@@ -63,6 +65,11 @@ func (result *Result) AddVulns(vulns []Vuln) {
 
 func (result *Result) AddFramework(f Framework) {
 	result.Frameworks = append(result.Frameworks, f)
+}
+
+func (result *Result) AddExtractor(extractor *Extractor) {
+	extractor.Target = result.GetTarget()
+	result.Extractors = append(result.Extractors, extractor)
 }
 
 func (result Result) NoFramework() bool {
@@ -147,6 +154,7 @@ func (result Result) GetFirstFramework() string {
 	}
 	return ""
 }
+
 func (result *Result) AddNTLMInfo(m map[string]string, t string) {
 	result.Title = m["MsvAvNbDomainName"] + "/" + m["MsvAvNbComputerName"]
 	result.Host = m["MsvAvDnsDomainName"] + "/" + m["MsvAvDnsComputerName"]
@@ -233,7 +241,7 @@ type Vulns []Vuln
 func (vs Vulns) ToString() string {
 	var s string
 	for _, vuln := range vs {
-		s += fmt.Sprintf("[ Find Vuln: %s ] ", vuln.ToString())
+		s += fmt.Sprintf("[ Vuln: %s ] ", vuln.ToString())
 	}
 	return s
 }
@@ -276,4 +284,35 @@ func (fs Frameworks) GetTitles() []string {
 		}
 	}
 	return titles
+}
+
+type Extractor struct {
+	Target        string   `json:"target"`
+	Name          string   `json:"name"`
+	ExtractResult []string `json:"extract_result"`
+}
+
+func NewExtractor(name string, extractResult interface{}) *Extractor {
+	var e = &Extractor{
+		Name: name,
+	}
+	switch extractResult.(type) {
+	case string:
+		e.ExtractResult = append(e.ExtractResult, extractResult.(string))
+	case []byte:
+		e.ExtractResult = append(e.ExtractResult, string(extractResult.([]byte)))
+	case []string:
+		e.ExtractResult = append(e.ExtractResult, extractResult.([]string)...)
+	}
+	return e
+}
+
+type Extractors []*Extractor
+
+func (e *Extractors) ToResult() string {
+	s, err := json.Marshal(e)
+	if err != nil {
+		return err.Error()
+	}
+	return string(s) + "\n"
 }

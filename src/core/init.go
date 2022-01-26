@@ -21,30 +21,33 @@ var InterConfig = map[string][]string{
 }
 
 type Options struct {
-	AliveSum   int
-	Clean      bool
-	Noscan     bool
-	Compress   bool
-	Quiet      bool
-	Debug      bool
-	file       *File
-	smartFile  *File
-	pingFile   *File
-	logFile    *File
-	DataCh     chan string
-	LogDataCh  chan string
-	Output     string
-	FileOutput string
+	AliveSum      int
+	Clean         bool
+	Noscan        bool
+	Compress      bool
+	Quiet         bool
+	Debug         bool
+	file          *File
+	smartFile     *File
+	extractorFile *File
+	pingFile      *File
+	logFile       *File
+	DataCh        chan string
+	ExtractorCh   chan string
+	LogDataCh     chan string
+	Output        string
+	FileOutput    string
 }
 
 var Opt = Options{
-	AliveSum:  0,
-	Clean:     false,
-	Noscan:    false,
-	Compress:  true,
-	Quiet:     false,
-	DataCh:    make(chan string, 100),
-	LogDataCh: make(chan string, 100),
+	AliveSum:    0,
+	Clean:       false,
+	Noscan:      false,
+	Compress:    true,
+	Quiet:       false,
+	DataCh:      make(chan string, 100),
+	LogDataCh:   make(chan string, 100),
+	ExtractorCh: make(chan string, 100),
 }
 
 func Init(config Config) Config {
@@ -223,10 +226,13 @@ func RunTask(config Config) {
 		} else {
 			createSmartScan(config.IP, config)
 		}
-
 	default:
 		createDefaultScan(config)
 	}
+	// 关闭管道
+	close(Opt.DataCh)
+	close(Opt.LogDataCh)
+	close(Opt.ExtractorCh)
 }
 
 func guessTime(targets interface{}, portlist []string, thread int) int {

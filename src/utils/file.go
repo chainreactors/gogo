@@ -35,6 +35,7 @@ func NewFile(filename string, compress bool) (*File, error) {
 		return nil, err
 	}
 	var file = &File{
+		Filename:    filename,
 		compress:    compress,
 		fileHandler: filehandler,
 		fileWriter:  bufio.NewWriter(filehandler),
@@ -44,6 +45,7 @@ func NewFile(filename string, compress bool) (*File, error) {
 }
 
 type File struct {
+	Filename    string
 	fileHandler *os.File
 	fileWriter  *bufio.Writer
 	buf         *bytes.Buffer

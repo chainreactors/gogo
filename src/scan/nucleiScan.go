@@ -1,7 +1,6 @@
 package scan
 
 import (
-	"fmt"
 	. "getitle/src/nuclei/templates"
 	"getitle/src/utils"
 	"strings"
@@ -9,36 +8,27 @@ import (
 
 //tamplate =
 func Nuclei(target string, result *utils.Result) {
-	var vulns []utils.Vuln
 
 	if RunOpt.Exploit == "auto" {
-		vulns = execute_templates(result.Frameworks.GetTitles(), target)
+		execute_templates(result, result.Frameworks.GetTitles(), target)
 	} else {
-		vulns = execute_templates(strings.Split(RunOpt.Exploit, ","), target)
+		execute_templates(result, strings.Split(RunOpt.Exploit, ","), target)
 	}
-	if len(vulns) > 0 {
-		result.AddVulns(vulns)
-	}
+
 }
 
-func execute_templates(titles []string, target string) []utils.Vuln {
+func execute_templates(result *utils.Result, titles []string, target string) {
 	var vulns []utils.Vuln
 	templates := choiceTemplates(titles)
 	for _, template := range templates { // 遍历所有poc
 		res, ok := template.Execute(target)
 		if ok {
-			if res.OutputExtracts != nil && RunOpt.ExtractorFile != nil {
-				_, _ = RunOpt.ExtractorFile.WriteString(fmt.Sprintf("---%s, %s---\n", target, template.Id))
-				for _, outputStr := range res.OutputExtracts {
-					_, _ = RunOpt.ExtractorFile.WriteString(outputStr)
-				}
-				_ = RunOpt.ExtractorFile.Sync()
-			}
+			result.AddExtractor(utils.NewExtractor(template.Id, res.OutputExtracts))
 			vulns = append(vulns, utils.Vuln{template.Id, res.PayloadValues, res.DynamicValues})
 		}
 	}
 
-	return vulns
+	result.AddVulns(vulns)
 }
 
 func choiceTemplates(titles []string) []*Template {
