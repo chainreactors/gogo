@@ -61,6 +61,8 @@ type Request struct {
 	CompiledOperators *protocols.Operators
 	attackType        protocols.Type
 	totalRequests     int
+
+	options *protocols.ExecuterOptions
 	//Result            *protocols.Result
 }
 
@@ -124,7 +126,8 @@ func (r *Request) Requests() int {
 	return len(r.Path)
 }
 
-func (r *Request) Compile() error {
+func (r *Request) Compile(options *protocols.ExecuterOptions) error {
+	r.options = options
 	var err error
 	connectionConfiguration := &Configuration{
 		//Threads:         r.Threads,

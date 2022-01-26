@@ -2,6 +2,7 @@ package protocols
 
 import (
 	"errors"
+	"getitle/src/nuclei"
 	"getitle/src/structutils"
 	"strings"
 )
@@ -261,4 +262,28 @@ func (i *payloadIterator) incrementPosition() {
 // value returns the value of the payload at an index
 func (i *payloadIterator) value() string {
 	return i.values[i.index]
+}
+
+// BuildPayloadFromOptions returns a map with the payloads provided via CLI
+func BuildPayloadFromOptions(options *Options) map[string]interface{} {
+	m := make(map[string]interface{})
+	// merge with vars
+	if len(options.VarsPayload) > 0 {
+		m = nuclei.MergeMaps(m, options.VarsPayload)
+	}
+
+	// merge with env vars
+	//if options.EnvironmentVariables {
+	//	m = MergeMaps(EnvVars(), m)
+	//}
+	return m
+}
+
+// CopyMap creates a new copy of an existing map
+func CopyMap(originalMap map[string]interface{}) map[string]interface{} {
+	newMap := make(map[string]interface{})
+	for key, value := range originalMap {
+		newMap[key] = value
+	}
+	return newMap
 }

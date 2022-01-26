@@ -2,6 +2,15 @@ package protocols
 
 import "time"
 
+type ExecuterOptions struct {
+	// TemplateID is the ID of the template for the request
+	TemplateID string
+	// TemplateInfo contains information block of the template request
+	TemplateInfo map[string]interface{}
+
+	Options *Options
+}
+
 // Executer is an interface implemented any protocol based request executer.
 type Executer interface {
 	// Compile compiles the execution generators preparing any requests possible.
@@ -14,20 +23,10 @@ type Executer interface {
 	//ExecuteWithResults(input string) error
 }
 
-type ExecuterOptions struct {
-	// TemplateID is the ID of the template for the request
-	TemplateID string
-	// TemplateInfo contains information block of the template request
-	TemplateInfo map[string]interface{}
-
-	Payloads  map[string]interface{}
-	Operators []*Operators // only used by offlinehttp module
-}
-
 // Request is an interface implemented any protocol based request generator.
 type Request interface {
 	// Compile compiles the request generators preparing any requests possible.
-	Compile() error
+	Compile(options *ExecuterOptions) error
 	// Requests returns the total number of requests the rule will perform
 	Requests() int
 	// GetID returns the ID for the request if any. IDs are used for multi-request

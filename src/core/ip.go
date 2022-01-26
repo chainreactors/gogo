@@ -78,7 +78,7 @@ func parseIP(target string) string {
 	}
 	iprecords, err := net.LookupIP(target)
 	if err != nil {
-		ConsoleLog("[-] Unable to resolve domain name:" + target + ". JUMPED!")
+		ConsoleLog("[-] Unable to resolve domain name:" + target + ". SKIPPED!")
 		return ""
 	}
 	for _, ip := range iprecords {

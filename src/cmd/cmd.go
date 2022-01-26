@@ -24,6 +24,7 @@ func CMD(k string) {
 	}
 	var config Config
 	var filters arrayFlags
+	var payloads arrayFlags
 	//默认参数信息
 	// INPUT
 	flag.StringVar(&config.IP, "ip", "", "")
@@ -60,7 +61,8 @@ func CMD(k string) {
 	flag.BoolVar(&Opt.Debug, "debug", false, "")
 	flag.IntVar(&RunOpt.Delay, "d", 2, "")
 	flag.IntVar(&RunOpt.HttpsDelay, "D", 2, "")
-	flag.StringVar(&RunOpt.Payloadstr, "payload", "", "")
+	flag.StringVar(&RunOpt.Payloadstr, "suffix", "", "")
+	flag.Var(&payloads, "payload", "")
 	version := flag.Bool("v", false, "")
 	version2 := flag.Bool("vv", false, "")
 	exploit := flag.Bool("e", false, "")
@@ -109,8 +111,8 @@ func CMD(k string) {
 	}
 
 	// 加载配置文件中的全局变量
-	configloader(*pocfile)
-
+	configloader()
+	nucleiLoader(*pocfile, payloads)
 	// 加载命令行中的参数配置
 	parseVersion(*version, *version2)
 	parseExploit(*exploit, *exploitConfig)
@@ -172,7 +174,12 @@ func printConfigs(t string) {
 	}
 }
 
-func configloader(pocfile string) {
+func nucleiLoader(pocfile string, payloads arrayFlags) {
+	ExecuterOptions = ParserCmdPayload(payloads)
+	TemplateMap = LoadNuclei(pocfile)
+}
+
+func configloader() {
 	Compiled = make(map[string][]regexp.Regexp)
 	Mmh3fingers, Md5fingers = LoadHashFinger()
 	Tcpfingers = LoadFingers("tcp")
@@ -184,7 +191,7 @@ func configloader(pocfile string) {
 		"xpb":       CompileRegexp("(?i)X-Powered-By: ([\x20-\x7e]+)"),
 		"sessionid": CompileRegexp("(?i) (.*SESS.*?ID)"),
 	}
-	LoadNuclei(pocfile)
+
 }
 
 type Value interface {

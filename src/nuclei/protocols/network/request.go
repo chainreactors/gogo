@@ -73,15 +73,9 @@ func (r *Request) ExecuteWithResults(input string, dynamicValues map[string]inte
 	}
 	dynamicValues = structutils.MergeMaps(dynamicValues, map[string]interface{}{"Hostname": address})
 	for _, kv := range r.addresses {
-		actualAddress := nuclei.Replace(kv.ip, map[string]interface{}{"Hostname": address})
-		if kv.port != "" {
-			if strings.Contains(address, ":") {
-				actualAddress, _, _ = net.SplitHostPort(actualAddress)
-			}
-			actualAddress = net.JoinHostPort(actualAddress, kv.port)
-		}
-
-		err = r.executeAddress(actualAddress, address, input, kv.tls, dynamicValues, callback)
+		variables := generateNetworkVariables(address)
+		actualAddress := nuclei.Replace(kv.address, variables)
+		err = r.executeAddress(variables, actualAddress, address, input, kv.tls, dynamicValues, callback)
 		if err != nil {
 			continue
 		}
@@ -90,12 +84,15 @@ func (r *Request) ExecuteWithResults(input string, dynamicValues map[string]inte
 }
 
 // executeAddress executes the request for an address
-func (r *Request) executeAddress(actualAddress, address, input string, shouldUseTLS bool, dynamicValues map[string]interface{}, callback protocols.OutputEventCallback) error {
+func (r *Request) executeAddress(variables map[string]interface{}, actualAddress, address, input string, shouldUseTLS bool, dynamicValues map[string]interface{}, callback protocols.OutputEventCallback) error {
 	if !strings.Contains(actualAddress, ":") {
 		err := errors.New("no port provided in network protocol request")
 		return err
 	}
-	//payloads := map[string]interface{}{}
+	payloads := protocols.BuildPayloadFromOptions(r.options.Options)
+	// add Hostname variable to the payload
+	//payloads = nuclei.MergeMaps(payloads, map[string]interface{}{"Hostname": address})
+
 	if r.generator != nil {
 		iterator := r.generator.NewIterator()
 
@@ -104,21 +101,22 @@ func (r *Request) executeAddress(actualAddress, address, input string, shouldUse
 			if !ok {
 				break
 			}
-			//value = structutils.MergeMaps(value, payloads)
-			if err := r.executeRequestWithPayloads(actualAddress, address, input, shouldUseTLS, value, dynamicValues, callback); err != nil {
+			value = nuclei.MergeMaps(value, payloads)
+			if err := r.executeRequestWithPayloads(variables, actualAddress, address, input, shouldUseTLS, value, dynamicValues, callback); err != nil {
 				return err
 			}
 		}
 	} else {
-		value := make(map[string]interface{})
-		if err := r.executeRequestWithPayloads(actualAddress, address, input, shouldUseTLS, value, dynamicValues, callback); err != nil {
+		value := protocols.CopyMap(payloads)
+
+		if err := r.executeRequestWithPayloads(variables, actualAddress, address, input, shouldUseTLS, value, dynamicValues, callback); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (r *Request) executeRequestWithPayloads(actualAddress, address, input string, shouldUseTLS bool, payloads map[string]interface{}, dynamicValues map[string]interface{}, callback protocols.OutputEventCallback) error {
+func (r *Request) executeRequestWithPayloads(variables map[string]interface{}, actualAddress, address, input string, shouldUseTLS bool, payloads map[string]interface{}, dynamicValues map[string]interface{}, callback protocols.OutputEventCallback) error {
 	var (
 		//hostname string
 		conn net.Conn
@@ -277,4 +275,19 @@ func getAddress(toTest string) (string, error) {
 		toTest = parsed.Host
 	}
 	return toTest, nil
+}
+
+func generateNetworkVariables(input string) map[string]interface{} {
+	if !strings.Contains(input, ":") {
+		return map[string]interface{}{"Hostname": input, "Host": input}
+	}
+	host, port, err := net.SplitHostPort(input)
+	if err != nil {
+		return map[string]interface{}{"Hostname": input}
+	}
+	return map[string]interface{}{
+		"Host":     host,
+		"Port":     port,
+		"Hostname": input,
+	}
 }
