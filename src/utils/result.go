@@ -211,10 +211,28 @@ func (results Results) GetValues(key string) []string {
 	return values
 }
 
+const (
+	// info leak
+	Info int = iota + 1
+	Low
+	Medium
+	High
+	Critical
+)
+
+var serverityMap = map[string]int{
+	"info":     Info,
+	"low":      Low,
+	"medium":   Medium,
+	"high":     High,
+	"critical": Critical,
+}
+
 type Vuln struct {
-	Name    string                 `json:"vn"`
-	Payload map[string]interface{} `json:"vp"`
-	Detail  map[string]interface{} `json:"vd"`
+	Name     string                 `json:"vn"`
+	Payload  map[string]interface{} `json:"vp"`
+	Detail   map[string]interface{} `json:"vd"`
+	Severity string                 `json:"vs"`
 }
 
 func (v *Vuln) GetPayload() string {
@@ -223,6 +241,15 @@ func (v *Vuln) GetPayload() string {
 
 func (v *Vuln) GetDetail() string {
 	return structutils.MaptoString(v.Detail)
+}
+
+func (v *Vuln) GetLevel() int {
+	if level, ok := serverityMap[v.Severity]; ok && v.Severity != "" {
+		return level
+	} else {
+		// 漏洞默认危害为high
+		return 3
+	}
 }
 
 func (v *Vuln) ToString() string {
@@ -241,7 +268,11 @@ type Vulns []Vuln
 func (vs Vulns) ToString() string {
 	var s string
 	for _, vuln := range vs {
-		s += fmt.Sprintf("[ Vuln: %s ] ", vuln.ToString())
+		if vuln.GetLevel() <= 1 {
+			s += fmt.Sprintf("[ Info: %s ] ", vuln.ToString())
+		} else {
+			s += fmt.Sprintf("[ Vuln: %s ] ", vuln.ToString())
+		}
 	}
 	return s
 }
@@ -253,16 +284,14 @@ type Framework struct {
 }
 
 func (f Framework) ToString() string {
+	var s = f.Name
 	if f.IsGuess {
-		return fmt.Sprintf("*%s", f.Name)
-	} else {
-		if f.Version == "" {
-			return fmt.Sprintf("%s", f.Name)
-		} else {
-			return fmt.Sprintf("%s:%s", f.Name, f.Version)
-		}
+		s = "*" + s
 	}
-
+	if f.Version == "" {
+		s += ":" + f.Version
+	}
+	return s
 }
 
 type Frameworks []Framework

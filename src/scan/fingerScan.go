@@ -1,8 +1,6 @@
 package scan
 
 import (
-	"crypto/md5"
-	"encoding/hex"
 	"getitle/src/utils"
 	"net"
 	"strings"
@@ -35,7 +33,11 @@ func httpFingerMatch(result *utils.Result, finger *utils.Finger) {
 		res, ok := utils.CompileMatch(reg, content)
 		if ok {
 			handlerMatchedResult(result, finger, res, content)
-			result.AddVuln(utils.Vuln{Name: finger.Vuln})
+			if finger.Info != "" {
+				result.AddVuln(utils.Vuln{Name: finger.Vuln, Severity: "info"})
+			} else if finger.Vuln != "" {
+				result.AddVuln(utils.Vuln{Name: finger.Vuln, Severity: "high"})
+			}
 			return
 		}
 	}
@@ -70,22 +72,17 @@ func httpFingerMatch(result *utils.Result, finger *utils.Finger) {
 		}
 	}
 
-	//} else if finger.Regexps.Cookie != nil {
-	//	for _, cookie := range finger.Regexps.Cookie {
-	//		if resp == nil {
-	//			if strings.Contains(content, cookie) {
-	//				result.Frameworks = finger.Name
-	//				return
-	//			}
-	//		} else if cookies[cookie] != "" {
-	//			result.Frameworks = finger.Name
-	//			return
-	//		}
-	//	}/
 	// MD5 匹配
 	for _, md5s := range finger.Regexps.MD5 {
-		m := md5.Sum([]byte(content))
-		if md5s == hex.EncodeToString(m[:]) {
+		if md5s == utils.Md5Hash([]byte(content)) {
+			result.AddFramework(utils.Framework{Name: finger.Name})
+			return
+		}
+	}
+
+	// mmh3 匹配
+	for _, mmh3s := range finger.Regexps.MMH3 {
+		if mmh3s == utils.Mmh3Hash32([]byte(content)) {
 			result.AddFramework(utils.Framework{Name: finger.Name})
 			return
 		}
@@ -157,8 +154,10 @@ func tcpFingerMatch(result *utils.Result, finger *utils.Finger) {
 		res, ok := utils.CompileMatch(reg, content)
 		if ok {
 			handlerMatchedResult(result, finger, res, content)
-			if finger.Vuln != "" {
-				result.AddVuln(utils.Vuln{Name: finger.Vuln})
+			if finger.Info != "" {
+				result.AddVuln(utils.Vuln{Name: finger.Vuln, Severity: "info"})
+			} else if finger.Vuln != "" {
+				result.AddVuln(utils.Vuln{Name: finger.Vuln, Severity: "high"})
 			}
 			return
 		}
@@ -179,10 +178,9 @@ func handlerMatchedResult(result *utils.Result, finger *utils.Finger, res, conte
 	if result.Protocol == "tcp" {
 		result.HttpStat = finger.Protocol
 	}
-
 	result.AddFramework(utils.Framework{Name: finger.Name, Version: res})
-
 	if RunOpt.VersionLevel >= 1 && finger.SendData_str != "" && content != "" { // 需要主动发包的指纹重新收集信息
+		result.Content = content
 		result.InfoFilter()
 	}
 }

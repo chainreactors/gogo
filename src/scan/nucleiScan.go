@@ -29,7 +29,7 @@ func execute_templates(result *utils.Result, titles []string, target string) {
 			//for _, extract := range res.OutputExtracts{
 			//	result.AddExtractor(utils.NewExtractor(template.Id, extract))
 			//}
-			vulns = append(vulns, utils.Vuln{template.Id, res.PayloadValues, res.DynamicValues})
+			vulns = append(vulns, utils.Vuln{template.Id, res.PayloadValues, res.DynamicValues, template.Info.Severity})
 		}
 	}
 
