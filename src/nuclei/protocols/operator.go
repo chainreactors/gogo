@@ -1,5 +1,9 @@
 package protocols
 
+import (
+	"getitle/src/nuclei"
+)
+
 // operators contains the operators that can be applied on protocols
 type Operators struct {
 	// Matchers contains the detection mechanism for the request to identify
@@ -72,6 +76,7 @@ func (operators *Operators) Execute(data map[string]interface{}, match matchFunc
 	}
 
 	//// Start with the extractors first and evaluate them.
+	var tmpname int
 	for _, extractor := range operators.Extractors {
 		var extractorResults []string
 
@@ -86,8 +91,13 @@ func (operators *Operators) Execute(data map[string]interface{}, match matchFunc
 				result.OutputExtracts = append(result.OutputExtracts, match)
 			}
 		}
-		if len(extractorResults) > 0 && !extractor.Internal && extractor.Name != "" {
-			result.Extracts[extractor.Name] = extractorResults
+		if len(extractorResults) > 0 && !extractor.Internal {
+			if extractor.Name != "" {
+				result.Extracts[extractor.Name] = extractorResults
+			} else {
+				result.Extracts[nuclei.ToString(tmpname)] = extractorResults
+				tmpname++
+			}
 		}
 	}
 

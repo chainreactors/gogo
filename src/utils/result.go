@@ -330,7 +330,7 @@ func (e *Extractors) ToResult() string {
 func (es Extractors) ToString() string {
 	var s string
 	for _, e := range es {
-		s += fmt.Sprintf("[ extract: %s ] ", e.ToString())
+		s += fmt.Sprintf("[ Extract: %s ] ", e.ToString())
 	}
 	return s
 }
