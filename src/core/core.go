@@ -193,7 +193,7 @@ func declineScan(iplist []string, config Config) {
 			tmpalive := Opt.AliveSum
 			SmartMod(ip, config)
 			progressLogln(fmt.Sprintf("[*] Found %d alive assets from CIDR %s", Opt.AliveSum-tmpalive, ip))
-			Opt.file.sync()
+			Opt.file.Sync()
 		}
 	}
 }

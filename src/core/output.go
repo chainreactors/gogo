@@ -87,9 +87,9 @@ func FormatOutput(filename string, outputfile string, autofile bool, filters []s
 			os.Exit(0)
 		}
 		fmt.Println("[*] Output filename: " + outputfile)
-		defer fileHandle.close()
+		defer fileHandle.Close()
 		outfunc = func(s string) {
-			fileHandle.write(s)
+			fileHandle.Write(s)
 		}
 	} else {
 		outfunc = func(s string) {
