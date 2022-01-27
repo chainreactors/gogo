@@ -14,7 +14,7 @@ import (
 func NotFoundScan(result *utils.Result) {
 	conn := utils.HttpConn(2)
 	resp, err := conn.Get(result.GetURL() + utils.RandomDir)
-	if err != nil {
+	if err != nil || resp.StatusCode != 404 {
 		return
 	}
 	content := string(utils.GetBody(resp))
