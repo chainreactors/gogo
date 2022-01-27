@@ -2,17 +2,15 @@ package scan
 
 import (
 	"getitle/src/utils"
-	"os"
 )
 
 type RunnerOpts struct {
-	Sum           int
-	Exploit       string
-	VersionLevel  int
-	Delay         int
-	HttpsDelay    int
-	Payloadstr    string
-	ExtractorFile *os.File
+	Sum          int
+	Exploit      string
+	VersionLevel int
+	Delay        int
+	HttpsDelay   int
+	Payloadstr   string
 }
 
 var RunOpt = RunnerOpts{
@@ -52,7 +50,7 @@ func Dispatch(result *utils.Result) {
 		socketHttp(target, result)
 	}
 
-	if !result.Open && result.SmartProbe {
+	if !result.Open || result.SmartProbe {
 		// 启发式探针或端口未OPEN,则直接退出, 不进行后续扫描
 		return
 	}
@@ -74,6 +72,9 @@ func Dispatch(result *utils.Result) {
 	if RunOpt.VersionLevel > 0 && result.IsHttp() {
 		// favicon指纹只有-v大于0并且为http服务才启用
 		faviconScan(result)
+		if result.HttpStat != "404" {
+			NotFoundScan(result)
+		}
 	} else {
 		// 如果versionlevel为0 ,或者非http服务, 则使用默认端口猜测指纹.
 		if !result.IsHttp() && result.NoFramework() {

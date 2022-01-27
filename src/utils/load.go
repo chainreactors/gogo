@@ -9,10 +9,11 @@ import (
 	"strings"
 )
 
-var Mmh3fingers, Md5fingers map[string]string
-var Tcpfingers *FingerMapper
-var Httpfingers *FingerMapper
-var Tagmap, Namemap, Portmap PortMapper
+var Mmh3Fingers, Md5Fingers map[string]string
+var AllFingers []*Finger
+var TcpFingers *FingerMapper
+var HttpFingers *FingerMapper
+var TagMap, NameMap, PortMap PortMapper
 var Compiled map[string][]regexp.Regexp
 var CommonCompiled map[string]regexp.Regexp
 
@@ -71,12 +72,15 @@ func LoadFingers(t string) *FingerMapper {
 	var tmpfingers []*Finger
 	var fingermap = make(FingerMapper)
 	// 根据权重排序在python脚本中已经实现
+
 	err := json.Unmarshal(LoadConfig(t), &tmpfingers)
 	if err != nil {
 		fmt.Println("[-] finger load FAIL!")
 		os.Exit(0)
 	}
-
+	if t == "http" {
+		AllFingers = tmpfingers
+	}
 	for _, finger := range tmpfingers {
 		finger.Protocol = t
 		finger.Decode() // 防止\xff \x00编码解码影响结果

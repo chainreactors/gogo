@@ -163,11 +163,11 @@ func Banner() {
 
 func Printportconfig() {
 	fmt.Println("当前已有端口配置: (根据端口类型分类)")
-	for k, v := range Namemap {
+	for k, v := range NameMap {
 		fmt.Println("	", k, ": ", strings.Join(v, ","))
 	}
 	fmt.Println("当前已有端口配置: (根据服务分类)")
-	for k, v := range Tagmap {
+	for k, v := range TagMap {
 		fmt.Println("	", k, ": ", strings.Join(v, ","))
 	}
 }

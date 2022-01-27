@@ -1,6 +1,7 @@
 import json, yaml
 import sys, io, os, zlib
 from base64 import b64encode
+import random
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf8')
 
@@ -49,6 +50,8 @@ if __name__ == "__main__":
     f = open("src/utils/finger.go", "w", encoding="utf-8")
     base = '''package utils
 
+var RandomDir = "/%s"
+
 func LoadConfig(typ string)[]byte  {
 	if typ == "tcp" {
 		return Decode(`%s`)
@@ -67,7 +70,8 @@ func LoadConfig(typ string)[]byte  {
 }
 	'''
 #     print(yaml2json(tcpfingers))
-    f.write(base % (yaml2json(tcpfingers),
+    f.write(base % (''.join(random.sample('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', 16)),
+                    yaml2json(tcpfingers),
                     yaml2json(httpfingers),
                     yaml2json(md5fingers),
                     yaml2json(port),

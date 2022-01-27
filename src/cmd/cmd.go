@@ -161,7 +161,7 @@ func CMD(k string) {
 
 func printConfigs(t string) {
 	if t == "port" {
-		Tagmap, Namemap, Portmap = LoadPortConfig()
+		TagMap, NameMap, PortMap = LoadPortConfig()
 		Printportconfig()
 	} else if t == "nuclei" {
 		LoadNuclei("")
@@ -180,10 +180,10 @@ func nucleiLoader(pocfile string, payloads arrayFlags) {
 
 func configloader() {
 	Compiled = make(map[string][]regexp.Regexp)
-	Mmh3fingers, Md5fingers = LoadHashFinger()
-	Tcpfingers = LoadFingers("tcp")
-	Httpfingers = LoadFingers("http")
-	Tagmap, Namemap, Portmap = LoadPortConfig()
+	Mmh3Fingers, Md5Fingers = LoadHashFinger()
+	TcpFingers = LoadFingers("tcp")
+	HttpFingers = LoadFingers("http")
+	TagMap, NameMap, PortMap = LoadPortConfig()
 	CommonCompiled = map[string]regexp.Regexp{
 		"title":     CompileRegexp("(?Uis)<title>(.*)</title>"),
 		"server":    CompileRegexp("(?i)Server: ([\x20-\x7e]+)"),

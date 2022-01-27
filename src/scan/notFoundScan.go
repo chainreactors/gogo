@@ -1,5 +1,9 @@
 package scan
 
+import (
+	"getitle/src/utils"
+)
+
 //
 //import (
 //	"main/src/utils"
@@ -7,26 +11,22 @@ package scan
 //	"strings"
 //)
 //
-//func NotFoundScan(target string, result utils.result) utils.result {
-//
-//	conn := utils.HttpConn(Delay+2)
-//	resp, err := conn.Get(target+"/fnotadjnq")
-//	if err!=nil {
-//		return result
-//	}
-//	bodyi,_ := ioutil.ReadAll(resp.Body)
-//	body := string(bodyi)
-//	if strings.Contains(body,"Apache Tomcat") {
-//		result.Midware = "Tomcat"
-//		//utils.Match()
-//		return result
-//	}else if strings.Contains(body,"<faultactor>/fnotadjnq") {
-//		result.Midware = "WebSphere"
-//		return result
-//	}else if strings.Contains(body,"aa") {
-//		return  result
-//	}
-//
-//
-//	return result
-//}
+func NotFoundScan(result *utils.Result) {
+	conn := utils.HttpConn(2)
+	resp, err := conn.Get(result.GetURL() + utils.RandomDir)
+	if err != nil || resp.StatusCode != 404 {
+		return
+	}
+	content := string(utils.GetBody(resp))
+	if content == "" {
+		return
+	}
+
+	for _, finger := range utils.AllFingers {
+		framework, ok := fingerMatcher(result, finger, content)
+		if ok {
+			framework.Version = "404"
+			result.AddFramework(framework)
+		}
+	}
+}
