@@ -16,7 +16,10 @@ import (
 	"github.com/panjf2000/ants/v2"
 )
 
-func CMD(k string) {
+var ver = ""
+var k = "ybb"
+
+func CMD() {
 	defer ants.Release()
 	connected = checkconn()
 	if !strings.Contains(strings.Join(os.Args, ""), k) {
@@ -84,7 +87,7 @@ func CMD(k string) {
 		exit()
 	}
 	if *gtversion {
-		fmt.Println("v1.1.0")
+		fmt.Println(ver)
 		os.Exit(0)
 	}
 
@@ -113,7 +116,7 @@ func CMD(k string) {
 	// 加载配置文件中的全局变量
 	configloader()
 	nucleiLoader(*pocfile, payloads)
-	// 加载命令行中的参数配置
+	// 解析命令行中的参数配置
 	parseVersion(*version, *version2)
 	parseExploit(*exploit, *exploitConfig)
 	parseFilename(*autofile, *hiddenfile, &config)
