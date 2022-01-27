@@ -44,7 +44,7 @@ func httpFingerMatch(result *utils.Result, finger *utils.Finger) {
 	// html匹配
 	for _, body := range finger.Regexps.Body {
 		if strings.Contains(content, body) {
-			result.AddFramework(utils.Framework{Name: finger.Name})
+			handlerMatchedResult(result, finger, "", content)
 			return
 		}
 	}
@@ -67,7 +67,7 @@ func httpFingerMatch(result *utils.Result, finger *utils.Finger) {
 		}
 
 		if strings.Contains(headerstr, strings.ToLower(header)) {
-			result.AddFramework(utils.Framework{Name: finger.Name})
+			handlerMatchedResult(result, finger, "", content)
 			return
 		}
 	}
@@ -90,7 +90,7 @@ func httpFingerMatch(result *utils.Result, finger *utils.Finger) {
 }
 
 func getFramework(result *utils.Result, fingermap *utils.FingerMapper, matcher func(*utils.Result, *utils.Finger)) {
-	// 优先匹配默认端口,第一遍循环只匹配默认端口
+	// 优先匹配默认端口,第一次循环只匹配默认端口
 	for _, finger := range fingermap.GetFingers(result.Port) {
 		matcher(result, finger)
 	}
@@ -103,6 +103,7 @@ func getFramework(result *utils.Result, fingermap *utils.FingerMapper, matcher f
 
 	for port, fingers := range *fingermap {
 		if port == result.Port {
+			// 跳过已经扫过的默认端口
 			continue
 		}
 		for _, finger := range fingers {
@@ -175,9 +176,6 @@ func tcpFingerMatch(result *utils.Result, finger *utils.Finger) {
 }
 
 func handlerMatchedResult(result *utils.Result, finger *utils.Finger, res, content string) {
-	if result.Protocol == "tcp" {
-		result.HttpStat = finger.Protocol
-	}
 	result.AddFramework(utils.Framework{Name: finger.Name, Version: res})
 	if RunOpt.VersionLevel >= 1 && finger.SendData_str != "" && content != "" { // 需要主动发包的指纹重新收集信息
 		result.Content = content
