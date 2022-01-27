@@ -50,7 +50,7 @@ func Dispatch(result *utils.Result) {
 		socketHttp(target, result)
 	}
 
-	if !result.Open && result.SmartProbe {
+	if !result.Open || result.SmartProbe {
 		// 启发式探针或端口未OPEN,则直接退出, 不进行后续扫描
 		return
 	}
