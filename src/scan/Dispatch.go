@@ -2,17 +2,15 @@ package scan
 
 import (
 	"getitle/src/utils"
-	"os"
 )
 
 type RunnerOpts struct {
-	Sum           int
-	Exploit       string
-	VersionLevel  int
-	Delay         int
-	HttpsDelay    int
-	Payloadstr    string
-	ExtractorFile *os.File
+	Sum          int
+	Exploit      string
+	VersionLevel int
+	Delay        int
+	HttpsDelay   int
+	Payloadstr   string
 }
 
 var RunOpt = RunnerOpts{
