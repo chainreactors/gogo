@@ -9,9 +9,9 @@ import (
 )
 
 type Template struct {
-	Id     string `json:"id"`
-	Finger string `json:"finger"`
-	Info   struct {
+	Id      string   `json:"id"`
+	Fingers []string `json:"finger"`
+	Info    struct {
 		Name      string `json:"name"`
 		Author    string `json:"author"`
 		Severity  string `json:"severity"`
