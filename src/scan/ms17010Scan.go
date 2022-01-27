@@ -93,7 +93,7 @@ func ms17010Scan(result *utils.Result) {
 	}
 	if reply[9] == 0x05 && reply[10] == 0x02 && reply[11] == 0x00 && reply[12] == 0xc0 {
 		result.Title = strings.Replace(os, "\x00", "", -1)
-		result.AddVuln(utils.Vuln{Name: "MS17-010"})
+		result.AddVuln(&utils.Vuln{Name: "MS17-010"})
 
 		trans2SessionSetupRequest[28] = treeID[0]
 		trans2SessionSetupRequest[29] = treeID[1]
@@ -106,7 +106,7 @@ func ms17010Scan(result *utils.Result) {
 			return
 		}
 		if reply[34] == 0x51 {
-			result.AddVuln(utils.Vuln{Name: "DOUBLEPULSAR"})
+			result.AddVuln(&utils.Vuln{Name: "DOUBLEPULSAR"})
 		}
 	}
 

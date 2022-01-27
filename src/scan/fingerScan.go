@@ -8,54 +8,33 @@ import (
 
 func fingerScan(result *utils.Result) {
 	//如果是http协议,则判断cms,如果是tcp则匹配规则库.暂时不考虑udp
-	if strings.HasPrefix(result.Protocol, "http") {
-		getFramework(result, utils.Httpfingers, httpFingerMatch)
+	if result.IsHttp() {
+		getFramework(result, utils.HttpFingers, httpFingerMatch)
 	} else {
-		getFramework(result, utils.Tcpfingers, tcpFingerMatch)
+		getFramework(result, utils.TcpFingers, tcpFingerMatch)
 	}
 	return
 }
 
-func httpFingerMatch(result *utils.Result, finger *utils.Finger) {
+func httpFingerMatch(result *utils.Result, finger *utils.Finger) *utils.Framework {
 	resp := result.Httpresp
 	content := result.Content
 	//var cookies map[string]string
-	if finger.SendData_str != "" && RunOpt.VersionLevel >= 1 {
+	if finger.SendDataStr != "" && RunOpt.VersionLevel >= 1 {
 		conn := utils.HttpConn(2)
-		resp, err := conn.Get(result.GetURL() + finger.SendData_str)
+		resp, err := conn.Get(result.GetURL() + finger.SendDataStr)
+		if err != nil {
+			return nil
+		}
 		if err == nil {
 			content = string(utils.GetBody(resp))
 		}
+
 	}
 
-	// 漏洞匹配优先
-	for _, reg := range utils.Compiled[finger.Name+"_vuln"] {
-		res, ok := utils.CompileMatch(reg, content)
-		if ok {
-			handlerMatchedResult(result, finger, res, content)
-			if finger.Info != "" {
-				result.AddVuln(utils.Vuln{Name: finger.Vuln, Severity: "info"})
-			} else if finger.Vuln != "" {
-				result.AddVuln(utils.Vuln{Name: finger.Vuln, Severity: "high"})
-			}
-			return
-		}
-	}
-	// html匹配
-	for _, body := range finger.Regexps.Body {
-		if strings.Contains(content, body) {
-			handlerMatchedResult(result, finger, "", content)
-			return
-		}
-	}
-
-	// 正则匹配
-	for _, reg := range utils.Compiled[finger.Name] {
-		res, ok := utils.CompileMatch(reg, content)
-		if ok {
-			handlerMatchedResult(result, finger, res, content)
-			return
-		}
+	framework, ok := fingerMatcher(result, finger, content)
+	if ok {
+		return framework
 	}
 	// http头匹配
 	for _, header := range finger.Regexps.Header {
@@ -67,32 +46,20 @@ func httpFingerMatch(result *utils.Result, finger *utils.Finger) {
 		}
 
 		if strings.Contains(headerstr, strings.ToLower(header)) {
-			handlerMatchedResult(result, finger, "", content)
-			return
+			return handlerMatchedResult(result, finger, "", content)
 		}
 	}
-
-	// MD5 匹配
-	for _, md5s := range finger.Regexps.MD5 {
-		if md5s == utils.Md5Hash([]byte(content)) {
-			result.AddFramework(utils.Framework{Name: finger.Name})
-			return
-		}
-	}
-
-	// mmh3 匹配
-	for _, mmh3s := range finger.Regexps.MMH3 {
-		if mmh3s == utils.Mmh3Hash32([]byte(content)) {
-			result.AddFramework(utils.Framework{Name: finger.Name})
-			return
-		}
-	}
+	return nil
 }
 
-func getFramework(result *utils.Result, fingermap *utils.FingerMapper, matcher func(*utils.Result, *utils.Finger)) {
+func getFramework(result *utils.Result, fingermap *utils.FingerMapper, matcher func(*utils.Result, *utils.Finger) *utils.Framework) {
 	// 优先匹配默认端口,第一次循环只匹配默认端口
+	var fs utils.Frameworks
 	for _, finger := range fingermap.GetFingers(result.Port) {
-		matcher(result, finger)
+		framework := matcher(result, finger)
+		if framework != nil {
+			fs = append(fs, framework)
+		}
 	}
 
 	if result.Protocol == "tcp" && !result.NoFramework() {
@@ -107,42 +74,32 @@ func getFramework(result *utils.Result, fingermap *utils.FingerMapper, matcher f
 			continue
 		}
 		for _, finger := range fingers {
-			matcher(result, finger)
+			framework := matcher(result, finger)
+			if framework != nil {
+				fs = append(fs, framework)
+			}
 		}
 	}
+	result.AddFrameworks(fs)
 	return
 }
 
-func tcpFingerMatch(result *utils.Result, finger *utils.Finger) {
+func tcpFingerMatch(result *utils.Result, finger *utils.Finger) *utils.Framework {
 	content := result.Content
 	var data []byte
 	var err error
 
 	// 某些规则需要主动发送一个数据包探测
-	if finger.SendData_str != "" && RunOpt.VersionLevel >= finger.Level {
+	if finger.SendDataStr != "" && RunOpt.VersionLevel >= finger.Level {
 		var conn net.Conn
 		conn, err = utils.TcpSocketConn(result.GetTarget(), 2)
 		if err != nil {
-			return
+			return nil
 		}
 		data, err = utils.SocketSend(conn, finger.SendData, 1024)
 		// 如果报错为EOF,则需要重新建立tcp连接
 		if err != nil {
-			return
-			//target := GetTarget(result)
-			//// 如果对端已经关闭,则本地socket也关闭,并重新建立连接
-			//(*result.TcpCon).Close()
-			//*result.TcpCon, err = TcpSocketConn(target, time.Duration(2))
-			//if err != nil {
-			//	return
-			//}
-			//data, err = SocketSend(*result.TcpCon, []byte(finger.SendData_str), 1024)
-			//
-			//// 重新建立链接后再次报错,则跳过该规则匹配
-			//if err != nil {
-			//	result.Error = err.Error()
-			//	return
-			//}
+			return nil
 		}
 	}
 	// 如果主动探测有回包,则正则匹配回包内容, 若主动探测没有返回内容,则直接跳过该规则
@@ -150,35 +107,64 @@ func tcpFingerMatch(result *utils.Result, finger *utils.Finger) {
 		content = string(data)
 	}
 
-	// 遍历漏洞正则
-	for _, reg := range utils.Compiled[finger.Name+"_vuln"] {
-		res, ok := utils.CompileMatch(reg, content)
-		if ok {
-			handlerMatchedResult(result, finger, res, content)
-			if finger.Info != "" {
-				result.AddVuln(utils.Vuln{Name: finger.Vuln, Severity: "info"})
-			} else if finger.Vuln != "" {
-				result.AddVuln(utils.Vuln{Name: finger.Vuln, Severity: "high"})
-			}
-			return
-		}
+	framework, ok := fingerMatcher(result, finger, content)
+	if ok {
+		return framework
 	}
-
-	//遍历指纹正则
-	for _, reg := range utils.Compiled[finger.Name] {
-		res, ok := utils.CompileMatch(reg, content)
-		if ok {
-			handlerMatchedResult(result, finger, res, content)
-			return
-		}
-	}
-	return
+	return nil
 }
 
-func handlerMatchedResult(result *utils.Result, finger *utils.Finger, res, content string) {
-	result.AddFramework(utils.Framework{Name: finger.Name, Version: res})
-	if RunOpt.VersionLevel >= 1 && finger.SendData_str != "" && content != "" { // 需要主动发包的指纹重新收集信息
+func handlerMatchedResult(result *utils.Result, finger *utils.Finger, res, content string) *utils.Framework {
+	if RunOpt.VersionLevel >= 1 && finger.SendDataStr != "" && content != "" { // 需要主动发包的指纹重新收集信息
 		result.Content = content
 		result.InfoFilter()
 	}
+	return &utils.Framework{Name: finger.Name, Version: res}
+}
+
+func fingerMatcher(result *utils.Result, finger *utils.Finger, content string) (*utils.Framework, bool) {
+	// 漏洞匹配优先
+	for _, reg := range utils.Compiled[finger.Name+"_vuln"] {
+		res, ok := utils.CompileMatch(reg, content)
+		if ok {
+			if finger.Info != "" {
+				result.AddVuln(&utils.Vuln{Name: finger.Info, Severity: "info"})
+			} else if finger.Vuln != "" {
+				result.AddVuln(&utils.Vuln{Name: finger.Vuln, Severity: "high"})
+			}
+			return handlerMatchedResult(result, finger, res, content), true
+		}
+	}
+
+	// body匹配
+	for _, body := range finger.Regexps.Body {
+		if strings.Contains(content, body) {
+
+			return handlerMatchedResult(result, finger, "", content), true
+		}
+	}
+
+	// 正则匹配
+	for _, reg := range utils.Compiled[finger.Name] {
+		res, ok := utils.CompileMatch(reg, content)
+		if ok {
+
+			return handlerMatchedResult(result, finger, res, content), true
+		}
+	}
+
+	// MD5 匹配
+	for _, md5s := range finger.Regexps.MD5 {
+		if md5s == utils.Md5Hash([]byte(content)) {
+			return &utils.Framework{Name: finger.Name}, true
+		}
+	}
+
+	// mmh3 匹配
+	for _, mmh3s := range finger.Regexps.MMH3 {
+		if mmh3s == utils.Mmh3Hash32([]byte(content)) {
+			return &utils.Framework{Name: finger.Name}, true
+		}
+	}
+	return nil, false
 }

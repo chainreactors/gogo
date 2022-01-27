@@ -23,17 +23,17 @@ func portHandler(portstring string) []string {
 func choiceports(portname string) []string {
 	var ports []string
 	if portname == "all" {
-		for p := range utils.Portmap {
+		for p := range utils.PortMap {
 			ports = append(ports, p)
 		}
 		return ports
 	}
 
-	if utils.Namemap[portname] != nil {
-		ports = append(ports, utils.Namemap[portname]...)
+	if utils.NameMap[portname] != nil {
+		ports = append(ports, utils.NameMap[portname]...)
 		return ports
-	} else if utils.Tagmap[portname] != nil {
-		ports = append(ports, utils.Tagmap[portname]...)
+	} else if utils.TagMap[portname] != nil {
+		ports = append(ports, utils.TagMap[portname]...)
 		return ports
 	} else {
 		return []string{portname}

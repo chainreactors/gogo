@@ -18,7 +18,7 @@ func Nuclei(target string, result *utils.Result) {
 }
 
 func execute_templates(result *utils.Result, titles []string, target string) {
-	var vulns []utils.Vuln
+	var vulns []*utils.Vuln
 	templates := choiceTemplates(titles)
 	for _, template := range templates { // 遍历所有poc
 		res, ok := template.Execute(target)
@@ -29,7 +29,7 @@ func execute_templates(result *utils.Result, titles []string, target string) {
 			//for _, extract := range res.OutputExtracts{
 			//	result.AddExtractor(utils.NewExtractor(template.Id, extract))
 			//}
-			vulns = append(vulns, utils.Vuln{template.Id, res.PayloadValues, res.DynamicValues, template.Info.Severity})
+			vulns = append(vulns, &utils.Vuln{template.Id, res.PayloadValues, res.DynamicValues, template.Info.Severity})
 		}
 	}
 

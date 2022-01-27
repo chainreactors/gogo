@@ -17,15 +17,15 @@ func decode(s string) []byte {
 }
 
 type Finger struct {
-	Name         string   `json:"name"`
-	Protocol     string   `json:"protocol"`
-	SendData_str string   `json:"send_data"`
-	SendData     senddata `json:"-"`
-	Info         string   `json:"info"`
-	Vuln         string   `json:"vuln"`
-	Level        int      `json:"level"`
-	Defaultport  []string `json:"default_port"`
-	Regexps      Regexps  `json:"regexps"`
+	Name        string   `json:"name"`
+	Protocol    string   `json:"protocol"`
+	SendDataStr string   `json:"send_data"`
+	SendData    senddata `json:"-"`
+	Info        string   `json:"info"`
+	Vuln        string   `json:"vuln"`
+	Level       int      `json:"level"`
+	Defaultport []string `json:"default_port"`
+	Regexps     Regexps  `json:"regexps"`
 }
 
 func (f *Finger) Decode() {
@@ -33,8 +33,8 @@ func (f *Finger) Decode() {
 		return
 	}
 
-	if f.SendData_str != "" {
-		f.SendData = decode(f.SendData_str)
+	if f.SendDataStr != "" {
+		f.SendData = decode(f.SendDataStr)
 	}
 	// todo
 	// regexp decode

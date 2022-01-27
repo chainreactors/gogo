@@ -55,16 +55,20 @@ func (result *Result) InfoFilter() {
 	}
 }
 
-func (result *Result) AddVuln(vuln Vuln) {
+func (result *Result) AddVuln(vuln *Vuln) {
 	result.Vulns = append(result.Vulns, vuln)
 }
 
-func (result *Result) AddVulns(vulns []Vuln) {
+func (result *Result) AddVulns(vulns []*Vuln) {
 	result.Vulns = append(result.Vulns, vulns...)
 }
 
-func (result *Result) AddFramework(f Framework) {
+func (result *Result) AddFramework(f *Framework) {
 	result.Frameworks = append(result.Frameworks, f)
+}
+
+func (result *Result) AddFrameworks(f []*Framework) {
+	result.Frameworks = append(result.Frameworks, f...)
 }
 
 func (result *Result) AddExtractor(extractor *Extractor) {
@@ -80,9 +84,9 @@ func (result Result) NoFramework() bool {
 }
 
 func (result *Result) GuessFramework() {
-	for _, v := range Portmap[result.Port] {
-		if Tagmap[v] == nil && !structutils.SliceContains([]string{"top1", "top2", "top3", "other", "windows"}, v) {
-			result.AddFramework(Framework{Name: v, IsGuess: true})
+	for _, v := range PortMap[result.Port] {
+		if TagMap[v] == nil && !structutils.SliceContains([]string{"top1", "top2", "top3", "other", "windows"}, v) {
+			result.AddFramework(&Framework{Name: v, IsGuess: true})
 		}
 	}
 }
@@ -158,7 +162,7 @@ func (result Result) GetFirstFramework() string {
 func (result *Result) AddNTLMInfo(m map[string]string, t string) {
 	result.Title = m["MsvAvNbDomainName"] + "/" + m["MsvAvNbComputerName"]
 	result.Host = m["MsvAvDnsDomainName"] + "/" + m["MsvAvDnsComputerName"]
-	result.AddFramework(Framework{Name: t, Version: m["Version"]})
+	result.AddFramework(&Framework{Name: t, Version: m["Version"]})
 }
 
 func (result Result) toZombie() zombiemeta {
@@ -263,7 +267,7 @@ func (v *Vuln) ToString() string {
 	return s
 }
 
-type Vulns []Vuln
+type Vulns []*Vuln
 
 func (vs Vulns) ToString() string {
 	var s string
@@ -288,25 +292,24 @@ func (f Framework) ToString() string {
 	if f.IsGuess {
 		s = "*" + s
 	}
-	if f.Version == "" {
+	if f.Version != "" {
 		s += ":" + f.Version
 	}
 	return s
 }
 
-type Frameworks []Framework
+type Frameworks []*Framework
 
 func (fs Frameworks) ToString() string {
-	framework_strs := make([]string, len(fs))
+	frameworkStrs := make([]string, len(fs))
 	for i, f := range fs {
-		framework_strs[i] = f.ToString()
+		frameworkStrs[i] = f.ToString()
 	}
-	return strings.Join(framework_strs, "||")
+	return strings.Join(frameworkStrs, "||")
 }
 
 func (fs Frameworks) GetTitles() []string {
 	var titles []string
-	//titles := []string{}
 	for _, f := range fs {
 		if !f.IsGuess {
 			titles = append(titles, f.Name)
