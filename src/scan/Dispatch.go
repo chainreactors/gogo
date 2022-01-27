@@ -72,7 +72,9 @@ func Dispatch(result *utils.Result) {
 	if RunOpt.VersionLevel > 0 && result.IsHttp() {
 		// favicon指纹只有-v大于0并且为http服务才启用
 		faviconScan(result)
-		NotFoundScan(result)
+		if result.HttpStat != "404" {
+			NotFoundScan(result)
+		}
 	} else {
 		// 如果versionlevel为0 ,或者非http服务, 则使用默认端口猜测指纹.
 		if !result.IsHttp() && result.NoFramework() {
