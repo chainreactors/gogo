@@ -61,8 +61,10 @@ func printConfigs(t string) {
 func parseExtractors(extracts arrayFlags, extractStr string) {
 	if extractStr != "" {
 		exts := strings.Split(extractStr, ",")
-		for _, ext := range exts {
-			Extractors[ext] = PresetExtracts[ext]
+		for _, extract := range exts {
+			if reg, ok := PresetExtracts[extract]; ok {
+				Extractors[extract] = reg
+			}
 		}
 	}
 	for _, extract := range extracts {
