@@ -3,7 +3,6 @@ package protocols
 import (
 	"errors"
 	"getitle/src/nuclei"
-	"getitle/src/structutils"
 	"strings"
 )
 
@@ -23,7 +22,7 @@ func loadPayloads(payloads map[string]interface{}) (map[string][]string, error) 
 		case interface{}:
 			s := make([]string, len(payload.([]interface{})))
 			for i, v := range pt.([]interface{}) {
-				s[i] = structutils.ToString(v)
+				s[i] = nuclei.ToString(v)
 			}
 			loadedPayloads[name] = s
 		}

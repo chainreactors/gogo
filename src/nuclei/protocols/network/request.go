@@ -5,7 +5,6 @@ import (
 	"errors"
 	"getitle/src/nuclei"
 	"getitle/src/nuclei/protocols"
-	"getitle/src/structutils"
 	"io"
 	"net"
 	"net/url"
@@ -25,7 +24,7 @@ func (request *Request) getMatchPart(part string, data protocols.InternalEvent) 
 	if !ok {
 		return "", false
 	}
-	itemStr := structutils.ToString(item)
+	itemStr := nuclei.ToString(item)
 
 	return itemStr, true
 }
@@ -71,7 +70,7 @@ func (r *Request) ExecuteWithResults(input string, dynamicValues map[string]inte
 	if err != nil {
 		return err
 	}
-	dynamicValues = structutils.MergeMaps(dynamicValues, map[string]interface{}{"Hostname": address})
+	dynamicValues = nuclei.MergeMaps(dynamicValues, map[string]interface{}{"Hostname": address})
 	for _, kv := range r.addresses {
 		variables := generateNetworkVariables(address)
 		actualAddress := nuclei.Replace(kv.address, variables)

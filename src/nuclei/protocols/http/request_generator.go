@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"getitle/src/nuclei"
 	"getitle/src/nuclei/protocols"
-	. "getitle/src/structutils"
 	"io"
 	"io/ioutil"
 	"net"
@@ -105,7 +104,7 @@ func (r *requestGenerator) Make(baseURL, data string, payloads, dynamicValues ma
 	// We get the next payload for the request.
 
 	for payloadName, payloadValue := range payloads {
-		payloads[payloadName] = ToString(payloadValue)
+		payloads[payloadName] = nuclei.ToString(payloadValue)
 	}
 
 	parsed, err := url.Parse(baseURL)
@@ -121,7 +120,7 @@ func (r *requestGenerator) Make(baseURL, data string, payloads, dynamicValues ma
 		trailingSlash = true
 	}
 	values := nuclei.MergeMaps(dynamicValues, generateVariables(parsed, trailingSlash))
-	values = MergeMaps(payloads, values)
+	values = nuclei.MergeMaps(payloads, values)
 
 	// If data contains \n it's a raw request, process it like raw. Else
 	// continue with the template based request flow.

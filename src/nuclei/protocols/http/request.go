@@ -3,8 +3,8 @@ package http
 import (
 	"errors"
 	"fmt"
+	. "getitle/src/nuclei"
 	"getitle/src/nuclei/protocols"
-	. "getitle/src/structutils"
 	"io"
 	"io/ioutil"
 	"net/http"
