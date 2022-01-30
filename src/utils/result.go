@@ -333,9 +333,9 @@ type Extract struct {
 func (e *Extract) ToString() string {
 	if len(e.ExtractResult) == 1 {
 		if len(e.ExtractResult[0]) > 30 {
-			return fmt.Sprintf("%s:%s ... %dbytes", e.Name, e.ExtractResult[0][:30], len(e.ExtractResult[0]))
+			return fmt.Sprintf("%s:%s ... %d bytes", e.Name, AsciiEncode(e.ExtractResult[0][:30]), len(e.ExtractResult[0]))
 		}
-		return fmt.Sprintf("%s:%s", e.Name, e.ExtractResult[0])
+		return fmt.Sprintf("%s:%s", e.Name, AsciiEncode(e.ExtractResult[0]))
 	} else {
 		return fmt.Sprintf("%s:%d objects", e.Name, len(e.ExtractResult))
 	}

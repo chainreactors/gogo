@@ -39,10 +39,16 @@ func LoadNuclei(filename string) map[string][]*Template {
 	if filename == "" {
 		return LoadTemplates(LoadConfig("nuclei"))
 	} else {
-		content, err := ioutil.ReadFile(filename)
-		if err != nil {
-			fmt.Println(err.Error())
-			os.Exit(0)
+		var content []byte
+		if IsExist(filename) {
+			var err error
+			content, err = ioutil.ReadFile(filename)
+			if err != nil {
+				fmt.Println(err.Error())
+				os.Exit(0)
+			}
+		} else {
+			content = Base64Decode(filename)
 		}
 		return LoadTemplates(content)
 	}

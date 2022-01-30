@@ -49,7 +49,7 @@ func GetBody(resp *http.Response) []byte {
 	return body
 }
 
-func EncodeTitle(s string) string {
+func AsciiEncode(s string) string {
 	s = strings.TrimSpace(s)
 	s = fmt.Sprintf("%q", s)
 	s = strings.Trim(s, "\"")

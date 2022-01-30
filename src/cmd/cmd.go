@@ -25,7 +25,7 @@ func CMD() {
 		inforev()
 	}
 	var config Config
-	var filters, payloads, extractors arrayFlags
+	var filters, payloads, extracts arrayFlags
 	//默认参数信息
 	// INPUT
 	flag.StringVar(&config.IP, "ip", "", "")
@@ -64,7 +64,8 @@ func CMD() {
 	flag.IntVar(&RunOpt.HttpsDelay, "D", 2, "")
 	flag.StringVar(&RunOpt.Payloadstr, "suffix", "", "")
 	flag.Var(&payloads, "payload", "")
-	flag.Var(&extractors, "extract", "")
+	flag.Var(&extracts, "extract", "")
+	extractStr := flag.String("extracts", "", "")
 	version := flag.Bool("v", false, "")
 	version2 := flag.Bool("vv", false, "")
 	exploit := flag.Bool("e", false, "")
@@ -119,7 +120,7 @@ func CMD() {
 	parseVersion(*version, *version2)
 	parseExploit(*exploit, *exploitConfig)
 	parseFilename(*autofile, *hiddenfile, &config)
-	parseExtractors(extractors)
+	parseExtractors(extracts, *extractStr)
 
 	starttime := time.Now()
 	// 初始化任务
