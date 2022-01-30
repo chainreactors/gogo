@@ -17,7 +17,7 @@ var (
 	TagMap, NameMap, PortMap PortMapper
 	Compiled                 map[string][]*regexp.Regexp
 	CommonCompiled           map[string]*regexp.Regexp
-	Extracts                 = make(map[string]*regexp.Regexp)
+	Extractors               = make(map[string]*regexp.Regexp)
 )
 
 var PresetExtracts = map[string]*regexp.Regexp{

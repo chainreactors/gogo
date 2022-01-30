@@ -22,7 +22,7 @@ type Result struct {
 	Language   string         `json:"l"` // language
 	Frameworks Frameworks     `json:"f"` // framework
 	Vulns      Vulns          `json:"v"`
-	Extractors Extractors     `json:"-"`
+	Extractors Extracts       `json:"-"`
 	Protocol   string         `json:"r"` // protocol
 	Hash       string         `json:"hs"`
 	Open       bool           `json:"-"`
@@ -48,10 +48,10 @@ func (result *Result) InfoFilter() {
 	result.Title = getTitle(result.Content)
 	if result.Content != "" {
 		result.Hash = Md5Hash([]byte(result.Content))[:4]
-		for name, extract := range Extracts {
+		for name, extract := range Extractors {
 			extractStr, ok := CompiledAllMatch(extract, result.Content)
 			if ok && extractStr != nil {
-				result.AddExtractor(&Extractor{Name: name, ExtractResult: extractStr})
+				result.AddExtract(NewExtract(name, extractStr))
 			}
 		}
 	}
@@ -77,7 +77,7 @@ func (result *Result) AddFrameworks(f []*Framework) {
 	result.Frameworks = append(result.Frameworks, f...)
 }
 
-func (result *Result) AddExtractor(extractor *Extractor) {
+func (result *Result) AddExtract(extractor *Extract) {
 	extractor.Target = result.GetTarget()
 	result.Extractors = append(result.Extractors, extractor)
 }
@@ -324,13 +324,13 @@ func (fs Frameworks) GetTitles() []string {
 	return titles
 }
 
-type Extractor struct {
+type Extract struct {
 	Target        string   `json:"target"`
 	Name          string   `json:"name"`
 	ExtractResult []string `json:"extract_result"`
 }
 
-func (e *Extractor) ToString() string {
+func (e *Extract) ToString() string {
 	if len(e.ExtractResult) == 1 {
 		if len(e.ExtractResult[0]) > 30 {
 			return fmt.Sprintf("%s:%s ... %dbytes", e.Name, e.ExtractResult[0][:30], len(e.ExtractResult[0]))
@@ -341,8 +341,8 @@ func (e *Extractor) ToString() string {
 	}
 }
 
-func NewExtractor(name string, extractResult interface{}) *Extractor {
-	var e = &Extractor{
+func NewExtract(name string, extractResult interface{}) *Extract {
+	var e = &Extract{
 		Name: name,
 	}
 	switch extractResult.(type) {
@@ -356,9 +356,9 @@ func NewExtractor(name string, extractResult interface{}) *Extractor {
 	return e
 }
 
-type Extractors []*Extractor
+type Extracts []*Extract
 
-func (e *Extractors) ToResult() string {
+func (e *Extracts) ToResult() string {
 	s, err := json.Marshal(e)
 	if err != nil {
 		return err.Error()
@@ -366,7 +366,7 @@ func (e *Extractors) ToResult() string {
 	return string(s) + "\n"
 }
 
-func (es Extractors) ToString() string {
+func (es Extracts) ToString() string {
 	var s string
 	for _, e := range es {
 		s += fmt.Sprintf("[ Extract: %s ] ", e.ToString())

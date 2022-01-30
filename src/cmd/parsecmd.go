@@ -60,9 +60,9 @@ func printConfigs(t string) {
 func parseExtractors(extracts arrayFlags) {
 	for _, extract := range extracts {
 		if reg, ok := PresetExtracts[extract]; ok {
-			Extracts[extract] = reg
+			Extractors[extract] = reg
 		} else {
-			Extracts[extract] = CompileRegexp(extract)
+			Extractors[extract] = CompileRegexp(extract)
 		}
 	}
 }
