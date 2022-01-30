@@ -22,7 +22,7 @@ type Result struct {
 	Language   string         `json:"l"` // language
 	Frameworks Frameworks     `json:"f"` // framework
 	Vulns      Vulns          `json:"v"`
-	Extractors Extractors     `json:"-"`
+	Extracts   *Extracts      `json:"-"`
 	Protocol   string         `json:"r"` // protocol
 	Hash       string         `json:"hs"`
 	Open       bool           `json:"-"`
@@ -40,7 +40,9 @@ func NewResult(ip, port string) *Result {
 		Port:     port,
 		Protocol: "tcp",
 		HttpStat: "tcp",
+		Extracts: &Extracts{},
 	}
+	result.Extracts.Target = result.GetTarget()
 	return &result
 }
 func (result *Result) InfoFilter() {
@@ -48,6 +50,12 @@ func (result *Result) InfoFilter() {
 	result.Title = getTitle(result.Content)
 	if result.Content != "" {
 		result.Hash = Md5Hash([]byte(result.Content))[:4]
+		for name, extract := range Extractors {
+			extractStr, ok := CompiledAllMatch(extract, result.Content)
+			if ok && extractStr != nil {
+				result.AddExtract(NewExtract(name, extractStr))
+			}
+		}
 	}
 	if result.IsHttp() {
 		result.Language = getLanguage(result.Httpresp, result.Content)
@@ -71,9 +79,8 @@ func (result *Result) AddFrameworks(f []*Framework) {
 	result.Frameworks = append(result.Frameworks, f...)
 }
 
-func (result *Result) AddExtractor(extractor *Extractor) {
-	extractor.Target = result.GetTarget()
-	result.Extractors = append(result.Extractors, extractor)
+func (result *Result) AddExtract(extract *Extract) {
+	result.Extracts.Extracts = append(result.Extracts.Extracts, extract)
 }
 
 func (result Result) NoFramework() bool {
@@ -318,24 +325,24 @@ func (fs Frameworks) GetTitles() []string {
 	return titles
 }
 
-type Extractor struct {
-	Target        string   `json:"target"`
+type Extract struct {
 	Name          string   `json:"name"`
 	ExtractResult []string `json:"extract_result"`
 }
 
-func (e *Extractor) ToString() string {
-	if len(e.ExtractResult) > 0 {
+func (e *Extract) ToString() string {
+	if len(e.ExtractResult) == 1 {
 		if len(e.ExtractResult[0]) > 30 {
 			return fmt.Sprintf("%s:%s ... %dbytes", e.Name, e.ExtractResult[0][:30], len(e.ExtractResult[0]))
 		}
 		return fmt.Sprintf("%s:%s", e.Name, e.ExtractResult[0])
+	} else {
+		return fmt.Sprintf("%s:%d objects", e.Name, len(e.ExtractResult))
 	}
-	return ""
 }
 
-func NewExtractor(name string, extractResult interface{}) *Extractor {
-	var e = &Extractor{
+func NewExtract(name string, extractResult interface{}) *Extract {
+	var e = &Extract{
 		Name: name,
 	}
 	switch extractResult.(type) {
@@ -349,19 +356,22 @@ func NewExtractor(name string, extractResult interface{}) *Extractor {
 	return e
 }
 
-type Extractors []*Extractor
+type Extracts struct {
+	Target   string     `json:"target"`
+	Extracts []*Extract `json:"extracts"`
+}
 
-func (e *Extractors) ToResult() string {
+func (e *Extracts) ToResult() string {
 	s, err := json.Marshal(e)
 	if err != nil {
 		return err.Error()
 	}
-	return string(s) + "\n"
+	return string(s)
 }
 
-func (es Extractors) ToString() string {
+func (es Extracts) ToString() string {
 	var s string
-	for _, e := range es {
+	for _, e := range es.Extracts {
 		s += fmt.Sprintf("[ Extract: %s ] ", e.ToString())
 	}
 	return s

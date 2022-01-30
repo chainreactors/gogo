@@ -9,13 +9,27 @@ import (
 	"strings"
 )
 
-var Mmh3Fingers, Md5Fingers map[string]string
-var AllFingers []*Finger
-var TcpFingers *FingerMapper
-var HttpFingers *FingerMapper
-var TagMap, NameMap, PortMap PortMapper
-var Compiled map[string][]regexp.Regexp
-var CommonCompiled map[string]regexp.Regexp
+var (
+	Md5Fingers     map[string]string
+	Mmh3Fingers    map[string]string
+	AllFingers     []*Finger
+	TcpFingers     FingerMapper
+	HttpFingers    FingerMapper
+	NameMap        PortMapper
+	PortMap        PortMapper
+	TagMap         PortMapper
+	Compiled       map[string][]*regexp.Regexp
+	CommonCompiled map[string]*regexp.Regexp
+	Extractors     = make(map[string]*regexp.Regexp)
+)
+
+var PresetExtracts = map[string]*regexp.Regexp{
+	"url":    regexp.MustCompile("^(http(s)?:\\/\\/)[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+(:[0-9]{1,5})?[-a-zA-Z0-9()@:%_\\\\\\+\\.~#?&//=]*$"),
+	"ip":     regexp.MustCompile("((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})(\\.((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})){3}"),
+	"mail":   regexp.MustCompile("^([A-Za-z0-9_\\-\\.\u4e00-\u9fa5])+\\@([A-Za-z0-9_\\-\\.])+\\.([A-Za-z]{2,8})$"),
+	"idcard": regexp.MustCompile("^(\\d{15}$)|(^\\d{17}([0-9]|[xX]))$"),
+	"phone":  regexp.MustCompile("^(\\+?0?86\\-?)?1[3-9]\\d{9}$"),
+}
 
 func Ports2PortSlice(ports []string) []string {
 	var tmpports []string
@@ -68,7 +82,7 @@ func LoadPortConfig() (PortMapper, PortMapper, PortMapper) {
 }
 
 //加载指纹到全局变量
-func LoadFingers(t string) *FingerMapper {
+func LoadFingers(t string) FingerMapper {
 	var tmpfingers []*Finger
 	var fingermap = make(FingerMapper)
 	// 根据权重排序在python脚本中已经实现
@@ -107,7 +121,7 @@ func LoadFingers(t string) *FingerMapper {
 		}
 
 	}
-	return &fingermap
+	return fingermap
 }
 
 func LoadHashFinger() (map[string]string, map[string]string) {

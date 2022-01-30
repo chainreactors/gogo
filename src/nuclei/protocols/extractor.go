@@ -2,7 +2,7 @@ package protocols
 
 import (
 	"fmt"
-	"getitle/src/structutils"
+	"getitle/src/nuclei"
 	"regexp"
 	"strings"
 )
@@ -235,7 +235,7 @@ func (e *Extractor) ExtractKval(data map[string]interface{}) map[string]struct{}
 		if !ok {
 			continue
 		}
-		itemString := structutils.ToString(item)
+		itemString := nuclei.ToString(item)
 		if _, ok := results[itemString]; !ok {
 			results[itemString] = struct{}{}
 		}

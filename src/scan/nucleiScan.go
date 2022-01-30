@@ -24,11 +24,8 @@ func execute_templates(result *utils.Result, titles []string, target string) {
 		res, ok := template.Execute(target)
 		if ok {
 			for name, extract := range res.Extracts {
-				result.AddExtractor(utils.NewExtractor(name, extract))
+				result.AddExtract(utils.NewExtract(name, extract))
 			}
-			//for _, extract := range res.OutputExtracts{
-			//	result.AddExtractor(utils.NewExtractor(template.Id, extract))
-			//}
 			vulns = append(vulns, &utils.Vuln{template.Id, res.PayloadValues, res.DynamicValues, template.Info.Severity})
 		}
 	}

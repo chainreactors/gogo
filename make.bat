@@ -1,11 +1,11 @@
 python updateconfig.py
 rm ./bin/*
 set name=getitle
-gox.exe -osarch="linux/amd64 linux/arm64 linux/386 windows/amd64 linux/mips64 windows/386 darwin/amd64" -ldflags="-s -w" -gcflags="-trimpath=$GOPATH" -asmflags="-trimpath=$GOPATH" -output=".\bin\%name%_{{.OS}}_{{.Arch}}" .
+gox.exe -osarch="linux/amd64 linux/arm64 linux/386 windows/amd64 linux/mips64 windows/386 darwin/amd64" -ldflags="-s -w -X 'getitle/src/cmd.ver=v%1' -X 'getitle/src/cmd.k=%2'" -gcflags="-trimpath=$GOPATH" -asmflags="-trimpath=$GOPATH" -output=".\bin\%name%_{{.OS}}_{{.Arch}}" .
 echo off
 @REM  go strip 去除编译信息
-@REM go-strip -f ./bin/%name%_windows_386.exe -a -output ./bin/%name%_windows_386.exe > nul
-@REM go-strip -f ./bin/%name%_windows_amd64.exe -a -output ./bin/%name%_windows_amd64.exe > nul
+go-strip -f ./bin/%name%_windows_386.exe -a -output ./bin/%name%_windows_386.exe > nul
+go-strip -f ./bin/%name%_windows_amd64.exe -a -output ./bin/%name%_windows_amd64.exe > nul
 go-strip -f ./bin/%name%_linux_386 -a -output ./bin/%name%_linux_386
 go-strip -f ./bin/%name%_linux_arm64 -a -output ./bin/%name%_linux_arm64
 go-strip -f ./bin/%name%_linux_amd64 -a -output ./bin/%name%_linux_amd64
