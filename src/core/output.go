@@ -39,7 +39,7 @@ func colorOutput(result *Result) string {
 }
 
 func fullOutput(result *Result) string {
-	s := fmt.Sprintf("[+] %s://%s:%s%s\t%s\t%s\t%s\t%s\t%s [%s] %s %s %s\n", result.Protocol, result.Ip, result.Port, result.Uri, result.Midware, result.Language, result.Frameworks.ToString(), result.Host, result.Hash, result.HttpStat, result.Title, result.Vulns.ToString(), result.Extractors.ToString())
+	s := fmt.Sprintf("[+] %s://%s:%s%s\t%s\t%s\t%s\t%s\t%s [%s] %s %s %s\n", result.Protocol, result.Ip, result.Port, result.Uri, result.Midware, result.Language, result.Frameworks.ToString(), result.Host, result.Hash, result.HttpStat, result.Title, result.Vulns.ToString(), result.Extracts.ToString())
 	return s
 }
 
@@ -51,8 +51,9 @@ func jsonOutput(result *Result) string {
 func FormatOutput(filename string, outputfile string, autofile bool, filters []string) {
 	var outfunc func(s string)
 	var iscolor bool
-	var resultsdata ResultsData
-	var smartdata SmartData
+	var resultsdata *ResultsData
+	var smartdata *SmartData
+	var extractsdata []Extracts
 	var textdata string
 	var file *os.File
 	if filename == "stdin" {
@@ -63,17 +64,20 @@ func FormatOutput(filename string, outputfile string, autofile bool, filters []s
 
 	data := LoadResultFile(file)
 	switch data.(type) {
-	case ResultsData:
-		resultsdata = data.(ResultsData)
+	case *ResultsData:
+		resultsdata = data.(*ResultsData)
 		ConsoleLog(resultsdata.ToConfig())
 		if outputfile == "" {
 			outputfile = GetFilename(resultsdata.Config, autofile, false, Opt.Output)
 		}
-	case SmartData:
-		smartdata = data.(SmartData)
+	case *SmartData:
+		smartdata = data.(*SmartData)
 		if outputfile == "" {
 			outputfile = GetFilename(smartdata.Config, autofile, false, "cidr")
 		}
+	case []Extracts:
+		extractsdata = data.([]Extracts)
+		//ConsoleLog("[*] parser extracts successfully")
 	case []byte:
 		textdata = string(data.([]byte))
 	default:
@@ -101,12 +105,10 @@ func FormatOutput(filename string, outputfile string, autofile bool, filters []s
 		iscolor = true
 	}
 
-	if smartdata.Data != nil {
+	if smartdata != nil && smartdata.Data != nil {
 		outfunc(strings.Join(smartdata.Data, "\n"))
 		return
-	}
-
-	if resultsdata.Data != nil {
+	} else if resultsdata != nil && resultsdata.Data != nil {
 		for _, filter := range filters {
 			if strings.Contains(filter, "::") {
 				kv := strings.Split(filter, "::")
@@ -133,8 +135,17 @@ func FormatOutput(filename string, outputfile string, autofile bool, filters []s
 		} else {
 			outfunc(resultsdata.ToValues(Opt.Output))
 		}
-	}
-	if textdata != "" {
+	} else if extractsdata != nil {
+		for _, extracts := range extractsdata {
+			var s string
+			s += fmt.Sprintf("[+] %s\n", extracts.Target)
+			for _, extract := range extracts.Extracts {
+				s += fmt.Sprintf(" \t * %s \n\t\t", extract.Name)
+				s += strings.Join(extract.ExtractResult, "\n\t\t")
+			}
+			fmt.Println(s)
+		}
+	} else if textdata != "" {
 		outfunc(textdata)
 	}
 }

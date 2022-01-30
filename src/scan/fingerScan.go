@@ -52,7 +52,7 @@ func httpFingerMatch(result *utils.Result, finger *utils.Finger) *utils.Framewor
 	return nil
 }
 
-func getFramework(result *utils.Result, fingermap *utils.FingerMapper, matcher func(*utils.Result, *utils.Finger) *utils.Framework) {
+func getFramework(result *utils.Result, fingermap utils.FingerMapper, matcher func(*utils.Result, *utils.Finger) *utils.Framework) {
 	// 优先匹配默认端口,第一次循环只匹配默认端口
 	var fs utils.Frameworks
 	for _, finger := range fingermap.GetFingers(result.Port) {
@@ -68,7 +68,7 @@ func getFramework(result *utils.Result, fingermap *utils.FingerMapper, matcher f
 		return
 	}
 
-	for port, fingers := range *fingermap {
+	for port, fingers := range fingermap {
 		if port == result.Port {
 			// 跳过已经扫过的默认端口
 			continue

@@ -101,32 +101,33 @@ func handler() {
 	if Opt.file != nil {
 		go func() {
 			defer fileCloser()
-			var commaflag3 bool
+			var rescommaflag bool
 			for res := range Opt.DataCh {
-				if commaflag3 {
+				if rescommaflag {
 					res = "," + res
 				} else if Opt.FileOutput == "json" && !Opt.Noscan {
 					// 如果json格式输出,则除了第一次输出,之后都会带上逗号
-					commaflag3 = true
+					rescommaflag = true
 				}
 				Opt.file.Write(res)
 			}
 		}()
 
 		go func() {
-			for res := range Opt.ExtractorCh {
-				if Opt.extractorFile == nil {
+			for res := range Opt.ExtractCh {
+				if Opt.extractFile == nil {
 					var err error
-					Opt.extractorFile, err = NewFile(Opt.file.Filename+"_extract", Opt.Compress)
+					Opt.extractFile, err = NewFile(Opt.file.Filename+"_extract", Opt.Compress)
 					if err != nil {
-						ConsoleLog("[warn] cannot create extractor result file")
+						ConsoleLog("[warn] cannot create extractor result file, " + err.Error())
+						return
 					}
 				}
-				Opt.extractorFile.SyncWrite(res)
+				Opt.extractFile.Write(res + "\n")
 			}
 
-			if Opt.extractorFile != nil {
-				Opt.extractorFile.Close()
+			if Opt.extractFile != nil {
+				Opt.extractFile.Close()
 			}
 		}()
 	}
@@ -137,7 +138,6 @@ func fileCloser() {
 		Opt.file.Write("]}")
 	}
 	Opt.file.Close()
-
 	if Opt.smartFile != nil {
 		Opt.smartFile.Write("]}")
 		Opt.smartFile.Close()
@@ -149,21 +149,22 @@ func fileCloser() {
 	}
 }
 
-var commaflag bool = false
+var smartcommaflag bool = false
 
 func writeSmartResult(ips []string) {
 	iplists := make([]string, len(ips))
 	for i, ip := range ips {
 		iplists[i] = "\"" + ip + "\""
 	}
-	if commaflag {
+	if smartcommaflag {
 		Opt.smartFile.Write(",")
+	} else {
+		smartcommaflag = true
 	}
 	Opt.smartFile.SyncWrite(strings.Join(iplists, ","))
-	commaflag = true
 }
 
-var commaflag2 bool = false
+var pingcommaflag bool = false
 
 func writePingResult(ips []string) {
 	iplists := make([]string, len(ips))
@@ -171,11 +172,12 @@ func writePingResult(ips []string) {
 		iplists[i] = "\"" + getIP(ip) + "\""
 	}
 
-	if commaflag2 {
+	if pingcommaflag {
 		Opt.pingFile.Write(",")
+	} else {
+		pingcommaflag = true
 	}
 	Opt.pingFile.SyncWrite(strings.Join(iplists, ","))
-	commaflag2 = true
 }
 
 //var winfile = []string{

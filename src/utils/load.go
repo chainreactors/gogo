@@ -10,14 +10,17 @@ import (
 )
 
 var (
-	Mmh3Fingers, Md5Fingers  map[string]string
-	AllFingers               []*Finger
-	TcpFingers               *FingerMapper
-	HttpFingers              *FingerMapper
-	TagMap, NameMap, PortMap PortMapper
-	Compiled                 map[string][]*regexp.Regexp
-	CommonCompiled           map[string]*regexp.Regexp
-	Extractors               = make(map[string]*regexp.Regexp)
+	Md5Fingers     map[string]string
+	Mmh3Fingers    map[string]string
+	AllFingers     []*Finger
+	TcpFingers     FingerMapper
+	HttpFingers    FingerMapper
+	NameMap        PortMapper
+	PortMap        PortMapper
+	TagMap         PortMapper
+	Compiled       map[string][]*regexp.Regexp
+	CommonCompiled map[string]*regexp.Regexp
+	Extractors     = make(map[string]*regexp.Regexp)
 )
 
 var PresetExtracts = map[string]*regexp.Regexp{
@@ -79,7 +82,7 @@ func LoadPortConfig() (PortMapper, PortMapper, PortMapper) {
 }
 
 //加载指纹到全局变量
-func LoadFingers(t string) *FingerMapper {
+func LoadFingers(t string) FingerMapper {
 	var tmpfingers []*Finger
 	var fingermap = make(FingerMapper)
 	// 根据权重排序在python脚本中已经实现
@@ -118,7 +121,7 @@ func LoadFingers(t string) *FingerMapper {
 		}
 
 	}
-	return &fingermap
+	return fingermap
 }
 
 func LoadHashFinger() (map[string]string, map[string]string) {

@@ -22,7 +22,7 @@ type Result struct {
 	Language   string         `json:"l"` // language
 	Frameworks Frameworks     `json:"f"` // framework
 	Vulns      Vulns          `json:"v"`
-	Extractors Extracts       `json:"-"`
+	Extracts   *Extracts      `json:"-"`
 	Protocol   string         `json:"r"` // protocol
 	Hash       string         `json:"hs"`
 	Open       bool           `json:"-"`
@@ -40,7 +40,9 @@ func NewResult(ip, port string) *Result {
 		Port:     port,
 		Protocol: "tcp",
 		HttpStat: "tcp",
+		Extracts: &Extracts{},
 	}
+	result.Extracts.Target = result.GetTarget()
 	return &result
 }
 func (result *Result) InfoFilter() {
@@ -77,9 +79,8 @@ func (result *Result) AddFrameworks(f []*Framework) {
 	result.Frameworks = append(result.Frameworks, f...)
 }
 
-func (result *Result) AddExtract(extractor *Extract) {
-	extractor.Target = result.GetTarget()
-	result.Extractors = append(result.Extractors, extractor)
+func (result *Result) AddExtract(extract *Extract) {
+	result.Extracts.Extracts = append(result.Extracts.Extracts, extract)
 }
 
 func (result Result) NoFramework() bool {
@@ -325,7 +326,6 @@ func (fs Frameworks) GetTitles() []string {
 }
 
 type Extract struct {
-	Target        string   `json:"target"`
 	Name          string   `json:"name"`
 	ExtractResult []string `json:"extract_result"`
 }
@@ -356,19 +356,22 @@ func NewExtract(name string, extractResult interface{}) *Extract {
 	return e
 }
 
-type Extracts []*Extract
+type Extracts struct {
+	Target   string     `json:"target"`
+	Extracts []*Extract `json:"extracts"`
+}
 
 func (e *Extracts) ToResult() string {
 	s, err := json.Marshal(e)
 	if err != nil {
 		return err.Error()
 	}
-	return string(s) + "\n"
+	return string(s)
 }
 
 func (es Extracts) ToString() string {
 	var s string
-	for _, e := range es {
+	for _, e := range es.Extracts {
 		s += fmt.Sprintf("[ Extract: %s ] ", e.ToString())
 	}
 	return s

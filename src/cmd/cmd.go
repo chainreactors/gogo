@@ -150,7 +150,7 @@ func CMD() {
 		if config.PingFilename != "" {
 			filenamelog += "Pingscan result filename: " + config.PingFilename
 		}
-		if IsExist(config.Filename + "_extractor") {
+		if IsExist(config.Filename + "_extract") {
 			filenamelog += "extractor result filename: " + config.Filename + "_extractor"
 		}
 		ConsoleLog(filenamelog)

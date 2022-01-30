@@ -203,17 +203,34 @@ func autofixjson(content []byte) []byte {
 	return content
 }
 
-func LoadResult(content []byte) (ResultsData, error) {
+func LoadResult(content []byte) (*ResultsData, error) {
 	// 自动修复未完成任务的json
 	var err error
 
-	var resultsdata ResultsData
+	var resultsdata *ResultsData
 	err = json.Unmarshal(content, &resultsdata)
 	if err != nil {
-		return resultsdata, err
-		//os.Exit(0)
+		return nil, err
 	}
 	return resultsdata, nil
+}
+
+type extractTmp struct {
+	extracts Extracts
+}
+
+func LoadExtracts(content []byte) ([]Extracts, error) {
+	var err error
+	var extractss []Extracts
+	var extracts Extracts
+	for _, res := range bytes.Split(content, []byte{'\n'}) {
+		err = json.Unmarshal(res, &extracts)
+		if err != nil {
+			return nil, err
+		}
+		extractss = append(extractss, extracts)
+	}
+	return extractss, nil
 }
 
 type SmartData struct {
@@ -222,12 +239,12 @@ type SmartData struct {
 	IP     string   `json:"ip"`
 }
 
-func loadSmartResult(content []byte) (SmartData, error) {
+func loadSmartResult(content []byte) (*SmartData, error) {
 	var err error
-	var smartdata SmartData
+	var smartdata *SmartData
 	err = json.Unmarshal(content, &smartdata)
 	if err != nil {
-		return smartdata, err
+		return nil, err
 	}
 	return smartdata, nil
 }
@@ -255,6 +272,8 @@ func LoadResultFile(file *os.File) interface{} {
 	} else if bytes.Contains(content, []byte("\"scan\",")) {
 		content = autofixjson(content)
 		data, err = LoadResult(content)
+	} else if bytes.Contains(content, []byte("\"extract_result")) {
+		data, err = LoadExtracts(content)
 	} else {
 		var results Results
 		for _, target := range strings.Split(string(content), "\n") {
@@ -262,6 +281,7 @@ func LoadResultFile(file *os.File) interface{} {
 				targetpair := strings.Split(target, ":")
 				results = append(results, NewResult(targetpair[0], targetpair[1]))
 			} else {
+				fmt.Printf("[-] format target: %s error\n\n", target)
 				return content
 			}
 		}

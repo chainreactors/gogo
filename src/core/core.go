@@ -61,8 +61,8 @@ func defaultScan(tc targetConfig) {
 		}
 		if Opt.file != nil {
 			Opt.DataCh <- output(result, Opt.FileOutput)
-			if result.Extractors != nil {
-				Opt.ExtractorCh <- result.Extractors.ToResult()
+			if result.Extracts.Extracts != nil {
+				Opt.ExtractCh <- result.Extracts.ToResult()
 			}
 		}
 	} else if Opt.Debug {
