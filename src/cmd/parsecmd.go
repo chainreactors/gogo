@@ -6,6 +6,7 @@ import (
 	. "getitle/src/scan"
 	. "getitle/src/utils"
 	"regexp"
+	"strings"
 )
 
 func parseVersion(version, version2 bool) {
@@ -57,7 +58,13 @@ func printConfigs(t string) {
 	}
 }
 
-func parseExtractors(extracts arrayFlags) {
+func parseExtractors(extracts arrayFlags, extractStr string) {
+	if extractStr != "" {
+		exts := strings.Split(extractStr, ",")
+		for _, ext := range exts {
+			Extractors[ext] = PresetExtracts[ext]
+		}
+	}
 	for _, extract := range extracts {
 		if reg, ok := PresetExtracts[extract]; ok {
 			Extractors[extract] = reg
