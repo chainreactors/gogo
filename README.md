@@ -61,6 +61,8 @@ Usage of ./getitle:
       -np bool     关闭自动上传扫描结果到云服务器
       -suffix string 指定特定的url
       -payload 用来自定义替换nuclei poc中的参数, 需要nuclei poc预定义占位符
+      -extract 自定义需要提取的内存, 输入正则表达式, 支持一些常见的预设
+      -extracts 逗号分割的多个extractor预设
    ```
 
 ## QuickStart
