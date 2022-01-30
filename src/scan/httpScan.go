@@ -113,7 +113,7 @@ func SystemHttp(target string, result *utils.Result) {
 	result.Error = ""
 	result.Protocol = resp.Request.URL.Scheme
 	result.HttpStat = structutils.ToString(resp.StatusCode)
-	result.Content = string(utils.GetBody(resp))
+	result.Content = utils.GetHttpRaw(resp)
 	result.Httpresp = resp
 
 	return
