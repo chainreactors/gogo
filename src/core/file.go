@@ -117,7 +117,7 @@ func handler() {
 			for res := range Opt.ExtractorCh {
 				if Opt.extractorFile == nil {
 					var err error
-					Opt.extractorFile, err = NewFile(Opt.file.Filename+"_extractor", false)
+					Opt.extractorFile, err = NewFile(Opt.file.Filename+"_extractor", Opt.Compress)
 					if err != nil {
 						ConsoleLog("[warn] cannot create extractor result file")
 					}
