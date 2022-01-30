@@ -59,7 +59,11 @@ func printConfigs(t string) {
 
 func parseExtractors(extracts arrayFlags) {
 	for _, extract := range extracts {
-		Extracts[extract] = CompileRegexp(extract)
+		if reg, ok := PresetExtracts[extract]; ok {
+			Extracts[extract] = reg
+		} else {
+			Extracts[extract] = CompileRegexp(extract)
+		}
 	}
 }
 
@@ -69,12 +73,12 @@ func nucleiLoader(pocfile string, payloads arrayFlags) {
 }
 
 func configloader() {
-	Compiled = make(map[string][]regexp.Regexp)
+	Compiled = make(map[string][]*regexp.Regexp)
 	Mmh3Fingers, Md5Fingers = LoadHashFinger()
 	TcpFingers = LoadFingers("tcp")
 	HttpFingers = LoadFingers("http")
 	TagMap, NameMap, PortMap = LoadPortConfig()
-	CommonCompiled = map[string]regexp.Regexp{
+	CommonCompiled = map[string]*regexp.Regexp{
 		"title":     CompileRegexp("(?Uis)<title>(.*)</title>"),
 		"server":    CompileRegexp("(?i)Server: ([\x20-\x7e]+)"),
 		"xpb":       CompileRegexp("(?i)X-Powered-By: ([\x20-\x7e]+)"),

@@ -70,7 +70,7 @@ func Match(regexpstr string, s string) (string, bool) {
 	return "", false
 }
 
-func CompiledMatch(reg regexp.Regexp, s string) (string, bool) {
+func CompiledMatch(reg *regexp.Regexp, s string) (string, bool) {
 	matched := reg.FindStringSubmatch(s)
 	if matched == nil {
 		return "", false
@@ -82,7 +82,7 @@ func CompiledMatch(reg regexp.Regexp, s string) (string, bool) {
 	}
 }
 
-func CompiledAllMatch(reg regexp.Regexp, s string) ([]string, bool) {
+func CompiledAllMatch(reg *regexp.Regexp, s string) ([]string, bool) {
 	matchedes := reg.FindAllString(s, -1)
 	if matchedes == nil {
 		return nil, false
@@ -100,13 +100,13 @@ func GetHeaderstr(resp *http.Response) string {
 	return headerstr
 }
 
-func CompileRegexp(s string) regexp.Regexp {
+func CompileRegexp(s string) *regexp.Regexp {
 	reg, err := regexp.Compile(s)
 	if err != nil {
 		fmt.Println("[-] regexp string error: " + s + " , " + err.Error())
 		os.Exit(0)
 	}
-	return *reg
+	return reg
 }
 
 func Md5Hash(raw []byte) string {
