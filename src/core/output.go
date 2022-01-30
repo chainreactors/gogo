@@ -141,7 +141,7 @@ func FormatOutput(filename string, outputfile string, autofile bool, filters []s
 			s += fmt.Sprintf("[+] %s\n", extracts.Target)
 			for _, extract := range extracts.Extracts {
 				s += fmt.Sprintf(" \t * %s \n\t\t", extract.Name)
-				s += strings.Join(extract.ExtractResult, "\n\t\t")
+				s += strings.Join(extract.ExtractResult, "\n\t\t") + "\n"
 			}
 			fmt.Println(s)
 		}
