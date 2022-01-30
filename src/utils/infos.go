@@ -11,7 +11,7 @@ func getTitle(content string) string {
 	if content == "" {
 		return ""
 	}
-	title, ok := CompileMatch(CommonCompiled["title"], content)
+	title, ok := CompiledMatch(CommonCompiled["title"], content)
 	if ok {
 		return title
 	} else if len(content) > 13 {
@@ -24,7 +24,7 @@ func getTitle(content string) string {
 func getMidware(resp *http.Response, content string) string {
 	var server string
 	if resp == nil {
-		server, _ = CompileMatch(CommonCompiled["server"], content)
+		server, _ = CompiledMatch(CommonCompiled["server"], content)
 	} else {
 		server = resp.Header.Get("Server")
 	}
@@ -35,12 +35,12 @@ func getMidware(resp *http.Response, content string) string {
 func getLanguage(resp *http.Response, content string) string {
 	var powered string
 	if resp == nil {
-		powered, ok := CompileMatch(CommonCompiled["xpb"], content)
+		powered, ok := CompiledMatch(CommonCompiled["xpb"], content)
 		if ok {
 			return powered
 		}
 
-		sessionid, ok := CompileMatch(CommonCompiled["sessionid"], content)
+		sessionid, ok := CompiledMatch(CommonCompiled["sessionid"], content)
 		if ok {
 			switch sessionid {
 			case "JSESSIONID":

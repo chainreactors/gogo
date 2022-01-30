@@ -70,14 +70,24 @@ func Match(regexpstr string, s string) (string, bool) {
 	return "", false
 }
 
-func CompileMatch(reg regexp.Regexp, s string) (string, bool) {
-	res := reg.FindStringSubmatch(s)
-	if len(res) == 1 {
-		return "", true
-	} else if len(res) == 2 {
-		return strings.TrimSpace(res[1]), true
+func CompiledMatch(reg regexp.Regexp, s string) (string, bool) {
+	matched := reg.FindStringSubmatch(s)
+	if matched == nil {
+		return "", false
 	}
-	return "", false
+	if len(matched) == 1 {
+		return "", true
+	} else {
+		return strings.TrimSpace(matched[1]), true
+	}
+}
+
+func CompiledAllMatch(reg regexp.Regexp, s string) ([]string, bool) {
+	matchedes := reg.FindAllString(s, -1)
+	if matchedes == nil {
+		return nil, false
+	}
+	return matchedes, true
 }
 
 func GetHeaderstr(resp *http.Response) string {
@@ -93,7 +103,7 @@ func GetHeaderstr(resp *http.Response) string {
 func CompileRegexp(s string) regexp.Regexp {
 	reg, err := regexp.Compile(s)
 	if err != nil {
-		fmt.Println("[-] regexp string error: " + s)
+		fmt.Println("[-] regexp string error: " + s + " , " + err.Error())
 		os.Exit(0)
 	}
 	return *reg

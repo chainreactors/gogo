@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"regexp"
 	"strings"
 	"time"
 
@@ -26,8 +25,7 @@ func CMD() {
 		inforev()
 	}
 	var config Config
-	var filters arrayFlags
-	var payloads arrayFlags
+	var filters, payloads, extractors arrayFlags
 	//默认参数信息
 	// INPUT
 	flag.StringVar(&config.IP, "ip", "", "")
@@ -66,6 +64,7 @@ func CMD() {
 	flag.IntVar(&RunOpt.HttpsDelay, "D", 2, "")
 	flag.StringVar(&RunOpt.Payloadstr, "suffix", "", "")
 	flag.Var(&payloads, "payload", "")
+	flag.Var(&extractors, "extract", "")
 	version := flag.Bool("v", false, "")
 	version2 := flag.Bool("vv", false, "")
 	exploit := flag.Bool("e", false, "")
@@ -120,6 +119,7 @@ func CMD() {
 	parseVersion(*version, *version2)
 	parseExploit(*exploit, *exploitConfig)
 	parseFilename(*autofile, *hiddenfile, &config)
+	parseExtractors(extractors)
 
 	starttime := time.Now()
 	// 初始化任务
@@ -160,40 +160,6 @@ func CMD() {
 	if connected && !*noup && config.Filename != "" { // 如果出网则自动上传结果到云服务器
 		uploadfiles([]string{config.Filename, config.SmartFilename})
 	}
-}
-
-func printConfigs(t string) {
-	if t == "port" {
-		TagMap, NameMap, PortMap = LoadPortConfig()
-		Printportconfig()
-	} else if t == "nuclei" {
-		LoadNuclei("")
-		PrintNucleiPoc()
-	} else if t == "inter" {
-		PrintInterConfig()
-	} else {
-		fmt.Println("choice port|nuclei|inter")
-	}
-}
-
-func nucleiLoader(pocfile string, payloads arrayFlags) {
-	ExecuterOptions = ParserCmdPayload(payloads)
-	TemplateMap = LoadNuclei(pocfile)
-}
-
-func configloader() {
-	Compiled = make(map[string][]regexp.Regexp)
-	Mmh3Fingers, Md5Fingers = LoadHashFinger()
-	TcpFingers = LoadFingers("tcp")
-	HttpFingers = LoadFingers("http")
-	TagMap, NameMap, PortMap = LoadPortConfig()
-	CommonCompiled = map[string]regexp.Regexp{
-		"title":     CompileRegexp("(?Uis)<title>(.*)</title>"),
-		"server":    CompileRegexp("(?i)Server: ([\x20-\x7e]+)"),
-		"xpb":       CompileRegexp("(?i)X-Powered-By: ([\x20-\x7e]+)"),
-		"sessionid": CompileRegexp("(?i) (.*SESS.*?ID)"),
-	}
-
 }
 
 type Value interface {

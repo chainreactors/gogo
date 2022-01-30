@@ -125,7 +125,7 @@ func handlerMatchedResult(result *utils.Result, finger *utils.Finger, res, conte
 func fingerMatcher(result *utils.Result, finger *utils.Finger, content string) (*utils.Framework, bool) {
 	// 漏洞匹配优先
 	for _, reg := range utils.Compiled[finger.Name+"_vuln"] {
-		res, ok := utils.CompileMatch(reg, content)
+		res, ok := utils.CompiledMatch(reg, content)
 		if ok {
 			if finger.Info != "" {
 				result.AddVuln(&utils.Vuln{Name: finger.Info, Severity: "info"})
@@ -146,7 +146,7 @@ func fingerMatcher(result *utils.Result, finger *utils.Finger, content string) (
 
 	// 正则匹配
 	for _, reg := range utils.Compiled[finger.Name] {
-		res, ok := utils.CompileMatch(reg, content)
+		res, ok := utils.CompiledMatch(reg, content)
 		if ok {
 
 			return handlerMatchedResult(result, finger, res, content), true

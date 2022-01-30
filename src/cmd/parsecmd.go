@@ -1,9 +1,11 @@
 package cmd
 
 import (
+	"fmt"
 	. "getitle/src/core"
 	. "getitle/src/scan"
-	"getitle/src/utils"
+	. "getitle/src/utils"
+	"regexp"
 )
 
 func parseVersion(version, version2 bool) {
@@ -28,7 +30,7 @@ func parseExploit(exploit bool, exploitConfig string) {
 	}
 }
 
-func parseFilename(autofile, hiddenfile bool, config *utils.Config) {
+func parseFilename(autofile, hiddenfile bool, config *Config) {
 	if config.Filename == "" {
 		config.Filename = GetFilename(*config, autofile, hiddenfile, Opt.FileOutput)
 	}
@@ -38,5 +40,44 @@ func parseFilename(autofile, hiddenfile bool, config *utils.Config) {
 
 	if config.Ping {
 		config.PingFilename = GetFilename(*config, autofile, hiddenfile, "ping")
+	}
+}
+
+func printConfigs(t string) {
+	if t == "port" {
+		TagMap, NameMap, PortMap = LoadPortConfig()
+		Printportconfig()
+	} else if t == "nuclei" {
+		LoadNuclei("")
+		PrintNucleiPoc()
+	} else if t == "inter" {
+		PrintInterConfig()
+	} else {
+		fmt.Println("choice port|nuclei|inter")
+	}
+}
+
+func parseExtractors(extracts arrayFlags) {
+	for _, extract := range extracts {
+		Extracts[extract] = CompileRegexp(extract)
+	}
+}
+
+func nucleiLoader(pocfile string, payloads arrayFlags) {
+	ExecuterOptions = ParserCmdPayload(payloads)
+	TemplateMap = LoadNuclei(pocfile)
+}
+
+func configloader() {
+	Compiled = make(map[string][]regexp.Regexp)
+	Mmh3Fingers, Md5Fingers = LoadHashFinger()
+	TcpFingers = LoadFingers("tcp")
+	HttpFingers = LoadFingers("http")
+	TagMap, NameMap, PortMap = LoadPortConfig()
+	CommonCompiled = map[string]regexp.Regexp{
+		"title":     CompileRegexp("(?Uis)<title>(.*)</title>"),
+		"server":    CompileRegexp("(?i)Server: ([\x20-\x7e]+)"),
+		"xpb":       CompileRegexp("(?i)X-Powered-By: ([\x20-\x7e]+)"),
+		"sessionid": CompileRegexp("(?i) (.*SESS.*?ID)"),
 	}
 }

@@ -48,6 +48,12 @@ func (result *Result) InfoFilter() {
 	result.Title = getTitle(result.Content)
 	if result.Content != "" {
 		result.Hash = Md5Hash([]byte(result.Content))[:4]
+		for name, extract := range Extracts {
+			extractStr, ok := CompiledAllMatch(extract, result.Content)
+			if ok && extractStr != nil {
+				result.AddExtractor(&Extractor{Name: name, ExtractResult: extractStr})
+			}
+		}
 	}
 	if result.IsHttp() {
 		result.Language = getLanguage(result.Httpresp, result.Content)
@@ -325,13 +331,14 @@ type Extractor struct {
 }
 
 func (e *Extractor) ToString() string {
-	if len(e.ExtractResult) > 0 {
+	if len(e.ExtractResult) == 1 {
 		if len(e.ExtractResult[0]) > 30 {
 			return fmt.Sprintf("%s:%s ... %dbytes", e.Name, e.ExtractResult[0][:30], len(e.ExtractResult[0]))
 		}
 		return fmt.Sprintf("%s:%s", e.Name, e.ExtractResult[0])
+	} else {
+		return fmt.Sprintf("%s:%d objects", e.Name, len(e.ExtractResult))
 	}
-	return ""
 }
 
 func NewExtractor(name string, extractResult interface{}) *Extractor {
