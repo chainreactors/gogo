@@ -110,6 +110,7 @@ func FormatOutput(filename string, outputfile string, autofile bool, filters []s
 		return
 	} else if resultsdata != nil && resultsdata.Data != nil {
 		for _, filter := range filters {
+			// 过滤指定数据
 			if strings.Contains(filter, "::") {
 				kv := strings.Split(filter, "::")
 				resultsdata.Data = resultsdata.Data.Filter(kv[0], kv[1], "::")
