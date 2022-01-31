@@ -5,13 +5,6 @@ import (
 	"getitle/src/utils"
 )
 
-//
-//import (
-//	"main/src/utils"
-//	"io/ioutil"
-//	"strings"
-//)
-//
 func NotFoundScan(result *utils.Result) {
 	conn := utils.HttpConn(2)
 	resp, err := conn.Get(result.GetURL() + utils.RandomDir)
