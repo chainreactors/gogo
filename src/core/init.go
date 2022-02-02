@@ -14,8 +14,8 @@ var Opt = Options{
 	AliveSum:  0,
 	Noscan:    false,
 	Compress:  true,
-	DataCh:    make(chan string, 100),
-	ExtractCh: make(chan string, 100),
+	dataCh:    make(chan string, 100),
+	extractCh: make(chan string, 100),
 }
 
 func InitConfig(config Config) Config {
@@ -90,9 +90,9 @@ func InitConfig(config Config) Config {
 	// 如果指定端口超过100,则自动启用spray
 	if len(config.Portlist) > 150 && !config.NoSpray {
 		if config.IPlist == nil && getMask(config.IP) == 32 {
-			config.Spray = false
+			config.PortSpray = false
 		} else {
-			config.Spray = true
+			config.PortSpray = true
 		}
 	}
 
@@ -155,14 +155,14 @@ func validate(config Config) error {
 		err = errors.New("cannot set -j and -l flags at same time")
 	}
 
-	if !HasPingPriv() && (strings.Contains(config.Ports, "icmp") || strings.Contains(config.Ports, "ping")) {
+	if !HasPingPriv() && (strings.Contains(config.Ports, "icmp") || strings.Contains(config.Ports, "ping") || SliceContains(config.AliveSprayMod, "icmp")) {
 		Log.Warn("current user is not root, icmp scan not work")
 	}
 
-	if !Win && Root && strings.Contains(config.Ports, "arp") {
+	if !Win && Root && (strings.Contains(config.Ports, "arp") || SliceContains(config.AliveSprayMod, "arp")) {
 		Log.Warn("current user is not root, arp scan maybe not work")
 	}
-	if Win && strings.Contains(config.Ports, "arp") {
+	if Win && (strings.Contains(config.Ports, "arp") || SliceContains(config.AliveSprayMod, "arp")) {
 		Log.Warn("windows not support arp scan, skip all arp scan task")
 	}
 	return err
@@ -171,7 +171,7 @@ func validate(config Config) error {
 func printTaskInfo(config Config, taskname string) {
 	// 输出任务的基本信息
 
-	Log.Logging(fmt.Sprintf("[*] Current goroutines: %d, Version Level: %d,Exploit Target: %s, Spray Scan: %t", config.Threads, RunOpt.VersionLevel, RunOpt.Exploit, config.Spray))
+	Log.Logging(fmt.Sprintf("[*] Current goroutines: %d, Version Level: %d,Exploit Target: %s, PortSpray Scan: %t", config.Threads, RunOpt.VersionLevel, RunOpt.Exploit, config.PortSpray))
 	if config.JsonFile == "" {
 		Log.Logging(fmt.Sprintf("[*] Starting task %s ,total ports: %d , mod: %s", taskname, len(config.Portlist), config.Mod))
 		// 输出端口信息
@@ -206,10 +206,8 @@ func RunTask(config Config) {
 	}
 }
 
-func guessTime(targets interface{}, portlist []string, thread int) int {
+func guessTime(targets interface{}, portcount, thread int) int {
 	ipcount := 0
-
-	portcount := len(portlist)
 
 	switch targets.(type) {
 	case []string:
@@ -290,11 +288,11 @@ func createDefaultScan(config Config) {
 	if config.Results != nil {
 		DefaultMod(config.Results, config)
 	} else {
-		if config.Ping {
+		if config.HasAlivedScan() {
 			if config.IPlist != nil {
-				PingMod(config.IPlist, config)
+				AliveMod(config.IPlist, config)
 			} else if config.IP != "" {
-				PingMod(config.IP, config)
+				AliveMod(config.IP, config)
 			}
 		} else {
 			if config.IPlist != nil {

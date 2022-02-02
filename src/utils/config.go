@@ -26,8 +26,8 @@ type Config struct {
 	Filename      string        `json:"-"`
 	SmartFilename string        `json:"-"`
 	PingFilename  string        `json:"-"`
-	Spray         bool          `json:"spray"`
-	Ping          bool          `json:"ping"`
+	PortSpray     bool          `json:"port_spray"`
+	AliveSprayMod []string      `json:"alive_spray"`
 	NoSpray       bool          `json:"-"`
 	Exploit       string        `json:"exploit"`
 	JsonType      string        `json:"json_type"`
@@ -36,42 +36,49 @@ type Config struct {
 	IsJsonInput   bool          `json:"-"`
 }
 
-func (config Config) IsScan() bool {
+func (config *Config) IsScan() bool {
 	if config.IP != "" || config.ListFile != "" || config.JsonFile != "" || config.Mod == "a" {
 		return true
 	}
 	return false
 }
 
-func (config Config) IsSmart() bool {
+func (config *Config) IsSmart() bool {
 	if structutils.SliceContains([]string{"ss", "s", "sc"}, config.Mod) {
 		return true
 	}
 	return false
 }
 
-func (config Config) IsSmartScan() bool {
+func (config *Config) IsSmartScan() bool {
 	if structutils.SliceContains([]string{"ss", "s"}, config.Mod) {
 		return true
 	}
 	return false
 }
 
-func (config Config) IsASmart() bool {
+func (config *Config) IsASmart() bool {
 	if structutils.SliceContains([]string{"ss", "sc"}, config.Mod) {
 		return true
 	}
 	return false
 }
 
-func (config Config) IsBSmart() bool {
+func (config *Config) IsBSmart() bool {
 	if structutils.SliceContains([]string{"s", "sb"}, config.Mod) {
 		return true
 	}
 	return false
 }
 
-func (config Config) GetTarget() string {
+func (config *Config) HasAlivedScan() bool {
+	if len(config.AliveSprayMod) > 0 {
+		return true
+	}
+	return false
+}
+
+func (config *Config) GetTarget() string {
 	if config.IP != "" {
 		return config.IP
 	} else if config.ListFile != "" {
@@ -83,7 +90,7 @@ func (config Config) GetTarget() string {
 	}
 }
 
-func (config Config) GetTargetName() string {
+func (config *Config) GetTargetName() string {
 	var target string
 	if config.ListFile != "" {
 		target = config.ListFile
@@ -97,7 +104,7 @@ func (config Config) GetTargetName() string {
 	return target
 }
 
-func (config Config) ToJson(json_type string) string {
+func (config *Config) ToJson(json_type string) string {
 	config.JsonType = json_type
 	s, err := json.Marshal(config)
 	if err != nil {

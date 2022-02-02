@@ -31,7 +31,7 @@ func Dispatch(result *utils.Result) {
 	} else if result.Port == "oxid" {
 		oxidScan(result)
 		return
-	} else if result.Port == "icmp" {
+	} else if result.Port == "icmp" || result.Port == "ping" {
 		icmpScan(result)
 		return
 	} else if result.Port == "arp" && !utils.Win {

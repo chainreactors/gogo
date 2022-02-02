@@ -130,7 +130,7 @@ func isnotAlive(ip string, temp *sync.Map) bool {
 func NewTargetGenerator(config Config) *targetGenerator {
 	gen := targetGenerator{
 		ip_generator: NewIpGenerator(config),
-		spray:        config.Spray,
+		spray:        config.PortSpray,
 	}
 	return &gen
 }

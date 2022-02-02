@@ -20,15 +20,17 @@ func NewRunner() *Runner {
 }
 
 type Runner struct {
-	Version      bool   // version level1
-	Version2     bool   // version level2
-	Exploit      bool   // 启用漏洞扫描
-	NoUpload     bool   // 关闭文件回传
-	Compress     bool   // 启用压缩
-	Clean        bool   // 是否开启命令行输出扫描结果
-	Quiet        bool   // 是否开启命令行输出日志
-	AutoFile     bool   // 自动生成格式化文件名
-	HiddenFile   bool   // 启用自动隐藏文件
+	Version      bool // version level1
+	Version2     bool // version level2
+	Exploit      bool // 启用漏洞扫描
+	NoUpload     bool // 关闭文件回传
+	Compress     bool // 启用压缩
+	Clean        bool // 是否开启命令行输出扫描结果
+	Quiet        bool // 是否开启命令行输出日志
+	AutoFile     bool // 自动生成格式化文件名
+	HiddenFile   bool // 启用自动隐藏文件
+	Ping         bool
+	Arp          bool
 	FormatOutput string // 待格式化文件名
 	filters      arrayFlags
 	payloads     arrayFlags
@@ -94,6 +96,13 @@ func (r *Runner) init() {
 		Log.Clean = !Log.Clean
 	}
 
+	if r.Arp {
+		r.config.AliveSprayMod = append(r.config.AliveSprayMod, "arp")
+	}
+	if r.Ping {
+		r.config.AliveSprayMod = append(r.config.AliveSprayMod, "icmp")
+	}
+
 	if !Win {
 		if r.iface == "eth0" {
 			Log.Warn("no interface name input, use default interface name: eth0")
@@ -117,8 +126,8 @@ func (r *Runner) init() {
 		r.config.SmartFilename = GetFilename(r.config, r.AutoFile, r.HiddenFile, "cidr")
 	}
 
-	if r.config.Ping {
-		r.config.PingFilename = GetFilename(r.config, r.AutoFile, r.HiddenFile, "ping")
+	if r.config.HasAlivedScan() {
+		r.config.PingFilename = GetFilename(r.config, r.AutoFile, r.HiddenFile, "alived")
 	}
 
 	if r.extracts != "" {

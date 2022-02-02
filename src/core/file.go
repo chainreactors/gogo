@@ -60,11 +60,11 @@ func initFile(config Config) error {
 	}
 
 	if config.PingFilename != "" {
-		Opt.pingFile, err = NewFile(config.PingFilename, Opt.Compress)
+		Opt.aliveFile, err = NewFile(config.PingFilename, Opt.Compress)
 		if err != nil {
 			return err
 		}
-		Opt.pingFile.Write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("ping")))
+		Opt.aliveFile.Write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("ping")))
 	}
 
 	handler()
@@ -90,7 +90,7 @@ func handler() {
 		go func() {
 			defer fileCloser()
 			var rescommaflag bool
-			for res := range Opt.DataCh {
+			for res := range Opt.dataCh {
 				if rescommaflag {
 					res = "," + res
 				} else if Opt.FileOutput == "json" && !Opt.Noscan {
@@ -102,7 +102,7 @@ func handler() {
 		}()
 
 		go func() {
-			for res := range Opt.ExtractCh {
+			for res := range Opt.extractCh {
 				if Opt.extractFile == nil {
 					var err error
 					Opt.extractFile, err = NewFile(Opt.file.Filename+"_extract", Opt.Compress)
@@ -131,9 +131,9 @@ func fileCloser() {
 		Opt.smartFile.Close()
 	}
 
-	if Opt.pingFile != nil {
-		Opt.pingFile.Write("]}")
-		Opt.pingFile.Close()
+	if Opt.aliveFile != nil {
+		Opt.aliveFile.Write("]}")
+		Opt.aliveFile.Close()
 	}
 }
 
@@ -161,11 +161,11 @@ func writePingResult(ips []string) {
 	}
 
 	if pingcommaflag {
-		Opt.pingFile.Write(",")
+		Opt.aliveFile.Write(",")
 	} else {
 		pingcommaflag = true
 	}
-	Opt.pingFile.SyncWrite(strings.Join(iplists, ","))
+	Opt.aliveFile.SyncWrite(strings.Join(iplists, ","))
 }
 
 //var winfile = []string{

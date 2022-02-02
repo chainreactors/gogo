@@ -20,9 +20,9 @@ type Options struct {
 	file        *File
 	smartFile   *File
 	extractFile *File
-	pingFile    *File
-	DataCh      chan string
-	ExtractCh   chan string
+	aliveFile   *File
+	dataCh      chan string
+	extractCh   chan string
 	Output      string
 	FileOutput  string
 	FilePath    string
@@ -32,6 +32,6 @@ var Log *Logger
 
 func (opt *Options) Close() {
 	// 关闭管道
-	close(Opt.DataCh)
-	close(Opt.ExtractCh)
+	close(Opt.dataCh)
+	close(Opt.extractCh)
 }
