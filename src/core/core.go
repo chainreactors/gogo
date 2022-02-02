@@ -31,7 +31,7 @@ var portstat = map[int]string{
 //直接扫描
 func DefaultMod(targets interface{}, config Config) {
 	// 输出预估时间
-	progressLogln(fmt.Sprintf("[*] Scan task time is about %d seconds", guessTime(targets, config.Portlist, config.Threads)))
+	Log.Logging(fmt.Sprintf("[*] Scan task time is about %d seconds", guessTime(targets, config.Portlist, config.Threads)))
 	var wgs sync.WaitGroup
 	targetGen := NewTargetGenerator(config)
 	targetCh := targetGen.generator(targets, config.Portlist)
@@ -56,9 +56,8 @@ func defaultScan(tc targetConfig) {
 
 	if result.Open {
 		Opt.AliveSum++
-		if !Opt.Clean {
-			fmt.Print(output(result, Opt.Output))
-		}
+		Log.Default(output(result, Opt.Output))
+
 		if Opt.file != nil {
 			Opt.DataCh <- output(result, Opt.FileOutput)
 			if result.Extracts.Extracts != nil {
@@ -73,10 +72,10 @@ func defaultScan(tc targetConfig) {
 func SmartMod(target string, config Config) {
 	// 输出预估时间
 	spended := guessSmarttime(target, config)
-	progressLogln(fmt.Sprintf("[*] Spraying B class IP: %s, Estimated to take %d seconds", target, spended))
+	Log.Logging(fmt.Sprintf("[*] Spraying B class IP: %s, Estimated to take %d seconds", target, spended))
 
 	// 初始化ip目标
-	progressLogln(fmt.Sprintf("[*] SmartScan %s, Mod: %s", target, config.Mod))
+	Log.Logging(fmt.Sprintf("[*] SmartScan %s, Mod: %s", target, config.Mod))
 	// 初始化mask
 	var mask int
 	switch config.Mod {
@@ -97,7 +96,7 @@ func SmartMod(target string, config Config) {
 	if config.Mod == "ss" {
 		probeconfig += "Smart IP probe: " + config.IpProbe
 	}
-	progressLogln(probeconfig)
+	Log.Logging(probeconfig)
 
 	tcChannel := targetGen.smartGenerator(target, config.SmartPortList, config.Mod)
 
@@ -157,7 +156,7 @@ func cidr_alived(ip string, temp *sync.Map, mask int, mod string) {
 	if !ok {
 		temp.Store(alivecidr, 1)
 		cidr := fmt.Sprintf("%s/%d", ip, mask)
-		ConsoleLog("[*] Found " + cidr)
+		Log.Important("[*] Found " + cidr)
 		Opt.AliveSum++
 		if Opt.file != nil && mod != "sc" && (Opt.Noscan || mod == "sb") {
 			// 只有-no 或 -m sc下,才会将网段信息输出到文件.
@@ -190,12 +189,12 @@ func declineScan(iplist []string, config Config) {
 		}
 	} else {
 		spended := guessSmarttime(iplist[0], config)
-		progressLogln(fmt.Sprintf("[*] Every Sub smartscan task time is about %d seconds, total found %d B Class CIDRs about %d s", spended, len(iplist), spended*len(iplist)))
+		Log.Logging(fmt.Sprintf("[*] Every Sub smartscan task time is about %d seconds, total found %d B Class CIDRs about %d s", spended, len(iplist), spended*len(iplist)))
 
 		for _, ip := range iplist {
 			tmpalive := Opt.AliveSum
 			SmartMod(ip, config)
-			progressLogln(fmt.Sprintf("[*] Found %d alive assets from CIDR %s", Opt.AliveSum-tmpalive, ip))
+			Log.Logging(fmt.Sprintf("[*] Found %d alive assets from CIDR %s", Opt.AliveSum-tmpalive, ip))
 			Opt.file.Sync()
 		}
 	}
@@ -203,7 +202,7 @@ func declineScan(iplist []string, config Config) {
 
 func PingMod(targets interface{}, config Config) {
 	var wgs sync.WaitGroup
-	progressLogln(fmt.Sprintf("[*] Ping spray task time is about %d seconds", guessTime(targets, config.Portlist, guessTime(targets, []string{"icmp"}, config.Threads))))
+	Log.Logging(fmt.Sprintf("[*] Ping spray task time is about %d seconds", guessTime(targets, config.Portlist, guessTime(targets, []string{"icmp"}, config.Threads))))
 	targetGen := NewTargetGenerator(config)
 	alivedmap := targetGen.ip_generator.alivedMap
 	targetCh := targetGen.generator(targets, []string{"icmp"})
@@ -228,10 +227,10 @@ func PingMod(targets interface{}, config Config) {
 	})
 
 	if len(iplist) == 0 {
-		progressLogln(fmt.Sprintf("[*] not found any alived ip"))
+		Log.Logging(fmt.Sprintf("[*] not found any alived ip"))
 		return
 	}
-	progressLogln(fmt.Sprintf("[*] found %d alived ips", len(iplist)))
+	Log.Logging(fmt.Sprintf("[*] found %d alived ips", len(iplist)))
 	if Opt.pingFile != nil {
 		writePingResult(iplist)
 	}

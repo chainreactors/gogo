@@ -36,7 +36,7 @@ func initFile(config Config) error {
 
 	// 初始化res文件handler
 	if config.Filename != "" {
-		Opt.Clean = !Opt.Clean
+		Log.Clean = !Log.Clean
 		// 创建output的filehandle
 		Opt.file, err = NewFile(config.Filename, Opt.Compress)
 		if err != nil {
@@ -78,8 +78,11 @@ func initFile(config Config) error {
 
 	Opt.logFile, err = NewFile(tmpfilename, false)
 	if err != nil {
-		ConsoleLog("[warn] cannot create logfile, err:" + err.Error())
+		Log.Important("[warn] cannot create logfile, err:" + err.Error())
+	} else {
+		Log.Init(Opt.logFile)
 	}
+
 	handler()
 	return nil
 }
@@ -90,10 +93,10 @@ func handler() {
 	// 进度文件
 	if Opt.logFile != nil {
 		go func() {
-			for res := range Opt.LogDataCh {
-				Opt.logFile.SyncWrite(res)
+			for res := range Log.LogCh {
+				Log.LogFile.SyncWrite(res)
 			}
-			Opt.logFile.Close()
+			Log.LogFile.Close()
 			_ = os.Remove(tmpfilename)
 		}()
 	}
@@ -120,7 +123,7 @@ func handler() {
 					var err error
 					Opt.extractFile, err = NewFile(Opt.file.Filename+"_extract", Opt.Compress)
 					if err != nil {
-						ConsoleLog("[warn] cannot create extractor result file, " + err.Error())
+						Log.Warn("cannot create extractor result file, " + err.Error())
 						return
 					}
 				}

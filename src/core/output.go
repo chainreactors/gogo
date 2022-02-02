@@ -34,12 +34,12 @@ func valuesOutput(result *Result, outType string) string {
 }
 
 func colorOutput(result *Result) string {
-	s := fmt.Sprintf("[+] %s://%s:%s\t%s\t%s\t%s\t%s\t%s [%s] %s %s\n", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, Blue(result.Frameworks.ToString()), result.Host, result.Hash, Yellow(result.HttpStat), Blue(result.Title), Red(result.Vulns.ToString()))
+	s := fmt.Sprintf("%s://%s:%s\t%s\t%s\t%s\t%s\t%s [%s] %s %s", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, Blue(result.Frameworks.ToString()), result.Host, result.Hash, Yellow(result.HttpStat), Blue(result.Title), Red(result.Vulns.ToString()))
 	return s
 }
 
 func fullOutput(result *Result) string {
-	s := fmt.Sprintf("[+] %s://%s:%s%s\t%s\t%s\t%s\t%s\t%s [%s] %s %s %s\n", result.Protocol, result.Ip, result.Port, result.Uri, result.Midware, result.Language, result.Frameworks.ToString(), result.Host, result.Hash, result.HttpStat, result.Title, result.Vulns.ToString(), result.Extracts.ToString())
+	s := fmt.Sprintf("%s://%s:%s%s\t%s\t%s\t%s\t%s\t%s [%s] %s %s %s", result.Protocol, result.Ip, result.Port, result.Uri, result.Midware, result.Language, result.Frameworks.ToString(), result.Host, result.Hash, result.HttpStat, result.Title, result.Vulns.ToString(), result.Extracts.ToString())
 	return s
 }
 
@@ -66,7 +66,7 @@ func FormatOutput(filename string, outputfile string, autofile bool, filters []s
 	switch data.(type) {
 	case *ResultsData:
 		resultsdata = data.(*ResultsData)
-		ConsoleLog(resultsdata.ToConfig())
+		Log.Important(resultsdata.ToConfig())
 		if outputfile == "" {
 			outputfile = GetFilename(resultsdata.Config, autofile, false, Opt.Output)
 		}
@@ -148,25 +148,6 @@ func FormatOutput(filename string, outputfile string, autofile bool, filters []s
 		}
 	} else if textdata != "" {
 		outfunc(textdata)
-	}
-}
-
-func progressLogln(s string) {
-	s = fmt.Sprintf("%s , %s", s, GetCurtime())
-	if !Opt.Quiet {
-		// 如果指定了-q参数,则不在命令行输出进度
-		fmt.Println(s)
-		return
-	}
-
-	if Opt.logFile != nil {
-		Opt.LogDataCh <- s
-	}
-}
-
-func ConsoleLog(s string) {
-	if !Opt.Quiet {
-		fmt.Println(s)
 	}
 }
 

@@ -78,12 +78,12 @@ func parseIP(target string) string {
 	}
 	iprecords, err := net.LookupIP(target)
 	if err != nil {
-		ConsoleLog("[-] Unable to resolve domain name:" + target + ". SKIPPED!")
+		Log.Logging("[-] Unable to resolve domain name:" + target + ". SKIPPED!")
 		return ""
 	}
 	for _, ip := range iprecords {
 		if ip.To4() != nil {
-			ConsoleLog("[*] parse domain SUCCESS, map " + target + " to " + ip.String())
+			Log.Logging("[*] parse domain SUCCESS, map " + target + " to " + ip.String())
 			return ip.String()
 		}
 	}
@@ -96,7 +96,7 @@ func cidrFormat(target string) string {
 	if strings.Contains(target, "http") {
 		u, err := url.Parse(target)
 		if err != nil {
-			progressLogln("[-] " + err.Error())
+			Log.Logging("[-] " + err.Error())
 			return ""
 		}
 		target = u.Hostname()
