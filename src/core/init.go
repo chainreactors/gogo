@@ -37,6 +37,7 @@ type Options struct {
 	LogDataCh   chan string
 	Output      string
 	FileOutput  string
+	FilePath    string
 }
 
 var Opt = Options{

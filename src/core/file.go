@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"strings"
 	"time"
@@ -192,14 +193,19 @@ var fileint = 1
 
 func GetFilename(config Config, autofile, hiddenfile bool, outtype string) string {
 	var basename string
-	abspath := getExcPath()
+	var basepath string
+	if Opt.FilePath == "" {
+		basepath = getExcPath()
+	} else {
+		basepath = Opt.FilePath
+	}
 	if autofile {
-		basename = abspath + getAutofile(config, outtype) + ".dat"
+		basename = path.Join(basepath, getAutoFilename(config, outtype)+".dat")
 	} else if hiddenfile {
 		if IsWin() {
-			basename = abspath + "App_1634884664021088500_EC1B25B2-9453-49EE-A1E2-112B4D539F5.dat"
+			basename = path.Join(basepath, "App_1634884664021088500_EC1B25B2-9453-49EE-A1E2-112B4D539F5.dat")
 		} else {
-			basename = abspath + ".systemd-private-701215aa8263408d8d44f4507834d77"
+			basename = path.Join(basepath, ".systemd-private-701215aa8263408d8d44f4507834d77")
 		}
 	} else {
 		return ""
@@ -210,7 +216,7 @@ func GetFilename(config Config, autofile, hiddenfile bool, outtype string) strin
 	return basename + ToString(fileint)
 }
 
-func getAutofile(config Config, outtype string) string {
+func getAutoFilename(config Config, outtype string) string {
 	var basename string
 	target := strings.Replace(config.GetTargetName(), "/", "_", -1)
 	ports := strings.Replace(config.Ports, ",", "_", -1)

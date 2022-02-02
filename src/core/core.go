@@ -66,7 +66,7 @@ func defaultScan(tc targetConfig) {
 			}
 		}
 	} else if Opt.Debug {
-		fmt.Println("[debug] tcp stat: %d, errmsg: %s", portstat[result.ErrStat], result.Error)
+		fmt.Printf("[debug] tcp stat: %s, errmsg: %s\n", portstat[result.ErrStat], result.Error)
 	}
 }
 
@@ -175,7 +175,7 @@ func smartScan(tc targetConfig, temp *sync.Map, mask int, mod string) {
 	if result.Open {
 		cidr_alived(result.Ip, temp, mask, mod)
 	} else if Opt.Debug {
-		fmt.Println("[debug] tcp stat: %d, errmsg: %s", portstat[result.ErrStat], result.Error)
+		fmt.Printf("[debug] tcp stat: %s, errmsg: %s\n", portstat[result.ErrStat], result.Error)
 	}
 }
 

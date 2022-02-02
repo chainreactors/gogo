@@ -43,6 +43,7 @@ func CMD() {
 
 	// OUTPUT
 	flag.StringVar(&config.Filename, "f", "", "")
+	flag.StringVar(&Opt.FilePath, "path", "", "")
 	flag.StringVar(&config.ExcludeIPs, "eip", "", "")
 	flag.StringVar(&Opt.Output, "o", "full", "")
 	flag.BoolVar(&Opt.Clean, "c", false, "")
