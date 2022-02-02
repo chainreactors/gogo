@@ -14,6 +14,16 @@ Usage of ./getitle:
       -ip string   IP地址, 支持逗号分割的输入 like 192.168.1.1/24,172.16.1.1/24
       -eip string  排除指定的ip地址,支持cidr, 支持逗号分割 -eip 192.168.1.1/28,192.168.1.199 
       -p string    ports (default "top1")
+         default 非特殊指定其他端口, 均默认使用这种方式扫描, 使用socket发送GET包
+         nbt  使用netbios收集域,sharing,DC信息
+         oxid 使用wmi协议收集网卡信息
+         smb  使用ntlm协议收集主机名/域信息
+         wmi 使用wmi的ntlm协议收集信息,与smb的协议收集到的内容一致 
+         snmp 使用snmp public收集信息
+         icmp/ping 使用ping判断存活
+         arp TODO
+         winrm 不太常用,暂时删除
+
       -m string    扫描模式：(每次只能选择一个生效)
             default (默认值, 资产扫描),
             s B段启发式扫描,
@@ -35,6 +45,7 @@ Usage of ./getitle:
    OUTPUT params:
       -o string    输出格式:clean,full(default) or json, 以及ip, url, target, zombie, cs 等多种输出格式
       -f string    输出文件名,默认为空
+      -path string 指定输出的目录, -f参数默认为当前目录, -af/hf参数为程序绝对目录
       -af bool	   自动生成文件名,格式为 ".IP_port_number.json"
       -hf bool     自动生成隐藏文件名.
       -C bool      强制关闭输出文件压缩, 变成明文输出
