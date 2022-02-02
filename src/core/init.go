@@ -40,6 +40,8 @@ func InitConfig(config Config) Config {
 				Log.Warn(fmt.Sprintf("System fd limit: %d , Please exec 'ulimit -n 65535'", fdlimit))
 				Log.Warn(fmt.Sprintf("Now set threads to %d", fdlimit-100))
 				config.Threads = fdlimit - 100
+			} else {
+				config.Threads = 4000
 			}
 		}
 
