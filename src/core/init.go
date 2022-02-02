@@ -18,7 +18,7 @@ var Opt = Options{
 	ExtractCh: make(chan string, 100),
 }
 
-func Init(config Config) Config {
+func InitConfig(config Config) Config {
 	err := validate(config)
 	if err != nil {
 		fmt.Println("[-]" + err.Error())

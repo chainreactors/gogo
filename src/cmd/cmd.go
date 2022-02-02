@@ -3,16 +3,12 @@ package cmd
 import (
 	"flag"
 	"fmt"
+	. "getitle/src/core"
+	. "getitle/src/scan"
+	"github.com/panjf2000/ants/v2"
 	"os"
 	"strings"
 	"time"
-
-	. "getitle/src/core"
-	. "getitle/src/scan"
-	. "getitle/src/structutils"
-	. "getitle/src/utils"
-
-	"github.com/panjf2000/ants/v2"
 )
 
 var ver = ""
@@ -25,8 +21,6 @@ func CMD() {
 		inforev()
 	}
 	runner := NewRunner()
-
-	var payloads, extracts arrayFlags
 	//默认参数信息
 	// INPUT
 	flag.StringVar(&runner.config.IP, "ip", "", "")
@@ -50,7 +44,7 @@ func CMD() {
 	flag.BoolVar(&runner.Clean, "c", false, "")
 	flag.StringVar(&Opt.FileOutput, "O", "json", "")
 	flag.BoolVar(&runner.Quiet, "q", false, "")
-	flag.Var(&runner.Filters, "filter", "")
+	flag.Var(&runner.filters, "filter", "")
 	flag.StringVar(&runner.FormatOutput, "F", "", "")
 	flag.BoolVar(&runner.AutoFile, "af", false, "")
 	flag.BoolVar(&runner.HiddenFile, "hf", false, "")
@@ -65,9 +59,9 @@ func CMD() {
 	flag.IntVar(&RunOpt.Delay, "d", 2, "")
 	flag.IntVar(&RunOpt.HttpsDelay, "D", 2, "")
 	flag.StringVar(&RunOpt.Payloadstr, "suffix", "", "")
-	flag.Var(&payloads, "payload", "")
-	flag.Var(&extracts, "extract", "")
-	extractStr := flag.String("extracts", "", "")
+	flag.Var(&runner.payloads, "payload", "")
+	flag.Var(&runner.extract, "extract", "")
+	flag.StringVar(&runner.extracts, "extracts", "", "")
 	flag.BoolVar(&runner.Version, "v", false, "")
 	flag.BoolVar(&runner.Version2, "vv", false, "")
 	flag.BoolVar(&runner.Exploit, "e", false, "")
@@ -94,48 +88,13 @@ func CMD() {
 		os.Exit(0)
 	}
 	runner.init()
-	// 解析命令行中的参数配置
-	parseExtractors(extracts, *extractStr)
 
-	starttime := time.Now()
 	// 初始化任务
-	config := Init(runner.config)
-	RunTask(config) // 运行
+	runner.config = InitConfig(runner.config)
+	RunTask(runner.config) // 运行
 
-	time.Sleep(200 * time.Microsecond)
-
-	if runner.HiddenFile {
-		Chtime(config.Filename)
-		if config.SmartFilename != "" {
-			Chtime(config.SmartFilename)
-		}
-	}
 	time.Sleep(time.Microsecond * 500)
-
-	// 任务统计
-	Log.Important(fmt.Sprintf("Alive sum: %d, Target sum : %d", Opt.AliveSum, RunOpt.Sum))
-	Log.Important("Totally run: " + time.Since(starttime).String())
-
-	var filenamelog string
-	// 输出文件名
-	if config.Filename != "" {
-		filenamelog = fmt.Sprintf("Results filename: %s , ", config.Filename)
-		if config.SmartFilename != "" {
-			filenamelog += "Smartscan result filename: " + config.SmartFilename + " , "
-		}
-		if config.PingFilename != "" {
-			filenamelog += "Pingscan result filename: " + config.PingFilename
-		}
-		if IsExist(config.Filename + "_extract") {
-			filenamelog += "extractor result filename: " + config.Filename + "_extractor"
-		}
-		Log.Important(filenamelog)
-	}
-
-	// 扫描结果文件自动上传
-	if connected && !runner.NoUpload && config.Filename != "" { // 如果出网则自动上传结果到云服务器
-		uploadfiles([]string{config.Filename, config.SmartFilename})
-	}
+	runner.close()
 }
 
 type Value interface {

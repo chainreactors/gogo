@@ -4,10 +4,12 @@ import (
 	"fmt"
 	. "getitle/src/core"
 	. "getitle/src/scan"
+	. "getitle/src/structutils"
 	. "getitle/src/utils"
 	"path"
 	"regexp"
 	"strings"
+	"time"
 )
 
 func NewRunner() *Runner {
@@ -27,13 +29,16 @@ type Runner struct {
 	AutoFile     bool   // 自动生成格式化文件名
 	HiddenFile   bool   // 启用自动隐藏文件
 	FormatOutput string // 待格式化文件名
-	Filters      arrayFlags
-	Payloads     arrayFlags
+	filters      arrayFlags
+	payloads     arrayFlags
+	extract      arrayFlags
+	extracts     string
 	ExploitName  string // 指定漏扫poc名字
 	ExploitFile  string // 指定漏扫文件
 	Printer      string // 输出特定的预设
 	UploadFile   string // 上传特定的文件名
 	Ver          bool   // 输出版本号
+	start        time.Time
 	config       Config
 }
 
@@ -46,7 +51,7 @@ func (r *Runner) preInit() bool {
 		return false
 	}
 	if r.FormatOutput != "" {
-		FormatOutput(r.FormatOutput, r.config.Filename, r.AutoFile, r.Filters)
+		FormatOutput(r.FormatOutput, r.config.Filename, r.AutoFile, r.filters)
 		return false
 	}
 	// 输出 config
@@ -101,11 +106,61 @@ func (r *Runner) init() {
 		r.config.PingFilename = GetFilename(r.config, r.AutoFile, r.HiddenFile, "ping")
 	}
 
+	if r.extracts != "" {
+		exts := strings.Split(r.extracts, ",")
+		for _, extract := range exts {
+			if reg, ok := PresetExtracts[extract]; ok {
+				Extractors[extract] = reg
+			}
+		}
+	}
+	for _, extract := range r.extract {
+		if reg, ok := PresetExtracts[extract]; ok {
+			Extractors[extract] = reg
+		} else {
+			Extractors[extract] = CompileRegexp(extract)
+		}
+	}
+
 	// 加载配置文件中的全局变量
 	configloader()
-	nucleiLoader(r.ExploitFile, r.Payloads)
+	nucleiLoader(r.ExploitFile, r.payloads)
+	r.start = time.Now()
 }
 
+func (r *Runner) close() {
+	if r.HiddenFile {
+		Chtime(r.config.Filename)
+		if r.config.SmartFilename != "" {
+			Chtime(r.config.SmartFilename)
+		}
+	}
+
+	// 任务统计
+	Log.Important(fmt.Sprintf("Alive sum: %d, Target sum : %d", Opt.AliveSum, RunOpt.Sum))
+	Log.Important("Totally run: " + time.Since(r.start).String())
+
+	var filenamelog string
+	// 输出文件名
+	if r.config.Filename != "" {
+		filenamelog = fmt.Sprintf("Results filename: %s , ", r.config.Filename)
+		if r.config.SmartFilename != "" {
+			filenamelog += "Smartscan result filename: " + r.config.SmartFilename + " , "
+		}
+		if r.config.PingFilename != "" {
+			filenamelog += "Pingscan result filename: " + r.config.PingFilename
+		}
+		if IsExist(r.config.Filename + "_extract") {
+			filenamelog += "extractor result filename: " + r.config.Filename + "_extractor"
+		}
+		Log.Important(filenamelog)
+	}
+
+	// 扫描结果文件自动上传
+	if connected && !r.NoUpload && r.config.Filename != "" { // 如果出网则自动上传结果到云服务器
+		uploadfiles([]string{r.config.Filename, r.config.SmartFilename})
+	}
+}
 func printConfigs(t string) {
 	if t == "port" {
 		TagMap, NameMap, PortMap = LoadPortConfig()
@@ -117,24 +172,6 @@ func printConfigs(t string) {
 		PrintInterConfig()
 	} else {
 		fmt.Println("choice port|nuclei|inter")
-	}
-}
-
-func parseExtractors(extracts arrayFlags, extractStr string) {
-	if extractStr != "" {
-		exts := strings.Split(extractStr, ",")
-		for _, extract := range exts {
-			if reg, ok := PresetExtracts[extract]; ok {
-				Extractors[extract] = reg
-			}
-		}
-	}
-	for _, extract := range extracts {
-		if reg, ok := PresetExtracts[extract]; ok {
-			Extractors[extract] = reg
-		} else {
-			Extractors[extract] = CompileRegexp(extract)
-		}
 	}
 }
 
