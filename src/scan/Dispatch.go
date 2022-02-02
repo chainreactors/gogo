@@ -2,6 +2,7 @@ package scan
 
 import (
 	"getitle/src/utils"
+	"net"
 )
 
 type RunnerOpts struct {
@@ -11,6 +12,7 @@ type RunnerOpts struct {
 	Delay        int
 	HttpsDelay   int
 	Payloadstr   string
+	Interface    *net.Interface
 }
 
 var RunOpt = RunnerOpts{
@@ -29,8 +31,11 @@ func Dispatch(result *utils.Result) {
 	} else if result.Port == "oxid" {
 		oxidScan(result)
 		return
-	} else if result.Port == "icmp" {
+	} else if result.Port == "icmp" || result.Port == "ping" {
 		icmpScan(result)
+		return
+	} else if result.Port == "arp" && !utils.Win {
+		arpScan(result)
 		return
 	} else if result.Port == "snmp" || result.Port == "161" {
 		snmpScan(result)

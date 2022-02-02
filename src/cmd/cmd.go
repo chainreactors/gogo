@@ -3,16 +3,11 @@ package cmd
 import (
 	"flag"
 	"fmt"
-	"os"
-	"strings"
-	"time"
-
 	. "getitle/src/core"
 	. "getitle/src/scan"
-	. "getitle/src/structutils"
-	. "getitle/src/utils"
-
 	"github.com/panjf2000/ants/v2"
+	"os"
+	"strings"
 )
 
 var ver = ""
@@ -24,60 +19,62 @@ func CMD() {
 	if !strings.Contains(strings.Join(os.Args, ""), k) {
 		inforev()
 	}
-	var config Config
-	var filters, payloads, extracts arrayFlags
+	runner := NewRunner()
 	//默认参数信息
 	// INPUT
-	flag.StringVar(&config.IP, "ip", "", "")
-	flag.StringVar(&config.Ports, "p", "top1", "")
-	flag.StringVar(&config.ListFile, "l", "", "")
-	flag.StringVar(&config.JsonFile, "j", "", "")
-	flag.BoolVar(&config.IsListInput, "L", false, "")
-	flag.BoolVar(&config.IsJsonInput, "J", false, "")
+	flag.StringVar(&runner.config.IP, "ip", "", "")
+	flag.StringVar(&runner.config.Ports, "p", "top1", "")
+	flag.StringVar(&runner.config.ListFile, "l", "", "")
+	flag.StringVar(&runner.config.JsonFile, "j", "", "")
+	flag.BoolVar(&runner.config.IsListInput, "L", false, "")
+	flag.BoolVar(&runner.config.IsJsonInput, "J", false, "")
 
 	// SMART
-	flag.StringVar(&config.SmartPort, "sp", "default", "")
-	flag.StringVar(&config.IpProbe, "ipp", "default", "")
-	flag.BoolVar(&config.NoSpray, "ns", false, "")
+	flag.StringVar(&runner.config.SmartPort, "sp", "default", "")
+	flag.StringVar(&runner.config.IpProbe, "ipp", "default", "")
+	flag.BoolVar(&runner.config.NoSpray, "ns", false, "")
 	flag.BoolVar(&Opt.Noscan, "no", false, "")
 
 	// OUTPUT
-	flag.StringVar(&config.Filename, "f", "", "")
-	flag.StringVar(&config.ExcludeIPs, "eip", "", "")
+	flag.StringVar(&runner.config.Filename, "f", "", "")
+	flag.StringVar(&Opt.FilePath, "path", "", "")
+	flag.StringVar(&runner.config.ExcludeIPs, "eip", "", "")
 	flag.StringVar(&Opt.Output, "o", "full", "")
-	flag.BoolVar(&Opt.Clean, "c", false, "")
+	flag.BoolVar(&runner.Clean, "c", false, "")
 	flag.StringVar(&Opt.FileOutput, "O", "json", "")
-	flag.BoolVar(&Opt.Quiet, "q", false, "")
-	flag.Var(&filters, "filter", "")
-	resultfilename := flag.String("F", "", "")
-	autofile := flag.Bool("af", false, "")
-	hiddenfile := flag.Bool("hf", false, "")
-	compress := flag.Bool("C", false, "")
+	flag.BoolVar(&runner.Quiet, "q", false, "")
+	flag.Var(&runner.filters, "filter", "")
+	flag.StringVar(&runner.FormatOutput, "F", "", "")
+	flag.BoolVar(&runner.AutoFile, "af", false, "")
+	flag.BoolVar(&runner.HiddenFile, "hf", false, "")
+	flag.BoolVar(&runner.Compress, "C", false, "")
 
 	// CONFIG
-	flag.IntVar(&config.Threads, "t", 0, "")
-	flag.StringVar(&config.Mod, "m", "default", "")
-	flag.BoolVar(&config.Spray, "s", false, "")
-	flag.BoolVar(&config.Ping, "ping", false, "")
+	flag.IntVar(&runner.config.Threads, "t", 0, "")
+	flag.StringVar(&runner.config.Mod, "m", "default", "")
+	flag.BoolVar(&runner.config.PortSpray, "s", false, "")
+	flag.BoolVar(&runner.Ping, "ping", false, "")
+	flag.BoolVar(&runner.Arp, "arp", false, "")
+	flag.StringVar(&runner.iface, "iface", "eth0", "")
 	flag.BoolVar(&Opt.Debug, "debug", false, "")
 	flag.IntVar(&RunOpt.Delay, "d", 2, "")
 	flag.IntVar(&RunOpt.HttpsDelay, "D", 2, "")
 	flag.StringVar(&RunOpt.Payloadstr, "suffix", "", "")
-	flag.Var(&payloads, "payload", "")
-	flag.Var(&extracts, "extract", "")
-	extractStr := flag.String("extracts", "", "")
-	version := flag.Bool("v", false, "")
-	version2 := flag.Bool("vv", false, "")
-	exploit := flag.Bool("e", false, "")
-	exploitConfig := flag.String("E", "none", "")
-	pocfile := flag.String("ef", "", "")
+	flag.Var(&runner.payloads, "payload", "")
+	flag.Var(&runner.extract, "extract", "")
+	flag.StringVar(&runner.extracts, "extracts", "", "")
+	flag.BoolVar(&runner.Version, "v", false, "")
+	flag.BoolVar(&runner.Version2, "vv", false, "")
+	flag.BoolVar(&runner.Exploit, "e", false, "")
+	flag.StringVar(&runner.ExploitName, "E", "none", "")
+	flag.StringVar(&runner.ExploitFile, "ef", "", "")
 
 	// OTHER
 	key := flag.String("k", "", "")
-	printType := flag.String("P", "", "")
-	noup := flag.Bool("nu", false, "")
-	uploadfile := flag.String("uf", "", "")
-	gtversion := flag.Bool("version", false, "")
+	flag.StringVar(&runner.Printer, "P", "", "")
+	flag.BoolVar(&runner.NoUpload, "nu", false, "")
+	flag.StringVar(&runner.UploadFile, "uf", "", "")
+	flag.BoolVar(&runner.Ver, "version", false, "")
 
 	flag.Usage = func() { exit() }
 	flag.Parse()
@@ -86,81 +83,19 @@ func CMD() {
 		//rev()
 		exit()
 	}
-	if *gtversion {
-		fmt.Println(ver)
+
+	ok := runner.preInit()
+	if !ok {
 		os.Exit(0)
 	}
+	runner.init()
 
-	// 输出 config
-	if *printType != "" {
-		printConfigs(*printType)
-		os.Exit(0)
-	}
-
-	// 格式化
-	if *resultfilename != "" {
-		FormatOutput(*resultfilename, config.Filename, *autofile, filters)
-		os.Exit(0)
-	}
-
-	if *compress {
-		Opt.Compress = !Opt.Compress
-	}
-
-	if *uploadfile != "" {
-		// 指定上传文件
-		uploadfiles([]string{*uploadfile})
-		os.Exit(0)
-	}
-
-	// 加载配置文件中的全局变量
-	configloader()
-	nucleiLoader(*pocfile, payloads)
-	// 解析命令行中的参数配置
-	parseVersion(*version, *version2)
-	parseExploit(*exploit, *exploitConfig)
-	parseFilename(*autofile, *hiddenfile, &config)
-	parseExtractors(extracts, *extractStr)
-
-	starttime := time.Now()
 	// 初始化任务
-	config = Init(config)
-	RunTask(config) // 运行
+	Log.InitFile() // 在真正运行前再初始化进度文件
+	runner.config = InitConfig(runner.config)
+	RunTask(runner.config) // 运行
 
-	time.Sleep(200 * time.Microsecond)
-
-	if *hiddenfile {
-		Chtime(config.Filename)
-		if config.SmartFilename != "" {
-			Chtime(config.SmartFilename)
-		}
-	}
-	time.Sleep(time.Microsecond * 500)
-
-	// 任务统计
-	ConsoleLog(fmt.Sprintf("\n[*] Alive sum: %d, Target sum : %d", Opt.AliveSum, RunOpt.Sum))
-	ConsoleLog("[*] Totally run: " + time.Since(starttime).String())
-
-	var filenamelog string
-	// 输出文件名
-	if config.Filename != "" {
-		filenamelog = fmt.Sprintf("[*] Results filename: %s , ", config.Filename)
-		if config.SmartFilename != "" {
-			filenamelog += "Smartscan result filename: " + config.SmartFilename + " , "
-		}
-		if config.PingFilename != "" {
-			filenamelog += "Pingscan result filename: " + config.PingFilename
-		}
-		if IsExist(config.Filename + "_extract") {
-			filenamelog += "extractor result filename: " + config.Filename + "_extractor"
-		}
-		ConsoleLog(filenamelog)
-	}
-
-	// 扫描结果文件自动上传
-	if connected && !*noup && config.Filename != "" { // 如果出网则自动上传结果到云服务器
-		uploadfiles([]string{config.Filename, config.SmartFilename})
-	}
+	runner.close()
 }
 
 type Value interface {

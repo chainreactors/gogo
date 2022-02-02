@@ -141,12 +141,38 @@ func (rd ResultsData) ToFormat(isColor bool) string {
 		s += fmt.Sprintf("[+] %s %s\n", ip, wininfo.toString())
 		for port, p := range pfs[ip] {
 			// 跳过OXID与NetBois
-			if !(p.Port == "135 (oxid)" || p.Port == "137" || p.Port == "icmp") {
+			if !(p.Port == "135 (oxid)" || p.Port == "137" || p.Port == "icmp" || p.Port == "arp") {
 				if isColor {
 					// 颜色输出
-					s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s\t%s\t%s [%s] %s %s\n", p.Protocol, ip, port, p.Midware, p.Language, Blue(p.Frameworks.ToString()), p.Host, p.Hash, Yellow(p.HttpStat), Blue(p.Title), Red(p.Vulns.ToString()))
+					s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s\t%s\t%s [%s] %s %s %s\n",
+						p.Protocol,
+						ip,
+						port,
+						p.Midware,
+						p.Language,
+						Blue(p.Frameworks.ToString()),
+						p.Host,
+						p.Hash,
+						Yellow(p.HttpStat),
+						Blue(p.Title),
+						Red(p.Vulns.ToString()),
+						Blue(p.GetExtractStat()),
+					)
 				} else {
-					s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s\t%s\t%s [%s] %s %s\n", p.Protocol, ip, port, p.Midware, p.Language, p.Frameworks.ToString(), p.Host, p.Hash, p.HttpStat, p.Title, p.Vulns.ToString())
+					s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s\t%s\t%s [%s] %s %s %s\n",
+						p.Protocol,
+						ip,
+						port,
+						p.Midware,
+						p.Language,
+						p.Frameworks.ToString(),
+						p.Host,
+						p.Hash,
+						p.HttpStat,
+						p.Title,
+						p.Vulns.ToString(),
+						p.GetExtractStat(),
+					)
 				}
 			}
 		}

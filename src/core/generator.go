@@ -32,7 +32,7 @@ func (gen *IpGenerator) defaultIpGenerator(CIDR string) {
 			gen.ch <- int2ip(i)
 		}
 		if i%65536 == 0 {
-			progressLogln(fmt.Sprintf("[*] Processing CIDR: %s/16", int2ip(i)))
+			Log.Logging(fmt.Sprintf("[*] Processing CIDR: %s/16", int2ip(i)))
 		}
 	}
 }
@@ -57,7 +57,7 @@ func (gen *IpGenerator) IPsGenerator(ips []string) {
 		tmpalive := Opt.AliveSum
 		gen.defaultIpGenerator(cidr)
 		if getMask(cidr) != 32 {
-			progressLogln(fmt.Sprintf("[*] Processed CIDR: %s, found %d ports", cidr, Opt.AliveSum-tmpalive))
+			Log.Logging(fmt.Sprintf("[*] Processed CIDR: %s, found %d ports", cidr, Opt.AliveSum-tmpalive))
 
 		}
 		Opt.file.Sync()
@@ -130,7 +130,7 @@ func isnotAlive(ip string, temp *sync.Map) bool {
 func NewTargetGenerator(config Config) *targetGenerator {
 	gen := targetGenerator{
 		ip_generator: NewIpGenerator(config),
-		spray:        config.Spray,
+		spray:        config.PortSpray,
 	}
 	return &gen
 }
@@ -170,7 +170,7 @@ func (gen *targetGenerator) genFromSpray(targets interface{}, portlist []string)
 				gen.ch <- targetConfig{ip, port, nil}
 			}
 		}
-		progressLogln(fmt.Sprintf("[*] Processed Port: %s, found %d ports", port, Opt.AliveSum-tmpalive))
+		Log.Logging(fmt.Sprintf("[*] Processed Port: %s, found %d ports", port, Opt.AliveSum-tmpalive))
 	}
 }
 

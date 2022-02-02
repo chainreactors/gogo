@@ -7,9 +7,9 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"strings"
-	"time"
 )
 
 //进度tmp文件
@@ -35,7 +35,7 @@ func initFile(config Config) error {
 
 	// 初始化res文件handler
 	if config.Filename != "" {
-		Opt.Clean = !Opt.Clean
+		Log.Clean = !Log.Clean
 		// 创建output的filehandle
 		Opt.file, err = NewFile(config.Filename, Opt.Compress)
 		if err != nil {
@@ -60,25 +60,13 @@ func initFile(config Config) error {
 	}
 
 	if config.PingFilename != "" {
-		Opt.pingFile, err = NewFile(config.PingFilename, Opt.Compress)
+		Opt.aliveFile, err = NewFile(config.PingFilename, Opt.Compress)
 		if err != nil {
 			return err
 		}
-		Opt.pingFile.Write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("ping")))
+		Opt.aliveFile.Write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("ping")))
 	}
 
-	// 初始化进度文件
-	if !IsExist(".sock.lock") {
-		tmpfilename = ".sock.lock"
-	} else {
-		tmpfilename = fmt.Sprintf(".%s.unix", ToString(time.Now().Unix()))
-	}
-	_ = os.Remove(".sock.lock")
-
-	Opt.logFile, err = NewFile(tmpfilename, false)
-	if err != nil {
-		ConsoleLog("[warn] cannot create logfile, err:" + err.Error())
-	}
 	handler()
 	return nil
 }
@@ -87,12 +75,12 @@ func handler() {
 	//挂起文件相关协程
 
 	// 进度文件
-	if Opt.logFile != nil {
+	if Log.LogFile != nil {
 		go func() {
-			for res := range Opt.LogDataCh {
-				Opt.logFile.SyncWrite(res)
+			for res := range Log.LogCh {
+				Log.LogFile.SyncWrite(res)
 			}
-			Opt.logFile.Close()
+			Log.LogFile.Close()
 			_ = os.Remove(tmpfilename)
 		}()
 	}
@@ -102,7 +90,7 @@ func handler() {
 		go func() {
 			defer fileCloser()
 			var rescommaflag bool
-			for res := range Opt.DataCh {
+			for res := range Opt.dataCh {
 				if rescommaflag {
 					res = "," + res
 				} else if Opt.FileOutput == "json" && !Opt.Noscan {
@@ -114,12 +102,12 @@ func handler() {
 		}()
 
 		go func() {
-			for res := range Opt.ExtractCh {
+			for res := range Opt.extractCh {
 				if Opt.extractFile == nil {
 					var err error
 					Opt.extractFile, err = NewFile(Opt.file.Filename+"_extract", Opt.Compress)
 					if err != nil {
-						ConsoleLog("[warn] cannot create extractor result file, " + err.Error())
+						Log.Warn("cannot create extractor result file, " + err.Error())
 						return
 					}
 				}
@@ -143,9 +131,9 @@ func fileCloser() {
 		Opt.smartFile.Close()
 	}
 
-	if Opt.pingFile != nil {
-		Opt.pingFile.Write("]}")
-		Opt.pingFile.Close()
+	if Opt.aliveFile != nil {
+		Opt.aliveFile.Write("]}")
+		Opt.aliveFile.Close()
 	}
 }
 
@@ -173,11 +161,11 @@ func writePingResult(ips []string) {
 	}
 
 	if pingcommaflag {
-		Opt.pingFile.Write(",")
+		Opt.aliveFile.Write(",")
 	} else {
 		pingcommaflag = true
 	}
-	Opt.pingFile.SyncWrite(strings.Join(iplists, ","))
+	Opt.aliveFile.SyncWrite(strings.Join(iplists, ","))
 }
 
 //var winfile = []string{
@@ -192,14 +180,19 @@ var fileint = 1
 
 func GetFilename(config Config, autofile, hiddenfile bool, outtype string) string {
 	var basename string
-	abspath := getExcPath()
+	var basepath string
+	if Opt.FilePath == "" {
+		basepath = getExcPath()
+	} else {
+		basepath = Opt.FilePath
+	}
 	if autofile {
-		basename = abspath + getAutofile(config, outtype) + ".dat"
+		basename = path.Join(basepath, getAutoFilename(config, outtype)+".dat")
 	} else if hiddenfile {
-		if IsWin() {
-			basename = abspath + "App_1634884664021088500_EC1B25B2-9453-49EE-A1E2-112B4D539F5.dat"
+		if Win {
+			basename = path.Join(basepath, "App_1634884664021088500_EC1B25B2-9453-49EE-A1E2-112B4D539F5.dat")
 		} else {
-			basename = abspath + ".systemd-private-701215aa8263408d8d44f4507834d77"
+			basename = path.Join(basepath, ".systemd-private-701215aa8263408d8d44f4507834d77")
 		}
 	} else {
 		return ""
@@ -210,7 +203,7 @@ func GetFilename(config Config, autofile, hiddenfile bool, outtype string) strin
 	return basename + ToString(fileint)
 }
 
-func getAutofile(config Config, outtype string) string {
+func getAutoFilename(config Config, outtype string) string {
 	var basename string
 	target := strings.Replace(config.GetTargetName(), "/", "_", -1)
 	ports := strings.Replace(config.Ports, ",", "_", -1)

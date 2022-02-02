@@ -31,7 +31,7 @@ var portstat = map[int]string{
 //直接扫描
 func DefaultMod(targets interface{}, config Config) {
 	// 输出预估时间
-	progressLogln(fmt.Sprintf("[*] Scan task time is about %d seconds", guessTime(targets, config.Portlist, config.Threads)))
+	Log.Logging(fmt.Sprintf("[*] Scan task time is about %d seconds", guessTime(targets, len(config.Portlist), config.Threads)))
 	var wgs sync.WaitGroup
 	targetGen := NewTargetGenerator(config)
 	targetCh := targetGen.generator(targets, config.Portlist)
@@ -56,27 +56,26 @@ func defaultScan(tc targetConfig) {
 
 	if result.Open {
 		Opt.AliveSum++
-		if !Opt.Clean {
-			fmt.Print(output(result, Opt.Output))
-		}
+		Log.Default(output(result, Opt.Output))
+
 		if Opt.file != nil {
-			Opt.DataCh <- output(result, Opt.FileOutput)
+			Opt.dataCh <- output(result, Opt.FileOutput)
 			if result.Extracts.Extracts != nil {
-				Opt.ExtractCh <- result.Extracts.ToResult()
+				Opt.extractCh <- result.Extracts.ToResult()
 			}
 		}
 	} else if Opt.Debug {
-		fmt.Println("[debug] tcp stat: %d, errmsg: %s", portstat[result.ErrStat], result.Error)
+		fmt.Printf("[debug] tcp stat: %s, errmsg: %s\n", portstat[result.ErrStat], result.Error)
 	}
 }
 
 func SmartMod(target string, config Config) {
 	// 输出预估时间
 	spended := guessSmarttime(target, config)
-	progressLogln(fmt.Sprintf("[*] Spraying B class IP: %s, Estimated to take %d seconds", target, spended))
+	Log.Logging(fmt.Sprintf("[*] Spraying B class IP: %s, Estimated to take %d seconds", target, spended))
 
 	// 初始化ip目标
-	progressLogln(fmt.Sprintf("[*] SmartScan %s, Mod: %s", target, config.Mod))
+	Log.Logging(fmt.Sprintf("[*] SmartScan %s, Mod: %s", target, config.Mod))
 	// 初始化mask
 	var mask int
 	switch config.Mod {
@@ -97,7 +96,7 @@ func SmartMod(target string, config Config) {
 	if config.Mod == "ss" {
 		probeconfig += "Smart IP probe: " + config.IpProbe
 	}
-	progressLogln(probeconfig)
+	Log.Logging(probeconfig)
 
 	tcChannel := targetGen.smartGenerator(target, config.SmartPortList, config.Mod)
 
@@ -143,8 +142,8 @@ func SmartMod(target string, config Config) {
 		config.Mod = "sb"
 		declineScan(iplist, config)
 	} else if config.Mod == "s" {
-		if config.Ping {
-			PingMod(iplist, config)
+		if config.HasAlivedScan() {
+			AliveMod(iplist, config)
 		} else {
 			DefaultMod(iplist, config)
 		}
@@ -157,12 +156,12 @@ func cidr_alived(ip string, temp *sync.Map, mask int, mod string) {
 	if !ok {
 		temp.Store(alivecidr, 1)
 		cidr := fmt.Sprintf("%s/%d", ip, mask)
-		ConsoleLog("[*] Found " + cidr)
+		Log.Logging("[+] Found " + cidr)
 		Opt.AliveSum++
 		if Opt.file != nil && mod != "sc" && (Opt.Noscan || mod == "sb") {
 			// 只有-no 或 -m sc下,才会将网段信息输出到文件.
 			// 模式为sc时,b段将不会输出到文件,只输出c段
-			Opt.DataCh <- cidr + "\n"
+			Opt.dataCh <- cidr + "\n"
 		}
 	}
 }
@@ -175,41 +174,48 @@ func smartScan(tc targetConfig, temp *sync.Map, mask int, mod string) {
 	if result.Open {
 		cidr_alived(result.Ip, temp, mask, mod)
 	} else if Opt.Debug {
-		fmt.Println("[debug] tcp stat: %d, errmsg: %s", portstat[result.ErrStat], result.Error)
+		fmt.Printf("[debug] tcp stat: %s, errmsg: %s\n", portstat[result.ErrStat], result.Error)
 	}
 }
 
 func declineScan(iplist []string, config Config) {
 	//config.IpProbeList = []uint{1} // ipp 只在ss与sc模式中生效,为了防止时间计算错误,reset ipp 数值
-
 	if len(config.Portlist) < 3 {
-		if config.Ping {
-			PingMod(iplist, config)
+		if config.HasAlivedScan() {
+			AliveMod(iplist, config)
 		} else {
 			DefaultMod(iplist, config)
 		}
 	} else {
 		spended := guessSmarttime(iplist[0], config)
-		progressLogln(fmt.Sprintf("[*] Every Sub smartscan task time is about %d seconds, total found %d B Class CIDRs about %d s", spended, len(iplist), spended*len(iplist)))
+		Log.Logging(fmt.Sprintf("[*] Every Sub smartscan task time is about %d seconds, total found %d B Class CIDRs about %d s", spended, len(iplist), spended*len(iplist)))
 
 		for _, ip := range iplist {
 			tmpalive := Opt.AliveSum
 			SmartMod(ip, config)
-			progressLogln(fmt.Sprintf("[*] Found %d alive assets from CIDR %s", Opt.AliveSum-tmpalive, ip))
+			Log.Logging(fmt.Sprintf("[*] Found %d alive assets from CIDR %s", Opt.AliveSum-tmpalive, ip))
 			Opt.file.Sync()
 		}
 	}
 }
 
-func PingMod(targets interface{}, config Config) {
+func AliveMod(targets interface{}, config Config) {
+	if !Win && !Root {
+		// linux的普通用户无权限使用icmp或arp扫描
+		Log.Warn("must be *unix's root, skipped ping/arp spray")
+		DefaultMod(targets, config)
+		return
+	}
+
 	var wgs sync.WaitGroup
-	progressLogln(fmt.Sprintf("[*] Ping spray task time is about %d seconds", guessTime(targets, config.Portlist, guessTime(targets, []string{"icmp"}, config.Threads))))
+	Log.Logging(fmt.Sprintf("[*] Alived spray task time is about %d seconds",
+		guessTime(targets, len(config.AliveSprayMod), config.Threads)))
 	targetGen := NewTargetGenerator(config)
 	alivedmap := targetGen.ip_generator.alivedMap
-	targetCh := targetGen.generator(targets, []string{"icmp"})
+	targetCh := targetGen.generator(targets, config.AliveSprayMod)
 	//targetChannel := generator(targets, config)
 	scanPool, _ := ants.NewPoolWithFunc(config.Threads, func(i interface{}) {
-		pingScan(i.(targetConfig), alivedmap)
+		aliveScan(i.(targetConfig), alivedmap)
 		wgs.Done()
 	})
 	defer scanPool.Release()
@@ -228,17 +234,17 @@ func PingMod(targets interface{}, config Config) {
 	})
 
 	if len(iplist) == 0 {
-		progressLogln(fmt.Sprintf("[*] not found any alived ip"))
+		Log.Logging(fmt.Sprintf("[*] not found any alived ip"))
 		return
 	}
-	progressLogln(fmt.Sprintf("[*] found %d alived ips", len(iplist)))
-	if Opt.pingFile != nil {
+	Log.Logging(fmt.Sprintf("[*] found %d alived ips", len(iplist)))
+	if Opt.aliveFile != nil {
 		writePingResult(iplist)
 	}
 	DefaultMod(iplist, config)
 }
 
-func pingScan(tc targetConfig, temp *sync.Map) {
+func aliveScan(tc targetConfig, temp *sync.Map) {
 	result := NewResult(tc.ip, tc.port)
 	scan.Dispatch(result)
 

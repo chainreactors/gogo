@@ -10,48 +10,15 @@ import (
 	"strings"
 )
 
-var InterConfig = map[string][]string{
-	"10.0.0.0/8":     {"ss", "icmp", "1"},
-	"172.16.0.0/12":  {"ss", "icmp", "1"},
-	"192.168.0.0/16": {"s", "80", "all"},
-	"100.100.0.0/16": {"s", "icmp", "all"},
-	"200.200.0.0/16": {"s", "icmp", "all"},
-	//"169.254.0.0/16": {"s", "icmp", "all"},
-	//"168.254.0.0/16": {"s", "icmp", "all"},
-}
-
-type Options struct {
-	AliveSum    int
-	Clean       bool
-	Noscan      bool
-	Compress    bool
-	Quiet       bool
-	Debug       bool
-	file        *File
-	smartFile   *File
-	extractFile *File
-	pingFile    *File
-	logFile     *File
-	DataCh      chan string
-	ExtractCh   chan string
-	LogDataCh   chan string
-	Output      string
-	FileOutput  string
-}
-
 var Opt = Options{
 	AliveSum:  0,
-	Clean:     false,
 	Noscan:    false,
 	Compress:  true,
-	Quiet:     false,
-	DataCh:    make(chan string, 100),
-	LogDataCh: make(chan string, 100),
-	ExtractCh: make(chan string, 100),
+	dataCh:    make(chan string, 100),
+	extractCh: make(chan string, 100),
 }
 
-func Init(config Config) Config {
-
+func InitConfig(config Config) Config {
 	err := validate(config)
 	if err != nil {
 		fmt.Println("[-]" + err.Error())
@@ -62,25 +29,23 @@ func Init(config Config) Config {
 	config.VerisonLevel = RunOpt.VersionLevel
 
 	if config.Threads == 0 { // if 默认线程
-		if IsWin() {
+		config.Threads = 4000
+		if Win {
 			//windows系统默认协程数为1000
 			config.Threads = 1000
 		} else {
 			// linux系统判断fd限制, 如果-t 大于fd限制,则将-t 设置到fd-100
 			if fdlimit := GetFdLimit(); config.Threads > fdlimit {
-				ConsoleLog(fmt.Sprintf("[Warn] System fd limit: %d , Please exec 'ulimit -n 65535'", fdlimit))
-				ConsoleLog(fmt.Sprintf("[Warn] System fd limit: %d , Please exec 'ulimit -n 65535'", fdlimit))
-				ConsoleLog(fmt.Sprintf("[Warn] System fd limit: %d , Please exec 'ulimit -n 65535'", fdlimit))
-				ConsoleLog(fmt.Sprintf("[Warn] Now set threads to %d", fdlimit-100))
+				Log.Warn(fmt.Sprintf("System fd limit: %d , Please exec 'ulimit -n 65535'", fdlimit))
+				Log.Warn(fmt.Sprintf("System fd limit: %d , Please exec 'ulimit -n 65535'", fdlimit))
+				Log.Warn(fmt.Sprintf("System fd limit: %d , Please exec 'ulimit -n 65535'", fdlimit))
+				Log.Warn(fmt.Sprintf("Now set threads to %d", fdlimit-100))
 				config.Threads = fdlimit - 100
 			}
 		}
-
 		if config.JsonFile != "" {
 			config.Threads = 50
 		}
-	} else {
-		config.Threads = 4000
 	}
 
 	var file *os.File
@@ -125,9 +90,9 @@ func Init(config Config) Config {
 	// 如果指定端口超过100,则自动启用spray
 	if len(config.Portlist) > 150 && !config.NoSpray {
 		if config.IPlist == nil && getMask(config.IP) == 32 {
-			config.Spray = false
+			config.PortSpray = false
 		} else {
-			config.Spray = true
+			config.PortSpray = true
 		}
 	}
 
@@ -175,10 +140,10 @@ func validate(config Config) error {
 	var err error
 	if config.JsonFile != "" {
 		if config.Ports != "top1" {
-			ConsoleLog("[warn] json input can not config ports")
+			Log.Warn("json input can not config ports")
 		}
 		if config.Mod != "default" {
-			ConsoleLog("[warn] input json can not config . Mod,default scanning")
+			Log.Warn("input json can not config . Mod,default scanning")
 		}
 	}
 
@@ -190,24 +155,34 @@ func validate(config Config) error {
 		err = errors.New("cannot set -j and -l flags at same time")
 	}
 
+	if !HasPingPriv() && (strings.Contains(config.Ports, "icmp") || strings.Contains(config.Ports, "ping") || SliceContains(config.AliveSprayMod, "icmp")) {
+		Log.Warn("current user is not root, icmp scan not work")
+	}
+
+	if !Win && Root && (strings.Contains(config.Ports, "arp") || SliceContains(config.AliveSprayMod, "arp")) {
+		Log.Warn("current user is not root, arp scan maybe not work")
+	}
+	if Win && (strings.Contains(config.Ports, "arp") || SliceContains(config.AliveSprayMod, "arp")) {
+		Log.Warn("windows not support arp scan, skip all arp scan task")
+	}
 	return err
 }
 
 func printTaskInfo(config Config, taskname string) {
 	// 输出任务的基本信息
 
-	progressLogln(fmt.Sprintf("[*] Current goroutines: %d, Version Level: %d,Exploit Target: %s, Spray Scan: %t", config.Threads, RunOpt.VersionLevel, RunOpt.Exploit, config.Spray))
+	Log.Logging(fmt.Sprintf("[*] Current goroutines: %d, Version Level: %d,Exploit Target: %s, PortSpray Scan: %t", config.Threads, RunOpt.VersionLevel, RunOpt.Exploit, config.PortSpray))
 	if config.JsonFile == "" {
-		progressLogln(fmt.Sprintf("[*] Starting task %s ,total ports: %d , mod: %s", taskname, len(config.Portlist), config.Mod))
+		Log.Logging(fmt.Sprintf("[*] Starting task %s ,total ports: %d , mod: %s", taskname, len(config.Portlist), config.Mod))
 		// 输出端口信息
 		if len(config.Portlist) > 500 {
-			progressLogln("[*] too much ports , only show top 500 ports: " + strings.Join(config.Portlist[:500], ",") + "......")
+			Log.Logging("[*] too much ports , only show top 500 ports: " + strings.Join(config.Portlist[:500], ",") + "......")
 		} else {
-			progressLogln("[*] ports: " + strings.Join(config.Portlist, ","))
+			Log.Logging("[*] ports: " + strings.Join(config.Portlist, ","))
 		}
 	} else {
-		progressLogln(fmt.Sprintf("[*] Starting results task: %s ,total target: %d", taskname, len(config.Results)))
-		//progressLogln(fmt.Sprintf("[*] Json . task time is about %d seconds", (len(config.Results)/config.Threads)*4+4))
+		Log.Logging(fmt.Sprintf("[*] Starting results task: %s ,total target: %d", taskname, len(config.Results)))
+		//progressLog(fmt.Sprintf("[*] Json . task time is about %d seconds", (len(config.Results)/config.Threads)*4+4))
 	}
 }
 
@@ -220,7 +195,7 @@ func RunTask(config Config) {
 	case "s", "f", "ss", "sc":
 		if config.IPlist != nil {
 			for _, ip := range config.IPlist {
-				progressLogln("[*] Spraying : " + ip)
+				Log.Logging("[*] Spraying : " + ip)
 				createSmartScan(ip, config)
 			}
 		} else {
@@ -229,16 +204,10 @@ func RunTask(config Config) {
 	default:
 		createDefaultScan(config)
 	}
-	// 关闭管道
-	close(Opt.DataCh)
-	close(Opt.LogDataCh)
-	close(Opt.ExtractCh)
 }
 
-func guessTime(targets interface{}, portlist []string, thread int) int {
+func guessTime(targets interface{}, portcount, thread int) int {
 	ipcount := 0
-
-	portcount := len(portlist)
 
 	switch targets.(type) {
 	case []string:
@@ -290,7 +259,7 @@ func countip(mask int) int {
 
 func autoScan(config Config) {
 	for cidr, st := range InterConfig {
-		progressLogln("[*] Spraying : " + cidr)
+		Log.Logging("[*] Spraying : " + cidr)
 		createAutoTask(config, cidr, st)
 	}
 }
@@ -319,11 +288,11 @@ func createDefaultScan(config Config) {
 	if config.Results != nil {
 		DefaultMod(config.Results, config)
 	} else {
-		if config.Ping {
+		if config.HasAlivedScan() {
 			if config.IPlist != nil {
-				PingMod(config.IPlist, config)
+				AliveMod(config.IPlist, config)
 			} else if config.IP != "" {
-				PingMod(config.IP, config)
+				AliveMod(config.IP, config)
 			}
 		} else {
 			if config.IPlist != nil {
