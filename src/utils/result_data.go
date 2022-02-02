@@ -141,7 +141,7 @@ func (rd ResultsData) ToFormat(isColor bool) string {
 		s += fmt.Sprintf("[+] %s %s\n", ip, wininfo.toString())
 		for port, p := range pfs[ip] {
 			// 跳过OXID与NetBois
-			if !(p.Port == "135 (oxid)" || p.Port == "137" || p.Port == "icmp") {
+			if !(p.Port == "135 (oxid)" || p.Port == "137" || p.Port == "icmp" || p.Port == "arp") {
 				if isColor {
 					// 颜色输出
 					s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s\t%s\t%s [%s] %s %s %s\n",
@@ -173,7 +173,6 @@ func (rd ResultsData) ToFormat(isColor bool) string {
 						p.Vulns.ToString(),
 						p.GetExtractStat(),
 					)
-
 				}
 			}
 		}

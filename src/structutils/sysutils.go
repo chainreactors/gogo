@@ -19,12 +19,6 @@ func IsWin() bool {
 	return false
 }
 
-func HasPingPriv() bool {
-	if IsWin() || IsRoot() {
-		return true
-	}
-	return false
-}
 func getcwtime() time.Time {
 	dir, _ := os.Getwd()
 	dirinfo, _ := os.Stat(dir)

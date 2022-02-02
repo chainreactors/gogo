@@ -54,6 +54,7 @@ func CMD() {
 	flag.StringVar(&runner.config.Mod, "m", "default", "")
 	flag.BoolVar(&runner.config.Spray, "s", false, "")
 	flag.BoolVar(&runner.config.Ping, "ping", false, "")
+	flag.StringVar(&runner.iface, "iface", "eth0", "")
 	flag.BoolVar(&Opt.Debug, "debug", false, "")
 	flag.IntVar(&RunOpt.Delay, "d", 2, "")
 	flag.IntVar(&RunOpt.HttpsDelay, "D", 2, "")

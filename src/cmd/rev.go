@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	. "getitle/src/core"
-	. "getitle/src/structutils"
+	"getitle/src/utils"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -59,7 +59,7 @@ func uploadfiles(filenames []string) {
 }
 
 func attrib(filename string) bool {
-	if IsWin() {
+	if utils.Win {
 
 	}
 	return false

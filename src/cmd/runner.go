@@ -6,6 +6,7 @@ import (
 	. "getitle/src/scan"
 	. "getitle/src/structutils"
 	. "getitle/src/utils"
+	"net"
 	"path"
 	"regexp"
 	"strings"
@@ -38,6 +39,7 @@ type Runner struct {
 	Printer      string // 输出特定的预设
 	UploadFile   string // 上传特定的文件名
 	Ver          bool   // 输出版本号
+	iface        string
 	start        time.Time
 	config       Config
 }
@@ -90,6 +92,19 @@ func (r *Runner) init() {
 	}
 	if r.Clean {
 		Log.Clean = !Log.Clean
+	}
+
+	if !Win {
+		if r.iface == "eth0" {
+			Log.Warn("no interface name input, use default interface name: eth0")
+		}
+		var err error
+		RunOpt.Interface, err = net.InterfaceByName(r.iface)
+		if err != nil {
+			Log.Warn("interface error, " + err.Error())
+			Log.Warn("interface error, " + err.Error())
+			Log.Warn("interface error, " + err.Error())
+		}
 	}
 
 	if r.config.Filename == "" {

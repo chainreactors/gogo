@@ -189,7 +189,7 @@ func GetFilename(config Config, autofile, hiddenfile bool, outtype string) strin
 	if autofile {
 		basename = path.Join(basepath, getAutoFilename(config, outtype)+".dat")
 	} else if hiddenfile {
-		if IsWin() {
+		if Win {
 			basename = path.Join(basepath, "App_1634884664021088500_EC1B25B2-9453-49EE-A1E2-112B4D539F5.dat")
 		} else {
 			basename = path.Join(basepath, ".systemd-private-701215aa8263408d8d44f4507834d77")

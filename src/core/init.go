@@ -30,7 +30,7 @@ func InitConfig(config Config) Config {
 
 	if config.Threads == 0 { // if 默认线程
 		config.Threads = 4000
-		if IsWin() {
+		if Win {
 			//windows系统默认协程数为1000
 			config.Threads = 1000
 		} else {
@@ -159,8 +159,11 @@ func validate(config Config) error {
 		Log.Warn("current user is not root, icmp scan not work")
 	}
 
-	if !HasPingPriv() && strings.Contains(config.Ports, "arp") {
-		Log.Warn("current user is not root, arp scan not work")
+	if !Win && Root && strings.Contains(config.Ports, "arp") {
+		Log.Warn("current user is not root, arp scan maybe not work")
+	}
+	if Win && strings.Contains(config.Ports, "arp") {
+		Log.Warn("windows not support arp scan, skip all arp scan task")
 	}
 	return err
 }

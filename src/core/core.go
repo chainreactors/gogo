@@ -3,7 +3,6 @@ package core
 import (
 	"fmt"
 	"getitle/src/scan"
-	"getitle/src/structutils"
 	. "getitle/src/utils"
 	"github.com/panjf2000/ants/v2"
 	"strings"
@@ -201,7 +200,7 @@ func declineScan(iplist []string, config Config) {
 }
 
 func PingMod(targets interface{}, config Config) {
-	if structutils.HasPingPriv() {
+	if HasPingPriv() {
 		// linux的普通用户无权限使用icmp或arp扫描
 		Log.Warn("must be *unix root, skipped ping spray")
 		DefaultMod(targets, config)
