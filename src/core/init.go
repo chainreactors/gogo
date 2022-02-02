@@ -157,11 +157,11 @@ func validate(config Config) error {
 		err = errors.New("cannot set -j and -l flags at same time")
 	}
 
-	if !IsWin() && !IsRoot() && (strings.Contains(config.Ports, "icmp") || strings.Contains(config.Ports, "ping")) {
+	if !HasPingPriv() && (strings.Contains(config.Ports, "icmp") || strings.Contains(config.Ports, "ping")) {
 		Log.Warn("current user is not root, icmp scan not work")
 	}
 
-	if !IsWin() && !IsRoot() && strings.Contains(config.Ports, "arp") {
+	if !HasPingPriv() && strings.Contains(config.Ports, "arp") {
 		Log.Warn("current user is not root, arp scan not work")
 	}
 	return err

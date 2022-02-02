@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 	"getitle/src/scan"
+	"getitle/src/structutils"
 	. "getitle/src/utils"
 	"github.com/panjf2000/ants/v2"
 	"strings"
@@ -180,7 +181,6 @@ func smartScan(tc targetConfig, temp *sync.Map, mask int, mod string) {
 
 func declineScan(iplist []string, config Config) {
 	//config.IpProbeList = []uint{1} // ipp 只在ss与sc模式中生效,为了防止时间计算错误,reset ipp 数值
-
 	if len(config.Portlist) < 3 {
 		if config.Ping {
 			PingMod(iplist, config)
@@ -201,6 +201,13 @@ func declineScan(iplist []string, config Config) {
 }
 
 func PingMod(targets interface{}, config Config) {
+	if structutils.HasPingPriv() {
+		// linux的普通用户无权限使用icmp或arp扫描
+		Log.Warn("must be *unix root, skipped ping spray")
+		DefaultMod(targets, config)
+		return
+	}
+
 	var wgs sync.WaitGroup
 	Log.Logging(fmt.Sprintf("[*] Ping spray task time is about %d seconds", guessTime(targets, config.Portlist, guessTime(targets, []string{"icmp"}, config.Threads))))
 	targetGen := NewTargetGenerator(config)
