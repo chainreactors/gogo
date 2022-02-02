@@ -3,6 +3,8 @@ package core
 import (
 	"fmt"
 	. "getitle/src/utils"
+	"os"
+	"time"
 )
 
 func NewLogger(quiet bool) *Logger {
@@ -18,8 +20,20 @@ type Logger struct {
 	LogFile *File
 }
 
-func (log *Logger) Init(file *File) {
-	log.LogFile = file
+func (log *Logger) InitFile() {
+	// 初始化进度文件
+	if !IsExist(".sock.lock") {
+		tmpfilename = ".sock.lock"
+	} else {
+		tmpfilename = fmt.Sprintf(".%d.unix", time.Now().Unix()-100000)
+	}
+	_ = os.Remove(".sock.lock")
+	var err error
+	log.LogFile, err = NewFile(tmpfilename, false)
+	if err != nil {
+		Log.Warn("cannot create logfile, err:" + err.Error())
+		return
+	}
 	log.LogCh = make(chan string, 100)
 }
 
@@ -42,7 +56,7 @@ func (log *Logger) Important(s string) {
 
 func (log *Logger) Default(s string) {
 	if !log.Clean {
-		fmt.Println("[+] " + s)
+		fmt.Println(s)
 	}
 }
 
@@ -60,7 +74,6 @@ func (log *Logger) Warn(s string) {
 
 func (log *Logger) Close() {
 	close(log.LogCh)
-	log.LogFile.Close()
 }
 
 //func progressLog(s string) {

@@ -10,7 +10,6 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
-	"time"
 )
 
 //进度tmp文件
@@ -68,21 +67,6 @@ func initFile(config Config) error {
 		Opt.pingFile.Write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("ping")))
 	}
 
-	// 初始化进度文件
-	if !IsExist(".sock.lock") {
-		tmpfilename = ".sock.lock"
-	} else {
-		tmpfilename = fmt.Sprintf(".%s.unix", ToString(time.Now().Unix()))
-	}
-	_ = os.Remove(".sock.lock")
-
-	Opt.logFile, err = NewFile(tmpfilename, false)
-	if err != nil {
-		Log.Important("[warn] cannot create logfile, err:" + err.Error())
-	} else {
-		Log.Init(Opt.logFile)
-	}
-
 	handler()
 	return nil
 }
@@ -91,7 +75,7 @@ func handler() {
 	//挂起文件相关协程
 
 	// 进度文件
-	if Opt.logFile != nil {
+	if Log.LogFile != nil {
 		go func() {
 			for res := range Log.LogCh {
 				Log.LogFile.SyncWrite(res)

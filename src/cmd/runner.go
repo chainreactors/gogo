@@ -123,12 +123,15 @@ func (r *Runner) init() {
 	}
 
 	// 加载配置文件中的全局变量
-	configloader()
+	configLoader()
 	nucleiLoader(r.ExploitFile, r.payloads)
 	r.start = time.Now()
 }
 
 func (r *Runner) close() {
+	Opt.Close()                        // 关闭result与extract写入管道
+	Log.Close()                        // 关闭进度写入管道
+	time.Sleep(time.Microsecond * 200) // 因为是异步的, 等待文件最后处理完成
 	if r.HiddenFile {
 		Chtime(r.config.Filename)
 		if r.config.SmartFilename != "" {
@@ -180,7 +183,7 @@ func nucleiLoader(pocfile string, payloads arrayFlags) {
 	TemplateMap = LoadNuclei(pocfile)
 }
 
-func configloader() {
+func configLoader() {
 	Compiled = make(map[string][]*regexp.Regexp)
 	Mmh3Fingers, Md5Fingers = LoadHashFinger()
 	TcpFingers = LoadFingers("tcp")

@@ -8,7 +8,6 @@ import (
 	"github.com/panjf2000/ants/v2"
 	"os"
 	"strings"
-	"time"
 )
 
 var ver = ""
@@ -90,10 +89,10 @@ func CMD() {
 	runner.init()
 
 	// 初始化任务
+	Log.InitFile() // 在真正运行前再初始化进度文件
 	runner.config = InitConfig(runner.config)
 	RunTask(runner.config) // 运行
 
-	time.Sleep(time.Microsecond * 500)
 	runner.close()
 }
 

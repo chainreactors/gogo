@@ -20,7 +20,6 @@ func output(result *Result, outType string) string {
 		out = fullOutput(result)
 	default:
 		out = valuesOutput(result, outType)
-
 	}
 	return out
 }
@@ -30,16 +29,16 @@ func valuesOutput(result *Result, outType string) string {
 	for i, out := range outs {
 		outs[i] = result.Get(out)
 	}
-	return strings.Join(outs, "\t") + "\n"
+	return strings.Join(outs, "\t")
 }
 
 func colorOutput(result *Result) string {
-	s := fmt.Sprintf("%s://%s:%s\t%s\t%s\t%s\t%s\t%s [%s] %s %s", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, Blue(result.Frameworks.ToString()), result.Host, result.Hash, Yellow(result.HttpStat), Blue(result.Title), Red(result.Vulns.ToString()))
+	s := fmt.Sprintf("[+] %s://%s:%s\t%s\t%s\t%s\t%s\t%s [%s] %s %s", result.Protocol, result.Ip, result.Port, result.Midware, result.Language, Blue(result.Frameworks.ToString()), result.Host, result.Hash, Yellow(result.HttpStat), Blue(result.Title), Red(result.Vulns.ToString()))
 	return s
 }
 
 func fullOutput(result *Result) string {
-	s := fmt.Sprintf("%s://%s:%s%s\t%s\t%s\t%s\t%s\t%s [%s] %s %s %s", result.Protocol, result.Ip, result.Port, result.Uri, result.Midware, result.Language, result.Frameworks.ToString(), result.Host, result.Hash, result.HttpStat, result.Title, result.Vulns.ToString(), result.Extracts.ToString())
+	s := fmt.Sprintf("[+] %s://%s:%s%s\t%s\t%s\t%s\t%s\t%s [%s] %s %s %s", result.Protocol, result.Ip, result.Port, result.Uri, result.Midware, result.Language, result.Frameworks.ToString(), result.Host, result.Hash, result.HttpStat, result.Title, result.Vulns.ToString(), result.Extracts.ToString())
 	return s
 }
 

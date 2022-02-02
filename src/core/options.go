@@ -21,7 +21,6 @@ type Options struct {
 	smartFile   *File
 	extractFile *File
 	pingFile    *File
-	logFile     *File
 	DataCh      chan string
 	ExtractCh   chan string
 	Output      string
