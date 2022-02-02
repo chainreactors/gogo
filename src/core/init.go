@@ -29,6 +29,7 @@ func InitConfig(config Config) Config {
 	config.VerisonLevel = RunOpt.VersionLevel
 
 	if config.Threads == 0 { // if 默认线程
+		config.Threads = 4000
 		if IsWin() {
 			//windows系统默认协程数为1000
 			config.Threads = 1000
@@ -40,16 +41,11 @@ func InitConfig(config Config) Config {
 				Log.Warn(fmt.Sprintf("System fd limit: %d , Please exec 'ulimit -n 65535'", fdlimit))
 				Log.Warn(fmt.Sprintf("Now set threads to %d", fdlimit-100))
 				config.Threads = fdlimit - 100
-			} else {
-				config.Threads = 4000
 			}
 		}
-
 		if config.JsonFile != "" {
 			config.Threads = 50
 		}
-	} else {
-		config.Threads = 4000
 	}
 
 	var file *os.File
