@@ -11,38 +11,40 @@ import (
 )
 
 type Result struct {
-	Ip           string         `json:"i"` // ip
-	Port         string         `json:"p"` // port
-	Uri          string         `json:"u"` // uri
-	Os           string         `json:"o"` // os
-	Host         string         `json:"h"` // host
-	Title        string         `json:"t"` // title
-	Midware      string         `json:"m"` // midware
-	HttpStat     string         `json:"s"` // http_stat
-	Language     string         `json:"l"` // language
-	Frameworks   Frameworks     `json:"f"` // framework
-	Vulns        Vulns          `json:"v"`
-	Extracts     *Extracts      `json:"-"`
-	ExtractsStat map[string]int `json:"ec"`
-	Protocol     string         `json:"r"` // protocol
-	Hash         string         `json:"hs"`
-	Open         bool           `json:"-"`
-	SmartProbe   bool           `json:"-"`
-	TcpCon       *net.Conn      `json:"-"`
-	Httpresp     *http.Response `json:"-"`
-	Error        string         `json:"-"`
-	ErrStat      int            `json:"-"`
-	Content      string         `json:"-"`
+	Ip            string          `json:"i"` // ip
+	Port          string          `json:"p"` // port
+	Uri           string          `json:"u"` // uri
+	Os            string          `json:"o"` // os
+	Host          string          `json:"h"` // host
+	Title         string          `json:"t"` // title
+	Midware       string          `json:"m"` // midware
+	HttpStat      string          `json:"s"` // http_stat
+	Language      string          `json:"l"` // language
+	Frameworks    Frameworks      `json:"f"` // framework
+	Vulns         Vulns           `json:"v"`
+	Extracts      *Extracts       `json:"-"`
+	ExtractsStat  map[string]int  `json:"ec"`
+	Protocol      string          `json:"r"` // protocol
+	Hash          string          `json:"hs"`
+	Open          bool            `json:"-"`
+	FrameworksMap map[string]bool `json:"-"`
+	SmartProbe    bool            `json:"-"`
+	TcpCon        *net.Conn       `json:"-"`
+	Httpresp      *http.Response  `json:"-"`
+	Error         string          `json:"-"`
+	ErrStat       int             `json:"-"`
+	Content       string          `json:"-"`
 }
 
 func NewResult(ip, port string) *Result {
 	var result = Result{
-		Ip:           ip,
-		Port:         port,
-		Protocol:     "tcp",
-		HttpStat:     "tcp",
-		Extracts:     &Extracts{},
-		ExtractsStat: map[string]int{},
+		Ip:            ip,
+		Port:          port,
+		Protocol:      "tcp",
+		HttpStat:      "tcp",
+		Extracts:      &Extracts{},
+		ExtractsStat:  map[string]int{},
+		FrameworksMap: map[string]bool{},
 	}
 	result.Extracts.Target = result.GetTarget()
 	return &result
@@ -75,10 +77,14 @@ func (result *Result) AddVulns(vulns []*Vuln) {
 
 func (result *Result) AddFramework(f *Framework) {
 	result.Frameworks = append(result.Frameworks, f)
+	result.FrameworksMap[f.ToString()] = true
 }
 
 func (result *Result) AddFrameworks(f []*Framework) {
 	result.Frameworks = append(result.Frameworks, f...)
+	for _, framework := range f {
+		result.FrameworksMap[framework.ToString()] = true
+	}
 }
 
 func (result *Result) AddExtract(extract *Extract) {

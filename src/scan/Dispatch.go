@@ -95,6 +95,9 @@ func Dispatch(result *utils.Result) {
 
 	// 格式化title编码, 防止输出二进制数据
 	result.Title = utils.AsciiEncode(result.Title)
+	if !result.Httpresp.Close {
+		_ = result.Httpresp.Body.Close()
+	}
 	return
 }
 

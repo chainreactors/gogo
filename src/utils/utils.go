@@ -37,6 +37,7 @@ func GetHttpRaw(resp *http.Response) string {
 		return raw
 	}
 	raw += string(body)
+	_ = resp.Body.Close()
 	return raw
 }
 
