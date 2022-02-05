@@ -43,6 +43,12 @@ func Ports2PortSlice(ports []string) []string {
 	var tmpports []string
 	//生成端口列表 支持,和-
 	for _, pr := range ports {
+		if pr[0] == 45 {
+			pr = "1" + pr
+		}
+		if pr[len(pr)-1] == 45 {
+			pr = pr + "65535"
+		}
 		tmpports = append(tmpports, port2PortSlice(pr)...)
 	}
 	return tmpports
