@@ -190,8 +190,8 @@ func RunTask(config Config) {
 	switch config.Mod {
 	case "default":
 		createDefaultScan(config)
-	case "a", "auto":
-		autoScan(config)
+	//case "a", "auto":
+	//	autoScan(config)
 	case "s", "f", "ss", "sc":
 		if config.IPlist != nil {
 			for _, ip := range config.IPlist {
@@ -257,12 +257,12 @@ func countip(mask int) int {
 	return count
 }
 
-func autoScan(config Config) {
-	for cidr, st := range InterConfig {
-		Log.Logging("[*] Spraying : " + cidr)
-		createAutoTask(config, cidr, st)
-	}
-}
+//func autoScan(config Config) {
+//	for cidr, st := range InterConfig {
+//		Log.Logging("[*] Spraying : " + cidr)
+//		createAutoTask(config, cidr, st)
+//	}
+//}
 
 func createAutoTask(config Config, cidr string, c []string) {
 	config.SmartPortList = portHandler(c[1])
