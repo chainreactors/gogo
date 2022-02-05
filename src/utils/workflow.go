@@ -1,5 +1,7 @@
 package utils
 
+import "path"
+
 type WorkFlow struct {
 	Name       string   `json:"name"`
 	IP         string   `json:"ip"`
@@ -7,10 +9,11 @@ type WorkFlow struct {
 	Mod        string   `json:"mod"`
 	Ping       bool     `json:"ping"`
 	Arp        bool     `json:"arp"`
-	NoScan     bool     `json:"no"`
-	IpProbe    string   `json:"ipprobe"   default:"default"`
-	SmartProbe string   `json:"portprobe" default:"default"`
-	File       string   `json:"file" default:"-auto"`
+	NoScan     bool     `json:"no-scan"`
+	IpProbe    string   `json:"ipprobe"`
+	SmartProbe string   `json:"portprobe"`
+	File       string   `json:"file"`
+	Path       string   `json:"path"`
 	Tags       []string `json:"tags"`
 }
 
@@ -22,12 +25,20 @@ func (w *WorkFlow) PrepareConfig() *Config {
 		IpProbe:   w.IpProbe,
 		SmartPort: w.SmartProbe,
 	}
+	// 参数默认值
 	if w.IpProbe == "" {
 		w.IpProbe = "default"
 	}
 	if w.SmartProbe == "" {
 		w.SmartProbe = "default"
 	}
+	if w.Ports == "" {
+		w.Ports = "top1"
+	}
+	if w.Mod == "" {
+		w.Mod = "default"
+	}
+
 	if w.Arp {
 		config.AliveSprayMod = append(config.AliveSprayMod, "arp")
 	}
@@ -35,17 +46,23 @@ func (w *WorkFlow) PrepareConfig() *Config {
 		config.AliveSprayMod = append(config.AliveSprayMod, "icmp")
 	}
 
-	if w.File == "" {
-		config.Filename = GetFilename(config, true, false, "", "json")
-		if config.IsSmartScan() && !w.NoScan {
-			config.SmartFilename = GetFilename(config, true, false, "", "cidr")
-		}
-		if config.HasAlivedScan() {
-			config.PingFilename = GetFilename(config, true, false, "", "alived")
-		}
+	var autofile, hiddenfile bool
+	if w.File == "auto" {
+		autofile = true
+	} else if w.File == "hidden" {
+		hiddenfile = true
 	} else {
-		config.Filename = w.File
+		config.Filename = path.Join(w.Path, w.File)
 	}
 
+	if config.Filename == "" {
+		config.Filename = GetFilename(config, autofile, hiddenfile, w.Path, "json")
+		if config.IsSmartScan() && !w.NoScan {
+			config.SmartFilename = GetFilename(config, autofile, hiddenfile, w.Path, "cidr")
+		}
+		if config.HasAlivedScan() {
+			config.PingFilename = GetFilename(config, autofile, hiddenfile, w.Path, "alived")
+		}
+	}
 	return config
 }

@@ -21,7 +21,7 @@ Usage of ./getitle:
          wmi 使用wmi的ntlm协议收集信息,与smb的协议收集到的内容一致 
          snmp 使用snmp public收集信息
          icmp/ping 使用ping判断存活
-         arp TODO
+         arp 使用arp协议判断ip存活, 并收集mac地址
          winrm 不太常用,暂时删除
 
       -m string    扫描模式：(每次只能选择一个生效)

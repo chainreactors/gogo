@@ -151,7 +151,7 @@ func (r *Runner) prepareConfig(config Config) *Config {
 	if config.Filename == "" {
 		config.Filename = GetFilename(&config, r.AutoFile, r.HiddenFile, Opt.FilePath, Opt.FileOutput)
 	} else {
-		path.Join(Opt.FilePath, config.Filename)
+		config.Filename = path.Join(Opt.FilePath, config.Filename)
 	}
 
 	if config.IsSmartScan() && !Opt.Noscan {
@@ -174,14 +174,27 @@ func (r *Runner) run() {
 		workflowMap := LoadWorkFlow()
 		if workflows, ok := workflowMap[strings.ToLower(r.WorkFlowName)]; ok {
 			for _, workflow := range workflows {
+				Log.Logging("[*] workflow " + workflow.Name + "starting")
+				// 文件名要在config初始化之前操作
+				if r.config.Filename != "" {
+					workflow.File = r.config.Filename
+				} else if r.AutoFile {
+					workflow.File = "auto"
+				} else if r.HiddenFile {
+					workflow.File = "hidden"
+				}
+				if Opt.FilePath != "" {
+					workflow.Path = Opt.FilePath
+				}
+
 				config = workflow.PrepareConfig()
 
 				// 一些workflow的参数, 允许被命令行参数覆盖
 				if r.Ports != "" {
 					config.Ports = r.Ports
 				}
-				if workflow.NoScan {
-					Opt.Noscan = true
+				if r.config.Threads != 0 {
+					config.Threads = r.config.Threads
 				}
 				config = InitConfig(config)
 				RunTask(*config) // 运行

@@ -176,9 +176,9 @@ func PrintNucleiPoc() {
 }
 
 func PrintInterConfig() {
-	fmt.Println("Auto internet smart scan config")
-	fmt.Println("CIDR\t\tMOD\tPortProbe\tIpProbe")
-	for k, v := range InterConfig {
-		fmt.Printf("%s\t\t%s\n", k, strings.Join(v, "\t"))
-	}
+	//fmt.Println("Auto internet smart scan config")
+	//fmt.Println("CIDR\t\tMOD\tPortProbe\tIpProbe")
+	//for k, v := range InterConfig {
+	//	fmt.Printf("%s\t\t%s\n", k, strings.Join(v, "\t"))
+	//}
 }
