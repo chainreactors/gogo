@@ -156,9 +156,9 @@ func LoadWorkFlow() map[string][]*WorkFlow {
 	}
 	var tmpmap = make(map[string][]*WorkFlow)
 	for _, workflow := range workflows {
-		tmpmap[workflow.Name] = append(tmpmap[workflow.Name], workflow)
+		tmpmap[strings.ToLower(workflow.Name)] = append(tmpmap[strings.ToLower(workflow.Name)], workflow)
 		for _, tag := range workflow.Tags {
-			tmpmap[tag] = append(tmpmap[tag], workflow)
+			tmpmap[strings.ToLower(tag)] = append(tmpmap[strings.ToLower(tag)], workflow)
 		}
 	}
 	return tmpmap

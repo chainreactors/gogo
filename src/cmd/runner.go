@@ -172,7 +172,7 @@ func (r *Runner) run() {
 		r.close(config)
 	} else {
 		workflowMap := LoadWorkFlow()
-		if workflows, ok := workflowMap[r.WorkFlowName]; ok {
+		if workflows, ok := workflowMap[strings.ToLower(r.WorkFlowName)]; ok {
 			for _, workflow := range workflows {
 				config = workflow.PrepareConfig()
 
