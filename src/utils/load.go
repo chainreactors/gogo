@@ -43,6 +43,10 @@ func Ports2PortSlice(ports []string) []string {
 	var tmpports []string
 	//生成端口列表 支持,和-
 	for _, pr := range ports {
+		if len(pr) == 0 {
+			continue
+		}
+		pr = strings.TrimSpace(pr)
 		if pr[0] == 45 {
 			pr = "1" + pr
 		}

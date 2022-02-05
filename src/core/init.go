@@ -11,11 +11,9 @@ import (
 )
 
 var Opt = Options{
-	AliveSum:  0,
-	Noscan:    false,
-	Compress:  true,
-	dataCh:    make(chan string, 100),
-	extractCh: make(chan string, 100),
+	AliveSum: 0,
+	Noscan:   false,
+	Compress: true,
 }
 
 func InitConfig(config *Config) *Config {

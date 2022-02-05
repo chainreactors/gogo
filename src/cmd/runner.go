@@ -209,7 +209,6 @@ func (r *Runner) run() {
 
 func (r *Runner) close(config *Config) {
 	Opt.Close()                        // 关闭result与extract写入管道
-	Log.Close()                        // 关闭进度写入管道
 	time.Sleep(time.Microsecond * 200) // 因为是异步的, 等待文件最后处理完成
 	if r.HiddenFile {
 		Chtime(config.Filename)

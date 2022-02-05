@@ -38,6 +38,9 @@ func (w *WorkFlow) PrepareConfig() *Config {
 	if w.Mod == "" {
 		w.Mod = "default"
 	}
+	if w.File == "" {
+		w.File = "auto"
+	}
 
 	if w.Arp {
 		config.AliveSprayMod = append(config.AliveSprayMod, "arp")

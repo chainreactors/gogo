@@ -8,6 +8,7 @@ import (
 
 func portHandler(portstring string) []string {
 	var ports []string
+	portstring = strings.TrimSpace(portstring)
 	portstring = strings.Replace(portstring, "\r", "", -1)
 
 	postslist := strings.Split(portstring, ",")

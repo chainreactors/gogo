@@ -22,6 +22,10 @@ var Log *Logger
 
 func (opt *Options) Close() {
 	// 关闭管道
-	close(Opt.dataCh)
-	close(Opt.extractCh)
+	if Opt.dataCh != nil {
+		close(Opt.dataCh)
+	}
+	if Opt.extractFile != nil {
+		close(Opt.extractCh)
+	}
 }

@@ -95,6 +95,7 @@ func CMD() {
 	Log.InitFile() // 在真正运行前再初始化进度文件
 	runner.run()
 
+	Log.Close() // 关闭进度写入管道
 }
 
 type Value interface {

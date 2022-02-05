@@ -28,7 +28,8 @@ func LoadFile(file *os.File) []string {
 
 func initFile(config *Config) error {
 	var err error
-
+	Opt.dataCh = make(chan string, 100)
+	Opt.extractCh = make(chan string, 100)
 	// 初始化res文件handler
 	if config.Filename != "" {
 		Log.Clean = !Log.Clean
