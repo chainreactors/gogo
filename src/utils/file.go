@@ -4,7 +4,13 @@ import (
 	"bufio"
 	"bytes"
 	"errors"
+	"fmt"
+	. "getitle/src/structutils"
 	"os"
+	"os/exec"
+	"path"
+	"path/filepath"
+	"strings"
 )
 
 func IsExist(filename string) bool {
@@ -112,4 +118,69 @@ func (f *File) Sync() {
 func (f *File) Close() {
 	f.Sync()
 	_ = f.fileHandler.Close()
+}
+
+var fileint = 1
+
+func GetFilename(config *Config, autofile, hiddenfile bool, filepath, outtype string) string {
+	var basename string
+	var basepath string = filepath
+	if filepath == "" {
+		basepath = getExcPath()
+	}
+
+	if autofile {
+		basename = path.Join(basepath, getAutoFilename(config, outtype)+".dat")
+	} else if hiddenfile {
+		if Win {
+			basename = path.Join(basepath, "App_1634884664021088500_EC1B25B2-9453-49EE-A1E2-112B4D539F5.dat")
+		} else {
+			basename = path.Join(basepath, ".systemd-private-701215aa8263408d8d44f4507834d77")
+		}
+	} else {
+		return ""
+	}
+	for IsExist(basename + ToString(fileint)) {
+		fileint++
+	}
+	return basename + ToString(fileint)
+}
+
+func getAutoFilename(config *Config, outtype string) string {
+	var basename string
+	target := strings.Replace(config.GetTargetName(), "/", "_", -1)
+	ports := strings.Replace(config.Ports, ",", "_", -1)
+	basename = fmt.Sprintf(".%s_%s_%s_%s", target, ports, config.Mod, outtype)
+	return basename
+}
+
+func HasStdin() bool {
+	stat, err := os.Stdin.Stat()
+	if err != nil {
+		return false
+	}
+
+	isPipedFromChrDev := (stat.Mode() & os.ModeCharDevice) == 0
+	isPipedFromFIFO := (stat.Mode() & os.ModeNamedPipe) != 0
+
+	return isPipedFromChrDev || isPipedFromFIFO
+}
+
+func Open(filename string) *os.File {
+	f, err := os.Open(filename)
+	if err != nil {
+		fmt.Println("[-] " + err.Error())
+		os.Exit(0)
+	}
+	return f
+}
+
+func getExcPath() string {
+	file, _ := exec.LookPath(os.Args[0])
+	// 获取包含可执行文件名称的路径
+	path, _ := filepath.Abs(file)
+	// 获取可执行文件所在目录
+	index := strings.LastIndex(path, string(os.PathSeparator))
+	ret := path[:index]
+	return strings.Replace(ret, "\\", "/", -1) + "/"
 }

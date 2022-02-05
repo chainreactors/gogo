@@ -67,12 +67,12 @@ func FormatOutput(filename string, outputfile string, autofile bool, filters []s
 		resultsdata = data.(*ResultsData)
 		Log.Important(resultsdata.ToConfig())
 		if outputfile == "" {
-			outputfile = GetFilename(resultsdata.Config, autofile, false, Opt.Output)
+			outputfile = GetFilename(&resultsdata.Config, autofile, false, Opt.FilePath, Opt.Output)
 		}
 	case *SmartData:
 		smartdata = data.(*SmartData)
 		if outputfile == "" {
-			outputfile = GetFilename(smartdata.Config, autofile, false, "cidr")
+			outputfile = GetFilename(&smartdata.Config, autofile, false, Opt.FilePath, "cidr")
 		}
 	case []Extracts:
 		extractsdata = data.([]Extracts)

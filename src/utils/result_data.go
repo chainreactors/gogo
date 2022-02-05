@@ -105,7 +105,7 @@ func (rd ResultsData) ToConfig() string {
 	// 输出配置信息
 	var configstr string
 	configstr = fmt.Sprintf("[*] Scan Target: %s, Ports: %s, Mod: %s \n", rd.Config.GetTargetName(), rd.Config.Ports, rd.Config.Mod)
-	configstr += fmt.Sprintf("[*] Exploit: %s, Version level: %d \n", rd.Config.Exploit, rd.Config.VerisonLevel)
+	configstr += fmt.Sprintf("[*] Exploit: %s, Version level: %d \n", rd.Config.Exploit, rd.Config.VersionLevel)
 	if rd.IP != "" {
 		configstr += fmt.Sprintf("[*] Internet IP: %s", rd.IP)
 	}

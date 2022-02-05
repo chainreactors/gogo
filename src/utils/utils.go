@@ -189,3 +189,8 @@ func HasPingPriv() bool {
 	}
 	return false
 }
+
+func Panic(s string) {
+	fmt.Println("[-] " + s)
+	os.Exit(0)
+}

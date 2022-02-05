@@ -11,14 +11,15 @@ import (
 )
 
 var (
-	Md5Fingers     map[string]string
-	Mmh3Fingers    map[string]string
-	AllFingers     []*Finger
-	TcpFingers     FingerMapper
-	HttpFingers    FingerMapper
-	NameMap        PortMapper
-	PortMap        PortMapper
-	TagMap         PortMapper
+	Md5Fingers  map[string]string
+	Mmh3Fingers map[string]string
+	AllFingers  []*Finger
+	TcpFingers  FingerMapper
+	HttpFingers FingerMapper
+	NameMap     PortMapper
+	PortMap     PortMapper
+	TagMap      PortMapper
+	//WorkFlowMap    map[string][]*WorkFlow
 	Compiled       map[string][]*regexp.Regexp
 	CommonCompiled map[string]*regexp.Regexp
 	Extractors     = make(map[string]*regexp.Regexp)
@@ -136,14 +137,29 @@ func LoadHashFinger() (map[string]string, map[string]string) {
 	var err error
 	err = json.Unmarshal(LoadConfig("mmh3"), &mmh3fingers)
 	if err != nil {
-		fmt.Println("[-] mmh3 load FAIL!")
-		os.Exit(0)
+		Panic("mmh3 load FAIL" + err.Error())
 	}
 
 	err = json.Unmarshal(LoadConfig("md5"), &md5fingers)
 	if err != nil {
-		fmt.Println("[-] mmh3 load FAIL!")
-		os.Exit(0)
+		Panic("md5 load FAIL" + err.Error())
 	}
 	return mmh3fingers, md5fingers
+}
+
+func LoadWorkFlow() map[string][]*WorkFlow {
+	var workflows []*WorkFlow
+	var err error
+	err = json.Unmarshal(LoadConfig("workflow"), &workflows)
+	if err != nil {
+		Panic("workflow load FAIL, " + err.Error())
+	}
+	var tmpmap = make(map[string][]*WorkFlow)
+	for _, workflow := range workflows {
+		tmpmap[workflow.Name] = append(tmpmap[workflow.Name], workflow)
+		for _, tag := range workflow.Tags {
+			tmpmap[tag] = append(tmpmap[tag], workflow)
+		}
+	}
+	return tmpmap
 }

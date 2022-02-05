@@ -31,7 +31,7 @@ type Config struct {
 	NoSpray       bool          `json:"-"`
 	Exploit       string        `json:"exploit"`
 	JsonType      string        `json:"json_type"`
-	VerisonLevel  int           `json:"version_level"`
+	VersionLevel  int           `json:"version_level"`
 	IsListInput   bool          `json:"-"`
 	IsJsonInput   bool          `json:"-"`
 }

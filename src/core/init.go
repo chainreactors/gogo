@@ -18,7 +18,7 @@ var Opt = Options{
 	extractCh: make(chan string, 100),
 }
 
-func InitConfig(config Config) Config {
+func InitConfig(config *Config) *Config {
 	err := validate(config)
 	if err != nil {
 		fmt.Println("[-]" + err.Error())
@@ -26,7 +26,7 @@ func InitConfig(config Config) Config {
 	}
 	// 初始化
 	config.Exploit = RunOpt.Exploit
-	config.VerisonLevel = RunOpt.VersionLevel
+	config.VersionLevel = RunOpt.VersionLevel
 
 	if config.Threads == 0 { // if 默认线程
 		config.Threads = 4000
@@ -83,7 +83,7 @@ func InitConfig(config Config) Config {
 		}
 	}
 
-	initIP(&config)
+	initIP(config)
 	// 初始化端口配置
 	config.Portlist = portHandler(config.Ports)
 
@@ -131,7 +131,7 @@ func InitConfig(config Config) Config {
 	return config
 }
 
-func validate(config Config) error {
+func validate(config *Config) error {
 	// 一些命令行参数错误处理,如果check没过直接退出程序或输出警告
 	//if config.Mod == "ss" && config.ListFile != "" {
 	//	fmt.Println("[-] error Smart . can not use File input")
@@ -168,7 +168,7 @@ func validate(config Config) error {
 	return err
 }
 
-func printTaskInfo(config Config, taskname string) {
+func printTaskInfo(config *Config, taskname string) {
 	// 输出任务的基本信息
 
 	Log.Logging(fmt.Sprintf("[*] Current goroutines: %d, Version Level: %d,Exploit Target: %s, PortSpray Scan: %t", config.Threads, RunOpt.VersionLevel, RunOpt.Exploit, config.PortSpray))
