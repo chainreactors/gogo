@@ -174,7 +174,7 @@ func (r *Runner) run() {
 		workflowMap := LoadWorkFlow()
 		if workflows, ok := workflowMap[strings.ToLower(r.WorkFlowName)]; ok {
 			for _, workflow := range workflows {
-				Log.Logging("[*] workflow " + workflow.Name + "starting")
+				Log.Logging("\n[*] workflow " + workflow.Name + " starting")
 				// 文件名要在config初始化之前操作
 				if r.config.Filename != "" {
 					workflow.File = r.config.Filename
@@ -187,6 +187,9 @@ func (r *Runner) run() {
 					workflow.Path = Opt.FilePath
 				}
 
+				if workflow.NoScan {
+					Opt.Noscan = true
+				}
 				config = workflow.PrepareConfig()
 
 				// 一些workflow的参数, 允许被命令行参数覆盖
@@ -196,6 +199,7 @@ func (r *Runner) run() {
 				if r.config.Threads != 0 {
 					config.Threads = r.config.Threads
 				}
+
 				config = InitConfig(config)
 				RunTask(*config) // 运行
 				r.close(config)

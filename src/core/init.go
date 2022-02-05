@@ -262,19 +262,19 @@ func countip(mask int) int {
 //	}
 //}
 
-func createAutoTask(config Config, cidr string, c []string) {
-	config.SmartPortList = portHandler(c[1])
-	config.Mod = c[0]
-	if c[2] != "all" {
-		config.IpProbe = c[2]
-		config.IpProbeList = Str2uintlist(c[2])
-	}
-	SmartMod(cidr, config)
-}
+//func createAutoTask(config Config, cidr string, c []string) {
+//	config.SmartPortList = portHandler(c[1])
+//	config.Mod = c[0]
+//	if c[2] != "all" {
+//		config.IpProbe = c[2]
+//		config.IpProbeList = Str2uintlist(c[2])
+//	}
+//	SmartMod(cidr, config)
+//}
 
 func createSmartScan(ip string, config Config) {
 	mask := getMask(ip)
-	if mask >= 24 {
+	if mask > 24 {
 		config.Mod = "default"
 		DefaultMod(ip, config)
 	} else {
