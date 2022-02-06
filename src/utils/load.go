@@ -157,7 +157,7 @@ func LoadHashFinger() (map[string]string, map[string]string) {
 	return mmh3fingers, md5fingers
 }
 
-func LoadWorkFlow() map[string][]*WorkFlow {
+func LoadWorkFlow() WorkflowMap {
 	var workflows []*WorkFlow
 	var err error
 	err = json.Unmarshal(LoadConfig("workflow"), &workflows)
@@ -172,4 +172,16 @@ func LoadWorkFlow() map[string][]*WorkFlow {
 		}
 	}
 	return tmpmap
+}
+
+type WorkflowMap map[string][]*WorkFlow
+
+func (m WorkflowMap) Choice(name string) []*WorkFlow {
+	var workflows []*WorkFlow
+	name = strings.TrimSpace(name)
+	names := strings.Split(name, ",")
+	for _, n := range names {
+		workflows = append(workflows, m[n]...)
+	}
+	return workflows
 }

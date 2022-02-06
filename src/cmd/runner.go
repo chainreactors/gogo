@@ -186,7 +186,7 @@ func (r *Runner) runWithCMD() {
 
 func (r *Runner) runWithWorkFlow() {
 	workflowMap := LoadWorkFlow()
-	if workflows, ok := workflowMap[strings.ToLower(r.WorkFlowName)]; ok {
+	if workflows := workflowMap.Choice(r.WorkFlowName); len(workflows) > 0 {
 		for _, workflow := range workflows {
 			Log.Logging("\n[*] workflow " + workflow.Name + " starting")
 			// 文件名要在config初始化之前操作
