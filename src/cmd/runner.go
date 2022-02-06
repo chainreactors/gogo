@@ -43,6 +43,7 @@ type Runner struct {
 	UploadFile   string // 上传特定的文件名
 	WorkFlowName string
 	Ver          bool // 输出版本号
+	NoScan       bool
 	iface        string
 	start        time.Time
 	config       Config
@@ -92,9 +93,14 @@ func (r *Runner) init() {
 		RunOpt.Exploit = r.ExploitName
 	}
 
+	if r.NoScan {
+		Opt.Noscan = r.NoScan
+	}
+
 	if r.Compress {
 		Opt.Compress = !Opt.Compress
 	}
+
 	if r.Clean {
 		Log.Clean = !Log.Clean
 	}
@@ -165,49 +171,73 @@ func (r *Runner) prepareConfig(config Config) *Config {
 }
 
 func (r *Runner) run() {
-	var config *Config
 	if r.WorkFlowName == "" {
-		config = r.prepareConfig(r.config)
-		RunTask(*InitConfig(config)) // 运行
-		r.close(config)
+		r.runWithCMD()
 	} else {
-		workflowMap := LoadWorkFlow()
-		if workflows, ok := workflowMap[strings.ToLower(r.WorkFlowName)]; ok {
-			for _, workflow := range workflows {
-				Log.Logging("\n[*] workflow " + workflow.Name + " starting")
-				// 文件名要在config初始化之前操作
-				if r.config.Filename != "" {
-					workflow.File = r.config.Filename
-				} else if r.AutoFile {
-					workflow.File = "auto"
-				} else if r.HiddenFile {
-					workflow.File = "hidden"
-				}
-				if Opt.FilePath != "" {
-					workflow.Path = Opt.FilePath
-				}
+		r.runWithWorkFlow()
+	}
+}
 
-				if workflow.NoScan {
-					Opt.Noscan = true
-				}
-				config = workflow.PrepareConfig()
+func (r *Runner) runWithCMD() {
+	config := r.prepareConfig(r.config)
+	RunTask(*InitConfig(config)) // 运行
+	r.close(config)
+}
 
-				// 一些workflow的参数, 允许被命令行参数覆盖
-				if r.Ports != "" {
-					config.Ports = r.Ports
-				}
-				if r.config.Threads != 0 {
-					config.Threads = r.config.Threads
-				}
-
-				config = InitConfig(config)
-				RunTask(*config) // 运行
-				r.close(config)
-				Opt.Noscan = false
+func (r *Runner) runWithWorkFlow() {
+	workflowMap := LoadWorkFlow()
+	if workflows, ok := workflowMap[strings.ToLower(r.WorkFlowName)]; ok {
+		for _, workflow := range workflows {
+			Log.Logging("\n[*] workflow " + workflow.Name + " starting")
+			// 文件名要在config初始化之前操作
+			if r.config.Filename != "" {
+				workflow.File = r.config.Filename
+			} else if r.AutoFile {
+				workflow.File = "auto"
+			} else if r.HiddenFile {
+				workflow.File = "hidden"
 			}
-		} else {
-			Panic("not fount workflow " + r.WorkFlowName)
+			if Opt.FilePath != "" {
+				workflow.Path = Opt.FilePath
+			}
+
+			config := workflow.PrepareConfig()
+
+			// 一些workflow的参数, 允许被命令行参数覆盖
+			if r.Ports != "" {
+				config.Ports = r.Ports
+			}
+			if r.config.Threads != 0 {
+				config.Threads = r.config.Threads
+			}
+
+			// 全局变量的处理
+			if !r.NoScan {
+				Opt.Noscan = workflow.NoScan
+			}
+			if r.Version {
+				RunOpt.VersionLevel = 1
+			} else {
+				RunOpt.VersionLevel = workflow.Version
+			}
+
+			if RunOpt.Exploit != "none" {
+				if r.Exploit {
+					RunOpt.Exploit = "auto"
+				} else {
+					RunOpt.Exploit = r.ExploitName
+				}
+			} else {
+				RunOpt.Exploit = workflow.Exploit
+			}
+
+			config = InitConfig(config)
+			RunTask(*config) // 运行
+			r.close(config)
+			r.resetGlobals()
 		}
+	} else {
+		Panic("not fount workflow " + r.WorkFlowName)
 	}
 }
 
@@ -245,6 +275,12 @@ func (r *Runner) close(config *Config) {
 	if connected && !r.NoUpload && config.Filename != "" { // 如果出网则自动上传结果到云服务器
 		uploadfiles([]string{config.Filename, config.SmartFilename})
 	}
+}
+
+func (r *Runner) resetGlobals() {
+	Opt.Noscan = false
+	RunOpt.Exploit = "none"
+	RunOpt.VersionLevel = 0
 }
 
 func printConfigs(t string) {

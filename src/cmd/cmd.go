@@ -34,7 +34,7 @@ func CMD() {
 	flag.StringVar(&runner.config.SmartPort, "sp", "default", "")
 	flag.StringVar(&runner.config.IpProbe, "ipp", "default", "")
 	flag.BoolVar(&runner.config.NoSpray, "ns", false, "")
-	flag.BoolVar(&Opt.Noscan, "no", false, "")
+	flag.BoolVar(&runner.NoScan, "no", false, "")
 
 	// OUTPUT
 	flag.StringVar(&runner.config.Filename, "f", "", "")

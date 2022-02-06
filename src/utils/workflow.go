@@ -12,6 +12,8 @@ type WorkFlow struct {
 	NoScan     bool     `json:"no-scan"`
 	IpProbe    string   `json:"ipprobe"`
 	SmartProbe string   `json:"portprobe"`
+	Exploit    string   `json:"exploit"`
+	Version    int      `json:"version"`
 	File       string   `json:"file"`
 	Path       string   `json:"path"`
 	Tags       []string `json:"tags"`
@@ -40,6 +42,9 @@ func (w *WorkFlow) PrepareConfig() *Config {
 	}
 	if w.File == "" {
 		w.File = "auto"
+	}
+	if w.Exploit == "" {
+		w.Exploit = "none"
 	}
 
 	if w.Arp {
