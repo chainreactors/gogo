@@ -2,9 +2,7 @@ package utils
 
 import (
 	"encoding/json"
-	"fmt"
 	"getitle/src/structutils"
-	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -78,8 +76,7 @@ func LoadPortConfig() (PortMapper, PortMapper, PortMapper) {
 	err := json.Unmarshal(LoadConfig("port"), &portfingers)
 
 	if err != nil {
-		fmt.Println("[-] port config load FAIL!")
-		os.Exit(0)
+		Panic("[-] port config load FAIL!, " + err.Error())
 	}
 	tagmap := make(PortMapper)  // 以服务名归类
 	namemap := make(PortMapper) // 以tag归类
@@ -107,8 +104,7 @@ func LoadFingers(t string) FingerMapper {
 
 	err := json.Unmarshal(LoadConfig(t), &tmpfingers)
 	if err != nil {
-		fmt.Println("[-] finger load FAIL!")
-		os.Exit(0)
+		Panic("[-] finger load FAIL!, " + err.Error())
 	}
 	if t == "http" {
 		AllFingers = tmpfingers

@@ -16,8 +16,7 @@ func LoadFile(file *os.File) []byte {
 	defer file.Close()
 	content, err := ioutil.ReadAll(file)
 	if err != nil {
-		fmt.Println(err.Error())
-		os.Exit(0)
+		Panic("[-] " + err.Error())
 	}
 	if IsBase64(content) {
 		content = Base64Decode(string(content))

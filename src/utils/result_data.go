@@ -213,8 +213,7 @@ func (rd ResultsData) ToZombie() string {
 	}
 	s, err := json.Marshal(zms)
 	if err != nil {
-		fmt.Println("[-] " + err.Error())
-		os.Exit(0)
+		Panic("[-] " + err.Error())
 	}
 	return string(s)
 }
@@ -279,7 +278,7 @@ func LoadResultFile(file *os.File) interface{} {
 	var data interface{}
 	content, err := ioutil.ReadAll(file)
 	if err != nil {
-		os.Exit(0)
+		Panic("[-] " + err.Error())
 	}
 
 	if IsBase64(content) {

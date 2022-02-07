@@ -86,8 +86,7 @@ func FormatOutput(filename string, outputfile string, autofile bool, filters []s
 	if outputfile != "" {
 		fileHandle, err := NewFile(outputfile, Opt.Compress)
 		if err != nil {
-			fmt.Println("[-] " + err.Error())
-			os.Exit(0)
+			Panic("[-] " + err.Error())
 		}
 		fmt.Println("[*] Output filename: " + outputfile)
 		defer fileHandle.Close()

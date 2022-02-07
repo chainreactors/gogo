@@ -19,8 +19,7 @@ var Opt = Options{
 func InitConfig(config *Config) *Config {
 	err := validate(config)
 	if err != nil {
-		fmt.Println("[-]" + err.Error())
-		os.Exit(0)
+		Panic("[-] " + err.Error())
 	}
 	// 初始化
 	config.Exploit = RunOpt.Exploit
@@ -58,8 +57,7 @@ func InitConfig(config *Config) *Config {
 	// 初始化文件操作
 	err = initFile(config)
 	if err != nil {
-		fmt.Println("[-]" + err.Error())
-		os.Exit(0)
+		Panic("[-] " + err.Error())
 	}
 
 	if config.ListFile != "" || config.IsListInput {
@@ -76,8 +74,7 @@ func InitConfig(config *Config) *Config {
 		case SmartData:
 			config.IPlist = data.(SmartData).Data
 		default:
-			fmt.Println("[-] not support result, maybe use -l")
-			os.Exit(0)
+			Panic("[-] not support result, maybe use -l")
 		}
 	}
 
