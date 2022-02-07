@@ -5,8 +5,8 @@ import (
 	"bytes"
 	"encoding/hex"
 	"errors"
+	"getitle/src/pkg"
 	"getitle/src/structutils"
-	"getitle/src/utils"
 	"github.com/M09ic/go-ntlmssp"
 )
 
@@ -88,7 +88,7 @@ func getNTLMSSPNegotiateData(Flags []byte) []byte {
 	}
 }
 
-func smbScan(result *utils.Result) {
+func smbScan(result *pkg.Result) {
 	result.Port = "445"
 	target := result.GetTarget()
 	var err error
@@ -122,17 +122,17 @@ func smbScan(result *utils.Result) {
 
 func smb1Scan(target string) ([]byte, error) {
 	var err error
-	conn, err := utils.TcpSocketConn(target, RunOpt.Delay)
+	conn, err := pkg.TcpSocketConn(target, RunOpt.Delay)
 	if err != nil {
 		return nil, errors.New("conn failed")
 	}
 	defer conn.Close()
-	_, err = utils.SocketSend(conn, NegotiateSMBv1Data1, 4096)
+	_, err = pkg.SocketSend(conn, NegotiateSMBv1Data1, 4096)
 	if err != nil {
 		return nil, err
 	}
 
-	r2, err := utils.SocketSend(conn, NegotiateSMBv1Data2, 4096)
+	r2, err := pkg.SocketSend(conn, NegotiateSMBv1Data2, 4096)
 	//if err != nil || len(r2) < 47 {
 	//	return nil, err
 	//}
@@ -147,12 +147,12 @@ func smb1Scan(target string) ([]byte, error) {
 
 func smb2Scan(target string) ([]byte, error) {
 	var err error
-	conn, err := utils.TcpSocketConn(target, RunOpt.Delay)
+	conn, err := pkg.TcpSocketConn(target, RunOpt.Delay)
 	if err != nil {
 		return nil, err
 	}
 	defer conn.Close()
-	r2, err := utils.SocketSend(conn, NegotiateSMBv2Data1, 4096)
+	r2, err := pkg.SocketSend(conn, NegotiateSMBv2Data1, 4096)
 
 	if err != nil {
 		return nil, err
@@ -165,12 +165,12 @@ func smb2Scan(target string) ([]byte, error) {
 		NTLMSSPNegotiatev2Data = getNTLMSSPNegotiateData([]byte{0x05, 0x80, 0x08, 0xa0})
 	}
 
-	_, err = utils.SocketSend(conn, NegotiateSMBv2Data2, 4096)
+	_, err = pkg.SocketSend(conn, NegotiateSMBv2Data2, 4096)
 	if err != nil {
 		return nil, err
 	}
 
-	ret, _ := utils.SocketSend(conn, NTLMSSPNegotiatev2Data, 4096)
+	ret, _ := pkg.SocketSend(conn, NTLMSSPNegotiatev2Data, 4096)
 	ntlmOff := bytes.Index(ret, []byte("NTLMSSP"))
 	if ntlmOff != -1 {
 		return ret[ntlmOff:], err

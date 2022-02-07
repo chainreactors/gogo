@@ -4,13 +4,13 @@
 package scan
 
 import (
-	"getitle/src/utils"
+	"getitle/src/pkg"
 	"github.com/mdlayher/arp"
 	"net"
 	"time"
 )
 
-func arpScan(result *utils.Result) {
+func arpScan(result *pkg.Result) {
 	// Set up ARP client with socket
 	c, err := arp.Dial(RunOpt.Interface)
 	if err != nil {

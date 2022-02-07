@@ -3,8 +3,8 @@
 
 package scan
 
-import "getitle/src/utils"
+import "getitle/src/pkg"
 
-func arpScan(result *utils.Result) {
+func arpScan(result *pkg.Result) {
 	return
 }

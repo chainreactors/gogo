@@ -2,7 +2,7 @@ package scan
 
 import (
 	"encoding/hex"
-	"getitle/src/utils"
+	"getitle/src/pkg"
 	"strconv"
 	"strings"
 )
@@ -46,19 +46,19 @@ func init() {
 	}
 }
 
-func nbtScan(result *utils.Result) {
+func nbtScan(result *pkg.Result) {
 	var Share bool = false
 	var DC bool = false
 	result.Protocol = "udp"
 	result.Port = "137"
 	target := result.GetTarget()
-	conn, err := utils.UdpSocketConn(target, RunOpt.Delay*2)
+	conn, err := pkg.UdpSocketConn(target, RunOpt.Delay*2)
 	if err != nil {
 		return
 	}
 	defer conn.Close()
 	payload := []byte("ff\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00 CKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\x00\x00!\x00\x01")
-	reply, _ := utils.SocketSend(conn, payload, 1024)
+	reply, _ := pkg.SocketSend(conn, payload, 1024)
 	if len(reply) > 58 {
 
 		result.Open = true

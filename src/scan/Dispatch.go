@@ -1,7 +1,7 @@
 package scan
 
 import (
-	"getitle/src/utils"
+	"getitle/src/pkg"
 	"net"
 )
 
@@ -19,7 +19,7 @@ var RunOpt = RunnerOpts{
 	Sum: 0,
 }
 
-func Dispatch(result *utils.Result) {
+func Dispatch(result *pkg.Result) {
 	target := result.GetTarget()
 	RunOpt.Sum++
 	if result.Port == "137" || result.Port == "nbt" {
@@ -34,7 +34,7 @@ func Dispatch(result *utils.Result) {
 	} else if result.Port == "icmp" || result.Port == "ping" {
 		icmpScan(result)
 		return
-	} else if result.Port == "arp" && !utils.Win {
+	} else if result.Port == "arp" && !pkg.Win {
 		arpScan(result)
 		return
 	} else if result.Port == "snmp" || result.Port == "161" {
@@ -94,14 +94,14 @@ func Dispatch(result *utils.Result) {
 	}
 
 	// 格式化title编码, 防止输出二进制数据
-	result.Title = utils.AsciiEncode(result.Title)
+	result.Title = pkg.AsciiEncode(result.Title)
 	if result.Httpresp != nil && !result.Httpresp.Close {
 		_ = result.Httpresp.Body.Close()
 	}
 	return
 }
 
-func ExploitDispatch(result *utils.Result) {
+func ExploitDispatch(result *pkg.Result) {
 	if result.IsHttp() && RunOpt.Exploit != "auto" {
 		// todo 将shiro改造成nuclei poc
 		shiroScan(result)

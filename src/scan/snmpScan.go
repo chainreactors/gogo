@@ -5,10 +5,10 @@ import (
 	"strings"
 
 	//"encoding/hex"
-	"getitle/src/utils"
+	"getitle/src/pkg"
 )
 
-func snmpScan(result *utils.Result) {
+func snmpScan(result *pkg.Result) {
 	var err error
 	result.Port = "161"
 	s, err := gosnmp.NewGoSNMP(result.GetTarget(), "public", gosnmp.Version2c, int64(RunOpt.Delay+2))
@@ -26,7 +26,7 @@ func snmpScan(result *utils.Result) {
 	result.Protocol = "snmp"
 	result.HttpStat = "snmp"
 	if len(resp.Variables) > 0 {
-		result.AddVuln(&utils.Vuln{Name: "snmp_default_auth", Payload: map[string]interface{}{"auth": "public"}})
+		result.AddVuln(&pkg.Vuln{Name: "snmp_default_auth", Payload: map[string]interface{}{"auth": "public"}})
 		result.Title = strings.Split(resp.Variables[0].Value.(string), "#")[0]
 	}
 }

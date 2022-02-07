@@ -1,4 +1,4 @@
-package utils
+package pkg
 
 import (
 	"bufio"
@@ -84,7 +84,7 @@ func (f *File) SyncWrite(s string) {
 
 func (f *File) WriteBytes(bs []byte) {
 	if f.compress {
-		//res = string(utils.Flate([]byte(res)))
+		//res = string(pkg.Flate([]byte(res)))
 		_, err := f.buf.Write(bs)
 		if err != nil {
 			Panic("[-] " + err.Error())

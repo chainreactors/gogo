@@ -5,7 +5,6 @@ import (
 	"fmt"
 	. "getitle/src/core"
 	. "getitle/src/scan"
-	"getitle/src/utils"
 	"github.com/panjf2000/ants/v2"
 	"os"
 	"strings"
@@ -89,7 +88,7 @@ func CMD() {
 
 	ok := runner.preInit()
 	if !ok {
-		utils.Panic("[-] preinit failed")
+		os.Exit(0)
 	}
 	runner.init()
 

@@ -2,22 +2,22 @@ package scan
 
 import (
 	"encoding/binary"
-	"getitle/src/utils"
+	"getitle/src/pkg"
 	"strings"
 )
 
-func ms17010Scan(result *utils.Result) {
+func ms17010Scan(result *pkg.Result) {
 	var (
-		negotiateProtocolRequest  = utils.Decode("YmBgaP0f7OtUxMDAwCARfIABBfz/x8DgwMCQxMAU4Kzg5xoS7h/krRAQ5O8e5OirYKhnwMDk4+jn6+gHZoZn5qXklxcrpOUXKYTnF2WnF+WXFhQrGOsZJjIw+fga6hlFGBgYwbQY6RkyMPmFKPj4KhjoGRoxAAAAAP//")
-		sessionSetupRequest       = utils.Decode("YmBg6Pgf7OtUzMDAwCDBfoABBfz/x8DgwMD7n6GDgUWQCyrICKWvMDAweEOY4QyZDHkMKQz5DOUMxQwKDEYMBmAIYhkyWDKY4lVjyqDHYMDAwAAAAAD//w==")
-		treeConnectRequest        = utils.Decode("VMWxCQIxAADAEwQzggNYCwlEY6VoZSEItimyhPv9ZJ/n0/01h9Z/n+cfjofJRp+Fh33XBDuZqopukrPoooyv8jgpqrevlxPuKwsAAAD//w==")
-		transNamedPipeRequest     = utils.Decode("YmBg8Pof7OukysDAwCDBqMGADDj6FjNyBM0QALH/////H1nOC4yZGJQZGBjYGWICPANcYxgAAAAA//8=")
-		trans2SessionSetupRequest = utils.Decode("YmBg8Psf7OtkxMDAwCDBfoABGXD8/8fA4cjAz8PAwMAIFVt2cwkDAwMPgxNIJwMjAx8DL4oeBgAAAAD//w==")
+		negotiateProtocolRequest  = pkg.Decode("YmBgaP0f7OtUxMDAwCARfIABBfz/x8DgwMCQxMAU4Kzg5xoS7h/krRAQ5O8e5OirYKhnwMDk4+jn6+gHZoZn5qXklxcrpOUXKYTnF2WnF+WXFhQrGOsZJjIw+fga6hlFGBgYwbQY6RkyMPmFKPj4KhjoGRoxAAAAAP//")
+		sessionSetupRequest       = pkg.Decode("YmBg6Pgf7OtUzMDAwCDBfoABBfz/x8DgwMD7n6GDgUWQCyrICKWvMDAweEOY4QyZDHkMKQz5DOUMxQwKDEYMBmAIYhkyWDKY4lVjyqDHYMDAwAAAAAD//w==")
+		treeConnectRequest        = pkg.Decode("VMWxCQIxAADAEwQzggNYCwlEY6VoZSEItimyhPv9ZJ/n0/01h9Z/n+cfjofJRp+Fh33XBDuZqopukrPoooyv8jgpqrevlxPuKwsAAAD//w==")
+		transNamedPipeRequest     = pkg.Decode("YmBg8Pof7OukysDAwCDBqMGADDj6FjNyBM0QALH/////H1nOC4yZGJQZGBjYGWICPANcYxgAAAAA//8=")
+		trans2SessionSetupRequest = pkg.Decode("YmBg8Psf7OtkxMDAwCDBfoABGXD8/8fA4cjAz8PAwMAIFVt2cwkDAwMPgxNIJwMjAx8DL4oeBgAAAAD//w==")
 	)
 	// connecting to a host in LAN if reachable should be very quick
 	result.Port = "445"
 	target := result.GetTarget()
-	conn, err := utils.TcpSocketConn(target, RunOpt.Delay)
+	conn, err := pkg.TcpSocketConn(target, RunOpt.Delay)
 	if err != nil {
 		result.Error = err.Error()
 		return
@@ -93,7 +93,7 @@ func ms17010Scan(result *utils.Result) {
 	}
 	if reply[9] == 0x05 && reply[10] == 0x02 && reply[11] == 0x00 && reply[12] == 0xc0 {
 		result.Title = strings.Replace(os, "\x00", "", -1)
-		result.AddVuln(&utils.Vuln{Name: "MS17-010"})
+		result.AddVuln(&pkg.Vuln{Name: "MS17-010"})
 
 		trans2SessionSetupRequest[28] = treeID[0]
 		trans2SessionSetupRequest[29] = treeID[1]
@@ -106,7 +106,7 @@ func ms17010Scan(result *utils.Result) {
 			return
 		}
 		if reply[34] == 0x51 {
-			result.AddVuln(&utils.Vuln{Name: "DOUBLEPULSAR"})
+			result.AddVuln(&pkg.Vuln{Name: "DOUBLEPULSAR"})
 		}
 	}
 

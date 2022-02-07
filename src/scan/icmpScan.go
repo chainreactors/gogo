@@ -6,13 +6,13 @@ package scan
 //Github: https://github.com/k8gege/LadonGo
 
 import (
-	"getitle/src/utils"
+	"getitle/src/pkg"
 	"net"
 	"time"
 )
 
 // -n i
-func icmpScan(result *utils.Result) {
+func icmpScan(result *pkg.Result) {
 	var size int
 	var seq int16 = 1
 	const ECHO_REQUEST_HEAD_LEN = 8
