@@ -48,7 +48,7 @@ if __name__ == "__main__":
     mmh3fingers = read("mmh3fingers.yaml")
     workflows = read("workflows.yaml")
     nuclei = loadnuclei()
-    f = open("src/utils/templates.go", "w", encoding="utf-8")
+    f = open("src/pkg/templates.go", "w", encoding="utf-8")
     base = '''package utils
 
 var RandomDir = "/%s"
