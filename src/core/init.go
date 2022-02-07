@@ -11,22 +11,19 @@ import (
 )
 
 var Opt = Options{
-	AliveSum:  0,
-	Noscan:    false,
-	Compress:  true,
-	dataCh:    make(chan string, 100),
-	extractCh: make(chan string, 100),
+	AliveSum: 0,
+	Noscan:   false,
+	Compress: true,
 }
 
-func InitConfig(config Config) Config {
+func InitConfig(config *Config) *Config {
 	err := validate(config)
 	if err != nil {
-		fmt.Println("[-]" + err.Error())
-		os.Exit(0)
+		Panic("[-] " + err.Error())
 	}
 	// 初始化
 	config.Exploit = RunOpt.Exploit
-	config.VerisonLevel = RunOpt.VersionLevel
+	config.VersionLevel = RunOpt.VersionLevel
 
 	if config.Threads == 0 { // if 默认线程
 		config.Threads = 4000
@@ -60,13 +57,12 @@ func InitConfig(config Config) Config {
 	// 初始化文件操作
 	err = initFile(config)
 	if err != nil {
-		fmt.Println("[-]" + err.Error())
-		os.Exit(0)
+		Panic("[-] " + err.Error())
 	}
 
 	if config.ListFile != "" || config.IsListInput {
 		// 如果从文件中读,初始化IP列表配置
-		config.IPlist = LoadFile(file)
+		config.IPlist = strings.Split(string(LoadFile(file)), "\n")
 	} else if config.JsonFile != "" || config.IsJsonInput {
 		// 如果输入的json不为空,则从json中加载result,并返回结果
 		data := LoadResultFile(file)
@@ -78,12 +74,11 @@ func InitConfig(config Config) Config {
 		case SmartData:
 			config.IPlist = data.(SmartData).Data
 		default:
-			fmt.Println("[-] not support result, maybe use -l")
-			os.Exit(0)
+			Panic("[-] not support result, maybe use -l")
 		}
 	}
 
-	initIP(&config)
+	initIP(config)
 	// 初始化端口配置
 	config.Portlist = portHandler(config.Ports)
 
@@ -131,7 +126,7 @@ func InitConfig(config Config) Config {
 	return config
 }
 
-func validate(config Config) error {
+func validate(config *Config) error {
 	// 一些命令行参数错误处理,如果check没过直接退出程序或输出警告
 	//if config.Mod == "ss" && config.ListFile != "" {
 	//	fmt.Println("[-] error Smart . can not use File input")
@@ -168,7 +163,7 @@ func validate(config Config) error {
 	return err
 }
 
-func printTaskInfo(config Config, taskname string) {
+func printTaskInfo(config *Config, taskname string) {
 	// 输出任务的基本信息
 
 	Log.Logging(fmt.Sprintf("[*] Current goroutines: %d, Version Level: %d,Exploit Target: %s, PortSpray Scan: %t", config.Threads, RunOpt.VersionLevel, RunOpt.Exploit, config.PortSpray))
@@ -190,8 +185,8 @@ func RunTask(config Config) {
 	switch config.Mod {
 	case "default":
 		createDefaultScan(config)
-	case "a", "auto":
-		autoScan(config)
+	//case "a", "auto":
+	//	autoScan(config)
 	case "s", "f", "ss", "sc":
 		if config.IPlist != nil {
 			for _, ip := range config.IPlist {
@@ -257,26 +252,26 @@ func countip(mask int) int {
 	return count
 }
 
-func autoScan(config Config) {
-	for cidr, st := range InterConfig {
-		Log.Logging("[*] Spraying : " + cidr)
-		createAutoTask(config, cidr, st)
-	}
-}
+//func autoScan(config Config) {
+//	for cidr, st := range InterConfig {
+//		Log.Logging("[*] Spraying : " + cidr)
+//		createAutoTask(config, cidr, st)
+//	}
+//}
 
-func createAutoTask(config Config, cidr string, c []string) {
-	config.SmartPortList = portHandler(c[1])
-	config.Mod = c[0]
-	if c[2] != "all" {
-		config.IpProbe = c[2]
-		config.IpProbeList = Str2uintlist(c[2])
-	}
-	SmartMod(cidr, config)
-}
+//func createAutoTask(config Config, cidr string, c []string) {
+//	config.SmartPortList = portHandler(c[1])
+//	config.Mod = c[0]
+//	if c[2] != "all" {
+//		config.IpProbe = c[2]
+//		config.IpProbeList = Str2uintlist(c[2])
+//	}
+//	SmartMod(cidr, config)
+//}
 
 func createSmartScan(ip string, config Config) {
 	mask := getMask(ip)
-	if mask >= 24 {
+	if mask > 24 {
 		config.Mod = "default"
 		DefaultMod(ip, config)
 	} else {

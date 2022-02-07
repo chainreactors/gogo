@@ -27,12 +27,13 @@ type Result struct {
 	Protocol     string         `json:"r"` // protocol
 	Hash         string         `json:"hs"`
 	Open         bool           `json:"-"`
-	SmartProbe   bool           `json:"-"`
-	TcpCon       *net.Conn      `json:"-"`
-	Httpresp     *http.Response `json:"-"`
-	Error        string         `json:"-"`
-	ErrStat      int            `json:"-"`
-	Content      string         `json:"-"`
+	//FrameworksMap map[string]bool `json:"-"`
+	SmartProbe bool           `json:"-"`
+	TcpCon     *net.Conn      `json:"-"`
+	Httpresp   *http.Response `json:"-"`
+	Error      string         `json:"-"`
+	ErrStat    int            `json:"-"`
+	Content    string         `json:"-"`
 }
 
 func NewResult(ip, port string) *Result {
@@ -43,6 +44,7 @@ func NewResult(ip, port string) *Result {
 		HttpStat:     "tcp",
 		Extracts:     &Extracts{},
 		ExtractsStat: map[string]int{},
+		//FrameworksMap: map[string]bool{},
 	}
 	result.Extracts.Target = result.GetTarget()
 	return &result
@@ -75,10 +77,14 @@ func (result *Result) AddVulns(vulns []*Vuln) {
 
 func (result *Result) AddFramework(f *Framework) {
 	result.Frameworks = append(result.Frameworks, f)
+	//result.FrameworksMap[f.ToString()] = true
 }
 
 func (result *Result) AddFrameworks(f []*Framework) {
 	result.Frameworks = append(result.Frameworks, f...)
+	//for _, framework := range f {
+	//result.FrameworksMap[framework.ToString()] = true
+	//}
 }
 
 func (result *Result) AddExtract(extract *Extract) {

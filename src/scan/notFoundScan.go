@@ -6,7 +6,7 @@ import (
 )
 
 func NotFoundScan(result *utils.Result) {
-	conn := utils.HttpConn(2)
+	conn := utils.HttpConn(RunOpt.Delay)
 	resp, err := conn.Get(result.GetURL() + utils.RandomDir)
 	if err != nil || structutils.ToString(resp.StatusCode) == result.HttpStat {
 		return

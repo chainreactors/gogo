@@ -105,7 +105,7 @@ func (rd ResultsData) ToConfig() string {
 	// 输出配置信息
 	var configstr string
 	configstr = fmt.Sprintf("[*] Scan Target: %s, Ports: %s, Mod: %s \n", rd.Config.GetTargetName(), rd.Config.Ports, rd.Config.Mod)
-	configstr += fmt.Sprintf("[*] Exploit: %s, Version level: %d \n", rd.Config.Exploit, rd.Config.VerisonLevel)
+	configstr += fmt.Sprintf("[*] Exploit: %s, Version level: %d \n", rd.Config.Exploit, rd.Config.VersionLevel)
 	if rd.IP != "" {
 		configstr += fmt.Sprintf("[*] Internet IP: %s", rd.IP)
 	}
@@ -213,8 +213,7 @@ func (rd ResultsData) ToZombie() string {
 	}
 	s, err := json.Marshal(zms)
 	if err != nil {
-		fmt.Println("[-] " + err.Error())
-		os.Exit(0)
+		Panic("[-] " + err.Error())
 	}
 	return string(s)
 }
@@ -279,10 +278,10 @@ func LoadResultFile(file *os.File) interface{} {
 	var data interface{}
 	content, err := ioutil.ReadAll(file)
 	if err != nil {
-		os.Exit(0)
+		Panic("[-] " + err.Error())
 	}
 
-	if isBase64(content) {
+	if IsBase64(content) {
 		// stdin输入二进制文件支持base64编码之后的. base64 result.txt|gt -F stdin
 		// 如果直接输入解压缩之后的json文件,则跳过这个步骤
 		content = Base64Decode(string(content))
@@ -327,7 +326,7 @@ func isClearResult(content []byte) bool {
 	return false
 }
 
-func isBase64(content []byte) bool {
+func IsBase64(content []byte) bool {
 	b64bytes := []byte("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=")
 	for _, i := range content {
 		if !bytes.Contains(b64bytes, []byte{i}) {

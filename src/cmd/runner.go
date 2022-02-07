@@ -7,6 +7,7 @@ import (
 	. "getitle/src/structutils"
 	. "getitle/src/utils"
 	"net"
+	"os"
 	"path"
 	"regexp"
 	"strings"
@@ -20,6 +21,7 @@ func NewRunner() *Runner {
 }
 
 type Runner struct {
+	Ports        string
 	Version      bool // version level1
 	Version2     bool // version level2
 	Exploit      bool // 启用漏洞扫描
@@ -40,7 +42,10 @@ type Runner struct {
 	ExploitFile  string // 指定漏扫文件
 	Printer      string // 输出特定的预设
 	UploadFile   string // 上传特定的文件名
-	Ver          bool   // 输出版本号
+	WorkFlowName string
+	Ver          bool // 输出版本号
+	NoScan       bool
+	IsWorkFlow   bool
 	iface        string
 	start        time.Time
 	config       Config
@@ -73,6 +78,7 @@ func (r *Runner) preInit() bool {
 }
 
 func (r *Runner) init() {
+	// 初始化各种全局变量
 	// 初始化指纹优先级
 	if r.Version {
 		RunOpt.VersionLevel = 1
@@ -89,18 +95,16 @@ func (r *Runner) init() {
 		RunOpt.Exploit = r.ExploitName
 	}
 
+	if r.NoScan {
+		Opt.Noscan = r.NoScan
+	}
+
 	if r.Compress {
 		Opt.Compress = !Opt.Compress
 	}
+
 	if r.Clean {
 		Log.Clean = !Log.Clean
-	}
-
-	if r.Arp {
-		r.config.AliveSprayMod = append(r.config.AliveSprayMod, "arp")
-	}
-	if r.Ping {
-		r.config.AliveSprayMod = append(r.config.AliveSprayMod, "icmp")
 	}
 
 	if !Win {
@@ -114,20 +118,6 @@ func (r *Runner) init() {
 			Log.Warn("interface error, " + err.Error())
 			Log.Warn("interface error, " + err.Error())
 		}
-	}
-
-	if r.config.Filename == "" {
-		r.config.Filename = GetFilename(r.config, r.AutoFile, r.HiddenFile, Opt.FileOutput)
-	} else {
-		path.Join(Opt.FilePath, r.config.Filename)
-	}
-
-	if r.config.IsSmartScan() && !Opt.Noscan {
-		r.config.SmartFilename = GetFilename(r.config, r.AutoFile, r.HiddenFile, "cidr")
-	}
-
-	if r.config.HasAlivedScan() {
-		r.config.PingFilename = GetFilename(r.config, r.AutoFile, r.HiddenFile, "alived")
 	}
 
 	if r.extracts != "" {
@@ -152,14 +142,123 @@ func (r *Runner) init() {
 	r.start = time.Now()
 }
 
-func (r *Runner) close() {
+func (r *Runner) prepareConfig(config Config) *Config {
+	if r.Ports == "" {
+		config.Ports = "top1"
+	} else {
+		config.Ports = r.Ports
+	}
+
+	if r.Arp {
+		config.AliveSprayMod = append(config.AliveSprayMod, "arp")
+	}
+	if r.Ping {
+		config.AliveSprayMod = append(config.AliveSprayMod, "icmp")
+	}
+
+	if config.Filename == "" {
+		config.Filename = GetFilename(&config, r.AutoFile, r.HiddenFile, Opt.FilePath, Opt.FileOutput)
+	} else {
+		config.Filename = path.Join(Opt.FilePath, config.Filename)
+	}
+
+	if config.IsSmartScan() && !Opt.Noscan {
+		config.SmartFilename = GetFilename(&config, r.AutoFile, r.HiddenFile, Opt.FilePath, "cidr")
+	}
+
+	if config.HasAlivedScan() {
+		config.PingFilename = GetFilename(&config, r.AutoFile, r.HiddenFile, Opt.FilePath, "alived")
+	}
+	return &config
+}
+
+func (r *Runner) run() {
+	if r.WorkFlowName == "" || !r.IsWorkFlow {
+		r.runWithCMD()
+	} else {
+		var workflowMap = WorkflowMap{}
+		if r.IsWorkFlow {
+			workflowMap["tmp"] = ParseWorkflowsFromInput(LoadFile(os.Stdin))
+			r.WorkFlowName = "tmp"
+		} else if IsExist(r.WorkFlowName) {
+			workflowMap["tmp"] = ParseWorkflowsFromInput(LoadFile(Open(r.WorkFlowName)))
+			r.WorkFlowName = "tmp"
+		} else {
+			workflowMap = LoadWorkFlow()
+		}
+		r.runWithWorkFlow(workflowMap)
+	}
+}
+
+func (r *Runner) runWithCMD() {
+	config := r.prepareConfig(r.config)
+	RunTask(*InitConfig(config)) // 运行
+	r.close(config)
+}
+
+func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) {
+	if workflows := workflowMap.Choice(r.WorkFlowName); len(workflows) > 0 {
+		for _, workflow := range workflows {
+			Log.Logging("\n[*] workflow " + workflow.Name + " starting")
+			// 文件名要在config初始化之前操作
+			if r.config.Filename != "" {
+				workflow.File = r.config.Filename
+			} else if r.AutoFile {
+				workflow.File = "auto"
+			} else if r.HiddenFile {
+				workflow.File = "hidden"
+			}
+			if Opt.FilePath != "" {
+				workflow.Path = Opt.FilePath
+			}
+
+			config := workflow.PrepareConfig()
+
+			// 一些workflow的参数, 允许被命令行参数覆盖
+			if r.Ports != "" {
+				config.Ports = r.Ports
+			}
+			if r.config.Threads != 0 {
+				config.Threads = r.config.Threads
+			}
+
+			// 全局变量的处理
+			if !r.NoScan {
+				Opt.Noscan = workflow.NoScan
+			}
+			if r.Version {
+				RunOpt.VersionLevel = 1
+			} else {
+				RunOpt.VersionLevel = workflow.Version
+			}
+
+			if RunOpt.Exploit != "none" {
+				if r.Exploit {
+					RunOpt.Exploit = "auto"
+				} else {
+					RunOpt.Exploit = r.ExploitName
+				}
+			} else {
+				RunOpt.Exploit = workflow.Exploit
+			}
+
+			config = InitConfig(config)
+			RunTask(*config) // 运行
+			r.close(config)
+			r.resetGlobals()
+		}
+	} else {
+		Panic("not fount workflow " + r.WorkFlowName)
+	}
+}
+
+func (r *Runner) close(config *Config) {
 	Opt.Close()                        // 关闭result与extract写入管道
-	Log.Close()                        // 关闭进度写入管道
 	time.Sleep(time.Microsecond * 200) // 因为是异步的, 等待文件最后处理完成
 	if r.HiddenFile {
-		Chtime(r.config.Filename)
-		if r.config.SmartFilename != "" {
-			Chtime(r.config.SmartFilename)
+		Chtime(config.Filename)
+		if config.SmartFilename != "" {
+			Chtime(config.SmartFilename)
 		}
 	}
 
@@ -169,25 +268,32 @@ func (r *Runner) close() {
 
 	var filenamelog string
 	// 输出文件名
-	if r.config.Filename != "" {
-		filenamelog = fmt.Sprintf("Results filename: %s , ", r.config.Filename)
-		if r.config.SmartFilename != "" {
-			filenamelog += "Smartscan result filename: " + r.config.SmartFilename + " , "
+	if config.Filename != "" {
+		filenamelog = fmt.Sprintf("Results filename: %s , ", config.Filename)
+		if config.SmartFilename != "" {
+			filenamelog += "Smartscan result filename: " + config.SmartFilename + " , "
 		}
-		if r.config.PingFilename != "" {
-			filenamelog += "Pingscan result filename: " + r.config.PingFilename
+		if config.PingFilename != "" {
+			filenamelog += "Pingscan result filename: " + config.PingFilename
 		}
-		if IsExist(r.config.Filename + "_extract") {
-			filenamelog += "extractor result filename: " + r.config.Filename + "_extractor"
+		if IsExist(config.Filename + "_extract") {
+			filenamelog += "extractor result filename: " + config.Filename + "_extractor"
 		}
 		Log.Important(filenamelog)
 	}
 
 	// 扫描结果文件自动上传
-	if connected && !r.NoUpload && r.config.Filename != "" { // 如果出网则自动上传结果到云服务器
-		uploadfiles([]string{r.config.Filename, r.config.SmartFilename})
+	if connected && !r.NoUpload && config.Filename != "" { // 如果出网则自动上传结果到云服务器
+		uploadfiles([]string{config.Filename, config.SmartFilename})
 	}
 }
+
+func (r *Runner) resetGlobals() {
+	Opt.Noscan = false
+	RunOpt.Exploit = "none"
+	RunOpt.VersionLevel = 0
+}
+
 func printConfigs(t string) {
 	if t == "port" {
 		TagMap, NameMap, PortMap = LoadPortConfig()
@@ -195,10 +301,12 @@ func printConfigs(t string) {
 	} else if t == "nuclei" {
 		LoadNuclei("")
 		PrintNucleiPoc()
-	} else if t == "inter" {
-		PrintInterConfig()
+	} else if t == "workflow" {
+		PrintWorkflow()
+	} else if t == "extract" {
+		PrintExtract()
 	} else {
-		fmt.Println("choice port|nuclei|inter")
+		fmt.Println("choice port|nuclei|workflow|extract")
 	}
 }
 

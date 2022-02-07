@@ -21,7 +21,7 @@ func httpFingerMatch(result *utils.Result, finger *utils.Finger) *utils.Framewor
 	content := result.Content
 	//var cookies map[string]string
 	if finger.SendDataStr != "" && RunOpt.VersionLevel >= 1 {
-		conn := utils.HttpConn(2)
+		conn := utils.HttpConn(RunOpt.Delay)
 		resp, err := conn.Get(result.GetURL() + finger.SendDataStr)
 		if err != nil {
 			return nil

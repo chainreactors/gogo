@@ -21,7 +21,7 @@ Usage of ./getitle:
          wmi 使用wmi的ntlm协议收集信息,与smb的协议收集到的内容一致 
          snmp 使用snmp public收集信息
          icmp/ping 使用ping判断存活
-         arp TODO
+         arp 使用arp协议判断ip存活, 并收集mac地址
          winrm 不太常用,暂时删除
 
       -m string    扫描模式：(每次只能选择一个生效)
@@ -35,10 +35,11 @@ Usage of ./getitle:
       -L bool     从管道中读数据的时候,指定数据类型为行分割的数据
       -J bool     从管道中读数据的时候, 指定数据为前一次的扫描结果, 从传入管道前请base64, 否则可能因为EOF字符被截断
       -F file      格式化扫描结果
+      -w string  workflow, 一些自动化预设  
       
    SMART CONFIGS
       -sp string   smart probe,启发式扫描端口探针,-m s 下默认为80, -m ss下默认为icmp
-      -ipp string  ip probe,-ss模式ip探针,默认1
+      -ipp string  smart ip probe,-ss模式ip探针,默认1
       -no bool	   (依赖-m s/ss) 高级扫描模式只探测存活网段不进行端口扫描
       -ping bool   在端口扫描前插入一次ping 喷洒, 存活的ip才会被加入端口扫描.
  
@@ -52,10 +53,11 @@ Usage of ./getitle:
 
       -c string    在指定了-f的情况下强制打开命令行输出扫描结果
       -q bool      不在命令行输出进度日志
-      -P string    查看配置预设  port|nuclei|inter 
+      -P string    查看配置预设  port|nuclei|workflow|extract 
          port 端口预设
          nuclei 可以选用的poc
-         inter  auto模式的内网探测配置
+         workflow workflow预设
+         extract  extract预设
 
    CONFIGURATIONS params:
       -version     输出版本号
@@ -83,13 +85,13 @@ Usage of ./getitle:
 
 一行全冲
 
-`gt -k [key] -m a -e -v -af`
+`gt -k [key] -w inter -e -v`
 
-一行A段乱冲
+使用预设, 启发式扫描10段常见
 
-`gt -k [key] -ip 10.1.1.1/8 -m ss -p all -e -v -af`
+`gt -k [key] -w 10`
 
-一行B段乱冲
+不适用预设, 手动指定特定网段与配置
 
 `gt -k [key] -ip 172.16.1.1/16 -m s -p all -e -v -af`
 

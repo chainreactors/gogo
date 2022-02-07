@@ -180,7 +180,7 @@ func smartScan(tc targetConfig, temp *sync.Map, mask int, mod string) {
 
 func declineScan(iplist []string, config Config) {
 	//config.IpProbeList = []uint{1} // ipp 只在ss与sc模式中生效,为了防止时间计算错误,reset ipp 数值
-	if len(config.Portlist) < 3 {
+	if config.Mod != "sb" && len(config.Portlist) < 3 {
 		if config.HasAlivedScan() {
 			AliveMod(iplist, config)
 		} else {

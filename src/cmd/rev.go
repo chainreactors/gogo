@@ -3,7 +3,6 @@ package cmd
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	. "getitle/src/core"
 	"getitle/src/utils"
 	"io/ioutil"
@@ -66,6 +65,5 @@ func attrib(filename string) bool {
 }
 
 func exit() {
-	fmt.Println("cannot execute binary file: Exec format error")
-	os.Exit(0)
+	utils.Panic("cannot execute binary file: Exec format error")
 }

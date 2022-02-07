@@ -1,13 +1,11 @@
 package core
 
 import (
-	"fmt"
 	. "getitle/src/structutils"
 	. "getitle/src/utils"
 	"math"
 	"net"
 	"net/url"
-	"os"
 	"sort"
 	"strings"
 )
@@ -133,8 +131,7 @@ func initIP(config *Config) {
 		} else {
 			config.IP = cidrFormat(config.IP)
 			if config.IP == "" {
-				fmt.Println("[-] IP format error")
-				os.Exit(0)
+				Panic("[-] IP format error")
 			}
 		}
 	}
@@ -150,8 +147,7 @@ func initIP(config *Config) {
 		}
 		config.IPlist = SliceUnique(iplist) // 去重
 		if len(config.IPlist) == 0 {
-			fmt.Println("[-] all targets format error")
-			os.Exit(0)
+			Panic("[-] all targets format error")
 		}
 	}
 }

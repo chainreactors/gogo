@@ -46,6 +46,7 @@ if __name__ == "__main__":
 
     port = read("port.yaml")
     mmh3fingers = read("mmh3fingers.yaml")
+    workflows = read("workflows.yaml")
     nuclei = loadnuclei()
     f = open("src/utils/finger.go", "w", encoding="utf-8")
     base = '''package utils
@@ -63,9 +64,11 @@ func LoadConfig(typ string)[]byte  {
          	return Decode(`%s`)
     }else if typ =="mmh3"{
          	return Decode(`%s`)
-    }else if typ == "nuclei"{
+    }else if typ == "workflow"{
          	return Decode(`%s`)
-     	}
+    }else if typ == "nuclei"{
+            return Decode(`%s`)
+    }
 	return []byte{}
 }
 	'''
@@ -76,6 +79,7 @@ func LoadConfig(typ string)[]byte  {
                     yaml2json(md5fingers),
                     yaml2json(port),
                     yaml2json(mmh3fingers),
+                    yaml2json(workflows),
                     compress(json.dumps(nuclei))))
 #     print(compress(json.dumps(tcpfingers)))
     print("fingerprint update success")

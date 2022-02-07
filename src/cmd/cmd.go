@@ -5,6 +5,7 @@ import (
 	"fmt"
 	. "getitle/src/core"
 	. "getitle/src/scan"
+	"getitle/src/utils"
 	"github.com/panjf2000/ants/v2"
 	"os"
 	"strings"
@@ -23,17 +24,19 @@ func CMD() {
 	//默认参数信息
 	// INPUT
 	flag.StringVar(&runner.config.IP, "ip", "", "")
-	flag.StringVar(&runner.config.Ports, "p", "top1", "")
+	flag.StringVar(&runner.Ports, "p", "", "")
 	flag.StringVar(&runner.config.ListFile, "l", "", "")
 	flag.StringVar(&runner.config.JsonFile, "j", "", "")
+	flag.StringVar(&runner.WorkFlowName, "w", "", "")
 	flag.BoolVar(&runner.config.IsListInput, "L", false, "")
 	flag.BoolVar(&runner.config.IsJsonInput, "J", false, "")
+	flag.BoolVar(&runner.IsWorkFlow, "W", false, "")
 
 	// SMART
 	flag.StringVar(&runner.config.SmartPort, "sp", "default", "")
 	flag.StringVar(&runner.config.IpProbe, "ipp", "default", "")
 	flag.BoolVar(&runner.config.NoSpray, "ns", false, "")
-	flag.BoolVar(&Opt.Noscan, "no", false, "")
+	flag.BoolVar(&runner.NoScan, "no", false, "")
 
 	// OUTPUT
 	flag.StringVar(&runner.config.Filename, "f", "", "")
@@ -86,16 +89,15 @@ func CMD() {
 
 	ok := runner.preInit()
 	if !ok {
-		os.Exit(0)
+		utils.Panic("[-] preinit failed")
 	}
 	runner.init()
 
 	// 初始化任务
 	Log.InitFile() // 在真正运行前再初始化进度文件
-	runner.config = InitConfig(runner.config)
-	RunTask(runner.config) // 运行
+	runner.run()
 
-	runner.close()
+	Log.Close() // 关闭进度写入管道
 }
 
 type Value interface {

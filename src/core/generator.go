@@ -100,15 +100,15 @@ func (gen *IpGenerator) generate(target interface{}, mod string) chan string {
 			mask := getMask(cidr)
 			switch mod {
 			case "s", "sb":
-				if mask < 24 {
+				if mask <= 24 {
 					gen.smartIpGenerator(cidr)
 				} else {
 					gen.defaultIpGenerator(cidr)
 				}
 			case "ss", "sc":
-				if mask < 16 {
+				if mask <= 16 {
 					gen.sSmartGenerator(cidr)
-				} else if mask >= 16 && mask < 24 {
+				} else if mask > 16 && mask <= 24 {
 					gen.smartIpGenerator(cidr)
 				} else {
 					gen.defaultIpGenerator(cidr)

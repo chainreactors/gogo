@@ -67,12 +67,12 @@ func FormatOutput(filename string, outputfile string, autofile bool, filters []s
 		resultsdata = data.(*ResultsData)
 		Log.Important(resultsdata.ToConfig())
 		if outputfile == "" {
-			outputfile = GetFilename(resultsdata.Config, autofile, false, Opt.Output)
+			outputfile = GetFilename(&resultsdata.Config, autofile, false, Opt.FilePath, Opt.Output)
 		}
 	case *SmartData:
 		smartdata = data.(*SmartData)
 		if outputfile == "" {
-			outputfile = GetFilename(smartdata.Config, autofile, false, "cidr")
+			outputfile = GetFilename(&smartdata.Config, autofile, false, Opt.FilePath, "cidr")
 		}
 	case []Extracts:
 		extractsdata = data.([]Extracts)
@@ -86,8 +86,7 @@ func FormatOutput(filename string, outputfile string, autofile bool, filters []s
 	if outputfile != "" {
 		fileHandle, err := NewFile(outputfile, Opt.Compress)
 		if err != nil {
-			fmt.Println("[-] " + err.Error())
-			os.Exit(0)
+			Panic("[-] " + err.Error())
 		}
 		fmt.Println("[*] Output filename: " + outputfile)
 		defer fileHandle.Close()
@@ -151,34 +150,4 @@ func FormatOutput(filename string, outputfile string, autofile bool, filters []s
 }
 
 func Banner() {
-}
-
-func Printportconfig() {
-	fmt.Println("当前已有端口配置: (根据端口类型分类)")
-	for k, v := range NameMap {
-		fmt.Println("	", k, ": ", strings.Join(v, ","))
-	}
-	fmt.Println("当前已有端口配置: (根据服务分类)")
-	for k, v := range TagMap {
-		fmt.Println("	", k, ": ", strings.Join(v, ","))
-	}
-}
-
-func PrintNucleiPoc() {
-	fmt.Println("Nuclei Pocs")
-	for k, v := range TemplateMap {
-		fmt.Println(k + ":")
-		for _, t := range v {
-			fmt.Println("\t" + t.Info.Name)
-		}
-
-	}
-}
-
-func PrintInterConfig() {
-	fmt.Println("Auto internet smart scan config")
-	fmt.Println("CIDR\t\tMOD\tPortProbe\tIpProbe")
-	for k, v := range InterConfig {
-		fmt.Printf("%s\t\t%s\n", k, strings.Join(v, "\t"))
-	}
 }

@@ -37,6 +37,7 @@ func GetHttpRaw(resp *http.Response) string {
 		return raw
 	}
 	raw += string(body)
+	_ = resp.Body.Close()
 	return raw
 }
 
@@ -103,8 +104,7 @@ func GetHeaderstr(resp *http.Response) string {
 func CompileRegexp(s string) *regexp.Regexp {
 	reg, err := regexp.Compile(s)
 	if err != nil {
-		fmt.Println("[-] regexp string error: " + s + " , " + err.Error())
-		os.Exit(0)
+		Panic(fmt.Sprintf("[-] regexp string error: %s, %s", s, err.Error()))
 	}
 	return reg
 }
@@ -172,8 +172,7 @@ func Encode(input []byte) string {
 func Base64Decode(s string) []byte {
 	data, err := base64.StdEncoding.DecodeString(s)
 	if err != nil {
-		println(err.Error())
-		os.Exit(0)
+		Panic("[-] " + err.Error())
 	}
 	return data
 }
@@ -187,4 +186,9 @@ func HasPingPriv() bool {
 		return true
 	}
 	return false
+}
+
+func Panic(s string) {
+	fmt.Println("[-] " + s)
+	os.Exit(0)
 }

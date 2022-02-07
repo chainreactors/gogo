@@ -6,7 +6,6 @@ import (
 	"getitle/src/nuclei/protocols"
 	. "getitle/src/nuclei/templates"
 	"io/ioutil"
-	"os"
 	"strings"
 )
 
@@ -44,8 +43,7 @@ func LoadNuclei(filename string) map[string][]*Template {
 			var err error
 			content, err = ioutil.ReadFile(filename)
 			if err != nil {
-				fmt.Println(err.Error())
-				os.Exit(0)
+				Panic("[-] " + err.Error())
 			}
 		} else {
 			content = Base64Decode(filename)
@@ -59,16 +57,13 @@ func LoadTemplates(content []byte) map[string][]*Template {
 	var templatemap = make(map[string][]*Template)
 	err := json.Unmarshal(content, &templates)
 	if err != nil {
-		fmt.Println("[-] " + err.Error())
-		fmt.Println("[-] nuclei config load FAIL!")
-		os.Exit(0)
+		Panic("[-] nuclei config load FAIL!, " + err.Error())
 	}
 	for _, template := range templates {
 		// 以指纹归类
 		err = template.Compile(*ExecuterOptions)
 		if err != nil {
-			println(err.Error())
-			os.Exit(0)
+			Panic("[-] " + err.Error())
 		}
 
 		for _, finger := range template.Fingers {

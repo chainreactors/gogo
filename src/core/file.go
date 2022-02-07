@@ -1,38 +1,36 @@
 package core
 
 import (
+	"bytes"
 	"fmt"
-	. "getitle/src/structutils"
 	. "getitle/src/utils"
 	"io/ioutil"
 	"os"
-	"os/exec"
-	"path"
-	"path/filepath"
 	"strings"
 )
 
 //进度tmp文件
 var tmpfilename string
 
-func LoadFile(file *os.File) []string {
+func LoadFile(file *os.File) []byte {
 	defer file.Close()
 	content, err := ioutil.ReadAll(file)
 	if err != nil {
-		fmt.Println(err.Error())
-		os.Exit(0)
+		Panic("[-] " + err.Error())
+	}
+	if IsBase64(content) {
+		content = Base64Decode(string(content))
 	}
 	if IsBin(content) {
 		content = UnFlate(content)
 	}
-	text := string(content)
-	text = strings.TrimSpace(text)
-	return strings.Split(text, "\n")
+	return bytes.TrimSpace(content)
 }
 
-func initFile(config Config) error {
+func initFile(config *Config) error {
 	var err error
-
+	Opt.dataCh = make(chan string, 100)
+	Opt.extractCh = make(chan string, 100)
 	// 初始化res文件handler
 	if config.Filename != "" {
 		Log.Clean = !Log.Clean
@@ -176,68 +174,3 @@ func writePingResult(ips []string) {
 //	".sess_ha73n80og7veig0pojpp3ltnt",
 //	".systemd-private-701215aa8263408d8d44f4507834d77",
 //}
-var fileint = 1
-
-func GetFilename(config Config, autofile, hiddenfile bool, outtype string) string {
-	var basename string
-	var basepath string
-	if Opt.FilePath == "" {
-		basepath = getExcPath()
-	} else {
-		basepath = Opt.FilePath
-	}
-	if autofile {
-		basename = path.Join(basepath, getAutoFilename(config, outtype)+".dat")
-	} else if hiddenfile {
-		if Win {
-			basename = path.Join(basepath, "App_1634884664021088500_EC1B25B2-9453-49EE-A1E2-112B4D539F5.dat")
-		} else {
-			basename = path.Join(basepath, ".systemd-private-701215aa8263408d8d44f4507834d77")
-		}
-	} else {
-		return ""
-	}
-	for IsExist(basename + ToString(fileint)) {
-		fileint++
-	}
-	return basename + ToString(fileint)
-}
-
-func getAutoFilename(config Config, outtype string) string {
-	var basename string
-	target := strings.Replace(config.GetTargetName(), "/", "_", -1)
-	ports := strings.Replace(config.Ports, ",", "_", -1)
-	basename = fmt.Sprintf(".%s_%s_%s_%s", target, ports, config.Mod, outtype)
-	return basename
-}
-
-func HasStdin() bool {
-	stat, err := os.Stdin.Stat()
-	if err != nil {
-		return false
-	}
-
-	isPipedFromChrDev := (stat.Mode() & os.ModeCharDevice) == 0
-	isPipedFromFIFO := (stat.Mode() & os.ModeNamedPipe) != 0
-
-	return isPipedFromChrDev || isPipedFromFIFO
-}
-
-func Open(filename string) *os.File {
-	f, err := os.Open(filename)
-	if err != nil {
-		fmt.Println("[-] " + err.Error())
-		os.Exit(0)
-	}
-	return f
-}
-
-func getExcPath() string {
-	file, _ := exec.LookPath(os.Args[0])
-	// 获取包含可执行文件名称的路径
-	path, _ := filepath.Abs(file)
-	// 获取可执行文件所在目录
-	index := strings.LastIndex(path, string(os.PathSeparator))
-	ret := path[:index]
-	return strings.Replace(ret, "\\", "/", -1) + "/"
-}

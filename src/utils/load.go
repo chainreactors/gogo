@@ -2,23 +2,22 @@ package utils
 
 import (
 	"encoding/json"
-	"fmt"
 	"getitle/src/structutils"
-	"os"
 	"regexp"
 	"strconv"
 	"strings"
 )
 
 var (
-	Md5Fingers     map[string]string
-	Mmh3Fingers    map[string]string
-	AllFingers     []*Finger
-	TcpFingers     FingerMapper
-	HttpFingers    FingerMapper
-	NameMap        PortMapper
-	PortMap        PortMapper
-	TagMap         PortMapper
+	Md5Fingers  map[string]string
+	Mmh3Fingers map[string]string
+	AllFingers  []*Finger
+	TcpFingers  FingerMapper
+	HttpFingers FingerMapper
+	NameMap     PortMapper
+	PortMap     PortMapper
+	TagMap      PortMapper
+	//WorkFlowMap    map[string][]*Workflow
 	Compiled       map[string][]*regexp.Regexp
 	CommonCompiled map[string]*regexp.Regexp
 	Extractors     = make(map[string]*regexp.Regexp)
@@ -42,6 +41,16 @@ func Ports2PortSlice(ports []string) []string {
 	var tmpports []string
 	//生成端口列表 支持,和-
 	for _, pr := range ports {
+		if len(pr) == 0 {
+			continue
+		}
+		pr = strings.TrimSpace(pr)
+		if pr[0] == 45 {
+			pr = "1" + pr
+		}
+		if pr[len(pr)-1] == 45 {
+			pr = pr + "65535"
+		}
 		tmpports = append(tmpports, port2PortSlice(pr)...)
 	}
 	return tmpports
@@ -67,8 +76,7 @@ func LoadPortConfig() (PortMapper, PortMapper, PortMapper) {
 	err := json.Unmarshal(LoadConfig("port"), &portfingers)
 
 	if err != nil {
-		fmt.Println("[-] port config load FAIL!")
-		os.Exit(0)
+		Panic("[-] port config load FAIL!, " + err.Error())
 	}
 	tagmap := make(PortMapper)  // 以服务名归类
 	namemap := make(PortMapper) // 以tag归类
@@ -96,8 +104,7 @@ func LoadFingers(t string) FingerMapper {
 
 	err := json.Unmarshal(LoadConfig(t), &tmpfingers)
 	if err != nil {
-		fmt.Println("[-] finger load FAIL!")
-		os.Exit(0)
+		Panic("[-] finger load FAIL!, " + err.Error())
 	}
 	if t == "http" {
 		AllFingers = tmpfingers
@@ -136,14 +143,65 @@ func LoadHashFinger() (map[string]string, map[string]string) {
 	var err error
 	err = json.Unmarshal(LoadConfig("mmh3"), &mmh3fingers)
 	if err != nil {
-		fmt.Println("[-] mmh3 load FAIL!")
-		os.Exit(0)
+		Panic("mmh3 load FAIL" + err.Error())
 	}
 
 	err = json.Unmarshal(LoadConfig("md5"), &md5fingers)
 	if err != nil {
-		fmt.Println("[-] mmh3 load FAIL!")
-		os.Exit(0)
+		Panic("md5 load FAIL" + err.Error())
 	}
 	return mmh3fingers, md5fingers
+}
+
+func LoadWorkFlow() WorkflowMap {
+	var workflows []*Workflow
+	var err error
+	err = json.Unmarshal(LoadConfig("workflow"), &workflows)
+	if err != nil {
+		Panic("workflow load FAIL, " + err.Error())
+	}
+
+	// 设置默认参数
+	for _, w := range workflows {
+		// 参数默认值
+		if w.IpProbe == "" {
+			w.IpProbe = "default"
+		}
+		if w.SmartProbe == "" {
+			w.SmartProbe = "default"
+		}
+		if w.Ports == "" {
+			w.Ports = "top1"
+		}
+		if w.Mod == "" {
+			w.Mod = "default"
+		}
+		if w.File == "" {
+			w.File = "auto"
+		}
+		if w.Exploit == "" {
+			w.Exploit = "none"
+		}
+	}
+
+	var tmpmap = make(map[string][]*Workflow)
+	for _, workflow := range workflows {
+		tmpmap[strings.ToLower(workflow.Name)] = append(tmpmap[strings.ToLower(workflow.Name)], workflow)
+		for _, tag := range workflow.Tags {
+			tmpmap[strings.ToLower(tag)] = append(tmpmap[strings.ToLower(tag)], workflow)
+		}
+	}
+	return tmpmap
+}
+
+type WorkflowMap map[string][]*Workflow
+
+func (m WorkflowMap) Choice(name string) []*Workflow {
+	var workflows []*Workflow
+	name = strings.TrimSpace(name)
+	names := strings.Split(name, ",")
+	for _, n := range names {
+		workflows = append(workflows, m[n]...)
+	}
+	return workflows
 }
