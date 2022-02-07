@@ -6,7 +6,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"getitle/src/pkg"
-	"getitle/src/structutils"
+	"getitle/src/utils"
 	"github.com/M09ic/go-ntlmssp"
 )
 
@@ -117,7 +117,7 @@ func smbScan(result *pkg.Result) {
 	}
 
 	result.Protocol = "smb"
-	result.AddNTLMInfo(structutils.ToStringMap(ntlmssp.NTLMInfo(ret)), "smb")
+	result.AddNTLMInfo(utils.ToStringMap(ntlmssp.NTLMInfo(ret)), "smb")
 }
 
 func smb1Scan(target string) ([]byte, error) {

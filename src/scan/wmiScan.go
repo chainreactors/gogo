@@ -3,7 +3,7 @@ package scan
 import (
 	"bytes"
 	"getitle/src/pkg"
-	"getitle/src/structutils"
+	"getitle/src/utils"
 	"github.com/M09ic/go-ntlmssp"
 )
 
@@ -26,7 +26,7 @@ func wmiScan(result *pkg.Result) {
 	if off_ntlm != -1 {
 		result.Protocol = "wmi"
 		result.HttpStat = "WMI"
-		tinfo := structutils.ToStringMap(ntlmssp.NTLMInfo(ret[off_ntlm:]))
+		tinfo := utils.ToStringMap(ntlmssp.NTLMInfo(ret[off_ntlm:]))
 		result.AddNTLMInfo(tinfo, "wmi")
 	}
 }

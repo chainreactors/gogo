@@ -2,13 +2,13 @@ package scan
 
 import (
 	"getitle/src/pkg"
-	"getitle/src/structutils"
+	"getitle/src/utils"
 )
 
 func NotFoundScan(result *pkg.Result) {
 	conn := pkg.HttpConn(RunOpt.Delay)
 	resp, err := conn.Get(result.GetURL() + pkg.RandomDir)
-	if err != nil || structutils.ToString(resp.StatusCode) == result.HttpStat {
+	if err != nil || utils.ToString(resp.StatusCode) == result.HttpStat {
 		return
 	}
 	content := string(pkg.GetBody(resp))

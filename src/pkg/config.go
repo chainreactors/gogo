@@ -2,7 +2,7 @@ package pkg
 
 import (
 	"encoding/json"
-	"getitle/src/structutils"
+	"getitle/src/utils"
 	"strings"
 )
 
@@ -44,28 +44,28 @@ func (config *Config) IsScan() bool {
 }
 
 func (config *Config) IsSmart() bool {
-	if structutils.SliceContains([]string{"ss", "s", "sc"}, config.Mod) {
+	if utils.SliceContains([]string{"ss", "s", "sc"}, config.Mod) {
 		return true
 	}
 	return false
 }
 
 func (config *Config) IsSmartScan() bool {
-	if structutils.SliceContains([]string{"ss", "s"}, config.Mod) {
+	if utils.SliceContains([]string{"ss", "s"}, config.Mod) {
 		return true
 	}
 	return false
 }
 
 func (config *Config) IsASmart() bool {
-	if structutils.SliceContains([]string{"ss", "sc"}, config.Mod) {
+	if utils.SliceContains([]string{"ss", "sc"}, config.Mod) {
 		return true
 	}
 	return false
 }
 
 func (config *Config) IsBSmart() bool {
-	if structutils.SliceContains([]string{"s", "sb"}, config.Mod) {
+	if utils.SliceContains([]string{"s", "sb"}, config.Mod) {
 		return true
 	}
 	return false

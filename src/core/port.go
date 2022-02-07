@@ -2,7 +2,7 @@ package core
 
 import (
 	"getitle/src/pkg"
-	"getitle/src/structutils"
+	"getitle/src/utils"
 	"strings"
 )
 
@@ -16,7 +16,7 @@ func portHandler(portstring string) []string {
 		ports = append(ports, choiceports(portname)...)
 	}
 	ports = pkg.Ports2PortSlice(ports)
-	ports = structutils.SliceUnique(ports)
+	ports = utils.SliceUnique(ports)
 	return ports
 }
 

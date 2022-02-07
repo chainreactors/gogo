@@ -2,7 +2,7 @@ package scan
 
 import (
 	"getitle/src/pkg"
-	"getitle/src/structutils"
+	"getitle/src/utils"
 	"net/http"
 	"strings"
 )
@@ -112,7 +112,7 @@ func SystemHttp(target string, result *pkg.Result) {
 	}
 	result.Error = ""
 	result.Protocol = resp.Request.URL.Scheme
-	result.HttpStat = structutils.ToString(resp.StatusCode)
+	result.HttpStat = utils.ToString(resp.StatusCode)
 	result.Content = pkg.GetHttpRaw(resp)
 	result.Httpresp = resp
 

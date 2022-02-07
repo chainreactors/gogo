@@ -5,7 +5,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	. "getitle/src/structutils"
+	. "getitle/src/utils"
 	"os"
 	"os/exec"
 	"path"

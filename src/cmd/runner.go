@@ -5,7 +5,7 @@ import (
 	. "getitle/src/core"
 	. "getitle/src/pkg"
 	. "getitle/src/scan"
-	. "getitle/src/structutils"
+	. "getitle/src/utils"
 	"net"
 	"os"
 	"path"
