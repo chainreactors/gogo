@@ -164,6 +164,30 @@ func LoadWorkFlow() WorkflowMap {
 	if err != nil {
 		Panic("workflow load FAIL, " + err.Error())
 	}
+
+	// 设置默认参数
+	for _, w := range workflows {
+		// 参数默认值
+		if w.IpProbe == "" {
+			w.IpProbe = "default"
+		}
+		if w.SmartProbe == "" {
+			w.SmartProbe = "default"
+		}
+		if w.Ports == "" {
+			w.Ports = "top1"
+		}
+		if w.Mod == "" {
+			w.Mod = "default"
+		}
+		if w.File == "" {
+			w.File = "auto"
+		}
+		if w.Exploit == "" {
+			w.Exploit = "none"
+		}
+	}
+
 	var tmpmap = make(map[string][]*Workflow)
 	for _, workflow := range workflows {
 		tmpmap[strings.ToLower(workflow.Name)] = append(tmpmap[strings.ToLower(workflow.Name)], workflow)

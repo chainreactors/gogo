@@ -301,10 +301,12 @@ func printConfigs(t string) {
 	} else if t == "nuclei" {
 		LoadNuclei("")
 		PrintNucleiPoc()
-	} else if t == "inter" {
-		PrintInterConfig()
+	} else if t == "workflow" {
+		PrintWorkflow()
+	} else if t == "extract" {
+		PrintExtract()
 	} else {
-		fmt.Println("choice port|nuclei|inter")
+		fmt.Println("choice port|nuclei|workflow|extract")
 	}
 }
 
