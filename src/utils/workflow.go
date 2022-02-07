@@ -1,8 +1,11 @@
 package utils
 
-import "path"
+import (
+	"encoding/json"
+	"path"
+)
 
-type WorkFlow struct {
+type Workflow struct {
 	Name       string   `json:"name"`
 	IP         string   `json:"ip"`
 	Ports      string   `json:"ports"`
@@ -19,7 +22,17 @@ type WorkFlow struct {
 	Tags       []string `json:"tags"`
 }
 
-func (w *WorkFlow) PrepareConfig() *Config {
+func ParseWorkflowsFromInput(content []byte) []*Workflow {
+	var workflows []*Workflow
+	var err error
+	err = json.Unmarshal(content, &workflows)
+	if err != nil {
+		Panic("workflow load FAIL, " + err.Error())
+	}
+	return workflows
+}
+
+func (w *Workflow) PrepareConfig() *Config {
 	var config = &Config{
 		IP:        w.IP,
 		Ports:     w.Ports,

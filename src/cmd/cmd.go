@@ -29,6 +29,7 @@ func CMD() {
 	flag.StringVar(&runner.WorkFlowName, "w", "", "")
 	flag.BoolVar(&runner.config.IsListInput, "L", false, "")
 	flag.BoolVar(&runner.config.IsJsonInput, "J", false, "")
+	flag.BoolVar(&runner.IsWorkFlow, "W", false, "")
 
 	// SMART
 	flag.StringVar(&runner.config.SmartPort, "sp", "default", "")

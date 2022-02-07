@@ -19,7 +19,7 @@ var (
 	NameMap     PortMapper
 	PortMap     PortMapper
 	TagMap      PortMapper
-	//WorkFlowMap    map[string][]*WorkFlow
+	//WorkFlowMap    map[string][]*Workflow
 	Compiled       map[string][]*regexp.Regexp
 	CommonCompiled map[string]*regexp.Regexp
 	Extractors     = make(map[string]*regexp.Regexp)
@@ -158,13 +158,13 @@ func LoadHashFinger() (map[string]string, map[string]string) {
 }
 
 func LoadWorkFlow() WorkflowMap {
-	var workflows []*WorkFlow
+	var workflows []*Workflow
 	var err error
 	err = json.Unmarshal(LoadConfig("workflow"), &workflows)
 	if err != nil {
 		Panic("workflow load FAIL, " + err.Error())
 	}
-	var tmpmap = make(map[string][]*WorkFlow)
+	var tmpmap = make(map[string][]*Workflow)
 	for _, workflow := range workflows {
 		tmpmap[strings.ToLower(workflow.Name)] = append(tmpmap[strings.ToLower(workflow.Name)], workflow)
 		for _, tag := range workflow.Tags {
@@ -174,10 +174,10 @@ func LoadWorkFlow() WorkflowMap {
 	return tmpmap
 }
 
-type WorkflowMap map[string][]*WorkFlow
+type WorkflowMap map[string][]*Workflow
 
-func (m WorkflowMap) Choice(name string) []*WorkFlow {
-	var workflows []*WorkFlow
+func (m WorkflowMap) Choice(name string) []*Workflow {
+	var workflows []*Workflow
 	name = strings.TrimSpace(name)
 	names := strings.Split(name, ",")
 	for _, n := range names {

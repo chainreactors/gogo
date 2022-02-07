@@ -64,7 +64,7 @@ func InitConfig(config *Config) *Config {
 
 	if config.ListFile != "" || config.IsListInput {
 		// 如果从文件中读,初始化IP列表配置
-		config.IPlist = LoadFile(file)
+		config.IPlist = strings.Split(string(LoadFile(file)), "\n")
 	} else if config.JsonFile != "" || config.IsJsonInput {
 		// 如果输入的json不为空,则从json中加载result,并返回结果
 		data := LoadResultFile(file)

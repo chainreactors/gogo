@@ -7,6 +7,7 @@ import (
 	. "getitle/src/structutils"
 	. "getitle/src/utils"
 	"net"
+	"os"
 	"path"
 	"regexp"
 	"strings"
@@ -44,6 +45,7 @@ type Runner struct {
 	WorkFlowName string
 	Ver          bool // 输出版本号
 	NoScan       bool
+	IsWorkFlow   bool
 	iface        string
 	start        time.Time
 	config       Config
@@ -171,10 +173,20 @@ func (r *Runner) prepareConfig(config Config) *Config {
 }
 
 func (r *Runner) run() {
-	if r.WorkFlowName == "" {
+	if r.WorkFlowName == "" || !r.IsWorkFlow {
 		r.runWithCMD()
 	} else {
-		r.runWithWorkFlow()
+		var workflowMap = WorkflowMap{}
+		if r.IsWorkFlow {
+			workflowMap["tmp"] = ParseWorkflowsFromInput(LoadFile(os.Stdin))
+			r.WorkFlowName = "tmp"
+		} else if IsExist(r.WorkFlowName) {
+			workflowMap["tmp"] = ParseWorkflowsFromInput(LoadFile(Open(r.WorkFlowName)))
+			r.WorkFlowName = "tmp"
+		} else {
+			workflowMap = LoadWorkFlow()
+		}
+		r.runWithWorkFlow(workflowMap)
 	}
 }
 
@@ -184,8 +196,7 @@ func (r *Runner) runWithCMD() {
 	r.close(config)
 }
 
-func (r *Runner) runWithWorkFlow() {
-	workflowMap := LoadWorkFlow()
+func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) {
 	if workflows := workflowMap.Choice(r.WorkFlowName); len(workflows) > 0 {
 		for _, workflow := range workflows {
 			Log.Logging("\n[*] workflow " + workflow.Name + " starting")

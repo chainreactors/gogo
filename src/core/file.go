@@ -1,6 +1,7 @@
 package core
 
 import (
+	"bytes"
 	"fmt"
 	. "getitle/src/utils"
 	"io/ioutil"
@@ -11,19 +12,20 @@ import (
 //进度tmp文件
 var tmpfilename string
 
-func LoadFile(file *os.File) []string {
+func LoadFile(file *os.File) []byte {
 	defer file.Close()
 	content, err := ioutil.ReadAll(file)
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(0)
 	}
+	if IsBase64(content) {
+		content = Base64Decode(string(content))
+	}
 	if IsBin(content) {
 		content = UnFlate(content)
 	}
-	text := string(content)
-	text = strings.TrimSpace(text)
-	return strings.Split(text, "\n")
+	return bytes.TrimSpace(content)
 }
 
 func initFile(config *Config) error {
