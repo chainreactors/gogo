@@ -48,7 +48,7 @@ if __name__ == "__main__":
     mmh3fingers = read("mmh3fingers.yaml")
     workflows = read("workflows.yaml")
     nuclei = loadnuclei()
-    f = open("src/utils/finger.go", "w", encoding="utf-8")
+    f = open("src/utils/templates.go", "w", encoding="utf-8")
     base = '''package utils
 
 var RandomDir = "/%s"
@@ -82,5 +82,5 @@ func LoadConfig(typ string)[]byte  {
                     yaml2json(workflows),
                     compress(json.dumps(nuclei))))
 #     print(compress(json.dumps(tcpfingers)))
-    print("fingerprint update success")
+    print("templates update success")
 
