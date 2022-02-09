@@ -9,6 +9,7 @@ type Workflow struct {
 	Name        string   `json:"name"`
 	Description string   `json:"description"`
 	IP          string   `json:"ip"`
+	IPlist      []string `json:"iplist"`
 	Ports       string   `json:"ports"`
 	Mod         string   `json:"mod"`
 	Ping        bool     `json:"ping"`
@@ -36,6 +37,7 @@ func ParseWorkflowsFromInput(content []byte) []*Workflow {
 func (w *Workflow) PrepareConfig() *Config {
 	var config = &Config{
 		IP:        w.IP,
+		IPlist:    w.IPlist,
 		Ports:     w.Ports,
 		Mod:       w.Mod,
 		IpProbe:   w.IpProbe,
