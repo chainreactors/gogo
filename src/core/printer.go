@@ -22,9 +22,22 @@ func PrintNucleiPoc() {
 	for k, v := range TemplateMap {
 		fmt.Println(k + ":")
 		for _, t := range v {
-			fmt.Println("\t" + t.Info.Name)
+			var payload string
+			for _, request := range t.RequestsHTTP {
+				for name, _ := range request.Payloads {
+					payload += name + "\t"
+				}
+			}
+			for _, request := range t.RequestsNetwork {
+				for name, _ := range request.Payloads {
+					payload += name + "\t"
+				}
+			}
+			if payload != "" {
+				payload = "payloads: " + payload
+			}
+			fmt.Printf("\t%s\t%s\t%s %s\n", t.Info.Name, t.Info.Severity, t.Info.Description, payload)
 		}
-
 	}
 }
 

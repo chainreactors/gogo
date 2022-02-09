@@ -12,12 +12,13 @@ type Template struct {
 	Id      string   `json:"id"`
 	Fingers []string `json:"fingers"`
 	Info    struct {
-		Name      string `json:"name"`
-		Author    string `json:"author"`
-		Severity  string `json:"severity"`
-		Reference string `json:"reference"`
-		Vendor    string `json:"vendor"`
-		Tags      string `json:"tags"`
+		Name string `json:"name"`
+		//Author    string `json:"author"`
+		Severity    string `json:"severity"`
+		Description string `json:"description"`
+		//Reference string `json:"reference"`
+		//Vendor    string `json:"vendor"`
+		Tags string `json:"tags"`
 	} `json:"info"`
 	RequestsHTTP    []http.Request    `json:"requests"`
 	RequestsNetwork []network.Request `json:"network"`

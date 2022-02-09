@@ -299,7 +299,7 @@ func printConfigs(t string) {
 		TagMap, NameMap, PortMap = LoadPortConfig()
 		Printportconfig()
 	} else if t == "nuclei" {
-		LoadNuclei("")
+		nucleiLoader("", arrayFlags{})
 		PrintNucleiPoc()
 	} else if t == "workflow" {
 		PrintWorkflow()
