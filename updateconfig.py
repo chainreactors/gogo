@@ -49,7 +49,7 @@ if __name__ == "__main__":
     workflows = read("workflows.yaml")
     nuclei = loadnuclei()
     f = open("src/pkg/templates.go", "w", encoding="utf-8")
-    base = '''package utils
+    base = '''package pkg
 
 var RandomDir = "/%s"
 
