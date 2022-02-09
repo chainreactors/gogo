@@ -1,7 +1,7 @@
 package scan
 
 import (
-	"getitle/src/utils"
+	"getitle/src/pkg"
 	"strings"
 )
 
@@ -9,10 +9,10 @@ var sendData = "\x05\x00\x0b\x03\x10\x00\x00\x00\x48\x00\x00\x00\x01\x00\x00\x00
 var sendData2 = "\x05\x00\x00\x03\x10\x00\x00\x00\x18\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x05\x00"
 
 // -default
-func oxidScan(result *utils.Result) {
+func oxidScan(result *pkg.Result) {
 	result.Port = "135"
 	target := result.GetTarget()
-	conn, err := utils.TcpSocketConn(target, RunOpt.Delay)
+	conn, err := pkg.TcpSocketConn(target, RunOpt.Delay)
 	if err != nil {
 
 		//fmt.Println(err)
@@ -22,8 +22,8 @@ func oxidScan(result *utils.Result) {
 	defer conn.Close()
 	result.Open = true
 
-	recv, _ := utils.SocketSend(conn, []byte(sendData), 4096)
-	recv, _ = utils.SocketSend(conn, []byte(sendData2), 4096)
+	recv, _ := pkg.SocketSend(conn, []byte(sendData), 4096)
+	recv, _ = pkg.SocketSend(conn, []byte(sendData2), 4096)
 	recvStr := string(recv)
 	if len(recvStr) < 42 {
 		return

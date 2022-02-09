@@ -1,16 +1,16 @@
 package scan
 
 import (
-	"getitle/src/utils"
+	"getitle/src/pkg"
 	"net/http"
 	"strings"
 )
 
 // -e
-func shiroScan(result *utils.Result) {
+func shiroScan(result *pkg.Result) {
 	var isshiro = false
 	target := result.GetURL()
-	conn := utils.HttpConn(RunOpt.Delay)
+	conn := pkg.HttpConn(RunOpt.Delay)
 	req := setshirocookie(target, "1")
 	resp, err := conn.Do(req)
 	if err != nil {
@@ -19,7 +19,7 @@ func shiroScan(result *utils.Result) {
 	}
 	deleteme := resp.Header.Get("Set-Cookie")
 	if strings.Contains(deleteme, "=deleteMe") {
-		result.AddFramework(&utils.Framework{Name: "shiro"})
+		result.AddFramework(&pkg.Framework{Name: "shiro"})
 		isshiro = true
 	}
 	req = setshirocookie(target, "/A29uyYfZg4mT+SUU/3eMAnRlgBWnVrveeiwZ/hz1LlF86NxSmq9dsWpS0U7Q2U+MjbAzaLBCsV7IHb7MQVFItU+ibEkDuyO7WoNGBM4ay8l+oBZo2W2mZcFXG3swJsGXxaZHua3m5jlJNKcCjqy9sX2oRZrm7eSABvUn71vY9NaohbC1i6+FKCRMW9s11/Q")
@@ -30,7 +30,7 @@ func shiroScan(result *utils.Result) {
 	}
 	deleteme = resp.Header.Get("Set-Cookie")
 	if isshiro && !strings.Contains(deleteme, "deleteMe") {
-		result.AddVuln(&utils.Vuln{Name: "shiro_550"})
+		result.AddVuln(&pkg.Vuln{Name: "shiro_550"})
 	}
 	return
 

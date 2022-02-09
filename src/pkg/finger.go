@@ -1,8 +1,8 @@
-package utils
+package pkg
 
 import (
 	b64 "encoding/base64"
-	"getitle/src/structutils"
+	"getitle/src/utils"
 )
 
 // common struct
@@ -76,7 +76,7 @@ func (fm FingerMapper) GetOthersFingers(port string) []*Finger {
 	var tmpfingers []*Finger
 	for _, fingers := range fm {
 		for _, finger := range fingers {
-			if structutils.SliceContains(finger.Defaultport, port) {
+			if utils.SliceContains(finger.Defaultport, port) {
 				continue
 			}
 			isrepeat := false

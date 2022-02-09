@@ -1,4 +1,4 @@
-package utils
+package pkg
 
 import (
 	"bytes"
@@ -98,7 +98,7 @@ func (rd ResultsData) groupBySortedIP() (map[string]IPMapResult, []string) {
 		ips[i] = ip
 		i++
 	}
-	return pfs, sort_ip(ips)
+	return pfs, sortIP(ips)
 }
 
 func (rd ResultsData) ToConfig() string {

@@ -1,4 +1,4 @@
-package structutils
+package utils
 
 import (
 	"strings"

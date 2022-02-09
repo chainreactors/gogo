@@ -1,4 +1,4 @@
-package utils
+package pkg
 
 import (
 	"net"
@@ -118,7 +118,7 @@ func int2ip(ipint uint) string {
 	return ip.String()
 }
 
-func sort_ip(ips []string) []string {
+func sortIP(ips []string) []string {
 	sort.Slice(ips, func(i, j int) bool {
 		return ip2int(ips[i]) < ip2int(ips[j])
 	})

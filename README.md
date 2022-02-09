@@ -1,7 +1,7 @@
 # Getitle
 一个资产探测扫描器. 
 
-README Version 1.1.3
+README Version 1.2.0
 
 ## Usage
 
@@ -299,7 +299,7 @@ SMB
 ## Make
 
 ### make.bat:
-windows下需要以下依赖
+windows下需要以下依赖添加到环境变量
  * upxs 自定义修改版的upx壳,可以在make.bat中替换成原版
  * limelighter 签名伪造工具
  * tar.exe 压缩打包工具

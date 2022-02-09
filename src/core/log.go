@@ -2,7 +2,7 @@ package core
 
 import (
 	"fmt"
-	. "getitle/src/utils"
+	. "getitle/src/pkg"
 	"os"
 	"time"
 )

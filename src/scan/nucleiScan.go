@@ -2,12 +2,12 @@ package scan
 
 import (
 	. "getitle/src/nuclei/templates"
-	"getitle/src/utils"
+	"getitle/src/pkg"
 	"strings"
 )
 
 //tamplate =
-func Nuclei(target string, result *utils.Result) {
+func Nuclei(target string, result *pkg.Result) {
 
 	if RunOpt.Exploit == "auto" {
 		execute_templates(result, result.Frameworks.GetTitles(), target)
@@ -17,16 +17,16 @@ func Nuclei(target string, result *utils.Result) {
 
 }
 
-func execute_templates(result *utils.Result, titles []string, target string) {
-	var vulns []*utils.Vuln
+func execute_templates(result *pkg.Result, titles []string, target string) {
+	var vulns []*pkg.Vuln
 	templates := choiceTemplates(titles)
 	for _, template := range templates { // 遍历所有poc
 		res, ok := template.Execute(target)
 		if ok {
 			for name, extract := range res.Extracts {
-				result.AddExtract(utils.NewExtract(name, extract))
+				result.AddExtract(pkg.NewExtract(name, extract))
 			}
-			vulns = append(vulns, &utils.Vuln{template.Id, res.PayloadValues, res.DynamicValues, template.Info.Severity})
+			vulns = append(vulns, &pkg.Vuln{template.Id, res.PayloadValues, res.DynamicValues, template.Info.Severity})
 		}
 	}
 
@@ -36,12 +36,12 @@ func execute_templates(result *utils.Result, titles []string, target string) {
 func choiceTemplates(titles []string) []*Template {
 	var templates []*Template
 	if titles[0] == "all" {
-		for _, tmp_templates := range utils.TemplateMap {
+		for _, tmp_templates := range pkg.TemplateMap {
 			templates = append(templates, tmp_templates...)
 		}
 	} else {
 		for _, t := range titles {
-			if tmp_templates, ok := utils.TemplateMap[strings.ToLower(t)]; ok {
+			if tmp_templates, ok := pkg.TemplateMap[strings.ToLower(t)]; ok {
 				templates = append(templates, tmp_templates...)
 			}
 		}

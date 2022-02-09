@@ -1,7 +1,7 @@
 package core
 
 import (
-	. "getitle/src/structutils"
+	. "getitle/src/pkg"
 	. "getitle/src/utils"
 	"math"
 	"net"

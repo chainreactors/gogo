@@ -3,8 +3,8 @@ package core
 import (
 	"errors"
 	"fmt"
+	. "getitle/src/pkg"
 	. "getitle/src/scan"
-	. "getitle/src/structutils"
 	. "getitle/src/utils"
 	"os"
 	"strings"

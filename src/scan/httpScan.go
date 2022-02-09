@@ -1,7 +1,7 @@
 package scan
 
 import (
-	"getitle/src/structutils"
+	"getitle/src/pkg"
 	"getitle/src/utils"
 	"net/http"
 	"strings"
@@ -13,14 +13,14 @@ var headers = http.Header{
 
 // -defalut
 //socket进行对网站的连接
-func socketHttp(target string, result *utils.Result) {
+func socketHttp(target string, result *pkg.Result) {
 	//fmt.Println(ip)
 	//socket tcp连接,超时时间
 	var err error
 	var ishttp = false
 	var statuscode = ""
 	result.Protocol = "tcp"
-	conn, err := utils.TcpSocketConn(target, RunOpt.Delay)
+	conn, err := pkg.TcpSocketConn(target, RunOpt.Delay)
 	if err != nil {
 		// return open: 0, closed: 1, filtered: 2, noroute: 3, denied: 4, down: 5, error_host: 6, unkown: -1
 		errMsg := err.Error()
@@ -58,14 +58,14 @@ func socketHttp(target string, result *utils.Result) {
 
 	//发送内容
 	senddata := []byte("GET / HTTP/1.1\r\nHost: " + target + "\r\nConnection: Keep-Alive\r\n\r\n")
-	data, err := utils.SocketSend(conn, senddata, 4096)
+	data, err := pkg.SocketSend(conn, senddata, 4096)
 	if err != nil {
 		result.Error = err.Error()
 	}
 
 	//获取状态码
 	result.Content = string(data)
-	ishttp, statuscode = utils.GetStatusCode(result.Content)
+	ishttp, statuscode = pkg.GetStatusCode(result.Content)
 	if ishttp {
 		result.HttpStat = statuscode
 		result.Protocol = "http"
@@ -81,7 +81,7 @@ func socketHttp(target string, result *utils.Result) {
 }
 
 //使用封装好了http
-func SystemHttp(target string, result *utils.Result) {
+func SystemHttp(target string, result *pkg.Result) {
 	var conn http.Client
 	var delay int
 	// 如果是400或者不可识别协议,则使用https
@@ -97,7 +97,7 @@ func SystemHttp(target string, result *utils.Result) {
 	if ishttps || strings.HasPrefix(result.HttpStat, "3") {
 		delay = RunOpt.Delay + RunOpt.HttpsDelay
 	}
-	conn = utils.HttpConn(delay)
+	conn = pkg.HttpConn(delay)
 	req, _ := http.NewRequest("GET", target, nil)
 	req.Header = headers
 	resp, err := conn.Do(req)
@@ -112,8 +112,8 @@ func SystemHttp(target string, result *utils.Result) {
 	}
 	result.Error = ""
 	result.Protocol = resp.Request.URL.Scheme
-	result.HttpStat = structutils.ToString(resp.StatusCode)
-	result.Content = utils.GetHttpRaw(resp)
+	result.HttpStat = utils.ToString(resp.StatusCode)
+	result.Content = pkg.GetHttpRaw(resp)
 	result.Httpresp = resp
 
 	return

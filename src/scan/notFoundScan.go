@@ -1,22 +1,22 @@
 package scan
 
 import (
-	"getitle/src/structutils"
+	"getitle/src/pkg"
 	"getitle/src/utils"
 )
 
-func NotFoundScan(result *utils.Result) {
-	conn := utils.HttpConn(RunOpt.Delay)
-	resp, err := conn.Get(result.GetURL() + utils.RandomDir)
-	if err != nil || structutils.ToString(resp.StatusCode) == result.HttpStat {
+func NotFoundScan(result *pkg.Result) {
+	conn := pkg.HttpConn(RunOpt.Delay)
+	resp, err := conn.Get(result.GetURL() + pkg.RandomDir)
+	if err != nil || utils.ToString(resp.StatusCode) == result.HttpStat {
 		return
 	}
-	content := string(utils.GetBody(resp))
+	content := string(pkg.GetBody(resp))
 	if content == "" {
 		return
 	}
 
-	for _, finger := range utils.AllFingers {
+	for _, finger := range pkg.AllFingers {
 		framework, ok := fingerMatcher(result, finger, content)
 		if ok {
 			framework.Version = "404"

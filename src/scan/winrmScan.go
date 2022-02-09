@@ -1,9 +1,9 @@
 package scan
 
-//func winrmScan(target string,result *utils.Result) {
+//func winrmScan(target string,result *pkg.Result) {
 //	//result = model.ProbeTaskResult{ProbeTask: task, Result: "", Err: nil}
 //	uri := fmt.Sprintf("http://%s/wsman", target)
-//	conn := utils.HttpConn(Delay)
+//	conn := pkg.HttpConn(Delay)
 //	req, _ := http.NewRequest("POST", uri, nil)
 //	req.Header.Add("Content-Length", "0")
 //	req.Header.Add("Keep-Alive", "true")

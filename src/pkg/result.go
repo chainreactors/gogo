@@ -1,9 +1,9 @@
-package utils
+package pkg
 
 import (
 	"encoding/json"
 	"fmt"
-	"getitle/src/structutils"
+	"getitle/src/utils"
 	"net"
 	"net/http"
 	"strconv"
@@ -113,7 +113,7 @@ func (result Result) NoFramework() bool {
 
 func (result *Result) GuessFramework() {
 	for _, v := range PortMap[result.Port] {
-		if TagMap[v] == nil && !structutils.SliceContains([]string{"top1", "top2", "top3", "other", "windows"}, v) {
+		if TagMap[v] == nil && !utils.SliceContains([]string{"top1", "top2", "top3", "other", "windows"}, v) {
 			result.AddFramework(&Framework{Name: v, IsGuess: true})
 		}
 	}
@@ -268,11 +268,11 @@ type Vuln struct {
 }
 
 func (v *Vuln) GetPayload() string {
-	return structutils.MaptoString(v.Payload)
+	return utils.MaptoString(v.Payload)
 }
 
 func (v *Vuln) GetDetail() string {
-	return structutils.MaptoString(v.Detail)
+	return utils.MaptoString(v.Detail)
 }
 
 func (v *Vuln) GetLevel() int {

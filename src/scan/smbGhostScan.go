@@ -1,7 +1,7 @@
 package scan
 
 import (
-	"getitle/src/utils"
+	"getitle/src/pkg"
 )
 
 const (
@@ -90,18 +90,18 @@ const (
 		"\x00\x00\x00\x00"
 )
 
-func smbGhostScan(result *utils.Result) {
+func smbGhostScan(result *pkg.Result) {
 	//target := result.GetTarget()
-	//conn,err := utils.TcpSocketConn(target,Delay)
+	//conn,err := pkg.TcpSocketConn(target,Delay)
 	//if err != nil {
 	//	return
 	//}
 	//defer conn.Close()
-	//buff,err := utils.SocketSend(conn,[]byte(pkt),1024)
+	//buff,err := pkg.SocketSend(conn,[]byte(pkt),1024)
 	//if err != nil {
 	//	return
 	//}
 	//if bytes.Contains(buff, []byte("Public")){
-	//	result.AddVuln(utils.Vuln{Name: "CVE-2020-0796"})
+	//	result.AddVuln(pkg.Vuln{Name: "CVE-2020-0796"})
 	//}
 }

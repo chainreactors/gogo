@@ -1,7 +1,7 @@
 package core
 
 import (
-	"getitle/src/structutils"
+	"getitle/src/pkg"
 	"getitle/src/utils"
 	"strings"
 )
@@ -15,8 +15,8 @@ func portHandler(portstring string) []string {
 	for _, portname := range postslist {
 		ports = append(ports, choiceports(portname)...)
 	}
-	ports = utils.Ports2PortSlice(ports)
-	ports = structutils.SliceUnique(ports)
+	ports = pkg.Ports2PortSlice(ports)
+	ports = utils.SliceUnique(ports)
 	return ports
 }
 
@@ -24,17 +24,17 @@ func portHandler(portstring string) []string {
 func choiceports(portname string) []string {
 	var ports []string
 	if portname == "all" {
-		for p := range utils.PortMap {
+		for p := range pkg.PortMap {
 			ports = append(ports, p)
 		}
 		return ports
 	}
 
-	if utils.NameMap[portname] != nil {
-		ports = append(ports, utils.NameMap[portname]...)
+	if pkg.NameMap[portname] != nil {
+		ports = append(ports, pkg.NameMap[portname]...)
 		return ports
-	} else if utils.TagMap[portname] != nil {
-		ports = append(ports, utils.TagMap[portname]...)
+	} else if pkg.TagMap[portname] != nil {
+		ports = append(ports, pkg.TagMap[portname]...)
 		return ports
 	} else {
 		return []string{portname}

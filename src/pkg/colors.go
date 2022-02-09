@@ -1,4 +1,4 @@
-package utils
+package pkg
 
 func Red(s string) string {
 	return "\033[1;31m" + s + "\033[0m"

@@ -1,8 +1,8 @@
-package utils
+package pkg
 
 import (
 	"encoding/json"
-	"getitle/src/structutils"
+	"getitle/src/utils"
 	"regexp"
 	"strconv"
 	"strings"
@@ -21,8 +21,8 @@ var (
 	Compiled       map[string][]*regexp.Regexp
 	CommonCompiled map[string]*regexp.Regexp
 	Extractors     = make(map[string]*regexp.Regexp)
-	Win            = structutils.IsWin()
-	Root           = structutils.IsRoot()
+	Win            = utils.IsWin()
+	Root           = utils.IsRoot()
 )
 
 var PresetExtracts = map[string]*regexp.Regexp{
