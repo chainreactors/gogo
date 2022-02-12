@@ -76,7 +76,7 @@ func LoadPortConfig() (PortMapper, PortMapper, PortMapper) {
 	err := json.Unmarshal(LoadConfig("port"), &portfingers)
 
 	if err != nil {
-		Panic("[-] port config load FAIL!, " + err.Error())
+		Fatal("[-] port config load FAIL!, " + err.Error())
 	}
 	tagmap := make(PortMapper)  // 以服务名归类
 	namemap := make(PortMapper) // 以tag归类
@@ -104,7 +104,7 @@ func LoadFingers(t string) FingerMapper {
 
 	err := json.Unmarshal(LoadConfig(t), &tmpfingers)
 	if err != nil {
-		Panic("[-] finger load FAIL!, " + err.Error())
+		Fatal("[-] finger load FAIL!, " + err.Error())
 	}
 	if t == "http" {
 		AllFingers = tmpfingers
@@ -143,12 +143,12 @@ func LoadHashFinger() (map[string]string, map[string]string) {
 	var err error
 	err = json.Unmarshal(LoadConfig("mmh3"), &mmh3fingers)
 	if err != nil {
-		Panic("mmh3 load FAIL" + err.Error())
+		Fatal("mmh3 load FAIL" + err.Error())
 	}
 
 	err = json.Unmarshal(LoadConfig("md5"), &md5fingers)
 	if err != nil {
-		Panic("md5 load FAIL" + err.Error())
+		Fatal("md5 load FAIL" + err.Error())
 	}
 	return mmh3fingers, md5fingers
 }
@@ -158,7 +158,7 @@ func LoadWorkFlow() WorkflowMap {
 	var err error
 	err = json.Unmarshal(LoadConfig("workflow"), &workflows)
 	if err != nil {
-		Panic("workflow load FAIL, " + err.Error())
+		Fatal("workflow load FAIL, " + err.Error())
 	}
 
 	// 设置默认参数

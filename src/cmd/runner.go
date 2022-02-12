@@ -248,7 +248,7 @@ func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) {
 			r.resetGlobals()
 		}
 	} else {
-		Panic("not fount workflow " + r.WorkFlowName)
+		Fatal("not fount workflow " + r.WorkFlowName)
 	}
 }
 
