@@ -10,7 +10,7 @@ import (
 
 type Template struct {
 	Id      string   `json:"id"`
-	Fingers []string `json:"fingers"`
+	Fingers []string `json:"finger"`
 	Info    struct {
 		Name string `json:"name"`
 		//Author    string `json:"author"`
