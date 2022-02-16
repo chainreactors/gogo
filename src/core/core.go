@@ -25,7 +25,7 @@ var portstat = map[int]string{
 	4:  "denied",
 	5:  "down",
 	6:  "error_host",
-	-1: "unknow",
+	-1: "unknown",
 }
 
 //直接扫描
