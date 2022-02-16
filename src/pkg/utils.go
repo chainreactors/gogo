@@ -22,7 +22,7 @@ func GetCurtime() string {
 	return curtime
 }
 
-func GetHttpRaw(resp *http.Response) string {
+func GetHttpRaw(resp *http.Response) (string, string) {
 	var raw string
 
 	raw += fmt.Sprintf("%s %s\r\n", resp.Proto, resp.Status)
@@ -34,11 +34,11 @@ func GetHttpRaw(resp *http.Response) string {
 	raw += "\r\n"
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return raw
+		return raw, ""
 	}
 	raw += string(body)
 	_ = resp.Body.Close()
-	return raw
+	return raw, string(body)
 }
 
 func GetBody(resp *http.Response) []byte {
