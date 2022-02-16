@@ -27,7 +27,7 @@ func httpFingerMatch(result *pkg.Result, finger *pkg.Finger) *pkg.Framework {
 			return nil
 		}
 		if err == nil {
-			content = string(pkg.GetBody(resp))
+			content, _ = pkg.GetHttpRaw(resp)
 		}
 
 	}

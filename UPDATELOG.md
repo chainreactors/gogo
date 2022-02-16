@@ -1,4 +1,79 @@
 ## Change Note
+* 2.0.2
+  * 优化hash判断
+  * 添加vcenter相关poc和信息收集
+  * 优化函数,文件与包命名
+* 2.0.1
+  * workflow配置文件中支持字段iplist
+  * 优化-P nuclei的输出, 现在可以看到可被payload参数覆盖的变量了
+  * 整理代码结构, 文件命名, 包命名
+* 2.0.0
+  * 新增-w 参数, 用来选用workflow, 支持文件或逗号分割workflow名字或base64编码的json格式输入.
+    例如:
+    * `gt -w inter` 调用扫描三个内网地址的常见端口
+    * `gt -w myworkflow.json`  使用自己编写的myworkflow.json文件
+    * `gt -w [base64string]` 远程使用时不太方便传文件, 可以传入base64编码的myworkflow.json, 来无文件使用自定义workflow
+  * 删除-m a参数, -m a 容易造成混淆, 已通过workflow功能代替
+  * 新增-P workflow , 用来查看当前预设的workflow
+  * 新增-P extract , 用来查询当前预设的extract
+* 1.3.0
+  * 新增arp扫描, 可使用-p arp 指定. windows下无法使用arp扫描
+  * 新增-arp参数, 可以使用-arp喷洒存活ip, 类似-ping参数, 并且可以与-ping参数同时使用.效果叠加,自动去重.
+  * 新增-iface指定arp扫描时使用的网卡, 默认为eth0
+  * 重构runner与log代码
+  * 优化404扫描逻辑
+  * 优化extract输出
+  * 新增-path参数, 用来指定输出文件目录, -f参数默认输出目录为当前目录, -af/hf参数默认输出目录为程序绝对目录. 可使用-path修改
+* 1.2.2
+  * 新增-extract参数, 指定正则表达式, 提取对应内容
+  * 新增-extracts参数, 指定逗号分割的多个预设extract, 当前支持ip, idcard, url, header, body, response, cookie等
+  * -ef支持base64编码的getitlepoc, 简单的poc不再需要上传文件
+  * 优化了extract的命令行显示
+  * -F参数现在支持对extract文件的解密了
+  * extract文件的加密与其他文件相同, 默认使用加密, 可以使用-C参数强制不加密
+* 1.2.1
+  * **修复1.1.4之后引入的bug, close的端口也会加入到指纹识别中, 浪费了大量时间**
+  * 新增404页面指纹识别, 有一套独特的逻辑, 能提升原有的指纹识别率, 合并在原有的-v参数中
+  * 删除大量低质量的fofa 指纹
+  * 略微优化getitle性能
+  * 新增info输出块, 用来区分vuln
+  * template 支持绑定多个fingerid
+* 1.2.0
+  * 支持了nuclei中有关extractor的功能, 可以自定义提取数据. 如果没有指定-f 将会在命令行输出预览, 如果指定了任意文件, 会创建 filename_extractor文件, 包含完整内容.
+    命令行输出示例:
+    `[+] http://222.186.57.62:85		Servlet/2.5 JSP/2.1			79f3 [200] \xb4\xf3\xc7\xf1ׯ\xb8\xd6\xcc\xfa\xcd\xf8\xcc\xfa\xb8\xe7\xc3\xc7\xd6\xfa\xca\xd6 [ Vuln: CVE-2022-21371 ] [ Vuln: weblogic-iiop-detect ] [ Vuln: weblogic-t3-detect ]  [ Extract: web-xml:<?xml version="1.0" encoding=" ... 33952bytes ] `
+    文件输出则为完整内容
+  * 支持通过参数配置nuclei poc中的payload, 例如`gt -ip 127.0.0.1 -p 8080 -v -e -payload auth:123456 -payload auth:dG9tY2F0OnMzY3JldA==`  , 可以将payload的auth参数替换为手动指定的, 支持多个参数, 每个参数的分割符号为 `:`
+  * 新增-suffix参数, 用来常规扫描中指定url, 替换原来的`/` 目录
+  * -j 参数支持 ip:port的多行输入
+  * cve-2022-21371 weblogic 读文件
+  * cve-2021-36260 海康摄像头 RCE
+  * 删除部分容易产生误报的fofa 指纹
+* 1.1.6
+  * 使用1.11编译, 兼容windows server 2003/XP系统
+  * 修复-no参数下扫描结果换行符丢失的bug
+  * log文件无法创建的时候,会提供warn命令行信息, 但不会结束程序; -f/af/hf指定的文件无法创建的时候会提示错误原因并退出程序
+* 1.1.4-1.1.5
+  * 添加设计文档, 在doc目录下
+  * 添加weblogic常见漏洞poc
+  * 集成全部fofa指纹, 后续根据情况删改
+  * 手动添加十数个指纹
+  * 添加-debug参数, 用来判断网络状态
+  * 优化代码逻辑, 删除无用代码
+* 1.1.0 - 1.1.3
+  * -F 命令添加 -filter子参数, 可以过滤想要的数据, 用法与gtfilter一致, -filter 可指定多个, 例如 -filter 1 filter 2
+  * 新增-ping参数, 可以在默认扫描前插入一次ping喷洒, 如果存在-af, 存活ip将会单独输出
+  * 新增-eip参数, 可以指定逗号分割的cidr或ip, 生成器将会跳过这些ip
+  * 新增-version, 用来判断gt是否正常工作
+  * 添加weblogic参见poc
+  * -F 命令 添加-o json参数, 可以输出过滤后的json
+  * 优化编译脚本
+  * 重构file, generator模块
+  * 重写了README.md, 在doc目录中添加了设计文档
+* 1.0.10
+  * 修复与优化了一些指纹以及输出. 修复多个输出的bug
+  * 重写了README.md
+  * 开始编写实现细节与设计思路的文档, 方便理解getitle是如何运作的来更好的使用getitile, 设计文档在doc目录下
 * 1.0.9
 
   add:  

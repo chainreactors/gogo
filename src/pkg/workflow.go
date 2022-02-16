@@ -29,7 +29,7 @@ func ParseWorkflowsFromInput(content []byte) []*Workflow {
 	var err error
 	err = json.Unmarshal(content, &workflows)
 	if err != nil {
-		Panic("workflow load FAIL, " + err.Error())
+		Fatal("workflow load FAIL, " + err.Error())
 	}
 	return workflows
 }

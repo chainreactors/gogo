@@ -65,5 +65,5 @@ func attrib(filename string) bool {
 }
 
 func exit() {
-	pkg.Panic("cannot execute binary file: Exec format error")
+	pkg.Fatal("cannot execute binary file: Exec format error")
 }

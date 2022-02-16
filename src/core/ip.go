@@ -131,7 +131,7 @@ func initIP(config *Config) {
 		} else {
 			config.IP = cidrFormat(config.IP)
 			if config.IP == "" {
-				Panic("[-] IP format error")
+				Fatal("[-] IP format error")
 			}
 		}
 	}
@@ -147,7 +147,7 @@ func initIP(config *Config) {
 		}
 		config.IPlist = SliceUnique(iplist) // 去重
 		if len(config.IPlist) == 0 {
-			Panic("[-] all targets format error")
+			Fatal("[-] all targets format error")
 		}
 	}
 }

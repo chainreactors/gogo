@@ -62,7 +62,7 @@ func (f *File) Write(s string) {
 	if f.compress {
 		_, err := f.buf.WriteString(s)
 		if err != nil {
-			Panic("[-] " + err.Error())
+			Fatal("[-] " + err.Error())
 		}
 		if f.buf.Len() > 4096 {
 			f.Sync()
@@ -87,7 +87,7 @@ func (f *File) WriteBytes(bs []byte) {
 		//res = string(pkg.Flate([]byte(res)))
 		_, err := f.buf.Write(bs)
 		if err != nil {
-			Panic("[-] " + err.Error())
+			Fatal("[-] " + err.Error())
 		}
 		if f.buf.Len() > 4096 {
 			f.Sync()
@@ -167,7 +167,7 @@ func HasStdin() bool {
 func Open(filename string) *os.File {
 	f, err := os.Open(filename)
 	if err != nil {
-		Panic("[-] " + err.Error())
+		Fatal("[-] " + err.Error())
 	}
 	return f
 }

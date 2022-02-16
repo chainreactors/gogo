@@ -34,6 +34,7 @@ type Result struct {
 	Error      string         `json:"-"`
 	ErrStat    int            `json:"-"`
 	Content    string         `json:"-"`
+	Body       string         `json:"-"`
 }
 
 func NewResult(ip, port string) *Result {
@@ -53,7 +54,7 @@ func (result *Result) InfoFilter() {
 	//result.errHandler()
 	result.Title = getTitle(result.Content)
 	if result.Content != "" {
-		result.Hash = Md5Hash([]byte(result.Content))[:4]
+		result.Hash = Md5Hash([]byte(result.Body))[:4]
 		for name, extract := range Extractors {
 			extractStr, ok := CompiledAllMatch(extract, result.Content)
 			if ok && extractStr != nil {
