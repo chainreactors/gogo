@@ -173,7 +173,7 @@ func (r *Runner) prepareConfig(config Config) *Config {
 }
 
 func (r *Runner) run() {
-	if r.WorkFlowName == "" || !r.IsWorkFlow {
+	if r.WorkFlowName == "" && !r.IsWorkFlow {
 		r.runWithCMD()
 	} else {
 		var workflowMap = WorkflowMap{}

@@ -172,7 +172,7 @@ func Encode(input []byte) string {
 func Base64Decode(s string) []byte {
 	data, err := base64.StdEncoding.DecodeString(s)
 	if err != nil {
-		Fatal("[-] " + err.Error())
+		Fatal("" + err.Error())
 	}
 	return data
 }
