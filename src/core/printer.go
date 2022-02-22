@@ -36,7 +36,7 @@ func PrintNucleiPoc() {
 			if payload != "" {
 				payload = "payloads: " + payload
 			}
-			fmt.Printf("\t%s\t%s\t%s %s\n", t.Info.Name, t.Info.Severity, t.Info.Description, payload)
+			fmt.Printf("\t%s\t%s\t%s\t%s %s\n", t.Id, t.Info.Name, t.Info.Severity, t.Info.Description, payload)
 		}
 	}
 }
