@@ -64,8 +64,8 @@ func defaultScan(tc targetConfig) {
 				Opt.extractCh <- result.Extracts.ToResult()
 			}
 		}
-	} else if Opt.Debug {
-		fmt.Printf("[debug] tcp stat: %s, errmsg: %s\n", portstat[result.ErrStat], result.Error)
+	} else if Opt.Debug && (result.ErrStat != 0 || result.Error != "") {
+		fmt.Printf("[debug] %s stat: %s, errmsg: %s\n", result.GetTarget(), portstat[result.ErrStat], result.Error)
 	}
 }
 

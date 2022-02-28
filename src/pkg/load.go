@@ -76,7 +76,7 @@ func LoadPortConfig() (PortMapper, PortMapper, PortMapper) {
 	err := json.Unmarshal(LoadConfig("port"), &portfingers)
 
 	if err != nil {
-		Fatal("[-] port config load FAIL!, " + err.Error())
+		Fatal("port config load FAIL!, " + err.Error())
 	}
 	tagmap := make(PortMapper)  // 以服务名归类
 	namemap := make(PortMapper) // 以tag归类
@@ -104,7 +104,7 @@ func LoadFingers(t string) FingerMapper {
 
 	err := json.Unmarshal(LoadConfig(t), &tmpfingers)
 	if err != nil {
-		Fatal("[-] finger load FAIL!, " + err.Error())
+		Fatal("finger load FAIL!, " + err.Error())
 	}
 	if t == "http" {
 		AllFingers = tmpfingers
@@ -201,7 +201,7 @@ func (m WorkflowMap) Choice(name string) []*Workflow {
 	name = strings.TrimSpace(name)
 	names := strings.Split(name, ",")
 	for _, n := range names {
-		workflows = append(workflows, m[n]...)
+		workflows = append(workflows, m[strings.ToLower(n)]...)
 	}
 	return workflows
 }

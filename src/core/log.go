@@ -74,6 +74,7 @@ func (log *Logger) Warn(s string) {
 
 func (log *Logger) Close() {
 	close(log.LogCh)
+	time.Sleep(time.Microsecond * 200)
 }
 
 //func progressLog(s string) {

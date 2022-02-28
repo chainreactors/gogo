@@ -9,6 +9,7 @@ README Version 1.2.0
 Usage of ./getitle:
 
    -k string    启动密码(必须输入)为ybb  
+   -debug bool  输出每个请求的错误日志, 用来debug
    
    INPUT params:
       -ip string   IP地址, 支持逗号分割的输入 like 192.168.1.1/24,172.16.1.1/24

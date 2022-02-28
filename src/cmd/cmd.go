@@ -58,7 +58,7 @@ func CMD() {
 	flag.BoolVar(&runner.Ping, "ping", false, "")
 	flag.BoolVar(&runner.Arp, "arp", false, "")
 	flag.StringVar(&runner.iface, "iface", "eth0", "")
-	flag.BoolVar(&Opt.Debug, "debug", false, "")
+	flag.BoolVar(&runner.Debug, "debug", false, "")
 	flag.IntVar(&RunOpt.Delay, "d", 2, "")
 	flag.IntVar(&RunOpt.HttpsDelay, "D", 2, "")
 	flag.StringVar(&RunOpt.Payloadstr, "suffix", "", "")
@@ -86,8 +86,7 @@ func CMD() {
 		exit()
 	}
 
-	ok := runner.preInit()
-	if !ok {
+	if ok := runner.preInit(); !ok {
 		os.Exit(0)
 	}
 	runner.init()
