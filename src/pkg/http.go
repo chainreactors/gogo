@@ -15,9 +15,9 @@ func HttpConn(delay int) http.Client {
 			InsecureSkipVerify: true,
 		},
 		DialContext: (&net.Dialer{
-			Timeout:   time.Duration(delay) * time.Second,
-			KeepAlive: time.Duration(delay) * time.Second,
-			DualStack: true,
+			//Timeout:   time.Duration(delay) * time.Second,
+			//KeepAlive: time.Duration(delay) * time.Second,
+			//DualStack: true,
 		}).DialContext,
 		MaxIdleConnsPerHost: 1,
 		MaxIdleConns:        4000,
