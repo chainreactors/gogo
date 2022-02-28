@@ -46,6 +46,7 @@ type Runner struct {
 	Ver          bool // 输出版本号
 	NoScan       bool
 	IsWorkFlow   bool
+	Debug        bool
 	iface        string
 	start        time.Time
 	config       Config
@@ -54,6 +55,10 @@ type Runner struct {
 func (r *Runner) preInit() bool {
 	// 初始化日志工具
 	Log = NewLogger(r.Quiet)
+	if r.Debug {
+		Opt.Debug = true
+		RunOpt.Debug = true
+	}
 	// 一些特殊的分支, 不继续先后执行
 	if r.Ver {
 		fmt.Println(ver)
