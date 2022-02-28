@@ -86,8 +86,7 @@ func CMD() {
 		exit()
 	}
 
-	ok := runner.preInit()
-	if !ok {
+	if ok := runner.preInit(); !ok {
 		os.Exit(0)
 	}
 	runner.init()

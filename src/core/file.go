@@ -79,7 +79,10 @@ func handler() {
 				Log.LogFile.SyncWrite(res)
 			}
 			Log.LogFile.Close()
-			_ = os.Remove(tmpfilename)
+			err := os.Remove(tmpfilename)
+			if err != nil {
+				Log.Warn(err.Error())
+			}
 		}()
 	}
 
