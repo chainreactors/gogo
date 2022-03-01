@@ -218,13 +218,18 @@ func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) {
 			}
 
 			config := workflow.PrepareConfig()
-
 			// 一些workflow的参数, 允许被命令行参数覆盖
 			if r.Ports != "" {
 				config.Ports = r.Ports
 			}
 			if r.config.Threads != 0 {
 				config.Threads = r.config.Threads
+			}
+			if r.config.SmartPort != "default" {
+				config.SmartPort = r.config.SmartPort
+			}
+			if r.config.IpProbe != "default" {
+				config.IpProbe = r.config.IpProbe
 			}
 
 			// 全局变量的处理
