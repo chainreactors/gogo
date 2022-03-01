@@ -21,6 +21,8 @@ func shiroScan(result *pkg.Result) {
 	if strings.Contains(deleteme, "=deleteMe") {
 		result.AddFramework(&pkg.Framework{Name: "shiro"})
 		isshiro = true
+	} else {
+		return
 	}
 	req = setshirocookie(target, "/A29uyYfZg4mT+SUU/3eMAnRlgBWnVrveeiwZ/hz1LlF86NxSmq9dsWpS0U7Q2U+MjbAzaLBCsV7IHb7MQVFItU+ibEkDuyO7WoNGBM4ay8l+oBZo2W2mZcFXG3swJsGXxaZHua3m5jlJNKcCjqy9sX2oRZrm7eSABvUn71vY9NaohbC1i6+FKCRMW9s11/Q")
 	resp, err = conn.Do(req)

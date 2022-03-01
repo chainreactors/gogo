@@ -103,7 +103,7 @@ func Dispatch(result *pkg.Result) {
 }
 
 func ExploitDispatch(result *pkg.Result) {
-	if result.IsHttp() && RunOpt.Exploit != "auto" {
+	if result.IsHttp() && (RunOpt.Exploit == "auto" || RunOpt.Exploit == "shiro") {
 		// todo 将shiro改造成nuclei poc
 		shiroScan(result)
 	}
