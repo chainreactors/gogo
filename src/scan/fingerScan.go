@@ -62,7 +62,7 @@ func getFramework(result *pkg.Result, fingermap pkg.FingerMapper, matcher func(*
 		}
 	}
 
-	if result.Protocol == "tcp" && !result.NoFramework() {
+	if result.Protocol == "tcp" && len(fs) > 0 {
 		// 如果是tcp协议,并且识别到一个指纹,则退出.
 		// 如果是http协议,可能存在多个指纹,则进行扫描
 		return
