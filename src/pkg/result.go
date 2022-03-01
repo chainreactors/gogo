@@ -190,7 +190,7 @@ func (result Result) GetFirstFramework() string {
 
 func (result *Result) AddNTLMInfo(m map[string]string, t string) {
 	result.Title = m["MsvAvNbDomainName"] + "/" + m["MsvAvNbComputerName"]
-	result.Host = m["MsvAvDnsDomainName"] + "/" + m["MsvAvDnsComputerName"]
+	result.Host = strings.Trim(m["MsvAvDnsDomainName"], "\x00") + "/" + m["MsvAvDnsComputerName"]
 	result.AddFramework(&Framework{Name: t, Version: m["Version"]})
 }
 
