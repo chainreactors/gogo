@@ -69,9 +69,9 @@ func InitConfig(config *Config) *Config {
 		switch data.(type) {
 		case Results:
 			config.Results = data.(Results)
-		case ResultsData:
+		case *ResultsData:
 			config.Results = data.(*ResultsData).Data
-		case SmartData:
+		case *SmartData:
 			config.IPlist = data.(*SmartData).Data
 		default:
 			Fatal("not support result, maybe use -l")
