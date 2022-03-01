@@ -8,11 +8,13 @@ import (
 
 func fingerScan(result *pkg.Result) {
 	//如果是http协议,则判断cms,如果是tcp则匹配规则库.暂时不考虑udp
+	var fs pkg.Frameworks
 	if result.IsHttp() {
-		getFramework(result, pkg.HttpFingers, httpFingerMatch)
+		fs = getFramework(result, pkg.HttpFingers, httpFingerMatch)
 	} else {
-		getFramework(result, pkg.TcpFingers, tcpFingerMatch)
+		fs = getFramework(result, pkg.TcpFingers, tcpFingerMatch)
 	}
+	result.AddFrameworks(fs)
 	return
 }
 
@@ -52,20 +54,19 @@ func httpFingerMatch(result *pkg.Result, finger *pkg.Finger) *pkg.Framework {
 	return nil
 }
 
-func getFramework(result *pkg.Result, fingermap pkg.FingerMapper, matcher func(*pkg.Result, *pkg.Finger) *pkg.Framework) {
+func getFramework(result *pkg.Result, fingermap pkg.FingerMapper, matcher func(*pkg.Result, *pkg.Finger) *pkg.Framework) pkg.Frameworks {
 	// 优先匹配默认端口,第一次循环只匹配默认端口
 	var fs pkg.Frameworks
 	for _, finger := range fingermap.GetFingers(result.Port) {
 		framework := matcher(result, finger)
 		if framework != nil {
 			fs = append(fs, framework)
+			if result.Protocol == "tcp" {
+				// 如果是tcp协议,并且识别到一个指纹,则退出.
+				// 如果是http协议,可能存在多个指纹,则进行扫描
+				return fs
+			}
 		}
-	}
-
-	if result.Protocol == "tcp" && len(fs) > 0 {
-		// 如果是tcp协议,并且识别到一个指纹,则退出.
-		// 如果是http协议,可能存在多个指纹,则进行扫描
-		return
 	}
 
 	for port, fingers := range fingermap {
@@ -77,11 +78,13 @@ func getFramework(result *pkg.Result, fingermap pkg.FingerMapper, matcher func(*
 			framework := matcher(result, finger)
 			if framework != nil {
 				fs = append(fs, framework)
+				if result.Protocol == "tcp" {
+					return fs
+				}
 			}
 		}
 	}
-	result.AddFrameworks(fs)
-	return
+	return fs
 }
 
 func tcpFingerMatch(result *pkg.Result, finger *pkg.Finger) *pkg.Framework {
