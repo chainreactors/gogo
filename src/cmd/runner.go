@@ -287,7 +287,7 @@ func (r *Runner) close(config *Config) {
 			filenamelog += "Pingscan result filename: " + config.PingFilename
 		}
 		if IsExist(config.Filename + "_extract") {
-			filenamelog += "extractor result filename: " + config.Filename + "_extractor"
+			filenamelog += "extractor result filename: " + config.Filename + "_extract"
 		}
 		Log.Important(filenamelog)
 	}
