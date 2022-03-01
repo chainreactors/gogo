@@ -244,11 +244,12 @@ type extractTmp struct {
 	extracts Extracts
 }
 
-func LoadExtracts(content []byte) ([]Extracts, error) {
+func LoadExtracts(content []byte) ([]*Extracts, error) {
 	var err error
-	var extractss []Extracts
-	var extracts Extracts
+	var extractss []*Extracts
+
 	for _, res := range bytes.Split(content, []byte{'\n'}) {
+		var extracts *Extracts
 		err = json.Unmarshal(res, &extracts)
 		if err != nil {
 			return nil, err

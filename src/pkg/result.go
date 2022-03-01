@@ -392,7 +392,7 @@ func (e *Extracts) ToResult() string {
 	return string(s)
 }
 
-func (es Extracts) ToString() string {
+func (es *Extracts) ToString() string {
 	var s string
 	for _, e := range es.Extracts {
 		s += fmt.Sprintf("[ Extract: %s ] ", e.ToString())
