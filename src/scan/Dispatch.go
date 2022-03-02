@@ -94,8 +94,6 @@ func Dispatch(result *pkg.Result) {
 		ExploitDispatch(result)
 	}
 
-	// 格式化title编码, 防止输出二进制数据
-	result.Title = pkg.AsciiEncode(result.Title)
 	if result.Httpresp != nil && !result.Httpresp.Close {
 		_ = result.Httpresp.Body.Close()
 	}

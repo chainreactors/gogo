@@ -56,6 +56,8 @@ func defaultScan(tc targetConfig) {
 
 	if result.Open {
 		Opt.AliveSum++
+		// 格式化title编码, 防止输出二进制数据
+		result.Title = AsciiEncode(result.Title)
 		Log.Default(output(result, Opt.Output))
 
 		if Opt.file != nil {
@@ -193,7 +195,7 @@ func declineScan(iplist []string, config Config) {
 		for _, ip := range iplist {
 			tmpalive := Opt.AliveSum
 			SmartMod(ip, config)
-			Log.Logging(fmt.Sprintf("[*] Found %d alive assets from CIDR %s", Opt.AliveSum-tmpalive, ip))
+			Log.Logging(fmt.Sprintf("[*] Found %d assets from CIDR %s", Opt.AliveSum-tmpalive, ip))
 			Opt.file.Sync()
 		}
 	}
