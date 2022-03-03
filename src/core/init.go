@@ -142,7 +142,7 @@ func validate(config *Config) error {
 		}
 	}
 
-	if config.IP == "" && config.ListFile == "" && config.JsonFile == "" && config.Mod != "a" && !HasStdin() { // 一些导致报错的参数组合
+	if config.IP == "" && config.ListFile == "" && config.JsonFile == "" && !config.IsJsonInput && !config.IsListInput { // 一些导致报错的参数组合
 		err = errors.New("cannot found target, please set -ip or -l or -j -or -a or stdin")
 	}
 
@@ -157,6 +157,7 @@ func validate(config *Config) error {
 	if !Win && Root && (strings.Contains(config.Ports, "arp") || SliceContains(config.AliveSprayMod, "arp")) {
 		Log.Warn("current user is not root, arp scan maybe not work")
 	}
+
 	if Win && (strings.Contains(config.Ports, "arp") || SliceContains(config.AliveSprayMod, "arp")) {
 		Log.Warn("windows not support arp scan, skip all arp scan task")
 	}

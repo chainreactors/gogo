@@ -95,7 +95,7 @@ func SmartMod(target string, config Config) {
 
 	// 输出启发式扫描探针
 	probeconfig := fmt.Sprintf("[*] Smart probe ports: %s , ", strings.Join(config.SmartPortList, ","))
-	if config.Mod == "ss" {
+	if config.IsASmart() {
 		probeconfig += "Smart IP probe: " + config.IpProbe
 	}
 	Log.Logging(probeconfig)
@@ -126,7 +126,7 @@ func SmartMod(target string, config Config) {
 		return true
 	})
 
-	if iplist == nil {
+	if len(iplist) == 0 {
 		return
 	} else {
 		sort_cidr(iplist)

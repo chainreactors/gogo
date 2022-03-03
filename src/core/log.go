@@ -38,9 +38,9 @@ func (log *Logger) InitFile() {
 }
 
 func (log *Logger) Logging(s string) {
-	s = fmt.Sprintf("%s , %s", s, GetCurtime())
+	s = fmt.Sprintf("%s , %s\n", s, GetCurtime())
 	if !log.Quiet {
-		fmt.Println(s)
+		fmt.Print(s)
 	}
 	if log.LogFile != nil {
 		log.LogCh <- s
