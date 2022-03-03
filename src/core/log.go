@@ -41,7 +41,6 @@ func (log *Logger) Logging(s string) {
 	s = fmt.Sprintf("%s , %s", s, GetCurtime())
 	if !log.Quiet {
 		fmt.Println(s)
-		return
 	}
 	if log.LogFile != nil {
 		log.LogCh <- s

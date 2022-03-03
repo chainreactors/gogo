@@ -22,10 +22,10 @@ upxs  ./bin/%name%_linux_amd64
 upxs  ./bin/%name%_linux_arm64
 
 @REM 伪造证书
-limelighter -I ./bin/%name%_windows_amd64.exe -O ./bin/%name%_windows_amd64s.exe -Domain www.sangfor.com
-limelighter -I ./bin/%name%_windows_amd64_upx.exe -O ./bin/%name%_windows_amd64_upxs.exe -Domain www.sangfor.com
-limelighter -I ./bin/%name%_windows_386_upx.exe -O ./bin/%name%_windows_386_upxs.exe -Domain www.sangfor.com
-limelighter -I ./bin/%name%_windows_386.exe -O ./bin/%name%_windows_386s.exe -Domain www.sangfor.com
+limelighter -I ./bin/%name%_windows_amd64.exe -O ./bin/%name%_windows_amd64s.exe -Domain www.moresec.cn
+limelighter -I ./bin/%name%_windows_amd64_upx.exe -O ./bin/%name%_windows_amd64_upxs.exe -Domain www.moresec.cn
+limelighter -I ./bin/%name%_windows_386_upx.exe -O ./bin/%name%_windows_386_upxs.exe -Domain www.moresec.cn
+limelighter -I ./bin/%name%_windows_386.exe -O ./bin/%name%_windows_386s.exe -Domain www.moresec.cn
 
 rm *.sangfor.*
 rm ./bin/%name%_windows_amd64.exe
