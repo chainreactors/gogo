@@ -11,7 +11,7 @@ import (
 )
 
 var ver = ""
-var k = "ybb"
+var k = ""
 
 func CMD() {
 	defer ants.Release()
