@@ -52,7 +52,7 @@ func FormatOutput(filename string, outputfile string, autofile bool, filters []s
 	var iscolor bool
 	var resultsdata *ResultsData
 	var smartdata *SmartData
-	var extractsdata []Extracts
+	var extractsdata []*Extracts
 	var textdata string
 	var file *os.File
 	if filename == "stdin" {
@@ -74,8 +74,8 @@ func FormatOutput(filename string, outputfile string, autofile bool, filters []s
 		if outputfile == "" {
 			outputfile = GetFilename(&smartdata.Config, autofile, false, Opt.FilePath, "cidr")
 		}
-	case []Extracts:
-		extractsdata = data.([]Extracts)
+	case []*Extracts:
+		extractsdata = data.([]*Extracts)
 		//ConsoleLog("[*] parser extracts successfully")
 	case []byte:
 		textdata = string(data.([]byte))

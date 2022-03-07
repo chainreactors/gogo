@@ -18,7 +18,7 @@ type targetConfig struct {
 // return open: 0, closed: 1, filtered: 2, noroute: 3, denied: 4, down: 5, error_host: 6, unkown: -1
 
 var portstat = map[int]string{
-	0:  "open",
+	//0:  "open",
 	1:  "closed",
 	2:  "filtered|closed",
 	3:  "noroute",
@@ -56,6 +56,8 @@ func defaultScan(tc targetConfig) {
 
 	if result.Open {
 		Opt.AliveSum++
+		// 格式化title编码, 防止输出二进制数据
+		result.Title = AsciiEncode(result.Title)
 		Log.Default(output(result, Opt.Output))
 
 		if Opt.file != nil {
@@ -93,7 +95,7 @@ func SmartMod(target string, config Config) {
 
 	// 输出启发式扫描探针
 	probeconfig := fmt.Sprintf("[*] Smart probe ports: %s , ", strings.Join(config.SmartPortList, ","))
-	if config.Mod == "ss" {
+	if config.IsASmart() {
 		probeconfig += "Smart IP probe: " + config.IpProbe
 	}
 	Log.Logging(probeconfig)
@@ -124,7 +126,7 @@ func SmartMod(target string, config Config) {
 		return true
 	})
 
-	if iplist == nil {
+	if len(iplist) == 0 {
 		return
 	} else {
 		sort_cidr(iplist)
@@ -193,7 +195,7 @@ func declineScan(iplist []string, config Config) {
 		for _, ip := range iplist {
 			tmpalive := Opt.AliveSum
 			SmartMod(ip, config)
-			Log.Logging(fmt.Sprintf("[*] Found %d alive assets from CIDR %s", Opt.AliveSum-tmpalive, ip))
+			Log.Logging(fmt.Sprintf("[*] Found %d assets from CIDR %s", Opt.AliveSum-tmpalive, ip))
 			Opt.file.Sync()
 		}
 	}

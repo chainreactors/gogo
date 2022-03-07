@@ -104,7 +104,7 @@ func (rd ResultsData) groupBySortedIP() (map[string]IPMapResult, []string) {
 func (rd ResultsData) ToConfig() string {
 	// 输出配置信息
 	var configstr string
-	configstr = fmt.Sprintf("[*] Scan Target: %s, Ports: %s, Mod: %s \n", rd.Config.GetTargetName(), rd.Config.Ports, rd.Config.Mod)
+	configstr = fmt.Sprintf("Scan Target: %s, Ports: %s, Mod: %s \n", rd.Config.GetTargetName(), rd.Config.Ports, rd.Config.Mod)
 	configstr += fmt.Sprintf("[*] Exploit: %s, Version level: %d \n", rd.Config.Exploit, rd.Config.VersionLevel)
 	if rd.IP != "" {
 		configstr += fmt.Sprintf("[*] Internet IP: %s", rd.IP)
@@ -244,11 +244,12 @@ type extractTmp struct {
 	extracts Extracts
 }
 
-func LoadExtracts(content []byte) ([]Extracts, error) {
+func LoadExtracts(content []byte) ([]*Extracts, error) {
 	var err error
-	var extractss []Extracts
-	var extracts Extracts
+	var extractss []*Extracts
+
 	for _, res := range bytes.Split(content, []byte{'\n'}) {
+		var extracts *Extracts
 		err = json.Unmarshal(res, &extracts)
 		if err != nil {
 			return nil, err

@@ -94,8 +94,6 @@ func Dispatch(result *pkg.Result) {
 		ExploitDispatch(result)
 	}
 
-	// 格式化title编码, 防止输出二进制数据
-	result.Title = pkg.AsciiEncode(result.Title)
 	if result.Httpresp != nil && !result.Httpresp.Close {
 		_ = result.Httpresp.Body.Close()
 	}
@@ -103,7 +101,7 @@ func Dispatch(result *pkg.Result) {
 }
 
 func ExploitDispatch(result *pkg.Result) {
-	if result.IsHttp() && RunOpt.Exploit != "auto" {
+	if result.IsHttp() && (RunOpt.Exploit == "auto" || RunOpt.Exploit == "shiro") {
 		// todo 将shiro改造成nuclei poc
 		shiroScan(result)
 	}

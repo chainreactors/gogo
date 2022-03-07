@@ -11,7 +11,7 @@ import (
 )
 
 var ver = ""
-var k = "ybb"
+var k = ""
 
 func CMD() {
 	defer ants.Release()
@@ -58,7 +58,6 @@ func CMD() {
 	flag.BoolVar(&runner.Ping, "ping", false, "")
 	flag.BoolVar(&runner.Arp, "arp", false, "")
 	flag.StringVar(&runner.iface, "iface", "eth0", "")
-	flag.BoolVar(&runner.Debug, "debug", false, "")
 	flag.IntVar(&RunOpt.Delay, "d", 2, "")
 	flag.IntVar(&RunOpt.HttpsDelay, "D", 2, "")
 	flag.StringVar(&RunOpt.Payloadstr, "suffix", "", "")
@@ -77,6 +76,7 @@ func CMD() {
 	flag.BoolVar(&runner.NoUpload, "nu", false, "")
 	flag.StringVar(&runner.UploadFile, "uf", "", "")
 	flag.BoolVar(&runner.Ver, "version", false, "")
+	flag.BoolVar(&runner.Debug, "debug", false, "")
 
 	flag.Usage = func() { exit() }
 	flag.Parse()
