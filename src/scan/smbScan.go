@@ -100,7 +100,7 @@ func smbScan(result *pkg.Result) {
 	//ret, err = smb1Scan(target)
 
 	if ret, err = smb1Scan(target); err != nil || ret == nil {
-		if err.Error() == "conn failed" {
+		if err != nil && err.Error() == "conn failed" {
 			return
 		}
 		result.Open = true
