@@ -35,7 +35,7 @@ func initFile(config *Config) error {
 	if config.Filename != "" {
 		Log.Clean = !Log.Clean
 		// 创建output的filehandle
-		Opt.file, err = NewFile(config.Filename, Opt.Compress)
+		Opt.File, err = NewFile(config.Filename, Opt.Compress, true)
 		if err != nil {
 			return err
 		}
@@ -44,25 +44,25 @@ func initFile(config *Config) error {
 			return err
 		}
 		if Opt.FileOutput == "json" && !(Opt.Noscan || config.Mod == "sc") {
-			Opt.file.Write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("scan")))
+			Opt.File.Write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("scan")))
 		}
 	}
 
 	// -af 参数下的启发式扫描结果handler初始化
 	if config.SmartFilename != "" {
-		Opt.smartFile, err = NewFile(config.SmartFilename, Opt.Compress)
+		Opt.SmartFile, err = NewFile(config.SmartFilename, Opt.Compress, true)
 		if err != nil {
 			return err
 		}
-		Opt.smartFile.Write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("smart")))
+		Opt.SmartFile.Write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("smart")))
 	}
 
 	if config.PingFilename != "" {
-		Opt.aliveFile, err = NewFile(config.PingFilename, Opt.Compress)
+		Opt.AliveFile, err = NewFile(config.PingFilename, Opt.Compress, true)
 		if err != nil {
 			return err
 		}
-		Opt.aliveFile.Write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("ping")))
+		Opt.AliveFile.Write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("ping")))
 	}
 
 	handler()
@@ -76,6 +76,12 @@ func handler() {
 	if Log.LogFile != nil {
 		go func() {
 			for res := range Log.LogCh {
+				if !Log.LogFile.Initialized {
+					err := Log.LogFile.Init()
+					if err != nil {
+						Log.Warn(err.Error())
+					}
+				}
 				Log.LogFile.SyncWrite(res)
 			}
 			Log.LogFile.Close()
@@ -87,36 +93,43 @@ func handler() {
 	}
 
 	// res文件
-	if Opt.file != nil {
+	if Opt.File != nil {
 		go func() {
 			defer fileCloser()
 			var rescommaflag bool
 			for res := range Opt.dataCh {
+				if !Opt.File.Initialized {
+					err := Opt.File.Init()
+					if err != nil {
+						Log.Warn(err.Error())
+					}
+				}
+
 				if rescommaflag {
 					res = "," + res
 				} else if Opt.FileOutput == "json" && !Opt.Noscan {
 					// 如果json格式输出,则除了第一次输出,之后都会带上逗号
 					rescommaflag = true
 				}
-				Opt.file.Write(res)
+				Opt.File.Write(res)
 			}
 		}()
 
 		go func() {
 			for res := range Opt.extractCh {
-				if Opt.extractFile == nil {
+				if Opt.ExtractFile == nil {
 					var err error
-					Opt.extractFile, err = NewFile(Opt.file.Filename+"_extract", Opt.Compress)
+					Opt.ExtractFile, err = NewFile(Opt.File.Filename+"_extract", Opt.Compress, false)
 					if err != nil {
-						Log.Warn("cannot create extractor result file, " + err.Error())
+						Log.Warn("cannot create extractor result File, " + err.Error())
 						return
 					}
 				}
-				Opt.extractFile.Write(res + "\n")
+				Opt.ExtractFile.Write(res + "\n")
 			}
 
-			if Opt.extractFile != nil {
-				Opt.extractFile.Close()
+			if Opt.ExtractFile != nil {
+				Opt.ExtractFile.Close()
 			}
 		}()
 	}
@@ -124,49 +137,64 @@ func handler() {
 
 func fileCloser() {
 	if Opt.FileOutput == "json" && !Opt.Noscan {
-		Opt.file.Write("]}")
+		Opt.File.Write("]}")
 	}
-	Opt.file.Close()
-	if Opt.smartFile != nil {
-		Opt.smartFile.Write("]}")
-		Opt.smartFile.Close()
+	Opt.File.Close()
+	if Opt.SmartFile != nil {
+		Opt.SmartFile.Write("]}")
+		Opt.SmartFile.Close()
 	}
 
-	if Opt.aliveFile != nil {
-		Opt.aliveFile.Write("]}")
-		Opt.aliveFile.Close()
+	if Opt.AliveFile != nil {
+		Opt.AliveFile.Write("]}")
+		Opt.AliveFile.Close()
 	}
 }
 
 var smartcommaflag bool = false
 
 func writeSmartResult(ips []string) {
+	if !Opt.SmartFile.Initialized {
+		err := Opt.SmartFile.Init()
+		if err != nil {
+			Log.Warn(err.Error())
+			return
+		}
+	}
+
 	iplists := make([]string, len(ips))
 	for i, ip := range ips {
 		iplists[i] = "\"" + ip + "\""
 	}
 	if smartcommaflag {
-		Opt.smartFile.Write(",")
+		Opt.SmartFile.Write(",")
 	} else {
 		smartcommaflag = true
 	}
-	Opt.smartFile.SyncWrite(strings.Join(iplists, ","))
+	Opt.SmartFile.SyncWrite(strings.Join(iplists, ","))
 }
 
 var pingcommaflag bool = false
 
 func writePingResult(ips []string) {
+	if !Opt.AliveFile.Initialized {
+		err := Opt.AliveFile.Init()
+		if err != nil {
+			Log.Warn(err.Error())
+			return
+		}
+	}
 	iplists := make([]string, len(ips))
 	for i, ip := range ips {
 		iplists[i] = "\"" + getIP(ip) + "\""
 	}
 
 	if pingcommaflag {
-		Opt.aliveFile.Write(",")
+		Opt.AliveFile.Write(",")
 	} else {
 		pingcommaflag = true
 	}
-	Opt.aliveFile.SyncWrite(strings.Join(iplists, ","))
+	Opt.AliveFile.SyncWrite(strings.Join(iplists, ","))
 }
 
 //var winfile = []string{

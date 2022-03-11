@@ -60,7 +60,7 @@ func defaultScan(tc targetConfig) {
 		result.Title = AsciiEncode(result.Title)
 		Log.Default(output(result, Opt.Output))
 
-		if Opt.file != nil {
+		if Opt.File != nil {
 			Opt.dataCh <- output(result, Opt.FileOutput)
 			if result.Extracts.Extracts != nil {
 				Opt.extractCh <- result.Extracts.ToResult()
@@ -132,7 +132,7 @@ func SmartMod(target string, config Config) {
 		sort_cidr(iplist)
 	}
 
-	if Opt.smartFile != nil {
+	if Opt.SmartFile != nil {
 		writeSmartResult(iplist)
 	}
 
@@ -160,7 +160,7 @@ func cidr_alived(ip string, temp *sync.Map, mask int, mod string) {
 		cidr := fmt.Sprintf("%s/%d", ip, mask)
 		Log.Logging("[+] Found " + cidr)
 		Opt.AliveSum++
-		if Opt.file != nil && mod != "sc" && (Opt.Noscan || mod == "sb") {
+		if Opt.File != nil && mod != "sc" && (Opt.Noscan || mod == "sb") {
 			// 只有-no 或 -m sc下,才会将网段信息输出到文件.
 			// 模式为sc时,b段将不会输出到文件,只输出c段
 			Opt.dataCh <- cidr + "\n"
@@ -196,7 +196,7 @@ func declineScan(iplist []string, config Config) {
 			tmpalive := Opt.AliveSum
 			SmartMod(ip, config)
 			Log.Logging(fmt.Sprintf("[*] Found %d assets from CIDR %s", Opt.AliveSum-tmpalive, ip))
-			Opt.file.Sync()
+			Opt.File.Sync()
 		}
 	}
 }
@@ -240,7 +240,7 @@ func AliveMod(targets interface{}, config Config) {
 		return
 	}
 	Log.Logging(fmt.Sprintf("[*] found %d alived ips", len(iplist)))
-	if Opt.aliveFile != nil {
+	if Opt.AliveFile != nil {
 		writePingResult(iplist)
 	}
 	DefaultMod(iplist, config)

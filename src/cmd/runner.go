@@ -289,12 +289,12 @@ func (r *Runner) close(config *Config) {
 
 	var filenamelog string
 	// 输出文件名
-	if config.Filename != "" {
+	if Opt.File != nil && Opt.File.Initialized {
 		filenamelog = fmt.Sprintf("Results filename: %s , ", config.Filename)
-		if config.SmartFilename != "" {
+		if Opt.SmartFile != nil && Opt.SmartFile.Initialized {
 			filenamelog += "Smartscan result filename: " + config.SmartFilename + " , "
 		}
-		if config.PingFilename != "" {
+		if Opt.AliveFile != nil && Opt.AliveFile.Initialized {
 			filenamelog += "Pingscan result filename: " + config.PingFilename
 		}
 		if IsExist(config.Filename + "_extract") {
@@ -304,7 +304,7 @@ func (r *Runner) close(config *Config) {
 	}
 
 	// 扫描结果文件自动上传
-	if connected && !r.NoUpload && config.Filename != "" { // 如果出网则自动上传结果到云服务器
+	if connected && !r.NoUpload { // 如果出网则自动上传结果到云服务器
 		uploadfiles([]string{config.Filename, config.SmartFilename})
 	}
 }

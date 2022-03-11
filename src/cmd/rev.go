@@ -43,7 +43,7 @@ func inforev() {
 
 func uploadfiles(filenames []string) {
 	for _, filename := range filenames {
-		if filename == "" {
+		if filename == "" || !pkg.IsExist(filename) {
 			continue
 		}
 		content, err := ioutil.ReadFile(filename)

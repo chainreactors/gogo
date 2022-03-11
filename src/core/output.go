@@ -84,7 +84,7 @@ func FormatOutput(filename string, outputfile string, autofile bool, filters []s
 	}
 
 	if outputfile != "" {
-		fileHandle, err := NewFile(outputfile, false)
+		fileHandle, err := NewFile(outputfile, false, false)
 		if err != nil {
 			Fatal("" + err.Error())
 		}
