@@ -183,6 +183,11 @@ func smartScan(tc targetConfig, temp *sync.Map, mask int, mod string) {
 func declineScan(iplist []string, config Config) {
 	//config.IpProbeList = []uint{1} // ipp 只在ss与sc模式中生效,为了防止时间计算错误,reset ipp 数值
 	if config.Mod != "sb" && len(config.Portlist) < 3 {
+		// 如果port数量为1, 直接扫描的耗时小于启发式
+		// 如果port数量为2, 直接扫描的耗时约等于启发式扫描
+		// 因此, 如果post数量小于2, 则直接使用defaultScan
+		Log.Logging("[*] port count less than 3, skipped smart scan.")
+
 		if config.HasAlivedScan() {
 			AliveMod(iplist, config)
 		} else {

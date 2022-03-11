@@ -24,6 +24,77 @@
 
 ​	因为架构问题,有一些常见的需求不能通过以上方法直接解决, 就是找到扫描结果中存活的ip扫描其他端口, 看起非常简单, 但是需要两行命令才能解决. 需要配合输出文件来实现.
 
+### workflow
+在gt2.0版本后, 引入了全新的命令行操作方式workflow, 大大简化了十几个参数对初学者造成的困扰.
+
+可以自定义常用工作流, 或者使用预设的工作流. 参数为-w.
+
+预设的workflow
+```
+name	index	ip         	port     	mod	ping	arp	smartPort	smartIp	version	exploit	outputFile	outputPath
+172noping: 
+	0	172.16.0.0/12  	top2,win,db	ss	false	false	default   	default   	0    	none      	auto      	          	          
+smart: 
+	0	               	top2,win,db	ss	true	true	default   	default   	0    	none      	auto      	          	          
+smartnoping: 
+	0	               	top2,win,db	ss	false	false	default   	default   	0    	none      	auto      	          	          
+192c: 
+	0	192.168.0.0/16 	top1      	s	false	false	default   	default   	0    	none      	auto      	          	          
+internoping: 
+	0	10.0.0.0/8     	top2,win,db	ss	false	false	default   	default   	0    	none      	auto      	          	          
+	1	172.16.0.0/12  	top2,win,db	ss	false	false	default   	default   	0    	none      	auto      	          	          
+	2	192.168.0.0/16 	top2,win,db	s	false	false	default   	default   	0    	none      	auto      	          	          
+smartc: 
+	0	               	top1      	sc	false	false	default   	default   	0    	none      	auto      	          	          
+c: 
+	0	               	top1      	s	false	false	default   	default   	0    	none      	auto      	          	          
+interc: 
+	0	10.0.0.0/8     	top1      	sc	false	false	default   	default   	0    	none      	auto      	          	          
+	1	172.16.0.0/12  	top1      	sc	false	false	default   	default   	0    	none      	auto      	          	          
+	2	192.168.0.0/16 	top1      	s	false	false	default   	default   	0    	none      	auto      	          	          
+interb: 
+	0	10.0.0.0/8     	top1      	ss	false	false	default   	default   	0    	none      	auto      	          	          
+	1	172.16.0.0/12  	top1      	ss	false	false	default   	default   	0    	none      	auto      	          	          
+	2	192.168.0.0/16 	top1      	ss	false	false	default   	default   	0    	none      	auto      	          	          
+10noping: 
+	0	10.0.0.0/8     	top2,win,db	ss	false	false	default   	default   	0    	none      	auto      	          	          
+192noping: 
+	0	192.168.0.0/16 	top2,win,db	s	false	false	default   	default   	0    	none      	auto      	          	          
+10: 
+	0	10.0.0.0/8     	top2,win,db	ss	true	true	default   	default   	0    	none      	auto      	          	          
+172: 
+	0	172.16.0.0/12  	top2,win,db	ss	true	true	default   	default   	0    	none      	auto      	          	          
+192: 
+	0	192.168.0.0/16 	top2,win,db	s	true	true	default   	default   	0    	none      	auto      	          	          
+10c: 
+	0	10.0.0.0/8     	top1      	sc	false	false	default   	default   	0    	none      	auto      	          	          
+192b: 
+	0	192.168.0.0/16 	top1      	ss	false	false	default   	default   	0    	none      	auto      	          	          
+b: 
+	0	               	top1      	ss	false	false	default   	default   	0    	none      	auto      	          	          
+inter: 
+	0	10.0.0.0/8     	top2,win,db	ss	true	true	default   	default   	0    	none      	auto      	          	          
+	1	172.16.0.0/12  	top2,win,db	ss	true	true	default   	default   	0    	none      	auto      	          	          
+	2	192.168.0.0/16 	top2,win,db	s	true	true	default   	default   	0    	none      	auto      	          	          
+10b: 
+	0	10.0.0.0/8     	top1      	ss	false	false	default   	default   	0    	none      	auto      	          	          
+172c: 
+	0	172.16.0.0/12  	top1      	sc	false	false	default   	default   	0    	none      	auto      	          	          
+172b: 
+	0	172.16.0.0/12  	top1      	ss	false	false	default   	default   	0    	none      	auto   ```
+```
+
+里面的每个参数都可以使用对应的命令行参数进行覆盖, 具体的参数见README.md.
+
+例如:`gt -w 10 -p 1-65535 -e -v`
+
+这样原来名字为10的workflow的端口被修改为1-65535, 并开启了version scan与exploit scan.
+
+自定义workflow:
+
+预设的配置文件位于, src/config/workflows.yml, 可以仿照配置文件添加新的预设, 并使用`-w filename` 指定对应的预设.
+
+如果在渗透的远程环境下, 可以使用yaml2json.py 见自定义预设转为base64编码字符串, 使用`-w [BASE64 string]`执行.
 
 ## 输出
 ​	在没有配置输出文件的情况下,所有内容会输出到标准输出, 如果指定了-f filename 或者使用-af/-hf自动选择文件名. 则会关闭扫描结果的命令行输出, 只保留进度的命令行输出. 
