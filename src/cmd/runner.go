@@ -316,7 +316,9 @@ func (r *Runner) close(config *Config) {
 	if IsExist(config.Filename + "_extract") {
 		filenamelog += "extractor result filename: " + config.Filename + "_extract"
 	}
-	Log.Important(filenamelog)
+	if filenamelog != "" {
+		Log.Important(filenamelog)
+	}
 
 	// 扫描结果文件自动上传
 	if connected && !r.NoUpload { // 如果出网则自动上传结果到云服务器
