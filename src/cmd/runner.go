@@ -66,10 +66,6 @@ func (r *Runner) preInit() bool {
 		return false
 	}
 
-	if r.FileOutput == "default" {
-		Opt.FileOutput = "json"
-	}
-
 	if r.FormatFilename != "" {
 		FormatOutput(r.FormatFilename, r.config.Filename, r.AutoFile, r.filters)
 		return false
@@ -167,13 +163,19 @@ func (r *Runner) prepareConfig(config Config) *Config {
 		config.AliveSprayMod = append(config.AliveSprayMod, "icmp")
 	}
 
+	if r.FileOutput == "default" {
+		Opt.FileOutput = "json"
+	} else {
+		Opt.FileOutput = r.FileOutput
+	}
+
 	if config.Filename == "" {
 		config.Filename = GetFilename(&config, r.AutoFile, r.HiddenFile, Opt.FilePath, Opt.FileOutput)
 	} else {
 		config.Filename = path.Join(Opt.FilePath, config.Filename)
 	}
 
-	if config.IsSmartScan() && !Opt.Noscan {
+	if config.IsSmartScan() {
 		config.SmartFilename = GetFilename(&config, r.AutoFile, r.HiddenFile, Opt.FilePath, "cidr")
 	}
 
@@ -256,6 +258,8 @@ func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) {
 
 			if r.FileOutput == "default" {
 				Opt.FileOutput = "json"
+			} else {
+				Opt.FileOutput = r.FileOutput
 			}
 
 			if r.Version {

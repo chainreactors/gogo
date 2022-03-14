@@ -43,7 +43,7 @@ func CMD() {
 	flag.StringVar(&runner.config.ExcludeIPs, "eip", "", "")
 	flag.StringVar(&Opt.Output, "o", "full", "")
 	flag.BoolVar(&runner.Clean, "c", false, "")
-	flag.StringVar(&Opt.FileOutput, "O", "default", "")
+	flag.StringVar(&runner.FileOutput, "O", "default", "")
 	flag.BoolVar(&runner.Quiet, "q", false, "")
 	flag.Var(&runner.filters, "filter", "")
 	flag.StringVar(&runner.FormatFilename, "F", "", "")

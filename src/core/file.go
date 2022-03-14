@@ -43,7 +43,7 @@ func initFile(config *Config) error {
 		if err != nil {
 			return err
 		}
-		if Opt.FileOutput == "json" && !(Opt.Noscan || config.Mod == "sc") {
+		if Opt.FileOutput == "json" {
 			Opt.File.Write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("scan")))
 		}
 	}

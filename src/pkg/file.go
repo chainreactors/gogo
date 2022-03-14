@@ -74,26 +74,32 @@ func (f *File) Init() error {
 }
 
 func (f *File) Write(s string) {
-	if f == nil || f.fileHandler == nil {
+	if f == nil {
 		return
 	}
 
-	if f.compress {
-		_, err := f.buf.WriteString(s)
-		if err != nil {
-			Fatal("" + err.Error())
-		}
-		if f.buf.Len() > 4096 {
-			f.Sync()
-		}
-		return
-	} else {
-		_, err := f.fileHandler.WriteString(s)
-		if err != nil {
-			Fatal("" + err.Error())
-		}
-		return
+	_, _ = f.buf.WriteString(s)
+	if f.buf.Len() > 4096 {
+		f.Sync()
 	}
+	return
+
+	//if f.compress {
+	//	_, err := f.buf.WriteString(s)
+	//	if err != nil {
+	//		Fatal("" + err.Error())
+	//	}
+	//	if f.buf.Len() > 4096 {
+	//		f.Sync()
+	//	}
+	//	return
+	//} else {
+	//	_, err := f.fileHandler.WriteString(s)
+	//	if err != nil {
+	//		Fatal("" + err.Error())
+	//	}
+	//	return
+	//}
 }
 
 func (f *File) SyncWrite(s string) {
@@ -102,39 +108,31 @@ func (f *File) SyncWrite(s string) {
 }
 
 func (f *File) WriteBytes(bs []byte) {
-	if f == nil || f.fileHandler == nil {
+	if f == nil {
+		return
+	}
+
+	_, _ = f.buf.Write(bs)
+	if f.buf.Len() > 4096 {
+		f.Sync()
+	}
+
+}
+
+func (f *File) Sync() {
+	if f == nil || f.fileHandler == nil || f.buf.Len() == 0 {
 		return
 	}
 
 	if f.compress {
-		//res = string(pkg.Flate([]byte(res)))
-		_, err := f.buf.Write(bs)
-		if err != nil {
-			Fatal("" + err.Error())
-		}
-		if f.buf.Len() > 4096 {
-			f.Sync()
-		}
-		return
-	} else {
-		_, _ = f.fileHandler.Write(bs)
-		return
-	}
-}
-
-func (f *File) Sync() {
-	if f == nil || f.fileHandler == nil {
-		return
-	}
-
-	if f.compress && f.fileWriter != nil && f.buf != nil && f.buf.Len() != 0 {
 		_, _ = f.fileWriter.Write(Flate(f.buf.Bytes()))
-		f.buf.Reset()
-		_ = f.fileWriter.Flush()
-		_ = f.fileHandler.Sync()
 	} else {
-		_ = f.fileHandler.Sync()
+		_, _ = f.fileWriter.Write(f.buf.Bytes())
 	}
+
+	f.buf.Reset()
+	_ = f.fileWriter.Flush()
+	_ = f.fileHandler.Sync()
 	return
 }
 
