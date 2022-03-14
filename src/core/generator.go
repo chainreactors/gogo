@@ -58,7 +58,6 @@ func (gen *IpGenerator) IPsGenerator(ips []string) {
 		gen.defaultIpGenerator(cidr)
 		if getMask(cidr) != 32 {
 			Log.Logging(fmt.Sprintf("[*] Processed CIDR: %s, found %d ports", cidr, Opt.AliveSum-tmpalive))
-
 		}
 		Opt.File.Sync()
 	}

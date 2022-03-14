@@ -74,9 +74,10 @@ func (f *File) Init() error {
 }
 
 func (f *File) Write(s string) {
-	if f.fileHandler == nil {
+	if f == nil || f.fileHandler == nil {
 		return
 	}
+
 	if f.compress {
 		_, err := f.buf.WriteString(s)
 		if err != nil {
@@ -87,7 +88,10 @@ func (f *File) Write(s string) {
 		}
 		return
 	} else {
-		_, _ = f.fileHandler.WriteString(s)
+		_, err := f.fileHandler.WriteString(s)
+		if err != nil {
+			Fatal("" + err.Error())
+		}
 		return
 	}
 }
@@ -98,7 +102,7 @@ func (f *File) SyncWrite(s string) {
 }
 
 func (f *File) WriteBytes(bs []byte) {
-	if f.fileHandler == nil {
+	if f == nil || f.fileHandler == nil {
 		return
 	}
 
@@ -119,7 +123,7 @@ func (f *File) WriteBytes(bs []byte) {
 }
 
 func (f *File) Sync() {
-	if f.fileHandler == nil {
+	if f == nil || f.fileHandler == nil {
 		return
 	}
 
@@ -128,8 +132,9 @@ func (f *File) Sync() {
 		f.buf.Reset()
 		_ = f.fileWriter.Flush()
 		_ = f.fileHandler.Sync()
+	} else {
+		_ = f.fileHandler.Sync()
 	}
-	_ = f.fileHandler.Sync()
 	return
 }
 
