@@ -93,53 +93,56 @@ func handler() {
 	}
 
 	// res文件
-	if Opt.File != nil {
-		go func() {
-			defer fileCloser()
-			var rescommaflag bool
-			for res := range Opt.dataCh {
-				if !Opt.File.Initialized {
-					err := Opt.File.Init()
-					if err != nil {
-						Log.Warn(err.Error())
-					}
-				}
-
-				if rescommaflag {
-					res = "," + res
-				} else if Opt.FileOutput == "json" && !Opt.Noscan {
-					// 如果json格式输出,则除了第一次输出,之后都会带上逗号
-					rescommaflag = true
-				}
-				Opt.File.Write(res)
+	go func() {
+		defer fileCloser()
+		var rescommaflag bool
+		for res := range Opt.dataCh {
+			if Opt.File == nil {
+				continue
 			}
-		}()
-
-		go func() {
-			for res := range Opt.extractCh {
-				if Opt.ExtractFile == nil {
-					var err error
-					Opt.ExtractFile, err = NewFile(Opt.File.Filename+"_extract", Opt.Compress, false)
-					if err != nil {
-						Log.Warn("cannot create extractor result File, " + err.Error())
-						return
-					}
+			if !Opt.File.Initialized {
+				err := Opt.File.Init()
+				if err != nil {
+					Log.Warn(err.Error())
 				}
-				Opt.ExtractFile.Write(res + "\n")
 			}
 
-			if Opt.ExtractFile != nil {
-				Opt.ExtractFile.Close()
+			if rescommaflag {
+				res = "," + res
+			} else if Opt.FileOutput == "json" {
+				// 如果json格式输出,则除了第一次输出,之后都会带上逗号
+				rescommaflag = true
 			}
-		}()
-	}
+			Opt.File.Write(res)
+		}
+	}()
+
+	go func() {
+		for res := range Opt.extractCh {
+			if Opt.ExtractFile == nil {
+				var err error
+				Opt.ExtractFile, err = NewFile(Opt.File.Filename+"_extract", Opt.Compress, false)
+				if err != nil {
+					Log.Warn("cannot create extractor result File, " + err.Error())
+					return
+				}
+			}
+			Opt.ExtractFile.Write(res + "\n")
+		}
+
+		if Opt.ExtractFile != nil {
+			Opt.ExtractFile.Close()
+		}
+	}()
+
 }
 
 func fileCloser() {
-	if Opt.FileOutput == "json" && !Opt.Noscan {
+	if Opt.File != nil && Opt.FileOutput == "json" {
 		Opt.File.Write("]}")
+		Opt.File.Close()
 	}
-	Opt.File.Close()
+
 	if Opt.SmartFile != nil {
 		Opt.SmartFile.Write("]}")
 		Opt.SmartFile.Close()

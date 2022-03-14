@@ -169,7 +169,7 @@ func (r *Runner) prepareConfig(config Config) *Config {
 		Opt.FileOutput = r.FileOutput
 	}
 
-	if config.Filename == "" {
+	if config.Filename == "" && !Opt.Noscan {
 		config.Filename = GetFilename(&config, r.AutoFile, r.HiddenFile, Opt.FilePath, Opt.FileOutput)
 	} else {
 		config.Filename = path.Join(Opt.FilePath, config.Filename)
@@ -306,17 +306,17 @@ func (r *Runner) close(config *Config) {
 	// 输出文件名
 	if Opt.File != nil && Opt.File.Initialized {
 		filenamelog = fmt.Sprintf("Results filename: %s , ", config.Filename)
-		if Opt.SmartFile != nil && Opt.SmartFile.Initialized {
-			filenamelog += "Smartscan result filename: " + config.SmartFilename + " , "
-		}
-		if Opt.AliveFile != nil && Opt.AliveFile.Initialized {
-			filenamelog += "Pingscan result filename: " + config.PingFilename
-		}
-		if IsExist(config.Filename + "_extract") {
-			filenamelog += "extractor result filename: " + config.Filename + "_extract"
-		}
-		Log.Important(filenamelog)
 	}
+	if Opt.SmartFile != nil && Opt.SmartFile.Initialized {
+		filenamelog += "Smartscan result filename: " + config.SmartFilename + " , "
+	}
+	if Opt.AliveFile != nil && Opt.AliveFile.Initialized {
+		filenamelog += "Pingscan result filename: " + config.PingFilename + ","
+	}
+	if IsExist(config.Filename + "_extract") {
+		filenamelog += "extractor result filename: " + config.Filename + "_extract"
+	}
+	Log.Important(filenamelog)
 
 	// 扫描结果文件自动上传
 	if connected && !r.NoUpload { // 如果出网则自动上传结果到云服务器

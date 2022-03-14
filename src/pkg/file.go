@@ -83,23 +83,6 @@ func (f *File) Write(s string) {
 		f.Sync()
 	}
 	return
-
-	//if f.compress {
-	//	_, err := f.buf.WriteString(s)
-	//	if err != nil {
-	//		Fatal("" + err.Error())
-	//	}
-	//	if f.buf.Len() > 4096 {
-	//		f.Sync()
-	//	}
-	//	return
-	//} else {
-	//	_, err := f.fileHandler.WriteString(s)
-	//	if err != nil {
-	//		Fatal("" + err.Error())
-	//	}
-	//	return
-	//}
 }
 
 func (f *File) SyncWrite(s string) {
@@ -116,7 +99,6 @@ func (f *File) WriteBytes(bs []byte) {
 	if f.buf.Len() > 4096 {
 		f.Sync()
 	}
-
 }
 
 func (f *File) Sync() {
