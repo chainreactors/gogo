@@ -16,6 +16,8 @@ func output(result *Result, outType string) string {
 		out = colorOutput(result)
 	case "json", "j":
 		out = jsonOutput(result)
+	case "jsonlines", "jl":
+		out = jsonOutput(result) + "\n"
 	case "full":
 		out = fullOutput(result)
 	default:

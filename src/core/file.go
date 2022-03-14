@@ -108,8 +108,10 @@ func handler() {
 			}
 
 			if rescommaflag {
+				// 只有json输出才需要手动添加逗号
 				res = "," + res
-			} else if Opt.FileOutput == "json" {
+			}
+			if Opt.FileOutput == "json" {
 				// 如果json格式输出,则除了第一次输出,之后都会带上逗号
 				rescommaflag = true
 			}
