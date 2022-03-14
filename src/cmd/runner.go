@@ -21,35 +21,36 @@ func NewRunner() *Runner {
 }
 
 type Runner struct {
-	Ports        string
-	Version      bool // version level1
-	Version2     bool // version level2
-	Exploit      bool // 启用漏洞扫描
-	NoUpload     bool // 关闭文件回传
-	Compress     bool // 启用压缩
-	Clean        bool // 是否开启命令行输出扫描结果
-	Quiet        bool // 是否开启命令行输出日志
-	AutoFile     bool // 自动生成格式化文件名
-	HiddenFile   bool // 启用自动隐藏文件
-	Ping         bool
-	Arp          bool
-	FormatOutput string // 待格式化文件名
-	filters      arrayFlags
-	payloads     arrayFlags
-	extract      arrayFlags
-	extracts     string
-	ExploitName  string // 指定漏扫poc名字
-	ExploitFile  string // 指定漏扫文件
-	Printer      string // 输出特定的预设
-	UploadFile   string // 上传特定的文件名
-	WorkFlowName string
-	Ver          bool // 输出版本号
-	NoScan       bool
-	IsWorkFlow   bool
-	Debug        bool
-	iface        string
-	start        time.Time
-	config       Config
+	Ports          string
+	Version        bool // version level1
+	Version2       bool // version level2
+	Exploit        bool // 启用漏洞扫描
+	NoUpload       bool // 关闭文件回传
+	Compress       bool // 启用压缩
+	Clean          bool // 是否开启命令行输出扫描结果
+	Quiet          bool // 是否开启命令行输出日志
+	AutoFile       bool // 自动生成格式化文件名
+	HiddenFile     bool // 启用自动隐藏文件
+	Ping           bool
+	Arp            bool
+	FileOutput     string
+	FormatFilename string // 待格式化文件名
+	filters        arrayFlags
+	payloads       arrayFlags
+	extract        arrayFlags
+	extracts       string
+	ExploitName    string // 指定漏扫poc名字
+	ExploitFile    string // 指定漏扫文件
+	Printer        string // 输出特定的预设
+	UploadFile     string // 上传特定的文件名
+	WorkFlowName   string
+	Ver            bool // 输出版本号
+	NoScan         bool
+	IsWorkFlow     bool
+	Debug          bool
+	iface          string
+	start          time.Time
+	config         Config
 }
 
 func (r *Runner) preInit() bool {
@@ -64,8 +65,9 @@ func (r *Runner) preInit() bool {
 		fmt.Println(ver)
 		return false
 	}
-	if r.FormatOutput != "" {
-		FormatOutput(r.FormatOutput, r.config.Filename, r.AutoFile, r.filters)
+
+	if r.FormatFilename != "" {
+		FormatOutput(r.FormatFilename, r.config.Filename, r.AutoFile, r.filters)
 		return false
 	}
 	// 输出 config
@@ -161,13 +163,19 @@ func (r *Runner) prepareConfig(config Config) *Config {
 		config.AliveSprayMod = append(config.AliveSprayMod, "icmp")
 	}
 
-	if config.Filename == "" {
+	if r.FileOutput == "default" {
+		Opt.FileOutput = "json"
+	} else {
+		Opt.FileOutput = r.FileOutput
+	}
+
+	if config.Filename == "" && !Opt.Noscan {
 		config.Filename = GetFilename(&config, r.AutoFile, r.HiddenFile, Opt.FilePath, Opt.FileOutput)
 	} else {
 		config.Filename = path.Join(Opt.FilePath, config.Filename)
 	}
 
-	if config.IsSmartScan() && !Opt.Noscan {
+	if config.IsSmartScan() {
 		config.SmartFilename = GetFilename(&config, r.AutoFile, r.HiddenFile, Opt.FilePath, "cidr")
 	}
 
@@ -247,6 +255,13 @@ func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) {
 			if !r.NoScan {
 				Opt.Noscan = workflow.NoScan
 			}
+
+			if r.FileOutput == "default" {
+				Opt.FileOutput = "json"
+			} else {
+				Opt.FileOutput = r.FileOutput
+			}
+
 			if r.Version {
 				RunOpt.VersionLevel = 1
 			} else {
@@ -289,22 +304,24 @@ func (r *Runner) close(config *Config) {
 
 	var filenamelog string
 	// 输出文件名
-	if config.Filename != "" {
+	if Opt.File != nil && Opt.File.Initialized {
 		filenamelog = fmt.Sprintf("Results filename: %s , ", config.Filename)
-		if config.SmartFilename != "" {
-			filenamelog += "Smartscan result filename: " + config.SmartFilename + " , "
-		}
-		if config.PingFilename != "" {
-			filenamelog += "Pingscan result filename: " + config.PingFilename
-		}
-		if IsExist(config.Filename + "_extract") {
-			filenamelog += "extractor result filename: " + config.Filename + "_extract"
-		}
+	}
+	if Opt.SmartFile != nil && Opt.SmartFile.Initialized {
+		filenamelog += "Smartscan result filename: " + config.SmartFilename + " , "
+	}
+	if Opt.AliveFile != nil && Opt.AliveFile.Initialized {
+		filenamelog += "Pingscan result filename: " + config.PingFilename + ","
+	}
+	if IsExist(config.Filename + "_extract") {
+		filenamelog += "extractor result filename: " + config.Filename + "_extract"
+	}
+	if filenamelog != "" {
 		Log.Important(filenamelog)
 	}
 
 	// 扫描结果文件自动上传
-	if connected && !r.NoUpload && config.Filename != "" { // 如果出网则自动上传结果到云服务器
+	if connected && !r.NoUpload { // 如果出网则自动上传结果到云服务器
 		uploadfiles([]string{config.Filename, config.SmartFilename})
 	}
 }

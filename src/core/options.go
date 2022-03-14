@@ -7,10 +7,10 @@ type Options struct {
 	Noscan      bool
 	Compress    bool
 	Debug       bool
-	file        *File
-	smartFile   *File
-	extractFile *File
-	aliveFile   *File
+	File        *File
+	SmartFile   *File
+	ExtractFile *File
+	AliveFile   *File
 	dataCh      chan string
 	extractCh   chan string
 	Output      string
@@ -25,7 +25,7 @@ func (opt *Options) Close() {
 	if Opt.dataCh != nil {
 		close(Opt.dataCh)
 	}
-	if Opt.extractFile != nil {
+	if Opt.ExtractFile != nil {
 		close(Opt.extractCh)
 	}
 }

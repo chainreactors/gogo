@@ -293,14 +293,18 @@ func LoadResultFile(file *os.File) interface{} {
 
 	content = bytes.TrimSpace(content) // 去除前后空格
 	if bytes.Contains(content, []byte("\"smart\",")) || bytes.Contains(content, []byte("\"ping\",")) {
+		// 解析启发式扫描结果
 		content = autofixjson(content)
 		data, err = loadSmartResult(content)
 	} else if bytes.Contains(content, []byte("\"scan\",")) {
+		// 解析扫描结果
 		content = autofixjson(content)
 		data, err = LoadResult(content)
 	} else if bytes.Contains(content, []byte("\"extract_result")) {
+		// 解析extract结果
 		data, err = LoadExtracts(content)
-	} else {
+	} else if IsJson(content) {
+		// 解析按行分割的 ip:port 输入
 		var results Results
 		for _, target := range strings.Split(string(content), "\n") {
 			if strings.Contains(target, ":") {
@@ -312,6 +316,8 @@ func LoadResultFile(file *os.File) interface{} {
 			}
 		}
 		return results
+	} else {
+		return content
 	}
 	if err != nil {
 		fmt.Println("[-] json error, " + err.Error())

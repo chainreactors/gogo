@@ -98,11 +98,12 @@ func smbScan(result *pkg.Result) {
 	//先发送探测SMBv1的payload，不支持的SMBv1的时候返回为空，然后尝试发送SMBv2的探测数据包
 	//if hex.EncodeToString(r1[4:8]) == "ff534d42" {
 	//ret, err = smb1Scan(target)
+	ret, err = smb1Scan(target)
+	if err != nil && err.Error() == "conn failed" {
+		return
+	}
 
-	if ret, err = smb1Scan(target); err != nil || ret == nil {
-		if err.Error() == "conn failed" {
-			return
-		}
+	if ret == nil {
 		result.Open = true
 		if ret, err = smb2Scan(target); ret != nil {
 			result.HttpStat = "SMB2"

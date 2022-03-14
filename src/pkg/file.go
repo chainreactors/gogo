@@ -35,80 +35,85 @@ func FileInitialize(filename string) (*os.File, error) {
 	return filehandle, err
 }
 
-func NewFile(filename string, compress bool) (*File, error) {
-	filehandler, err := FileInitialize(filename)
-	if err != nil {
-		return nil, err
-	}
+func NewFile(filename string, compress, lazy bool) (*File, error) {
 	var file = &File{
-		Filename:    filename,
-		compress:    compress,
-		fileHandler: filehandler,
-		fileWriter:  bufio.NewWriter(filehandler),
-		buf:         bytes.NewBuffer([]byte{}),
+		Filename: filename,
+		compress: compress,
+		buf:      bytes.NewBuffer([]byte{}),
 	}
+	if !lazy {
+		err := file.Init()
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return file, nil
 }
 
 type File struct {
 	Filename    string
+	Initialized bool
 	fileHandler *os.File
 	fileWriter  *bufio.Writer
 	buf         *bytes.Buffer
 	compress    bool
 }
 
-func (f *File) Write(s string) {
-	if f.compress {
-		_, err := f.buf.WriteString(s)
+func (f *File) Init() error {
+	if f.fileHandler == nil {
+		var err error
+		f.fileHandler, err = FileInitialize(f.Filename)
 		if err != nil {
-			Fatal("" + err.Error())
+			return err
 		}
-		if f.buf.Len() > 4096 {
-			f.Sync()
-		}
-		return
-	} else {
-		_, _ = f.fileHandler.WriteString(s)
+		f.fileWriter = bufio.NewWriter(f.fileHandler)
+		f.Initialized = true
+	}
+	return nil
+}
+
+func (f *File) Write(s string) {
+	if f == nil {
 		return
 	}
+
+	_, _ = f.buf.WriteString(s)
+	if f.buf.Len() > 4096 {
+		f.Sync()
+	}
+	return
 }
 
-func SafeWrite(s string) {
-
-}
 func (f *File) SyncWrite(s string) {
 	f.Write(s)
 	f.Sync()
 }
 
 func (f *File) WriteBytes(bs []byte) {
-	if f.compress {
-		//res = string(pkg.Flate([]byte(res)))
-		_, err := f.buf.Write(bs)
-		if err != nil {
-			Fatal("" + err.Error())
-		}
-		if f.buf.Len() > 4096 {
-			f.Sync()
-		}
+	if f == nil {
 		return
-	} else {
-		_, _ = f.fileHandler.Write(bs)
-		return
+	}
+
+	_, _ = f.buf.Write(bs)
+	if f.buf.Len() > 4096 {
+		f.Sync()
 	}
 }
 
 func (f *File) Sync() {
-	if f == nil {
+	if f == nil || f.fileHandler == nil || f.buf.Len() == 0 {
 		return
 	}
-	if f.compress && f.fileWriter != nil && f.buf != nil && f.buf.Len() != 0 {
+
+	if f.compress {
 		_, _ = f.fileWriter.Write(Flate(f.buf.Bytes()))
-		f.buf.Reset()
-		_ = f.fileWriter.Flush()
-		_ = f.fileHandler.Sync()
+	} else {
+		_, _ = f.fileWriter.Write(f.buf.Bytes())
 	}
+
+	f.buf.Reset()
+	_ = f.fileWriter.Flush()
 	_ = f.fileHandler.Sync()
 	return
 }

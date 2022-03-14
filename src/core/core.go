@@ -60,7 +60,7 @@ func defaultScan(tc targetConfig) {
 		result.Title = AsciiEncode(result.Title)
 		Log.Default(output(result, Opt.Output))
 
-		if Opt.file != nil {
+		if Opt.File != nil {
 			Opt.dataCh <- output(result, Opt.FileOutput)
 			if result.Extracts.Extracts != nil {
 				Opt.extractCh <- result.Extracts.ToResult()
@@ -115,25 +115,26 @@ func SmartMod(target string, config Config) {
 	}
 	wg.Wait()
 
-	if Opt.Noscan {
-		// -no 被设置的时候停止后续扫描
-		return
-	}
-
 	var iplist []string
 	temp.Range(func(ip, _ interface{}) bool {
 		iplist = append(iplist, fmt.Sprintf("%s/%d", ip.(string), mask))
 		return true
 	})
 
-	if len(iplist) == 0 {
-		return
-	} else {
+	// 网段排序
+	if len(iplist) > 0 {
 		sort_cidr(iplist)
+	} else {
+		return
 	}
 
-	if Opt.smartFile != nil {
+	if Opt.SmartFile != nil {
 		writeSmartResult(iplist)
+	}
+
+	if Opt.Noscan {
+		// -no 被设置的时候停止后续扫描
+		return
 	}
 
 	// 启发式扫描逐步降级,从喷洒B段到喷洒C段到默认扫描
@@ -160,11 +161,11 @@ func cidr_alived(ip string, temp *sync.Map, mask int, mod string) {
 		cidr := fmt.Sprintf("%s/%d", ip, mask)
 		Log.Logging("[+] Found " + cidr)
 		Opt.AliveSum++
-		if Opt.file != nil && mod != "sc" && (Opt.Noscan || mod == "sb") {
-			// 只有-no 或 -m sc下,才会将网段信息输出到文件.
-			// 模式为sc时,b段将不会输出到文件,只输出c段
-			Opt.dataCh <- cidr + "\n"
-		}
+		//if Opt.File != nil {
+		//	// 只有-no 或 -m sc下,才会将网段信息输出到文件.
+		//	// 模式为sc时,b段将不会输出到文件,只输出c段
+		//	Opt.dataCh <- "\"" + cidr + "\""
+		//}
 	}
 }
 
@@ -183,6 +184,11 @@ func smartScan(tc targetConfig, temp *sync.Map, mask int, mod string) {
 func declineScan(iplist []string, config Config) {
 	//config.IpProbeList = []uint{1} // ipp 只在ss与sc模式中生效,为了防止时间计算错误,reset ipp 数值
 	if config.Mod != "sb" && len(config.Portlist) < 3 {
+		// 如果port数量为1, 直接扫描的耗时小于启发式
+		// 如果port数量为2, 直接扫描的耗时约等于启发式扫描
+		// 因此, 如果post数量小于2, 则直接使用defaultScan
+		Log.Logging("[*] port count less than 3, skipped smart scan.")
+
 		if config.HasAlivedScan() {
 			AliveMod(iplist, config)
 		} else {
@@ -196,7 +202,7 @@ func declineScan(iplist []string, config Config) {
 			tmpalive := Opt.AliveSum
 			SmartMod(ip, config)
 			Log.Logging(fmt.Sprintf("[*] Found %d assets from CIDR %s", Opt.AliveSum-tmpalive, ip))
-			Opt.file.Sync()
+			Opt.File.Sync()
 		}
 	}
 }
@@ -240,7 +246,7 @@ func AliveMod(targets interface{}, config Config) {
 		return
 	}
 	Log.Logging(fmt.Sprintf("[*] found %d alived ips", len(iplist)))
-	if Opt.aliveFile != nil {
+	if Opt.AliveFile != nil {
 		writePingResult(iplist)
 	}
 	DefaultMod(iplist, config)

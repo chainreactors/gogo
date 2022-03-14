@@ -74,7 +74,7 @@ func InitConfig(config *Config) *Config {
 		case *SmartData:
 			config.IPlist = data.(*SmartData).Data
 		default:
-			Fatal("not support result, maybe use -l")
+			Fatal("not support result type, maybe use -l flag")
 		}
 	}
 

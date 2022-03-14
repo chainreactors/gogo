@@ -42,11 +42,11 @@ func PrintNucleiPoc() {
 }
 
 func PrintWorkflow() {
-	fmt.Println("name\tindex\tip      \tport\tmod\tping\tarp\tsmartPortProbe\tsmartIpProbe\tversionLevel\texploit\toutputFile\toutputPath")
+	fmt.Println("name\tindex\tip         \tport     \tmod\tping\tarp\tsmartPort\tsmartIp\tversion\texploit\toutputFile\toutputPath")
 	for name, workflows := range LoadWorkFlow() {
 		fmt.Println(name + ": ")
 		for i, w := range workflows {
-			fmt.Printf("\t%-d\t%-s\t%-s\t%-s\t%-t\t%-t\t%-s\t%-s\t%-d\t%-s\t%-s\t%-s\t%-s\n", i, w.IP, w.Ports, w.Mod, w.Ping, w.Arp, w.SmartProbe, w.IpProbe, w.Version, w.Exploit, w.File, w.Path, w.Description)
+			fmt.Printf("\t%-d\t%-15s\t%-10s\t%-s\t%-t\t%-t\t%-10s\t%-10s\t%-5d\t%-10s\t%-10s\t%-10s\t%-10s\n", i, w.IP, w.Ports, w.Mod, w.Ping, w.Arp, w.SmartProbe, w.IpProbe, w.Version, w.Exploit, w.File, w.Path, w.Description)
 		}
 	}
 }
