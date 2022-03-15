@@ -2,7 +2,6 @@ package scan
 
 import (
 	"getitle/src/pkg"
-	"getitle/src/utils"
 	"net/http"
 	"strings"
 )
@@ -14,11 +13,7 @@ var headers = http.Header{
 // -defalut
 //socket进行对网站的连接
 func socketHttp(target string, result *pkg.Result) {
-	//fmt.Println(ip)
-	//socket tcp连接,超时时间
 	var err error
-	var ishttp = false
-	var statuscode = ""
 	result.Protocol = "tcp"
 	conn, err := pkg.TcpSocketConn(target, RunOpt.Delay)
 	if err != nil {
@@ -64,12 +59,7 @@ func socketHttp(target string, result *pkg.Result) {
 	}
 
 	//获取状态码
-	result.Content = string(data)
-	ishttp, statuscode = pkg.GetStatusCode(result.Content)
-	if ishttp {
-		result.HttpStat = statuscode
-		result.Protocol = "http"
-	}
+	pkg.CollectSocketInfo(result, data)
 
 	//所有30x,400,以及非http协议的开放端口都送到http包尝试获取更多信息
 	if result.HttpStat == "400" || result.Protocol == "tcp" || strings.HasPrefix(result.HttpStat, "3") {
@@ -77,7 +67,6 @@ func socketHttp(target string, result *pkg.Result) {
 		SystemHttp(target, result)
 	}
 	return
-
 }
 
 //使用封装好了http
@@ -105,16 +94,17 @@ func SystemHttp(target string, result *pkg.Result) {
 		// 证书在错误处理之前, 因为有可能存在证书,但是服务已关闭
 		result.Protocol = "https"
 		result.Host = strings.Join(resp.TLS.PeerCertificates[0].DNSNames, ",")
+		if len(resp.TLS.PeerCertificates[0].DNSNames) > 0 && len(resp.TLS.PeerCertificates[0].DNSNames) < 3 && result.HttpHost == "" {
+			// 经验公式: 通常只有cdn会绑定超过2个host, 正常情况只有一个host或者带上www的两个host
+			result.HttpHost = pkg.FormatCertDomain(resp.TLS.PeerCertificates[0].DNSNames[0])
+		}
 	}
 	if err != nil {
 		result.Error = err.Error()
 		return
 	}
 	result.Error = ""
-	result.Protocol = resp.Request.URL.Scheme
-	result.HttpStat = utils.ToString(resp.StatusCode)
-	result.Content, result.Body = pkg.GetHttpRaw(resp)
-	result.Httpresp = resp
-
+	content, body := pkg.GetHttpRaw(resp)
+	pkg.CollectHttpInfo(result, resp, content, body)
 	return
 }

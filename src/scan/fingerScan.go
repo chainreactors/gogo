@@ -21,24 +21,30 @@ func fingerScan(result *pkg.Result) {
 func httpFingerMatch(result *pkg.Result, finger *pkg.Finger) *pkg.Framework {
 	resp := result.Httpresp
 	content := result.Content
+	var body string
+	var rerequest bool
 	//var cookies map[string]string
-	if finger.SendDataStr != "" && RunOpt.VersionLevel >= 1 {
+	if RunOpt.VersionLevel >= 1 && finger.SendDataStr != "" {
+		// 如果level大于1,并且存在主动发包, 则重新获取resp与content
 		conn := pkg.HttpConn(RunOpt.Delay)
-		resp, err := conn.Get(result.GetURL() + finger.SendDataStr)
-		if err != nil {
-			return nil
-		}
+		tmpresp, err := conn.Get(result.GetURL() + finger.SendDataStr)
 		if err == nil {
-			content, _ = pkg.GetHttpRaw(resp)
+			resp = tmpresp
+			content, body = pkg.GetHttpRaw(resp)
+			rerequest = true
 		}
-
 	}
 
 	framework, ok := fingerMatcher(result, finger, content)
-	if ok {
+	if ok { // 如果已经匹配到一个指纹,则略过头匹配
+		if rerequest {
+			// 如果主动发包匹配到了指纹,则重新进行信息收集
+			pkg.CollectHttpInfo(result, resp, content, body)
+		}
 		return framework
 	}
-	// http头匹配
+
+	// http头匹配, http协议特有的匹配
 	for _, header := range finger.Regexps.Header {
 		var headerstr string
 		if resp == nil {
@@ -48,7 +54,11 @@ func httpFingerMatch(result *pkg.Result, finger *pkg.Finger) *pkg.Framework {
 		}
 
 		if strings.Contains(headerstr, strings.ToLower(header)) {
-			return handlerMatchedResult(result, finger, "", content)
+			if rerequest {
+				// 如果主动发包匹配到了指纹,则重新进行信息收集
+				pkg.CollectHttpInfo(result, resp, content, body)
+			}
+			return &pkg.Framework{Name: finger.Name}
 		}
 	}
 	return nil
@@ -117,14 +127,6 @@ func tcpFingerMatch(result *pkg.Result, finger *pkg.Finger) *pkg.Framework {
 	return nil
 }
 
-func handlerMatchedResult(result *pkg.Result, finger *pkg.Finger, res, content string) *pkg.Framework {
-	if RunOpt.VersionLevel >= 1 && finger.SendDataStr != "" && content != "" { // 需要主动发包的指纹重新收集信息
-		result.Content = content
-		result.InfoFilter()
-	}
-	return &pkg.Framework{Name: finger.Name, Version: res}
-}
-
 func fingerMatcher(result *pkg.Result, finger *pkg.Finger, content string) (*pkg.Framework, bool) {
 	// 漏洞匹配优先
 	for _, reg := range pkg.Compiled[finger.Name+"_vuln"] {
@@ -135,7 +137,7 @@ func fingerMatcher(result *pkg.Result, finger *pkg.Finger, content string) (*pkg
 			} else if finger.Vuln != "" {
 				result.AddVuln(&pkg.Vuln{Name: finger.Vuln, Severity: "high"})
 			}
-			return handlerMatchedResult(result, finger, res, content), true
+			return &pkg.Framework{Name: finger.Name, Version: res}, true
 		}
 	}
 
@@ -143,7 +145,7 @@ func fingerMatcher(result *pkg.Result, finger *pkg.Finger, content string) (*pkg
 	for _, body := range finger.Regexps.Body {
 		if strings.Contains(content, body) {
 
-			return handlerMatchedResult(result, finger, "", content), true
+			return &pkg.Framework{Name: finger.Name, Version: ""}, true
 		}
 	}
 
@@ -152,7 +154,7 @@ func fingerMatcher(result *pkg.Result, finger *pkg.Finger, content string) (*pkg
 		res, ok := pkg.CompiledMatch(reg, content)
 		if ok {
 
-			return handlerMatchedResult(result, finger, res, content), true
+			return &pkg.Framework{Name: finger.Name, Version: res}, true
 		}
 	}
 
