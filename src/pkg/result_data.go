@@ -316,7 +316,7 @@ func LoadResultFile(file *os.File) interface{} {
 
 				if len(targetpair) >= 2 {
 					if !IsIPv4(ip) {
-						if tmpip := ParseIP(ip); tmpip != "" {
+						if tmpip, ok := ParseIP(ip); ok {
 							host = ip
 							ip = tmpip
 						}

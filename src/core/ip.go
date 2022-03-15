@@ -55,14 +55,15 @@ func getIpRange(target string) (start uint, fin uint) {
 	return start, fin
 }
 
-func cidrFormat(target string) string {
+func cidrFormat(target string) (string, string) {
+	// return ip, host
 	var ip, mask string
 	target = strings.TrimSpace(target)
 	if strings.Contains(target, "http") {
 		u, err := url.Parse(target)
 		if err != nil {
 			Log.Error(err.Error())
-			return ""
+			return "", ""
 		}
 		target = u.Hostname()
 	}
@@ -76,20 +77,30 @@ func cidrFormat(target string) string {
 		mask = "32"
 	}
 
-	if ip = ParseIP(ip); ip != "" {
-		return ip + "/" + mask
+	if parsedIp, isparse := ParseIP(ip); ip != "" {
+		if isparse {
+			return parsedIp + "/" + mask, ip
+		} else {
+			return parsedIp + "/" + mask, ""
+		}
 	} else {
-		return ""
+		return "", ""
 	}
 }
 
 func initIP(config *Config) {
+	config.HostsMap = make(map[string]string)
 	// 优先处理ip
 	if config.IP != "" {
 		if strings.Contains(config.IP, ",") {
 			config.IPlist = strings.Split(config.IP, ",")
 		} else {
-			config.IP = cidrFormat(config.IP)
+			var host string
+			config.IP, host = cidrFormat(config.IP)
+			if host != "" {
+				ip, _ := splitCIDR(config.IP)
+				config.HostsMap[ip] = host
+			}
 			if config.IP == "" {
 				Fatal("IP format error")
 			}
@@ -100,9 +111,13 @@ func initIP(config *Config) {
 	if config.IPlist != nil {
 		var iplist []string
 		for _, ip := range config.IPlist {
-			tmpip := cidrFormat(ip)
-			if tmpip != "" {
-				iplist = append(iplist, tmpip)
+			ip, host := cidrFormat(ip)
+			if host != "" {
+				i, _ := splitCIDR(ip)
+				config.HostsMap[i] = host
+			}
+			if ip != "" {
+				iplist = append(iplist, ip)
 			}
 		}
 		config.IPlist = SliceUnique(iplist) // 去重

@@ -14,23 +14,23 @@ func IsIPv4(ip string) bool {
 	return false
 }
 
-func ParseIP(target string) string {
+func ParseIP(target string) (string, bool) {
 	target = strings.TrimSpace(target)
 	if IsIPv4(target) {
-		return target
+		return target, false
 	}
 	iprecords, err := net.LookupIP(target)
 	if err != nil {
 		Log.Error("Unable to resolve domain name:" + target + ". SKIPPED!")
-		return ""
+		return "", false
 	}
 	for _, ip := range iprecords {
 		if ip.To4() != nil {
 			Log.Important("parse domain SUCCESS, map " + target + " to " + ip.String())
-			return ip.String()
+			return ip.String(), true
 		}
 	}
-	return ""
+	return "", false
 }
 
 func Ip2Int(ip string) uint {

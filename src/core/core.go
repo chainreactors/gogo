@@ -103,7 +103,7 @@ func SmartMod(target string, config Config) {
 
 	//var ipChannel chan string
 	targetGen := NewTargetGenerator(config)
-	temp := targetGen.ip_generator.alivedMap
+	temp := targetGen.ipGenerator.alivedMap
 
 	// 输出启发式扫描探针
 	probeconfig := fmt.Sprintf("[*] Smart probe ports: %s , ", strings.Join(config.SmartPortList, ","))
@@ -231,7 +231,7 @@ func AliveMod(targets interface{}, config Config) {
 	Log.Logging(fmt.Sprintf("[*] Alived spray task time is about %d seconds",
 		guessTime(targets, len(config.AliveSprayMod), config.Threads)))
 	targetGen := NewTargetGenerator(config)
-	alivedmap := targetGen.ip_generator.alivedMap
+	alivedmap := targetGen.ipGenerator.alivedMap
 	targetCh := targetGen.generator(targets, config.AliveSprayMod)
 	//targetChannel := generator(targets, config)
 	scanPool, _ := ants.NewPoolWithFunc(config.Threads, func(i interface{}) {

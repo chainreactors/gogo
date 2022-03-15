@@ -128,24 +128,26 @@ func isnotAlive(ip string, temp *sync.Map) bool {
 
 func NewTargetGenerator(config Config) *targetGenerator {
 	gen := targetGenerator{
-		ip_generator: NewIpGenerator(config),
-		spray:        config.PortSpray,
+		ipGenerator: NewIpGenerator(config),
+		spray:       config.PortSpray,
+		hostsMap:    config.HostsMap,
 	}
 	return &gen
 }
 
 type targetGenerator struct {
-	count        int
-	spray        bool
-	ch           chan targetConfig
-	ip_generator *IpGenerator
+	count       int
+	spray       bool
+	ch          chan targetConfig
+	hostsMap    map[string]string
+	ipGenerator *IpGenerator
 }
 
 func (gen *targetGenerator) genFromDefault(targets interface{}, portlist []string) {
-	ch := gen.ip_generator.generate(targets, "default")
+	ch := gen.ipGenerator.generate(targets, "default")
 	for ip := range ch {
 		for _, port := range portlist {
-			gen.ch <- targetConfig{ip: ip, port: port}
+			gen.ch <- targetConfig{ip: ip, port: port, host: gen.hostsMap[ip]}
 		}
 	}
 }
@@ -157,16 +159,16 @@ func (gen *targetGenerator) genFromSpray(targets interface{}, portlist []string)
 		switch targets.(type) {
 		case []string:
 			for _, cidr := range targets.([]string) {
-				ch = gen.ip_generator.generate(cidr, "default")
+				ch = gen.ipGenerator.generate(cidr, "default")
 				for ip := range ch {
-					gen.ch <- targetConfig{ip: ip, port: port}
+					gen.ch <- targetConfig{ip: ip, port: port, host: gen.hostsMap[ip]}
 				}
 				Opt.File.Sync()
 			}
 		default:
-			ch = gen.ip_generator.generate(targets.(string), "default")
+			ch = gen.ipGenerator.generate(targets.(string), "default")
 			for ip := range ch {
-				gen.ch <- targetConfig{ip: ip, port: port}
+				gen.ch <- targetConfig{ip: ip, port: port, host: gen.hostsMap[ip]}
 			}
 		}
 		Log.Logging(fmt.Sprintf("[*] Processed Port: %s, found %d ports", port, Opt.AliveSum-tmpalive))
@@ -202,7 +204,7 @@ func (gen *targetGenerator) smartGenerator(targets string, portlist []string, mo
 	gen.ch = make(chan targetConfig)
 
 	go func() {
-		ch := gen.ip_generator.generate(targets, mod)
+		ch := gen.ipGenerator.generate(targets, mod)
 		for ip := range ch {
 			for _, port := range portlist {
 				gen.ch <- targetConfig{ip: ip, port: port}
