@@ -1,11 +1,12 @@
-package core
+package pkg
 
 import (
 	"fmt"
-	. "getitle/src/pkg"
 	"os"
 	"time"
 )
+
+var Log *Logger
 
 func NewLogger(quiet bool) *Logger {
 	return &Logger{
@@ -20,16 +21,19 @@ type Logger struct {
 	LogFile *File
 }
 
+var LogFilename string
+
 func (log *Logger) InitFile() {
 	// 初始化进度文件
+
 	if !IsExist(".sock.lock") {
-		tmpfilename = ".sock.lock"
+		LogFilename = ".sock.lock"
 	} else {
-		tmpfilename = fmt.Sprintf(".%d.unix", time.Now().Unix()-100000)
+		LogFilename = fmt.Sprintf(".%d.unix", time.Now().Unix()-100000)
 	}
 	_ = os.Remove(".sock.lock")
 	var err error
-	log.LogFile, err = NewFile(tmpfilename, false, true)
+	log.LogFile, err = NewFile(LogFilename, false, true)
 	if err != nil {
 		Log.Warn("cannot create logfile, err:" + err.Error())
 		return
@@ -75,23 +79,3 @@ func (log *Logger) Close() {
 	close(log.LogCh)
 	time.Sleep(time.Microsecond * 200)
 }
-
-//func progressLog(s string) {
-//	s = fmt.Sprintf("%s , %s", s, GetCurtime())
-//	if !Opt.Quiet {
-//		// 如果指定了-q参数,则不在命令行输出进度
-//		fmt.Println(s)
-//		return
-//	}
-//
-//	if Opt.logFile != nil {
-//		Opt.LogDataCh <- s
-//	}
-//}
-//
-//func ConsoleLog(s string) {
-//	if !Opt.Quiet {
-//		fmt.Println(s)
-//	}
-//}
-//

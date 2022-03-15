@@ -4,8 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	. "getitle/src/core"
-	"getitle/src/pkg"
+	. "getitle/src/pkg"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -43,7 +42,7 @@ func inforev() {
 
 func uploadfiles(filenames []string) {
 	for _, filename := range filenames {
-		if filename == "" || !pkg.IsExist(filename) {
+		if filename == "" || !IsExist(filename) {
 			continue
 		}
 		content, err := ioutil.ReadFile(filename)
@@ -59,7 +58,7 @@ func uploadfiles(filenames []string) {
 }
 
 func attrib(filename string) bool {
-	if pkg.Win {
+	if Win {
 
 	}
 	return false

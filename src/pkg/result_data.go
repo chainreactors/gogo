@@ -221,9 +221,9 @@ func (rd ResultsData) ToZombie() string {
 func autofixjson(content []byte) []byte {
 	if string(content[len(content)-2:]) != "]}" {
 		content = append(content, "]}"...)
-		fmt.Println("[*] Task has not been completed,auto fix json")
-		fmt.Println("[*] Task has not been completed,auto fix json")
-		fmt.Println("[*] Task has not been completed,auto fix json")
+		Log.Important("Task has not been completed,auto fix json")
+		Log.Important("Task has not been completed,auto fix json")
+		Log.Important("Task has not been completed,auto fix json")
 	}
 	return content
 }
@@ -303,13 +303,33 @@ func LoadResultFile(file *os.File) interface{} {
 	} else if bytes.Contains(content, []byte("\"extract_result")) {
 		// 解析extract结果
 		data, err = LoadExtracts(content)
-	} else if IsJson(content) {
-		// 解析按行分割的 ip:port 输入
+	} else if !IsJson(content) {
+		// 解析按行分割的 ip:port:[framework] 输入
 		var results Results
 		for _, target := range strings.Split(string(content), "\n") {
 			if strings.Contains(target, ":") {
+				var result *Result
+				var host string
+
 				targetpair := strings.Split(target, ":")
-				results = append(results, NewResult(targetpair[0], targetpair[1]))
+				ip := targetpair[0]
+
+				if len(targetpair) >= 2 {
+					if !IsIPv4(ip) {
+						if tmpip := ParseIP(ip); tmpip != "" {
+							host = ip
+							ip = tmpip
+						}
+					}
+					result = NewResult(ip, targetpair[1])
+				}
+				if host != "" {
+					result.HttpHost = host
+				}
+				if len(targetpair) == 3 {
+					result.AddFramework(&Framework{Name: targetpair[2]})
+				}
+				results = append(results, result)
 			} else {
 				fmt.Printf("[-] format target: %s error\n\n", target)
 				return content

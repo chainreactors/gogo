@@ -29,10 +29,10 @@ func (gen *IpGenerator) defaultIpGenerator(CIDR string) {
 	for i := start; i <= fin; i++ {
 		// 如果是广播地址或网络地址,则跳过
 		if (i)%256 != 255 && (i)%256 != 0 && !gen.excludeIP[i] {
-			gen.ch <- int2ip(i)
+			gen.ch <- Int2Ip(i)
 		}
 		if i%65536 == 0 {
-			Log.Logging(fmt.Sprintf("[*] Processing CIDR: %s/16", int2ip(i)))
+			Log.Logging(fmt.Sprintf("[*] Processing CIDR: %s/16", Int2Ip(i)))
 		}
 	}
 }
@@ -44,8 +44,8 @@ func (gen *IpGenerator) smartIpGenerator(cidr string) {
 
 	for C = 1; C < 255; C++ {
 		for B = 0; B <= (fin-start)/256; B++ {
-			outIP = int2ip(start + 256*B + C)
-			if isnotAlive(int2ip(start+256*B), gen.alivedMap) && !gen.excludeIP[start+256*B+C] {
+			outIP = Int2Ip(start + 256*B + C)
+			if isnotAlive(Int2Ip(start+256*B), gen.alivedMap) && !gen.excludeIP[start+256*B+C] {
 				gen.ch <- outIP
 			}
 		}
@@ -74,11 +74,11 @@ func (gen *IpGenerator) sSmartGenerator(cidr string) {
 		for b = 0; b <= finb-startb; b++ {
 			//println(int2ip(start + b*65536 + c*256 + 1))
 			//ip := int2ip(start + b*65536 + c + 1)
-			if isnotAlive(int2ip(start+b*65536+256), gen.alivedMap) {
+			if isnotAlive(Int2Ip(start+b*65536+256), gen.alivedMap) {
 				//println(int2ip(start + b*65536 + c*256 + 1))
 				for _, p := range gen.ipProbe {
 					if !gen.excludeIP[start+b*65536+c*256+p] {
-						gen.ch <- int2ip(start + b*65536 + c*256 + p)
+						gen.ch <- Int2Ip(start + b*65536 + c*256 + p)
 					}
 				}
 			}
@@ -145,7 +145,7 @@ func (gen *targetGenerator) genFromDefault(targets interface{}, portlist []strin
 	ch := gen.ip_generator.generate(targets, "default")
 	for ip := range ch {
 		for _, port := range portlist {
-			gen.ch <- targetConfig{ip, port, nil}
+			gen.ch <- targetConfig{ip: ip, port: port}
 		}
 	}
 }
@@ -159,14 +159,14 @@ func (gen *targetGenerator) genFromSpray(targets interface{}, portlist []string)
 			for _, cidr := range targets.([]string) {
 				ch = gen.ip_generator.generate(cidr, "default")
 				for ip := range ch {
-					gen.ch <- targetConfig{ip, port, nil} // finger适配
+					gen.ch <- targetConfig{ip: ip, port: port}
 				}
 				Opt.File.Sync()
 			}
 		default:
 			ch = gen.ip_generator.generate(targets.(string), "default")
 			for ip := range ch {
-				gen.ch <- targetConfig{ip, port, nil}
+				gen.ch <- targetConfig{ip: ip, port: port}
 			}
 		}
 		Log.Logging(fmt.Sprintf("[*] Processed Port: %s, found %d ports", port, Opt.AliveSum-tmpalive))
@@ -175,7 +175,7 @@ func (gen *targetGenerator) genFromSpray(targets interface{}, portlist []string)
 
 func (gen *targetGenerator) genFromResult(results Results) {
 	for _, result := range results {
-		gen.ch <- targetConfig{result.Ip, result.Port, result.Frameworks}
+		gen.ch <- targetConfig{result.Ip, result.Port, result.HttpHost, result.Frameworks}
 	}
 }
 

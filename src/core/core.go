@@ -12,6 +12,7 @@ import (
 type targetConfig struct {
 	ip     string
 	port   string
+	host   string
 	finger Frameworks
 }
 
