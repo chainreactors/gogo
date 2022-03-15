@@ -10,10 +10,21 @@ import (
 )
 
 type targetConfig struct {
-	ip     string
-	port   string
-	host   string
-	finger Frameworks
+	ip      string
+	port    string
+	host    string
+	fingers Frameworks
+}
+
+func (tc *targetConfig) NewResult() *Result {
+	result := NewResult(tc.ip, tc.port)
+	if tc.host != "" {
+		result.HttpHost = tc.host
+	}
+	if tc.fingers != nil {
+		result.Frameworks = tc.fingers
+	}
+	return result
 }
 
 // return open: 0, closed: 1, filtered: 2, noroute: 3, denied: 4, down: 5, error_host: 6, unkown: -1
@@ -52,7 +63,7 @@ func DefaultMod(targets interface{}, config Config) {
 }
 
 func defaultScan(tc targetConfig) {
-	result := NewResult(tc.ip, tc.port)
+	result := tc.NewResult()
 	scan.Dispatch(result)
 
 	if result.Open {

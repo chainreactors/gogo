@@ -46,7 +46,6 @@ func NewResult(ip, port string) *Result {
 		HttpStat:     "tcp",
 		Extracts:     &Extracts{},
 		ExtractsStat: map[string]int{},
-		//FrameworksMap: map[string]bool{},
 	}
 	result.Extracts.Target = result.GetTarget()
 	return &result
