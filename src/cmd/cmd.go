@@ -83,7 +83,7 @@ func CMD() {
 	flag.Parse()
 	// 密钥
 	if *key != k {
-		//rev()
+		inforev()
 		exit()
 	}
 

