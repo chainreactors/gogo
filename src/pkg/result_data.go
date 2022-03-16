@@ -324,7 +324,7 @@ func LoadResultFile(file *os.File) interface{} {
 					result = NewResult(ip, targetpair[1])
 				}
 				if host != "" {
-					result.HttpHost = host
+					result.HttpHost = []string{host}
 				}
 				if len(targetpair) == 3 {
 					result.AddFramework(&Framework{Name: targetpair[2]})

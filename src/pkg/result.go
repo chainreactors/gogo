@@ -16,7 +16,7 @@ type Result struct {
 	Uri          string         `json:"u"` // uri
 	Os           string         `json:"o"` // os
 	Host         string         `json:"h"` // host
-	HttpHost     string         `json:"-"`
+	HttpHost     []string       `json:"-"`
 	Title        string         `json:"t"` // title
 	Midware      string         `json:"m"` // midware
 	HttpStat     string         `json:"s"` // http_stat

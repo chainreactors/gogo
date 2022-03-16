@@ -56,7 +56,7 @@ func getIpRange(target string) (start uint, fin uint) {
 }
 
 func cidrFormat(target string) (string, string) {
-	// return ip, host
+	// return ip, hosts
 	var ip, mask string
 	target = strings.TrimSpace(target)
 	if strings.Contains(target, "http") {
@@ -89,7 +89,7 @@ func cidrFormat(target string) (string, string) {
 }
 
 func initIP(config *Config) {
-	config.HostsMap = make(map[string]string)
+	config.HostsMap = make(map[string][]string)
 	// 优先处理ip
 	if config.IP != "" {
 		if strings.Contains(config.IP, ",") {
@@ -99,7 +99,7 @@ func initIP(config *Config) {
 			config.IP, host = cidrFormat(config.IP)
 			if host != "" {
 				ip, _ := splitCIDR(config.IP)
-				config.HostsMap[ip] = host
+				config.HostsMap[ip] = append(config.HostsMap[ip], host)
 			}
 			if config.IP == "" {
 				Fatal("IP format error")
@@ -114,7 +114,7 @@ func initIP(config *Config) {
 			ip, host := cidrFormat(ip)
 			if host != "" {
 				i, _ := splitCIDR(ip)
-				config.HostsMap[i] = host
+				config.HostsMap[i] = append(config.HostsMap[i], host)
 			}
 			if ip != "" {
 				iplist = append(iplist, ip)

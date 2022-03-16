@@ -139,7 +139,7 @@ type targetGenerator struct {
 	count       int
 	spray       bool
 	ch          chan targetConfig
-	hostsMap    map[string]string
+	hostsMap    map[string][]string
 	ipGenerator *IpGenerator
 }
 
@@ -147,7 +147,7 @@ func (gen *targetGenerator) genFromDefault(targets interface{}, portlist []strin
 	ch := gen.ipGenerator.generate(targets, "default")
 	for ip := range ch {
 		for _, port := range portlist {
-			gen.ch <- targetConfig{ip: ip, port: port, host: gen.hostsMap[ip]}
+			gen.ch <- targetConfig{ip: ip, port: port, hosts: gen.hostsMap[ip]}
 		}
 	}
 }
@@ -161,14 +161,14 @@ func (gen *targetGenerator) genFromSpray(targets interface{}, portlist []string)
 			for _, cidr := range targets.([]string) {
 				ch = gen.ipGenerator.generate(cidr, "default")
 				for ip := range ch {
-					gen.ch <- targetConfig{ip: ip, port: port, host: gen.hostsMap[ip]}
+					gen.ch <- targetConfig{ip: ip, port: port, hosts: gen.hostsMap[ip]}
 				}
 				Opt.File.Sync()
 			}
 		default:
 			ch = gen.ipGenerator.generate(targets.(string), "default")
 			for ip := range ch {
-				gen.ch <- targetConfig{ip: ip, port: port, host: gen.hostsMap[ip]}
+				gen.ch <- targetConfig{ip: ip, port: port, hosts: gen.hostsMap[ip]}
 			}
 		}
 		Log.Logging(fmt.Sprintf("[*] Processed Port: %s, found %d ports", port, Opt.AliveSum-tmpalive))

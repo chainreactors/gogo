@@ -78,7 +78,7 @@ func Dispatch(result *pkg.Result) {
 		if result.HttpStat != "404" {
 			NotFoundScan(result)
 		}
-		if result.HttpHost != "" {
+		if result.HttpHost != nil {
 			hostScan(result)
 		}
 	} else {

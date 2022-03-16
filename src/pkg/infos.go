@@ -21,7 +21,7 @@ func CollectSocketInfo(result *Result, socketContent []byte) {
 		result.HttpStat = statuscode
 		result.Protocol = "http"
 		result.Hash = Md5Hash([]byte(strings.TrimSpace(body)))[:4] // 因为头中经常有随机值, 因此hash通过body判断
-		result.Title = getTitle(content)
+		result.Title = GetTitle(content)
 		result.Language = getSocketLanguage(content)
 		result.Midware, _ = CompiledMatch(CommonCompiled["server"], content)
 	}
@@ -36,12 +36,12 @@ func CollectHttpInfo(result *Result, resp *http.Response, content, body string) 
 	result.HttpStat = utils.ToString(resp.StatusCode)
 	result.Language = getHttpLanguage(resp)
 	result.Midware = resp.Header.Get("Server")
-	result.Title = getTitle(content)
+	result.Title = GetTitle(content)
 	result.Hash = Md5Hash([]byte(strings.TrimSpace(body)))[:4] // 因为头中经常有随机值, 因此hash通过body判断
 	result.AddExtracts(ExtractContent(content))
 }
 
-func getTitle(content string) string {
+func GetTitle(content string) string {
 	if content == "" {
 		return ""
 	}
@@ -124,9 +124,13 @@ func GetStatusCode(content string) (bool, string) {
 	return false, "tcp"
 }
 
-func FormatCertDomain(domain string) string {
-	if strings.HasPrefix(domain, "*.") {
-		domain = strings.Trim(domain, "*.")
+func FormatCertDomains(domains []string) []string {
+	var hosts []string
+	for _, domain := range domains {
+		if strings.HasPrefix(domain, "*.") {
+			domain = strings.Trim(domain, "*.")
+		}
+		hosts = append(hosts, domain)
 	}
-	return domain
+	return utils.SliceUnique(hosts)
 }

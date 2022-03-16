@@ -12,14 +12,14 @@ import (
 type targetConfig struct {
 	ip      string
 	port    string
-	host    string
+	hosts   []string
 	fingers Frameworks
 }
 
 func (tc *targetConfig) NewResult() *Result {
 	result := NewResult(tc.ip, tc.port)
-	if tc.host != "" {
-		result.HttpHost = tc.host
+	if tc.hosts != nil {
+		result.HttpHost = tc.hosts
 	}
 	if tc.fingers != nil {
 		result.Frameworks = tc.fingers
