@@ -77,7 +77,7 @@ func cidrFormat(target string) (string, string) {
 		mask = "32"
 	}
 
-	if parsedIp, isparse := ParseIP(ip); ip != "" {
+	if parsedIp, isparse := ParseIP(ip); parsedIp != "" {
 		if isparse {
 			return parsedIp + "/" + mask, ip
 		} else {
