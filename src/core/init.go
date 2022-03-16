@@ -112,7 +112,8 @@ func InitConfig(config *Config) *Config {
 	if config.ExcludeIPs != "" {
 		config.ExcludeMap = make(map[uint]bool)
 		for _, ip := range strings.Split(config.ExcludeIPs, ",") {
-			start, end := getIpRange(cidrFormat(ip))
+			ip, _ = cidrFormat(ip)
+			start, end := getIpRange(ip)
 			for i := start; i <= end; i++ {
 				config.ExcludeMap[i] = true
 			}

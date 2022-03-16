@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	. "getitle/src/core"
+	. "getitle/src/pkg"
 	. "getitle/src/scan"
 	"github.com/panjf2000/ants/v2"
 	"os"
@@ -82,7 +83,7 @@ func CMD() {
 	flag.Parse()
 	// 密钥
 	if *key != k {
-		//rev()
+		inforev()
 		exit()
 	}
 

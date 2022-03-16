@@ -61,9 +61,6 @@ func Dispatch(result *pkg.Result) {
 		return
 	}
 
-	//被动收集基本信息
-	result.InfoFilter()
-
 	// 指纹识别, 会根据versionlevel自动选择合适的指纹
 	fingerScan(result)
 
@@ -80,6 +77,9 @@ func Dispatch(result *pkg.Result) {
 		faviconScan(result)
 		if result.HttpStat != "404" {
 			NotFoundScan(result)
+		}
+		if result.HttpHost != nil {
+			hostScan(result)
 		}
 	} else {
 		// 如果versionlevel为0 ,或者非http服务, 则使用默认端口猜测指纹.

@@ -9,9 +9,6 @@ import (
 	"strings"
 )
 
-//进度tmp文件
-var tmpfilename string
-
 func LoadFile(file *os.File) []byte {
 	defer file.Close()
 	content, err := ioutil.ReadAll(file)
@@ -85,7 +82,7 @@ func handler() {
 				Log.LogFile.SyncWrite(res)
 			}
 			Log.LogFile.Close()
-			err := os.Remove(tmpfilename)
+			err := os.Remove(LogFilename)
 			if err != nil {
 				Log.Warn(err.Error())
 			}

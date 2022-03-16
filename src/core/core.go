@@ -10,9 +10,21 @@ import (
 )
 
 type targetConfig struct {
-	ip     string
-	port   string
-	finger Frameworks
+	ip      string
+	port    string
+	hosts   []string
+	fingers Frameworks
+}
+
+func (tc *targetConfig) NewResult() *Result {
+	result := NewResult(tc.ip, tc.port)
+	if tc.hosts != nil {
+		result.HttpHost = tc.hosts
+	}
+	if tc.fingers != nil {
+		result.Frameworks = tc.fingers
+	}
+	return result
 }
 
 // return open: 0, closed: 1, filtered: 2, noroute: 3, denied: 4, down: 5, error_host: 6, unkown: -1
@@ -51,7 +63,7 @@ func DefaultMod(targets interface{}, config Config) {
 }
 
 func defaultScan(tc targetConfig) {
-	result := NewResult(tc.ip, tc.port)
+	result := tc.NewResult()
 	scan.Dispatch(result)
 
 	if result.Open {
@@ -62,7 +74,7 @@ func defaultScan(tc targetConfig) {
 
 		if Opt.File != nil {
 			Opt.dataCh <- output(result, Opt.FileOutput)
-			if result.Extracts.Extracts != nil {
+			if result.Extracts.Extractors != nil {
 				Opt.extractCh <- result.Extracts.ToResult()
 			}
 		}
@@ -91,7 +103,7 @@ func SmartMod(target string, config Config) {
 
 	//var ipChannel chan string
 	targetGen := NewTargetGenerator(config)
-	temp := targetGen.ip_generator.alivedMap
+	temp := targetGen.ipGenerator.alivedMap
 
 	// 输出启发式扫描探针
 	probeconfig := fmt.Sprintf("[*] Smart probe ports: %s , ", strings.Join(config.SmartPortList, ","))
@@ -219,7 +231,7 @@ func AliveMod(targets interface{}, config Config) {
 	Log.Logging(fmt.Sprintf("[*] Alived spray task time is about %d seconds",
 		guessTime(targets, len(config.AliveSprayMod), config.Threads)))
 	targetGen := NewTargetGenerator(config)
-	alivedmap := targetGen.ip_generator.alivedMap
+	alivedmap := targetGen.ipGenerator.alivedMap
 	targetCh := targetGen.generator(targets, config.AliveSprayMod)
 	//targetChannel := generator(targets, config)
 	scanPool, _ := ants.NewPoolWithFunc(config.Threads, func(i interface{}) {

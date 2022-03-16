@@ -16,6 +16,7 @@ type Result struct {
 	Uri          string         `json:"u"` // uri
 	Os           string         `json:"o"` // os
 	Host         string         `json:"h"` // host
+	HttpHost     []string       `json:"-"`
 	Title        string         `json:"t"` // title
 	Midware      string         `json:"m"` // midware
 	HttpStat     string         `json:"s"` // http_stat
@@ -45,27 +46,9 @@ func NewResult(ip, port string) *Result {
 		HttpStat:     "tcp",
 		Extracts:     &Extracts{},
 		ExtractsStat: map[string]int{},
-		//FrameworksMap: map[string]bool{},
 	}
 	result.Extracts.Target = result.GetTarget()
 	return &result
-}
-func (result *Result) InfoFilter() {
-	//result.errHandler()
-	result.Title = getTitle(result.Content)
-	if result.Content != "" {
-		result.Hash = Md5Hash([]byte(result.Body))[:4]
-		for name, extract := range Extractors {
-			extractStr, ok := CompiledAllMatch(extract, result.Content)
-			if ok && extractStr != nil {
-				result.AddExtract(NewExtract(name, extractStr))
-			}
-		}
-	}
-	if result.IsHttp() {
-		result.Language = getLanguage(result.Httpresp, result.Content)
-		result.Midware = getMidware(result.Httpresp, result.Content)
-	}
 }
 
 func (result *Result) AddVuln(vuln *Vuln) {
@@ -89,8 +72,15 @@ func (result *Result) AddFrameworks(f []*Framework) {
 }
 
 func (result *Result) AddExtract(extract *Extract) {
-	result.Extracts.Extracts = append(result.Extracts.Extracts, extract)
+	result.Extracts.Extractors = append(result.Extracts.Extractors, extract)
 	result.ExtractsStat[extract.Name] = len(extract.ExtractResult)
+}
+
+func (result *Result) AddExtracts(extracts []*Extract) {
+	for _, extract := range extracts {
+		result.Extracts.Extractors = append(result.Extracts.Extractors, extract)
+		result.ExtractsStat[extract.Name] = len(extract.ExtractResult)
+	}
 }
 
 func (result *Result) GetExtractStat() string {
@@ -381,7 +371,7 @@ func NewExtract(name string, extractResult interface{}) *Extract {
 type Extracts struct {
 	Target       string     `json:"target"`
 	MatchedNames []string   `json:"-"`
-	Extracts     []*Extract `json:"extracts"`
+	Extractors   []*Extract `json:"extracts"`
 }
 
 func (e *Extracts) ToResult() string {
@@ -394,7 +384,7 @@ func (e *Extracts) ToResult() string {
 
 func (es *Extracts) ToString() string {
 	var s string
-	for _, e := range es.Extracts {
+	for _, e := range es.Extractors {
 		s += fmt.Sprintf("[ Extract: %s ] ", e.ToString())
 	}
 	return s

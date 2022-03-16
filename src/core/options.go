@@ -18,8 +18,6 @@ type Options struct {
 	FilePath    string
 }
 
-var Log *Logger
-
 func (opt *Options) Close() {
 	// 关闭管道
 	if Opt.dataCh != nil {
