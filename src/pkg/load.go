@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"getitle/src/utils"
 	"regexp"
-	"strconv"
 	"strings"
 )
 
@@ -37,40 +36,6 @@ var PresetExtracts = map[string]*regexp.Regexp{
 	"response": regexp.MustCompile("(?s).*"),
 }
 
-func Ports2PortSlice(ports []string) []string {
-	var tmpports []string
-	//生成端口列表 支持,和-
-	for _, pr := range ports {
-		if len(pr) == 0 {
-			continue
-		}
-		pr = strings.TrimSpace(pr)
-		if pr[0] == 45 {
-			pr = "1" + pr
-		}
-		if pr[len(pr)-1] == 45 {
-			pr = pr + "65535"
-		}
-		tmpports = append(tmpports, port2PortSlice(pr)...)
-	}
-	return tmpports
-}
-
-func port2PortSlice(port string) []string {
-	var tmpports []string
-	if strings.Contains(port, "-") {
-		sf := strings.Split(port, "-")
-		start, _ := strconv.Atoi(sf[0])
-		fin, _ := strconv.Atoi(sf[1])
-		for port := start; port <= fin; port++ {
-			tmpports = append(tmpports, strconv.Itoa(port))
-		}
-	} else {
-		tmpports = append(tmpports, port)
-	}
-	return tmpports
-}
-
 func LoadPortConfig() (PortMapper, PortMapper, PortMapper) {
 	var portfingers []PortFinger
 	err := json.Unmarshal(LoadConfig("port"), &portfingers)
@@ -83,7 +48,7 @@ func LoadPortConfig() (PortMapper, PortMapper, PortMapper) {
 	portmap := make(PortMapper) // 以端口号归类
 
 	for _, v := range portfingers {
-		v.Ports = Ports2PortSlice(v.Ports)
+		v.Ports = parsePortsPreset(v.Ports)
 		namemap[v.Name] = append(namemap[v.Name], v.Ports...)
 		for _, t := range v.Type {
 			tagmap[t] = append(tagmap[t], v.Ports...)
@@ -113,8 +78,9 @@ func LoadFingers(t string) FingerMapper {
 		finger.Protocol = t
 		finger.Decode() // 防止\xff \x00编码解码影响结果
 
+		finger.Defaultport = portSliceHandler(finger.Defaultport)
 		// http默认为80
-		if finger.Defaultport == nil && finger.Protocol == "http" {
+		if len(finger.Defaultport) == 0 && finger.Protocol == "http" {
 			finger.Defaultport = []string{"80"}
 		}
 
@@ -128,10 +94,8 @@ func LoadFingers(t string) FingerMapper {
 		}
 
 		// 根据端口分类指纹
-		for _, ports := range finger.Defaultport {
-			for _, port := range port2PortSlice(ports) {
-				fingermap[port] = append(fingermap[port], finger)
-			}
+		for _, port := range finger.Defaultport {
+			fingermap[port] = append(fingermap[port], finger)
 		}
 
 	}

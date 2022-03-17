@@ -355,10 +355,10 @@ func nucleiLoader(pocfile string, payloads arrayFlags) {
 
 func configLoader() {
 	Compiled = make(map[string][]*regexp.Regexp)
+	TagMap, NameMap, PortMap = LoadPortConfig()
 	Mmh3Fingers, Md5Fingers = LoadHashFinger()
 	TcpFingers = LoadFingers("tcp")
 	HttpFingers = LoadFingers("http")
-	TagMap, NameMap, PortMap = LoadPortConfig()
 	CommonCompiled = map[string]*regexp.Regexp{
 		"title":     CompileRegexp("(?Uis)<title>(.*)</title>"),
 		"server":    CompileRegexp("(?i)Server: ([\x20-\x7e]+)"),
