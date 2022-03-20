@@ -130,9 +130,9 @@ func (result Result) Get(key string) string {
 		return result.Ip
 	case "port":
 		return result.Port
-	case "frameworks":
+	case "frameworks", "framework":
 		return result.Frameworks.ToString()
-	case "vulns":
+	case "vulns", "vuln":
 		return result.Vulns.ToString()
 	case "host":
 		return result.Host
@@ -142,6 +142,14 @@ func (result Result) Get(key string) string {
 		return result.GetTarget()
 	case "url":
 		return result.GetURL()
+	case "midware":
+		return result.Midware
+	case "hash":
+		return result.Hash
+	case "language":
+		return result.Language
+	case "protocol":
+		return result.Protocol
 	default:
 		return ""
 	}
