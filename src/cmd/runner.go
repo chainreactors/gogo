@@ -33,7 +33,7 @@ type Runner struct {
 	HiddenFile     bool // 启用自动隐藏文件
 	Ping           bool
 	Arp            bool
-	FileOutput     string
+	FileOutput     string // 输出格式
 	FormatFilename string // 待格式化文件名
 	filters        arrayFlags
 	payloads       arrayFlags
@@ -54,13 +54,30 @@ type Runner struct {
 }
 
 func (r *Runner) preInit() bool {
-	// 初始化日志工具
+	// 初始化日志工具"
 	Log = NewLogger(r.Quiet)
 	if r.Debug {
 		Opt.Debug = true
 		RunOpt.Debug = true
 	}
-	// 一些特殊的分支, 不继续先后执行
+	legalFormat := []string{"url", "ip", "port", "frameworks", "framework", "vuln", "vulns", "protocol", "title", "target", "hash", "language", "host", "color", "c", "json", "j", "full", "jsonlines", "jl"}
+	if r.FileOutput != "default" {
+		for _, form := range strings.Split(r.FileOutput, ",") {
+			if !SliceContains(legalFormat, form) {
+				Log.Warn(fmt.Sprintf("illegal file output format: %s, Please use one or more of the following formats: %s", form, strings.Join(legalFormat, ", ")))
+			}
+		}
+	}
+
+	if Opt.Output != "full" {
+		for _, form := range strings.Split(Opt.Output, ",") {
+			if !SliceContains(legalFormat, form) {
+				Log.Warn(fmt.Sprintf("illegal output format: %s, Please use one or more of the following formats: %s", form, strings.Join(legalFormat, ", ")))
+			}
+		}
+	}
+
+	// 一些特殊的分支, 这些分支将会直接退出程序
 	if r.Ver {
 		fmt.Println(ver)
 		return false
