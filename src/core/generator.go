@@ -1,7 +1,6 @@
 package core
 
 import (
-	"fmt"
 	. "getitle/src/pkg"
 	"sync"
 )
@@ -32,7 +31,7 @@ func (gen *IpGenerator) defaultIpGenerator(CIDR string) {
 			gen.ch <- Int2Ip(i)
 		}
 		if i%65536 == 0 {
-			Log.Logging(fmt.Sprintf("[*] Processing CIDR: %s/16", Int2Ip(i)))
+			Log.Importantf("Processing CIDR: %s/16", Int2Ip(i))
 		}
 	}
 }
@@ -57,7 +56,7 @@ func (gen *IpGenerator) IPsGenerator(ips []string) {
 		tmpalive := Opt.AliveSum
 		gen.defaultIpGenerator(cidr)
 		if getMask(cidr) != 32 {
-			Log.Logging(fmt.Sprintf("[*] Processed CIDR: %s, found %d ports", cidr, Opt.AliveSum-tmpalive))
+			Log.Importantf("Processed CIDR: %s, found %d ports", cidr, Opt.AliveSum-tmpalive)
 		}
 		Opt.File.Sync()
 	}
@@ -171,7 +170,7 @@ func (gen *targetGenerator) genFromSpray(targets interface{}, portlist []string)
 				gen.ch <- targetConfig{ip: ip, port: port, hosts: gen.hostsMap[ip]}
 			}
 		}
-		Log.Logging(fmt.Sprintf("[*] Processed Port: %s, found %d ports", port, Opt.AliveSum-tmpalive))
+		Log.Importantf("Processed Port: %s, found %d ports", port, Opt.AliveSum-tmpalive)
 	}
 }
 

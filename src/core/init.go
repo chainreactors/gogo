@@ -2,7 +2,6 @@ package core
 
 import (
 	"errors"
-	"fmt"
 	. "getitle/src/pkg"
 	. "getitle/src/scan"
 	. "getitle/src/utils"
@@ -33,10 +32,10 @@ func InitConfig(config *Config) *Config {
 		} else {
 			// linux系统判断fd限制, 如果-t 大于fd限制,则将-t 设置到fd-100
 			if fdlimit := GetFdLimit(); config.Threads > fdlimit {
-				Log.Warn(fmt.Sprintf("System fd limit: %d , Please exec 'ulimit -n 65535'", fdlimit))
-				Log.Warn(fmt.Sprintf("System fd limit: %d , Please exec 'ulimit -n 65535'", fdlimit))
-				Log.Warn(fmt.Sprintf("System fd limit: %d , Please exec 'ulimit -n 65535'", fdlimit))
-				Log.Warn(fmt.Sprintf("Now set threads to %d", fdlimit-100))
+				Log.Warnf("System fd limit: %d , Please exec 'ulimit -n 65535'", fdlimit)
+				Log.Warnf("System fd limit: %d , Please exec 'ulimit -n 65535'", fdlimit)
+				Log.Warnf("System fd limit: %d , Please exec 'ulimit -n 65535'", fdlimit)
+				Log.Warnf("Now set threads to %d", fdlimit-100)
 				config.Threads = fdlimit - 100
 			}
 		}
@@ -168,18 +167,18 @@ func validate(config *Config) error {
 func printTaskInfo(config *Config, taskname string) {
 	// 输出任务的基本信息
 
-	Log.Logging(fmt.Sprintf("[*] Current goroutines: %d, Version Level: %d,Exploit Target: %s, PortSpray Scan: %t", config.Threads, RunOpt.VersionLevel, RunOpt.Exploit, config.PortSpray))
+	Log.Importantf("Current goroutines: %d, Version Level: %d,Exploit Target: %s, PortSpray Scan: %t", config.Threads, RunOpt.VersionLevel, RunOpt.Exploit, config.PortSpray)
 	if config.JsonFile == "" {
-		Log.Logging(fmt.Sprintf("[*] Starting task %s ,total ports: %d , mod: %s", taskname, len(config.Portlist), config.Mod))
+		Log.Importantf("Starting task %s ,total ports: %d , mod: %s", taskname, len(config.Portlist), config.Mod)
 		// 输出端口信息
 		if len(config.Portlist) > 500 {
-			Log.Logging("[*] too much ports , only show top 500 ports: " + strings.Join(config.Portlist[:500], ",") + "......")
+			Log.Important("too much ports , only show top 500 ports: " + strings.Join(config.Portlist[:500], ",") + "......")
 		} else {
-			Log.Logging("[*] ports: " + strings.Join(config.Portlist, ","))
+			Log.Important("ports: " + strings.Join(config.Portlist, ","))
 		}
 	} else {
-		Log.Logging(fmt.Sprintf("[*] Starting results task: %s ,total target: %d", taskname, len(config.Results)))
-		//progressLog(fmt.Sprintf("[*] Json . task time is about %d seconds", (len(config.Results)/config.Threads)*4+4))
+		Log.Importantf("Starting results task: %s ,total target: %d", taskname, len(config.Results))
+		//progressLog(fmt.Sprintf("Json . task time is about %d seconds", (len(config.Results)/config.Threads)*4+4))
 	}
 }
 
@@ -192,7 +191,7 @@ func RunTask(config Config) {
 	case "s", "f", "ss", "sc":
 		if config.IPlist != nil {
 			for _, ip := range config.IPlist {
-				Log.Logging("[*] Spraying : " + ip)
+				Log.Important("Spraying : " + ip)
 				createSmartScan(ip, config)
 			}
 		} else {
@@ -256,7 +255,7 @@ func countip(mask int) int {
 
 //func autoScan(config Config) {
 //	for cidr, st := range InterConfig {
-//		Log.Logging("[*] Spraying : " + cidr)
+//		Log.Important("Spraying : " + cidr)
 //		createAutoTask(config, cidr, st)
 //	}
 //}

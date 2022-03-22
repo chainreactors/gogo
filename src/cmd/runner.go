@@ -55,16 +55,12 @@ type Runner struct {
 
 func (r *Runner) preInit() bool {
 	// 初始化日志工具"
-	Log = NewLogger(r.Quiet)
-	if r.Debug {
-		Opt.Debug = true
-		RunOpt.Debug = true
-	}
+	Log = NewLogger(r.Quiet, r.Debug)
 	legalFormat := []string{"url", "ip", "port", "frameworks", "framework", "vuln", "vulns", "protocol", "title", "target", "hash", "language", "host", "color", "c", "json", "j", "full", "jsonlines", "jl"}
 	if r.FileOutput != "default" {
 		for _, form := range strings.Split(r.FileOutput, ",") {
 			if !SliceContains(legalFormat, form) {
-				Log.Warn(fmt.Sprintf("illegal file output format: %s, Please use one or more of the following formats: %s", form, strings.Join(legalFormat, ", ")))
+				Log.Warnf("illegal file output format: %s, Please use one or more of the following formats: %s", form, strings.Join(legalFormat, ", "))
 			}
 		}
 	}
@@ -72,7 +68,7 @@ func (r *Runner) preInit() bool {
 	if Opt.Output != "full" {
 		for _, form := range strings.Split(Opt.Output, ",") {
 			if !SliceContains(legalFormat, form) {
-				Log.Warn(fmt.Sprintf("illegal output format: %s, Please use one or more of the following formats: %s", form, strings.Join(legalFormat, ", ")))
+				Log.Warnf("illegal output format: %s, Please use one or more of the following formats: %s", form, strings.Join(legalFormat, ", "))
 			}
 		}
 	}
@@ -229,7 +225,7 @@ func (r *Runner) runWithCMD() {
 func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) {
 	if workflows := workflowMap.Choice(r.WorkFlowName); len(workflows) > 0 {
 		for _, workflow := range workflows {
-			Log.Logging("\n[*] workflow " + workflow.Name + " starting")
+			Log.Important("\nworkflow " + workflow.Name + " starting")
 			// 文件名要在config初始化之前操作
 			if r.config.Filename != "" {
 				workflow.File = r.config.Filename
@@ -316,7 +312,7 @@ func (r *Runner) close(config *Config) {
 	}
 
 	// 任务统计
-	Log.Important(fmt.Sprintf("Alive sum: %d, Target sum : %d", Opt.AliveSum, RunOpt.Sum))
+	Log.Importantf("Alive sum: %d, Target sum : %d", Opt.AliveSum, RunOpt.Sum)
 	Log.Important("Totally run: " + time.Since(r.start).String())
 
 	var filenamelog string

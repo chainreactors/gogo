@@ -13,7 +13,6 @@ type RunnerOpts struct {
 	HttpsDelay   int
 	Payloadstr   string
 	Interface    *net.Interface
-	Debug        bool
 }
 
 var RunOpt = RunnerOpts{

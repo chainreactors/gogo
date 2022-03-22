@@ -6,7 +6,6 @@ type Options struct {
 	AliveSum    int
 	Noscan      bool
 	Compress    bool
-	Debug       bool
 	File        *File
 	SmartFile   *File
 	ExtractFile *File

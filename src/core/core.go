@@ -43,7 +43,7 @@ var portstat = map[int]string{
 //直接扫描
 func DefaultMod(targets interface{}, config Config) {
 	// 输出预估时间
-	Log.Logging(fmt.Sprintf("[*] Scan task time is about %d seconds", guessTime(targets, len(config.Portlist), config.Threads)))
+	Log.Importantf("Scan task time is about %d seconds", guessTime(targets, len(config.Portlist), config.Threads))
 	var wgs sync.WaitGroup
 	targetGen := NewTargetGenerator(config)
 	targetCh := targetGen.generator(targets, config.Portlist)
@@ -78,18 +78,18 @@ func defaultScan(tc targetConfig) {
 				Opt.extractCh <- result.Extracts.ToResult()
 			}
 		}
-	} else if Opt.Debug && (result.ErrStat != 0 || result.Error != "") {
-		fmt.Printf("[debug] %s stat: %s, errmsg: %s\n", result.GetTarget(), portstat[result.ErrStat], result.Error)
+	} else if result.ErrStat != 0 || result.Error != "" {
+		Log.Debugf("%s stat: %s, errmsg: %s", result.GetTarget(), portstat[result.ErrStat], result.Error)
 	}
 }
 
 func SmartMod(target string, config Config) {
 	// 输出预估时间
 	spended := guessSmarttime(target, config)
-	Log.Logging(fmt.Sprintf("[*] Spraying B class IP: %s, Estimated to take %d seconds", target, spended))
+	Log.Importantf("Spraying B class IP: %s, Estimated to take %d seconds", target, spended)
 
 	// 初始化ip目标
-	Log.Logging(fmt.Sprintf("[*] SmartScan %s, Mod: %s", target, config.Mod))
+	Log.Importantf("SmartScan %s, Mod: %s", target, config.Mod)
 	// 初始化mask
 	var mask int
 	switch config.Mod {
@@ -106,11 +106,11 @@ func SmartMod(target string, config Config) {
 	temp := targetGen.ipGenerator.alivedMap
 
 	// 输出启发式扫描探针
-	probeconfig := fmt.Sprintf("[*] Smart probe ports: %s , ", strings.Join(config.SmartPortList, ","))
+	probeconfig := fmt.Sprintf("Smart probe ports: %s , ", strings.Join(config.SmartPortList, ","))
 	if config.IsASmart() {
 		probeconfig += "Smart IP probe: " + config.IpProbe
 	}
-	Log.Logging(probeconfig)
+	Log.Important(probeconfig)
 
 	tcChannel := targetGen.smartGenerator(target, config.SmartPortList, config.Mod)
 
@@ -171,7 +171,7 @@ func cidr_alived(ip string, temp *sync.Map, mask int, mod string) {
 	if !ok {
 		temp.Store(alivecidr, 1)
 		cidr := fmt.Sprintf("%s/%d", ip, mask)
-		Log.Logging("[+] Found " + cidr)
+		Log.Important("[+] Found " + cidr)
 		Opt.AliveSum++
 		//if Opt.File != nil {
 		//	// 只有-no 或 -m sc下,才会将网段信息输出到文件.
@@ -188,8 +188,8 @@ func smartScan(tc targetConfig, temp *sync.Map, mask int, mod string) {
 
 	if result.Open {
 		cidr_alived(result.Ip, temp, mask, mod)
-	} else if Opt.Debug {
-		fmt.Printf("[debug] tcp stat: %s, errmsg: %s\n", portstat[result.ErrStat], result.Error)
+	} else {
+		Log.Debugf("tcp stat: %s, errmsg: %s", portstat[result.ErrStat], result.Error)
 	}
 }
 
@@ -199,7 +199,7 @@ func declineScan(iplist []string, config Config) {
 		// 如果port数量为1, 直接扫描的耗时小于启发式
 		// 如果port数量为2, 直接扫描的耗时约等于启发式扫描
 		// 因此, 如果post数量小于2, 则直接使用defaultScan
-		Log.Logging("[*] port count less than 3, skipped smart scan.")
+		Log.Important("port count less than 3, skipped smart scan.")
 
 		if config.HasAlivedScan() {
 			AliveMod(iplist, config)
@@ -208,12 +208,12 @@ func declineScan(iplist []string, config Config) {
 		}
 	} else {
 		spended := guessSmarttime(iplist[0], config)
-		Log.Logging(fmt.Sprintf("[*] Every Sub smartscan task time is about %d seconds, total found %d B Class CIDRs about %d s", spended, len(iplist), spended*len(iplist)))
+		Log.Importantf("Every Sub smartscan task time is about %d seconds, total found %d B Class CIDRs about %d s", spended, len(iplist), spended*len(iplist))
 
 		for _, ip := range iplist {
 			tmpalive := Opt.AliveSum
 			SmartMod(ip, config)
-			Log.Logging(fmt.Sprintf("[*] Found %d assets from CIDR %s", Opt.AliveSum-tmpalive, ip))
+			Log.Importantf("Found %d assets from CIDR %s", Opt.AliveSum-tmpalive, ip)
 			Opt.File.Sync()
 		}
 	}
@@ -228,8 +228,8 @@ func AliveMod(targets interface{}, config Config) {
 	}
 
 	var wgs sync.WaitGroup
-	Log.Logging(fmt.Sprintf("[*] Alived spray task time is about %d seconds",
-		guessTime(targets, len(config.AliveSprayMod), config.Threads)))
+	Log.Importantf("Alived spray task time is about %d seconds",
+		guessTime(targets, len(config.AliveSprayMod), config.Threads))
 	targetGen := NewTargetGenerator(config)
 	alivedmap := targetGen.ipGenerator.alivedMap
 	targetCh := targetGen.generator(targets, config.AliveSprayMod)
@@ -254,10 +254,10 @@ func AliveMod(targets interface{}, config Config) {
 	})
 
 	if len(iplist) == 0 {
-		Log.Logging(fmt.Sprintf("[*] not found any alived ip"))
+		Log.Important("not found any alived ip")
 		return
 	}
-	Log.Logging(fmt.Sprintf("[*] found %d alived ips", len(iplist)))
+	Log.Importantf("found %d alived ips", len(iplist))
 	if Opt.AliveFile != nil {
 		writePingResult(iplist)
 	}

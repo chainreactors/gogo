@@ -78,7 +78,7 @@ func FormatOutput(filename string, outputfile string, autofile bool, filters []s
 		}
 	case []*Extracts:
 		extractsdata = data.([]*Extracts)
-		//ConsoleLog("[*] parser extracts successfully")
+		//ConsoleLog("parser extracts successfully")
 	case []byte:
 		textdata = string(data.([]byte))
 	default:
@@ -91,7 +91,7 @@ func FormatOutput(filename string, outputfile string, autofile bool, filters []s
 		if err != nil {
 			Fatal("" + err.Error())
 		}
-		fmt.Println("[*] Output filename: " + outputfile)
+		fmt.Println("Output filename: " + outputfile)
 		defer fileHandle.Close()
 		outfunc = func(s string) {
 			fileHandle.Write(s)
