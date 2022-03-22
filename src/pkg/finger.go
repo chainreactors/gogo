@@ -72,6 +72,17 @@ func (fm FingerMapper) GetFingers(port string) []*Finger {
 	return fm[port]
 }
 
+type Fingers []*Finger
+
+func (fs Fingers) Contain(f *Finger) bool {
+	for _, finger := range fs {
+		if f == finger {
+			return true
+		}
+	}
+	return false
+}
+
 func (fm FingerMapper) GetOthersFingers(port string) []*Finger {
 	var tmpfingers []*Finger
 	for _, fingers := range fm {
