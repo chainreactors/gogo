@@ -8,15 +8,17 @@ import (
 
 var Log *Logger
 
-func NewLogger(quiet bool) *Logger {
+func NewLogger(quiet, debug bool) *Logger {
 	return &Logger{
-		Quiet: quiet,
+		Quiet:   quiet,
+		IsDebug: debug,
 	}
 }
 
 type Logger struct {
 	Quiet   bool
 	Clean   bool
+	IsDebug bool
 	LogCh   chan string
 	LogFile *File
 }
@@ -41,8 +43,8 @@ func (log *Logger) InitFile() {
 	log.LogCh = make(chan string, 100)
 }
 
-func (log *Logger) Logging(s string) {
-	s = fmt.Sprintf("%s , %s\n", s, GetCurtime())
+func (log *Logger) Important(s string) {
+	s = fmt.Sprintf("[*] %s , %s\n", s, GetCurtime())
 	if !log.Quiet {
 		fmt.Print(s)
 	}
@@ -51,9 +53,13 @@ func (log *Logger) Logging(s string) {
 	}
 }
 
-func (log *Logger) Important(s string) {
+func (log *Logger) Importantf(format string, s ...interface{}) {
+	line := fmt.Sprintf("[*] "+format+", "+GetCurtime()+"\n", s...)
 	if !log.Quiet {
-		fmt.Println("[*] " + s)
+		fmt.Print(line)
+	}
+	if log.LogFile != nil {
+		log.LogCh <- line
 	}
 }
 
@@ -69,9 +75,33 @@ func (log *Logger) Error(s string) {
 	}
 }
 
+func (log *Logger) Errorf(format string, s ...interface{}) {
+	if !log.Quiet {
+		fmt.Printf("[-] "+format+"\n", s...)
+	}
+}
+
 func (log *Logger) Warn(s string) {
 	if !log.Quiet {
 		fmt.Println("[warn] " + s)
+	}
+}
+
+func (log *Logger) Warnf(format string, s ...interface{}) {
+	if !log.Quiet {
+		fmt.Printf("[warn] "+format+"\n", s...)
+	}
+}
+
+func (log *Logger) Debug(s string) {
+	if log.IsDebug {
+		fmt.Println("[debug] " + s)
+	}
+}
+
+func (log *Logger) Debugf(format string, s ...interface{}) {
+	if log.IsDebug {
+		fmt.Printf("[debug] "+format+"\n", s...)
 	}
 }
 

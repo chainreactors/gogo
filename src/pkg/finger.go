@@ -2,7 +2,6 @@ package pkg
 
 import (
 	b64 "encoding/base64"
-	"getitle/src/utils"
 )
 
 // common struct
@@ -72,23 +71,34 @@ func (fm FingerMapper) GetFingers(port string) []*Finger {
 	return fm[port]
 }
 
-func (fm FingerMapper) GetOthersFingers(port string) []*Finger {
-	var tmpfingers []*Finger
-	for _, fingers := range fm {
-		for _, finger := range fingers {
-			if utils.SliceContains(finger.Defaultport, port) {
-				continue
-			}
-			isrepeat := false
-			for _, tmpfinger := range tmpfingers {
-				if finger == tmpfinger {
-					isrepeat = true
-				}
-			}
-			if !isrepeat {
-				tmpfingers = append(tmpfingers, finger)
-			}
+type Fingers []*Finger
+
+func (fs Fingers) Contain(f *Finger) bool {
+	for _, finger := range fs {
+		if f == finger {
+			return true
 		}
 	}
-	return tmpfingers
+	return false
 }
+
+//func (fm FingerMapper) GetOthersFingers(port string) []*Finger {
+//	var tmpfingers []*Finger
+//	for _, fingers := range fm {
+//		for _, finger := range fingers {
+//			if utils.SliceContains(finger.Defaultport, port) {
+//				continue
+//			}
+//			isrepeat := false
+//			for _, tmpfinger := range tmpfingers {
+//				if finger == tmpfinger {
+//					isrepeat = true
+//				}
+//			}
+//			if !isrepeat {
+//				tmpfingers = append(tmpfingers, finger)
+//			}
+//		}
+//	}
+//	return tmpfingers
+//}

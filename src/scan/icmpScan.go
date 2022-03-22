@@ -6,7 +6,6 @@ package scan
 //Github: https://github.com/k8gege/LadonGo
 
 import (
-	"fmt"
 	"getitle/src/pkg"
 	"net"
 	"time"
@@ -42,7 +41,7 @@ func icmpScan(result *pkg.Result) {
 	check := checkSum(msg[0:length])
 	msg[2] = byte(check >> 8)
 	msg[3] = byte(check & 255)
-
+	pkg.Log.Debug("request icmp " + result.GetTarget())
 	_, err = conn.Write(msg[0:length])
 	if err != nil {
 		result.Error = err.Error()
@@ -58,9 +57,7 @@ func icmpScan(result *pkg.Result) {
 		return
 	}
 
-	if RunOpt.Debug {
-		fmt.Println(fmt.Sprintf("[debug] %q", receive[:n]))
-	}
+	pkg.Log.Debugf("[debug] %q", receive[:n])
 
 	if receive[ECHO_REPLY_HEAD_LEN+4] != msg[4] || receive[ECHO_REPLY_HEAD_LEN+5] != msg[5] || receive[ECHO_REPLY_HEAD_LEN+6] != msg[6] || receive[ECHO_REPLY_HEAD_LEN+7] != msg[7] || receive[ECHO_REPLY_HEAD_LEN] == 11 {
 		return

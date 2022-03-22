@@ -104,7 +104,7 @@ func GetHeaderstr(resp *http.Response) string {
 func CompileRegexp(s string) *regexp.Regexp {
 	reg, err := regexp.Compile(s)
 	if err != nil {
-		Fatal(fmt.Sprintf("[-] regexp string error: %s, %s", s, err.Error()))
+		Fatal(fmt.Sprintf("regexp string error: %s, %s", s, err.Error()))
 	}
 	return reg
 }

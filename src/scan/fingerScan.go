@@ -26,6 +26,7 @@ func httpFingerMatch(result *pkg.Result, finger *pkg.Finger) *pkg.Framework {
 	//var cookies map[string]string
 	if RunOpt.VersionLevel >= 1 && finger.SendDataStr != "" {
 		// 如果level大于1,并且存在主动发包, 则重新获取resp与content
+		pkg.Log.Debugf("request finger %s for %s", result.GetURL()+finger.SendDataStr, finger.Name)
 		conn := pkg.HttpConn(RunOpt.Delay)
 		tmpresp, err := conn.Get(result.GetURL() + finger.SendDataStr)
 		if err == nil {
@@ -67,8 +68,10 @@ func httpFingerMatch(result *pkg.Result, finger *pkg.Finger) *pkg.Framework {
 func getFramework(result *pkg.Result, fingermap pkg.FingerMapper, matcher func(*pkg.Result, *pkg.Finger) *pkg.Framework) pkg.Frameworks {
 	// 优先匹配默认端口,第一次循环只匹配默认端口
 	var fs pkg.Frameworks
+	var alreadyFrameworks pkg.Fingers
 	for _, finger := range fingermap.GetFingers(result.Port) {
 		framework := matcher(result, finger)
+		alreadyFrameworks = append(alreadyFrameworks, finger)
 		if framework != nil {
 			fs = append(fs, framework)
 			if result.Protocol == "tcp" {
@@ -85,6 +88,11 @@ func getFramework(result *pkg.Result, fingermap pkg.FingerMapper, matcher func(*
 			continue
 		}
 		for _, finger := range fingers {
+			if alreadyFrameworks.Contain(finger) {
+				continue
+			} else {
+				alreadyFrameworks = append(alreadyFrameworks, finger)
+			}
 			framework := matcher(result, finger)
 			if framework != nil {
 				fs = append(fs, framework)
@@ -104,6 +112,7 @@ func tcpFingerMatch(result *pkg.Result, finger *pkg.Finger) *pkg.Framework {
 
 	// 某些规则需要主动发送一个数据包探测
 	if finger.SendDataStr != "" && RunOpt.VersionLevel >= finger.Level {
+		pkg.Log.Debugf("request finger %s for %s", result.GetTarget(), finger.Name)
 		var conn net.Conn
 		conn, err = pkg.TcpSocketConn(result.GetTarget(), 2)
 		if err != nil {

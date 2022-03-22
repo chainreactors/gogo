@@ -26,6 +26,7 @@ func arpScan(result *pkg.Result) {
 	}
 
 	// Request hardware address for IP address
+	pkg.Log.Debug("request arp " + result.GetTarget())
 	mac, err := c.Resolve(net.ParseIP(result.Ip))
 	if err != nil {
 		result.Error = err.Error()

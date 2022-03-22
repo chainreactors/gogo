@@ -1,6 +1,7 @@
 package scan
 
 import (
+	"fmt"
 	"getitle/src/pkg"
 	"net/http"
 	"strings"
@@ -52,8 +53,8 @@ func socketHttp(target string, result *pkg.Result) {
 	result.HttpStat = "tcp"
 
 	//发送内容
-	senddata := []byte("GET / HTTP/1.1\r\nHost: " + target + "\r\nConnection: Keep-Alive\r\n\r\n")
-	data, err := pkg.SocketSend(conn, senddata, 4096)
+	senddataStr := fmt.Sprintf("GET /%s HTTP/1.1\r\nHost: %s\r\nConnection: Keep-Alive\r\n\r\n", result.Uri, target)
+	data, err := pkg.SocketSend(conn, []byte(senddataStr), 4096)
 	if err != nil {
 		result.Error = err.Error()
 	}
@@ -82,6 +83,9 @@ func SystemHttp(target string, result *pkg.Result) {
 		target = "http://" + target
 	}
 
+	if RunOpt.SuffixStr != "" {
+		target += "/" + RunOpt.SuffixStr
+	}
 	//如果是https或者30x跳转,则增加超时时间
 	if ishttps || strings.HasPrefix(result.HttpStat, "3") {
 		delay = RunOpt.Delay + RunOpt.HttpsDelay
@@ -89,6 +93,7 @@ func SystemHttp(target string, result *pkg.Result) {
 	conn = pkg.HttpConn(delay)
 	req, _ := http.NewRequest("GET", target, nil)
 	req.Header = headers
+	pkg.Log.Debug("request http " + target)
 	resp, err := conn.Do(req)
 	if resp != nil && resp.TLS != nil {
 		// 证书在错误处理之前, 因为有可能存在证书,但是服务已关闭

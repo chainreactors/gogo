@@ -5,12 +5,12 @@ import (
 	"strconv"
 )
 
-func payloadScan(result *pkg.Result) {
-	url := result.GetURL()
-	//println(url+Payloadstr)
-	result.Uri = RunOpt.Payloadstr
+func suffixScan(result *pkg.Result) {
+	url := result.GetBaseURL()
+	//println(url+SuffixStr)
+	result.Uri = RunOpt.SuffixStr
 	conn := pkg.HttpConn(RunOpt.Delay)
-	resp, err := conn.Get(url + RunOpt.Payloadstr)
+	resp, err := conn.Get(url + RunOpt.SuffixStr)
 	if err != nil {
 		result.Error = err.Error()
 		return

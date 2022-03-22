@@ -61,7 +61,7 @@ func CMD() {
 	flag.StringVar(&runner.iface, "iface", "eth0", "")
 	flag.IntVar(&RunOpt.Delay, "d", 2, "")
 	flag.IntVar(&RunOpt.HttpsDelay, "D", 2, "")
-	flag.StringVar(&RunOpt.Payloadstr, "suffix", "", "")
+	flag.StringVar(&RunOpt.SuffixStr, "suffix", "", "")
 	flag.Var(&runner.payloads, "payload", "")
 	flag.Var(&runner.extract, "extract", "")
 	flag.StringVar(&runner.extracts, "extracts", "", "")
