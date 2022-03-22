@@ -6,7 +6,6 @@ import (
 	"getitle/src/utils"
 	"net"
 	"net/http"
-	"path"
 	"strconv"
 	"strings"
 )
@@ -179,7 +178,7 @@ func (result Result) GetBaseURL() string {
 
 func (result Result) GetURL() string {
 	if result.IsHttp() {
-		return path.Join(fmt.Sprintf("%s://%s:%s", result.Protocol, result.Ip, result.Port), result.Uri)
+		return fmt.Sprintf("%s://%s:%s%s", result.Protocol, result.Ip, result.Port, result.Uri)
 	} else {
 		return result.GetBaseURL()
 	}

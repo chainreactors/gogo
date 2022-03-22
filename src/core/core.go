@@ -24,7 +24,10 @@ func (tc *targetConfig) NewResult() *Result {
 	if tc.fingers != nil {
 		result.Frameworks = tc.fingers
 	}
-	result.Uri = scan.RunOpt.SuffixStr
+
+	if scan.RunOpt.SuffixStr != "" && !strings.HasPrefix(scan.RunOpt.SuffixStr, "/") {
+		result.Uri = "/" + scan.RunOpt.SuffixStr
+	}
 	return result
 }
 

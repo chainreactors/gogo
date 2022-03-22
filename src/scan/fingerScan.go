@@ -26,13 +26,15 @@ func httpFingerMatch(result *pkg.Result, finger *pkg.Finger) *pkg.Framework {
 	//var cookies map[string]string
 	if RunOpt.VersionLevel >= 1 && finger.SendDataStr != "" {
 		// 如果level大于1,并且存在主动发包, 则重新获取resp与content
-		pkg.Log.Debugf("request finger %s for %s", result.GetURL()+finger.SendDataStr, finger.Name)
 		conn := pkg.HttpConn(RunOpt.Delay)
 		tmpresp, err := conn.Get(result.GetURL() + finger.SendDataStr)
 		if err == nil {
+			pkg.Log.Debugf("request finger %s %d for %s", result.GetURL()+finger.SendDataStr, tmpresp.StatusCode, finger.Name)
 			resp = tmpresp
 			content, body = pkg.GetHttpRaw(resp)
 			rerequest = true
+		} else {
+			pkg.Log.Debugf("request finger %s %s for %s", result.GetURL()+finger.SendDataStr, err.Error(), finger.Name)
 		}
 	}
 
