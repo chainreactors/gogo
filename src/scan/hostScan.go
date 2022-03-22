@@ -7,7 +7,7 @@ import (
 )
 
 func hostScan(result *pkg.Result) {
-	url := result.GetURL()
+	url := result.GetBaseURL()
 	conn := pkg.HttpConn(RunOpt.Delay)
 	req, _ := http.NewRequest("GET", url, nil)
 	vuln := &pkg.Vuln{Name: "host", Detail: map[string]interface{}{}, Severity: "info"}

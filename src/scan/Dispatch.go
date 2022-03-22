@@ -11,7 +11,7 @@ type RunnerOpts struct {
 	VersionLevel int
 	Delay        int
 	HttpsDelay   int
-	Payloadstr   string
+	SuffixStr    string
 	Interface    *net.Interface
 }
 
@@ -64,11 +64,11 @@ func Dispatch(result *pkg.Result) {
 	fingerScan(result)
 
 	// 指定payload扫描
-	if result.IsHttp() && RunOpt.Payloadstr != "" {
-		// 根据指定的payload进行探测, 探测完后即结束
-		payloadScan(result)
-		return
-	}
+	//	根据指定的payload进行探测, 探测完后即结束
+	//if result.IsHttp() && RunOpt.SuffixStr != "" {
+	//suffixScan(result)
+	//return
+	//}
 
 	//主动信息收集
 	if RunOpt.VersionLevel > 0 && result.IsHttp() {
@@ -106,7 +106,7 @@ func ExploitDispatch(result *pkg.Result) {
 	}
 
 	if (!result.NoFramework() || RunOpt.Exploit != "auto") && result.IsHttp() {
-		Nuclei(result.GetURL(), result)
+		Nuclei(result.GetBaseURL(), result)
 	}
 
 	return

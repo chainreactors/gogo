@@ -6,6 +6,7 @@ import (
 	"getitle/src/utils"
 	"net"
 	"net/http"
+	"path"
 	"strconv"
 	"strings"
 )
@@ -18,6 +19,7 @@ type Result struct {
 	Host         string         `json:"h"` // host
 	HttpHost     []string       `json:"-"`
 	Title        string         `json:"t"` // title
+	Path         string         `json:"path"`
 	Midware      string         `json:"m"` // midware
 	HttpStat     string         `json:"s"` // http_stat
 	Language     string         `json:"l"` // language
@@ -141,7 +143,7 @@ func (result Result) Get(key string) string {
 	case "target":
 		return result.GetTarget()
 	case "url":
-		return result.GetURL()
+		return result.GetBaseURL()
 	case "midware":
 		return result.Midware
 	case "hash":
@@ -171,8 +173,16 @@ func (result *Result) errHandler() {
 	}
 }
 
-func (result Result) GetURL() string {
+func (result Result) GetBaseURL() string {
 	return fmt.Sprintf("%s://%s:%s", result.Protocol, result.Ip, result.Port)
+}
+
+func (result Result) GetURL() string {
+	if result.IsHttp() {
+		return path.Join(fmt.Sprintf("%s://%s:%s", result.Protocol, result.Ip, result.Port), result.Uri)
+	} else {
+		return result.GetBaseURL()
+	}
 }
 
 func (result Result) GetTarget() string {
