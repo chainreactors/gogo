@@ -89,6 +89,7 @@ func SystemHttp(target string, result *pkg.Result) {
 	conn = pkg.HttpConn(delay)
 	req, _ := http.NewRequest("GET", target, nil)
 	req.Header = headers
+	pkg.Log.Debug("request http " + result.GetURL())
 	resp, err := conn.Do(req)
 	if resp != nil && resp.TLS != nil {
 		// 证书在错误处理之前, 因为有可能存在证书,但是服务已关闭

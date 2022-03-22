@@ -17,6 +17,7 @@ func shiroScan(result *pkg.Result) {
 		result.Error = err.Error()
 		return
 	}
+	pkg.Log.Debug("request shiro " + result.GetURL())
 	deleteme := resp.Header.Get("Set-Cookie")
 	if strings.Contains(deleteme, "=deleteMe") {
 		result.AddFramework(&pkg.Framework{Name: "shiro"})
@@ -25,6 +26,7 @@ func shiroScan(result *pkg.Result) {
 		return
 	}
 	req = setshirocookie(target, "/A29uyYfZg4mT+SUU/3eMAnRlgBWnVrveeiwZ/hz1LlF86NxSmq9dsWpS0U7Q2U+MjbAzaLBCsV7IHb7MQVFItU+ibEkDuyO7WoNGBM4ay8l+oBZo2W2mZcFXG3swJsGXxaZHua3m5jlJNKcCjqy9sX2oRZrm7eSABvUn71vY9NaohbC1i6+FKCRMW9s11/Q")
+	pkg.Log.Debug("request shiro default key " + result.GetURL())
 	resp, err = conn.Do(req)
 	if err != nil {
 		result.Error = err.Error()

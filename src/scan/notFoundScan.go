@@ -7,6 +7,7 @@ import (
 
 func NotFoundScan(result *pkg.Result) {
 	conn := pkg.HttpConn(RunOpt.Delay)
+	pkg.Log.Debug("request 404page " + result.GetURL() + pkg.RandomDir)
 	resp, err := conn.Get(result.GetURL() + pkg.RandomDir)
 	if err != nil || utils.ToString(resp.StatusCode) == result.HttpStat {
 		return

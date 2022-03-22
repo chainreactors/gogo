@@ -26,6 +26,7 @@ func httpFingerMatch(result *pkg.Result, finger *pkg.Finger) *pkg.Framework {
 	//var cookies map[string]string
 	if RunOpt.VersionLevel >= 1 && finger.SendDataStr != "" {
 		// 如果level大于1,并且存在主动发包, 则重新获取resp与content
+		pkg.Log.Debugf("request finger %s for %s", result.GetURL()+finger.SendDataStr, finger.Name)
 		conn := pkg.HttpConn(RunOpt.Delay)
 		tmpresp, err := conn.Get(result.GetURL() + finger.SendDataStr)
 		if err == nil {
@@ -111,6 +112,7 @@ func tcpFingerMatch(result *pkg.Result, finger *pkg.Finger) *pkg.Framework {
 
 	// 某些规则需要主动发送一个数据包探测
 	if finger.SendDataStr != "" && RunOpt.VersionLevel >= finger.Level {
+		pkg.Log.Debugf("request finger %s for %s", result.GetTarget(), finger.Name)
 		var conn net.Conn
 		conn, err = pkg.TcpSocketConn(result.GetTarget(), 2)
 		if err != nil {

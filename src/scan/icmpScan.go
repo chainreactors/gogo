@@ -41,7 +41,7 @@ func icmpScan(result *pkg.Result) {
 	check := checkSum(msg[0:length])
 	msg[2] = byte(check >> 8)
 	msg[3] = byte(check & 255)
-
+	pkg.Log.Debug("request icmp " + result.GetTarget())
 	_, err = conn.Write(msg[0:length])
 	if err != nil {
 		result.Error = err.Error()
