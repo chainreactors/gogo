@@ -175,7 +175,7 @@ func cidr_alived(ip string, temp *sync.Map, mask int, mod string) {
 	if !ok {
 		temp.Store(alivecidr, 1)
 		cidr := fmt.Sprintf("%s/%d", ip, mask)
-		Log.Important("[+] Found " + cidr)
+		Log.Important("Found " + cidr)
 		Opt.AliveSum++
 		//if Opt.File != nil {
 		//	// 只有-no 或 -m sc下,才会将网段信息输出到文件.
