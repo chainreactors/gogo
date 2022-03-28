@@ -81,24 +81,3 @@ func (fs Fingers) Contain(f *Finger) bool {
 	}
 	return false
 }
-
-//func (fm FingerMapper) GetOthersFingers(port string) []*Finger {
-//	var tmpfingers []*Finger
-//	for _, fingers := range fm {
-//		for _, finger := range fingers {
-//			if utils.SliceContains(finger.Defaultport, port) {
-//				continue
-//			}
-//			isrepeat := false
-//			for _, tmpfinger := range tmpfingers {
-//				if finger == tmpfinger {
-//					isrepeat = true
-//				}
-//			}
-//			if !isrepeat {
-//				tmpfingers = append(tmpfingers, finger)
-//			}
-//		}
-//	}
-//	return tmpfingers
-//}
