@@ -85,14 +85,12 @@ func LoadFinger(t string) fingers.Fingers {
 }
 
 func LoadHashFinger() (map[string]string, map[string]string) {
-	var mmh3fingers, md5fingers map[string]string
-	var err error
-	err = json.Unmarshal(LoadConfig("mmh3"), &mmh3fingers)
+	mmh3fingers, err := fingers.LoadHashMapFingers(LoadConfig("mmh3"))
 	if err != nil {
 		Fatal("mmh3 load FAIL" + err.Error())
 	}
 
-	err = json.Unmarshal(LoadConfig("md5"), &md5fingers)
+	md5fingers, err := fingers.LoadHashMapFingers(LoadConfig("md5"))
 	if err != nil {
 		Fatal("md5 load FAIL" + err.Error())
 	}
