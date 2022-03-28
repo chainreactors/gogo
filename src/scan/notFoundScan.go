@@ -1,6 +1,7 @@
 package scan
 
 import (
+	"getitle/src/fingers"
 	"getitle/src/pkg"
 	"getitle/src/utils"
 )
@@ -24,7 +25,7 @@ func NotFoundScan(result *pkg.Result) {
 	}
 
 	for _, finger := range pkg.AllFingers {
-		framework, _, ok := fingerMatcher(finger, content)
+		framework, _, ok := fingers.FingerMatcher(finger, content)
 		if ok {
 			framework.Version = "404"
 			result.AddFramework(framework)

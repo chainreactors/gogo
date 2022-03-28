@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"getitle/src/fingers"
 	"getitle/src/utils"
 	"net/http"
 	"strings"
@@ -20,7 +21,7 @@ func CollectSocketInfo(result *Result, socketContent []byte) {
 
 		result.HttpStat = statuscode
 		result.Protocol = "http"
-		result.Hash = Md5Hash([]byte(strings.TrimSpace(body)))[:4] // 因为头中经常有随机值, 因此hash通过body判断
+		result.Hash = fingers.Md5Hash([]byte(strings.TrimSpace(body)))[:4] // 因为头中经常有随机值, 因此hash通过body判断
 		result.Title = GetTitle(content)
 		result.Language = getSocketLanguage(content)
 		result.Midware, _ = CompiledMatch(CommonCompiled["server"], content)
@@ -37,7 +38,7 @@ func CollectHttpInfo(result *Result, resp *http.Response, content, body string) 
 	result.Language = getHttpLanguage(resp)
 	result.Midware = resp.Header.Get("Server")
 	result.Title = GetTitle(content)
-	result.Hash = Md5Hash([]byte(strings.TrimSpace(body)))[:4] // 因为头中经常有随机值, 因此hash通过body判断
+	result.Hash = fingers.Md5Hash([]byte(strings.TrimSpace(body)))[:4] // 因为头中经常有随机值, 因此hash通过body判断
 	result.AddExtracts(ExtractContent(content))
 }
 

@@ -1,6 +1,7 @@
 package scan
 
 import (
+	"getitle/src/fingers"
 	"github.com/alouca/gosnmp"
 	"strings"
 
@@ -26,7 +27,7 @@ func snmpScan(result *pkg.Result) {
 	result.Protocol = "snmp"
 	result.HttpStat = "snmp"
 	if len(resp.Variables) > 0 {
-		result.AddVuln(&pkg.Vuln{Name: "snmp_default_auth", Payload: map[string]interface{}{"auth": "public"}})
+		result.AddVuln(&fingers.Vuln{Name: "snmp_default_auth", Payload: map[string]interface{}{"auth": "public"}})
 		result.Title = strings.Split(resp.Variables[0].Value.(string), "#")[0]
 	}
 }

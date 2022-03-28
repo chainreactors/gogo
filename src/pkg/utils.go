@@ -3,11 +3,8 @@ package pkg
 import (
 	"bytes"
 	"compress/flate"
-	"crypto/md5"
 	"encoding/base64"
-	"encoding/hex"
 	"fmt"
-	"github.com/twmb/murmur3"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -109,30 +106,30 @@ func CompileRegexp(s string) *regexp.Regexp {
 	return reg
 }
 
-func Md5Hash(raw []byte) string {
-	m := md5.Sum(raw)
-	return hex.EncodeToString(m[:])
-}
-
-func Mmh3Hash32(raw []byte) string {
-	var h32 = murmur3.New32()
-	_, _ = h32.Write(standBase64(raw))
-	return fmt.Sprintf("%d", h32.Sum32())
-}
-
-func standBase64(braw []byte) []byte {
-	bckd := base64.StdEncoding.EncodeToString(braw)
-	var buffer bytes.Buffer
-	for i := 0; i < len(bckd); i++ {
-		ch := bckd[i]
-		buffer.WriteByte(ch)
-		if (i+1)%76 == 0 {
-			buffer.WriteByte('\n')
-		}
-	}
-	buffer.WriteByte('\n')
-	return buffer.Bytes()
-}
+//func Md5Hash(raw []byte) string {
+//	m := md5.Sum(raw)
+//	return hex.EncodeToString(m[:])
+//}
+//
+//func Mmh3Hash32(raw []byte) string {
+//	var h32 = murmur3.New32()
+//	_, _ = h32.Write(standBase64(raw))
+//	return fmt.Sprintf("%d", h32.Sum32())
+//}
+//
+//func standBase64(braw []byte) []byte {
+//	bckd := base64.StdEncoding.EncodeToString(braw)
+//	var buffer bytes.Buffer
+//	for i := 0; i < len(bckd); i++ {
+//		ch := bckd[i]
+//		buffer.WriteByte(ch)
+//		if (i+1)%76 == 0 {
+//			buffer.WriteByte('\n')
+//		}
+//	}
+//	buffer.WriteByte('\n')
+//	return buffer.Bytes()
+//}
 
 //var flatedict = `{"i":"`+`","p":"`+`","u":"`+`","o":"`+`","h":"`+`","t":"`+`","m":"` + `","s":"` + `","l":"` + `","f":` + `null` + `","v":` + `"r":"`
 var flatedict = `,":`
