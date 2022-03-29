@@ -18,7 +18,6 @@ var (
 	PortMap     PortMapper
 	TagMap      PortMapper
 	//WorkFlowMap    map[string][]*Workflow
-	Compiled       map[string][]*regexp.Regexp
 	CommonCompiled map[string]*regexp.Regexp
 	Extractors     = make(map[string]*regexp.Regexp)
 	Win            = utils.IsWin()

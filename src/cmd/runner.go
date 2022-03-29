@@ -367,7 +367,6 @@ func nucleiLoader(pocfile string, payloads arrayFlags) {
 }
 
 func configLoader() {
-	Compiled = make(map[string][]*regexp.Regexp)
 	TagMap, NameMap, PortMap = LoadPortConfig()
 	Mmh3Fingers, Md5Fingers = LoadHashFinger()
 	AllFingers = LoadFinger("http")
