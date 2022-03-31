@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"getitle/src/fingers"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -327,7 +328,7 @@ func LoadResultFile(file *os.File) interface{} {
 					result.HttpHost = []string{host}
 				}
 				if len(targetpair) == 3 {
-					result.AddFramework(&Framework{Name: targetpair[2]})
+					result.AddFramework(&fingers.Framework{Name: targetpair[2]})
 				}
 				results = append(results, result)
 			} else {

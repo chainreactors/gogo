@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"encoding/json"
+	"getitle/src/fingers"
 	"getitle/src/utils"
 	"regexp"
 	"strings"
@@ -10,14 +11,13 @@ import (
 var (
 	Md5Fingers  map[string]string
 	Mmh3Fingers map[string]string
-	AllFingers  []*Finger
-	TcpFingers  FingerMapper
-	HttpFingers FingerMapper
+	AllFingers  fingers.Fingers
+	TcpFingers  fingers.FingerMapper
+	HttpFingers fingers.FingerMapper
 	NameMap     PortMapper
 	PortMap     PortMapper
 	TagMap      PortMapper
 	//WorkFlowMap    map[string][]*Workflow
-	Compiled       map[string][]*regexp.Regexp
 	CommonCompiled map[string]*regexp.Regexp
 	Extractors     = make(map[string]*regexp.Regexp)
 	Win            = utils.IsWin()
@@ -34,6 +34,13 @@ var PresetExtracts = map[string]*regexp.Regexp{
 	"body":     regexp.MustCompile("[\\r\\n]{4}[\\w\\W]*"),
 	"cookie":   regexp.MustCompile("(?i)Set-Cookie.*"),
 	"response": regexp.MustCompile("(?s).*"),
+}
+
+type PortMapper map[string][]string
+type PortFinger struct {
+	Name  string   `json:"name"`
+	Ports []string `json:"ports"`
+	Type  []string `json:"type"`
 }
 
 func LoadPortConfig() (PortMapper, PortMapper, PortMapper) {
@@ -62,55 +69,27 @@ func LoadPortConfig() (PortMapper, PortMapper, PortMapper) {
 }
 
 //加载指纹到全局变量
-func LoadFingers(t string) FingerMapper {
-	var tmpfingers []*Finger
-	var fingermap = make(FingerMapper)
-	// 根据权重排序在python脚本中已经实现
-
-	err := json.Unmarshal(LoadConfig(t), &tmpfingers)
+func LoadFinger(t string) fingers.Fingers {
+	fs, err := fingers.LoadFingers(LoadConfig(t))
 	if err != nil {
-		Fatal("finger load FAIL!, " + err.Error())
+		Fatal(err.Error())
 	}
-	if t == "http" {
-		AllFingers = tmpfingers
+	for _, finger := range fs {
+		err := finger.Compile(portSliceHandler)
+		if err != nil {
+			Fatal(err.Error())
+		}
 	}
-	for _, finger := range tmpfingers {
-		finger.Protocol = t
-		finger.Decode() // 防止\xff \x00编码解码影响结果
-
-		finger.Defaultport = portSliceHandler(finger.Defaultport)
-		// http默认为80
-		if len(finger.Defaultport) == 0 && finger.Protocol == "http" {
-			finger.Defaultport = []string{"80"}
-		}
-
-		// 普通指纹, 预编译
-		for _, regstr := range finger.Regexps.Regexp {
-			Compiled[finger.Name] = append(Compiled[finger.Name], CompileRegexp("(?im)"+regstr))
-		}
-		// 漏洞指纹预编译,指纹名称后接 "_vuln"
-		for _, regstr := range finger.Regexps.Vuln {
-			Compiled[finger.Name+"_vuln"] = append(Compiled[finger.Name+"_vuln"], CompileRegexp("(?im)"+regstr))
-		}
-
-		// 根据端口分类指纹
-		for _, port := range finger.Defaultport {
-			fingermap[port] = append(fingermap[port], finger)
-		}
-
-	}
-	return fingermap
+	return fs
 }
 
 func LoadHashFinger() (map[string]string, map[string]string) {
-	var mmh3fingers, md5fingers map[string]string
-	var err error
-	err = json.Unmarshal(LoadConfig("mmh3"), &mmh3fingers)
+	mmh3fingers, err := fingers.LoadHashMapFingers(LoadConfig("mmh3"))
 	if err != nil {
 		Fatal("mmh3 load FAIL" + err.Error())
 	}
 
-	err = json.Unmarshal(LoadConfig("md5"), &md5fingers)
+	md5fingers, err := fingers.LoadHashMapFingers(LoadConfig("md5"))
 	if err != nil {
 		Fatal("md5 load FAIL" + err.Error())
 	}

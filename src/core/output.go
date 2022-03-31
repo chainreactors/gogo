@@ -67,7 +67,7 @@ func FormatOutput(filename string, outputfile string, autofile bool, filters []s
 	switch data.(type) {
 	case *ResultsData:
 		resultsdata = data.(*ResultsData)
-		Log.Important(resultsdata.ToConfig())
+		fmt.Println(resultsdata.ToConfig())
 		if outputfile == "" {
 			outputfile = GetFilename(&resultsdata.Config, autofile, false, Opt.FilePath, Opt.Output)
 		}

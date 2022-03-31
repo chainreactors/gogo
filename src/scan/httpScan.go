@@ -93,9 +93,16 @@ func SystemHttp(target string, result *pkg.Result) {
 	conn = pkg.HttpConn(delay)
 	req, _ := http.NewRequest("GET", target, nil)
 	req.Header = headers
-	pkg.Log.Debug("request http " + target)
+
 	resp, err := conn.Do(req)
-	if resp != nil && resp.TLS != nil {
+	if err != nil {
+		result.Error = err.Error()
+		pkg.Log.Debugf("request %s , %s ", target, err.Error())
+		return
+	}
+	pkg.Log.Debugf("request %s , %d ", target, resp.StatusCode)
+
+	if resp.TLS != nil {
 		// 证书在错误处理之前, 因为有可能存在证书,但是服务已关闭
 		result.Protocol = "https"
 		result.Host = strings.Join(resp.TLS.PeerCertificates[0].DNSNames, ",")
@@ -104,10 +111,7 @@ func SystemHttp(target string, result *pkg.Result) {
 			result.HttpHost = pkg.FormatCertDomains(resp.TLS.PeerCertificates[0].DNSNames)
 		}
 	}
-	if err != nil {
-		result.Error = err.Error()
-		return
-	}
+
 	result.Error = ""
 	content, body := pkg.GetHttpRaw(resp)
 	pkg.CollectHttpInfo(result, resp, content, body)

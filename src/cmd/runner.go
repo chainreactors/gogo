@@ -56,7 +56,7 @@ type Runner struct {
 func (r *Runner) preInit() bool {
 	// 初始化日志工具"
 	Log = NewLogger(r.Quiet, r.Debug)
-	legalFormat := []string{"url", "ip", "port", "frameworks", "framework", "vuln", "vulns", "protocol", "title", "target", "hash", "language", "host", "color", "c", "json", "j", "full", "jsonlines", "jl"}
+	legalFormat := []string{"url", "ip", "port", "frameworks", "framework", "vuln", "vulns", "protocol", "title", "target", "hash", "language", "host", "color", "c", "json", "j", "full", "jsonlines", "jl", "zombie"}
 	if r.FileOutput != "default" {
 		for _, form := range strings.Split(r.FileOutput, ",") {
 			if !SliceContains(legalFormat, form) {
@@ -225,7 +225,7 @@ func (r *Runner) runWithCMD() {
 func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) {
 	if workflows := workflowMap.Choice(r.WorkFlowName); len(workflows) > 0 {
 		for _, workflow := range workflows {
-			Log.Important("\nworkflow " + workflow.Name + " starting")
+			Log.Important("workflow " + workflow.Name + " starting")
 			// 文件名要在config初始化之前操作
 			if r.config.Filename != "" {
 				workflow.File = r.config.Filename
@@ -367,11 +367,11 @@ func nucleiLoader(pocfile string, payloads arrayFlags) {
 }
 
 func configLoader() {
-	Compiled = make(map[string][]*regexp.Regexp)
 	TagMap, NameMap, PortMap = LoadPortConfig()
 	Mmh3Fingers, Md5Fingers = LoadHashFinger()
-	TcpFingers = LoadFingers("tcp")
-	HttpFingers = LoadFingers("http")
+	AllFingers = LoadFinger("http")
+	TcpFingers = LoadFinger("tcp").GroupByPort()
+	HttpFingers = AllFingers.GroupByPort()
 	CommonCompiled = map[string]*regexp.Regexp{
 		"title":     CompileRegexp("(?Uis)<title>(.*)</title>"),
 		"server":    CompileRegexp("(?i)Server: ([\x20-\x7e]+)"),

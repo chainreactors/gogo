@@ -3,10 +3,10 @@ package pkg
 import (
 	"encoding/json"
 	"fmt"
+	. "getitle/src/fingers"
 	"getitle/src/utils"
 	"net"
 	"net/http"
-	"path"
 	"strconv"
 	"strings"
 )
@@ -179,7 +179,7 @@ func (result Result) GetBaseURL() string {
 
 func (result Result) GetURL() string {
 	if result.IsHttp() {
-		return path.Join(fmt.Sprintf("%s://%s:%s", result.Protocol, result.Ip, result.Port), result.Uri)
+		return fmt.Sprintf("%s://%s:%s%s", result.Protocol, result.Ip, result.Port, result.Uri)
 	} else {
 		return result.GetBaseURL()
 	}
@@ -252,57 +252,57 @@ func (results Results) GetValues(key string) []string {
 	return values
 }
 
-const (
-	// info leak
-	Info int = iota + 1
-	Low
-	Medium
-	High
-	Critical
-)
+//const (
+//	// info leak
+//	Info int = iota + 1
+//	Low
+//	Medium
+//	High
+//	Critical
+//)
+//
+//var serverityMap = map[string]int{
+//	"info":     Info,
+//	"low":      Low,
+//	"medium":   Medium,
+//	"high":     High,
+//	"critical": Critical,
+//}
 
-var serverityMap = map[string]int{
-	"info":     Info,
-	"low":      Low,
-	"medium":   Medium,
-	"high":     High,
-	"critical": Critical,
-}
-
-type Vuln struct {
-	Name     string                 `json:"vn"`
-	Payload  map[string]interface{} `json:"vp"`
-	Detail   map[string]interface{} `json:"vd"`
-	Severity string                 `json:"vs"`
-}
-
-func (v *Vuln) GetPayload() string {
-	return utils.MaptoString(v.Payload)
-}
-
-func (v *Vuln) GetDetail() string {
-	return utils.MaptoString(v.Detail)
-}
-
-func (v *Vuln) GetLevel() int {
-	if level, ok := serverityMap[v.Severity]; ok && v.Severity != "" {
-		return level
-	} else {
-		// 漏洞默认危害为high
-		return 3
-	}
-}
-
-func (v *Vuln) ToString() string {
-	s := v.Name
-	if payload := v.GetPayload(); payload != "" {
-		s += fmt.Sprintf(" payloads:%s", payload)
-	}
-	if detail := v.GetDetail(); detail != "" {
-		s += fmt.Sprintf(" payloads:%s", detail)
-	}
-	return s
-}
+//type Vuln struct {
+//	Name     string                 `json:"vn"`
+//	Payload  map[string]interface{} `json:"vp"`
+//	Detail   map[string]interface{} `json:"vd"`
+//	Severity string                 `json:"vs"`
+//}
+//
+//func (v *Vuln) GetPayload() string {
+//	return utils.MaptoString(v.Payload)
+//}
+//
+//func (v *Vuln) GetDetail() string {
+//	return utils.MaptoString(v.Detail)
+//}
+//
+//func (v *Vuln) GetLevel() int {
+//	if level, ok := serverityMap[v.Severity]; ok && v.Severity != "" {
+//		return level
+//	} else {
+//		// 漏洞默认危害为high
+//		return 3
+//	}
+//}
+//
+//func (v *Vuln) ToString() string {
+//	s := v.Name
+//	if payload := v.GetPayload(); payload != "" {
+//		s += fmt.Sprintf(" payloads:%s", payload)
+//	}
+//	if detail := v.GetDetail(); detail != "" {
+//		s += fmt.Sprintf(" payloads:%s", detail)
+//	}
+//	return s
+//}
 
 type Vulns []*Vuln
 
@@ -318,22 +318,22 @@ func (vs Vulns) ToString() string {
 	return s
 }
 
-type Framework struct {
-	Name    string `json:"ft"`
-	Version string `json:"fv"`
-	IsGuess bool   `json:"fg"`
-}
-
-func (f Framework) ToString() string {
-	var s = f.Name
-	if f.IsGuess {
-		s = "*" + s
-	}
-	if f.Version != "" {
-		s += ":" + f.Version
-	}
-	return s
-}
+//type Framework struct {
+//	Name    string `json:"ft"`
+//	Version string `json:"fv"`
+//	IsGuess bool   `json:"fg"`
+//}
+//
+//func (f Framework) ToString() string {
+//	var s = f.Name
+//	if f.IsGuess {
+//		s = "*" + s
+//	}
+//	if f.Version != "" {
+//		s += ":" + f.Version
+//	}
+//	return s
+//}
 
 type Frameworks []*Framework
 
