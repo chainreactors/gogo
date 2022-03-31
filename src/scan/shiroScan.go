@@ -21,7 +21,7 @@ func shiroScan(result *Result) {
 	Log.Debug("request shiro " + result.GetURL())
 	deleteme := resp.Header.Get("Set-Cookie")
 	if strings.Contains(deleteme, "=deleteMe") {
-		result.AddFramework(&Framework{Name: "shiro"})
+		result.AddFramework(&Framework{Name: "shiro", Version: "active"})
 		isshiro = true
 	} else {
 		return
@@ -35,7 +35,7 @@ func shiroScan(result *Result) {
 	}
 	deleteme = resp.Header.Get("Set-Cookie")
 	if isshiro && !strings.Contains(deleteme, "deleteMe") {
-		result.AddVuln(&Vuln{Name: "shiro_550"})
+		result.AddVuln(&Vuln{Name: "shiro_550", Payload: map[string]interface{}{"key": "kPH+bIxk5D2deZiIxcaaaA=="}})
 	}
 	return
 
