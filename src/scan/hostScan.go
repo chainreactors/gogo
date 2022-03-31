@@ -13,13 +13,12 @@ func hostScan(result *Result) {
 	req, _ := http.NewRequest("GET", url, nil)
 	vuln := &Vuln{Name: "host", Detail: map[string]interface{}{}, Severity: "info"}
 	for _, host := range result.HttpHost {
-
 		req.Host = host
 		resp, err := conn.Do(req)
 		if err != nil {
-			return
+			continue
 		}
-
+		Log.Debugf("request host %s, %d for %s", url, resp.StatusCode, host)
 		if resp.StatusCode != 200 {
 			continue
 		}
