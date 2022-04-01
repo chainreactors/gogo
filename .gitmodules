@@ -1,0 +1,3 @@
+[submodule "src/fingers"]
+	path = src/fingers
+	url = https://github.com/ZTeam-H3/fingers
