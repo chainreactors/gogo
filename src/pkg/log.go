@@ -65,7 +65,7 @@ func (log *Logger) Importantf(format string, s ...interface{}) {
 
 func (log *Logger) Default(s string) {
 	if !log.Clean {
-		fmt.Println(s)
+		fmt.Print(s)
 	}
 }
 

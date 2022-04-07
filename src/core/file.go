@@ -89,14 +89,15 @@ func handler() {
 		}()
 	}
 
+	if Opt.File == nil {
+		return
+	}
+
 	// res文件
 	go func() {
 		defer fileCloser()
 		var rescommaflag bool
 		for res := range Opt.dataCh {
-			if Opt.File == nil {
-				continue
-			}
 			if !Opt.File.Initialized {
 				err := Opt.File.Init()
 				if err != nil {
@@ -133,12 +134,13 @@ func handler() {
 			Opt.ExtractFile.Close()
 		}
 	}()
-
 }
 
 func fileCloser() {
-	if Opt.File != nil && Opt.FileOutput == "json" {
-		Opt.File.Write("]}")
+	if Opt.File != nil {
+		if Opt.FileOutput == "json" {
+			Opt.File.Write("]}")
+		}
 		Opt.File.Close()
 	}
 
