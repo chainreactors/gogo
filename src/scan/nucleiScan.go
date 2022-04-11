@@ -21,29 +21,39 @@ func Nuclei(target string, result *Result) {
 func execute_templates(result *Result, titles []string, target string) {
 	var vulns []*Vuln
 	templates := choiceTemplates(titles)
-	for _, template := range templates { // 遍历所有poc
-		res, ok := template.Execute(target)
-		if ok {
-			for name, extract := range res.Extracts {
-				result.AddExtract(NewExtract(name, extract))
+chainLoop:
+	for {
+		var chainsTemplates []*Template
+		for _, template := range templates { // 遍历所有poc
+			res, ok := template.Execute(target)
+			if ok {
+				for name, extract := range res.Extracts {
+					result.AddExtract(NewExtract(name, extract))
+				}
+				vulns = append(vulns, &Vuln{template.Id, res.PayloadValues, res.DynamicValues, template.Info.Severity})
+				chainsTemplates = diffTemplates(templates, choiceTemplates(template.Chains))
 			}
-			vulns = append(vulns, &Vuln{template.Id, res.PayloadValues, res.DynamicValues, template.Info.Severity})
+		}
+		if chainsTemplates != nil {
+			templates = chainsTemplates
+			goto chainLoop
+		} else {
+			break
 		}
 	}
-
 	result.AddVulns(vulns)
 }
 
 func choiceTemplates(titles []string) []*Template {
 	var templates []*Template
 	if titles[0] == "all" {
-		for _, tmp_templates := range TemplateMap {
-			templates = append(templates, tmp_templates...)
+		for _, tmpTemplates := range TemplateMap {
+			templates = append(templates, tmpTemplates...)
 		}
 	} else {
 		for _, t := range titles {
-			if tmp_templates, ok := TemplateMap[strings.ToLower(t)]; ok {
-				templates = append(templates, tmp_templates...)
+			if tmpTemplates, ok := TemplateMap[strings.ToLower(t)]; ok {
+				templates = append(templates, tmpTemplates...)
 			}
 		}
 	}
@@ -51,15 +61,29 @@ func choiceTemplates(titles []string) []*Template {
 }
 
 func uniqueTemplates(templates []*Template) []*Template {
-	tmp_templates := make(map[*Template]bool)
+	tmpTemplates := make(map[*Template]bool)
 	for _, template := range templates {
-		tmp_templates[template] = true
+		tmpTemplates[template] = true
 	}
-	uniquetemplates := make([]*Template, len(tmp_templates))
+	uniquetemplates := make([]*Template, len(tmpTemplates))
 	i := 0
-	for template, _ := range tmp_templates {
+	for template, _ := range tmpTemplates {
 		uniquetemplates[i] = template
 		i++
 	}
 	return uniquetemplates
+}
+
+func diffTemplates(baseTemplates []*Template, templates []*Template) []*Template {
+	tmpTemplates := make(map[*Template]bool)
+	for _, template := range baseTemplates {
+		tmpTemplates[template] = true
+	}
+	var uniqueTemplates []*Template
+	for _, t := range templates {
+		if _, ok := tmpTemplates[t]; !ok {
+			uniqueTemplates = append(uniqueTemplates, t)
+		}
+	}
+	return uniqueTemplates
 }
