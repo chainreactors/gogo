@@ -63,6 +63,23 @@ func FormatOutput(filename string, outputfile string, autofile bool, filters []s
 		file = Open(filename)
 	}
 
+	// 初始化再输出文件
+	if outputfile != "" {
+		fileHandle, err := NewFile(outputfile, false, false)
+		if err != nil {
+			Fatal("" + err.Error())
+		}
+		fmt.Println("Output filename: " + outputfile)
+		defer fileHandle.Close()
+		outfunc = func(s string) {
+			fileHandle.Write(s)
+		}
+	} else {
+		outfunc = func(s string) {
+			fmt.Print(s)
+		}
+	}
+
 	data := LoadResultFile(file)
 	switch data.(type) {
 	case *ResultsData:
@@ -83,23 +100,6 @@ func FormatOutput(filename string, outputfile string, autofile bool, filters []s
 		textdata = string(data.([]byte))
 	default:
 		return
-	}
-
-	// 初始化再输出文件
-	if outputfile != "" {
-		fileHandle, err := NewFile(outputfile, false, false)
-		if err != nil {
-			Fatal("" + err.Error())
-		}
-		fmt.Println("Output filename: " + outputfile)
-		defer fileHandle.Close()
-		outfunc = func(s string) {
-			fileHandle.Write(s)
-		}
-	} else {
-		outfunc = func(s string) {
-			fmt.Print(s)
-		}
 	}
 
 	if Opt.Output == "c" {

@@ -132,11 +132,11 @@ func CompileRegexp(s string) *regexp.Regexp {
 //}
 
 //var flatedict = `{"i":"`+`","p":"`+`","u":"`+`","o":"`+`","h":"`+`","t":"`+`","m":"` + `","s":"` + `","l":"` + `","f":` + `null` + `","v":` + `"r":"`
-var flatedict = `,":`
+//var flatedict = `,":`
 
 func Flate(input []byte) []byte {
 	var bf = bytes.NewBuffer([]byte{})
-	var flater, _ = flate.NewWriterDict(bf, flate.BestCompression, []byte(flatedict))
+	var flater, _ = flate.NewWriter(bf, flate.BestCompression)
 	defer flater.Close()
 	if _, err := flater.Write(input); err != nil {
 		println(err.Error())
@@ -151,7 +151,7 @@ func Flate(input []byte) []byte {
 
 func UnFlate(input []byte) []byte {
 	rdata := bytes.NewReader(input)
-	r := flate.NewReaderDict(rdata, []byte(flatedict))
+	r := flate.NewReader(rdata)
 	s, _ := ioutil.ReadAll(r)
 	return s
 }
