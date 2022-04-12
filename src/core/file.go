@@ -32,9 +32,9 @@ func initFile(config *Config) error {
 	if config.Filename != "" {
 		Log.Clean = !Log.Clean
 		// 创建output的filehandle
-		Opt.File, err = NewFile(config.Filename, Opt.Compress, true)
+		Opt.File, err = NewFile(config.Filename, Opt.Compress, false)
 		if err != nil {
-			return err
+			Log.Warn(err.Error())
 		}
 
 		if err != nil {
@@ -73,12 +73,6 @@ func handler() {
 	if Log.LogFile != nil {
 		go func() {
 			for res := range Log.LogCh {
-				if !Log.LogFile.Initialized {
-					err := Log.LogFile.Init()
-					if err != nil {
-						Log.Warn(err.Error())
-					}
-				}
 				Log.LogFile.SyncWrite(res)
 			}
 			Log.LogFile.Close()
