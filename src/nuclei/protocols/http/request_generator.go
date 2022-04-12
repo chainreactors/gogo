@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"getitle/src/nuclei"
 	"getitle/src/nuclei/protocols"
-	"io"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -179,18 +178,19 @@ func (r *requestGenerator) handleRawWithPayloads(rawRequest, baseURL string, val
 	if err != nil {
 		return nil, err
 	}
-	request = rawRequestData.makeRequest()
+
 	// Unsafe option uses rawhttp library
 	if r.request.Unsafe {
+		request = rawRequestData.makeRequest()
 		unsafeReq := &generatedRequest{request: request, meta: generatorValues, original: r.request}
 		return unsafeReq, nil
 	}
 
 	// retryablehttp
-	var body io.ReadCloser
-	body = ioutil.NopCloser(strings.NewReader(rawRequestData.Data))
+	//var body io.ReadCloser
+	//body = ioutil.NopCloser(strings.NewReader(rawRequestData.Data))
 
-	req, err := http.NewRequest(rawRequestData.Method, rawRequestData.FullURL, body)
+	req, err := http.NewRequest(rawRequestData.Method, rawRequestData.FullURL, strings.NewReader(rawRequestData.Data))
 	if err != nil {
 		return nil, err
 	}

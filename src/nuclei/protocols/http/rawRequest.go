@@ -131,11 +131,11 @@ func parseRaw(request, baseURL string, unsafe bool) (*rawRequest, error) {
 }
 
 func (raw rawRequest) makeRequest() *http.Request {
-	var body io.ReadCloser
+	//var body io.ReadCloser
+	//
+	//body = ioutil.NopCloser(strings.NewReader(raw.Data))
 
-	body = ioutil.NopCloser(strings.NewReader(raw.Data))
-
-	req, err := http.NewRequest(raw.Method, raw.FullURL, body)
+	req, err := http.NewRequest(raw.Method, raw.FullURL, strings.NewReader(raw.Data))
 	if err != nil {
 		return nil
 	}
