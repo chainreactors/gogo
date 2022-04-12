@@ -203,14 +203,15 @@ func (r *Request) Requests() int {
 func (r *Request) Compile(options *protocols.ExecuterOptions) error {
 	r.options = options
 	var err error
+
 	connectionConfiguration := &Configuration{
 		//Threads:         r.Threads,
+		Timeout:         DefaultOption.Timeout,
 		MaxRedirects:    r.MaxRedirects,
 		FollowRedirects: r.Redirects,
 		CookieReuse:     r.CookieReuse,
 	}
-	client := createClient(connectionConfiguration)
-	r.httpClient = client
+	r.httpClient = createClient(connectionConfiguration)
 
 	if r.Body != "" && !strings.Contains(r.Body, "\r\n") {
 		r.Body = strings.Replace(r.Body, "\n", "\r\n", -1)

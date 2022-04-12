@@ -2,6 +2,7 @@ package http
 
 import (
 	"crypto/tls"
+	"net"
 	"net/http"
 	"net/http/cookiejar"
 	"time"
@@ -14,7 +15,7 @@ type Configuration struct {
 	CookieReuse     bool
 }
 
-var Defaultoption = Configuration{
+var DefaultOption = Configuration{
 	2,
 	true,
 	3,
@@ -28,6 +29,11 @@ func createClient(opt *Configuration) *http.Client {
 			Renegotiation:      tls.RenegotiateOnceAsClient,
 			InsecureSkipVerify: true,
 		},
+		DialContext: (&net.Dialer{
+			Timeout: time.Duration(opt.Timeout) * time.Second,
+			//KeepAlive: time.Duration(delay) * time.Second,
+			//DualStack: true,
+		}).DialContext,
 		DisableKeepAlives: true,
 	}
 	var jar *cookiejar.Jar

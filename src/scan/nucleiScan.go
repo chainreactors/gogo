@@ -25,6 +25,7 @@ chainLoop:
 	for {
 		var chainsTemplates []*Template
 		for _, template := range templates { // 遍历所有poc
+			Log.Debugf("nuclei scan %s with %s", target, template.Id)
 			res, ok := template.Execute(target)
 			if ok {
 				for name, extract := range res.Extracts {
@@ -46,6 +47,9 @@ chainLoop:
 
 func choiceTemplates(titles []string) []*Template {
 	var templates []*Template
+	if len(titles) == 0 {
+		return nil
+	}
 	if titles[0] == "all" {
 		for _, tmpTemplates := range TemplateMap {
 			templates = append(templates, tmpTemplates...)
