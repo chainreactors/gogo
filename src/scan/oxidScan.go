@@ -1,7 +1,6 @@
 package scan
 
 import (
-	"fmt"
 	"getitle/src/pkg"
 	"strings"
 )
@@ -39,7 +38,7 @@ func oxidScan(result *pkg.Result) {
 	hostname_list := strings.Split(packet_v2, "\x07")
 
 	result.Host = hostname_list[0]
-	result.Title += fmt.Sprintf("%q", strings.Join(hostname_list[1:], ","))
+	result.Title += pkg.AsciiEncode(strings.Join(hostname_list[1:], ","))
 	result.HttpStat = "OXID"
 	result.Port = "135 (oxid)"
 	result.Protocol = "wmi"
