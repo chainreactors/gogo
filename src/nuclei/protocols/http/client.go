@@ -43,7 +43,7 @@ func createClient(opt *Configuration) *http.Client {
 	client := &http.Client{
 		Transport:     tr,
 		Timeout:       time.Duration(opt.Timeout) * time.Second,
-		CheckRedirect: makeCheckRedirectFunc(opt.FollowRedirects, opt.MaxRedirects),
+		CheckRedirect: makeCheckRedirectFunc(opt.FollowRedirects, 3),
 	}
 	if jar != nil {
 		client.Jar = jar
