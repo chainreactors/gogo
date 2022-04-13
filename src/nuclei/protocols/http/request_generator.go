@@ -126,7 +126,7 @@ func (r *requestGenerator) Make(baseURL, data string, payloads, dynamicValues ma
 	if isRawRequest {
 		return r.makeHTTPRequestFromRaw(parsed.String(), data, values, payloads)
 	}
-	return r.makeHTTPRequestFromModel(data, values)
+	return r.makeHTTPRequestFromModel(data, values, payloads)
 }
 
 // baseURLWithTemplatePrefs returns the url for BaseURL keeping
@@ -150,7 +150,7 @@ func baseURLWithTemplatePrefs(data string, parsed *url.URL) (string, *url.URL) {
 //}
 
 // MakeHTTPRequestFromModel creates a *http.Request from a request template
-func (r *requestGenerator) makeHTTPRequestFromModel(data string, values map[string]interface{}) (*generatedRequest, error) {
+func (r *requestGenerator) makeHTTPRequestFromModel(data string, values, generatorValues map[string]interface{}) (*generatedRequest, error) {
 	final := nuclei.Replace(data, values)
 
 	// Build a request on the specified URL
@@ -160,7 +160,7 @@ func (r *requestGenerator) makeHTTPRequestFromModel(data string, values map[stri
 	}
 
 	request := r.fillRequest(req, values)
-	return &generatedRequest{request: request, original: r.request}, nil
+	return &generatedRequest{request: request, original: r.request, meta: generatorValues}, nil
 }
 
 // makeHTTPRequestFromRaw creates a *http.Request from a raw request
