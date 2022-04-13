@@ -70,7 +70,7 @@ func httpFingerMatch(result *Result, finger *Finger) (*Framework, *Vuln) {
 	//var cookies map[string]string
 	if RunOpt.VersionLevel >= 1 && finger.SendDataStr != "" {
 		// 如果level大于1,并且存在主动发包, 则重新获取resp与content
-		conn := HttpConn(RunOpt.Delay)
+		conn := result.GetHttpConn(RunOpt.Delay)
 		tmpresp, err := conn.Get(result.GetURL() + finger.SendDataStr)
 		if err == nil {
 			Log.Debugf("request finger %s %d for %s", result.GetURL()+finger.SendDataStr, tmpresp.StatusCode, finger.Name)

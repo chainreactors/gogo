@@ -9,7 +9,7 @@ func suffixScan(result *pkg.Result) {
 	url := result.GetBaseURL()
 	//println(url+SuffixStr)
 	result.Uri = RunOpt.SuffixStr
-	conn := pkg.HttpConn(RunOpt.Delay)
+	conn := result.GetHttpConn(RunOpt.Delay)
 	resp, err := conn.Get(url + RunOpt.SuffixStr)
 	if err != nil {
 		result.Error = err.Error()

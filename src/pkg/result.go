@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type Result struct {
@@ -32,7 +33,8 @@ type Result struct {
 	Open         bool           `json:"-"`
 	//FrameworksMap map[string]bool `json:"-"`
 	SmartProbe bool           `json:"-"`
-	TcpCon     *net.Conn      `json:"-"`
+	TcpConn    *net.Conn      `json:"-"`
+	HttpConn   *http.Client   `json:"-"`
 	Httpresp   *http.Response `json:"-"`
 	Error      string         `json:"-"`
 	ErrStat    int            `json:"-"`
@@ -51,6 +53,15 @@ func NewResult(ip, port string) *Result {
 	}
 	result.Extracts.Target = result.GetTarget()
 	return &result
+}
+
+func (result *Result) GetHttpConn(delay int) *http.Client {
+	if result.HttpConn == nil {
+		result.HttpConn = HttpConn(delay)
+	} else {
+		result.HttpConn.Timeout = time.Duration(delay) * time.Second
+	}
+	return result.HttpConn
 }
 
 func (result *Result) AddVuln(vuln *Vuln) {

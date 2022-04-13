@@ -72,7 +72,6 @@ func socketHttp(target string, result *pkg.Result) {
 
 //使用封装好了http
 func SystemHttp(target string, result *pkg.Result) {
-	var conn http.Client
 	var delay int
 	// 如果是400或者不可识别协议,则使用https
 	var ishttps bool
@@ -90,7 +89,7 @@ func SystemHttp(target string, result *pkg.Result) {
 	if ishttps || strings.HasPrefix(result.HttpStat, "3") {
 		delay = RunOpt.Delay + RunOpt.HttpsDelay
 	}
-	conn = pkg.HttpConn(delay)
+	conn := result.GetHttpConn(delay)
 	req, _ := http.NewRequest("GET", target, nil)
 	req.Header = headers
 

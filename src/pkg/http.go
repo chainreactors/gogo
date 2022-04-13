@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func HttpConn(delay int) http.Client {
+func HttpConn(delay int) *http.Client {
 	tr := &http.Transport{
 		//TLSHandshakeTimeout : delay * time.Second,
 		TLSClientConfig: &tls.Config{
@@ -30,7 +30,7 @@ func HttpConn(delay int) http.Client {
 		Timeout:       time.Duration(delay) * time.Second,
 		CheckRedirect: checkRedirect,
 	}
-	return *conn
+	return conn
 }
 
 var maxRedirects = 3

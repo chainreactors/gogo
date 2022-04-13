@@ -9,7 +9,7 @@ import (
 
 func hostScan(result *Result) {
 	url := result.GetBaseURL()
-	conn := HttpConn(RunOpt.Delay)
+	conn := result.GetHttpConn(RunOpt.Delay)
 	req, _ := http.NewRequest("GET", url, nil)
 	vuln := &Vuln{Name: "host", Detail: map[string]interface{}{}, Severity: "info"}
 	for _, host := range result.HttpHost {
