@@ -66,9 +66,9 @@ func LoadTemplates(content []byte) map[string][]*Template {
 			Fatal("" + err.Error())
 		}
 
-		//for _, finger := range template.Fingers {
-		//	templatemap[strings.ToLower(finger)] = append(templatemap[strings.ToLower(finger)], template)
-		//}
+		for _, finger := range template.Fingers {
+			templatemap[strings.ToLower(finger)] = append(templatemap[strings.ToLower(finger)], template)
+		}
 
 		if template.Id != "" {
 			templatemap[strings.ToLower(template.Id)] = append(templatemap[strings.ToLower(template.Id)], template)

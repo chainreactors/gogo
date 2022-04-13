@@ -19,3 +19,14 @@ func TestLoadWorkFlow(t *testing.T) {
 	b := a.GroupByPort()
 	print(a, b)
 }
+
+func TestTeamplate(t *testing.T) {
+	a := []string{"aa", "bb", "cc"}
+	b := []string{"aa", "bb", "dd"}
+	for _, i := range a {
+		if i == "cc" {
+			a = append(a, b...)
+		}
+		println(i)
+	}
+}
