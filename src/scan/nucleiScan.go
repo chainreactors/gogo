@@ -57,7 +57,6 @@ func choiceTemplates(titles []string) []*Template {
 	} else {
 		for _, t := range titles {
 			if tmpTemplates, ok := TemplateMap[strings.ToLower(t)]; ok {
-				println(t, ok)
 				templates = append(templates, tmpTemplates...)
 			}
 		}
@@ -90,6 +89,5 @@ func diffTemplates(baseTemplates []*Template, templates []*Template) []*Template
 			uniqueTemplates = append(uniqueTemplates, t)
 		}
 	}
-	println(len(uniqueTemplates))
 	return uniqueTemplates
 }
