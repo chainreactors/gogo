@@ -32,7 +32,7 @@ chainLoop:
 					result.AddExtract(NewExtract(name, extract))
 				}
 				vulns = append(vulns, &Vuln{template.Id, res.PayloadValues, res.DynamicValues, template.Info.Severity})
-				chainsTemplates = diffTemplates(templates, choiceTemplates(template.Chains))
+				chainsTemplates = append(chainsTemplates, diffTemplates(templates, choiceTemplates(template.Chains))...)
 			}
 		}
 		if chainsTemplates != nil {
@@ -57,6 +57,7 @@ func choiceTemplates(titles []string) []*Template {
 	} else {
 		for _, t := range titles {
 			if tmpTemplates, ok := TemplateMap[strings.ToLower(t)]; ok {
+				println(t, ok)
 				templates = append(templates, tmpTemplates...)
 			}
 		}
@@ -89,5 +90,6 @@ func diffTemplates(baseTemplates []*Template, templates []*Template) []*Template
 			uniqueTemplates = append(uniqueTemplates, t)
 		}
 	}
+	println(len(uniqueTemplates))
 	return uniqueTemplates
 }
