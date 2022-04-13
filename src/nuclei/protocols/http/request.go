@@ -54,11 +54,8 @@ type Request struct {
 	// their history for being matched at the end.
 	// Currently only works with sequential http requests.
 	ReqCondition bool `json:"req-condition"`
-
-	//Matchers []*matcher `json:"matchers,omitempty"`
-	//MatchersCondition string `json:"matchers-condition,omitempty"`
-	//matchersCondition conditionType
-
+	//   StopAtFirstMatch stops the execution of the requests and template as soon as a match is found.
+	StopAtFirstMatch  bool                 `json:"stop-at-first-match"`
 	generator         *protocols.Generator // optional, only enabled when using payloads
 	httpClient        *http.Client
 	httpresp          *http.Response
@@ -276,14 +273,14 @@ func (request *Request) ExecuteRequestWithResults(reqURL string, dynamicValues m
 				}
 				return true, err
 			}
-
+			var gotOutput bool
 			err = request.executeRequest(generatedHttpRequest, dynamicValues, func(event *protocols.InternalWrappedEvent) {
 				// Add the extracts to the dynamic values if any.
-				//if event.OperatorsResult != nil {
-				//	gotOutput = true
-				//	gotDynamicValues := MergeMaps(event.OperatorsResult.DynamicValues, dynamicValues)
-				//	gotDynamicValues = MergeMaps(gotDynamicValues, gotDynamicValues)
-				//}
+				if event.OperatorsResult != nil {
+					gotOutput = true
+					//	gotDynamicValues := MergeMaps(event.OperatorsResult.DynamicValues, dynamicValues)
+					//	gotDynamicValues = MergeMaps(gotDynamicValues, gotDynamicValues)
+				}
 				callback(event)
 			})
 
@@ -298,9 +295,9 @@ func (request *Request) ExecuteRequestWithResults(reqURL string, dynamicValues m
 			//request.options.Progress.IncrementRequests()
 
 			// If this was a match, and we want to stop at first match, skip all further requests.
-			//if (generatedHttpRequest.original.options.Options.StopAtFirstMatch || generatedHttpRequest.original.options.StopAtFirstMatch || request.StopAtFirstMatch) && gotOutput {
-			//	return true, nil
-			//}
+			if request.StopAtFirstMatch && gotOutput {
+				return true, nil
+			}
 			return false, nil
 		}
 
