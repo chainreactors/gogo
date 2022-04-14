@@ -32,7 +32,7 @@ func initFile(config *Config) error {
 	if config.Filename != "" {
 		Log.Clean = !Log.Clean
 		// 创建output的filehandle
-		Opt.File, err = NewFile(config.Filename, Opt.Compress, false)
+		Opt.File, err = NewFile(config.Filename, Opt.Compress, true)
 		if err != nil {
 			Log.Warn(err.Error())
 		}

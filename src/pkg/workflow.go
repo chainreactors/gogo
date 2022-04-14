@@ -2,7 +2,6 @@ package pkg
 
 import (
 	"encoding/json"
-	"path"
 )
 
 type Workflow struct {
@@ -51,23 +50,14 @@ func (w *Workflow) PrepareConfig() *Config {
 		config.AliveSprayMod = append(config.AliveSprayMod, "icmp")
 	}
 
-	var autofile, hiddenfile bool
-	if w.File == "auto" {
-		autofile = true
-	} else if w.File == "hidden" {
-		hiddenfile = true
-	} else {
-		config.Filename = path.Join(w.Path, w.File)
-	}
-
-	if config.Filename == "" {
-		config.Filename = GetFilename(config, autofile, hiddenfile, w.Path, "json")
-		if config.IsSmartScan() {
-			config.SmartFilename = GetFilename(config, autofile, hiddenfile, w.Path, "cidr")
-		}
-		if config.HasAlivedScan() {
-			config.PingFilename = GetFilename(config, autofile, hiddenfile, w.Path, "alived")
-		}
-	}
+	//if w.File {
+	//	config.Filename = GetFilename(config, w.File, w.Path, "json")
+	//	if config.IsSmartScan() {
+	//		config.SmartFilename = GetFilename(config, w.File, w.Path, "cidr")
+	//	}
+	//	if config.HasAlivedScan() {
+	//		config.PingFilename = GetFilename(config, w.File, w.Path, "alived")
+	//	}
+	//}
 	return config
 }

@@ -21,36 +21,37 @@ func NewRunner() *Runner {
 }
 
 type Runner struct {
-	Ports          string
-	Version        bool // version level1
-	Version2       bool // version level2
-	Exploit        bool // 启用漏洞扫描
-	NoUpload       bool // 关闭文件回传
-	Compress       bool // 启用压缩
-	Clean          bool // 是否开启命令行输出扫描结果
-	Quiet          bool // 是否开启命令行输出日志
-	AutoFile       bool // 自动生成格式化文件名
-	HiddenFile     bool // 启用自动隐藏文件
-	Ping           bool
-	Arp            bool
-	FileOutput     string // 输出格式
-	FormatFilename string // 待格式化文件名
-	filters        arrayFlags
-	payloads       arrayFlags
-	extract        arrayFlags
-	extracts       string
-	ExploitName    string // 指定漏扫poc名字
-	ExploitFile    string // 指定漏扫文件
-	Printer        string // 输出特定的预设
-	UploadFile     string // 上传特定的文件名
-	WorkFlowName   string
-	Ver            bool // 输出版本号
-	NoScan         bool
-	IsWorkFlow     bool
-	Debug          bool
-	iface          string
-	start          time.Time
-	config         Config
+	Ports             string
+	Version           bool // version level1
+	Version2          bool // version level2
+	Exploit           bool // 启用漏洞扫描
+	NoUpload          bool // 关闭文件回传
+	Compress          bool // 启用压缩
+	Clean             bool // 是否开启命令行输出扫描结果
+	Quiet             bool // 是否开启命令行输出日志
+	AutoFile          bool // 自动生成格式化文件名
+	HiddenFile        bool // 启用自动隐藏文件
+	Ping              bool
+	Arp               bool
+	FileOutput        string // 输出格式
+	FilenameFormat    string // 文件名格式, clear, auto or hidden
+	FormatterFilename string // 待格式化文件名
+	filters           arrayFlags
+	payloads          arrayFlags
+	extract           arrayFlags
+	extracts          string
+	ExploitName       string // 指定漏扫poc名字
+	ExploitFile       string // 指定漏扫文件
+	Printer           string // 输出特定的预设
+	UploadFile        string // 上传特定的文件名
+	WorkFlowName      string
+	Ver               bool // 输出版本号
+	NoScan            bool
+	IsWorkFlow        bool
+	Debug             bool
+	iface             string
+	start             time.Time
+	config            Config
 }
 
 func (r *Runner) preInit() bool {
@@ -73,14 +74,20 @@ func (r *Runner) preInit() bool {
 		}
 	}
 
+	if r.AutoFile {
+		r.FilenameFormat = "auto"
+	} else if r.HiddenFile {
+		r.FilenameFormat = "hidden"
+	}
+
 	// 一些特殊的分支, 这些分支将会直接退出程序
 	if r.Ver {
 		fmt.Println(ver)
 		return false
 	}
 
-	if r.FormatFilename != "" {
-		FormatOutput(r.FormatFilename, r.config.Filename, r.AutoFile, r.filters)
+	if r.FormatterFilename != "" {
+		FormatOutput(r.FormatterFilename, r.config.Filename, r.filters)
 		return false
 	}
 	// 输出 config
@@ -182,18 +189,22 @@ func (r *Runner) prepareConfig(config Config) *Config {
 		Opt.FileOutput = r.FileOutput
 	}
 
-	if config.Filename == "" && !Opt.Noscan {
-		config.Filename = GetFilename(&config, r.AutoFile, r.HiddenFile, Opt.FilePath, Opt.FileOutput)
+	if config.Filename == "" {
+		config.Filename = GetFilename(&config, r.FilenameFormat, Opt.FilePath, Opt.FileOutput)
 	} else {
 		config.Filename = path.Join(Opt.FilePath, config.Filename)
 	}
 
 	if config.IsSmartScan() {
-		config.SmartFilename = GetFilename(&config, r.AutoFile, r.HiddenFile, Opt.FilePath, "cidr")
+		if r.NoScan && !r.AutoFile && !r.HiddenFile {
+			config.SmartFilename = config.Filename
+		} else {
+			config.SmartFilename = GetFilename(&config, r.FilenameFormat, Opt.FilePath, "cidr")
+		}
 	}
 
 	if config.HasAlivedScan() {
-		config.PingFilename = GetFilename(&config, r.AutoFile, r.HiddenFile, Opt.FilePath, "alived")
+		config.PingFilename = GetFilename(&config, r.FormatterFilename, Opt.FilePath, "alived")
 	}
 	return &config
 }
@@ -226,19 +237,33 @@ func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) {
 	if workflows := workflowMap.Choice(r.WorkFlowName); len(workflows) > 0 {
 		for _, workflow := range workflows {
 			Log.Important("workflow " + workflow.Name + " starting")
-			// 文件名要在config初始化之前操作
-			if r.config.Filename != "" {
-				workflow.File = r.config.Filename
-			} else if r.AutoFile {
-				workflow.File = "auto"
-			} else if r.HiddenFile {
-				workflow.File = "hidden"
-			}
+
 			if Opt.FilePath != "" {
 				workflow.Path = Opt.FilePath
 			}
 
 			config := workflow.PrepareConfig()
+
+			if r.config.Filename != "" {
+				config.Filename = r.config.Filename
+			} else if r.AutoFile {
+				config.Filename = GetFilename(config, "auto", workflow.Path, "json")
+				if config.IsSmartScan() {
+					config.SmartFilename = GetFilename(config, "auto", workflow.Path, "cidr")
+				}
+				if config.HasAlivedScan() {
+					config.PingFilename = GetFilename(config, "auto", workflow.Path, "alived")
+				}
+			} else if r.HiddenFile {
+				workflow.File = GetFilename(config, "hidden", workflow.Path, "json")
+				if config.IsSmartScan() {
+					config.SmartFilename = GetFilename(config, "hidden", workflow.Path, "cidr")
+				}
+				if config.HasAlivedScan() {
+					config.PingFilename = GetFilename(config, "hidden", workflow.Path, "alived")
+				}
+			}
+
 			// 一些workflow的参数, 允许被命令行参数覆盖
 			if r.config.IP != "" {
 				config.IP = r.config.IP

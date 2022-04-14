@@ -125,21 +125,23 @@ func (f *File) Close() {
 
 var fileint = 1
 
-func GetFilename(config *Config, autofile, hiddenfile bool, filepath, outtype string) string {
+func GetFilename(config *Config, format string, filepath, outtype string) string {
 	var basename string
 	var basepath string = filepath
 	if filepath == "" {
 		basepath = getExcPath()
 	}
 
-	if autofile {
-		basename = path.Join(basepath, getAutoFilename(config, outtype)+".dat")
-	} else if hiddenfile {
+	if format == "auto" {
+		basename = path.Join(basepath, "."+getAutoFilename(config, outtype)+".dat")
+	} else if format == "hidden" {
 		if Win {
 			basename = path.Join(basepath, "App_1634884664021088500_EC1B25B2-9453-49EE-A1E2-112B4D539F5.dat")
 		} else {
 			basename = path.Join(basepath, ".systemd-private-701215aa8263408d8d44f4507834d77")
 		}
+	} else if format == "clear" {
+		basename = path.Join(basepath, getAutoFilename(config, outtype)+".txt")
 	} else {
 		return ""
 	}
@@ -153,7 +155,7 @@ func getAutoFilename(config *Config, outtype string) string {
 	var basename string
 	target := strings.Replace(config.GetTargetName(), "/", "_", -1)
 	ports := strings.Replace(config.Ports, ",", "_", -1)
-	basename = fmt.Sprintf(".%s_%s_%s_%s", target, ports, config.Mod, outtype)
+	basename = fmt.Sprintf("%s_%s_%s_%s", target, ports, config.Mod, outtype)
 	return basename
 }
 

@@ -49,7 +49,7 @@ func jsonOutput(result *Result) string {
 	return string(jsons)
 }
 
-func FormatOutput(filename string, outputfile string, autofile bool, filters []string) {
+func FormatOutput(filename string, outputfile string, filters []string) {
 	var outfunc func(s string)
 	var iscolor bool
 	var resultsdata *ResultsData
@@ -61,6 +61,28 @@ func FormatOutput(filename string, outputfile string, autofile bool, filters []s
 		file = os.Stdin
 	} else {
 		file = Open(filename)
+	}
+
+	data := LoadResultFile(file)
+	switch data.(type) {
+	case *ResultsData:
+		resultsdata = data.(*ResultsData)
+		fmt.Println(resultsdata.ToConfig())
+		if outputfile == "" {
+			outputfile = GetFilename(&resultsdata.Config, "clear", Opt.FilePath, Opt.Output)
+		}
+	case *SmartData:
+		smartdata = data.(*SmartData)
+		if outputfile == "" {
+			outputfile = GetFilename(&smartdata.Config, "clear", Opt.FilePath, "cidr")
+		}
+	case []*Extracts:
+		extractsdata = data.([]*Extracts)
+		//ConsoleLog("parser extracts successfully")
+	case []byte:
+		textdata = string(data.([]byte))
+	default:
+		return
 	}
 
 	// 初始化再输出文件
@@ -80,32 +102,6 @@ func FormatOutput(filename string, outputfile string, autofile bool, filters []s
 		}
 	}
 
-	data := LoadResultFile(file)
-	switch data.(type) {
-	case *ResultsData:
-		resultsdata = data.(*ResultsData)
-		fmt.Println(resultsdata.ToConfig())
-		if outputfile == "" {
-			outputfile = GetFilename(&resultsdata.Config, autofile, false, Opt.FilePath, Opt.Output)
-		}
-	case *SmartData:
-		smartdata = data.(*SmartData)
-		if outputfile == "" {
-			outputfile = GetFilename(&smartdata.Config, autofile, false, Opt.FilePath, "cidr")
-		}
-	case []*Extracts:
-		extractsdata = data.([]*Extracts)
-		//ConsoleLog("parser extracts successfully")
-	case []byte:
-		textdata = string(data.([]byte))
-	default:
-		return
-	}
-
-	if Opt.Output == "c" {
-		iscolor = true
-	}
-
 	if smartdata != nil && smartdata.Data != nil {
 		outfunc(strings.Join(smartdata.Data, "\n"))
 		return
@@ -119,6 +115,10 @@ func FormatOutput(filename string, outputfile string, autofile bool, filters []s
 				kv := strings.Split(filter, "==")
 				resultsdata.Data = resultsdata.Data.Filter(kv[0], kv[1], "==")
 			}
+		}
+
+		if Opt.Output == "c" {
+			iscolor = true
 		}
 
 		if Opt.Output == "cs" {

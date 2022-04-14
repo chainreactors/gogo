@@ -35,7 +35,7 @@ func (log *Logger) InitFile() {
 	}
 	_ = os.Remove(".sock.lock")
 	var err error
-	log.LogFile, err = NewFile(LogFilename, false, true)
+	log.LogFile, err = NewFile(LogFilename, false, false)
 	if err != nil {
 		Log.Warn("cannot create logfile, err:" + err.Error())
 		return

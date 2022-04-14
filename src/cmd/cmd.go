@@ -47,7 +47,7 @@ func CMD() {
 	flag.StringVar(&runner.FileOutput, "O", "default", "")
 	flag.BoolVar(&runner.Quiet, "q", false, "")
 	flag.Var(&runner.filters, "filter", "")
-	flag.StringVar(&runner.FormatFilename, "F", "", "")
+	flag.StringVar(&runner.FormatterFilename, "F", "", "")
 	flag.BoolVar(&runner.AutoFile, "af", false, "")
 	flag.BoolVar(&runner.HiddenFile, "hf", false, "")
 	flag.BoolVar(&runner.Compress, "C", false, "")
