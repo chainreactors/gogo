@@ -11,7 +11,7 @@ import (
 type Template struct {
 	Id      string   `json:"id"`
 	Fingers []string `json:"finger"`
-	Chains  []string `json:"chains"`
+	Chains  []string `json:"chain"`
 	Info    struct {
 		Name string `json:"name"`
 		//Author    string `json:"author"`
