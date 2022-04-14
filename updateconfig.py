@@ -7,8 +7,8 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf8')
 
 
 def compress(s):
-    flatedict = bytes(', ":'.encode())
-    com = zlib.compressobj(level=9, zdict=flatedict)
+#     flatedict = bytes(', ":'.encode())
+    com = zlib.compressobj(level=9a)
     return b64encode(zlib.compress(s.encode())[2:-4]).decode()
 
 
