@@ -8,7 +8,11 @@ import (
 )
 
 // -default
-var UNIQUE_NAMES, GROUP_NAMES, NetBIOS_ITEM_TYPE map[string]string
+var (
+	NetbiosItemType map[string]string
+	GroupNames      map[string]string
+	UniqueNames     map[string]string
+)
 
 func Byte2Int(input []byte) (int, error) {
 	encodedStr := hex.EncodeToString(input)
@@ -17,7 +21,7 @@ func Byte2Int(input []byte) (int, error) {
 }
 
 func init() {
-	UNIQUE_NAMES = map[string]string{
+	UniqueNames = map[string]string{
 		"\x00": "Workstation Service",
 		"\x03": "Messenger Service",
 		"\x06": "RAS Server Service",
@@ -30,13 +34,13 @@ func init() {
 		"\x1B": "Domain Master Browser",
 	}
 
-	GROUP_NAMES = map[string]string{
+	GroupNames = map[string]string{
 		"\x00": "Domain Name",
 		"\x1C": "Domain Controllers",
 		"\x1E": "Browser Service Elections",
 	}
 
-	NetBIOS_ITEM_TYPE = map[string]string{
+	NetbiosItemType = map[string]string{
 		"\x01\x00": "NetBIOS computer name",
 		"\x02\x00": "NetBIOS domain name",
 		"\x03\x00": "DNS computer name",
@@ -56,13 +60,11 @@ func nbtScan(result *pkg.Result) {
 	if err != nil {
 		return
 	}
+	result.Open = true
 	defer conn.Close()
 	payload := []byte("ff\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00 CKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\x00\x00!\x00\x01")
 	reply, _ := pkg.SocketSend(conn, payload, 1024)
-	if len(reply) > 58 {
-
-		result.Open = true
-	} else {
+	if len(reply) <= 58 {
 		return
 	}
 
@@ -91,11 +93,11 @@ func nbtScan(result *pkg.Result) {
 				//fmt.Printf("%s\t%s\t%s\n",name,"U",UNIQUE_NAMES[string(flag_bit)])
 			}
 		} else {
-			if _, ok := GROUP_NAMES[string(flag_bit)]; ok {
+			if _, ok := GroupNames[string(flag_bit)]; ok {
 				if string(flag_bit) == "\x1C" {
 					DC = true
 				}
-			} else if _, ok := UNIQUE_NAMES[string(flag_bit)]; ok {
+			} else if _, ok := UniqueNames[string(flag_bit)]; ok {
 				if string(flag_bit) == "\x20" {
 					Share = true
 				}
