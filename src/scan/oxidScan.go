@@ -5,8 +5,8 @@ import (
 	"strings"
 )
 
-var sendData = "\x05\x00\x0b\x03\x10\x00\x00\x00\x48\x00\x00\x00\x01\x00\x00\x00\xb8\x10\xb8\x10\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x01\x00\xc4\xfe\xfc\x99\x60\x52\x1b\x10\xbb\xcb\x00\xaa\x00\x21\x34\x7a\x00\x00\x00\x00\x04\x5d\x88\x8a\xeb\x1c\xc9\x11\x9f\xe8\x08\x00\x2b\x10\x48\x60\x02\x00\x00\x00"
-var sendData2 = "\x05\x00\x00\x03\x10\x00\x00\x00\x18\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x05\x00"
+var sendData = pkg.Decode("YmXgZhZgYGDwYGBgYGRgYNghsAPEBbNB5JF/f2YmBEkL7D7NsIpB0aQKJMoS29H1Wuak4PwXHAzaAh4JTAwMDAAAAAD//w==")
+var sendData2 = pkg.Decode("YmVgYBZgYGCQYGBgYGSAAVYGAAAAAP//")
 
 // -default
 func oxidScan(result *pkg.Result) {
@@ -22,8 +22,14 @@ func oxidScan(result *pkg.Result) {
 	defer conn.Close()
 	result.Open = true
 
-	recv, _ := pkg.SocketSend(conn, []byte(sendData), 4096)
-	recv, _ = pkg.SocketSend(conn, []byte(sendData2), 4096)
+	recv, err := pkg.SocketSend(conn, sendData, 4096)
+	if err != nil {
+		return
+	}
+	recv, err = pkg.SocketSend(conn, sendData2, 4096)
+	if err != nil {
+		return
+	}
 	recvStr := string(recv)
 	if len(recvStr) < 42 {
 		return

