@@ -19,6 +19,7 @@ func CMD() {
 	connected = checkconn()
 	if !strings.Contains(strings.Join(os.Args, ""), k) {
 		inforev()
+		exit()
 	}
 	runner := NewRunner()
 	//默认参数信息

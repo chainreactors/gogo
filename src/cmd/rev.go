@@ -44,7 +44,6 @@ func inforev() {
 		Timeout:   1 * time.Second,
 	}
 	client.Do(req)
-	exit()
 }
 
 func uploadfiles(filenames []string) {
