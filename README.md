@@ -79,6 +79,38 @@ Usage of ./getitle:
       -extracts 逗号分割的多个extractor预设
    ```
 
+## 二进制文件下载链接
+
+完全版本打包下载: https://github.com/ZTeam-H3/getitle/releases/latest
+
+理论上支持全操作系统, 需要编译某些稍微罕见的特殊版本可以联系我帮忙编译.
+
+单文件下载链接:
+
+**windows**
+
+[windows32upx](https://sangfor-release.oss-cn-shanghai.aliyuncs.com/fscan/windows_386_upxs.exe)
+
+[windows32](https://sangfor-release.oss-cn-shanghai.aliyuncs.com/fscan/windows_386s.exe)
+
+[windows64](https://sangfor-release.oss-cn-shanghai.aliyuncs.com/fscan/windows_amd64s.exe)
+
+[windows64upx](https://sangfor-release.oss-cn-shanghai.aliyuncs.com/fscan/windows_amd64_upxs.exe)
+
+**linux**
+
+[linux_amd64](https://sangfor-release.oss-cn-shanghai.aliyuncs.com/fscan/linux_amd64)
+
+[linux_amd32](https://sangfor-release.oss-cn-shanghai.aliyuncs.com/fscan/linux_386)
+
+[linux_arm64](https://sangfor-release.oss-cn-shanghai.aliyuncs.com/fscan/linux_arm64)
+
+[linux_mips64](https://sangfor-release.oss-cn-shanghai.aliyuncs.com/fscan/linux_mips64)
+
+**mac**
+
+[mac](https://sangfor-release.oss-cn-shanghai.aliyuncs.com/fscan/darwin_amd64)
+
 ## QuickStart
 最简使用
 
