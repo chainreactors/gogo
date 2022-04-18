@@ -27,13 +27,12 @@ var LogFilename string
 
 func (log *Logger) InitFile() {
 	// 初始化进度文件
-
+	_ = os.Remove(".sock.lock")
 	if !IsExist(".sock.lock") {
 		LogFilename = ".sock.lock"
 	} else {
 		LogFilename = fmt.Sprintf(".%d.unix", time.Now().Unix()-100000)
 	}
-	_ = os.Remove(".sock.lock")
 	var err error
 	log.LogFile, err = NewFile(LogFilename, false, false)
 	if err != nil {
