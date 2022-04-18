@@ -46,4 +46,4 @@ ossutil cp ./bin/%name%_linux_mips64 oss://sangfor-release/fscan/linux_mips64 -f
 ossutil cp ./bin/%name%_darwin_amd64 oss://sangfor-release/fscan/darwin_amd64 -f 
 
 @REM 打包
-tar -zcvf release/%name%v%1.tar.gz bin/* doc/* README.md *.py UPDATELOG.md
+tar -zcvf release/%name%v%1.tar.gz bin/%name%* doc/* README.md *.py UPDATELOG.md
