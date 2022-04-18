@@ -49,7 +49,7 @@ func jsonOutput(result *Result) string {
 	return string(jsons)
 }
 
-func FormatOutput(filename string, outputfile string, filters []string) {
+func FormatOutput(filename string, outputfile string, autofile bool, filters []string) {
 	var outfunc func(s string)
 	var iscolor bool
 	var resultsdata *ResultsData
@@ -63,18 +63,23 @@ func FormatOutput(filename string, outputfile string, filters []string) {
 		file = Open(filename)
 	}
 
+	var fileformat string
+	if autofile {
+		fileformat = "clear"
+	}
+
 	data := LoadResultFile(file)
 	switch data.(type) {
 	case *ResultsData:
 		resultsdata = data.(*ResultsData)
 		fmt.Println(resultsdata.ToConfig())
 		if outputfile == "" {
-			outputfile = GetFilename(&resultsdata.Config, "clear", Opt.FilePath, Opt.Output)
+			outputfile = GetFilename(&resultsdata.Config, fileformat, Opt.FilePath, Opt.Output)
 		}
 	case *SmartData:
 		smartdata = data.(*SmartData)
 		if outputfile == "" {
-			outputfile = GetFilename(&smartdata.Config, "clear", Opt.FilePath, "cidr")
+			outputfile = GetFilename(&smartdata.Config, fileformat, Opt.FilePath, "cidr")
 		}
 	case []*Extracts:
 		extractsdata = data.([]*Extracts)

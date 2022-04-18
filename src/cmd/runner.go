@@ -87,7 +87,7 @@ func (r *Runner) preInit() bool {
 	}
 
 	if r.FormatterFilename != "" {
-		FormatOutput(r.FormatterFilename, r.config.Filename, r.filters)
+		FormatOutput(r.FormatterFilename, r.config.Filename, r.AutoFile, r.filters)
 		return false
 	}
 	// 输出 config
