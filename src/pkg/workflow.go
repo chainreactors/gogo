@@ -50,14 +50,14 @@ func (w *Workflow) PrepareConfig() *Config {
 		config.AliveSprayMod = append(config.AliveSprayMod, "icmp")
 	}
 
-	//if w.File {
-	//	config.Filename = GetFilename(config, w.File, w.Path, "json")
-	//	if config.IsSmartScan() {
-	//		config.SmartFilename = GetFilename(config, w.File, w.Path, "cidr")
-	//	}
-	//	if config.HasAlivedScan() {
-	//		config.PingFilename = GetFilename(config, w.File, w.Path, "alived")
-	//	}
-	//}
+	if w.File != "" {
+		config.Filename = GetFilename(config, w.File, w.Path, "json")
+		if config.IsSmartScan() {
+			config.SmartFilename = GetFilename(config, w.File, w.Path, "cidr")
+		}
+		if config.HasAlivedScan() {
+			config.PingFilename = GetFilename(config, w.File, w.Path, "alived")
+		}
+	}
 	return config
 }
