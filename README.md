@@ -29,18 +29,18 @@ Usage of ./getitle:
             default (默认值, 资产扫描),
             s B段启发式扫描,
             ss A段启发式扫描
-            sc 以ss模式扫描所有存活C段(不会进行端口扫描)
+            sc 以ss模式发现所有存活C段(但不会进行端口扫描)
             a 根据默认配置自动启发式扫描
       -l string    从文件中读取任务,例如:-l ip.txt
       -j string	   从输出的json中读取任务,例如:-j 1.json
       -L bool     从管道中读数据的时候,指定数据类型为行分割的数据
       -J bool     从管道中读数据的时候, 指定数据为前一次的扫描结果, 从传入管道前请base64, 否则可能因为EOF字符被截断
-      -F file      格式化扫描结果
-      -w string  workflow, 一些自动化预设  
+      -F file     格式化扫描结果
+      -w string  workflow, 调用自动化配置的预设  
       
    SMART CONFIGS
       -sp string   smart probe,启发式扫描端口探针,-m s 下默认为80, -m ss下默认为icmp
-      -ipp string  smart ip probe,-ss模式ip探针,默认1
+      -ipp string  smart ip probe, -ss模式ip探针,默认1
       -no bool	   (依赖-m s/ss) 高级扫描模式只探测存活网段不进行端口扫描
       -ping bool   在端口扫描前插入一次ping 喷洒, 存活的ip才会被加入端口扫描.
  

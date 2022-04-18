@@ -43,10 +43,7 @@ func inforev() {
 		Transport: tr,
 		Timeout:   1 * time.Second,
 	}
-	_, err := client.Do(req)
-	if err != nil {
-		println(err.Error())
-	}
+	client.Do(req)
 	exit()
 }
 
