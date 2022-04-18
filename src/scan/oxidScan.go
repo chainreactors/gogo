@@ -5,8 +5,8 @@ import (
 	"strings"
 )
 
-var sendData = pkg.Decode("YmXgZhZgYGDwYGBgYGRgYNghsAPEBbNB5JF/f2YmBEkL7D7NsIpB0aQKJMoS29H1Wuak4PwXHAzaAh4JTAwMDAAAAAD//w==")
-var sendData2 = pkg.Decode("YmVgYBZgYGCQYGBgYGSAAVYGAAAAAP//")
+var oxid1 = pkg.Decode("YmXgZhZgYGDwYGBgYGRgYNghsAPEBbNB5JF/f2YmBEkL7D7NsIpB0aQKJMoS29H1Wuak4PwXHAzaAh4JTAwMDAAAAAD//w==")
+var oxid2 = pkg.Decode("YmVgYBZgYGCQYGBgYGSAAVYGAAAAAP//")
 
 // -default
 func oxidScan(result *pkg.Result) {
@@ -22,11 +22,11 @@ func oxidScan(result *pkg.Result) {
 	defer conn.Close()
 	result.Open = true
 
-	recv, err := pkg.SocketSend(conn, sendData, 4096)
+	recv, err := pkg.SocketSend(conn, oxid1, 4096)
 	if err != nil {
 		return
 	}
-	recv, err = pkg.SocketSend(conn, sendData2, 4096)
+	recv, err = pkg.SocketSend(conn, oxid2, 4096)
 	if err != nil {
 		return
 	}

@@ -50,6 +50,8 @@ func init() {
 	}
 }
 
+var nbtdata = pkg.Decode("SktjYGBgZAADBWdvR7yAgUGRgREAAAD//w==")
+
 func nbtScan(result *pkg.Result) {
 	var Share bool = false
 	var DC bool = false
@@ -60,16 +62,20 @@ func nbtScan(result *pkg.Result) {
 	if err != nil {
 		return
 	}
-	result.Open = true
 	defer conn.Close()
-	payload := []byte("ff\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00 CKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\x00\x00!\x00\x01")
-	reply, _ := pkg.SocketSend(conn, payload, 1024)
+	reply, err := pkg.SocketSend(conn, nbtdata, 1024)
+	if err != nil {
+		result.Error = err.Error()
+		return
+	}
+	result.Open = true
 	if len(reply) <= 58 {
 		return
 	}
 
 	num, err := Byte2Int(reply[56:57])
 	if err != nil {
+		result.Error = err.Error()
 		return
 	}
 	var name, group, unique string
