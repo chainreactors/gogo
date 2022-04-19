@@ -82,7 +82,7 @@ func InitConfig(config *Config) *Config {
 	config.Portlist = PortsHandler(config.Ports)
 
 	// 如果指定端口超过100,则自动启用spray
-	if len(config.Portlist) > 150 && !config.NoSpray {
+	if len(config.Portlist) > 500 && !config.NoSpray {
 		if config.IPlist == nil && getMask(config.IP) == 32 {
 			config.PortSpray = false
 		} else {
