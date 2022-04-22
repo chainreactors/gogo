@@ -144,8 +144,12 @@ func SmartMod(target string, config Config) {
 		return
 	}
 
-	if Opt.SmartFile != nil {
+	if Opt.SmartFile != nil && config.Mod != "sb" {
 		writeSmartResult(iplist)
+	}
+
+	if Opt.File != nil && config.Mod == "sb" {
+		Opt.dataCh <- strings.Join(iplist, "\n") + "\n"
 	}
 
 	if Opt.Noscan {

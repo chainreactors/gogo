@@ -52,7 +52,7 @@ func (w *Workflow) PrepareConfig() *Config {
 
 	if w.File != "" {
 		config.Filename = GetFilename(config, w.File, w.Path, "json")
-		if config.IsSmartScan() {
+		if config.IsSmart() {
 			config.SmartFilename = GetFilename(config, w.File, w.Path, "cidr")
 		}
 		if config.HasAlivedScan() {

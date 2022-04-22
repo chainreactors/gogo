@@ -332,7 +332,7 @@ func LoadResultFile(file *os.File) interface{} {
 				}
 				results = append(results, result)
 			} else {
-				fmt.Printf("[-] format target: %s error\n\n", target)
+				//fmt.Printf("[-] format target: %s error\n\n", target)
 				return content
 			}
 		}

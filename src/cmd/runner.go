@@ -189,13 +189,17 @@ func (r *Runner) prepareConfig(config Config) *Config {
 		Opt.FileOutput = r.FileOutput
 	}
 
+	if config.Mod == "sc" {
+		Opt.FileOutput = "raw"
+	}
+
 	if config.Filename == "" {
 		config.Filename = GetFilename(&config, r.FilenameFormat, Opt.FilePath, Opt.FileOutput)
 	} else {
 		config.Filename = path.Join(Opt.FilePath, config.Filename)
 	}
 
-	if config.IsSmartScan() {
+	if config.IsSmart() {
 		if r.NoScan && !r.AutoFile && !r.HiddenFile {
 			config.SmartFilename = config.Filename
 		} else {
@@ -240,6 +244,15 @@ func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) {
 
 			if Opt.FilePath != "" {
 				workflow.Path = Opt.FilePath
+			}
+
+			if workflow.Mod == "sc" {
+				Opt.FileOutput = "raw"
+			}
+
+			// 一些workflow的参数, 允许被命令行参数覆盖
+			if r.config.IP != "" {
+				workflow.IP = r.config.IP
 			}
 
 			config := workflow.PrepareConfig()
@@ -294,7 +307,7 @@ func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) {
 				Opt.Noscan = workflow.NoScan
 			}
 
-			if r.FileOutput == "default" {
+			if r.FileOutput == "default" && config.Mod != "sc" {
 				Opt.FileOutput = "json"
 			} else {
 				Opt.FileOutput = r.FileOutput
@@ -340,22 +353,18 @@ func (r *Runner) close(config *Config) {
 	Log.Importantf("Alive sum: %d, Target sum : %d", Opt.AliveSum, RunOpt.Sum)
 	Log.Important("Totally run: " + time.Since(r.start).String())
 
-	var filenamelog string
 	// 输出文件名
 	if Opt.File != nil && Opt.File.Initialized {
-		filenamelog = fmt.Sprintf("Results filename: %s , ", config.Filename)
+		Log.Importantf("Results filename: " + config.Filename)
 	}
 	if Opt.SmartFile != nil && Opt.SmartFile.Initialized {
-		filenamelog += "Smartscan result filename: " + config.SmartFilename + " , "
+		Log.Important("Smartscan result filename: " + config.SmartFilename)
 	}
 	if Opt.AliveFile != nil && Opt.AliveFile.Initialized {
-		filenamelog += "Pingscan result filename: " + config.PingFilename + ","
+		Log.Important("Pingscan result filename: " + config.PingFilename)
 	}
 	if IsExist(config.Filename + "_extract") {
-		filenamelog += "extractor result filename: " + config.Filename + "_extract"
-	}
-	if filenamelog != "" {
-		Log.Important(filenamelog)
+		Log.Important("extractor result filename: " + config.Filename + "_extract")
 	}
 
 	// 扫描结果文件自动上传
