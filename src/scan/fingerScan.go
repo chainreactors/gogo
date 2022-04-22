@@ -24,15 +24,15 @@ func getFramework(result *Result, fingermap FingerMapper, matcher func(*Result, 
 		framework, vuln := matcher(result, finger)
 		alreadyFrameworks = append(alreadyFrameworks, finger)
 		if framework != nil {
+			if vuln != nil {
+				result.AddVuln(vuln)
+			}
 			result.AddFramework(framework)
 			if result.Protocol == "tcp" {
 				// 如果是tcp协议,并且识别到一个指纹,则退出.
 				// 如果是http协议,可能存在多个指纹,则进行扫描
 				return
 			}
-		}
-		if vuln != nil {
-			result.AddVuln(vuln)
 		}
 	}
 
