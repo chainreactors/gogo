@@ -154,6 +154,8 @@ func GetFilename(config *Config, format string, filepath, outtype string) string
 func getAutoFilename(config *Config, outtype string) string {
 	var basename string
 	target := strings.Replace(config.GetTargetName(), "/", "_", -1)
+	target = strings.Replace(target, ":", "", -1)
+	target = strings.Replace(target, "\\", "_", -1)
 	ports := strings.Replace(config.Ports, ",", "_", -1)
 	basename = fmt.Sprintf("%s_%s_%s_%s", target, ports, config.Mod, outtype)
 	return basename
