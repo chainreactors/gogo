@@ -86,6 +86,7 @@ func httpFingerMatch(result *Result, finger *Finger) (*Framework, *Vuln) {
 	if ok { // 如果已经匹配到一个指纹,则略过头匹配
 		if rerequest {
 			// 如果主动发包匹配到了指纹,则重新进行信息收集
+			framework.Version += "active"
 			CollectHttpInfo(result, resp, content, body)
 		}
 		return framework, vuln
