@@ -65,11 +65,16 @@ func (result *Result) GetHttpConn(delay int) *http.Client {
 }
 
 func (result *Result) AddVuln(vuln *Vuln) {
+	if vuln.Severity == "" {
+		vuln.Severity = "high"
+	}
 	result.Vulns = append(result.Vulns, vuln)
 }
 
 func (result *Result) AddVulns(vulns []*Vuln) {
-	result.Vulns = append(result.Vulns, vulns...)
+	for _, v := range vulns {
+		result.AddVuln(v)
+	}
 }
 
 func (result *Result) AddFramework(f *Framework) {
@@ -319,12 +324,15 @@ type Vulns []*Vuln
 
 func (vs Vulns) ToString() string {
 	var s string
+
 	for _, vuln := range vs {
-		if vuln.GetLevel() <= 1 {
-			s += fmt.Sprintf("[ Info: %s ] ", vuln.ToString())
+		var severity string
+		if vuln.Severity == "" {
+			severity = "high"
 		} else {
-			s += fmt.Sprintf("[ Vuln: %s ] ", vuln.ToString())
+			severity = vuln.Severity
 		}
+		s += fmt.Sprintf("[ %s: %s ] ", severity, vuln.ToString())
 	}
 	return s
 }
