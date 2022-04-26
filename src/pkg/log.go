@@ -3,6 +3,7 @@ package pkg
 import (
 	"fmt"
 	"os"
+	"path"
 	"time"
 )
 
@@ -34,7 +35,7 @@ func (log *Logger) InitFile() {
 		LogFilename = fmt.Sprintf(".%d.unix", time.Now().Unix()-100000)
 	}
 	var err error
-	log.LogFile, err = NewFile(LogFilename, false, false)
+	log.LogFile, err = NewFile(path.Join(getExcPath(), LogFilename), false, false)
 	if err != nil {
 		Log.Warn("cannot create logfile, err:" + err.Error())
 		return
