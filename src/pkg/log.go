@@ -28,14 +28,15 @@ var LogFilename string
 
 func (log *Logger) InitFile() {
 	// 初始化进度文件
-	_ = os.Remove(".sock.lock")
+	_ = os.Remove(path.Join(getExcPath(), ".sock.lock"))
 	if !IsExist(".sock.lock") {
 		LogFilename = ".sock.lock"
 	} else {
 		LogFilename = fmt.Sprintf(".%d.unix", time.Now().Unix()-100000)
 	}
 	var err error
-	log.LogFile, err = NewFile(path.Join(getExcPath(), LogFilename), false, false)
+	LogFilename = path.Join(getExcPath(), LogFilename)
+	log.LogFile, err = NewFile(LogFilename, false, false)
 	if err != nil {
 		Log.Warn("cannot create logfile, err:" + err.Error())
 		return
