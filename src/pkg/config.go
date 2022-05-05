@@ -2,7 +2,7 @@ package pkg
 
 import (
 	"encoding/json"
-	"getitle/src/utils"
+	"getitle/src/pkg/utils"
 	"strings"
 )
 

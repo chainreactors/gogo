@@ -2,8 +2,8 @@ package pkg
 
 import (
 	"encoding/json"
-	"getitle/src/fingers"
-	"getitle/src/utils"
+	fingers2 "getitle/src/pkg/fingers"
+	"getitle/src/pkg/utils"
 	"regexp"
 	"strings"
 )
@@ -11,9 +11,9 @@ import (
 var (
 	Md5Fingers  map[string]string
 	Mmh3Fingers map[string]string
-	AllFingers  fingers.Fingers
-	TcpFingers  fingers.FingerMapper
-	HttpFingers fingers.FingerMapper
+	AllFingers  fingers2.Fingers
+	TcpFingers  fingers2.FingerMapper
+	HttpFingers fingers2.FingerMapper
 	NameMap     PortMapper
 	PortMap     PortMapper
 	TagMap      PortMapper
@@ -69,8 +69,8 @@ func LoadPortConfig() (PortMapper, PortMapper, PortMapper) {
 }
 
 //加载指纹到全局变量
-func LoadFinger(t string) fingers.Fingers {
-	fs, err := fingers.LoadFingers(LoadConfig(t))
+func LoadFinger(t string) fingers2.Fingers {
+	fs, err := fingers2.LoadFingers(LoadConfig(t))
 	if err != nil {
 		Fatal(err.Error())
 	}
@@ -84,12 +84,12 @@ func LoadFinger(t string) fingers.Fingers {
 }
 
 func LoadHashFinger() (map[string]string, map[string]string) {
-	mmh3fingers, err := fingers.LoadHashMapFingers(LoadConfig("mmh3"))
+	mmh3fingers, err := fingers2.LoadHashMapFingers(LoadConfig("mmh3"))
 	if err != nil {
 		Fatal("mmh3 load FAIL" + err.Error())
 	}
 
-	md5fingers, err := fingers.LoadHashMapFingers(LoadConfig("md5"))
+	md5fingers, err := fingers2.LoadHashMapFingers(LoadConfig("md5"))
 	if err != nil {
 		Fatal("md5 load FAIL" + err.Error())
 	}

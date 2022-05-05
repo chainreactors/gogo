@@ -3,8 +3,8 @@ package pkg
 import (
 	"encoding/json"
 	"fmt"
-	. "getitle/src/fingers"
-	"getitle/src/utils"
+	. "getitle/src/pkg/fingers"
+	"getitle/src/pkg/utils"
 	"net"
 	"net/http"
 	"strconv"

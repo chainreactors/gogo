@@ -2,10 +2,10 @@ package cmd
 
 import (
 	"fmt"
-	. "getitle/src/core"
+	. "getitle/src/internal/core"
+	"getitle/src/internal/scan"
 	. "getitle/src/pkg"
-	. "getitle/src/scan"
-	. "getitle/src/utils"
+	. "getitle/src/pkg/utils"
 	"net"
 	"os"
 	"path"
@@ -108,18 +108,18 @@ func (r *Runner) init() {
 	// 初始化各种全局变量
 	// 初始化指纹优先级
 	if r.Version {
-		RunOpt.VersionLevel = 1
+		scan.RunOpt.VersionLevel = 1
 	} else if r.Version2 {
-		RunOpt.VersionLevel = 2
+		scan.RunOpt.VersionLevel = 2
 	} else {
-		RunOpt.VersionLevel = 0
+		scan.RunOpt.VersionLevel = 0
 	}
 
 	// 初始化漏洞
 	if r.Exploit {
-		RunOpt.Exploit = "auto"
+		scan.RunOpt.Exploit = "auto"
 	} else {
-		RunOpt.Exploit = r.ExploitName
+		scan.RunOpt.Exploit = r.ExploitName
 	}
 
 	if r.NoScan {
@@ -139,7 +139,7 @@ func (r *Runner) init() {
 			Log.Warn("no interface name input, use default interface name: eth0")
 		}
 		var err error
-		RunOpt.Interface, err = net.InterfaceByName(r.iface)
+		scan.RunOpt.Interface, err = net.InterfaceByName(r.iface)
 		if err != nil {
 			Log.Warn("interface error, " + err.Error())
 			Log.Warn("interface error, " + err.Error())
@@ -314,19 +314,19 @@ func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) {
 			}
 
 			if r.Version {
-				RunOpt.VersionLevel = 1
+				scan.RunOpt.VersionLevel = 1
 			} else {
-				RunOpt.VersionLevel = workflow.Version
+				scan.RunOpt.VersionLevel = workflow.Version
 			}
 
-			if RunOpt.Exploit != "none" {
+			if scan.RunOpt.Exploit != "none" {
 				if r.Exploit {
-					RunOpt.Exploit = "auto"
+					scan.RunOpt.Exploit = "auto"
 				} else {
-					RunOpt.Exploit = r.ExploitName
+					scan.RunOpt.Exploit = r.ExploitName
 				}
 			} else {
-				RunOpt.Exploit = workflow.Exploit
+				scan.RunOpt.Exploit = workflow.Exploit
 			}
 
 			config = InitConfig(config)
@@ -350,7 +350,7 @@ func (r *Runner) close(config *Config) {
 	}
 
 	// 任务统计
-	Log.Importantf("Alive sum: %d, Target sum : %d", Opt.AliveSum, RunOpt.Sum)
+	Log.Importantf("Alive sum: %d, Target sum : %d", Opt.AliveSum, scan.RunOpt.Sum)
 	Log.Important("Totally run: " + time.Since(r.start).String())
 
 	// 输出文件名
@@ -375,8 +375,8 @@ func (r *Runner) close(config *Config) {
 
 func (r *Runner) resetGlobals() {
 	Opt.Noscan = false
-	RunOpt.Exploit = "none"
-	RunOpt.VersionLevel = 0
+	scan.RunOpt.Exploit = "none"
+	scan.RunOpt.VersionLevel = 0
 }
 
 func printConfigs(t string) {

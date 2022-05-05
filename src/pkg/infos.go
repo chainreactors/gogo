@@ -1,8 +1,8 @@
 package pkg
 
 import (
-	"getitle/src/fingers"
-	"getitle/src/utils"
+	"getitle/src/pkg/fingers"
+	utils2 "getitle/src/pkg/utils"
 	"net/http"
 	"strings"
 )
@@ -34,7 +34,7 @@ func CollectHttpInfo(result *Result, resp *http.Response, content, body string) 
 	result.Body = body
 	result.Content = content
 	result.Protocol = resp.Request.URL.Scheme
-	result.HttpStat = utils.ToString(resp.StatusCode)
+	result.HttpStat = utils2.ToString(resp.StatusCode)
 	result.Language = getHttpLanguage(resp)
 	result.Midware = resp.Header.Get("Server")
 	result.Title = GetTitle(content)
@@ -133,5 +133,5 @@ func FormatCertDomains(domains []string) []string {
 		}
 		hosts = append(hosts, domain)
 	}
-	return utils.SliceUnique(hosts)
+	return utils2.SliceUnique(hosts)
 }
