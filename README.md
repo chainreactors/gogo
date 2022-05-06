@@ -8,7 +8,7 @@ README Version 1.2.0
 ```
 Usage of ./getitle:
 
-   -k string    启动密码(必须输入)为ybb  
+   -k string    启动密码(必须输入) 
    -debug bool  输出每个请求的错误日志, 用来debug
    
    INPUT params:
@@ -110,19 +110,23 @@ Usage of ./getitle:
 
 `gt -k [key] -ip 192.168.1.1/24 -p win,db,top2 `
 
-一行全冲
+一行内网全冲
 
 `gt -k [key] -w inter -e -v`
 
-使用预设, 启发式扫描10段常见
+使用工作流, 启发式扫描10段常见端口
 
 `gt -k [key] -w 10`
 
-不适用预设, 手动指定特定网段与配置
+不适用工作流, 手动指定特定网段与配置
 
 `gt -k [key] -ip 172.16.1.1/16 -m s -p all -e -v -af`
 
-**网段发现** :
+查看全部可用工作流
+
+`gt -k [key] -P workflow`
+
+**网段发现**(参数使用较为复杂, 现在已经基本被淘汰, 仅在少数场景下手动指定) :
 
 喷洒存活C段
 
@@ -132,7 +136,7 @@ Usage of ./getitle:
 
 `gt -k [key] -ip 10.0.0.0/8 -m ss -no -af`
 
-梯度下降喷洒C段(在A段中喷洒C段)
+递归下降喷洒C段(在A段中喷洒C段)
 
 `gt -k [key] -ip 10.0.0.0/8 -m sc -af`
 
