@@ -8,14 +8,14 @@ import (
 
 func NotFoundScan(result *pkg.Result) {
 	conn := result.GetHttpConn(RunOpt.Delay)
-
-	resp, err := conn.Get(result.GetURL() + pkg.RandomDir)
+	url := result.GetHostURL() + pkg.RandomDir
+	resp, err := conn.Get(url)
 
 	if err != nil {
-		pkg.Log.Debugf("request 404page %s %s", result.GetURL()+pkg.RandomDir, err.Error())
+		pkg.Log.Debugf("request 404page %s %s", url, err.Error())
 		return
 	}
-	pkg.Log.Debugf("request 404page %s %d", result.GetURL()+pkg.RandomDir, resp.StatusCode)
+	pkg.Log.Debugf("request 404page %s %d", url, resp.StatusCode)
 	if utils.ToString(resp.StatusCode) == result.HttpStat {
 		return
 	}

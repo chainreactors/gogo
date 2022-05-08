@@ -20,7 +20,6 @@ var RunOpt = RunnerOpts{
 }
 
 func Dispatch(result *pkg.Result) {
-	target := result.GetTarget()
 	RunOpt.Sum++
 	if result.Port == "137" || result.Port == "nbt" {
 		nbtScan(result)
@@ -52,7 +51,7 @@ func Dispatch(result *pkg.Result) {
 		}
 		return
 	} else {
-		socketHttp(target, result)
+		socketHttp(result)
 	}
 
 	if !result.Open || result.SmartProbe {
@@ -73,12 +72,13 @@ func Dispatch(result *pkg.Result) {
 	//主动信息收集
 	if RunOpt.VersionLevel > 0 && result.IsHttp() {
 		// favicon指纹只有-v大于0并且为http服务才启用
+		if result.HttpHost != nil {
+			hostScan(result)
+		}
+
 		faviconScan(result)
 		if result.HttpStat != "404" {
 			NotFoundScan(result)
-		}
-		if result.HttpHost != nil {
-			hostScan(result)
 		}
 	} else {
 		// 如果versionlevel为0 ,或者非http服务, 则使用默认端口猜测指纹.
@@ -91,6 +91,10 @@ func Dispatch(result *pkg.Result) {
 	// 如果exploit参数不为none,则进行漏洞探测
 	if RunOpt.Exploit != "none" {
 		ExploitDispatch(result)
+	}
+
+	if result.Host == "" {
+		result.Host = result.CurrentHost
 	}
 
 	if result.Httpresp != nil && !result.Httpresp.Close {
@@ -106,7 +110,7 @@ func ExploitDispatch(result *pkg.Result) {
 	}
 
 	if (!result.NoFramework() || RunOpt.Exploit != "auto") && result.IsHttp() {
-		Nuclei(result.GetBaseURL(), result)
+		Nuclei(result.GetHostBaseURL(), result)
 	}
 
 	return

@@ -10,15 +10,15 @@ import (
 // -e
 func shiroScan(result *Result) {
 	var isshiro = false
-	target := result.GetURL()
+	url := result.GetHostURL()
 	conn := result.GetHttpConn(RunOpt.Delay)
-	req := setshirocookie(target, "1")
+	req := setshirocookie(url, "1")
 	resp, err := conn.Do(req)
 	if err != nil {
 		result.Error = err.Error()
 		return
 	}
-	Log.Debug("request shiro " + result.GetURL())
+	Log.Debug("request shiro " + url)
 	deleteme := resp.Header.Get("Set-Cookie")
 	if strings.Contains(deleteme, "=deleteMe") {
 		result.AddFramework(&Framework{Name: "shiro", Version: "active"})
@@ -26,8 +26,8 @@ func shiroScan(result *Result) {
 	} else {
 		return
 	}
-	req = setshirocookie(target, "/A29uyYfZg4mT+SUU/3eMAnRlgBWnVrveeiwZ/hz1LlF86NxSmq9dsWpS0U7Q2U+MjbAzaLBCsV7IHb7MQVFItU+ibEkDuyO7WoNGBM4ay8l+oBZo2W2mZcFXG3swJsGXxaZHua3m5jlJNKcCjqy9sX2oRZrm7eSABvUn71vY9NaohbC1i6+FKCRMW9s11/Q")
-	Log.Debug("request shiro default key " + result.GetURL())
+	req = setshirocookie(url, "/A29uyYfZg4mT+SUU/3eMAnRlgBWnVrveeiwZ/hz1LlF86NxSmq9dsWpS0U7Q2U+MjbAzaLBCsV7IHb7MQVFItU+ibEkDuyO7WoNGBM4ay8l+oBZo2W2mZcFXG3swJsGXxaZHua3m5jlJNKcCjqy9sX2oRZrm7eSABvUn71vY9NaohbC1i6+FKCRMW9s11/Q")
+	Log.Debug("request shiro default key " + url)
 	resp, err = conn.Do(req)
 	if err != nil {
 		result.Error = err.Error()

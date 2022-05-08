@@ -19,6 +19,9 @@ type targetConfig struct {
 func (tc *targetConfig) NewResult() *Result {
 	result := NewResult(tc.ip, tc.port)
 	if tc.hosts != nil {
+		if len(tc.hosts) == 1 {
+			result.CurrentHost = tc.hosts[0]
+		}
 		result.HttpHost = tc.hosts
 	}
 	if tc.fingers != nil {

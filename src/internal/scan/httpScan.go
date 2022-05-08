@@ -13,8 +13,9 @@ var headers = http.Header{
 
 // -defalut
 //socket进行对网站的连接
-func socketHttp(target string, result *pkg.Result) {
+func socketHttp(result *pkg.Result) {
 	var err error
+	target := result.GetTarget()
 	result.Protocol = "tcp"
 	conn, err := pkg.TcpSocketConn(target, RunOpt.Delay)
 	if err != nil {
@@ -53,7 +54,13 @@ func socketHttp(target string, result *pkg.Result) {
 	result.HttpStat = "tcp"
 
 	//发送内容
-	senddataStr := fmt.Sprintf("GET /%s HTTP/1.1\r\nHost: %s\r\nConnection: Keep-Alive\r\n\r\n", result.Uri, target)
+	var host string
+	if result.CurrentHost == "" {
+		host = target
+	} else {
+		host = fmt.Sprintf("%s:%s", result.CurrentHost, result.Port)
+	}
+	senddataStr := fmt.Sprintf("GET /%s HTTP/1.1\r\nHost: %s\r\nConnection: Keep-Alive\r\n\r\n", result.Uri, host)
 	data, err := pkg.SocketSend(conn, []byte(senddataStr), 4096)
 	if err != nil {
 		result.Error = err.Error()
@@ -92,6 +99,9 @@ func SystemHttp(target string, result *pkg.Result) {
 	conn := result.GetHttpConn(delay)
 	req, _ := http.NewRequest("GET", target, nil)
 	req.Header = headers
+	if result.CurrentHost != "" {
+		req.Host = result.CurrentHost
+	}
 
 	resp, err := conn.Do(req)
 	if err != nil {
@@ -104,10 +114,10 @@ func SystemHttp(target string, result *pkg.Result) {
 	if resp.TLS != nil {
 		// 证书在错误处理之前, 因为有可能存在证书,但是服务已关闭
 		result.Protocol = "https"
-		result.Host = strings.Join(resp.TLS.PeerCertificates[0].DNSNames, ",")
+		result.Cert = strings.Join(resp.TLS.PeerCertificates[0].DNSNames, ",")
 		if len(resp.TLS.PeerCertificates[0].DNSNames) > 0 && len(resp.TLS.PeerCertificates[0].DNSNames) < 3 && result.HttpHost == nil {
 			// 经验公式: 通常只有cdn会绑定超过2个host, 正常情况只有一个host或者带上www的两个host
-			result.HttpHost = pkg.FormatCertDomains(resp.TLS.PeerCertificates[0].DNSNames)
+			result.HttpHost = append(result.HttpHost, pkg.FormatCertDomains(resp.TLS.PeerCertificates[0].DNSNames)...)
 		}
 	}
 

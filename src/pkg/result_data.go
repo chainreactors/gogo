@@ -145,7 +145,7 @@ func (rd ResultsData) ToFormat(isColor bool) string {
 			if !(p.Port == "135 (oxid)" || p.Port == "137" || p.Port == "icmp" || p.Port == "arp") {
 				if isColor {
 					// 颜色输出
-					s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s\t%s\t%s [%s] %s %s %s\n",
+					s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s\t%s\t%s\t%s [%s] %s %s %s\n",
 						p.Protocol,
 						ip,
 						port,
@@ -153,6 +153,7 @@ func (rd ResultsData) ToFormat(isColor bool) string {
 						p.Language,
 						Blue(p.Frameworks.ToString()),
 						p.Host,
+						p.Cert,
 						p.Hash,
 						Yellow(p.HttpStat),
 						Blue(p.Title),
@@ -160,7 +161,7 @@ func (rd ResultsData) ToFormat(isColor bool) string {
 						Blue(p.GetExtractStat()),
 					)
 				} else {
-					s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s\t%s\t%s [%s] %s %s %s\n",
+					s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s\t%s\t%s\t%s [%s] %s %s %s\n",
 						p.Protocol,
 						ip,
 						port,
@@ -168,6 +169,7 @@ func (rd ResultsData) ToFormat(isColor bool) string {
 						p.Language,
 						p.Frameworks.ToString(),
 						p.Host,
+						p.Cert,
 						p.Hash,
 						p.HttpStat,
 						p.Title,
@@ -305,7 +307,7 @@ func LoadResultFile(file *os.File) interface{} {
 		// 解析extract结果
 		data, err = LoadExtracts(content)
 	} else if !IsJson(content) {
-		// 解析按行分割的 ip:port:[framework] 输入
+		// 解析按行分割的 ip:port:framework 输入
 		var results Results
 		for _, target := range strings.Split(string(content), "\n") {
 			if strings.Contains(target, ":") {
@@ -317,16 +319,14 @@ func LoadResultFile(file *os.File) interface{} {
 
 				if len(targetpair) >= 2 {
 					if !IsIPv4(ip) {
-						if tmpip, ok := ParseIP(ip); ok {
-							host = ip
-							ip = tmpip
+						if parsedIP, ok := ParseIP(ip); ok {
+							ip = parsedIP
+							result.HttpHost = []string{host}
 						}
 					}
 					result = NewResult(ip, targetpair[1])
 				}
-				if host != "" {
-					result.HttpHost = []string{host}
-				}
+
 				if len(targetpair) == 3 {
 					result.AddFramework(&fingers.Framework{Name: targetpair[2]})
 				}

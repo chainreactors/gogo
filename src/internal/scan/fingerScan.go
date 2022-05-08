@@ -71,14 +71,15 @@ func httpFingerMatch(result *Result, finger *Finger) (*Framework, *Vuln) {
 	if RunOpt.VersionLevel >= 1 && finger.SendDataStr != "" {
 		// 如果level大于1,并且存在主动发包, 则重新获取resp与content
 		conn := result.GetHttpConn(RunOpt.Delay)
-		tmpresp, err := conn.Get(result.GetURL() + finger.SendDataStr)
+		url := result.GetHostURL() + finger.SendDataStr
+		tmpresp, err := conn.Get(url)
 		if err == nil {
-			Log.Debugf("request finger %s %d for %s", result.GetURL()+finger.SendDataStr, tmpresp.StatusCode, finger.Name)
+			Log.Debugf("request finger %s %d for %s", url, tmpresp.StatusCode, finger.Name)
 			resp = tmpresp
 			content, body = GetHttpRaw(resp)
 			rerequest = true
 		} else {
-			Log.Debugf("request finger %s %s for %s", result.GetURL()+finger.SendDataStr, err.Error(), finger.Name)
+			Log.Debugf("request finger %s %s for %s", url, err.Error(), finger.Name)
 		}
 	}
 

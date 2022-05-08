@@ -18,7 +18,9 @@ type Result struct {
 	Uri          string         `json:"u"` // uri
 	Os           string         `json:"o"` // os
 	Host         string         `json:"h"` // host
+	Cert         string         `json:"c"`
 	HttpHost     []string       `json:"-"`
+	CurrentHost  string         `json:"-"`
 	Title        string         `json:"t"` // title
 	Path         string         `json:"path"`
 	Midware      string         `json:"m"` // midware
@@ -193,12 +195,24 @@ func (result Result) GetBaseURL() string {
 	return fmt.Sprintf("%s://%s:%s", result.Protocol, result.Ip, result.Port)
 }
 
+func (result Result) GetHostBaseURL() string {
+	if result.CurrentHost == "" {
+		return result.GetBaseURL()
+	} else {
+		return fmt.Sprintf("%s://%s:%s", result.Protocol, result.CurrentHost, result.Port)
+	}
+}
+
 func (result Result) GetURL() string {
 	if result.IsHttp() {
-		return fmt.Sprintf("%s://%s:%s%s", result.Protocol, result.Ip, result.Port, result.Uri)
+		return result.GetBaseURL() + result.Uri
 	} else {
 		return result.GetBaseURL()
 	}
+}
+
+func (result Result) GetHostURL() string {
+	return result.GetHostBaseURL() + result.Uri
 }
 
 func (result Result) GetTarget() string {
