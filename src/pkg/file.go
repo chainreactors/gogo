@@ -111,7 +111,7 @@ func (f *File) Sync() {
 	} else {
 		_, _ = f.fileWriter.Write(f.buf.Bytes())
 	}
-
+	Log.Debugf("sync %d bytes to %s", f.buf.Len(), f.Filename)
 	f.buf.Reset()
 	_ = f.fileWriter.Flush()
 	_ = f.fileHandler.Sync()
