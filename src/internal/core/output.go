@@ -153,7 +153,9 @@ func FormatOutput(filename string, outputfile string, autofile bool, filters []s
 			fmt.Println(s)
 		}
 	} else if textdata != "" {
-		outfunc(textdata)
+		if outputfile != "" {
+			outfunc(textdata)
+		}
 	}
 }
 
