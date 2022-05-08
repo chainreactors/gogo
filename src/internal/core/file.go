@@ -92,22 +92,26 @@ func handler() {
 		defer fileCloser()
 		var rescommaflag bool
 		for res := range Opt.dataCh {
-			if !Opt.File.Initialized {
-				err := Opt.File.Init()
-				if err != nil {
-					Log.Warn(err.Error())
+			if res == "sync" {
+				Opt.File.Sync()
+			} else {
+				if !Opt.File.Initialized {
+					err := Opt.File.Init()
+					if err != nil {
+						Log.Warn(err.Error())
+					}
 				}
-			}
 
-			if rescommaflag {
-				// 只有json输出才需要手动添加逗号
-				res = "," + res
+				if rescommaflag {
+					// 只有json输出才需要手动添加逗号
+					res = "," + res
+				}
+				if Opt.FileOutput == "json" {
+					// 如果json格式输出,则除了第一次输出,之后都会带上逗号
+					rescommaflag = true
+				}
+				Opt.File.Write(res)
 			}
-			if Opt.FileOutput == "json" {
-				// 如果json格式输出,则除了第一次输出,之后都会带上逗号
-				rescommaflag = true
-			}
-			Opt.File.Write(res)
 		}
 	}()
 
