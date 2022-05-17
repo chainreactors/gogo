@@ -40,12 +40,12 @@ def read(filename):
 
 
 if __name__ == "__main__":
-    tcpfingers = read("tcpfingers.yaml")
-    httpfingers = read("httpfingers.yaml")
-    md5fingers = read("md5fingers.yaml")
+    tcpfingers = read("fingers/tcpfingers.yaml")
+    httpfingers = read("fingers/httpfingers.yaml")
+    md5fingers = read("fingers/md5fingers.yaml")
+    mmh3fingers = read("fingers/mmh3fingers.yaml")
 
     port = read("port.yaml")
-    mmh3fingers = read("mmh3fingers.yaml")
     workflows = read("workflows.yaml")
     nuclei = loadnuclei()
     f = open("src/pkg/templates.go", "w", encoding="utf-8")
