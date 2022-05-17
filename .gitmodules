@@ -1,6 +1,3 @@
 [submodule "src/config"]
 	path = src/config
 	url = https://github.com/ZTeam-H3/getitle-templates
-[submodule "src/pkg/fingers"]
-	path = src/pkg/fingers
-	url = https://github.com/ZTeam-H3/fingers
