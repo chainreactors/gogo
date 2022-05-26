@@ -8,7 +8,7 @@ import (
 
 func NotFoundScan(result *pkg.Result) {
 	conn := result.GetHttpConn(RunOpt.Delay)
-	url := result.GetHostURL() + pkg.RandomDir
+	url := result.GetURL() + pkg.RandomDir
 	resp, err := conn.Get(url)
 
 	if err != nil {

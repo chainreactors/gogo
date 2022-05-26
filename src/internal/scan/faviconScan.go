@@ -10,7 +10,7 @@ import (
 func faviconScan(result *Result) {
 	var err error
 	conn := result.GetHttpConn(RunOpt.Delay)
-	url := result.GetHostURL() + "/favicon.ico"
+	url := result.GetURL() + "/favicon.ico"
 	resp, err := conn.Get(url)
 	if err != nil {
 		Log.Debugf("request favicon %s %s", url, err.Error())
