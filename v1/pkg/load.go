@@ -2,8 +2,8 @@ package pkg
 
 import (
 	"encoding/json"
-	"getitle/src/pkg/fingers"
-	"getitle/src/pkg/utils"
+	"getitle/v1/pkg/fingers"
+	"getitle/v1/pkg/utils"
 	"regexp"
 	"strings"
 )

@@ -2,7 +2,7 @@ package protocols
 
 import (
 	"errors"
-	"getitle/src/pkg/nuclei"
+	"getitle/v1/pkg/nuclei"
 	"strings"
 )
 

@@ -1,8 +1,8 @@
 package scan
 
 import (
-	. "getitle/src/pkg"
-	. "getitle/src/pkg/fingers"
+	. "getitle/v1/pkg"
+	. "getitle/v1/pkg/fingers"
 	"net/http"
 	"strings"
 )

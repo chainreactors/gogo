@@ -1,7 +1,7 @@
 package scan
 
 import (
-	"getitle/src/pkg"
+	"getitle/v1/pkg"
 	"strconv"
 )
 

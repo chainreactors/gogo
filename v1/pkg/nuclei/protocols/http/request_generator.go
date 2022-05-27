@@ -2,8 +2,8 @@ package http
 
 import (
 	"fmt"
-	"getitle/src/pkg/nuclei"
-	"getitle/src/pkg/nuclei/protocols"
+	"getitle/v1/pkg/nuclei"
+	"getitle/v1/pkg/nuclei/protocols"
 	"io/ioutil"
 	"net"
 	"net/http"

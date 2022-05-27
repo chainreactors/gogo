@@ -2,7 +2,7 @@ package protocols
 
 import (
 	"fmt"
-	"getitle/src/pkg/nuclei"
+	"getitle/v1/pkg/nuclei"
 	"regexp"
 	"strings"
 )

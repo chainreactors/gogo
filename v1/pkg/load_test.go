@@ -1,7 +1,7 @@
 package pkg
 
 import (
-	"getitle/src/pkg/fingers"
+	"getitle/v1/pkg/fingers"
 	"testing"
 )
 

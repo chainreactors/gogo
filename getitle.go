@@ -1,7 +1,7 @@
-//go:generate go run src/pkg/templates_gen.go
+//go:generate go run v1/pkg/templates_gen.go
 package main
 
-import "getitle/src/cmd"
+import "getitle/v1/cmd"
 
 func main() {
 	//f, _ := os.Create("cpu.txt")

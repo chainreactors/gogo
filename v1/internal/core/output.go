@@ -3,7 +3,7 @@ package core
 import (
 	"encoding/json"
 	"fmt"
-	. "getitle/src/pkg"
+	. "getitle/v1/pkg"
 	"os"
 	"strings"
 )

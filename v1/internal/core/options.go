@@ -1,6 +1,6 @@
 package core
 
-import . "getitle/src/pkg"
+import . "getitle/v1/pkg"
 
 type Options struct {
 	AliveSum    int

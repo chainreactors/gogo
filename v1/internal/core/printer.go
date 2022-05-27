@@ -2,7 +2,7 @@ package core
 
 import (
 	"fmt"
-	. "getitle/src/pkg"
+	. "getitle/v1/pkg"
 	"strings"
 )
 

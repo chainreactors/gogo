@@ -1,7 +1,7 @@
 package core
 
 import (
-	. "getitle/src/pkg"
+	. "getitle/v1/pkg"
 	"sync"
 )
 

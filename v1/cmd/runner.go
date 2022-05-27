@@ -2,10 +2,10 @@ package cmd
 
 import (
 	"fmt"
-	. "getitle/src/internal/core"
-	"getitle/src/internal/scan"
-	. "getitle/src/pkg"
-	. "getitle/src/pkg/utils"
+	. "getitle/v1/internal/core"
+	"getitle/v1/internal/scan"
+	. "getitle/v1/pkg"
+	. "getitle/v1/pkg/utils"
 	"net"
 	"os"
 	"path"

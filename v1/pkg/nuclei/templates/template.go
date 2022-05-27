@@ -1,10 +1,10 @@
 package templates
 
 import (
-	protocols2 "getitle/src/pkg/nuclei/protocols"
-	"getitle/src/pkg/nuclei/protocols/executer"
-	"getitle/src/pkg/nuclei/protocols/http"
-	"getitle/src/pkg/nuclei/protocols/network"
+	protocols2 "getitle/v1/pkg/nuclei/protocols"
+	"getitle/v1/pkg/nuclei/protocols/executer"
+	"getitle/v1/pkg/nuclei/protocols/http"
+	"getitle/v1/pkg/nuclei/protocols/network"
 	"strings"
 )
 

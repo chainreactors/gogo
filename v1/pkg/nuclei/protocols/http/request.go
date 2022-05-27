@@ -3,8 +3,8 @@ package http
 import (
 	"errors"
 	"fmt"
-	. "getitle/src/pkg/nuclei"
-	protocols2 "getitle/src/pkg/nuclei/protocols"
+	. "getitle/v1/pkg/nuclei"
+	protocols2 "getitle/v1/pkg/nuclei/protocols"
 	"io"
 	"io/ioutil"
 	"net/http"

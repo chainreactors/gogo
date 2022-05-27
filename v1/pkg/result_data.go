@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"getitle/src/pkg/fingers"
+	"getitle/v1/pkg/fingers"
 	"io/ioutil"
 	"os"
 	"strings"

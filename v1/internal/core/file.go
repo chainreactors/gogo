@@ -3,7 +3,7 @@ package core
 import (
 	"bytes"
 	"fmt"
-	. "getitle/src/pkg"
+	. "getitle/v1/pkg"
 	"io/ioutil"
 	"os"
 	"strings"

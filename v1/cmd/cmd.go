@@ -3,9 +3,9 @@ package cmd
 import (
 	"flag"
 	"fmt"
-	. "getitle/src/internal/core"
-	. "getitle/src/internal/scan"
-	. "getitle/src/pkg"
+	. "getitle/v1/internal/core"
+	. "getitle/v1/internal/scan"
+	. "getitle/v1/pkg"
 	"github.com/panjf2000/ants/v2"
 	"os"
 	"strings"

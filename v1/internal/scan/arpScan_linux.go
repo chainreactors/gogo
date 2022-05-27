@@ -4,7 +4,7 @@
 package scan
 
 import (
-	"getitle/src/pkg"
+	"getitle/v1/pkg"
 )
 
 func arpScan(result *pkg.Result) {

@@ -3,8 +3,8 @@ package network
 import (
 	"encoding/hex"
 	"errors"
-	"getitle/src/pkg/nuclei"
-	protocols2 "getitle/src/pkg/nuclei/protocols"
+	"getitle/v1/pkg/nuclei"
+	protocols2 "getitle/v1/pkg/nuclei/protocols"
 	"io"
 	"net"
 	"net/url"

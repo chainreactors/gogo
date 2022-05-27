@@ -1,7 +1,7 @@
 package executer
 
 import (
-	protocols2 "getitle/src/pkg/nuclei/protocols"
+	protocols2 "getitle/v1/pkg/nuclei/protocols"
 )
 
 type Executer struct {

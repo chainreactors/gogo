@@ -3,7 +3,7 @@
 
 package scan
 
-import "getitle/src/pkg"
+import "getitle/v1/pkg"
 
 func arpScan(result *pkg.Result) {
 	return

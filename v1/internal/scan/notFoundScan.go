@@ -1,9 +1,9 @@
 package scan
 
 import (
-	"getitle/src/pkg"
-	"getitle/src/pkg/fingers"
-	"getitle/src/pkg/utils"
+	"getitle/v1/pkg"
+	"getitle/v1/pkg/fingers"
+	"getitle/v1/pkg/utils"
 )
 
 func NotFoundScan(result *pkg.Result) {

@@ -2,9 +2,9 @@ package core
 
 import (
 	"errors"
-	. "getitle/src/internal/scan"
-	. "getitle/src/pkg"
-	. "getitle/src/pkg/utils"
+	. "getitle/v1/internal/scan"
+	. "getitle/v1/pkg"
+	. "getitle/v1/pkg/utils"
 	"os"
 	"strings"
 )

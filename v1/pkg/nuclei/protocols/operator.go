@@ -1,7 +1,7 @@
 package protocols
 
 import (
-	"getitle/src/pkg/nuclei"
+	"getitle/v1/pkg/nuclei"
 )
 
 // operators contains the operators that can be applied on protocols

@@ -1,8 +1,8 @@
 package pkg
 
 import (
-	"getitle/src/pkg/fingers"
-	utils2 "getitle/src/pkg/utils"
+	"getitle/v1/pkg/fingers"
+	utils2 "getitle/v1/pkg/utils"
 	"net/http"
 	"strings"
 )

@@ -1,7 +1,7 @@
 package pkg
 
 import (
-	"getitle/src/pkg/utils"
+	"getitle/v1/pkg/utils"
 	"strconv"
 	"strings"
 )

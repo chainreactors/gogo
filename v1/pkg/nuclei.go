@@ -3,8 +3,8 @@ package pkg
 import (
 	"encoding/json"
 	"fmt"
-	protocols2 "getitle/src/pkg/nuclei/protocols"
-	. "getitle/src/pkg/nuclei/templates"
+	protocols2 "getitle/v1/pkg/nuclei/protocols"
+	. "getitle/v1/pkg/nuclei/templates"
 	"io/ioutil"
 	"strings"
 )

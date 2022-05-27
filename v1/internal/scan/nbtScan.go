@@ -2,7 +2,7 @@ package scan
 
 import (
 	"encoding/hex"
-	"getitle/src/pkg"
+	"getitle/v1/pkg"
 	"strconv"
 	"strings"
 )

@@ -2,8 +2,8 @@ package core
 
 import (
 	"fmt"
-	"getitle/src/internal/scan"
-	. "getitle/src/pkg"
+	"getitle/v1/internal/scan"
+	. "getitle/v1/pkg"
 	"github.com/panjf2000/ants/v2"
 	"strings"
 	"sync"

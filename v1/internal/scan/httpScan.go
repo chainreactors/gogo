@@ -2,7 +2,7 @@ package scan
 
 import (
 	"fmt"
-	"getitle/src/pkg"
+	"getitle/v1/pkg"
 	"net/http"
 	"strings"
 )

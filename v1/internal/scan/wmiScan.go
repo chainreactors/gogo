@@ -2,8 +2,8 @@ package scan
 
 import (
 	"bytes"
-	"getitle/src/pkg"
-	"getitle/src/pkg/utils"
+	"getitle/v1/pkg"
+	"getitle/v1/pkg/utils"
 	"github.com/M09ic/go-ntlmssp"
 )
 
