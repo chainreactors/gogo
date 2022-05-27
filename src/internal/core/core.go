@@ -176,7 +176,7 @@ func SmartMod(target string, config Config) {
 	}
 }
 
-func cidr_alived(ip string, temp *sync.Map, mask int, mod string) {
+func cidrAlived(ip string, temp *sync.Map, mask int, mod string) {
 	alivecidr := ip2superip(ip, mask)
 	_, ok := temp.Load(alivecidr)
 	if !ok {
@@ -198,7 +198,7 @@ func smartScan(tc targetConfig, temp *sync.Map, mask int, mod string) {
 	scan.Dispatch(result)
 
 	if result.Open {
-		cidr_alived(result.Ip, temp, mask, mod)
+		cidrAlived(result.Ip, temp, mask, mod)
 	} else {
 		Log.Debugf("tcp stat: %s, errmsg: %s", portstat[result.ErrStat], result.Error)
 	}
