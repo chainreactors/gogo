@@ -25,7 +25,7 @@ gen
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
-src/pkg/templates.go
+v1/pkg/templates.go
 /exe
 /bin
 /release
