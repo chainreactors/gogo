@@ -11,7 +11,7 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-func loadYamlFile2JsonString(filename string) string{
+func loadYamlFile2JsonString(filename string) string {
 	var err error
 	file, err := os.Open("v1/config/" + filename)
 	if err != nil {
@@ -27,27 +27,26 @@ func loadYamlFile2JsonString(filename string) string{
 	return Encode(jsonstr)
 }
 
-
 func visit(files *[]string) filepath.WalkFunc {
 	return func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			panic(err)
 		}
-		if !info.IsDir(){
+		if !info.IsDir() {
 			*files = append(*files, path)
 		}
 		return nil
 	}
 }
 
-func recuLoadYamlFiles2JsonString(dir string) string{
+func recuLoadYamlFiles2JsonString(dir string) string {
 	var files []string
-	err := filepath.Walk("v1/config/" + dir, visit(&files))
+	err := filepath.Walk("v1/config/"+dir, visit(&files))
 	if err != nil {
 		panic(err)
 	}
 	var pocs []interface{}
-	for _, file := range files{
+	for _, file := range files {
 		var tmp interface{}
 		bs, err := os.ReadFile(file)
 		if err != nil {
@@ -71,7 +70,7 @@ func recuLoadYamlFiles2JsonString(dir string) string{
 
 func main() {
 
-	template :=`
+	template := `
 package pkg
 
 var RandomDir = "/g8kZMwp4oeKsL2in"
@@ -111,10 +110,5 @@ func LoadConfig(typ string)[]byte  {
 	f.WriteString(template)
 	f.Sync()
 	f.Close()
-	if err == nil{
-		println("generate templates.go successfully")
-	}else{
-		println(err.Error())
-	}
+	println("generate templates.go successfully")
 }
-
