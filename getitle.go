@@ -1,3 +1,4 @@
+//go:generate go run src/pkg/templates_gen.go
 package main
 
 import "getitle/src/cmd"
