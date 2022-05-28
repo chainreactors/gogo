@@ -77,7 +77,7 @@ func InitConfig(config *Config) *Config {
 		}
 	}
 
-	initIP(config)
+	config.InitIP()
 	// 初始化端口配置
 	config.Portlist = PortsHandler(config.Ports)
 
@@ -111,7 +111,7 @@ func InitConfig(config *Config) *Config {
 	if config.ExcludeIPs != "" {
 		config.ExcludeMap = make(map[uint]bool)
 		for _, ip := range strings.Split(config.ExcludeIPs, ",") {
-			ip, _ = cidrFormat(ip)
+			ip, _ = ParseCIDR(ip)
 			start, end := getIpRange(ip)
 			for i := start; i <= end; i++ {
 				config.ExcludeMap[i] = true

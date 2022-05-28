@@ -79,6 +79,45 @@ func (config *Config) HasAlivedScan() bool {
 	return false
 }
 
+func (config *Config) InitIP() {
+	config.HostsMap = make(map[string][]string)
+	// 优先处理ip
+	if config.IP != "" {
+		if strings.Contains(config.IP, ",") {
+			config.IPlist = strings.Split(config.IP, ",")
+		} else {
+			var host string
+			config.IP, host = ParseCIDR(config.IP)
+			if host != "" {
+				ip, _ := SplitCIDR(config.IP)
+				config.HostsMap[ip] = append(config.HostsMap[ip], host)
+			}
+			if config.IP == "" {
+				Fatal("IP format error")
+			}
+		}
+	}
+
+	// 如果输入的是文件,则格式化所有输入值.如果无有效ip
+	if config.IPlist != nil {
+		var iplist []string
+		for _, ip := range config.IPlist {
+			ip, host := ParseCIDR(ip)
+			if host != "" {
+				i, _ := SplitCIDR(ip)
+				config.HostsMap[i] = append(config.HostsMap[i], host)
+			}
+			if ip != "" {
+				iplist = append(iplist, ip)
+			}
+		}
+		config.IPlist = utils.SliceUnique(iplist) // 去重
+		if len(config.IPlist) == 0 {
+			Fatal("all targets format error")
+		}
+	}
+}
+
 func (config *Config) GetTarget() string {
 	if config.IP != "" {
 		return config.IP

@@ -1,7 +1,9 @@
 package pkg
 
 import (
+	"getitle/v1/pkg/utils"
 	"net"
+	"net/url"
 	"sort"
 	"strings"
 )
@@ -52,4 +54,49 @@ func sortIP(ips []string) []string {
 		return Ip2Int(ips[i]) < Ip2Int(ips[j])
 	})
 	return ips
+}
+
+func ParseCIDR(target string) (string, string) {
+	// return ip, hosts
+	var ip, mask string
+	target = strings.TrimSpace(target)
+	if strings.Contains(target, "http") {
+		u, err := url.Parse(target)
+		if err != nil {
+			Log.Error(err.Error())
+			return "", ""
+		}
+		target = u.Hostname()
+	}
+
+	target = strings.Trim(target, "/")
+	if strings.Contains(target, "/") {
+		ip = strings.Split(target, "/")[0]
+		mask = strings.Split(target, "/")[1]
+		if !(utils.ToInt(mask) > 0 && utils.ToInt(mask) <= 32) {
+			Fatal(target + " netmask out of 1-32")
+		}
+	} else {
+		ip = target
+		mask = "32"
+	}
+
+	if parsedIp, isparse := ParseIP(ip); parsedIp != "" {
+		if isparse {
+			return parsedIp + "/" + mask, ip
+		} else {
+			return parsedIp + "/" + mask, ""
+		}
+	} else {
+		return "", ""
+	}
+}
+
+func SplitCIDR(cidr string) (string, int) {
+	tmp := strings.Split(cidr, "/")
+	if len(tmp) == 2 {
+		return tmp[0], utils.ToInt(tmp[1])
+	} else {
+		return tmp[0], 32
+	}
 }

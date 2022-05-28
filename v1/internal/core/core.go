@@ -142,7 +142,7 @@ func SmartMod(target string, config Config) {
 
 	// 网段排序
 	if len(iplist) > 0 {
-		sort_cidr(iplist)
+		sortCIDR(iplist)
 	} else {
 		return
 	}
