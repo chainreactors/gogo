@@ -1,9 +1,8 @@
-python updateconfig.py
 set name=getitle
 set cert_domain=www.dbappsecurity.com.cn
 rm ./bin/*
 go generate getitle.go
-gox.exe -osarch="linux/amd64 linux/arm64 linux/386 windows/amd64 linux/mips64 windows/386 darwin/amd64" -ldflags="-s -w -X 'getitle/src/cmd.ver=v%1' -X 'getitle/src/cmd.k=%2'" -gcflags="-trimpath=$GOPATH" -asmflags="-trimpath=$GOPATH" -output=".\bin\%name%_{{.OS}}_{{.Arch}}" .
+gox.exe -osarch="linux/amd64 linux/arm64 linux/386 windows/amd64 linux/mips64 windows/386 darwin/amd64" -ldflags="-s -w -X 'getitle/v1/cmd.ver=v%1' -X 'getitle/v1/cmd.k=%2'" -gcflags="-trimpath=$GOPATH" -asmflags="-trimpath=$GOPATH" -output=".\bin\%name%_{{.OS}}_{{.Arch}}" .
 echo off
 @REM  go strip 去除编译信息
 go-strip -f ./bin/%name%_windows_386.exe -a -output ./bin/%name%_windows_386.exe
