@@ -71,8 +71,7 @@ func recuLoadYamlFiles2JsonString(dir string) string {
 
 func main() {
 
-	template := `
-package pkg
+	template := `package pkg
 
 var RandomDir = "/g8kZMwp4oeKsL2in"
 
