@@ -2,6 +2,7 @@ package core
 
 import (
 	. "getitle/v1/pkg"
+	"strings"
 	"sync"
 )
 
@@ -170,8 +171,11 @@ func (gen *targetGenerator) genFromSpray(targets interface{}, portlist []string)
 				gen.ch <- targetConfig{ip: ip, port: port, hosts: gen.hostsMap[ip]}
 			}
 		}
+		var tmpPorts []string
 		if Opt.AliveSum-tmpalive > 0 {
-			Log.Importantf("Processed Port: %s, found %d ports", port, Opt.AliveSum-tmpalive)
+			Log.Importantf("Processed Port: %s, found %d ports", strings.Join(tmpPorts, ","), Opt.AliveSum-tmpalive)
+		} else {
+			tmpPorts = append(tmpPorts, port)
 		}
 	}
 }
