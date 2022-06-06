@@ -63,12 +63,14 @@ type File struct {
 func (f *File) Init() error {
 	if f.fileHandler == nil {
 		var err error
+		// 防止初始化失败之后重复初始化, flag提前设置为true
+		f.Initialized = true
+
 		f.fileHandler, err = FileInitialize(f.Filename)
 		if err != nil {
 			return err
 		}
 		f.fileWriter = bufio.NewWriter(f.fileHandler)
-		f.Initialized = true
 	}
 	return nil
 }
