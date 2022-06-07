@@ -80,10 +80,10 @@ func LoadConfig(typ string)[]byte  {
 		return Decode("%s")
 	}else if typ=="http"{
 		return Decode("%s")
-	}else if typ =="md5"{
-     		return Decode("%s")
-    }else if typ == "mmh3"{
-         	return Decode("%s")
+	//}else if typ =="md5"{
+    // 		return Decode("%s")
+    //}else if typ == "mmh3"{
+    //     	return Decode("%s")
     }else if typ =="port"{
          	return Decode("%s")
     }else if typ == "workflow"{
@@ -97,8 +97,8 @@ func LoadConfig(typ string)[]byte  {
 	template = fmt.Sprintf(template,
 		loadYamlFile2JsonString("fingers/tcpfingers.yaml"),
 		loadYamlFile2JsonString("fingers/httpfingers.yaml"),
-		loadYamlFile2JsonString("fingers/md5fingers.yaml"),
-		loadYamlFile2JsonString("fingers/mmh3fingers.yaml"),
+		//loadYamlFile2JsonString("fingers/md5fingers.yaml"),
+		//loadYamlFile2JsonString("fingers/mmh3fingers.yaml"),
 		loadYamlFile2JsonString("port.yaml"),
 		loadYamlFile2JsonString("workflows.yaml"),
 		recuLoadYamlFiles2JsonString("nuclei"),
