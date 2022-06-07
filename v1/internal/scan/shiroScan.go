@@ -21,7 +21,7 @@ func shiroScan(result *Result) {
 	Log.Debug("request shiro " + url)
 	deleteme := resp.Header.Get("Set-Cookie")
 	if strings.Contains(deleteme, "=deleteMe") {
-		result.AddFramework(&Framework{Name: "shiro", Version: "active"})
+		result.AddFramework(&Framework{Name: "shiro", From: "active"})
 		isshiro = true
 	} else {
 		return

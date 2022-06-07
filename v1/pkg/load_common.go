@@ -2,21 +2,15 @@ package pkg
 
 import (
 	"encoding/json"
-	"getitle/v1/pkg/fingers"
 	"getitle/v1/pkg/utils"
 	"regexp"
 	"strings"
 )
 
 var (
-	Md5Fingers  map[string]string
-	Mmh3Fingers map[string]string
-	AllFingers  fingers.Fingers
-	TcpFingers  fingers.FingerMapper
-	HttpFingers fingers.FingerMapper
-	NameMap     PortMapper
-	PortMap     PortMapper
-	TagMap      PortMapper
+	NameMap PortMapper
+	PortMap PortMapper
+	TagMap  PortMapper
 	//WorkFlowMap    map[string][]*Workflow
 	CommonCompiled map[string]*regexp.Regexp
 	Extractors     = make(map[string]*regexp.Regexp)
@@ -66,34 +60,6 @@ func LoadPortConfig() (PortMapper, PortMapper, PortMapper) {
 	}
 
 	return tagmap, namemap, portmap
-}
-
-//加载指纹到全局变量
-func LoadFinger(t string) fingers.Fingers {
-	fs, err := fingers.LoadFingers(LoadConfig(t))
-	if err != nil {
-		Fatal(err.Error())
-	}
-	for _, finger := range fs {
-		err := finger.Compile(portSliceHandler)
-		if err != nil {
-			Fatal(err.Error())
-		}
-	}
-	return fs
-}
-
-func LoadHashFinger() (map[string]string, map[string]string) {
-	mmh3fingers, err := fingers.LoadHashMapFingers(LoadConfig("mmh3"))
-	if err != nil {
-		Fatal("mmh3 load FAIL" + err.Error())
-	}
-
-	md5fingers, err := fingers.LoadHashMapFingers(LoadConfig("md5"))
-	if err != nil {
-		Fatal("md5 load FAIL" + err.Error())
-	}
-	return mmh3fingers, md5fingers
 }
 
 func LoadWorkFlow() WorkflowMap {

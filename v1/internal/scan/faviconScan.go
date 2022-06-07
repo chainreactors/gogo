@@ -25,14 +25,14 @@ func faviconScan(result *Result) {
 	// MD5 hash匹配
 	md5h := Md5Hash(content)
 	if Md5Fingers[md5h] != "" {
-		result.AddFramework(&Framework{Name: Md5Fingers[md5h], Version: "ico"})
+		result.AddFramework(&Framework{Name: Md5Fingers[md5h], From: "ico"})
 		return
 	}
 
 	// mmh3 hash匹配,指纹来自kscan
 	mmh3h := Mmh3Hash32(content)
 	if Mmh3Fingers[mmh3h] != "" {
-		result.AddFramework(&Framework{Name: Mmh3Fingers[mmh3h], Version: "ico"})
+		result.AddFramework(&Framework{Name: Mmh3Fingers[mmh3h], From: "ico"})
 		return
 	}
 	return

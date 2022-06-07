@@ -68,29 +68,32 @@ func httpFingerMatch(result *Result, finger *Finger) (*Framework, *Vuln) {
 	var body string
 	var rerequest bool
 	//var cookies map[string]string
-	if RunOpt.VersionLevel >= 1 && finger.SendDataStr != "" {
-		// 如果level大于1,并且存在主动发包, 则重新获取resp与content
-		conn := result.GetHttpConn(RunOpt.Delay)
-		url := result.GetURL() + finger.SendDataStr
-		tmpresp, err := conn.Get(url)
-		if err == nil {
-			Log.Debugf("request finger %s %d for %s", url, tmpresp.StatusCode, finger.Name)
-			resp = tmpresp
-			content, body = GetHttpRaw(resp)
-			rerequest = true
-		} else {
-			Log.Debugf("request finger %s %s for %s", url, err.Error(), finger.Name)
+	for i, rule := range finger.Rules {
+		if RunOpt.VersionLevel >= 1 && rule.SendDataStr != "" {
+			// 如果level大于1,并且存在主动发包, 则重新获取resp与content
+			conn := result.GetHttpConn(RunOpt.Delay)
+			url := result.GetURL() + rule.SendDataStr
+			tmpresp, err := conn.Get(url)
+			if err == nil {
+				Log.Debugf("request finger %s %d for %s", url, tmpresp.StatusCode, finger.Name)
+				resp = tmpresp
+				content, body = GetHttpRaw(resp)
+				rerequest = true
+			} else {
+				Log.Debugf("request finger %s %s for %s", url, err.Error(), finger.Name)
+			}
 		}
-	}
 
-	framework, vuln, ok := FingerMatcher(finger, content)
-	if ok { // 如果已经匹配到一个指纹,则略过头匹配
-		if rerequest {
-			// 如果主动发包匹配到了指纹,则重新进行信息收集
-			framework.Version += "active"
-			CollectHttpInfo(result, resp, content, body)
+		hasFrame, hasVuln, res := RuleMatcher(rule, content, true)
+		if hasFrame {
+			frame, vuln := finger.ToResult(hasFrame, hasVuln, res, i)
+			if rerequest {
+				// 如果主动发包匹配到了指纹,则重新进行信息收集
+				frame.From = "active"
+				CollectHttpInfo(result, resp, content, body)
+			}
+			return frame, vuln
 		}
-		return framework, vuln
 	}
 	return nil, nil
 }
@@ -100,28 +103,32 @@ func tcpFingerMatch(result *Result, finger *Finger) (*Framework, *Vuln) {
 	var data []byte
 	var err error
 
-	// 某些规则需要主动发送一个数据包探测
-	if finger.SendDataStr != "" && RunOpt.VersionLevel >= finger.Level {
-		Log.Debugf("request finger %s for %s", result.GetTarget(), finger.Name)
-		var conn net.Conn
-		conn, err = TcpSocketConn(result.GetTarget(), 2)
-		if err != nil {
-			return nil, nil
+	for i, rule := range finger.Rules {
+		// 某些规则需要主动发送一个数据包探测
+		if rule.SendDataStr != "" && RunOpt.VersionLevel >= rule.Level {
+			Log.Debugf("request finger %s for %s", result.GetTarget(), finger.Name)
+			var conn net.Conn
+			conn, err = TcpSocketConn(result.GetTarget(), 2)
+			if err != nil {
+				return nil, nil
+			}
+			data, err = SocketSend(conn, rule.SendData, 1024)
+			// 如果报错为EOF,则需要重新建立tcp连接
+			if err != nil {
+				return nil, nil
+			}
 		}
-		data, err = SocketSend(conn, finger.SendData, 1024)
-		// 如果报错为EOF,则需要重新建立tcp连接
-		if err != nil {
-			return nil, nil
+		// 如果主动探测有回包,则正则匹配回包内容, 若主动探测没有返回内容,则直接跳过该规则
+		if len(data) != 0 {
+			content = string(data)
 		}
-	}
-	// 如果主动探测有回包,则正则匹配回包内容, 若主动探测没有返回内容,则直接跳过该规则
-	if len(data) != 0 {
-		content = string(data)
+
+		hasFrame, hasVuln, res := RuleMatcher(rule, content, false)
+		if hasFrame {
+			frame, vuln := finger.ToResult(hasFrame, hasVuln, res, i)
+			return frame, vuln
+		}
 	}
 
-	framework, vuln, ok := FingerMatcher(finger, content)
-	if ok {
-		return framework, vuln
-	}
 	return nil, nil
 }

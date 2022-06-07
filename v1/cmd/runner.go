@@ -402,8 +402,8 @@ func nucleiLoader(pocfile string, payloads arrayFlags) {
 
 func configLoader() {
 	TagMap, NameMap, PortMap = LoadPortConfig()
-	Mmh3Fingers, Md5Fingers = LoadHashFinger()
 	AllFingers = LoadFinger("http")
+	Mmh3Fingers, Md5Fingers = LoadHashFinger(AllFingers)
 	TcpFingers = LoadFinger("tcp").GroupByPort()
 	HttpFingers = AllFingers.GroupByPort()
 	CommonCompiled = map[string]*regexp.Regexp{

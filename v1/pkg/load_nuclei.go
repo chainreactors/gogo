@@ -3,17 +3,17 @@ package pkg
 import (
 	"encoding/json"
 	"fmt"
-	protocols2 "getitle/v1/pkg/nuclei/protocols"
+	"getitle/v1/pkg/nuclei/protocols"
 	. "getitle/v1/pkg/nuclei/templates"
 	"io/ioutil"
 	"strings"
 )
 
-var ExecuterOptions *protocols2.ExecuterOptions
+var ExecuterOptions *protocols.ExecuterOptions
 
-func ParserCmdPayload(payloads []string) *protocols2.ExecuterOptions {
-	var options = &protocols2.ExecuterOptions{
-		Options: &protocols2.Options{
+func ParserCmdPayload(payloads []string) *protocols.ExecuterOptions {
+	var options = &protocols.ExecuterOptions{
+		Options: &protocols.Options{
 			VarsPayload: map[string]interface{}{},
 		},
 	}

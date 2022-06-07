@@ -26,7 +26,7 @@ func compileRegexp(s string) (*regexp.Regexp, error) {
 	return reg, nil
 }
 
-func maptoString(m map[string]interface{}) string {
+func mapToString(m map[string]interface{}) string {
 	if m == nil || len(m) == 0 {
 		return ""
 	}
@@ -38,15 +38,10 @@ func maptoString(m map[string]interface{}) string {
 }
 
 type Finger struct {
-	Name        string   `json:"name"`
-	Protocol    string   `json:"protocol"`
-	SendDataStr string   `json:"send_data"`
-	SendData    senddata `json:"-"`
-	Info        string   `json:"info"`
-	Vuln        string   `json:"vuln"`
-	Level       int      `json:"level"`
-	Defaultport []string `json:"default_port"`
-	Regexps     Regexps  `json:"regexps"`
+	Name        string   `yaml:"name" json:"name"`
+	Protocol    string   `yaml:"protocol,omitempty" json:"protocol"`
+	Defaultport []string `yaml:"default_port,omitempty" json:"default_port,omitempty"`
+	Rules       Rules    `yaml:"rule,omitempty" json:"rule,omitempty"`
 }
 
 func (f *Finger) Compile(portHandler func([]string) []string) error {
@@ -62,36 +57,107 @@ func (f *Finger) Compile(portHandler func([]string) []string) error {
 		f.Defaultport = portHandler(f.Defaultport)
 	}
 
-	f.Decode()
-
-	for _, reg := range f.Regexps.Regexp {
-		creg, err := compileRegexp(reg)
-		if err != nil {
-			return err
-		}
-		f.Regexps.CompliedRegexp = append(f.Regexps.CompliedRegexp, creg)
-	}
-
-	for _, reg := range f.Regexps.Vuln {
-		creg, err := compileRegexp(reg)
-		if err != nil {
-			return err
-		}
-		f.Regexps.CompiledVulnRegexp = append(f.Regexps.CompiledVulnRegexp, creg)
+	err := f.Rules.Compile()
+	if err != nil {
+		return err
 	}
 	return nil
 }
 
-func (f *Finger) Decode() {
-	if f.Protocol != "tcp" {
-		return
+func (f *Finger) ToResult(hasFrame, hasVuln bool, res string, index int) (frame *Framework, vuln *Vuln) {
+	if index+1 > len(f.Rules) {
+		return nil, nil
 	}
 
-	if f.SendDataStr != "" {
-		f.SendData = decode(f.SendDataStr)
+	if hasFrame {
+		if res != "" {
+			frame = &Framework{Name: f.Name, Version: res}
+		} else if f.Rules[index].Version != "" {
+			frame = &Framework{Name: f.Name, Version: res}
+		} else {
+			frame = &Framework{Name: f.Name}
+		}
+	}
+
+	if hasVuln {
+		if f.Rules[index].Vuln != "" {
+			vuln = &Vuln{Name: f.Rules[index].Vuln, Severity: "high"}
+		} else if f.Rules[index].Info != "" {
+			vuln = &Vuln{Name: f.Rules[index].Info, Severity: "info"}
+		} else {
+			vuln = &Vuln{Name: f.Name, Severity: "info"}
+		}
+	}
+	return frame, vuln
+}
+
+type Regexps struct {
+	Body               []string         `yaml:"body,omitempty" json:"body,omitempty"`
+	MD5                []string         `yaml:"md5,omitempty" json:"md5,omitempty"`
+	MMH3               []string         `yaml:"mmh3,omitempty" json:"mmh3,omitempty"`
+	Regexp             []string         `yaml:"regexp,omitempty" json:"regexp"`
+	CompliedRegexp     []*regexp.Regexp `yaml:"-" json:"-"`
+	CompiledVulnRegexp []*regexp.Regexp `yaml:"-" json:"-"`
+	Header             []string         `yaml:"header,omitempty" json:"header,omitempty"`
+	Vuln               []string         `yaml:"vuln,omitempty" json:"vuln,omitempty"`
+}
+
+func (r *Regexps) RegexpCompile() error {
+	for _, reg := range r.Regexp {
+		creg, err := compileRegexp(reg)
+		if err != nil {
+			return err
+		}
+		r.CompliedRegexp = append(r.CompliedRegexp, creg)
+	}
+
+	for _, reg := range r.Vuln {
+		creg, err := compileRegexp(reg)
+		if err != nil {
+			return err
+		}
+		r.CompiledVulnRegexp = append(r.CompiledVulnRegexp, creg)
+	}
+	return nil
+}
+
+type Favicons struct {
+	Mmh3 []string `yaml:"mmh3,omitempty" json:"mmh3,omitempty"`
+	Md5  []string `yaml:"md5,omitempty" json:"md5,omitempty"`
+}
+
+type Rule struct {
+	Version     string    `yaml:"version,omitempty" json:"version,omitempty"`
+	Favicon     *Favicons `yaml:"favicon,omitempty" json:"favicon,omitempty"`
+	Regexps     *Regexps  `yaml:"regexps,omitempty" json:"regexps,omitempty"`
+	SendDataStr string    `yaml:"send_data,omitempty" json:"send_data_str,omitempty"`
+	SendData    senddata  `yaml:"-" json:"-,omitempty"`
+	Info        string    `yaml:"info,omitempty" json:"info,omitempty"`
+	Vuln        string    `yaml:"vuln,omitempty" json:"vuln,omitempty"`
+	Level       int       `yaml:"level,omitempty" json:"level,omitempty"`
+}
+
+func (r *Rule) dataDecode() {
+	if r.SendDataStr != "" {
+		r.SendData = decode(r.SendDataStr)
 	}
 	// todo
 	// regexp decode
+}
+
+type Rules []*Rule
+
+func (rs Rules) Compile() error {
+	for _, r := range rs {
+		r.dataDecode()
+		if r.Regexps != nil {
+			err := r.Regexps.RegexpCompile()
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 type senddata []byte
@@ -101,17 +167,6 @@ func (d senddata) IsNull() bool {
 		return true
 	}
 	return false
-}
-
-type Regexps struct {
-	Body               []string `json:"body"`
-	MD5                []string `json:"md5"`
-	MMH3               []string `json:"mmh3"`
-	Regexp             []string `json:"regexp"`
-	CompliedRegexp     []*regexp.Regexp
-	CompiledVulnRegexp []*regexp.Regexp
-	Header             []string `json:"header"`
-	Vuln               []string `json:"vuln"`
 }
 
 type FingerMapper map[string][]*Finger
@@ -142,7 +197,6 @@ func (fs Fingers) GroupByPort() FingerMapper {
 }
 
 func LoadFingers(content []byte) (fingers Fingers, err error) {
-	// 根据权重排序在python脚本中已经实现
 	err = json.Unmarshal(content, &fingers)
 	if err != nil {
 		return nil, err
@@ -153,6 +207,7 @@ func LoadFingers(content []byte) (fingers Fingers, err error) {
 type Framework struct {
 	Name    string `json:"ft"`
 	Version string `json:"fv"`
+	From    string `json:"ff"`
 	IsGuess bool   `json:"fg"`
 }
 
@@ -162,15 +217,16 @@ func (f Framework) ToString() string {
 		s = "*" + s
 	}
 	if f.Version != "" {
-		s += ":" + f.Version
+		s += " " + f.Version
+	}
+	if f.From != "" {
+		s += ":" + f.From
 	}
 	return s
 }
 
 const (
-	// info leak
 	Info int = iota + 1
-	Low
 	Medium
 	High
 	Critical
@@ -178,7 +234,6 @@ const (
 
 var serverityMap = map[string]int{
 	"info":     Info,
-	"low":      Low,
 	"medium":   Medium,
 	"high":     High,
 	"critical": Critical,
@@ -192,11 +247,11 @@ type Vuln struct {
 }
 
 func (v *Vuln) GetPayload() string {
-	return maptoString(v.Payload)
+	return mapToString(v.Payload)
 }
 
 func (v *Vuln) GetDetail() string {
-	return maptoString(v.Detail)
+	return mapToString(v.Detail)
 }
 
 func (v *Vuln) ToString() string {

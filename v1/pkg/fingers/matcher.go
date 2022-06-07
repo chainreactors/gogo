@@ -49,68 +49,82 @@ func compiledMatch(reg *regexp.Regexp, s string) (string, bool) {
 }
 
 func FingerMatcher(finger *Finger, content string) (*Framework, *Vuln, bool) {
+	// 只进行被动的指纹判断, 将无视rules中的senddata字段
+	for i, rule := range finger.Rules {
+		var ishttp bool
+		if finger.Protocol == "http" {
+			ishttp = true
+		}
+		hasFrame, hasVuln, res := RuleMatcher(rule, content, ishttp)
+		if hasFrame {
+			frame, vuln := finger.ToResult(hasFrame, hasVuln, res, i)
+			return frame, vuln, true
+		}
+	}
+	return nil, nil, false
+}
+
+func RuleMatcher(rule *Rule, content string, ishttp bool) (bool, bool, string) {
 	// 漏洞匹配优先
-	for _, reg := range finger.Regexps.CompiledVulnRegexp {
+	if rule.Regexps == nil {
+		return false, false, ""
+	}
+	for _, reg := range rule.Regexps.CompiledVulnRegexp {
 		res, ok := compiledMatch(reg, content)
 		if ok {
-			var vuln *Vuln
-			if finger.Info != "" {
-				vuln = &Vuln{Name: finger.Info, Severity: "info"}
-			} else if finger.Vuln != "" {
-				vuln = &Vuln{Name: finger.Vuln, Severity: "high"}
-			}
-			return &Framework{Name: finger.Name, Version: res}, vuln, true
+			return true, true, res
 		}
 	}
 
-	// body匹配
-	for _, bodyReg := range finger.Regexps.Body {
-		var body string
-		if finger.Protocol == "http" {
-			cs := strings.Index(content, "\r\n\r\n")
-			if cs != -1 {
-				body = content[cs:]
-			}
-		} else {
-			body = content
+	var body, header string
+	if ishttp {
+		cs := strings.Index(content, "\r\n\r\n")
+		if cs != -1 {
+			body = content[cs+4:]
+			header = content[:cs]
 		}
+	} else {
+		body = content
+	}
+
+	// body匹配
+	for _, bodyReg := range rule.Regexps.Body {
 		if strings.Contains(body, bodyReg) {
-			return &Framework{Name: finger.Name, Version: ""}, nil, true
+			return true, false, ""
 		}
 	}
 
 	// 正则匹配
-	for _, reg := range finger.Regexps.CompliedRegexp {
+	for _, reg := range rule.Regexps.CompliedRegexp {
 		res, ok := compiledMatch(reg, content)
 		if ok {
-			return &Framework{Name: finger.Name, Version: res}, nil, true
+			return true, false, res
 		}
 	}
 
 	// MD5 匹配
-	for _, md5s := range finger.Regexps.MD5 {
+	for _, md5s := range rule.Regexps.MD5 {
 		if md5s == Md5Hash([]byte(content)) {
-			return &Framework{Name: finger.Name}, nil, true
+			return true, false, ""
 		}
 	}
 
 	// mmh3 匹配
-	for _, mmh3s := range finger.Regexps.MMH3 {
+	for _, mmh3s := range rule.Regexps.MMH3 {
 		if mmh3s == Mmh3Hash32([]byte(content)) {
-			return &Framework{Name: finger.Name}, nil, true
+			return true, false, ""
 		}
 	}
 
 	// http头匹配, http协议特有的匹配
-	if finger.Protocol != "http" {
-		return nil, nil, false
+	if !ishttp {
+		return false, false, ""
 	}
 
-	for _, headerReg := range finger.Regexps.Header {
-		headerstr := strings.ToLower(strings.Split(content, "\r\n\r\n")[0])
-		if strings.Contains(headerstr, strings.ToLower(headerReg)) {
-			return &Framework{Name: finger.Name}, nil, true
+	for _, headerReg := range rule.Regexps.Header {
+		if strings.Contains(header, strings.ToLower(headerReg)) {
+			return true, false, ""
 		}
 	}
-	return nil, nil, false
+	return false, false, ""
 }
