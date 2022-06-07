@@ -122,7 +122,7 @@ func RuleMatcher(rule *Rule, content string, ishttp bool) (bool, bool, string) {
 	}
 
 	for _, headerReg := range rule.Regexps.Header {
-		if strings.Contains(header, strings.ToLower(headerReg)) {
+		if strings.Contains(header, headerReg) {
 			return true, false, ""
 		}
 	}
