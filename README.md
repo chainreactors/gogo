@@ -337,7 +337,7 @@ windows下需要以下依赖添加到环境变量
  * gox go语言快捷编译工具
  * python3 用到了python处理编译前的代码
    ```
-   make.bat [version] # .e.g make.bat 0.3.0
+   make.bat 1.0.0 key ; obfuscate.bat ; release.bat 1.0.0
    ```
 
 ## THANKS
