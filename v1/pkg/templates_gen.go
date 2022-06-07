@@ -40,7 +40,7 @@ func visit(files *[]string) filepath.WalkFunc {
 	}
 }
 
-func recuLoadYamlFiles2JsonString(dir string) string {
+func recuLoadYamlFiles2JsonString(dir string, single bool) string {
 	var files []string
 	err := filepath.Walk("v1/config/"+dir, visit(&files))
 	if err != nil {
@@ -58,7 +58,12 @@ func recuLoadYamlFiles2JsonString(dir string) string {
 		if err != nil {
 			panic(err)
 		}
-		pocs = append(pocs, tmp)
+		if single {
+			pocs = append(pocs, tmp)
+		} else {
+			pocs = append(pocs, tmp.([]interface{})...)
+		}
+
 	}
 
 	jsonstr, err := json.Marshal(pocs)
@@ -92,10 +97,10 @@ func LoadConfig(typ string)[]byte  {
 `
 	template = fmt.Sprintf(template,
 		loadYamlFile2JsonString("fingers/tcpfingers.yaml"),
-		loadYamlFile2JsonString("fingers/httpfingers.yaml"),
+		recuLoadYamlFiles2JsonString("fingers/http", false),
 		loadYamlFile2JsonString("port.yaml"),
 		loadYamlFile2JsonString("workflows.yaml"),
-		recuLoadYamlFiles2JsonString("nuclei"),
+		recuLoadYamlFiles2JsonString("nuclei", true),
 	)
 	f, err := os.OpenFile("v1/pkg/templates.go", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 	if err != nil {
