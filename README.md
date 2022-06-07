@@ -8,7 +8,7 @@ README Version 1.2.0
 ```
 Usage of ./getitle:
 
-   -k string    启动密码(必须输入)为ybb  
+   -k string    启动密码(必须输入) 
    -debug bool  输出每个请求的错误日志, 用来debug
    
    INPUT params:
@@ -29,18 +29,18 @@ Usage of ./getitle:
             default (默认值, 资产扫描),
             s B段启发式扫描,
             ss A段启发式扫描
-            sc 以ss模式扫描所有存活C段(不会进行端口扫描)
+            sc 以ss模式发现所有存活C段(但不会进行端口扫描)
             a 根据默认配置自动启发式扫描
       -l string    从文件中读取任务,例如:-l ip.txt
       -j string	   从输出的json中读取任务,例如:-j 1.json
       -L bool     从管道中读数据的时候,指定数据类型为行分割的数据
       -J bool     从管道中读数据的时候, 指定数据为前一次的扫描结果, 从传入管道前请base64, 否则可能因为EOF字符被截断
-      -F file      格式化扫描结果
-      -w string  workflow, 一些自动化预设  
+      -F file     格式化扫描结果
+      -w string  workflow, 调用自动化配置的预设  
       
    SMART CONFIGS
       -sp string   smart probe,启发式扫描端口探针,-m s 下默认为80, -m ss下默认为icmp
-      -ipp string  smart ip probe,-ss模式ip探针,默认1
+      -ipp string  smart ip probe, -ss模式ip探针,默认1
       -no bool	   (依赖-m s/ss) 高级扫描模式只探测存活网段不进行端口扫描
       -ping bool   在端口扫描前插入一次ping 喷洒, 存活的ip才会被加入端口扫描.
  
@@ -79,24 +79,54 @@ Usage of ./getitle:
       -extracts 逗号分割的多个extractor预设
    ```
 
+## 二进制文件下载链接
+
+完全版本打包下载: https://github.com/ZTeam-H3/getitle/releases/latest
+
+理论上支持全操作系统, 需要编译某些稍微罕见的特殊版本可以联系我帮忙编译.
+
+单文件下载链接:
+
+**windows**
+
+[windows32upx](https://sangfor-release.oss-cn-shanghai.aliyuncs.com/fscan/windows_386_upxs.exe)
+ [windows32](https://sangfor-release.oss-cn-shanghai.aliyuncs.com/fscan/windows_386s.exe)
+ [windows64](https://sangfor-release.oss-cn-shanghai.aliyuncs.com/fscan/windows_amd64s.exe)
+ [windows64upx](https://sangfor-release.oss-cn-shanghai.aliyuncs.com/fscan/windows_amd64_upxs.exe)
+
+**linux**
+
+[linux_amd64](https://sangfor-release.oss-cn-shanghai.aliyuncs.com/fscan/linux_amd64)
+ [linux_amd32](https://sangfor-release.oss-cn-shanghai.aliyuncs.com/fscan/linux_386)
+ [linux_arm64](https://sangfor-release.oss-cn-shanghai.aliyuncs.com/fscan/linux_arm64)
+ [linux_mips64](https://sangfor-release.oss-cn-shanghai.aliyuncs.com/fscan/linux_mips64)
+
+**mac**
+
+[mac](https://sangfor-release.oss-cn-shanghai.aliyuncs.com/fscan/darwin_amd64)
+
 ## QuickStart
 最简使用
 
 `gt -k [key] -ip 192.168.1.1/24 -p win,db,top2 `
 
-一行全冲
+一行内网全冲
 
 `gt -k [key] -w inter -e -v`
 
-使用预设, 启发式扫描10段常见
+使用工作流, 启发式扫描10段常见端口
 
 `gt -k [key] -w 10`
 
-不适用预设, 手动指定特定网段与配置
+不适用工作流, 手动指定特定网段与配置
 
 `gt -k [key] -ip 172.16.1.1/16 -m s -p all -e -v -af`
 
-**网段发现** :
+查看全部可用工作流
+
+`gt -k [key] -P workflow`
+
+**网段发现**(参数使用较为复杂, 现在已经基本被淘汰, 仅在少数场景下手动指定) :
 
 喷洒存活C段
 
@@ -106,7 +136,7 @@ Usage of ./getitle:
 
 `gt -k [key] -ip 10.0.0.0/8 -m ss -no -af`
 
-梯度下降喷洒C段(在A段中喷洒C段)
+递归下降喷洒C段(在A段中喷洒C段)
 
 `gt -k [key] -ip 10.0.0.0/8 -m sc -af`
 
@@ -307,7 +337,7 @@ windows下需要以下依赖添加到环境变量
  * gox go语言快捷编译工具
  * python3 用到了python处理编译前的代码
    ```
-   make.bat [version] # .e.g make.bat 0.3.0
+   make.bat 1.0.0 key ; obfuscate.bat ; release.bat 1.0.0
    ```
 
 ## THANKS

@@ -1,0 +1,3 @@
+[submodule "v1/config"]
+	path = v1/config
+	url = https://github.com/ZTeam-H3/getitle-templates

@@ -25,9 +25,9 @@ gen
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
-
 /exe
 /bin
 /release
 /bbin
 /script
+/v1/pkg/templates.go

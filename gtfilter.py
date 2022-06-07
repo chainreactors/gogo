@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 import json
-import zlib
-
 import click
+import zlib
+from ipaddress import ip_address
+from itertools import groupby
 from functools import partial
 
 
@@ -16,7 +17,7 @@ class ResultJson:
         "title": "t",
         "midware": "m",
         "http_stat": "s",
-        "languate": "l",
+        "language": "l",
         "frameworks": "f",
         "framework": "f",
         "app": "f",
@@ -24,11 +25,11 @@ class ResultJson:
         "vulns": "v",
         "vuln": "v",
         "protocol": "r",
-        "vuln_name": "vn",
-        "vuln_payload": "vp",
-        "vuln_detail": "vd",
-        "framework_name": "ft",
-        "framework_version": "fv",
+        # "vuln_name": "vn",
+        # "vuln_payload": "vp",
+        # "vuln_detail": "vd",
+        # "framework_name": "ft",
+        # "framework_version": "fv",
         "url": "_",
         "target": "_"
     }
@@ -37,7 +38,7 @@ class ResultJson:
         self.json = json
 
     def __getattr__(self, item):
-        assert item in self.namemap.keys(), "no found key in %s"%" ".join(self.namemap.keys())
+        assert item in self.namemap.keys(), "no found key in " + " ".join(self.namemap.keys())
         return self.json[self.namemap[item]]
 
     def __getitem__(self, item):
@@ -70,7 +71,20 @@ class GetitleResult:
 
     @property
     def frameworks(self):
-        return self.dict2string(self.result["frameworks"])
+        if self.result["frameworks"]:
+            f_list = []
+            for f in self.result["frameworks"]:
+                fs = ""
+                if f.get("fg", False):
+                    fs += "*"
+                if f.get("ft", ""):
+                    fs += f["ft"]
+                if f.get("fv", ""):
+                    fs += ":" + f["fv"]
+                f_list.append(fs)
+            return "||".join(f_list)
+        else:
+            return ""
 
     @property
     def app(self):
@@ -93,7 +107,7 @@ class GetitleResult:
 
     def dict2string(self, l):
         if l:
-            return "|".join(["".join(map(str,i.values())) for i in l]).lower()
+            return "|".join(["".join(map(str, i.values())) for i in l]).lower()
         else:
             return ""
 
@@ -224,6 +238,17 @@ class GetitleResults:
                             }
                            for result in self.brute])
 
+    @property
+    def full(self):
+        sorted_results = sorted(self.results, key=lambda x: int(ip_address(x.ip)))
+        group_results = groupby(sorted_results, lambda x: x.ip)
+        s = ""
+        for ip, results in group_results:
+            s += "[+] %s\n" % ip
+            for result in results:
+                s += f"\t{result.url}\t{result.midware}\t{result.language}\t{result.frameworks}\t{result.host}\t{result.hash}\t[{result.http_stat}]{result.title}\t{result.vulns}\n"
+        return s
+
     def gets(self, *args):
         return [result.gets(*args) for result in self]
 
@@ -252,18 +277,21 @@ def decompress(bs):
 def loadResult(file):
     try:
         content = file.read()
-        if content[:10] != '{"config"':
+        if content[:10] != b'{"config":':
             content = decompress(content)
-
-        content = fixjson(content)
+            content = fixjson(content)
+        else:
+            content = content.decode()
+            content = fixjson(content)
         return json.loads(content)["data"]
-    except:
+    except Exception as e:
+        print(str(e))
         return []
 
 
 @click.command()
 @click.argument("files", nargs=-1, type=click.File("rb"))
-@click.option('--output', '-o', default="target", help='Output format.')
+@click.option('--output', '-o', default="full", help='Output format.')
 @click.option('--expr', '-e', "exprs", multiple=True, help='filter rules')
 @click.option('--outfile', '-f', help='output file')
 @click.option('--or', '-or', "_or", default=False, is_flag=True)
@@ -318,8 +346,9 @@ def main(files, output, exprs, outfile, _or):
 
     results = GetitleResults(results)
     results = results.exprs(exprs,_or)
-
-    if output == "json":  # 输出过滤后的json
+    if output == "full":
+        outfunc(results.full)
+    elif output == "json":  # 输出过滤后的json
         outfunc(results.raw_json)
     elif output == "zombie":  # 输出结果到zombie
         outfunc(results.zombie)
