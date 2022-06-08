@@ -54,29 +54,29 @@ func NewFile(filename string, compress, lazy bool) (*File, error) {
 type File struct {
 	Filename    string
 	Initialized bool
-	fileHandler *os.File
+	FileHandler *os.File
 	fileWriter  *bufio.Writer
 	buf         *bytes.Buffer
 	compress    bool
 }
 
 func (f *File) Init() error {
-	if f.fileHandler == nil {
+	if f.FileHandler == nil {
 		var err error
 		// 防止初始化失败之后重复初始化, flag提前设置为true
 		f.Initialized = true
 
-		f.fileHandler, err = FileInitialize(f.Filename)
+		f.FileHandler, err = FileInitialize(f.Filename)
 		if err != nil {
 			return err
 		}
-		f.fileWriter = bufio.NewWriter(f.fileHandler)
+		f.fileWriter = bufio.NewWriter(f.FileHandler)
 	}
 	return nil
 }
 
 func (f *File) Write(s string) {
-	if f == nil {
+	if f.FileHandler == nil {
 		return
 	}
 
@@ -93,7 +93,7 @@ func (f *File) SyncWrite(s string) {
 }
 
 func (f *File) WriteBytes(bs []byte) {
-	if f == nil {
+	if f.FileHandler == nil {
 		return
 	}
 
@@ -104,7 +104,7 @@ func (f *File) WriteBytes(bs []byte) {
 }
 
 func (f *File) Sync() {
-	if f == nil || f.fileHandler == nil || f.buf.Len() == 0 {
+	if f.FileHandler == nil || f.buf.Len() == 0 {
 		return
 	}
 
@@ -116,13 +116,16 @@ func (f *File) Sync() {
 	Log.Debugf("sync %d bytes to %s", f.buf.Len(), f.Filename)
 	f.buf.Reset()
 	_ = f.fileWriter.Flush()
-	_ = f.fileHandler.Sync()
+	_ = f.FileHandler.Sync()
 	return
 }
 
 func (f *File) Close() {
+	if f.FileHandler == nil {
+		return
+	}
 	f.Sync()
-	_ = f.fileHandler.Close()
+	_ = f.FileHandler.Close()
 }
 
 var fileint = 1
