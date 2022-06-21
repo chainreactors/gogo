@@ -76,9 +76,9 @@ func (f *File) Init() error {
 }
 
 func (f *File) Write(s string) {
-	if f.FileHandler == nil {
-		return
-	}
+	//if f.FileHandler == nil {
+	//	return
+	//}
 
 	_, _ = f.buf.WriteString(s)
 	if f.buf.Len() > 4096 {
@@ -93,9 +93,9 @@ func (f *File) SyncWrite(s string) {
 }
 
 func (f *File) WriteBytes(bs []byte) {
-	if f.FileHandler == nil {
-		return
-	}
+	//if f.FileHandler == nil {
+	//	return
+	//}
 
 	_, _ = f.buf.Write(bs)
 	if f.buf.Len() > 4096 {
