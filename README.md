@@ -45,7 +45,7 @@ Usage of ./getitle:
       -ping bool   在端口扫描前插入一次ping 喷洒, 存活的ip才会被加入端口扫描.
  
    OUTPUT params:
-      -o string    输出格式:clean,full(default) or json, 以及ip, url, target, zombie, cs 等多种输出格式
+      -o string    输出格式:clean,full(default) or json, 以及ip, url, target, zombie(仅限-F), cs(仅限-F) 等多种输出格式
       -f string    输出文件名,默认为空
       -path string 指定输出的目录, -f参数默认为当前目录, -af/hf参数为程序绝对目录
       -af bool	   自动生成文件名,格式为 ".IP_port_number.json"
