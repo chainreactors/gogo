@@ -31,7 +31,7 @@ func hostScan(result *Result) {
 		hash := Md5Hash([]byte(strings.TrimSpace(body)))[:4] // 因为头中经常有随机值, 因此hash通过body判断
 		if result.Hash != hash {
 			//if result.CurrentHost == "" {
-			//	result.CurrentHost = host
+			result.Host = host
 			//}
 			vuln.Detail[host] = AsciiEncode(GetTitle(content))
 		}

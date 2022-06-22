@@ -93,9 +93,9 @@ func Dispatch(result *pkg.Result) {
 		ExploitDispatch(result)
 	}
 
-	if result.IsHttp() && result.Host == "" {
-		result.Host = result.CurrentHost
-	}
+	//if result.IsHttp() && result.Host == "" {
+	//	result.Host = result.CurrentHost
+	//}
 
 	if result.Httpresp != nil && !result.Httpresp.Close {
 		_ = result.Httpresp.Body.Close()

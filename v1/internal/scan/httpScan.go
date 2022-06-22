@@ -54,13 +54,13 @@ func socketHttp(result *pkg.Result) {
 	result.HttpStat = "tcp"
 
 	//发送内容
-	var host string
-	if result.CurrentHost == "" {
-		host = target
-	} else {
-		host = fmt.Sprintf("%s:%s", result.CurrentHost, result.Port)
-	}
-	senddataStr := fmt.Sprintf("GET /%s HTTP/1.1\r\nHost: %s\r\nConnection: Keep-Alive\r\n\r\n", result.Uri, host)
+	//var host string
+	//if result.CurrentHost == "" {
+	//	host = target
+	//} else {
+	//	host = fmt.Sprintf("%s:%s", result.CurrentHost, result.Port)
+	//}
+	senddataStr := fmt.Sprintf("GET /%s HTTP/1.1\r\nHost: %s\r\nConnection: Keep-Alive\r\n\r\n", result.Uri, target)
 	data, err := pkg.SocketSend(conn, []byte(senddataStr), 4096)
 	if err != nil {
 		result.Error = err.Error()
@@ -99,9 +99,9 @@ func SystemHttp(target string, result *pkg.Result) {
 	conn := result.GetHttpConn(delay)
 	req, _ := http.NewRequest("GET", target, nil)
 	req.Header = headers
-	if result.CurrentHost != "" {
-		req.Host = result.CurrentHost
-	}
+	//if result.CurrentHost != "" {
+	//	req.Host = result.CurrentHost
+	//}
 
 	resp, err := conn.Do(req)
 	if err != nil {
