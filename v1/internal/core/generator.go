@@ -172,12 +172,10 @@ func (gen *targetGenerator) genFromSpray(targets interface{}, portlist []string)
 				gen.ch <- targetConfig{ip: ip, port: port, hosts: gen.hostsMap[ip]}
 			}
 		}
-
+		tmpPorts = append(tmpPorts, port)
 		if Opt.AliveSum-tmpalive > 0 {
 			Log.Importantf("Processed Port: %s, found %d ports", strings.Join(tmpPorts, ","), Opt.AliveSum-tmpalive)
 			tmpPorts = []string{}
-		} else {
-			tmpPorts = append(tmpPorts, port)
 		}
 	}
 }
