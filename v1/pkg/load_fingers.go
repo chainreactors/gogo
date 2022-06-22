@@ -42,5 +42,5 @@ func LoadHashFinger(fs fingers.Fingers) (map[string]string, map[string]string) {
 			}
 		}
 	}
-	return md5hash, mmh3hash
+	return mmh3hash, md5hash
 }
