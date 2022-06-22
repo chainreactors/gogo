@@ -333,7 +333,7 @@ func LoadResultFile(file *os.File) interface{} {
 					if !IsIPv4(host) {
 						if parsedIP, ok := ParseIP(host); ok {
 							result = NewResult(parsedIP, targetpair[1])
-							result.HttpHost = []string{host}
+							result.HttpHosts = []string{host}
 						}
 					} else {
 						result = NewResult(host, targetpair[1])

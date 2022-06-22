@@ -19,7 +19,7 @@ type Result struct {
 	Os           string         `json:"o"` // os
 	Host         string         `json:"h"` // host
 	Cert         string         `json:"c"`
-	HttpHost     []string       `json:"-"`
+	HttpHosts    []string       `json:"-"`
 	CurrentHost  string         `json:"-"`
 	Title        string         `json:"t"` // title
 	Path         string         `json:"path"`

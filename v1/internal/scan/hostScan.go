@@ -10,14 +10,14 @@ import (
 func hostScan(result *Result) {
 	url := result.GetBaseURL()
 	conn := result.GetHttpConn(RunOpt.Delay)
-	if len(result.HttpHost) > 5 {
+	if len(result.HttpHosts) > 5 {
 		//经验公式: 绑定超过2个host可以认为是cdn, 5个留点冗余
 		return
 	}
 
 	req, _ := http.NewRequest("GET", url, nil)
 	vuln := &Vuln{Name: "host", Detail: map[string]interface{}{}, Severity: "info"}
-	for _, host := range result.HttpHost {
+	for _, host := range result.HttpHosts {
 		req.Host = host
 		resp, err := conn.Do(req)
 		if err != nil {

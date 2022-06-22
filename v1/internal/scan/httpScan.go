@@ -115,9 +115,9 @@ func SystemHttp(target string, result *pkg.Result) {
 		// 证书在错误处理之前, 因为有可能存在证书,但是服务已关闭
 		result.Protocol = "https"
 		result.Cert = strings.Join(resp.TLS.PeerCertificates[0].DNSNames, ",")
-		if len(resp.TLS.PeerCertificates[0].DNSNames) > 0 && len(resp.TLS.PeerCertificates[0].DNSNames) < 3 && result.HttpHost == nil {
+		if len(resp.TLS.PeerCertificates[0].DNSNames) > 0 && len(resp.TLS.PeerCertificates[0].DNSNames) < 3 && result.HttpHosts == nil {
 			// 经验公式: 通常只有cdn会绑定超过2个host, 正常情况只有一个host或者带上www的两个host
-			result.HttpHost = append(result.HttpHost, pkg.FormatCertDomains(resp.TLS.PeerCertificates[0].DNSNames)...)
+			result.HttpHosts = append(result.HttpHosts, pkg.FormatCertDomains(resp.TLS.PeerCertificates[0].DNSNames)...)
 		}
 	}
 

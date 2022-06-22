@@ -182,7 +182,7 @@ func (gen *targetGenerator) genFromSpray(targets interface{}, portlist []string)
 
 func (gen *targetGenerator) genFromResult(results Results) {
 	for _, result := range results {
-		gen.ch <- targetConfig{result.Ip, result.Port, result.HttpHost, result.Frameworks}
+		gen.ch <- targetConfig{result.Ip, result.Port, result.HttpHosts, result.Frameworks}
 	}
 }
 

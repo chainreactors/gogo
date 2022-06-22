@@ -72,7 +72,7 @@ func Dispatch(result *pkg.Result) {
 	//主动信息收集
 	if RunOpt.VersionLevel > 0 && result.IsHttp() {
 		// favicon指纹只有-v大于0并且为http服务才启用
-		if result.HttpHost != nil {
+		if result.HttpHosts != nil {
 			hostScan(result)
 		}
 
