@@ -56,20 +56,24 @@ func sortIP(ips []string) []string {
 	return ips
 }
 
-func ParseCIDR(target string) (string, string) {
-	// return ip, hosts
-	var ip, mask string
-	target = strings.TrimSpace(target)
+func ParseHost(target string) string {
 	if strings.Contains(target, "http") {
 		u, err := url.Parse(target)
 		if err != nil {
 			Log.Error(err.Error())
-			return "", ""
+			return ""
 		}
-		target = u.Hostname()
+		return u.Hostname()
+	} else {
+		return strings.TrimSpace(strings.Trim(target, "/"))
 	}
+}
 
-	target = strings.Trim(target, "/")
+func ParseCIDR(target string) (string, string) {
+	// return ip, hosts
+	var ip, mask string
+	target = strings.TrimSpace(target)
+	target = ParseHost(target)
 	if strings.Contains(target, "/") {
 		ip = strings.Split(target, "/")[0]
 		mask = strings.Split(target, "/")[1]

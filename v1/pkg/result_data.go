@@ -312,25 +312,40 @@ func LoadResultFile(file *os.File) interface{} {
 		for _, target := range strings.Split(string(content), "\n") {
 			if strings.Contains(target, ":") {
 				var result *Result
-				var host string
+				if strings.Contains(target, "http") {
+					if strings.HasPrefix(target, "http://") {
+						target = strings.TrimLeft(target, "http://")
+						if !strings.Contains(target, ":") {
+							target = target + ":80"
+						}
+					} else if strings.HasPrefix(target, "https://") {
+						target = strings.TrimLeft(target, "https://")
+						if !strings.Contains(target, ":") {
+							target = target + ":443"
+						}
+					}
+				}
 
 				targetpair := strings.Split(target, ":")
-				ip := targetpair[0]
+				host := targetpair[0]
 
 				if len(targetpair) >= 2 {
-					if !IsIPv4(ip) {
-						if parsedIP, ok := ParseIP(ip); ok {
+					var ip string
+					if !IsIPv4(host) {
+						if parsedIP, ok := ParseIP(host); ok {
 							ip = parsedIP
-							result.HttpHost = []string{host}
 						}
 					}
 					result = NewResult(ip, targetpair[1])
+					result.HttpHost = []string{host}
 				}
 
 				if len(targetpair) == 3 {
 					result.AddFramework(&fingers.Framework{Name: targetpair[2]})
 				}
-				results = append(results, result)
+				if result != nil {
+					results = append(results, result)
+				}
 			} else {
 				//fmt.Printf("[-] format target: %s error\n\n", target)
 				return content
