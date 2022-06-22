@@ -310,8 +310,8 @@ func LoadResultFile(file *os.File) interface{} {
 		// 解析按行分割的 ip:port:framework 输入
 		var results Results
 		for _, target := range strings.Split(string(content), "\n") {
+			var result *Result
 			if strings.Contains(target, ":") {
-				var result *Result
 				if strings.Contains(target, "http") {
 					if strings.HasPrefix(target, "http://") {
 						target = strings.TrimLeft(target, "http://")
@@ -330,14 +330,14 @@ func LoadResultFile(file *os.File) interface{} {
 				host := targetpair[0]
 
 				if len(targetpair) >= 2 {
-					var ip string
 					if !IsIPv4(host) {
 						if parsedIP, ok := ParseIP(host); ok {
-							ip = parsedIP
+							result = NewResult(parsedIP, targetpair[1])
+							result.HttpHost = []string{host}
 						}
+					} else {
+						result = NewResult(host, targetpair[1])
 					}
-					result = NewResult(ip, targetpair[1])
-					result.HttpHost = []string{host}
 				}
 
 				if len(targetpair) == 3 {
