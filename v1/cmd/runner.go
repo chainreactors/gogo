@@ -354,13 +354,13 @@ func (r *Runner) close(config *Config) {
 	Log.Important("Totally run: " + time.Since(r.start).String())
 
 	// 输出文件名
-	if Opt.File != nil && Opt.File.Initialized {
+	if Opt.File != nil && Opt.File.FileHandler != nil {
 		Log.Importantf("Results filename: " + config.Filename)
 	}
-	if Opt.SmartFile != nil && Opt.SmartFile.Initialized {
+	if Opt.SmartFile != nil && Opt.SmartFile.FileHandler != nil {
 		Log.Important("Smartscan result filename: " + config.SmartFilename)
 	}
-	if Opt.AliveFile != nil && Opt.AliveFile.Initialized {
+	if Opt.AliveFile != nil && Opt.AliveFile.FileHandler != nil {
 		Log.Important("Pingscan result filename: " + config.PingFilename)
 	}
 	if IsExist(config.Filename + "_extract") {

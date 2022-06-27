@@ -107,6 +107,8 @@ func (log *Logger) Debugf(format string, s ...interface{}) {
 }
 
 func (log *Logger) Close() {
-	close(log.LogCh)
-	time.Sleep(time.Microsecond * 200)
+	if log.LogCh != nil {
+		close(log.LogCh)
+		time.Sleep(time.Microsecond * 200)
+	}
 }

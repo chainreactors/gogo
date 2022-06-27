@@ -22,7 +22,7 @@ func (tc *targetConfig) NewResult() *Result {
 		if len(tc.hosts) == 1 {
 			result.CurrentHost = tc.hosts[0]
 		}
-		result.HttpHost = tc.hosts
+		result.HttpHosts = tc.hosts
 	}
 	if tc.fingers != nil {
 		result.Frameworks = tc.fingers

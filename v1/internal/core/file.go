@@ -94,7 +94,6 @@ func handler() {
 		for res := range Opt.dataCh {
 			if res == "sync" {
 				Opt.File.Sync()
-
 			} else {
 				if !Opt.File.Initialized {
 					err := Opt.File.Init()
