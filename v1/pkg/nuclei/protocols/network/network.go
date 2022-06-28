@@ -1,7 +1,7 @@
 package network
 
 import (
-	protocols2 "getitle/v1/pkg/nuclei/protocols"
+	protocols "getitle/v1/pkg/nuclei/protocols"
 	"net"
 	"strings"
 )
@@ -27,15 +27,15 @@ type Request struct {
 
 	ReadAll bool `json:"read-all"`
 
-	protocols2.Operators `json:",inline,omitempty"`
+	protocols.Operators `json:",inline,omitempty"`
 	// Operators for the current request go here.
-	CompiledOperators *protocols2.Operators
+	CompiledOperators *protocols.Operators
 	dialer            *net.Dialer
-	generator         *protocols2.Generator
-	attackType        protocols2.Type
+	generator         *protocols.Generator
+	attackType        protocols.Type
 	// cache any variables that may be needed for operation.
 	//dialer  *fastdialer.Dialer
-	options *protocols2.ExecuterOptions
+	options *protocols.ExecuterOptions
 }
 
 type addressKV struct {
@@ -61,7 +61,7 @@ func (r *Request) GetID() string {
 }
 
 // Compile compiles the protocol request for further execution.
-func (r *Request) Compile(options *protocols2.ExecuterOptions) error {
+func (r *Request) Compile(options *protocols.ExecuterOptions) error {
 	var shouldUseTLS bool
 	var err error
 	r.options = options
@@ -85,7 +85,7 @@ func (r *Request) Compile(options *protocols2.ExecuterOptions) error {
 		if attackType == "" {
 			attackType = "sniper"
 		}
-		r.attackType = protocols2.StringToType[attackType]
+		r.attackType = protocols.StringToType[attackType]
 
 		// Resolve payload paths if they are files.
 		//for name, payload := range r.Payloads {
@@ -98,7 +98,7 @@ func (r *Request) Compile(options *protocols2.ExecuterOptions) error {
 		//		r.Payloads[name] = final
 		//	}
 		//}
-		r.generator, err = protocols2.New(r.Payloads, r.attackType)
+		r.generator, err = protocols.New(r.Payloads, r.attackType)
 		if err != nil {
 			return err
 		}

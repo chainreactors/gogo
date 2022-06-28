@@ -1,7 +1,7 @@
 package templates
 
 import (
-	protocols2 "getitle/v1/pkg/nuclei/protocols"
+	protocols "getitle/v1/pkg/nuclei/protocols"
 	"getitle/v1/pkg/nuclei/protocols/executer"
 	"getitle/v1/pkg/nuclei/protocols/http"
 	"getitle/v1/pkg/nuclei/protocols/network"
@@ -37,8 +37,8 @@ func (t *Template) GetTags() []string {
 	return []string{}
 }
 
-func (t *Template) Compile(options protocols2.ExecuterOptions) error {
-	var requests []protocols2.Request
+func (t *Template) Compile(options protocols.ExecuterOptions) error {
+	var requests []protocols.Request
 	var err error
 	if len(t.RequestsHTTP) > 0 {
 		for _, req := range t.RequestsHTTP {
@@ -62,7 +62,7 @@ func (t *Template) Compile(options protocols2.ExecuterOptions) error {
 	return nil
 }
 
-func (t *Template) Execute(url string) (*protocols2.Result, bool) {
+func (t *Template) Execute(url string) (*protocols.Result, bool) {
 	res, err := t.Executor.Execute(url)
 	if err != nil || res == nil {
 		return nil, false

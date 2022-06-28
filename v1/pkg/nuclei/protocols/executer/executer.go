@@ -1,24 +1,24 @@
 package executer
 
 import (
-	protocols2 "getitle/v1/pkg/nuclei/protocols"
+	"getitle/v1/pkg/nuclei/protocols"
 )
 
 type Executer struct {
-	requests []protocols2.Request
-	options  *protocols2.ExecuterOptions
+	requests []protocols.Request
+	options  *protocols.ExecuterOptions
 }
 
 type Event map[string]interface{}
 type WrappedEvent struct {
 	InternalEvent   Event
-	OperatorsResult *protocols2.Result
+	OperatorsResult *protocols.Result
 }
 
-var _ protocols2.Executer = &Executer{}
+var _ protocols.Executer = &Executer{}
 
 // NewExecuter creates a new request executer for list of requests
-func NewExecuter(requests []protocols2.Request, options *protocols2.ExecuterOptions) *Executer {
+func NewExecuter(requests []protocols.Request, options *protocols.ExecuterOptions) *Executer {
 	return &Executer{requests: requests, options: options}
 }
 
@@ -43,13 +43,13 @@ func (e *Executer) Requests() int {
 }
 
 // Execute executes the protocol group and returns true or false if results were found.
-func (e *Executer) Execute(input string) (*protocols2.Result, error) {
-	var result *protocols2.Result
+func (e *Executer) Execute(input string) (*protocols.Result, error) {
+	var result *protocols.Result
 
 	dynamicValues := make(map[string]interface{})
 	//previous := make(map[string]interface{})
 	for _, req := range e.requests {
-		err := req.ExecuteWithResults(input, dynamicValues, func(event *protocols2.InternalWrappedEvent) {
+		err := req.ExecuteWithResults(input, dynamicValues, func(event *protocols.InternalWrappedEvent) {
 			//ID := req.GetID()
 			if event.OperatorsResult != nil {
 				result = event.OperatorsResult
