@@ -75,8 +75,8 @@ func (imap IPMapResult) isWin() bool {
 
 type ResultsData struct {
 	Config Config  `json:"config"`
-	Data   Results `json:"data"`
 	IP     string  `json:"ip"`
+	Data   Results `json:"data"`
 }
 
 func (rd ResultsData) groupByIP() map[string]IPMapResult {
