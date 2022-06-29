@@ -130,8 +130,8 @@ type Rule struct {
 	Version     string    `yaml:"version,omitempty" json:"version,omitempty"`
 	Favicon     *Favicons `yaml:"favicon,omitempty" json:"favicon,omitempty"`
 	Regexps     *Regexps  `yaml:"regexps,omitempty" json:"regexps,omitempty"`
-	SendDataStr string    `yaml:"send_data,omitempty" json:"send_data_str,omitempty"`
-	SendData    senddata  `yaml:"-" json:"-,omitempty"`
+	SendDataStr string    `yaml:"send_data,omitempty" json:"send_data,omitempty"`
+	SendData    senddata  `yaml:"-,omitempty" json:"-,omitempty"`
 	Info        string    `yaml:"info,omitempty" json:"info,omitempty"`
 	Vuln        string    `yaml:"vuln,omitempty" json:"vuln,omitempty"`
 	Level       int       `yaml:"level,omitempty" json:"level,omitempty"`
