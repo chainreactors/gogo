@@ -22,6 +22,18 @@ func Base64Encode(b []byte) string {
 	return base64.StdEncoding.EncodeToString(b)
 }
 
+func UnHexlify(s string) []byte {
+	b, err := hex.DecodeString(s)
+	if err != nil {
+		utils.Fatal("" + err.Error())
+	}
+	return b
+}
+
+func Hexlify(b []byte) string {
+	return hex.EncodeToString(b)
+}
+
 func Md5Hash(raw []byte) string {
 	m := md5.Sum(raw)
 	return hex.EncodeToString(m[:])

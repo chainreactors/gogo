@@ -1,9 +1,9 @@
 package fingers
 
 import (
-	b64 "encoding/base64"
 	"encoding/json"
 	"fmt"
+	"getitle/v1/pkg/dsl"
 	"regexp"
 )
 
@@ -11,7 +11,9 @@ import (
 func decode(s string) []byte {
 	var bs []byte
 	if s[:4] == "b64|" {
-		bs, _ = b64.StdEncoding.DecodeString(s[4:])
+		bs = dsl.Base64Decode(s[4:])
+	} else if s[:5] == "hex|" {
+		bs = dsl.UnHexlify(s[5:])
 	} else {
 		bs = []byte(s)
 	}
