@@ -78,7 +78,7 @@ func ParseCIDR(target string) (string, string) {
 		ip = strings.Split(target, "/")[0]
 		mask = strings.Split(target, "/")[1]
 		if !(utils.ToInt(mask) > 0 && utils.ToInt(mask) <= 32) {
-			Fatal(target + " netmask out of 1-32")
+			utils.Fatal(target + " netmask out of 1-32")
 		}
 	} else {
 		ip = target

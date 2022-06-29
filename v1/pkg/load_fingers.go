@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"getitle/v1/pkg/fingers"
+	"getitle/v1/pkg/utils"
 )
 
 var (
@@ -16,12 +17,12 @@ var (
 func LoadFinger(t string) fingers.Fingers {
 	fs, err := fingers.LoadFingers(LoadConfig(t))
 	if err != nil {
-		Fatal(err.Error())
+		utils.Fatal(err.Error())
 	}
 	for _, finger := range fs {
 		err := finger.Compile(portSliceHandler)
 		if err != nil {
-			Fatal(err.Error())
+			utils.Fatal(err.Error())
 		}
 	}
 	return fs

@@ -7,9 +7,7 @@ import (
 	"fmt"
 	. "getitle/v1/pkg/utils"
 	"os"
-	"os/exec"
 	"path"
-	"path/filepath"
 	"strings"
 )
 
@@ -134,7 +132,7 @@ func GetFilename(config *Config, format string, filepath, outtype string) string
 	var basename string
 	var basepath string = filepath
 	if filepath == "" {
-		basepath = getExcPath()
+		basepath = GetExcPath()
 	}
 
 	if format == "auto" {
@@ -184,14 +182,4 @@ func Open(filename string) *os.File {
 		Fatal("" + err.Error())
 	}
 	return f
-}
-
-func getExcPath() string {
-	file, _ := exec.LookPath(os.Args[0])
-	// 获取包含可执行文件名称的路径
-	path, _ := filepath.Abs(file)
-	// 获取可执行文件所在目录
-	index := strings.LastIndex(path, string(os.PathSeparator))
-	ret := path[:index]
-	return strings.Replace(ret, "\\", "/", -1) + "/"
 }

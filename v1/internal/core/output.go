@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	. "getitle/v1/pkg"
+	"getitle/v1/pkg/utils"
 	"os"
 	"strings"
 )
@@ -94,7 +95,7 @@ func FormatOutput(filename string, outputfile string, autofile bool, filters []s
 	if outputfile != "" {
 		fileHandle, err := NewFile(outputfile, false, false)
 		if err != nil {
-			Fatal("" + err.Error())
+			utils.Fatal("" + err.Error())
 		}
 		fmt.Println("Output filename: " + outputfile)
 		defer fileHandle.Close()

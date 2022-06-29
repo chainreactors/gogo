@@ -3,11 +3,11 @@ package pkg
 import (
 	"bytes"
 	"compress/flate"
-	"encoding/base64"
 	"fmt"
+	"getitle/v1/pkg/dsl"
+	"getitle/v1/pkg/utils"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"regexp"
 	"strings"
 	"time"
@@ -101,7 +101,7 @@ func GetHeaderstr(resp *http.Response) string {
 func CompileRegexp(s string) *regexp.Regexp {
 	reg, err := regexp.Compile(s)
 	if err != nil {
-		Fatal(fmt.Sprintf("regexp string error: %s, %s", s, err.Error()))
+		utils.Fatal(fmt.Sprintf("regexp string error: %s, %s", s, err.Error()))
 	}
 	return reg
 }
@@ -157,25 +157,13 @@ func UnFlate(input []byte) []byte {
 }
 
 func Decode(input string) []byte {
-	b := Base64Decode(input)
+	b := dsl.Base64Decode(input)
 	return UnFlate(b)
 }
 
 func Encode(input []byte) string {
 	s := Flate(input)
-	return Base64Encode(s)
-}
-
-func Base64Decode(s string) []byte {
-	data, err := base64.StdEncoding.DecodeString(s)
-	if err != nil {
-		Fatal("" + err.Error())
-	}
-	return data
-}
-
-func Base64Encode(b []byte) string {
-	return base64.StdEncoding.EncodeToString(b)
+	return dsl.Base64Encode(s)
 }
 
 func HasPingPriv() bool {
@@ -183,9 +171,4 @@ func HasPingPriv() bool {
 		return true
 	}
 	return false
-}
-
-func Fatal(s string) {
-	fmt.Println("[-] " + s)
-	os.Exit(0)
 }

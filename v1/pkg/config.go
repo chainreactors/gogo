@@ -93,7 +93,7 @@ func (config *Config) InitIP() {
 				config.HostsMap[ip] = append(config.HostsMap[ip], host)
 			}
 			if config.IP == "" {
-				Fatal("IP format error")
+				utils.Fatal("IP format error")
 			}
 		}
 	}
@@ -113,7 +113,7 @@ func (config *Config) InitIP() {
 		}
 		config.IPlist = utils.SliceUnique(iplist) // 去重
 		if len(config.IPlist) == 0 {
-			Fatal("all targets format error")
+			utils.Fatal("all targets format error")
 		}
 	}
 }

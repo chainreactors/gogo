@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"fmt"
 	. "getitle/v1/pkg"
+	. "getitle/v1/pkg/dsl"
+	"getitle/v1/pkg/utils"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -13,7 +15,7 @@ func LoadFile(file *os.File) []byte {
 	defer file.Close()
 	content, err := ioutil.ReadAll(file)
 	if err != nil {
-		Fatal(err.Error())
+		utils.Fatal(err.Error())
 	}
 	if IsBase64(content) {
 		content = Base64Decode(string(content))
