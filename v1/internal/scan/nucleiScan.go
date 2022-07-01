@@ -11,14 +11,14 @@ import (
 func Nuclei(target string, result *Result) {
 
 	if RunOpt.Exploit == "auto" {
-		execute_templates(result, result.Frameworks.GetTitles(), target)
+		executeTemplates(result, result.Frameworks.GetTitles(), target)
 	} else {
-		execute_templates(result, strings.Split(RunOpt.Exploit, ","), target)
+		executeTemplates(result, strings.Split(RunOpt.Exploit, ","), target)
 	}
 
 }
 
-func execute_templates(result *Result, titles []string, target string) {
+func executeTemplates(result *Result, titles []string, target string) {
 	var vulns []*Vuln
 	templates := choiceTemplates(titles)
 chainLoop:
