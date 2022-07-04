@@ -57,6 +57,7 @@ func recuLoadYamlFiles2JsonString(dir string, single bool) string {
 
 		err = yaml.Unmarshal(bs, &tmp)
 		if err != nil {
+			print(file)
 			panic(err)
 		}
 		if single {
