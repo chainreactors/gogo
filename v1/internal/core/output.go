@@ -93,7 +93,7 @@ func FormatOutput(filename string, outputfile string, autofile bool, filters []s
 
 	// 初始化再输出文件
 	if outputfile != "" {
-		fileHandle, err := NewFile(outputfile, false, false)
+		fileHandle, err := NewFile(outputfile, false, false, false)
 		if err != nil {
 			utils.Fatal("" + err.Error())
 		}

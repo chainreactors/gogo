@@ -4,11 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"errors"
-	"fmt"
-	. "getitle/v1/pkg/utils"
 	"os"
-	"path"
-	"strings"
 )
 
 func IsExist(filename string) bool {
@@ -19,7 +15,7 @@ func IsExist(filename string) bool {
 	return exist
 }
 
-func FileInitialize(filename string) (*os.File, error) {
+func CreateFile(filename string) (*os.File, error) {
 	var err error
 	var filehandle *os.File
 	if IsExist(filename) { //如果文件存在
@@ -33,7 +29,24 @@ func FileInitialize(filename string) (*os.File, error) {
 	return filehandle, err
 }
 
-func NewFile(filename string, compress, lazy bool) (*File, error) {
+func AppendFile(filename string) (*os.File, error) {
+	var err error
+	var filehandle *os.File
+	if IsExist(filename) { //如果文件存在
+		filehandle, err = os.OpenFile(filename, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		filehandle, err = os.Create(filename) //创建文件
+		if err != nil {
+			return nil, err
+		}
+	}
+	return filehandle, err
+}
+
+func NewFile(filename string, compress, lazy, append bool) (*File, error) {
 	var file = &File{
 		Filename: filename,
 		compress: compress,
@@ -56,6 +69,7 @@ type File struct {
 	fileWriter  *bufio.Writer
 	buf         *bytes.Buffer
 	compress    bool
+	append      bool
 }
 
 func (f *File) Init() error {
@@ -64,7 +78,11 @@ func (f *File) Init() error {
 		// 防止初始化失败之后重复初始化, flag提前设置为true
 		f.Initialized = true
 
-		f.FileHandler, err = FileInitialize(f.Filename)
+		if f.append {
+			f.FileHandler, err = AppendFile(f.Filename)
+		} else {
+			f.FileHandler, err = CreateFile(f.Filename)
+		}
 		if err != nil {
 			return err
 		}
@@ -74,10 +92,6 @@ func (f *File) Init() error {
 }
 
 func (f *File) Write(s string) {
-	//if f.FileHandler == nil {
-	//	return
-	//}
-
 	_, _ = f.buf.WriteString(s)
 	if f.buf.Len() > 4096 {
 		f.Sync()
@@ -91,10 +105,6 @@ func (f *File) SyncWrite(s string) {
 }
 
 func (f *File) WriteBytes(bs []byte) {
-	//if f.FileHandler == nil {
-	//	return
-	//}
-
 	_, _ = f.buf.Write(bs)
 	if f.buf.Len() > 4096 {
 		f.Sync()
@@ -126,44 +136,6 @@ func (f *File) Close() {
 	_ = f.FileHandler.Close()
 }
 
-var fileint = 1
-
-func GetFilename(config *Config, format string, filepath, outtype string) string {
-	var basename string
-	var basepath string = filepath
-	if filepath == "" {
-		basepath = GetExcPath()
-	}
-
-	if format == "auto" {
-		basename = path.Join(basepath, "."+getAutoFilename(config, outtype)+".dat")
-	} else if format == "hidden" {
-		if Win {
-			basename = path.Join(basepath, "App_1634884664021088500_EC1B25B2-9453-49EE-A1E2-112B4D539F5.dat")
-		} else {
-			basename = path.Join(basepath, ".systemd-private-701215aa8263408d8d44f4507834d77")
-		}
-	} else if format == "clear" {
-		basename = path.Join(basepath, getAutoFilename(config, outtype)+".txt")
-	} else {
-		return ""
-	}
-	for IsExist(basename + ToString(fileint)) {
-		fileint++
-	}
-	return basename + ToString(fileint)
-}
-
-func getAutoFilename(config *Config, outtype string) string {
-	var basename string
-	target := strings.Replace(config.GetTargetName(), "/", "_", -1)
-	target = strings.Replace(target, ":", "", -1)
-	target = strings.Replace(target, "\\", "_", -1)
-	ports := strings.Replace(config.Ports, ",", "_", -1)
-	basename = fmt.Sprintf("%s_%s_%s_%s", target, ports, config.Mod, outtype)
-	return basename
-}
-
 func HasStdin() bool {
 	stat, err := os.Stdin.Stat()
 	if err != nil {
@@ -174,12 +146,4 @@ func HasStdin() bool {
 	isPipedFromFIFO := (stat.Mode() & os.ModeNamedPipe) != 0
 
 	return isPipedFromChrDev || isPipedFromFIFO
-}
-
-func Open(filename string) *os.File {
-	f, err := os.Open(filename)
-	if err != nil {
-		Fatal("" + err.Error())
-	}
-	return f
 }

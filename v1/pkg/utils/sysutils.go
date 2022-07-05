@@ -10,7 +10,9 @@ import (
 	"time"
 )
 
-var cwtime = getcwtime()
+var (
+	cwtime = getcwtime()
+)
 
 func IsWin() bool {
 	os := runtime.GOOS

@@ -33,7 +33,7 @@ func initFile(config *Config) error {
 	if config.Filename != "" {
 		Log.Clean = !Log.Clean
 		// 创建output的filehandle
-		Opt.File, err = NewFile(config.Filename, Opt.Compress, true)
+		Opt.File, err = NewFile(config.Filename, Opt.Compress, true, false)
 		if err != nil {
 			Log.Warn(err.Error())
 		}
@@ -48,7 +48,7 @@ func initFile(config *Config) error {
 
 	// -af 参数下的启发式扫描结果handler初始化
 	if config.SmartFilename != "" {
-		Opt.SmartFile, err = NewFile(config.SmartFilename, Opt.Compress, true)
+		Opt.SmartFile, err = NewFile(config.SmartFilename, Opt.Compress, true, false)
 		if err != nil {
 			return err
 		}
@@ -56,7 +56,7 @@ func initFile(config *Config) error {
 	}
 
 	if config.PingFilename != "" {
-		Opt.AliveFile, err = NewFile(config.PingFilename, Opt.Compress, true)
+		Opt.AliveFile, err = NewFile(config.PingFilename, Opt.Compress, true, false)
 		if err != nil {
 			return err
 		}
@@ -120,7 +120,7 @@ func handler() {
 		for res := range Opt.extractCh {
 			if Opt.ExtractFile == nil {
 				var err error
-				Opt.ExtractFile, err = NewFile(Opt.File.Filename+"_extract", Opt.Compress, false)
+				Opt.ExtractFile, err = NewFile(Opt.File.Filename+"_extract", Opt.Compress, false, false)
 				if err != nil {
 					Log.Warn("cannot create extractor result File, " + err.Error())
 					return

@@ -14,8 +14,6 @@ var (
 	//WorkFlowMap    map[string][]*Workflow
 	CommonCompiled map[string]*regexp.Regexp
 	Extractors     = make(map[string]*regexp.Regexp)
-	Win            = utils.IsWin()
-	Root           = utils.IsRoot()
 )
 
 var PresetExtracts = map[string]*regexp.Regexp{

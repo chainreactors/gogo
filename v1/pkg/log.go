@@ -37,7 +37,7 @@ func (log *Logger) InitFile() {
 	}
 	var err error
 	LogFilename = path.Join(utils.GetExcPath(), LogFilename)
-	log.LogFile, err = NewFile(LogFilename, false, false)
+	log.LogFile, err = NewFile(LogFilename, false, false, true)
 	if err != nil {
 		Log.Warn("cannot create logfile, err:" + err.Error())
 		return
