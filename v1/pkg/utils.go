@@ -1,11 +1,10 @@
 package pkg
 
 import (
-	"bytes"
-	"compress/flate"
 	"fmt"
 	"getitle/v1/pkg/dsl"
 	"getitle/v1/pkg/utils"
+	. "github.com/chainreactors/files"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -140,28 +139,28 @@ func CompileRegexp(s string) *regexp.Regexp {
 
 //var flatedict = `{"i":"`+`","p":"`+`","u":"`+`","o":"`+`","h":"`+`","t":"`+`","m":"` + `","s":"` + `","l":"` + `","f":` + `null` + `","v":` + `"r":"`
 //var flatedict = `,":`
-
-func Flate(input []byte) []byte {
-	var bf = bytes.NewBuffer([]byte{})
-	var flater, _ = flate.NewWriter(bf, flate.BestCompression)
-	defer flater.Close()
-	if _, err := flater.Write(input); err != nil {
-		println(err.Error())
-		return []byte{}
-	}
-	if err := flater.Flush(); err != nil {
-		println(err.Error())
-		return []byte{}
-	}
-	return bf.Bytes()
-}
-
-func UnFlate(input []byte) []byte {
-	rdata := bytes.NewReader(input)
-	r := flate.NewReader(rdata)
-	s, _ := ioutil.ReadAll(r)
-	return s
-}
+//
+//func Flate(input []byte) []byte {
+//	var bf = bytes.NewBuffer([]byte{})
+//	var flater, _ = flate.NewWriter(bf, flate.BestCompression)
+//	defer flater.Close()
+//	if _, err := flater.Write(input); err != nil {
+//		println(err.Error())
+//		return []byte{}
+//	}
+//	if err := flater.Flush(); err != nil {
+//		println(err.Error())
+//		return []byte{}
+//	}
+//	return bf.Bytes()
+//}
+//
+//func UnFlate(input []byte) []byte {
+//	rdata := bytes.NewReader(input)
+//	r := flate.NewReader(rdata)
+//	s, _ := ioutil.ReadAll(r)
+//	return s
+//}
 
 func Decode(input string) []byte {
 	b := dsl.Base64Decode(input)
@@ -178,6 +177,14 @@ func HasPingPriv() bool {
 		return true
 	}
 	return false
+}
+
+func IsExist(filename string) bool {
+	var exist = true
+	if _, err := os.Stat(filename); os.IsNotExist(err) {
+		exist = false
+	}
+	return exist
 }
 
 func Open(filename string) *os.File {
@@ -224,4 +231,16 @@ func GetFilename(config *Config, format string, filepath, outtype string) string
 		fileint++
 	}
 	return basename + utils.ToString(fileint)
+}
+
+func HasStdin() bool {
+	stat, err := os.Stdin.Stat()
+	if err != nil {
+		return false
+	}
+
+	isPipedFromChrDev := (stat.Mode() & os.ModeCharDevice) == 0
+	isPipedFromFIFO := (stat.Mode() & os.ModeNamedPipe) != 0
+
+	return isPipedFromChrDev || isPipedFromFIFO
 }

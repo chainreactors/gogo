@@ -1,6 +1,8 @@
 package core
 
-import . "getitle/v1/pkg"
+import (
+	. "github.com/chainreactors/files"
+)
 
 type Options struct {
 	AliveSum    int

@@ -3,6 +3,7 @@ package pkg
 import (
 	"fmt"
 	"getitle/v1/pkg/utils"
+	. "github.com/chainreactors/files"
 	"os"
 	"path"
 	"time"

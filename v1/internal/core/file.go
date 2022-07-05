@@ -5,6 +5,7 @@ import (
 	"fmt"
 	. "getitle/v1/pkg"
 	"getitle/v1/pkg/utils"
+	. "github.com/chainreactors/files"
 	"io/ioutil"
 	"os"
 	"strings"
