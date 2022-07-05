@@ -6,6 +6,7 @@ import (
 	"getitle/v1/internal/scan"
 	. "getitle/v1/pkg"
 	. "getitle/v1/pkg/utils"
+	"github.com/chainreactors/logs"
 	"net"
 	"os"
 	"path"
@@ -56,7 +57,7 @@ type Runner struct {
 
 func (r *Runner) preInit() bool {
 	// 初始化日志工具"
-	Log = NewLogger(r.Quiet, r.Debug)
+	Log = logs.NewLogger(r.Quiet, r.Debug)
 	legalFormat := []string{"url", "ip", "port", "frameworks", "framework", "vuln", "vulns", "protocol", "title", "target", "hash", "language", "host", "color", "c", "json", "j", "full", "jsonlines", "jl", "zombie"}
 	if r.FileOutput != "default" {
 		for _, form := range strings.Split(r.FileOutput, ",") {

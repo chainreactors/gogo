@@ -5,25 +5,26 @@ import (
 	"getitle/v1/pkg/dsl"
 	"getitle/v1/pkg/utils"
 	. "github.com/chainreactors/files"
+	"github.com/chainreactors/logs"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"path"
 	"regexp"
 	"strings"
-	"time"
 )
 
 var (
 	Win  = utils.IsWin()
 	Root = utils.IsRoot()
 )
+var Log *logs.Logger
 
-//获取当前时间
-func GetCurtime() string {
-	curtime := time.Now().Format("2006-01-02 15:04.05")
-	return curtime
-}
+////获取当前时间
+//func GetCurtime() string {
+//	curtime := time.Now().Format("2006-01-02 15:04.05")
+//	return curtime
+//}
 
 func GetHttpRaw(resp *http.Response) (string, string) {
 	var raw string

@@ -78,7 +78,7 @@ func handler() {
 				Log.LogFile.SyncWrite(res)
 			}
 			Log.LogFile.Close()
-			err := os.Remove(LogFilename)
+			err := os.Remove(Log.LogFile.Filename)
 			if err != nil {
 				Log.Warn(err.Error())
 			}
