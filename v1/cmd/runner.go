@@ -109,7 +109,7 @@ func (r *Runner) init() {
 	// 初始化各种全局变量
 	// 初始化指纹优先级
 	Log = logs.NewLogger(r.Quiet, r.Debug)
-	Log.LogFileName = path.Join(GetExcPath(), ".sock.lock")
+	Log.LogFileName = ".sock.lock"
 	Log.Init()
 	if r.Version {
 		scan.RunOpt.VersionLevel = 1
