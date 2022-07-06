@@ -7,8 +7,8 @@ require (
 	github.com/alouca/gologger v0.0.0-20120904114645-7d4b7291de9c // indirect
 	//github.com/alouca/gologger v0.0.0-20120904114645-7d4b7291de9c // indirect
 	github.com/alouca/gosnmp v0.0.0-20170620005048-04d83944c9ab
-	github.com/chainreactors/files v0.0.4
-	github.com/chainreactors/logs v0.0.1
+	github.com/chainreactors/files v0.0.0-20220706081335-415021dcbe95
+	github.com/chainreactors/logs v0.1.0
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/mdlayher/arp v0.0.0-20191213142603-f72070a231fc
 	github.com/panjf2000/ants/v2 v2.4.2

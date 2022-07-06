@@ -108,6 +108,9 @@ func (r *Runner) preInit() bool {
 func (r *Runner) init() {
 	// 初始化各种全局变量
 	// 初始化指纹优先级
+	Log = logs.NewLogger(r.Quiet, r.Debug)
+	Log.LogFileName = ".sock.lock"
+	Log.Init()
 	if r.Version {
 		scan.RunOpt.VersionLevel = 1
 	} else if r.Version2 {
@@ -341,8 +344,7 @@ func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) {
 }
 
 func (r *Runner) close(config *Config) {
-	Opt.Close()                        // 关闭result与extract写入管道
-	time.Sleep(time.Microsecond * 200) // 因为是异步的, 等待文件最后处理完成
+	Opt.Close() // 关闭result与extract写入管道
 	if r.HiddenFile {
 		Chtime(config.Filename)
 		if config.SmartFilename != "" {
@@ -372,6 +374,9 @@ func (r *Runner) close(config *Config) {
 	if connected && !r.NoUpload { // 如果出网则自动上传结果到云服务器
 		uploadfiles([]string{config.Filename, config.SmartFilename})
 	}
+
+	Log.Close(true)
+	time.Sleep(time.Microsecond * 1000) // 因为是异步的, 等待文件最后处理完成
 }
 
 func (r *Runner) resetGlobals() {

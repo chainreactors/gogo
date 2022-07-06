@@ -12,19 +12,24 @@ type Options struct {
 	SmartFile   *File
 	ExtractFile *File
 	AliveFile   *File
-	dataCh      chan string
-	extractCh   chan string
-	Output      string
-	FileOutput  string
-	FilePath    string
+	//dataCh      chan string
+	//extractCh   chan string
+	Output     string
+	FileOutput string
+	FilePath   string
 }
 
 func (opt *Options) Close() {
-	// 关闭管道
-	if Opt.dataCh != nil {
-		close(Opt.dataCh)
+	if Opt.File != nil {
+		Opt.File.Close()
+	}
+	if Opt.SmartFile != nil {
+		Opt.SmartFile.Close()
+	}
+	if Opt.AliveFile != nil {
+		Opt.AliveFile.Close()
 	}
 	if Opt.ExtractFile != nil {
-		close(Opt.extractCh)
+		Opt.ExtractFile.Close()
 	}
 }

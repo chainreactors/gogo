@@ -5,7 +5,6 @@ import (
 	"fmt"
 	. "getitle/v1/internal/core"
 	. "getitle/v1/internal/scan"
-	. "getitle/v1/pkg"
 	"github.com/panjf2000/ants/v2"
 	"os"
 	"strings"
@@ -92,12 +91,8 @@ func CMD() {
 		os.Exit(0)
 	}
 	runner.init()
-
-	// 初始化任务
-	Log.InitFile() // 在真正运行前再初始化进度文件
 	runner.run()
 
-	Log.Close() // 关闭进度写入管道
 }
 
 type Value interface {
