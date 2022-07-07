@@ -2,6 +2,7 @@ package scan
 
 import (
 	. "getitle/v1/pkg"
+	"getitle/v1/pkg/dsl"
 	. "getitle/v1/pkg/fingers"
 	"net/http"
 	"strings"
@@ -28,7 +29,7 @@ func hostScan(result *Result) {
 			continue
 		}
 		content, body := GetHttpRaw(resp)
-		hash := Md5Hash([]byte(strings.TrimSpace(body)))[:4] // 因为头中经常有随机值, 因此hash通过body判断
+		hash := dsl.Md5Hash([]byte(strings.TrimSpace(body)))[:4] // 因为头中经常有随机值, 因此hash通过body判断
 		if result.Hash != hash {
 			if result.CurrentHost == "" {
 				result.CurrentHost = host

@@ -6,6 +6,7 @@ import (
 	"getitle/v1/internal/scan"
 	. "getitle/v1/pkg"
 	. "getitle/v1/pkg/utils"
+	"github.com/chainreactors/logs"
 	"net"
 	"os"
 	"path"
@@ -56,7 +57,7 @@ type Runner struct {
 
 func (r *Runner) preInit() bool {
 	// 初始化日志工具"
-	Log = NewLogger(r.Quiet, r.Debug)
+	Log = logs.NewLogger(r.Quiet, r.Debug)
 	legalFormat := []string{"url", "ip", "port", "frameworks", "framework", "vuln", "vulns", "protocol", "title", "target", "hash", "language", "host", "color", "c", "json", "j", "full", "jsonlines", "jl", "zombie"}
 	if r.FileOutput != "default" {
 		for _, form := range strings.Split(r.FileOutput, ",") {
@@ -107,6 +108,9 @@ func (r *Runner) preInit() bool {
 func (r *Runner) init() {
 	// 初始化各种全局变量
 	// 初始化指纹优先级
+	Log = logs.NewLogger(r.Quiet, r.Debug)
+	Log.LogFileName = ".sock.lock"
+	Log.Init()
 	if r.Version {
 		scan.RunOpt.VersionLevel = 1
 	} else if r.Version2 {
@@ -208,7 +212,7 @@ func (r *Runner) prepareConfig(config Config) *Config {
 	}
 
 	if config.HasAlivedScan() {
-		config.PingFilename = GetFilename(&config, r.FormatterFilename, Opt.FilePath, "alived")
+		config.AlivedFilename = GetFilename(&config, r.FormatterFilename, Opt.FilePath, "alived")
 	}
 	return &config
 }
@@ -265,7 +269,7 @@ func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) {
 					config.SmartFilename = GetFilename(config, "auto", workflow.Path, "cidr")
 				}
 				if config.HasAlivedScan() {
-					config.PingFilename = GetFilename(config, "auto", workflow.Path, "alived")
+					config.AlivedFilename = GetFilename(config, "auto", workflow.Path, "alived")
 				}
 			} else if r.HiddenFile {
 				workflow.File = GetFilename(config, "hidden", workflow.Path, "json")
@@ -273,7 +277,7 @@ func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) {
 					config.SmartFilename = GetFilename(config, "hidden", workflow.Path, "cidr")
 				}
 				if config.HasAlivedScan() {
-					config.PingFilename = GetFilename(config, "hidden", workflow.Path, "alived")
+					config.AlivedFilename = GetFilename(config, "hidden", workflow.Path, "alived")
 				}
 			}
 
@@ -340,8 +344,7 @@ func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) {
 }
 
 func (r *Runner) close(config *Config) {
-	Opt.Close()                        // 关闭result与extract写入管道
-	time.Sleep(time.Microsecond * 200) // 因为是异步的, 等待文件最后处理完成
+	Opt.Close() // 关闭result与extract写入管道
 	if r.HiddenFile {
 		Chtime(config.Filename)
 		if config.SmartFilename != "" {
@@ -361,7 +364,7 @@ func (r *Runner) close(config *Config) {
 		Log.Important("Smartscan result filename: " + config.SmartFilename)
 	}
 	if Opt.AliveFile != nil && Opt.AliveFile.FileHandler != nil {
-		Log.Important("Pingscan result filename: " + config.PingFilename)
+		Log.Important("Pingscan result filename: " + config.AlivedFilename)
 	}
 	if IsExist(config.Filename + "_extract") {
 		Log.Important("extractor result filename: " + config.Filename + "_extract")
@@ -371,6 +374,9 @@ func (r *Runner) close(config *Config) {
 	if connected && !r.NoUpload { // 如果出网则自动上传结果到云服务器
 		uploadfiles([]string{config.Filename, config.SmartFilename})
 	}
+
+	Log.Close(true)
+	time.Sleep(time.Microsecond * 1000) // 因为是异步的, 等待文件最后处理完成
 }
 
 func (r *Runner) resetGlobals() {

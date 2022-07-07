@@ -4,7 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"getitle/v1/pkg/dsl"
 	"getitle/v1/pkg/fingers"
+	"getitle/v1/pkg/utils"
+	. "github.com/chainreactors/files"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -75,8 +78,8 @@ func (imap IPMapResult) isWin() bool {
 
 type ResultsData struct {
 	Config Config  `json:"config"`
-	Data   Results `json:"data"`
 	IP     string  `json:"ip"`
+	Data   Results `json:"data"`
 }
 
 func (rd ResultsData) groupByIP() map[string]IPMapResult {
@@ -216,7 +219,7 @@ func (rd ResultsData) ToZombie() string {
 	}
 	s, err := json.Marshal(zms)
 	if err != nil {
-		Fatal("" + err.Error())
+		utils.Fatal("" + err.Error())
 	}
 	return string(s)
 }
@@ -282,15 +285,17 @@ func LoadResultFile(file *os.File) interface{} {
 	var data interface{}
 	content, err := ioutil.ReadAll(file)
 	if err != nil {
-		Fatal("" + err.Error())
+		utils.Fatal("" + err.Error())
 	}
 
 	if IsBase64(content) {
 		// stdin输入二进制文件支持base64编码之后的. base64 result.txt|gt -F stdin
 		// 如果直接输入解压缩之后的json文件,则跳过这个步骤
-		content = Base64Decode(string(content))
+		content = dsl.Base64Decode(string(content))
 	}
+
 	if IsBin(content) {
+		content = dsl.XorEncode(content, Key, 0)
 		content = UnFlate(content)
 	}
 

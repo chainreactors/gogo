@@ -77,12 +77,12 @@ func defaultScan(tc targetConfig) {
 		Opt.AliveSum++
 		// 格式化title编码, 防止输出二进制数据
 		result.Title = AsciiEncode(result.Title)
-		Log.Default(output(result, Opt.Output))
+		Log.Console(output(result, Opt.Output))
 
 		if Opt.File != nil {
-			Opt.dataCh <- output(result, Opt.FileOutput)
+			Opt.File.SafeWrite(output(result, Opt.FileOutput))
 			if result.Extracts.Extractors != nil {
-				Opt.extractCh <- result.Extracts.ToResult()
+				Opt.ExtractFile.SafeWrite(result.Extracts.ToResult())
 			}
 		}
 	} else if result.Error != "" {
@@ -152,7 +152,7 @@ func SmartMod(target string, config Config) {
 	}
 
 	if Opt.File != nil && config.Mod == "sb" {
-		Opt.dataCh <- strings.Join(iplist, "\n") + "\n"
+		Opt.File.SafeWrite(strings.Join(iplist, "\n") + "\n")
 	}
 
 	if Opt.Noscan {
@@ -225,7 +225,7 @@ func declineScan(iplist []string, config Config) {
 			tmpalive := Opt.AliveSum
 			SmartMod(ip, config)
 			Log.Importantf("Found %d assets from CIDR %s", Opt.AliveSum-tmpalive, ip)
-			Opt.dataCh <- "sync"
+			Opt.File.SafeSync()
 		}
 	}
 }

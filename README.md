@@ -335,7 +335,7 @@ SMB
 
 可以带两个参数, 第一个为版本号, 第二个为key, 不加则自动为空
 
-`make.bat 1.0.0 [key]`
+`make.bat [key]`
 
 
 ### obfuscate.bat
@@ -345,6 +345,10 @@ SMB
 
 ### release.bat 
 自动将单个文件上传到alioss, 将README.md 二进制文件和一些小工具打包.
+
+### full
+
+`./make.bat [key] ; ./obfuscate.bat ; release.bat `
 
 ## THANKS
 

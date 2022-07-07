@@ -14,8 +14,6 @@ var (
 	//WorkFlowMap    map[string][]*Workflow
 	CommonCompiled map[string]*regexp.Regexp
 	Extractors     = make(map[string]*regexp.Regexp)
-	Win            = utils.IsWin()
-	Root           = utils.IsRoot()
 )
 
 var PresetExtracts = map[string]*regexp.Regexp{
@@ -42,7 +40,7 @@ func LoadPortConfig() (PortMapper, PortMapper, PortMapper) {
 	err := json.Unmarshal(LoadConfig("port"), &portfingers)
 
 	if err != nil {
-		Fatal("port config load FAIL!, " + err.Error())
+		utils.Fatal("port config load FAIL!, " + err.Error())
 	}
 	tagmap := make(PortMapper)  // 以服务名归类
 	namemap := make(PortMapper) // 以tag归类
@@ -67,7 +65,7 @@ func LoadWorkFlow() WorkflowMap {
 	var err error
 	err = json.Unmarshal(LoadConfig("workflow"), &workflows)
 	if err != nil {
-		Fatal("workflow load FAIL, " + err.Error())
+		utils.Fatal("workflow load FAIL, " + err.Error())
 	}
 
 	// 设置默认参数

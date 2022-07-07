@@ -3,8 +3,10 @@ package pkg
 import (
 	"encoding/json"
 	"fmt"
+	"getitle/v1/pkg/dsl"
 	"getitle/v1/pkg/nuclei/protocols"
 	. "getitle/v1/pkg/nuclei/templates"
+	"getitle/v1/pkg/utils"
 	"io/ioutil"
 	"strings"
 )
@@ -43,10 +45,10 @@ func LoadNuclei(filename string) map[string][]*Template {
 			var err error
 			content, err = ioutil.ReadFile(filename)
 			if err != nil {
-				Fatal(err.Error())
+				utils.Fatal(err.Error())
 			}
 		} else {
-			content = Base64Decode(filename)
+			content = dsl.Base64Decode(filename)
 		}
 		return LoadTemplates(content)
 	}
@@ -57,13 +59,13 @@ func LoadTemplates(content []byte) map[string][]*Template {
 	var templatemap = make(map[string][]*Template)
 	err := json.Unmarshal(content, &templates)
 	if err != nil {
-		Fatal("nuclei config load FAIL!, " + err.Error())
+		utils.Fatal("nuclei config load FAIL!, " + err.Error())
 	}
 	for _, template := range templates {
 		// 以指纹归类
 		err = template.Compile(*ExecuterOptions)
 		if err != nil {
-			Fatal("" + err.Error())
+			utils.Fatal("" + err.Error())
 		}
 
 		for _, finger := range template.Fingers {

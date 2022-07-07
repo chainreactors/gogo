@@ -57,6 +57,7 @@ func recuLoadYamlFiles2JsonString(dir string, single bool) string {
 
 		err = yaml.Unmarshal(bs, &tmp)
 		if err != nil {
+			print(file)
 			panic(err)
 		}
 		if single {
@@ -76,22 +77,23 @@ func recuLoadYamlFiles2JsonString(dir string, single bool) string {
 }
 
 func main() {
-
+	Key = []byte(os.Getenv("gt_key"))
+	fmt.Println("key: " + os.Getenv("gt_key"))
 	template := `package pkg
 
 var RandomDir = "/g8kZMwp4oeKsL2in"
 
 func LoadConfig(typ string)[]byte  {
 	if typ == "tcp" {
-		return Decode("%s")
+		return FileDecode("%s")
 	}else if typ=="http"{
-		return Decode("%s")
+		return FileDecode("%s")
     }else if typ =="port"{
-         	return Decode("%s")
+         	return FileDecode("%s")
     }else if typ == "workflow"{
-         	return Decode("%s")
+         	return FileDecode("%s")
     }else if typ == "nuclei"{
-            return Decode("%s")
+            return FileDecode("%s")
     }
 	return []byte{}
 }

@@ -58,7 +58,7 @@ func (gen *IpGenerator) IPsGenerator(ips []string) {
 		gen.defaultIpGenerator(cidr)
 		if getMask(cidr) != 32 {
 			Log.Importantf("Processed CIDR: %s, found %d ports", cidr, Opt.AliveSum-tmpalive)
-			Opt.dataCh <- "sync"
+			Opt.File.SafeSync()
 		}
 	}
 }
@@ -164,7 +164,7 @@ func (gen *targetGenerator) genFromSpray(targets interface{}, portlist []string)
 				for ip := range ch {
 					gen.ch <- targetConfig{ip: ip, port: port, hosts: gen.hostsMap[ip]}
 				}
-				Opt.dataCh <- "sync"
+				Opt.File.SafeSync()
 			}
 		default:
 			ch = gen.ipGenerator.generate(targets.(string), "default")

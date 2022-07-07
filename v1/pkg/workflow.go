@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"encoding/json"
+	"getitle/v1/pkg/utils"
 )
 
 type Workflow struct {
@@ -28,7 +29,7 @@ func ParseWorkflowsFromInput(content []byte) []*Workflow {
 	var err error
 	err = json.Unmarshal(content, &workflows)
 	if err != nil {
-		Fatal("workflow load FAIL, " + err.Error())
+		utils.Fatal("workflow load FAIL, " + err.Error())
 	}
 	return workflows
 }
@@ -56,7 +57,7 @@ func (w *Workflow) PrepareConfig() *Config {
 			config.SmartFilename = GetFilename(config, w.File, w.Path, "cidr")
 		}
 		if config.HasAlivedScan() {
-			config.PingFilename = GetFilename(config, w.File, w.Path, "alived")
+			config.AlivedFilename = GetFilename(config, w.File, w.Path, "alived")
 		}
 	}
 	return config

@@ -35,7 +35,7 @@ func shiroScan(result *Result) {
 	}
 	deleteme = resp.Header.Get("Set-Cookie")
 	if isshiro && !strings.Contains(deleteme, "deleteMe") {
-		result.AddVuln(&Vuln{Name: "shiro_550", Payload: map[string]interface{}{"key": "kPH+bIxk5D2deZiIxcaaaA=="}})
+		result.AddVuln(&Vuln{Name: "shiro_550", Payload: map[string]interface{}{"key": "kPH+bIxk5D2deZiIxcaaaA=="}, Severity: "critical"})
 	}
 	return
 

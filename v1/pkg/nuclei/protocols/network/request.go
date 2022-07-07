@@ -4,7 +4,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"getitle/v1/pkg/nuclei"
-	protocols2 "getitle/v1/pkg/nuclei/protocols"
+	protocols "getitle/v1/pkg/nuclei/protocols"
 	"io"
 	"net"
 	"net/url"
@@ -12,9 +12,9 @@ import (
 	"time"
 )
 
-var _ protocols2.Request = &Request{}
+var _ protocols.Request = &Request{}
 
-func (request *Request) getMatchPart(part string, data protocols2.InternalEvent) (string, bool) {
+func (request *Request) getMatchPart(part string, data protocols.InternalEvent) (string, bool) {
 	switch part {
 	case "body", "all", "":
 		part = "data"
@@ -29,43 +29,43 @@ func (request *Request) getMatchPart(part string, data protocols2.InternalEvent)
 	return itemStr, true
 }
 
-func (r *Request) Match(data map[string]interface{}, matcher *protocols2.Matcher) bool {
+func (r *Request) Match(data map[string]interface{}, matcher *protocols.Matcher) bool {
 	itemStr, ok := r.getMatchPart(matcher.Part, data)
 	if !ok {
 		return ok
 	}
 
 	switch matcher.GetType() {
-	case protocols2.SizeMatcher:
+	case protocols.SizeMatcher:
 		return matcher.Result(matcher.MatchSize(len(itemStr)))
-	case protocols2.WordsMatcher:
+	case protocols.WordsMatcher:
 		return matcher.Result(matcher.MatchWords(itemStr))
-	case protocols2.RegexMatcher:
+	case protocols.RegexMatcher:
 		return matcher.Result(matcher.MatchRegex(itemStr))
-	case protocols2.BinaryMatcher:
+	case protocols.BinaryMatcher:
 		return matcher.Result(matcher.MatchBinary(itemStr))
 	}
 	return false
 }
 
 // Extract performs extracting operation for an extractor on model and returns true or false.
-func (request *Request) Extract(data map[string]interface{}, extractor *protocols2.Extractor) map[string]struct{} {
+func (request *Request) Extract(data map[string]interface{}, extractor *protocols.Extractor) map[string]struct{} {
 	itemStr, ok := request.getMatchPart(extractor.Part, data)
 	if !ok {
 		return nil
 	}
 
 	switch extractor.GetType() {
-	case protocols2.RegexExtractor:
+	case protocols.RegexExtractor:
 		return extractor.ExtractRegex(itemStr)
-	case protocols2.KValExtractor:
+	case protocols.KValExtractor:
 		return extractor.ExtractKval(data)
 	}
 	return nil
 }
 
 // ExecuteWithResults executes the protocol requests and returns results instead of writing them.
-func (r *Request) ExecuteWithResults(input string, dynamicValues map[string]interface{}, callback protocols2.OutputEventCallback) error {
+func (r *Request) ExecuteWithResults(input string, dynamicValues map[string]interface{}, callback protocols.OutputEventCallback) error {
 	address, err := getAddress(input)
 	if err != nil {
 		return err
@@ -83,12 +83,12 @@ func (r *Request) ExecuteWithResults(input string, dynamicValues map[string]inte
 }
 
 // executeAddress executes the request for an address
-func (r *Request) executeAddress(variables map[string]interface{}, actualAddress, address, input string, shouldUseTLS bool, dynamicValues map[string]interface{}, callback protocols2.OutputEventCallback) error {
+func (r *Request) executeAddress(variables map[string]interface{}, actualAddress, address, input string, shouldUseTLS bool, dynamicValues map[string]interface{}, callback protocols.OutputEventCallback) error {
 	if !strings.Contains(actualAddress, ":") {
 		err := errors.New("no port provided in network protocol request")
 		return err
 	}
-	payloads := protocols2.BuildPayloadFromOptions(r.options.Options)
+	payloads := protocols.BuildPayloadFromOptions(r.options.Options)
 	// add Hostname variable to the payload
 	//payloads = nuclei.MergeMaps(payloads, map[string]interface{}{"Hostname": address})
 
@@ -106,7 +106,7 @@ func (r *Request) executeAddress(variables map[string]interface{}, actualAddress
 			}
 		}
 	} else {
-		value := protocols2.CopyMap(payloads)
+		value := protocols.CopyMap(payloads)
 
 		if err := r.executeRequestWithPayloads(variables, actualAddress, address, input, shouldUseTLS, value, dynamicValues, callback); err != nil {
 			return err
@@ -115,7 +115,7 @@ func (r *Request) executeAddress(variables map[string]interface{}, actualAddress
 	return nil
 }
 
-func (r *Request) executeRequestWithPayloads(variables map[string]interface{}, actualAddress, address, input string, shouldUseTLS bool, payloads map[string]interface{}, dynamicValues map[string]interface{}, callback protocols2.OutputEventCallback) error {
+func (r *Request) executeRequestWithPayloads(variables map[string]interface{}, actualAddress, address, input string, shouldUseTLS bool, payloads map[string]interface{}, dynamicValues map[string]interface{}, callback protocols.OutputEventCallback) error {
 	var (
 		//hostname string
 		conn net.Conn
@@ -248,7 +248,7 @@ func (r *Request) executeRequestWithPayloads(variables map[string]interface{}, a
 	//for k, v := range inputEvents {
 	//	outputEvent[k] = v
 	//}
-	event := &protocols2.InternalWrappedEvent{InternalEvent: dynamicValues}
+	event := &protocols.InternalWrappedEvent{InternalEvent: dynamicValues}
 	if r.CompiledOperators != nil {
 		result, ok := r.CompiledOperators.Execute(map[string]interface{}{"data": responseBuilder.String()}, r.Match, r.Extract)
 		if ok && result != nil {

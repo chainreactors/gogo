@@ -1,9 +1,9 @@
 package fingers
 
 import (
-	b64 "encoding/base64"
 	"encoding/json"
 	"fmt"
+	"getitle/v1/pkg/dsl"
 	"regexp"
 )
 
@@ -11,7 +11,9 @@ import (
 func decode(s string) []byte {
 	var bs []byte
 	if s[:4] == "b64|" {
-		bs, _ = b64.StdEncoding.DecodeString(s[4:])
+		bs = dsl.Base64Decode(s[4:])
+	} else if s[:5] == "hex|" {
+		bs = dsl.UnHexlify(s[5:])
 	} else {
 		bs = []byte(s)
 	}
@@ -92,14 +94,16 @@ func (f *Finger) ToResult(hasFrame, hasVuln bool, res string, index int) (frame 
 }
 
 type Regexps struct {
-	Body               []string         `yaml:"body,omitempty" json:"body,omitempty"`
-	MD5                []string         `yaml:"md5,omitempty" json:"md5,omitempty"`
-	MMH3               []string         `yaml:"mmh3,omitempty" json:"mmh3,omitempty"`
-	Regexp             []string         `yaml:"regexp,omitempty" json:"regexp"`
-	CompliedRegexp     []*regexp.Regexp `yaml:"-" json:"-"`
-	CompiledVulnRegexp []*regexp.Regexp `yaml:"-" json:"-"`
-	Header             []string         `yaml:"header,omitempty" json:"header,omitempty"`
-	Vuln               []string         `yaml:"vuln,omitempty" json:"vuln,omitempty"`
+	Body                  []string         `yaml:"body,omitempty" json:"body,omitempty"`
+	MD5                   []string         `yaml:"md5,omitempty" json:"md5,omitempty"`
+	MMH3                  []string         `yaml:"mmh3,omitempty" json:"mmh3,omitempty"`
+	Regexp                []string         `yaml:"regexp,omitempty" json:"regexp,omitempty"`
+	Version               []string         `yaml:"version,omitempty" json:"version,omitempty"`
+	CompliedRegexp        []*regexp.Regexp `yaml:"-" json:"-"`
+	CompiledVulnRegexp    []*regexp.Regexp `yaml:"-" json:"-"`
+	CompiledVersionRegexp []*regexp.Regexp `yaml:"-" json:"-"`
+	Header                []string         `yaml:"header,omitempty" json:"header,omitempty"`
+	Vuln                  []string         `yaml:"vuln,omitempty" json:"vuln,omitempty"`
 }
 
 func (r *Regexps) RegexpCompile() error {
@@ -118,6 +122,14 @@ func (r *Regexps) RegexpCompile() error {
 		}
 		r.CompiledVulnRegexp = append(r.CompiledVulnRegexp, creg)
 	}
+
+	for _, reg := range r.Version {
+		creg, err := compileRegexp(reg)
+		if err != nil {
+			return err
+		}
+		r.CompiledVersionRegexp = append(r.CompiledVersionRegexp, creg)
+	}
 	return nil
 }
 
@@ -130,8 +142,8 @@ type Rule struct {
 	Version     string    `yaml:"version,omitempty" json:"version,omitempty"`
 	Favicon     *Favicons `yaml:"favicon,omitempty" json:"favicon,omitempty"`
 	Regexps     *Regexps  `yaml:"regexps,omitempty" json:"regexps,omitempty"`
-	SendDataStr string    `yaml:"send_data,omitempty" json:"send_data_str,omitempty"`
-	SendData    senddata  `yaml:"-" json:"-,omitempty"`
+	SendDataStr string    `yaml:"send_data,omitempty" json:"send_data,omitempty"`
+	SendData    senddata  `yaml:"-,omitempty" json:"-,omitempty"`
 	Info        string    `yaml:"info,omitempty" json:"info,omitempty"`
 	Vuln        string    `yaml:"vuln,omitempty" json:"vuln,omitempty"`
 	Level       int       `yaml:"level,omitempty" json:"level,omitempty"`

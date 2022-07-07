@@ -4,6 +4,9 @@ import (
 	"bytes"
 	"fmt"
 	. "getitle/v1/pkg"
+	"getitle/v1/pkg/dsl"
+	"getitle/v1/pkg/utils"
+	. "github.com/chainreactors/files"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -13,95 +16,48 @@ func LoadFile(file *os.File) []byte {
 	defer file.Close()
 	content, err := ioutil.ReadAll(file)
 	if err != nil {
-		Fatal(err.Error())
+		utils.Fatal(err.Error())
 	}
-	if IsBase64(content) {
-		content = Base64Decode(string(content))
-	}
-	if IsBin(content) {
-		content = UnFlate(content)
-	}
+	//if IsBase64(content) {
+	//	content = Base64Decode(string(content))
+	//}
+	//if IsBin(content) {
+	//	content = UnFlate(content)
+	//}
 	return bytes.TrimSpace(content)
+}
+
+func newFile(filename string) (*File, error) {
+	file, err := NewFile(filename, Opt.Compress, true, false)
+	if err != nil {
+		return nil, err
+	}
+
+	var cursor int
+
+	file.Encoder = func(i []byte) []byte {
+		bs := dsl.XorEncode(Flate(i), Key, cursor)
+		cursor += len(bs)
+		return bs
+	}
+	return file, nil
 }
 
 func initFile(config *Config) error {
 	var err error
-	Opt.dataCh = make(chan string, 100)
-	Opt.extractCh = make(chan string, 100)
 	// 初始化res文件handler
 	if config.Filename != "" {
 		Log.Clean = !Log.Clean
 		// 创建output的filehandle
-		Opt.File, err = NewFile(config.Filename, Opt.Compress, true)
+		Opt.File, err = newFile(config.Filename)
 		if err != nil {
-			Log.Warn(err.Error())
-		}
-
-		if err != nil {
-			return err
+			utils.Fatal(err.Error())
 		}
 		if Opt.FileOutput == "json" {
+			var rescommaflag bool
 			Opt.File.Write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("scan")))
-		}
-	}
-
-	// -af 参数下的启发式扫描结果handler初始化
-	if config.SmartFilename != "" {
-		Opt.SmartFile, err = NewFile(config.SmartFilename, Opt.Compress, true)
-		if err != nil {
-			return err
-		}
-		Opt.SmartFile.Write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("smart")))
-	}
-
-	if config.PingFilename != "" {
-		Opt.AliveFile, err = NewFile(config.PingFilename, Opt.Compress, true)
-		if err != nil {
-			return err
-		}
-		Opt.AliveFile.Write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("ping")))
-	}
-
-	handler()
-	return nil
-}
-
-func handler() {
-	//挂起文件相关协程
-
-	// 进度文件
-	if Log.LogFile != nil {
-		go func() {
-			for res := range Log.LogCh {
-				Log.LogFile.SyncWrite(res)
-			}
-			Log.LogFile.Close()
-			err := os.Remove(LogFilename)
-			if err != nil {
-				Log.Warn(err.Error())
-			}
-		}()
-	}
-
-	if Opt.File == nil {
-		return
-	}
-
-	// res文件
-	go func() {
-		defer fileCloser()
-		var rescommaflag bool
-		for res := range Opt.dataCh {
-			if res == "sync" {
-				Opt.File.Sync()
-			} else {
-				if !Opt.File.Initialized {
-					err := Opt.File.Init()
-					if err != nil {
-						Log.Warn(err.Error())
-					}
-				}
-
+			Opt.File.ClosedAppend = "]}"
+			Opt.File.Handler = func(res string) string {
 				if rescommaflag {
 					// 只有json输出才需要手动添加逗号
 					res = "," + res
@@ -110,47 +66,33 @@ func handler() {
 					// 如果json格式输出,则除了第一次输出,之后都会带上逗号
 					rescommaflag = true
 				}
-				Opt.File.Write(res)
+				return res
 			}
 		}
-	}()
-
-	go func() {
-		for res := range Opt.extractCh {
-			if Opt.ExtractFile == nil {
-				var err error
-				Opt.ExtractFile, err = NewFile(Opt.File.Filename+"_extract", Opt.Compress, false)
-				if err != nil {
-					Log.Warn("cannot create extractor result File, " + err.Error())
-					return
-				}
-			}
-			Opt.ExtractFile.Write(res + "\n")
-		}
-
-		if Opt.ExtractFile != nil {
-			Opt.ExtractFile.Close()
-		}
-	}()
-}
-
-func fileCloser() {
-	if Opt.File != nil {
-		if Opt.FileOutput == "json" {
-			Opt.File.Write("]}")
-		}
-		Opt.File.Close()
+		Opt.ExtractFile, err = newFile(config.Filename + "_extract")
 	}
 
-	if Opt.SmartFile != nil {
-		Opt.SmartFile.Write("]}")
-		Opt.SmartFile.Close()
+	// -af 参数下的启发式扫描结果handler初始化
+	if config.SmartFilename != "" {
+		Opt.SmartFile, err = newFile(config.SmartFilename)
+		if err != nil {
+			return err
+		}
+
+		Opt.SmartFile.Write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("smart")))
+		Opt.SmartFile.ClosedAppend = "]}"
 	}
 
-	if Opt.AliveFile != nil {
-		Opt.AliveFile.Write("]}")
-		Opt.AliveFile.Close()
+	if config.AlivedFilename != "" {
+		Opt.AliveFile, err = newFile(config.AlivedFilename)
+		if err != nil {
+			return err
+		}
+		Opt.AliveFile.Write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("ping")))
+		Opt.AliveFile.ClosedAppend = "]}"
 	}
+
+	return nil
 }
 
 var smartcommaflag bool = false

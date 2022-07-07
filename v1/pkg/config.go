@@ -7,34 +7,34 @@ import (
 )
 
 type Config struct {
-	IP            string              `json:"ip"`
-	IPlist        []string            `json:"ips"`
-	ExcludeIPs    string              `json:"-"`
-	ExcludeMap    map[uint]bool       `json:"-"`
-	Ports         string              `json:"ports"`     // 预设字符串
-	Portlist      []string            `json:"-"`         // 处理完的端口列表
-	JsonFile      string              `json:"json_file"` // gt的结果json文件,可以再次读入扫描
-	Results       Results             `json:"-"`         // json反序列化后的内网,保存在内存中
-	ListFile      string              `json:"list_file"` // 目标ip列表
-	HostsMap      map[string][]string `json:"-"`         // host映射表
-	Threads       int                 `json:"threads"`   // 线程数
-	Mod           string              `json:"mod"`       // 扫描模式
-	SmartPort     string              `json:"-"`         // 启发式扫描预设探针
-	SmartPortList []string            `json:"-"`         // 启发式扫描预设探针
-	IpProbe       string              `json:"-"`
-	IpProbeList   []uint              `json:"-"`
-	Output        string              `json:"-"`
-	Filename      string              `json:"-"`
-	SmartFilename string              `json:"-"`
-	PingFilename  string              `json:"-"`
-	PortSpray     bool                `json:"port_spray"`
-	AliveSprayMod []string            `json:"alive_spray"`
-	NoSpray       bool                `json:"-"`
-	Exploit       string              `json:"exploit"`
-	JsonType      string              `json:"json_type"`
-	VersionLevel  int                 `json:"version_level"`
-	IsListInput   bool                `json:"-"`
-	IsJsonInput   bool                `json:"-"`
+	IP             string              `json:"ip"`
+	IPlist         []string            `json:"ips"`
+	ExcludeIPs     string              `json:"-"`
+	ExcludeMap     map[uint]bool       `json:"-"`
+	Ports          string              `json:"ports"`     // 预设字符串
+	Portlist       []string            `json:"-"`         // 处理完的端口列表
+	JsonFile       string              `json:"json_file"` // gt的结果json文件,可以再次读入扫描
+	Results        Results             `json:"-"`         // json反序列化后的内网,保存在内存中
+	ListFile       string              `json:"list_file"` // 目标ip列表
+	HostsMap       map[string][]string `json:"-"`         // host映射表
+	Threads        int                 `json:"threads"`   // 线程数
+	Mod            string              `json:"mod"`       // 扫描模式
+	SmartPort      string              `json:"-"`         // 启发式扫描预设探针
+	SmartPortList  []string            `json:"-"`         // 启发式扫描预设探针
+	IpProbe        string              `json:"-"`
+	IpProbeList    []uint              `json:"-"`
+	Output         string              `json:"-"`
+	Filename       string              `json:"-"`
+	SmartFilename  string              `json:"-"`
+	AlivedFilename string              `json:"-"`
+	PortSpray      bool                `json:"port_spray"`
+	AliveSprayMod  []string            `json:"alive_spray"`
+	NoSpray        bool                `json:"-"`
+	Exploit        string              `json:"exploit"`
+	JsonType       string              `json:"json_type"`
+	VersionLevel   int                 `json:"version_level"`
+	IsListInput    bool                `json:"-"`
+	IsJsonInput    bool                `json:"-"`
 }
 
 func (config *Config) IsScan() bool {
@@ -93,7 +93,7 @@ func (config *Config) InitIP() {
 				config.HostsMap[ip] = append(config.HostsMap[ip], host)
 			}
 			if config.IP == "" {
-				Fatal("IP format error")
+				utils.Fatal("IP format error")
 			}
 		}
 	}
@@ -113,7 +113,7 @@ func (config *Config) InitIP() {
 		}
 		config.IPlist = utils.SliceUnique(iplist) // 去重
 		if len(config.IPlist) == 0 {
-			Fatal("all targets format error")
+			utils.Fatal("all targets format error")
 		}
 	}
 }

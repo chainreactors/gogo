@@ -4,12 +4,15 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"time"
 )
 
-var cwtime = getcwtime()
+var (
+	cwtime = getcwtime()
+)
 
 func IsWin() bool {
 	os := runtime.GOOS
@@ -51,6 +54,21 @@ func GetFdLimit() int {
 	}
 	s := strings.TrimSpace(string(out))
 	return ToInt(s)
+}
+
+func GetExcPath() string {
+	file, _ := exec.LookPath(os.Args[0])
+	// 获取包含可执行文件名称的路径
+	path, _ := filepath.Abs(file)
+	// 获取可执行文件所在目录
+	index := strings.LastIndex(path, string(os.PathSeparator))
+	ret := path[:index]
+	return strings.Replace(ret, "\\", "/", -1) + "/"
+}
+
+func Fatal(s string) {
+	fmt.Println("[-] " + s)
+	os.Exit(0)
 }
 
 //func SetFdLimit(i int)bool{
