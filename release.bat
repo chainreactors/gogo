@@ -1,5 +1,5 @@
 set name=getitle
-
+for /F %%i in ('git describe --abbrev^=0 --tags') do ( set gt_ver=%%i)
 @REM 上传到阿里云
 ossutil cp ./bin/%name%_windows_386_upxs.exe oss://sangfor-release/fscan/windows_386_upxs.exe -f
 ossutil cp ./bin/%name%_windows_386s.exe oss://sangfor-release/fscan/windows_386s.exe -f
@@ -12,4 +12,4 @@ ossutil cp ./bin/%name%_linux_mips64 oss://sangfor-release/fscan/linux_mips64 -f
 ossutil cp ./bin/%name%_darwin_amd64 oss://sangfor-release/fscan/darwin_amd64 -f
 
 @REM 打包
-tar --format=ustar -zcvf release/%name%v%1.tar.gz bin/%name%* doc/* README.md *.py UPDATELOG.md
+tar --format=ustar -zcvf release/%name%%gt_ver%.tar.gz bin/%name%* doc/* README.md *.py UPDATELOG.md
