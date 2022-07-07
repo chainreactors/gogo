@@ -28,6 +28,15 @@ func FingerMatcher(finger *Finger, content string) (*Framework, *Vuln, bool) {
 		hasFrame, hasVuln, res := RuleMatcher(rule, content, ishttp)
 		if hasFrame {
 			frame, vuln := finger.ToResult(hasFrame, hasVuln, res, i)
+			if frame.Version == "" && rule.Regexps.CompiledVersionRegexp != nil {
+				for _, reg := range rule.Regexps.CompiledVersionRegexp {
+					res, _ := compiledMatch(reg, content)
+					if res != "" {
+						frame.Version = res
+						break
+					}
+				}
+			}
 			return frame, vuln, true
 		}
 	}

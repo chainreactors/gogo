@@ -94,14 +94,16 @@ func (f *Finger) ToResult(hasFrame, hasVuln bool, res string, index int) (frame 
 }
 
 type Regexps struct {
-	Body               []string         `yaml:"body,omitempty" json:"body,omitempty"`
-	MD5                []string         `yaml:"md5,omitempty" json:"md5,omitempty"`
-	MMH3               []string         `yaml:"mmh3,omitempty" json:"mmh3,omitempty"`
-	Regexp             []string         `yaml:"regexp,omitempty" json:"regexp"`
-	CompliedRegexp     []*regexp.Regexp `yaml:"-" json:"-"`
-	CompiledVulnRegexp []*regexp.Regexp `yaml:"-" json:"-"`
-	Header             []string         `yaml:"header,omitempty" json:"header,omitempty"`
-	Vuln               []string         `yaml:"vuln,omitempty" json:"vuln,omitempty"`
+	Body                  []string         `yaml:"body,omitempty" json:"body,omitempty"`
+	MD5                   []string         `yaml:"md5,omitempty" json:"md5,omitempty"`
+	MMH3                  []string         `yaml:"mmh3,omitempty" json:"mmh3,omitempty"`
+	Regexp                []string         `yaml:"regexp,omitempty" json:"regexp,omitempty"`
+	Version               []string         `yaml:"version,omitempty" json:"version,omitempty"`
+	CompliedRegexp        []*regexp.Regexp `yaml:"-" json:"-"`
+	CompiledVulnRegexp    []*regexp.Regexp `yaml:"-" json:"-"`
+	CompiledVersionRegexp []*regexp.Regexp `yaml:"-" json:"-"`
+	Header                []string         `yaml:"header,omitempty" json:"header,omitempty"`
+	Vuln                  []string         `yaml:"vuln,omitempty" json:"vuln,omitempty"`
 }
 
 func (r *Regexps) RegexpCompile() error {
@@ -119,6 +121,14 @@ func (r *Regexps) RegexpCompile() error {
 			return err
 		}
 		r.CompiledVulnRegexp = append(r.CompiledVulnRegexp, creg)
+	}
+
+	for _, reg := range r.Version {
+		creg, err := compileRegexp(reg)
+		if err != nil {
+			return err
+		}
+		r.CompiledVersionRegexp = append(r.CompiledVersionRegexp, creg)
 	}
 	return nil
 }
