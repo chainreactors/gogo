@@ -59,14 +59,16 @@ func standBase64(braw []byte) []byte {
 	return buffer.Bytes()
 }
 
-func XorEncode(bs []byte, keys []byte) []byte {
+func XorEncode(bs []byte, keys []byte, cursor int) []byte {
 	if len(keys) == 0 {
 		return bs
 	}
 
+	//fmt.Printf("first %d %d\n", (cursor)%len(keys), keys[(cursor)%len(keys)])
 	newbs := make([]byte, len(bs))
 	for i, b := range bs {
-		newbs[i] = b ^ keys[i%len(keys)]
+		newbs[i] = b ^ keys[(i+cursor)%len(keys)]
 	}
+	//fmt.Printf("last %d, %d\n", (len(bs)+cursor)%len(keys), keys[(len(bs)+cursor)%len(keys)])
 	return newbs
 }

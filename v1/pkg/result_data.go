@@ -295,7 +295,7 @@ func LoadResultFile(file *os.File) interface{} {
 	}
 
 	if IsBin(content) {
-		content = dsl.XorEncode(content, Key)
+		content = dsl.XorEncode(content, Key, 0)
 		content = UnFlate(content)
 	}
 

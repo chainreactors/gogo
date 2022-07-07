@@ -32,8 +32,13 @@ func newFile(filename string) (*File, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	var cursor int
+
 	file.Encoder = func(i []byte) []byte {
-		return dsl.XorEncode(Flate(i), Key)
+		bs := dsl.XorEncode(Flate(i), Key, cursor)
+		cursor += len(bs)
+		return bs
 	}
 	return file, nil
 }

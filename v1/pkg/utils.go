@@ -171,13 +171,13 @@ func Decode(input string) []byte {
 
 func FileDecode(input string) []byte {
 	b := dsl.Base64Decode(input)
-	b = dsl.XorEncode(b, Key)
+	b = dsl.XorEncode(b, Key, 0)
 	return UnFlate(b)
 }
 
 func Encode(input []byte) string {
 	s := Flate(input)
-	s = dsl.XorEncode(s, Key)
+	s = dsl.XorEncode(s, Key, 0)
 	return dsl.Base64Encode(s)
 }
 
