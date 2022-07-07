@@ -4,10 +4,9 @@ github.com/alouca/gologger v0.0.0-20120904114645-7d4b7291de9c h1:k/7/05/5kPRX7Ha
 github.com/alouca/gologger v0.0.0-20120904114645-7d4b7291de9c/go.mod h1:SI1d/2/wpSTDjHgdS9ZLy6hqvsdhzVYAc8RLztweMpA=
 github.com/alouca/gosnmp v0.0.0-20170620005048-04d83944c9ab h1:pfx9N/EMDxIwVzGu9JLnmbOMNukW1mfPA9Ymo+S58Ng=
 github.com/alouca/gosnmp v0.0.0-20170620005048-04d83944c9ab/go.mod h1:kEcj+iUROrUCr7AIrul5NutI2kWv0ns9BL0ezVp1h/Y=
-github.com/chainreactors/files v0.0.0-20220706081335-415021dcbe95 h1:stCPJ0pUz/HIMoQhxBvzsWANUUoe6YXqzIfjgMIKiG0=
 github.com/chainreactors/files v0.0.0-20220706081335-415021dcbe95/go.mod h1:/Xa9YXhjBlaC33JTD6ZTJFig6pcplak2IDcovf42/6A=
-github.com/chainreactors/files v0.1.0 h1:bcjRt5AfFl8r8VwPx94US5C1mQaBr7zIphbmXrS24QA=
-github.com/chainreactors/files v0.1.0/go.mod h1:/Xa9YXhjBlaC33JTD6ZTJFig6pcplak2IDcovf42/6A=
+github.com/chainreactors/files v0.1.2 h1:7vrQXp8bwZDM+/5swuMfW3Mqqgu3kwBoaHJ5J8WLWeU=
+github.com/chainreactors/files v0.1.2/go.mod h1:/Xa9YXhjBlaC33JTD6ZTJFig6pcplak2IDcovf42/6A=
 github.com/chainreactors/logs v0.1.0 h1:S1vhPshaFFIPwcc0go2KDrnl7aS1XCohK8ZiSbiAJ5s=
 github.com/chainreactors/logs v0.1.0/go.mod h1:WuG/Q1q/Eu3VoNiFNgYbyj5yI+uppMzMSeXEmU3GnvY=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

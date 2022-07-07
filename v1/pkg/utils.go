@@ -17,6 +17,7 @@ import (
 var (
 	Win  = utils.IsWin()
 	Root = utils.IsRoot()
+	Key  = []byte{}
 )
 var Log *logs.Logger
 
@@ -168,8 +169,15 @@ func Decode(input string) []byte {
 	return UnFlate(b)
 }
 
+func FileDecode(input string) []byte {
+	b := dsl.Base64Decode(input)
+	b = dsl.XorEncode(b, Key)
+	return UnFlate(b)
+}
+
 func Encode(input []byte) string {
 	s := Flate(input)
+	s = dsl.XorEncode(s, Key)
 	return dsl.Base64Encode(s)
 }
 

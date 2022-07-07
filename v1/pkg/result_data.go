@@ -293,7 +293,9 @@ func LoadResultFile(file *os.File) interface{} {
 		// 如果直接输入解压缩之后的json文件,则跳过这个步骤
 		content = dsl.Base64Decode(string(content))
 	}
+
 	if IsBin(content) {
+		content = dsl.XorEncode(content, Key)
 		content = UnFlate(content)
 	}
 

@@ -212,7 +212,7 @@ func (r *Runner) prepareConfig(config Config) *Config {
 	}
 
 	if config.HasAlivedScan() {
-		config.PingFilename = GetFilename(&config, r.FormatterFilename, Opt.FilePath, "alived")
+		config.AlivedFilename = GetFilename(&config, r.FormatterFilename, Opt.FilePath, "alived")
 	}
 	return &config
 }
@@ -269,7 +269,7 @@ func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) {
 					config.SmartFilename = GetFilename(config, "auto", workflow.Path, "cidr")
 				}
 				if config.HasAlivedScan() {
-					config.PingFilename = GetFilename(config, "auto", workflow.Path, "alived")
+					config.AlivedFilename = GetFilename(config, "auto", workflow.Path, "alived")
 				}
 			} else if r.HiddenFile {
 				workflow.File = GetFilename(config, "hidden", workflow.Path, "json")
@@ -277,7 +277,7 @@ func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) {
 					config.SmartFilename = GetFilename(config, "hidden", workflow.Path, "cidr")
 				}
 				if config.HasAlivedScan() {
-					config.PingFilename = GetFilename(config, "hidden", workflow.Path, "alived")
+					config.AlivedFilename = GetFilename(config, "hidden", workflow.Path, "alived")
 				}
 			}
 
@@ -364,7 +364,7 @@ func (r *Runner) close(config *Config) {
 		Log.Important("Smartscan result filename: " + config.SmartFilename)
 	}
 	if Opt.AliveFile != nil && Opt.AliveFile.FileHandler != nil {
-		Log.Important("Pingscan result filename: " + config.PingFilename)
+		Log.Important("Pingscan result filename: " + config.AlivedFilename)
 	}
 	if IsExist(config.Filename + "_extract") {
 		Log.Important("extractor result filename: " + config.Filename + "_extract")

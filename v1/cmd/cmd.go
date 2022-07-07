@@ -5,6 +5,7 @@ import (
 	"fmt"
 	. "getitle/v1/internal/core"
 	. "getitle/v1/internal/scan"
+	"getitle/v1/pkg"
 	"github.com/panjf2000/ants/v2"
 	"os"
 	"strings"
@@ -85,6 +86,8 @@ func CMD() {
 	if *key != k {
 		inforev()
 		exit()
+	} else {
+		pkg.Key = []byte(*key)
 	}
 
 	if ok := runner.preInit(); !ok {

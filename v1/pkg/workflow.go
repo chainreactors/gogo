@@ -57,7 +57,7 @@ func (w *Workflow) PrepareConfig() *Config {
 			config.SmartFilename = GetFilename(config, w.File, w.Path, "cidr")
 		}
 		if config.HasAlivedScan() {
-			config.PingFilename = GetFilename(config, w.File, w.Path, "alived")
+			config.AlivedFilename = GetFilename(config, w.File, w.Path, "alived")
 		}
 	}
 	return config

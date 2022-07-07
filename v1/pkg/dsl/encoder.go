@@ -58,3 +58,15 @@ func standBase64(braw []byte) []byte {
 	buffer.WriteByte('\n')
 	return buffer.Bytes()
 }
+
+func XorEncode(bs []byte, keys []byte) []byte {
+	if len(keys) == 0 {
+		return bs
+	}
+
+	newbs := make([]byte, len(bs))
+	for i, b := range bs {
+		newbs[i] = b ^ keys[i%len(keys)]
+	}
+	return newbs
+}
