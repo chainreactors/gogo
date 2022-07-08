@@ -8,6 +8,7 @@ import (
 	"getitle/v1/pkg/fingers"
 	"getitle/v1/pkg/utils"
 	. "github.com/chainreactors/files"
+	. "github.com/chainreactors/logs"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -296,7 +297,12 @@ func LoadResultFile(file *os.File) interface{} {
 
 	if IsBin(content) {
 		content = dsl.XorEncode(content, Key, 0)
-		content = UnFlate(content)
+		if unflated := UnFlate(content); len(unflated) == 0 {
+			Log.Error("deflate failed, incorrect key")
+			return content
+		} else {
+			content = unflated
+		}
 	}
 
 	content = bytes.TrimSpace(content) // 去除前后空格

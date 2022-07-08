@@ -5,6 +5,7 @@ import (
 	. "getitle/v1/internal/scan"
 	. "getitle/v1/pkg"
 	. "getitle/v1/pkg/utils"
+	. "github.com/chainreactors/logs"
 	"os"
 	"strings"
 )

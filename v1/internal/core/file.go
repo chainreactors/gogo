@@ -7,6 +7,7 @@ import (
 	"getitle/v1/pkg/dsl"
 	"getitle/v1/pkg/utils"
 	. "github.com/chainreactors/files"
+	. "github.com/chainreactors/logs"
 	"io/ioutil"
 	"os"
 	"strings"

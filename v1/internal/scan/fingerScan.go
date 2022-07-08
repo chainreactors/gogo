@@ -3,6 +3,7 @@ package scan
 import (
 	. "getitle/v1/pkg"
 	. "getitle/v1/pkg/fingers"
+	"github.com/chainreactors/logs"
 	"net"
 )
 
@@ -75,12 +76,12 @@ func httpFingerMatch(result *Result, finger *Finger) (*Framework, *Vuln) {
 			url := result.GetURL() + rule.SendDataStr
 			tmpresp, err := conn.Get(url)
 			if err == nil {
-				Log.Debugf("request finger %s %d for %s", url, tmpresp.StatusCode, finger.Name)
+				logs.Log.Debugf("request finger %s %d for %s", url, tmpresp.StatusCode, finger.Name)
 				resp = tmpresp
 				content, body = GetHttpRaw(resp)
 				rerequest = true
 			} else {
-				Log.Debugf("request finger %s %s for %s", url, err.Error(), finger.Name)
+				logs.Log.Debugf("request finger %s %s for %s", url, err.Error(), finger.Name)
 			}
 		}
 
@@ -106,7 +107,7 @@ func tcpFingerMatch(result *Result, finger *Finger) (*Framework, *Vuln) {
 	for i, rule := range finger.Rules {
 		// 某些规则需要主动发送一个数据包探测
 		if rule.SendDataStr != "" && RunOpt.VersionLevel >= rule.Level {
-			Log.Debugf("request finger %s for %s", result.GetTarget(), finger.Name)
+			logs.Log.Debugf("request finger %s for %s", result.GetTarget(), finger.Name)
 			var conn net.Conn
 			conn, err = TcpSocketConn(result.GetTarget(), 2)
 			if err != nil {

@@ -3,6 +3,7 @@ package scan
 import (
 	"fmt"
 	"getitle/v1/pkg"
+	"github.com/chainreactors/logs"
 	"net/http"
 	"strings"
 )
@@ -106,10 +107,10 @@ func SystemHttp(target string, result *pkg.Result) {
 	resp, err := conn.Do(req)
 	if err != nil {
 		result.Error = err.Error()
-		pkg.Log.Debugf("request %s , %s ", target, err.Error())
+		logs.Log.Debugf("request %s , %s ", target, err.Error())
 		return
 	}
-	pkg.Log.Debugf("request %s , %d ", target, resp.StatusCode)
+	logs.Log.Debugf("request %s , %d ", target, resp.StatusCode)
 
 	if resp.TLS != nil {
 		// 证书在错误处理之前, 因为有可能存在证书,但是服务已关闭

@@ -2,6 +2,7 @@ package core
 
 import (
 	. "getitle/v1/pkg"
+	. "github.com/chainreactors/logs"
 	"strings"
 	"sync"
 )

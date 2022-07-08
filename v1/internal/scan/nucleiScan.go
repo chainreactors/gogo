@@ -4,6 +4,7 @@ import (
 	. "getitle/v1/pkg"
 	. "getitle/v1/pkg/fingers"
 	. "getitle/v1/pkg/nuclei/templates"
+	"github.com/chainreactors/logs"
 	"strings"
 )
 
@@ -25,7 +26,7 @@ chainLoop:
 	for {
 		var chainsTemplates []*Template
 		for _, template := range templates { // 遍历所有poc
-			Log.Debugf("nuclei scan %s with %s", target, template.Id)
+			logs.Log.Debugf("nuclei scan %s with %s", target, template.Id)
 			res, ok := template.Execute(target)
 			if ok {
 				for name, extract := range res.Extracts {

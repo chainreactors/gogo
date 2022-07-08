@@ -3,6 +3,7 @@ package scan
 import (
 	. "getitle/v1/pkg"
 	. "getitle/v1/pkg/fingers"
+	"github.com/chainreactors/logs"
 	"net/http"
 	"strings"
 )
@@ -18,7 +19,7 @@ func shiroScan(result *Result) {
 		result.Error = err.Error()
 		return
 	}
-	Log.Debug("request shiro " + url)
+	logs.Log.Debug("request shiro " + url)
 	deleteme := resp.Header.Get("Set-Cookie")
 	if strings.Contains(deleteme, "=deleteMe") {
 		result.AddFramework(&Framework{Name: "shiro", From: "active"})
@@ -27,7 +28,7 @@ func shiroScan(result *Result) {
 		return
 	}
 	req = setshirocookie(url, "/A29uyYfZg4mT+SUU/3eMAnRlgBWnVrveeiwZ/hz1LlF86NxSmq9dsWpS0U7Q2U+MjbAzaLBCsV7IHb7MQVFItU+ibEkDuyO7WoNGBM4ay8l+oBZo2W2mZcFXG3swJsGXxaZHua3m5jlJNKcCjqy9sX2oRZrm7eSABvUn71vY9NaohbC1i6+FKCRMW9s11/Q")
-	Log.Debug("request shiro default key " + url)
+	logs.Log.Debug("request shiro default key " + url)
 	resp, err = conn.Do(req)
 	if err != nil {
 		result.Error = err.Error()

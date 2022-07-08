@@ -6,7 +6,7 @@ import (
 	"getitle/v1/internal/scan"
 	. "getitle/v1/pkg"
 	. "getitle/v1/pkg/utils"
-	"github.com/chainreactors/logs"
+	. "github.com/chainreactors/logs"
 	"net"
 	"os"
 	"path"
@@ -57,7 +57,9 @@ type Runner struct {
 
 func (r *Runner) preInit() bool {
 	// 初始化日志工具"
-	Log = logs.NewLogger(r.Quiet, r.Debug)
+	Log = NewLogger(r.Quiet, r.Debug)
+	Log.LogFileName = ".sock.lock"
+	Log.Init()
 	legalFormat := []string{"url", "ip", "port", "frameworks", "framework", "vuln", "vulns", "protocol", "title", "target", "hash", "language", "host", "color", "c", "json", "j", "full", "jsonlines", "jl", "zombie"}
 	if r.FileOutput != "default" {
 		for _, form := range strings.Split(r.FileOutput, ",") {
@@ -108,9 +110,6 @@ func (r *Runner) preInit() bool {
 func (r *Runner) init() {
 	// 初始化各种全局变量
 	// 初始化指纹优先级
-	Log = logs.NewLogger(r.Quiet, r.Debug)
-	Log.LogFileName = ".sock.lock"
-	Log.Init()
 	if r.Version {
 		scan.RunOpt.VersionLevel = 1
 	} else if r.Version2 {

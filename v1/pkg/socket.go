@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"github.com/chainreactors/logs"
 	"net"
 	"time"
 )
@@ -62,7 +63,7 @@ func UdpSocketConn(target string, delay int) (net.Conn, error) {
 func SocketSend(conn net.Conn, data []byte, max int) ([]byte, error) {
 	_ = conn.SetDeadline(time.Now().Add(time.Duration(2) * time.Second))
 	var err error
-	Log.Debugf("send %s binary data: %q", conn.RemoteAddr().String(), data)
+	logs.Log.Debugf("send %s binary data: %q", conn.RemoteAddr().String(), data)
 	_, err = conn.Write(data)
 	if err != nil {
 		return []byte{}, err
