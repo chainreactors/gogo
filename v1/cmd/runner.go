@@ -145,8 +145,8 @@ func (r *Runner) init() {
 		scan.RunOpt.Interface, err = net.InterfaceByName(r.iface)
 		if err != nil {
 			Log.Warn("interface error, " + err.Error())
-			Log.Warn("interface error, " + err.Error())
-			Log.Warn("interface error, " + err.Error())
+			//Log.Warn("interface error, " + err.Error())
+			//Log.Warn("interface error, " + err.Error())
 		}
 	}
 
