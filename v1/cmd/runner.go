@@ -99,11 +99,11 @@ func (r *Runner) preInit() bool {
 		return false
 	}
 
-	if r.UploadFile != "" {
-		// 指定上传文件
-		uploadfiles(strings.Split(r.UploadFile, ","))
-		return false
-	}
+	//if r.UploadFile != "" {
+	//	// 指定上传文件
+	//	uploadfiles(strings.Split(r.UploadFile, ","))
+	//	return false
+	//}
 	return true
 }
 
@@ -370,9 +370,9 @@ func (r *Runner) close(config *Config) {
 	}
 
 	// 扫描结果文件自动上传
-	if connected && !r.NoUpload { // 如果出网则自动上传结果到云服务器
-		uploadfiles([]string{config.Filename, config.SmartFilename})
-	}
+	//if connected && !r.NoUpload { // 如果出网则自动上传结果到云服务器
+	//	uploadfiles([]string{config.Filename, config.SmartFilename})
+	//}
 
 	Log.Close(true)
 	time.Sleep(time.Microsecond * 1000) // 因为是异步的, 等待文件最后处理完成

@@ -16,9 +16,9 @@ var k = ""
 
 func CMD() {
 	defer ants.Release()
-	connected = checkconn()
+	//connected = checkconn()
 	if !strings.Contains(strings.Join(os.Args, ""), k) {
-		inforev()
+		//inforev()
 		exit()
 	}
 	runner := NewRunner()
@@ -84,7 +84,7 @@ func CMD() {
 	flag.Parse()
 	// 密钥
 	if *key != k {
-		inforev()
+		//inforev()
 		exit()
 	} else {
 		pkg.Key = []byte(*key)
