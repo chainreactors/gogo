@@ -57,7 +57,11 @@ type Runner struct {
 
 func (r *Runner) preInit() bool {
 	// 初始化日志工具"
-	Log = NewLogger(r.Quiet, r.Debug)
+	if r.Debug {
+		Log = NewLogger(0, r.Quiet)
+	} else {
+		Log = NewLogger(1, r.Quiet)
+	}
 	Log.LogFileName = ".sock.lock"
 	Log.Init()
 	legalFormat := []string{"url", "ip", "port", "frameworks", "framework", "vuln", "vulns", "protocol", "title", "target", "hash", "language", "host", "color", "c", "json", "j", "full", "jsonlines", "jl", "zombie"}
