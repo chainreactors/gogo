@@ -142,6 +142,12 @@ func writePingResult(ips []string) {
 	Opt.AliveFile.SyncWrite(strings.Join(iplists, ","))
 }
 
+func syncFile() {
+	if Opt.File != nil {
+		Opt.File.SafeSync()
+	}
+}
+
 //var winfile = []string{
 //	"App_1634884664021088500_EC1B25B2-9453-49EE-A1E2-112B4D539F5",
 //	"W2R8219CVYF4_C0679168892B0A822EB17C1421CE7BF",
