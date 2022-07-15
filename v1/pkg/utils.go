@@ -5,7 +5,6 @@ import (
 	"getitle/v1/pkg/dsl"
 	"getitle/v1/pkg/utils"
 	. "github.com/chainreactors/files"
-	"github.com/chainreactors/logs"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -19,7 +18,6 @@ var (
 	Root = utils.IsRoot()
 	Key  = []byte{}
 )
-var Log *logs.Logger
 
 ////获取当前时间
 //func GetCurtime() string {

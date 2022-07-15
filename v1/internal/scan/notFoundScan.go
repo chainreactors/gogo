@@ -4,6 +4,7 @@ import (
 	"getitle/v1/pkg"
 	"getitle/v1/pkg/fingers"
 	"getitle/v1/pkg/utils"
+	"github.com/chainreactors/logs"
 )
 
 func NotFoundScan(result *pkg.Result) {
@@ -12,10 +13,10 @@ func NotFoundScan(result *pkg.Result) {
 	resp, err := conn.Get(url)
 
 	if err != nil {
-		pkg.Log.Debugf("request 404page %s %s", url, err.Error())
+		logs.Log.Debugf("request 404page %s %s", url, err.Error())
 		return
 	}
-	pkg.Log.Debugf("request 404page %s %d", url, resp.StatusCode)
+	logs.Log.Debugf("request 404page %s %d", url, resp.StatusCode)
 	if utils.ToString(resp.StatusCode) == result.HttpStat {
 		return
 	}

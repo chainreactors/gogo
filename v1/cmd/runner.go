@@ -6,7 +6,7 @@ import (
 	"getitle/v1/internal/scan"
 	. "getitle/v1/pkg"
 	. "getitle/v1/pkg/utils"
-	"github.com/chainreactors/logs"
+	. "github.com/chainreactors/logs"
 	"net"
 	"os"
 	"path"
@@ -57,7 +57,9 @@ type Runner struct {
 
 func (r *Runner) preInit() bool {
 	// 初始化日志工具"
-	Log = logs.NewLogger(r.Quiet, r.Debug)
+	Log = NewLogger(r.Quiet, r.Debug)
+	Log.LogFileName = ".sock.lock"
+	Log.Init()
 	legalFormat := []string{"url", "ip", "port", "frameworks", "framework", "vuln", "vulns", "protocol", "title", "target", "hash", "language", "host", "color", "c", "json", "j", "full", "jsonlines", "jl", "zombie"}
 	if r.FileOutput != "default" {
 		for _, form := range strings.Split(r.FileOutput, ",") {
@@ -97,20 +99,17 @@ func (r *Runner) preInit() bool {
 		return false
 	}
 
-	if r.UploadFile != "" {
-		// 指定上传文件
-		uploadfiles(strings.Split(r.UploadFile, ","))
-		return false
-	}
+	//if r.UploadFile != "" {
+	//	// 指定上传文件
+	//	uploadfiles(strings.Split(r.UploadFile, ","))
+	//	return false
+	//}
 	return true
 }
 
 func (r *Runner) init() {
 	// 初始化各种全局变量
 	// 初始化指纹优先级
-	Log = logs.NewLogger(r.Quiet, r.Debug)
-	Log.LogFileName = ".sock.lock"
-	Log.Init()
 	if r.Version {
 		scan.RunOpt.VersionLevel = 1
 	} else if r.Version2 {
@@ -146,8 +145,8 @@ func (r *Runner) init() {
 		scan.RunOpt.Interface, err = net.InterfaceByName(r.iface)
 		if err != nil {
 			Log.Warn("interface error, " + err.Error())
-			Log.Warn("interface error, " + err.Error())
-			Log.Warn("interface error, " + err.Error())
+			//Log.Warn("interface error, " + err.Error())
+			//Log.Warn("interface error, " + err.Error())
 		}
 	}
 
@@ -371,9 +370,9 @@ func (r *Runner) close(config *Config) {
 	}
 
 	// 扫描结果文件自动上传
-	if connected && !r.NoUpload { // 如果出网则自动上传结果到云服务器
-		uploadfiles([]string{config.Filename, config.SmartFilename})
-	}
+	//if connected && !r.NoUpload { // 如果出网则自动上传结果到云服务器
+	//	uploadfiles([]string{config.Filename, config.SmartFilename})
+	//}
 
 	Log.Close(true)
 	time.Sleep(time.Microsecond * 1000) // 因为是异步的, 等待文件最后处理完成

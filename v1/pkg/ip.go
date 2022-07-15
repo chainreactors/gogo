@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"getitle/v1/pkg/utils"
+	. "github.com/chainreactors/logs"
 	"net"
 	"net/url"
 	"sort"

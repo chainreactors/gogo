@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"getitle/v1/internal/scan"
 	. "getitle/v1/pkg"
+	. "github.com/chainreactors/logs"
 	"github.com/panjf2000/ants/v2"
 	"strings"
 	"sync"

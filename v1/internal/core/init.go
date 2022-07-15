@@ -5,6 +5,7 @@ import (
 	. "getitle/v1/internal/scan"
 	. "getitle/v1/pkg"
 	. "getitle/v1/pkg/utils"
+	. "github.com/chainreactors/logs"
 	"os"
 	"strings"
 )
@@ -33,8 +34,8 @@ func InitConfig(config *Config) *Config {
 			// linux系统判断fd限制, 如果-t 大于fd限制,则将-t 设置到fd-100
 			if fdlimit := GetFdLimit(); config.Threads > fdlimit {
 				Log.Warnf("System fd limit: %d , Please exec 'ulimit -n 65535'", fdlimit)
-				Log.Warnf("System fd limit: %d , Please exec 'ulimit -n 65535'", fdlimit)
-				Log.Warnf("System fd limit: %d , Please exec 'ulimit -n 65535'", fdlimit)
+				//Log.Warnf("System fd limit: %d , Please exec 'ulimit -n 65535'", fdlimit)
+				//Log.Warnf("System fd limit: %d , Please exec 'ulimit -n 65535'", fdlimit)
 				Log.Warnf("Now set threads to %d", fdlimit-100)
 				config.Threads = fdlimit - 100
 			}

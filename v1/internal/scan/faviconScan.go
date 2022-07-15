@@ -4,6 +4,7 @@ import (
 	. "getitle/v1/pkg"
 	"getitle/v1/pkg/dsl"
 	. "getitle/v1/pkg/fingers"
+	"github.com/chainreactors/logs"
 )
 
 // -v
@@ -14,10 +15,10 @@ func faviconScan(result *Result) {
 	url := result.GetURL() + "/favicon.ico"
 	resp, err := conn.Get(url)
 	if err != nil {
-		Log.Debugf("request favicon %s %s", url, err.Error())
+		logs.Log.Debugf("request favicon %s %s", url, err.Error())
 		return
 	}
-	Log.Debugf("request favicon %s %d", url, resp.StatusCode)
+	logs.Log.Debugf("request favicon %s %d", url, resp.StatusCode)
 	if resp.StatusCode != 200 {
 		return
 	}

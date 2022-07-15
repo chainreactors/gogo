@@ -4,6 +4,7 @@ import (
 	. "getitle/v1/pkg"
 	"getitle/v1/pkg/dsl"
 	. "getitle/v1/pkg/fingers"
+	"github.com/chainreactors/logs"
 	"net/http"
 	"strings"
 )
@@ -24,7 +25,7 @@ func hostScan(result *Result) {
 		if err != nil {
 			continue
 		}
-		Log.Debugf("request host %s, %d for %s", url, resp.StatusCode, host)
+		logs.Log.Debugf("request host %s, %d for %s", url, resp.StatusCode, host)
 		if resp.StatusCode != 200 {
 			continue
 		}
