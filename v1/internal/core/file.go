@@ -96,6 +96,19 @@ func initFile(config *Config) error {
 	return nil
 }
 
+func commaStream(ips []string, comma *bool) string {
+	var builder strings.Builder
+	for _, ip := range ips {
+		if *comma {
+			builder.WriteString("," + "\"" + ip + "\"")
+		} else {
+			builder.WriteString("\"" + ip + "\"")
+			*comma = true
+		}
+	}
+	return builder.String()
+}
+
 var smartcommaflag bool = false
 
 func writeSmartResult(ips []string) {
@@ -107,16 +120,7 @@ func writeSmartResult(ips []string) {
 		}
 	}
 
-	iplists := make([]string, len(ips))
-	for i, ip := range ips {
-		iplists[i] = "\"" + ip + "\""
-	}
-	if smartcommaflag {
-		Opt.SmartFile.Write(",")
-	} else {
-		smartcommaflag = true
-	}
-	Opt.SmartFile.SyncWrite(strings.Join(iplists, ","))
+	Opt.SmartFile.SyncWrite(commaStream(ips, &smartcommaflag))
 }
 
 var pingcommaflag bool = false
@@ -129,17 +133,8 @@ func writePingResult(ips []string) {
 			return
 		}
 	}
-	iplists := make([]string, len(ips))
-	for i, ip := range ips {
-		iplists[i] = "\"" + getIP(ip) + "\""
-	}
 
-	if pingcommaflag {
-		Opt.AliveFile.Write(",")
-	} else {
-		pingcommaflag = true
-	}
-	Opt.AliveFile.SyncWrite(strings.Join(iplists, ","))
+	Opt.AliveFile.SyncWrite(commaStream(ips, &pingcommaflag))
 }
 
 func syncFile() {

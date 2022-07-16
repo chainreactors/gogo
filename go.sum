@@ -6,6 +6,8 @@ github.com/alouca/gosnmp v0.0.0-20170620005048-04d83944c9ab h1:pfx9N/EMDxIwVzGu9
 github.com/alouca/gosnmp v0.0.0-20170620005048-04d83944c9ab/go.mod h1:kEcj+iUROrUCr7AIrul5NutI2kWv0ns9BL0ezVp1h/Y=
 github.com/chainreactors/files v0.1.3 h1:gR1uwofvXia8CKChl/SDx8s3FrPdHlTrOTiBQzruG/E=
 github.com/chainreactors/files v0.1.3/go.mod h1:/Xa9YXhjBlaC33JTD6ZTJFig6pcplak2IDcovf42/6A=
+github.com/chainreactors/ipcs v0.0.3 h1:L8YEtALu8BEIJT+IfFJmCwSIakoJsKztN1jTvrUXum4=
+github.com/chainreactors/ipcs v0.0.3/go.mod h1:E9M3Ohyq0TYQLlV4i2dbM9ThBZB1Nnd7Oexoie2xLII=
 github.com/chainreactors/logs v0.4.1 h1:mvKe7FssYf08dA/INZKb4c0YgF5hHcsqRw5s3bnsDQs=
 github.com/chainreactors/logs v0.4.1/go.mod h1:Q0hK5vAq/ZI9GsjN1TRW8+Wxs6Sz7uRRKN6F8qTZW40=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

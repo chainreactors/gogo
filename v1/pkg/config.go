@@ -3,12 +3,15 @@ package pkg
 import (
 	"encoding/json"
 	"getitle/v1/pkg/utils"
+	"github.com/chainreactors/ipcs"
+	"github.com/chainreactors/logs"
 	"strings"
 )
 
 type Config struct {
 	IP             string              `json:"ip"`
 	IPlist         []string            `json:"ips"`
+	CIDRs          ipcs.CIDRs          `json:"-"`
 	ExcludeIPs     string              `json:"-"`
 	ExcludeMap     map[uint]bool       `json:"-"`
 	Ports          string              `json:"ports"`     // 预设字符串
@@ -86,33 +89,26 @@ func (config *Config) InitIP() {
 		if strings.Contains(config.IP, ",") {
 			config.IPlist = strings.Split(config.IP, ",")
 		} else {
-			var host string
-			config.IP, host = ParseCIDR(config.IP)
-			if host != "" {
-				ip, _ := SplitCIDR(config.IP)
-				config.HostsMap[ip] = append(config.HostsMap[ip], host)
-			}
-			if config.IP == "" {
-				utils.Fatal("IP format error")
-			}
+			config.IPlist = append(config.IPlist, config.IP)
 		}
 	}
 
 	// 如果输入的是文件,则格式化所有输入值.如果无有效ip
 	if config.IPlist != nil {
-		var iplist []string
 		for _, ip := range config.IPlist {
-			ip, host := ParseCIDR(ip)
-			if host != "" {
-				i, _ := SplitCIDR(ip)
-				config.HostsMap[i] = append(config.HostsMap[i], host)
+			var host string
+			cidr, err := ipcs.ParseCIDR(ip)
+			if err != nil {
+				logs.Log.Warn("Parse Ip Failed, " + err.Error())
 			}
-			if ip != "" {
-				iplist = append(iplist, ip)
+			config.CIDRs = append(config.CIDRs, cidr)
+			if cidr.IP.Host != "" {
+				config.HostsMap[cidr.IP.String()] = append(config.HostsMap[cidr.IP.String()], host)
 			}
 		}
-		config.IPlist = utils.SliceUnique(iplist) // 去重
-		if len(config.IPlist) == 0 {
+
+		config.CIDRs = utils.Unique(config.CIDRs).(ipcs.CIDRs)
+		if len(config.CIDRs) == 0 {
 			utils.Fatal("all targets format error")
 		}
 	}

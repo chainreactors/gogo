@@ -5,6 +5,7 @@ import (
 	. "getitle/v1/internal/scan"
 	. "getitle/v1/pkg"
 	. "getitle/v1/pkg/utils"
+	"github.com/chainreactors/ipcs"
 	. "github.com/chainreactors/logs"
 	"os"
 	"strings"
@@ -84,7 +85,7 @@ func InitConfig(config *Config) *Config {
 
 	// 如果指定端口超过100,则自动启用spray
 	if len(config.Portlist) > 500 && !config.NoSpray {
-		if config.IPlist == nil && getMask(config.IP) == 32 {
+		if config.CIDRs.Count() == 1 {
 			config.PortSpray = false
 		} else {
 			config.PortSpray = true
@@ -109,16 +110,17 @@ func InitConfig(config *Config) *Config {
 		config.IpProbeList = []uint{1}
 	}
 
-	if config.ExcludeIPs != "" {
-		config.ExcludeMap = make(map[uint]bool)
-		for _, ip := range strings.Split(config.ExcludeIPs, ",") {
-			ip, _ = ParseCIDR(ip)
-			start, end := getIpRange(ip)
-			for i := start; i <= end; i++ {
-				config.ExcludeMap[i] = true
-			}
-		}
-	}
+	// todo 排除ip功能等待重构
+	//if config.ExcludeIPs != "" {
+	//	config.ExcludeMap = make(map[uint]bool)
+	//	for _, ip := range strings.Split(config.ExcludeIPs, ",") {
+	//		ip, _ = ParseCIDR(ip)
+	//		start, end := getIpRange(ip)
+	//		for i := start; i <= end; i++ {
+	//			config.ExcludeMap[i] = true
+	//		}
+	//	}
+	//}
 
 	// 初始已完成,输出任务基本信息
 	taskname := config.GetTargetName()
@@ -190,13 +192,13 @@ func RunTask(config Config) {
 	//case "a", "auto":
 	//	autoScan(config)
 	case "s", "f", "ss", "sc":
-		if config.IPlist != nil {
-			for _, ip := range config.IPlist {
-				Log.Important("Spraying : " + ip)
-				createSmartScan(ip, config)
+		if config.CIDRs != nil {
+			for _, ip := range config.CIDRs {
+				Log.Important("Spraying : " + ip.String())
+				SmartMod(ip, config)
 			}
-		} else {
-			createSmartScan(config.IP, config)
+			//} else {
+			//	createSmartScan(config.IP, config)
 		}
 	default:
 		createDefaultScan(config)
@@ -207,23 +209,22 @@ func guessTime(targets interface{}, portcount, thread int) int {
 	ipcount := 0
 
 	switch targets.(type) {
-	case []string:
-		for _, ip := range targets.([]string) {
-			mask := getMask(ip)
-			ipcount += countip(mask)
+	case ipcs.CIDRs:
+		for _, cidr := range targets.(ipcs.CIDRs) {
+			cidr.Count()
 		}
 	case Results:
 		ipcount = len(targets.(Results))
 		portcount = 1
 	default:
-		mask := getMask(targets.(string))
-		ipcount = countip(mask)
+		//mask := getMask(targets.(string))
+		//ipcount = countip(mask)
 	}
 
 	return (portcount*ipcount/thread)*4 + 4
 }
 
-func guessSmarttime(target string, config Config) int {
+func guessSmarttime(cidr *ipcs.CIDR, config Config) int {
 	var spc, ippc int
 	var mask int
 	spc = len(config.SmartPortList)
@@ -232,7 +233,7 @@ func guessSmarttime(target string, config Config) int {
 	} else {
 		ippc = len(config.IpProbeList)
 	}
-	mask = getMask(target)
+	mask = cidr.Mask
 
 	var count int
 	if config.Mod == "s" || config.Mod == "sb" {
@@ -241,44 +242,7 @@ func guessSmarttime(target string, config Config) int {
 		count = 2 << uint((32-mask)-9)
 	}
 
-	return ((spc*ippc*count)/(config.Threads)*2 + 2)
-}
-
-func countip(mask int) int {
-	count := 0
-	if mask == 32 {
-		count++
-	} else {
-		count += 2 << (31 - uint(mask))
-	}
-	return count
-}
-
-//func autoScan(config Config) {
-//	for cidr, st := range InterConfig {
-//		Log.Important("Spraying : " + cidr)
-//		createAutoTask(config, cidr, st)
-//	}
-//}
-
-//func createAutoTask(config Config, cidr string, c []string) {
-//	config.SmartPortList = portHandler(c[1])
-//	config.Mod = c[0]
-//	if c[2] != "all" {
-//		config.IpProbe = c[2]
-//		config.IpProbeList = Str2uintlist(c[2])
-//	}
-//	SmartMod(cidr, config)
-//}
-
-func createSmartScan(ip string, config Config) {
-	mask := getMask(ip)
-	if mask > 24 {
-		config.Mod = "default"
-		DefaultMod(ip, config)
-	} else {
-		SmartMod(ip, config)
-	}
+	return (spc*ippc*count)/(config.Threads)*2 + 2
 }
 
 func createDefaultScan(config Config) {
@@ -286,17 +250,9 @@ func createDefaultScan(config Config) {
 		DefaultMod(config.Results, config)
 	} else {
 		if config.HasAlivedScan() {
-			if config.IPlist != nil {
-				AliveMod(config.IPlist, config)
-			} else if config.IP != "" {
-				AliveMod(config.IP, config)
-			}
+			AliveMod(config.CIDRs, config)
 		} else {
-			if config.IPlist != nil {
-				DefaultMod(config.IPlist, config)
-			} else if config.IP != "" {
-				DefaultMod(config.IP, config)
-			}
+			DefaultMod(config.CIDRs, config)
 		}
 	}
 }

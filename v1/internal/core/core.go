@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"getitle/v1/internal/scan"
 	. "getitle/v1/pkg"
+	"github.com/chainreactors/ipcs"
 	. "github.com/chainreactors/logs"
 	"github.com/panjf2000/ants/v2"
+	"sort"
 	"strings"
 	"sync"
 )
@@ -54,8 +56,8 @@ func DefaultMod(targets interface{}, config Config) {
 	Log.Importantf("Scan task time is about %d seconds", guessTime(targets, len(config.Portlist), config.Threads))
 	var wgs sync.WaitGroup
 	targetGen := NewTargetGenerator(config)
-	targetCh := targetGen.generator(targets, config.Portlist)
-	//targetChannel := generator(targets, config)
+	targetCh := targetGen.generatorDispatch(targets, config.Portlist)
+	//targetChannel := generatorDispatch(targets, config)
 	scanPool, _ := ants.NewPoolWithFunc(config.Threads, func(i interface{}) {
 		defaultScan(i.(targetConfig))
 		wgs.Done()
@@ -91,7 +93,7 @@ func defaultScan(tc targetConfig) {
 	}
 }
 
-func SmartMod(target string, config Config) {
+func SmartMod(target *ipcs.CIDR, config Config) {
 	// 输出预估时间
 	spended := guessSmarttime(target, config)
 	Log.Importantf("Spraying B class IP: %s, Estimated to take %d seconds", target, spended)
@@ -135,25 +137,25 @@ func SmartMod(target string, config Config) {
 	}
 	wg.Wait()
 
-	var iplist []string
+	var iplist ipcs.CIDRs
 	temp.Range(func(ip, _ interface{}) bool {
-		iplist = append(iplist, fmt.Sprintf("%s/%d", ip.(string), mask))
+		iplist = append(iplist, ipcs.NewCIDR(ip.(string), mask))
 		return true
 	})
 
 	// 网段排序
 	if len(iplist) > 0 {
-		sortCIDR(iplist)
+		sort.Sort(iplist)
 	} else {
 		return
 	}
 
 	if Opt.SmartFile != nil && config.Mod != "sb" {
-		writeSmartResult(iplist)
+		writeSmartResult(iplist.Strings())
 	}
 
 	if Opt.File != nil && config.Mod == "sb" {
-		Opt.File.SafeWrite(strings.Join(iplist, "\n") + "\n")
+		Opt.File.SafeWrite(strings.Join(iplist.Strings(), "\n") + "\n")
 	}
 
 	if Opt.Noscan {
@@ -178,7 +180,8 @@ func SmartMod(target string, config Config) {
 }
 
 func cidrAlived(ip string, temp *sync.Map, mask int, mod string) {
-	alivecidr := ip2superip(ip, mask)
+	i, _ := ipcs.ParseIP(ip)
+	alivecidr := i.Mask(mask)
 	_, ok := temp.Load(alivecidr)
 	if !ok {
 		temp.Store(alivecidr, 1)
@@ -205,7 +208,7 @@ func smartScan(tc targetConfig, temp *sync.Map, mask int, mod string) {
 	}
 }
 
-func declineScan(iplist []string, config Config) {
+func declineScan(cidrs ipcs.CIDRs, config Config) {
 	//config.IpProbeList = []uint{1} // ipp 只在ss与sc模式中生效,为了防止时间计算错误,reset ipp 数值
 	if config.Mod != "sb" && len(config.Portlist) < 3 {
 		// 如果port数量为1, 直接扫描的耗时小于启发式
@@ -214,15 +217,15 @@ func declineScan(iplist []string, config Config) {
 		Log.Important("port count less than 3, skipped smart scan.")
 
 		if config.HasAlivedScan() {
-			AliveMod(iplist, config)
+			AliveMod(cidrs, config)
 		} else {
-			DefaultMod(iplist, config)
+			DefaultMod(cidrs, config)
 		}
 	} else {
-		spended := guessSmarttime(iplist[0], config)
-		Log.Importantf("Every Sub smartscan task time is about %d seconds, total found %d B Class CIDRs about %d s", spended, len(iplist), spended*len(iplist))
+		//spended := guessSmarttime(cidrs[0], config)
+		//Log.Importantf("Every Sub smartscan task time is about %d seconds, total found %d B Class CIDRs about %d s", spended, len(iplist), spended*len(iplist))
 
-		for _, ip := range iplist {
+		for _, ip := range cidrs {
 			tmpalive := Opt.AliveSum
 			SmartMod(ip, config)
 			Log.Importantf("Found %d assets from CIDR %s", Opt.AliveSum-tmpalive, ip)
@@ -244,8 +247,8 @@ func AliveMod(targets interface{}, config Config) {
 		guessTime(targets, len(config.AliveSprayMod), config.Threads))
 	targetGen := NewTargetGenerator(config)
 	alivedmap := targetGen.ipGenerator.alivedMap
-	targetCh := targetGen.generator(targets, config.AliveSprayMod)
-	//targetChannel := generator(targets, config)
+	targetCh := targetGen.generatorDispatch(targets, config.AliveSprayMod)
+	//targetChannel := generatorDispatch(targets, config)
 	scanPool, _ := ants.NewPoolWithFunc(config.Threads, func(i interface{}) {
 		aliveScan(i.(targetConfig), alivedmap)
 		wgs.Done()
