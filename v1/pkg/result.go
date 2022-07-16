@@ -123,8 +123,8 @@ func (result Result) NoFramework() bool {
 }
 
 func (result *Result) GuessFramework() {
-	for _, v := range PortMap[result.Port] {
-		if TagMap[v] == nil && !utils.SliceContains([]string{"top1", "top2", "top3", "other", "windows"}, v) {
+	for _, v := range PortMap.Get(result.Port) {
+		if TagMap.Get(v) == nil && !utils.SliceContains([]string{"top1", "top2", "top3", "other", "windows"}, v) {
 			result.AddFramework(&Framework{Name: v, IsGuess: true})
 		}
 	}

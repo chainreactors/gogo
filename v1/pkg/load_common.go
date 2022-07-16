@@ -3,14 +3,15 @@ package pkg
 import (
 	"encoding/json"
 	"getitle/v1/pkg/utils"
+	"github.com/chainreactors/ipcs"
 	"regexp"
 	"strings"
 )
 
 var (
-	NameMap PortMapper
-	PortMap PortMapper
-	TagMap  PortMapper
+	NameMap = ipcs.NameMap
+	PortMap = ipcs.PortMap
+	TagMap  = ipcs.TagMap
 	//WorkFlowMap    map[string][]*Workflow
 	CommonCompiled map[string]*regexp.Regexp
 	Extractors     = make(map[string]*regexp.Regexp)
@@ -28,36 +29,29 @@ var PresetExtracts = map[string]*regexp.Regexp{
 	"response": regexp.MustCompile("(?s).*"),
 }
 
-type PortMapper map[string][]string
 type PortFinger struct {
 	Name  string   `json:"name"`
 	Ports []string `json:"ports"`
 	Type  []string `json:"type"`
 }
 
-func LoadPortConfig() (PortMapper, PortMapper, PortMapper) {
+func LoadPortConfig() {
 	var portfingers []PortFinger
 	err := json.Unmarshal(LoadConfig("port"), &portfingers)
 
 	if err != nil {
 		utils.Fatal("port config load FAIL!, " + err.Error())
 	}
-	tagmap := make(PortMapper)  // 以服务名归类
-	namemap := make(PortMapper) // 以tag归类
-	portmap := make(PortMapper) // 以端口号归类
-
 	for _, v := range portfingers {
-		v.Ports = parsePortsPreset(v.Ports)
-		namemap[v.Name] = append(namemap[v.Name], v.Ports...)
+		v.Ports = ipcs.ParsePorts(v.Ports)
+		ipcs.NameMap.Append(v.Name, v.Ports...)
 		for _, t := range v.Type {
-			tagmap[t] = append(tagmap[t], v.Ports...)
+			ipcs.TagMap.Append(t, v.Ports...)
 		}
 		for _, p := range v.Ports {
-			portmap[p] = append(portmap[p], v.Name)
+			ipcs.PortMap.Append(p, v.Name)
 		}
 	}
-
-	return tagmap, namemap, portmap
 }
 
 func LoadWorkFlow() WorkflowMap {

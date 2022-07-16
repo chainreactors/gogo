@@ -8,6 +8,7 @@ import (
 	"getitle/v1/pkg/fingers"
 	"getitle/v1/pkg/utils"
 	. "github.com/chainreactors/files"
+	"github.com/chainreactors/ipcs"
 	. "github.com/chainreactors/logs"
 	"io/ioutil"
 	"os"
@@ -341,9 +342,9 @@ func LoadResultFile(file *os.File) interface{} {
 				host := targetpair[0]
 
 				if len(targetpair) >= 2 {
-					if !IsIPv4(host) {
-						if parsedIP, ok := ParseIP(host); ok {
-							result = NewResult(parsedIP, targetpair[1])
+					if !ipcs.IsIpv4(host) {
+						if parsedIP, err := ipcs.ParseIP(host); err != nil {
+							result = NewResult(parsedIP.String(), targetpair[1])
 							result.HttpHosts = []string{host}
 						}
 					} else {

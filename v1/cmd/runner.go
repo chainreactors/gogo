@@ -390,7 +390,7 @@ func (r *Runner) resetGlobals() {
 
 func printConfigs(t string) {
 	if t == "port" {
-		TagMap, NameMap, PortMap = LoadPortConfig()
+		LoadPortConfig()
 		Printportconfig()
 	} else if t == "nuclei" {
 		nucleiLoader("", arrayFlags{})
@@ -410,7 +410,7 @@ func nucleiLoader(pocfile string, payloads arrayFlags) {
 }
 
 func configLoader() {
-	TagMap, NameMap, PortMap = LoadPortConfig()
+	LoadPortConfig()
 	AllFingers = LoadFinger("http")
 	Mmh3Fingers, Md5Fingers = LoadHashFinger(AllFingers)
 	TcpFingers = LoadFinger("tcp").GroupByPort()
