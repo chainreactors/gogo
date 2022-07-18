@@ -181,7 +181,7 @@ func SmartMod(target *ipcs.CIDR, config Config) {
 
 func cidrAlived(ip string, temp *sync.Map, mask int, mod string) {
 	i, _ := ipcs.ParseIP(ip)
-	alivecidr := i.Mask(mask)
+	alivecidr := i.Mask(mask).String()
 	_, ok := temp.Load(alivecidr)
 	if !ok {
 		temp.Store(alivecidr, 1)
