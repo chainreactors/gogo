@@ -96,7 +96,7 @@ func defaultScan(tc targetConfig) {
 
 func SmartMod(target *ipcs.CIDR, config Config) {
 	// 输出预估时间
-	spended := guessSmarttime(target, config)
+	spended := guessSmartTime(target, config)
 	Log.Importantf("Spraying B class IP: %s, Estimated to take %d seconds", target, spended)
 
 	// 初始化ip目标
@@ -217,7 +217,7 @@ func declineScan(cidrs ipcs.CIDRs, config Config) {
 			DefaultMod(cidrs, config)
 		}
 	} else {
-		spended := guessSmarttime(cidrs[0], config)
+		spended := guessSmartTime(cidrs[0], config)
 		Log.Importantf("Every Sub smartscan task time is about %d seconds, total found %d B Class CIDRs about %d s", spended, len(cidrs), spended*len(cidrs))
 
 		for _, ip := range cidrs {

@@ -211,20 +211,20 @@ func guessTime(targets interface{}, portcount, thread int) int {
 	switch targets.(type) {
 	case ipcs.CIDRs:
 		for _, cidr := range targets.(ipcs.CIDRs) {
-			cidr.Count()
+			ipcount += int(cidr.Count())
 		}
+	case ipcs.CIDR:
+		ipcount += int(targets.(ipcs.CIDR).Count())
 	case Results:
 		ipcount = len(targets.(Results))
 		portcount = 1
 	default:
-		//mask := getMask(targets.(string))
-		//ipcount = countip(mask)
 	}
 
 	return (portcount*ipcount/thread)*4 + 4
 }
 
-func guessSmarttime(cidr *ipcs.CIDR, config Config) int {
+func guessSmartTime(cidr *ipcs.CIDR, config Config) int {
 	var spc, ippc int
 	var mask int
 	spc = len(config.SmartPortList)
