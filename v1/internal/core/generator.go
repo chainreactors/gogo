@@ -47,7 +47,8 @@ func (gen *IpGenerator) smartIpGenerator(cidr *ipcs.CIDR) {
 	for C = 1; C < 255; C++ {
 		for B = 0; B <= (fin-start)/256; B++ {
 			outIP = ipcs.Int2Ip(start + 256*B + C)
-			if isnotAlive(ipcs.Int2Ip(start+256*B), gen.alivedMap) && !gen.excludeIP[start+256*B+C] {
+			//if isnotAlive(ipcs.Int2Ip(start+256*B), gen.alivedMap) && !gen.excludeIP[start+256*B+C] {
+			if isnotAlive(ipcs.Int2Ip(start+256*B), gen.alivedMap) {
 				gen.ch <- outIP
 			}
 		}
@@ -79,9 +80,10 @@ func (gen *IpGenerator) sSmartGenerator(cidr *ipcs.CIDR) {
 			if isnotAlive(ipcs.Int2Ip(start+b*65536+256), gen.alivedMap) {
 				//println(int2ip(start + b*65536 + c*256 + 1))
 				for _, p := range gen.ipProbe {
-					if !gen.excludeIP[start+b*65536+c*256+p] {
-						gen.ch <- ipcs.Int2Ip(start + b*65536 + c*256 + p)
-					}
+					gen.ch <- ipcs.Int2Ip(start + b*65536 + c*256 + p)
+					//if !gen.excludeIP[start+b*65536+c*256+p] {
+					//
+					//}
 				}
 			}
 		}
@@ -97,16 +99,18 @@ func (gen *IpGenerator) generatorDispatch(cidr *ipcs.CIDR, mod string) chan stri
 		case "s", "sb":
 			if mask <= 24 {
 				gen.smartIpGenerator(cidr)
-			} else {
-				gen.defaultIpGenerator(cidr)
+				//} else {
+				//	gen.defaultIpGenerator(cidr)
 			}
 		case "ss", "sc":
 			if mask <= 16 {
 				gen.sSmartGenerator(cidr)
-			} else if mask > 16 && mask <= 24 {
-				gen.smartIpGenerator(cidr)
-			} else {
-				gen.defaultIpGenerator(cidr)
+				//} else if mask > 16 && mask <= 24 {
+				//	Log.Warnf("mask: %d, decline to smart mod", mask)
+				//	gen.smartIpGenerator(cidr)
+				//} else {
+				//	Log.Warnf("mask: %d, decline to default mod", mask)
+				//	gen.defaultIpGenerator(cidr)
 			}
 		default:
 			gen.defaultIpGenerator(cidr)
