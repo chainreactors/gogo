@@ -192,6 +192,9 @@ func (gen *targetGenerator) generatorDispatch(targets interface{}, portlist []st
 				gen.genFromSpray(targets.(ipcs.CIDRs), portlist)
 			} else { // 默认模式 批量处理
 				for _, cidr := range targets.(ipcs.CIDRs) {
+					if cidr.Count() > 1 {
+						Log.Info("default scan " + cidr.String())
+					}
 					gen.genFromDefault(cidr, portlist)
 				}
 			}
