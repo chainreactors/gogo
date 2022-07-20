@@ -84,6 +84,9 @@ func defaultScan(tc targetConfig) {
 		Log.Console(output(result, Opt.Output))
 
 		if Opt.File != nil {
+			if !Opt.File.Initialized {
+				Log.Important("init file: " + Opt.File.Filename)
+			}
 			Opt.File.SafeWrite(output(result, Opt.FileOutput))
 			if result.Extracts.Extractors != nil {
 				Opt.ExtractFile.SafeWrite(result.Extracts.ToResult())
@@ -269,7 +272,7 @@ func AliveMod(targets interface{}, config Config) {
 	}
 	Log.Importantf("found %d alived ips", len(iplist))
 	if Opt.AliveFile != nil {
-		writePingResult(iplist.Strings())
+		writeAlivedResult(iplist.Strings())
 	}
 	DefaultMod(iplist, config)
 }

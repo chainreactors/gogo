@@ -142,23 +142,29 @@ type targetGenerator struct {
 	ipGenerator *IpGenerator
 }
 
-func (gen *targetGenerator) genFromDefault(targets *ipcs.CIDR, portlist []string) {
-	ch := gen.ipGenerator.generatorDispatch(targets, "default")
-	for ip := range ch {
-		for _, port := range portlist {
-			gen.ch <- targetConfig{ip: ip, port: port, hosts: gen.hostsMap[ip]}
+func (gen *targetGenerator) genFromDefault(cidrs ipcs.CIDRs, portlist []string) {
+	for _, cidr := range cidrs {
+		if cidr.Count() > 1 {
+			Log.Info("default scan " + cidr.String())
 		}
+		ch := gen.ipGenerator.generatorDispatch(cidr, "default")
+		for ip := range ch {
+			for _, port := range portlist {
+				gen.ch <- targetConfig{ip: ip, port: port, hosts: gen.hostsMap[ip]}
+			}
+		}
+		syncFile()
 	}
 }
 
 func (gen *targetGenerator) genFromSpray(cidrs ipcs.CIDRs, portlist []string) {
-	var ch chan string
+	//gen.ch = make(chan string)
 	var tmpPorts []string
 	for _, port := range portlist {
 		tmpalive := Opt.AliveSum
 
 		for _, cidr := range cidrs {
-			ch = gen.ipGenerator.generatorDispatch(cidr, "default")
+			ch := gen.ipGenerator.generatorDispatch(cidr, "default")
 			for ip := range ch {
 				gen.ch <- targetConfig{ip: ip, port: port, hosts: gen.hostsMap[ip]}
 			}
@@ -195,12 +201,7 @@ func (gen *targetGenerator) generatorDispatch(targets interface{}, portlist []st
 			if gen.spray { // 端口喷洒
 				gen.genFromSpray(targets.(ipcs.CIDRs), portlist)
 			} else { // 默认模式 批量处理
-				for _, cidr := range targets.(ipcs.CIDRs) {
-					if cidr.Count() > 1 {
-						Log.Info("default scan " + cidr.String())
-					}
-					gen.genFromDefault(cidr, portlist)
-				}
+				gen.genFromDefault(targets.(ipcs.CIDRs), portlist)
 			}
 		}
 		close(gen.ch)

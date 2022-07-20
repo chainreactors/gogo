@@ -112,29 +112,15 @@ func commaStream(ips []string, comma *bool) string {
 var smartcommaflag bool = false
 
 func writeSmartResult(ips []string) {
-	if !Opt.SmartFile.Initialized {
-		err := Opt.SmartFile.Init()
-		if err != nil {
-			Log.Warn(err.Error())
-			return
-		}
-	}
-
 	Opt.SmartFile.SyncWrite(commaStream(ips, &smartcommaflag))
+	Opt.AliveFile.SafeSync()
 }
 
 var pingcommaflag bool = false
 
-func writePingResult(ips []string) {
-	if !Opt.AliveFile.Initialized {
-		err := Opt.AliveFile.Init()
-		if err != nil {
-			Log.Warn(err.Error())
-			return
-		}
-	}
-
-	Opt.AliveFile.SyncWrite(commaStream(ips, &pingcommaflag))
+func writeAlivedResult(ips []string) {
+	Opt.AliveFile.SafeWrite(commaStream(ips, &pingcommaflag))
+	Opt.AliveFile.SafeSync()
 }
 
 func syncFile() {
