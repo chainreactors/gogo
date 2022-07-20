@@ -198,9 +198,17 @@ func (gen *targetGenerator) generatorDispatch(targets interface{}, portlist []st
 		case Results:
 			gen.genFromResult(targets.(Results))
 		default:
+			//ips := targets.(ipcs.CIDRs).Strings()
+			//addrs := ipcs.NewAddrs(ips, portlist)
 			if gen.spray { // 端口喷洒
+				//for addr := range addrs.GenerateWithPort(){
+				//	gen.ch <- targetConfig{addr: addr, hosts: gen.hostsMap[addr.IP.String()]}
+				//}
 				gen.genFromSpray(targets.(ipcs.CIDRs), portlist)
 			} else { // 默认模式 批量处理
+				//for addr := range addrs.GenerateWithIP(){
+				//	gen.ch <- targetConfig{addr: addr, hosts: gen.hostsMap[addr.IP.String()]}
+				//}
 				gen.genFromDefault(targets.(ipcs.CIDRs), portlist)
 			}
 		}
