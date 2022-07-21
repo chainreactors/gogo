@@ -112,7 +112,7 @@ func commaStream(ips []string, comma *bool) string {
 var smartcommaflag bool = false
 
 func writeSmartResult(ips []string) {
-	Opt.SmartFile.SyncWrite(commaStream(ips, &smartcommaflag))
+	Opt.SmartFile.SafeWrite(commaStream(ips, &smartcommaflag))
 	Opt.SmartFile.SafeSync()
 }
 
