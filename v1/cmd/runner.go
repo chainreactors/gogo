@@ -379,7 +379,6 @@ func (r *Runner) close(config *Config) {
 	//}
 
 	Log.Close(true)
-	time.Sleep(time.Microsecond * 1000) // 因为是异步的, 等待文件最后处理完成
 }
 
 func (r *Runner) resetGlobals() {

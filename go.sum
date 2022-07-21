@@ -4,8 +4,9 @@ github.com/alouca/gologger v0.0.0-20120904114645-7d4b7291de9c h1:k/7/05/5kPRX7Ha
 github.com/alouca/gologger v0.0.0-20120904114645-7d4b7291de9c/go.mod h1:SI1d/2/wpSTDjHgdS9ZLy6hqvsdhzVYAc8RLztweMpA=
 github.com/alouca/gosnmp v0.0.0-20170620005048-04d83944c9ab h1:pfx9N/EMDxIwVzGu9JLnmbOMNukW1mfPA9Ymo+S58Ng=
 github.com/alouca/gosnmp v0.0.0-20170620005048-04d83944c9ab/go.mod h1:kEcj+iUROrUCr7AIrul5NutI2kWv0ns9BL0ezVp1h/Y=
-github.com/chainreactors/files v0.1.3 h1:gR1uwofvXia8CKChl/SDx8s3FrPdHlTrOTiBQzruG/E=
 github.com/chainreactors/files v0.1.3/go.mod h1:/Xa9YXhjBlaC33JTD6ZTJFig6pcplak2IDcovf42/6A=
+github.com/chainreactors/files v0.1.4 h1:AYkucNUn8lJ2lJ3V92U78UuNERow9Z7K2tXR3Nkd8i4=
+github.com/chainreactors/files v0.1.4/go.mod h1:/Xa9YXhjBlaC33JTD6ZTJFig6pcplak2IDcovf42/6A=
 github.com/chainreactors/ipcs v0.0.9 h1:4Onroq7gXLG5SLCCgNDx3JmtLxB4XgepGdHCtLp1Ows=
 github.com/chainreactors/ipcs v0.0.9/go.mod h1:E9M3Ohyq0TYQLlV4i2dbM9ThBZB1Nnd7Oexoie2xLII=
 github.com/chainreactors/logs v0.4.1 h1:mvKe7FssYf08dA/INZKb4c0YgF5hHcsqRw5s3bnsDQs=
