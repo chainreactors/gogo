@@ -113,7 +113,7 @@ var smartcommaflag bool = false
 
 func writeSmartResult(ips []string) {
 	Opt.SmartFile.SyncWrite(commaStream(ips, &smartcommaflag))
-	Opt.AliveFile.SafeSync()
+	Opt.SmartFile.SafeSync()
 }
 
 var pingcommaflag bool = false
