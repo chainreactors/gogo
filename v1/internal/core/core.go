@@ -100,7 +100,7 @@ func defaultScan(tc targetConfig) {
 func SmartMod(target *ipcs.CIDR, config Config) {
 	// 输出预估时间
 	spended := guessSmartTime(target, config)
-	Log.Importantf("Spraying B class IP: %s, Estimated to take %d seconds", target, spended)
+	Log.Importantf("Spraying %s with %s, Estimated to take %d seconds", config.Mod, target, spended)
 
 	// 初始化ip目标
 	Log.Importantf("SmartScan %s, Mod: %s", target, config.Mod)
@@ -157,7 +157,6 @@ func SmartMod(target *ipcs.CIDR, config Config) {
 	if Opt.SmartFile != nil && config.Mod != "sb" {
 		writeSmartResult(iplist.Strings())
 	}
-
 	if Opt.File != nil && config.Mod == "sb" {
 		Opt.File.SafeWrite(strings.Join(iplist.Strings(), "\n") + "\n")
 	}
@@ -170,11 +169,14 @@ func SmartMod(target *ipcs.CIDR, config Config) {
 	// 启发式扫描逐步降级,从喷洒B段到喷洒C段到默认扫描
 	if config.Mod == "ss" {
 		config.Mod = "s"
+		declineScan(iplist, config)
 	} else if config.Mod == "sc" {
 		config.Mod = "sb"
+		declineScan(iplist, config)
+	} else {
+		DefaultMod(iplist, config)
 	}
 
-	declineScan(iplist, config)
 }
 
 func cidrAlived(ip string, temp *sync.Map, mask int, mod string) {
