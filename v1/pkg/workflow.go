@@ -51,6 +51,10 @@ func (w *Workflow) PrepareConfig() *Config {
 		config.AliveSprayMod = append(config.AliveSprayMod, "icmp")
 	}
 
+	if w.Mod == "" {
+		config.Mod = "default"
+	}
+
 	if w.File != "" {
 		config.Filename = GetFilename(config, w.File, w.Path, "json")
 		if config.IsSmart() {
