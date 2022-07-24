@@ -15,43 +15,20 @@ func output(result *Result, outType string) string {
 
 	switch outType {
 	case "color", "c":
-		out = colorOutput(result)
+		out = ColorOutput(result)
 	case "json", "j":
-		out = jsonOutput(result)
+		out = JsonOutput(result)
 	case "jsonlines", "jl":
-		out = jsonOutput(result) + "\n"
+		out = JsonOutput(result) + "\n"
 	case "full":
-		out = fullOutput(result)
+		out = FullOutput(result)
 	default:
-		out = valuesOutput(result, outType)
+		out = ValuesOutput(result, outType)
 	}
 	return out
 }
 
-func valuesOutput(result *Result, outType string) string {
-	outs := strings.Split(outType, ",")
-	for i, out := range outs {
-		outs[i] = result.Get(out)
-	}
-	return strings.Join(outs, "\t") + "\n"
-}
-
-func colorOutput(result *Result) string {
-	s := fmt.Sprintf("[+] %s\t%s\t%s\t%s\t%s\t%s\t%s [%s] %s %s\n", result.GetURL(), result.Midware, result.Language, Blue(result.Frameworks.ToString()), result.Host, result.Cert, result.Hash, Yellow(result.HttpStat), Blue(result.Title), Red(result.Vulns.ToString()))
-	return s
-}
-
-func fullOutput(result *Result) string {
-	s := fmt.Sprintf("[+] %s\t%s\t%s\t%s\t%s\t%s\t%s [%s] %s %s %s\n", result.GetURL(), result.Midware, result.Language, result.Frameworks.ToString(), result.Host, result.Cert, result.Hash, result.HttpStat, result.Title, result.Vulns.ToString(), result.Extracts.ToString())
-	return s
-}
-
-func jsonOutput(result *Result) string {
-	jsons, _ := json.Marshal(result)
-	return string(jsons)
-}
-
-func FormatOutput(filename string, outputfile string, autofile bool, filters []string) {
+func FormatOutput(filename string, outputfile string, autofile, isfocus bool, filters []string) {
 	var outfunc func(s string)
 	var iscolor bool
 	var resultsdata *ResultsData
@@ -142,7 +119,7 @@ func FormatOutput(filename string, outputfile string, autofile bool, filters []s
 			}
 			outfunc(string(content))
 		} else {
-			outfunc(resultsdata.ToValues(Opt.Output))
+			outfunc(resultsdata.ToValues(Opt.Output, isfocus))
 		}
 	} else if extractsdata != nil {
 		for _, extracts := range extractsdata {

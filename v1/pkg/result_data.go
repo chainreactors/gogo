@@ -118,12 +118,12 @@ func (rd ResultsData) ToConfig() string {
 	return configstr
 }
 
-func (rd ResultsData) ToValues(outType string) string {
+func (rd ResultsData) ToValues(outType string, focus bool) string {
 	outs := strings.Split(outType, ",")
 	outvalues := make([][]string, len(outs))
 	ss := make([]string, len(rd.Data))
 	for i, out := range outs {
-		outvalues[i] = rd.Data.GetValues(out)
+		outvalues[i] = rd.Data.GetValues(out, focus)
 	}
 
 	for i := 0; i < len(ss); i++ {

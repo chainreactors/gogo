@@ -52,6 +52,7 @@ func CMD() {
 	flag.BoolVar(&runner.AutoFile, "af", false, "")
 	flag.BoolVar(&runner.HiddenFile, "hf", false, "")
 	flag.BoolVar(&runner.Compress, "C", false, "")
+	flag.BoolVar(&runner.IsFocus, "focus", false, "")
 
 	// CONFIG
 	flag.IntVar(&runner.config.Threads, "t", 0, "")

@@ -31,6 +31,7 @@ type Runner struct {
 	Clean             bool // 是否开启命令行输出扫描结果
 	Quiet             bool // 是否开启命令行输出日志
 	AutoFile          bool // 自动生成格式化文件名
+	IsFocus           bool
 	HiddenFile        bool // 启用自动隐藏文件
 	Ping              bool
 	Arp               bool
@@ -94,7 +95,7 @@ func (r *Runner) preInit() bool {
 	}
 
 	if r.FormatterFilename != "" {
-		FormatOutput(r.FormatterFilename, r.config.Filename, r.AutoFile, r.filters)
+		FormatOutput(r.FormatterFilename, r.config.Filename, r.IsFocus, r.AutoFile, r.filters)
 		return false
 	}
 	// 输出 config
