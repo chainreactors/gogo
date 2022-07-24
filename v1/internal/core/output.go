@@ -28,7 +28,7 @@ func output(result *Result, outType string) string {
 	return out
 }
 
-func FormatOutput(filename string, outputfile string, autofile, isfocus bool, filters []string) {
+func FormatOutput(filename string, outputfile string, autofile bool, filters []string) {
 	var outfunc func(s string)
 	var iscolor bool
 	var resultsdata *ResultsData
@@ -91,14 +91,7 @@ func FormatOutput(filename string, outputfile string, autofile, isfocus bool, fi
 		return
 	} else if resultsdata != nil && resultsdata.Data != nil {
 		for _, filter := range filters {
-			// 过滤指定数据
-			if strings.Contains(filter, "::") {
-				kv := strings.Split(filter, "::")
-				resultsdata.Data = resultsdata.Data.Filter(kv[0], kv[1], "::")
-			} else if strings.Contains(filter, "==") {
-				kv := strings.Split(filter, "==")
-				resultsdata.Data = resultsdata.Data.Filter(kv[0], kv[1], "==")
-			}
+			resultsdata.Filter(filter)
 		}
 
 		if Opt.Output == "c" {
@@ -119,7 +112,7 @@ func FormatOutput(filename string, outputfile string, autofile, isfocus bool, fi
 			}
 			outfunc(string(content))
 		} else {
-			outfunc(resultsdata.ToValues(Opt.Output, isfocus))
+			outfunc(resultsdata.ToValues(Opt.Output))
 		}
 	} else if extractsdata != nil {
 		for _, extracts := range extractsdata {

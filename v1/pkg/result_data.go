@@ -107,6 +107,30 @@ func (rd ResultsData) groupBySortedIP() (map[string]IPMapResult, []string) {
 	return pfs, sortIP(ips)
 }
 
+func (rd *ResultsData) Filter(name string) {
+	var results Results
+	if name == "focus" {
+		results = rd.Data.Filter("frame", "focus", "::")
+	} else if name == "vuln" {
+		results = rd.Data.Filter("vuln", "high", "::")
+		results = append(results, rd.Data.Filter("vuln", "critical", "::")...)
+	} else if name == "domain" {
+		//rd.Data = rd.Data.Filter()
+		//} else if name == "network" {
+		//results = rd.Data.Filter()
+	} else {
+		// 过滤指定数据
+		if strings.Contains(name, "::") {
+			kv := strings.Split(name, "::")
+			results = rd.Data.Filter(kv[0], kv[1], "::")
+		} else if strings.Contains(name, "==") {
+			kv := strings.Split(name, "==")
+			results = rd.Data.Filter(kv[0], kv[1], "==")
+		}
+	}
+	rd.Data = results
+}
+
 func (rd ResultsData) ToConfig() string {
 	// 输出配置信息
 	var configstr string
@@ -118,12 +142,12 @@ func (rd ResultsData) ToConfig() string {
 	return configstr
 }
 
-func (rd ResultsData) ToValues(outType string, focus bool) string {
+func (rd ResultsData) ToValues(outType string) string {
 	outs := strings.Split(outType, ",")
 	outvalues := make([][]string, len(outs))
 	ss := make([]string, len(rd.Data))
 	for i, out := range outs {
-		outvalues[i] = rd.Data.GetValues(out, focus)
+		outvalues[i] = rd.Data.GetValues(out)
 	}
 
 	for i := 0; i < len(ss); i++ {

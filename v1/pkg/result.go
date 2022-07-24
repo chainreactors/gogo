@@ -150,7 +150,7 @@ func (result *Result) Get(key string) string {
 		return result.Ip
 	case "port":
 		return result.Port
-	case "frameworks", "framework":
+	case "frameworks", "framework", "frame":
 		return result.Frameworks.ToString()
 	case "vulns", "vuln":
 		return result.Vulns.ToString()
@@ -274,13 +274,13 @@ func (rs Results) Filter(k, v, op string) Results {
 	return filtedres
 }
 
-func (results Results) GetValues(key string, focus bool) []string {
+func (results Results) GetValues(key string) []string {
 	values := make([]string, len(results))
 	for i, result := range results {
-		if focus && !result.Frameworks.IsFocus() {
-			// 如果需要focus, 则跳过非focus标记的framework
-			continue
-		}
+		//if focus && !result.Frameworks.IsFocus() {
+		//	// 如果需要focus, 则跳过非focus标记的framework
+		//	continue
+		//}
 		values[i] = result.Get(key)
 	}
 	return values
