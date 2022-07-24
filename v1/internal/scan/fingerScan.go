@@ -3,7 +3,6 @@ package scan
 import (
 	. "getitle/v1/pkg"
 	. "getitle/v1/pkg/fingers"
-	"net"
 )
 
 func fingerScan(result *Result) {
@@ -31,7 +30,11 @@ func fingerScan(result *Result) {
 			if err != nil {
 				return "", false
 			}
-			return tcpSender(conn, sendData)
+			data, err := SocketSend(conn, sendData, 1024)
+			if err != nil {
+				return "", false
+			}
+			return string(data), true
 		}
 
 		matcher := func(result *Result, finger *Finger) (*Framework, *Vuln) {
@@ -127,14 +130,6 @@ func httpFingerMatch(result *Result, finger *Finger, sender func(sendData []byte
 	//	}
 	//}
 	return nil, nil
-}
-
-func tcpSender(conn net.Conn, sendData []byte) (string, bool) {
-	data, err := SocketSend(conn, sendData, 1024)
-	if err != nil {
-		return "", false
-	}
-	return string(data), true
 }
 
 func tcpFingerMatch(result *Result, finger *Finger, sender func(sendData []byte) (string, bool)) (*Framework, *Vuln) {
