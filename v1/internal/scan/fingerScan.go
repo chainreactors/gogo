@@ -3,16 +3,41 @@ package scan
 import (
 	. "getitle/v1/pkg"
 	. "getitle/v1/pkg/fingers"
-	"github.com/chainreactors/logs"
 	"net"
 )
 
 func fingerScan(result *Result) {
 	//如果是http协议,则判断cms,如果是tcp则匹配规则库.暂时不考虑udp
 	if result.IsHttp() {
-		getFramework(result, HttpFingers, httpFingerMatch)
+		sender := func(sendData []byte) (string, bool) {
+			conn := result.GetHttpConn(RunOpt.Delay)
+			url := result.GetURL() + string(sendData)
+			resp, err := conn.Get(url)
+			if err == nil {
+				content, _ := GetHttpRaw(resp)
+				return content, true
+			} else {
+				return "", false
+			}
+		}
+
+		matcher := func(result *Result, finger *Finger) (*Framework, *Vuln) {
+			return httpFingerMatch(result, finger, sender)
+		}
+		getFramework(result, HttpFingers, matcher)
 	} else {
-		getFramework(result, TcpFingers, tcpFingerMatch)
+		sender := func(sendData []byte) (string, bool) {
+			conn, err := TcpSocketConn(result.GetTarget(), 2)
+			if err != nil {
+				return "", false
+			}
+			return tcpSender(conn, sendData)
+		}
+
+		matcher := func(result *Result, finger *Finger) (*Framework, *Vuln) {
+			return tcpFingerMatch(result, finger, sender)
+		}
+		getFramework(result, TcpFingers, matcher)
 	}
 	return
 }
@@ -63,26 +88,13 @@ func getFramework(result *Result, fingermap FingerMapper, matcher func(*Result, 
 	return
 }
 
-func httpFingerMatch(result *Result, finger *Finger) (*Framework, *Vuln) {
+func httpFingerMatch(result *Result, finger *Finger, sender func(sendData []byte) (string, bool)) (*Framework, *Vuln) {
 	//resp := result.Httpresp
 	//content := result.Content
 	//var body string
 	//var rerequest bool
 	//var cookies map[string]string
 
-	sender := func(sendData []byte) (string, bool) {
-		conn := result.GetHttpConn(RunOpt.Delay)
-		url := result.GetURL() + string(sendData)
-		resp, err := conn.Get(url)
-		if err == nil {
-			logs.Log.Debugf("request finger %s %d for %s", url, resp.StatusCode, finger.Name)
-			content, _ := GetHttpRaw(resp)
-			return content, true
-		} else {
-			logs.Log.Debugf("request finger %s %s for %s", url, err.Error(), finger.Name)
-			return "", false
-		}
-	}
 	frame, vuln, ok := FingerMatcher(finger, RunOpt.VersionLevel, result.Content, sender)
 	if ok {
 		return frame, vuln
@@ -125,18 +137,10 @@ func tcpSender(conn net.Conn, sendData []byte) (string, bool) {
 	return string(data), true
 }
 
-func tcpFingerMatch(result *Result, finger *Finger) (*Framework, *Vuln) {
+func tcpFingerMatch(result *Result, finger *Finger, sender func(sendData []byte) (string, bool)) (*Framework, *Vuln) {
 	//content := result.Content
 	//var data []byte
 	//var err error
-	sender := func(sendData []byte) (string, bool) {
-		logs.Log.Debugf("request finger %s for %s", result.GetTarget(), finger.Name)
-		conn, err := TcpSocketConn(result.GetTarget(), 2)
-		if err != nil {
-			return "", false
-		}
-		return tcpSender(conn, sendData)
-	}
 
 	frame, vuln, ok := FingerMatcher(finger, RunOpt.VersionLevel, result.Content, sender)
 	if ok {

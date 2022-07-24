@@ -3,6 +3,7 @@ package fingers
 import (
 	"fmt"
 	"getitle/v1/pkg/dsl"
+	"github.com/chainreactors/logs"
 	"regexp"
 	"strings"
 )
@@ -24,7 +25,7 @@ func (f Framework) ToString() string {
 	}
 
 	if f.Version != "" {
-		s += " " + f.Version
+		s += ":" + strings.Replace(f.Version, ":", "_", -1)
 	}
 	if f.From != "" {
 		s += ":" + f.From
@@ -93,6 +94,7 @@ func FingerMatcher(finger *Finger, level int, content string, sender func([]byte
 			ishttp = true
 		}
 		if level >= rule.Level && rule.SendData != nil {
+			logs.Log.Debugf("active match with %s", rule.SendDataStr)
 			c, ok := sender(rule.SendData)
 			if ok {
 				isactive = true
