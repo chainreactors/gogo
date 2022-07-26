@@ -100,7 +100,7 @@ func defaultScan(tc targetConfig) {
 func SmartMod(target *ipcs.CIDR, config Config) {
 	// 输出预估时间
 	spended := guessSmartTime(target, config)
-	Log.Importantf("Spraying %s with %s, Estimated to take %d seconds", config.Mod, target, spended)
+	Log.Importantf("Spraying %s with %s, Estimated to take %d seconds", target, config.Mod, spended)
 
 	// 初始化ip目标
 	Log.Importantf("SmartScan %s, Mod: %s", target, config.Mod)
@@ -161,7 +161,7 @@ func SmartMod(target *ipcs.CIDR, config Config) {
 		Opt.File.SafeWrite(strings.Join(iplist.Strings(), "\n") + "\n")
 	}
 
-	if Opt.Noscan {
+	if Opt.Noscan || config.Mod == "sb" {
 		// -no 被设置的时候停止后续扫描
 		return
 	}
@@ -208,29 +208,38 @@ func smartScan(tc targetConfig, temp *sync.Map, mask int, mod string) {
 
 func declineScan(cidrs ipcs.CIDRs, config Config) {
 	//config.IpProbeList = []uint{1} // ipp 只在ss与sc模式中生效,为了防止时间计算错误,reset ipp 数值
-	if config.Mod == "default" {
-		DefaultMod(cidrs, config)
-	} else if config.Mod != "sb" && len(config.Portlist) < 3 {
+	if config.Mod == "s" {
 		// 如果port数量为1, 直接扫描的耗时小于启发式
 		// 如果port数量为2, 直接扫描的耗时约等于启发式扫描
 		// 因此, 如果post数量小于2, 则直接使用defaultScan
-		Log.Important("port count less than 3, skipped smart scan.")
+		if len(config.Portlist) < 3 {
+			Log.Important("port count less than 3, skipped smart scan.")
 
-		if config.HasAlivedScan() {
-			AliveMod(cidrs, config)
+			if config.HasAlivedScan() {
+				AliveMod(cidrs, config)
+			} else {
+				DefaultMod(cidrs, config)
+			}
 		} else {
-			DefaultMod(cidrs, config)
+			spended := guessSmartTime(cidrs[0], config)
+			Log.Importantf("Every Sub smartscan task time is about %d seconds, total found %d B Class CIDRs about %d s", spended, len(cidrs), spended*len(cidrs))
+			for _, ip := range cidrs {
+				tmpalive := Opt.AliveSum
+				SmartMod(ip, config)
+				Log.Importantf("Found %d assets from CIDR %s", Opt.AliveSum-tmpalive, ip)
+				syncFile()
+			}
 		}
-	} else {
+
+	} else if config.Mod == "sb" {
 		spended := guessSmartTime(cidrs[0], config)
 		Log.Importantf("Every Sub smartscan task time is about %d seconds, total found %d B Class CIDRs about %d s", spended, len(cidrs), spended*len(cidrs))
 
 		for _, ip := range cidrs {
-			tmpalive := Opt.AliveSum
 			SmartMod(ip, config)
-			Log.Importantf("Found %d assets from CIDR %s", Opt.AliveSum-tmpalive, ip)
-			syncFile()
 		}
+	} else {
+		DefaultMod(cidrs, config)
 	}
 }
 
