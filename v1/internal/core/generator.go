@@ -145,7 +145,7 @@ type targetGenerator struct {
 func (gen *targetGenerator) genFromDefault(cidrs ipcs.CIDRs, portlist []string) {
 	for _, cidr := range cidrs {
 		if cidr.Count() > 1 {
-			Log.Info("default scan " + cidr.String())
+			Log.Importantf("Scanning %s with %d ports", cidr.String(), len(portlist))
 		}
 		ch := gen.ipGenerator.generatorDispatch(cidr, "default")
 		for ip := range ch {
@@ -179,7 +179,10 @@ func (gen *targetGenerator) genFromSpray(cidrs ipcs.CIDRs, portlist []string) {
 		//}
 		tmpPorts = append(tmpPorts, port)
 		if Opt.AliveSum-tmpalive > 0 {
-			Log.Importantf("Processed Port: %s, found %d ports", strings.Join(tmpPorts, ","), Opt.AliveSum-tmpalive)
+			if len(tmpPorts) >= 100 {
+				tmpPorts = tmpPorts[:100]
+			}
+			Log.Importantf("Processed Port: %s, found %d ports", strings.Join(tmpPorts, ",")+", "+port, Opt.AliveSum-tmpalive)
 			tmpPorts = []string{}
 		}
 	}

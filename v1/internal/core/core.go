@@ -54,7 +54,7 @@ var portstat = map[int]string{
 //直接扫描
 func DefaultMod(targets interface{}, config Config) {
 	// 输出预估时间
-	Log.Importantf("Scan task time is about %d seconds", guessTime(targets, len(config.Portlist), config.Threads))
+	Log.Importantf("Default Scan time is about %d seconds", guessTime(targets, len(config.Portlist), config.Threads))
 	var wgs sync.WaitGroup
 	targetGen := NewTargetGenerator(config)
 	targetCh := targetGen.generatorDispatch(targets, config.Portlist)
