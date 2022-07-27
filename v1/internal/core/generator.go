@@ -182,7 +182,7 @@ func (gen *targetGenerator) genFromSpray(cidrs ipcs.CIDRs, portlist []string) {
 			if len(tmpPorts) >= 100 {
 				tmpPorts = tmpPorts[:100]
 			}
-			Log.Importantf("Processed Port: %s, found %d ports", strings.Join(tmpPorts, ",")+", "+port, Opt.AliveSum-tmpalive)
+			Log.Importantf("Processed Port: %s, found %d ports", strings.Join(tmpPorts, ",")+"......, "+port, Opt.AliveSum-tmpalive)
 			tmpPorts = []string{}
 		}
 	}
