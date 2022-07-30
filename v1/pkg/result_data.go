@@ -8,6 +8,7 @@ import (
 	"getitle/v1/pkg/fingers"
 	"getitle/v1/pkg/utils"
 	. "github.com/chainreactors/files"
+	"github.com/chainreactors/ipcs"
 	. "github.com/chainreactors/logs"
 	"io/ioutil"
 	"os"
@@ -104,6 +105,30 @@ func (rd ResultsData) groupBySortedIP() (map[string]IPMapResult, []string) {
 		i++
 	}
 	return pfs, sortIP(ips)
+}
+
+func (rd *ResultsData) Filter(name string) {
+	var results Results
+	if name == "focus" {
+		results = rd.Data.Filter("frame", "focus", "::")
+	} else if name == "vuln" {
+		results = rd.Data.Filter("vuln", "high", "::")
+		results = append(results, rd.Data.Filter("vuln", "critical", "::")...)
+	} else if name == "domain" {
+		//rd.Data = rd.Data.Filter()
+		//} else if name == "network" {
+		//results = rd.Data.Filter()
+	} else {
+		// 过滤指定数据
+		if strings.Contains(name, "::") {
+			kv := strings.Split(name, "::")
+			results = rd.Data.Filter(kv[0], kv[1], "::")
+		} else if strings.Contains(name, "==") {
+			kv := strings.Split(name, "==")
+			results = rd.Data.Filter(kv[0], kv[1], "==")
+		}
+	}
+	rd.Data = results
 }
 
 func (rd ResultsData) ToConfig() string {
@@ -341,9 +366,9 @@ func LoadResultFile(file *os.File) interface{} {
 				host := targetpair[0]
 
 				if len(targetpair) >= 2 {
-					if !IsIPv4(host) {
-						if parsedIP, ok := ParseIP(host); ok {
-							result = NewResult(parsedIP, targetpair[1])
+					if !ipcs.IsIpv4(host) {
+						if parsedIP, err := ipcs.ParseIP(host); err != nil {
+							result = NewResult(parsedIP.String(), targetpair[1])
 							result.HttpHosts = []string{host}
 						}
 					} else {

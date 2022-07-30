@@ -17,7 +17,6 @@ type decodeOptions struct {
 
 func main() {
 	var opt decodeOptions
-	logs.Log = logs.NewLogger(false, false)
 	flag.StringVar(&opt.xor_key, "k", "", "key")
 	flag.StringVar(&opt.filename, "F", "", "input filename")
 	flag.StringVar(&opt.outfilename, "f", "", "output filename")

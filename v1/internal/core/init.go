@@ -81,7 +81,7 @@ func InitConfig(config *Config) *Config {
 
 	config.InitIP()
 	// 初始化端口配置
-	config.Portlist = PortsHandler(config.Ports)
+	config.Portlist = ipcs.ParsePort(config.Ports)
 
 	// 如果指定端口超过100,则自动启用spray
 	if len(config.Portlist) > 500 && !config.NoSpray {
@@ -94,7 +94,7 @@ func InitConfig(config *Config) *Config {
 
 	// 初始化启发式扫描的端口探针
 	if config.SmartPort != "default" {
-		config.SmartPortList = PortsHandler(config.SmartPort)
+		config.SmartPortList = ipcs.ParsePort(config.SmartPort)
 	} else {
 		if config.Mod == "s" {
 			config.SmartPortList = []string{"80"}
@@ -211,20 +211,20 @@ func guessTime(targets interface{}, portcount, thread int) int {
 	switch targets.(type) {
 	case ipcs.CIDRs:
 		for _, cidr := range targets.(ipcs.CIDRs) {
-			cidr.Count()
+			ipcount += int(cidr.Count())
 		}
+	case ipcs.CIDR:
+		ipcount += int(targets.(ipcs.CIDR).Count())
 	case Results:
 		ipcount = len(targets.(Results))
 		portcount = 1
 	default:
-		//mask := getMask(targets.(string))
-		//ipcount = countip(mask)
 	}
 
 	return (portcount*ipcount/thread)*4 + 4
 }
 
-func guessSmarttime(cidr *ipcs.CIDR, config Config) int {
+func guessSmartTime(cidr *ipcs.CIDR, config Config) int {
 	var spc, ippc int
 	var mask int
 	spc = len(config.SmartPortList)

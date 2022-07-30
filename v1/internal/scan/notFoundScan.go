@@ -26,7 +26,7 @@ func NotFoundScan(result *pkg.Result) {
 	}
 
 	for _, finger := range pkg.AllFingers {
-		framework, _, ok := fingers.FingerMatcher(finger, content)
+		framework, _, ok := fingers.FingerMatcher(finger, 0, content, nil)
 		if ok {
 			framework.From = "404"
 			result.AddFramework(framework)

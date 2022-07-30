@@ -5,11 +5,13 @@ import (
 	"getitle/v1/pkg/dsl"
 	"getitle/v1/pkg/utils"
 	. "github.com/chainreactors/files"
+	"github.com/chainreactors/ipcs"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"path"
 	"regexp"
+	"sort"
 	"strings"
 )
 
@@ -18,12 +20,6 @@ var (
 	Root = utils.IsRoot()
 	Key  = []byte{}
 )
-
-////获取当前时间
-//func GetCurtime() string {
-//	curtime := time.Now().Format("2006-01-02 15:04.05")
-//	return curtime
-//}
 
 func GetHttpRaw(resp *http.Response) (string, string) {
 	var raw string
@@ -112,56 +108,6 @@ func CompileRegexp(s string) *regexp.Regexp {
 	return reg
 }
 
-//func Md5Hash(raw []byte) string {
-//	m := md5.Sum(raw)
-//	return hex.EncodeToString(m[:])
-//}
-//
-//func Mmh3Hash32(raw []byte) string {
-//	var h32 = murmur3.New32()
-//	_, _ = h32.Write(standBase64(raw))
-//	return fmt.Sprintf("%d", h32.Sum32())
-//}
-//
-//func standBase64(braw []byte) []byte {
-//	bckd := base64.StdEncoding.EncodeToString(braw)
-//	var buffer bytes.Buffer
-//	for i := 0; i < len(bckd); i++ {
-//		ch := bckd[i]
-//		buffer.WriteByte(ch)
-//		if (i+1)%76 == 0 {
-//			buffer.WriteByte('\n')
-//		}
-//	}
-//	buffer.WriteByte('\n')
-//	return buffer.Bytes()
-//}
-
-//var flatedict = `{"i":"`+`","p":"`+`","u":"`+`","o":"`+`","h":"`+`","t":"`+`","m":"` + `","s":"` + `","l":"` + `","f":` + `null` + `","v":` + `"r":"`
-//var flatedict = `,":`
-//
-//func Flate(input []byte) []byte {
-//	var bf = bytes.NewBuffer([]byte{})
-//	var flater, _ = flate.NewWriter(bf, flate.BestCompression)
-//	defer flater.Close()
-//	if _, err := flater.Write(input); err != nil {
-//		println(err.Error())
-//		return []byte{}
-//	}
-//	if err := flater.Flush(); err != nil {
-//		println(err.Error())
-//		return []byte{}
-//	}
-//	return bf.Bytes()
-//}
-//
-//func UnFlate(input []byte) []byte {
-//	rdata := bytes.NewReader(input)
-//	r := flate.NewReader(rdata)
-//	s, _ := ioutil.ReadAll(r)
-//	return s
-//}
-
 func Decode(input string) []byte {
 	b := dsl.Base64Decode(input)
 	return UnFlate(b)
@@ -184,6 +130,13 @@ func HasPingPriv() bool {
 		return true
 	}
 	return false
+}
+
+func sortIP(ips []string) []string {
+	sort.Slice(ips, func(i, j int) bool {
+		return ipcs.Ip2Int(ips[i]) < ipcs.Ip2Int(ips[j])
+	})
+	return ips
 }
 
 func IsExist(filename string) bool {

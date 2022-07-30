@@ -123,8 +123,8 @@ func (result Result) NoFramework() bool {
 }
 
 func (result *Result) GuessFramework() {
-	for _, v := range PortMap[result.Port] {
-		if TagMap[v] == nil && !utils.SliceContains([]string{"top1", "top2", "top3", "other", "windows"}, v) {
+	for _, v := range PortMap.Get(result.Port) {
+		if TagMap.Get(v) == nil && !utils.SliceContains([]string{"top1", "top2", "top3", "other", "windows"}, v) {
 			result.AddFramework(&Framework{Name: v, IsGuess: true})
 		}
 	}
@@ -144,13 +144,13 @@ func (result Result) IsHttps() bool {
 	return false
 }
 
-func (result Result) Get(key string) string {
+func (result *Result) Get(key string) string {
 	switch key {
 	case "ip":
 		return result.Ip
 	case "port":
 		return result.Port
-	case "frameworks", "framework":
+	case "frameworks", "framework", "frame":
 		return result.Frameworks.ToString()
 	case "vulns", "vuln":
 		return result.Vulns.ToString()
@@ -277,6 +277,10 @@ func (rs Results) Filter(k, v, op string) Results {
 func (results Results) GetValues(key string) []string {
 	values := make([]string, len(results))
 	for i, result := range results {
+		//if focus && !result.Frameworks.IsFocus() {
+		//	// 如果需要focus, 则跳过非focus标记的framework
+		//	continue
+		//}
 		values[i] = result.Get(key)
 	}
 	return values
@@ -378,7 +382,7 @@ func (fs Frameworks) ToString() string {
 	return strings.Join(frameworkStrs, "||")
 }
 
-func (fs Frameworks) GetTitles() []string {
+func (fs Frameworks) GetNames() []string {
 	var titles []string
 	for _, f := range fs {
 		if !f.IsGuess {
@@ -386,6 +390,15 @@ func (fs Frameworks) GetTitles() []string {
 		}
 	}
 	return titles
+}
+
+func (fs Frameworks) IsFocus() bool {
+	for _, f := range fs {
+		if f.IsFocus {
+			return true
+		}
+	}
+	return false
 }
 
 type Extract struct {
@@ -439,4 +452,27 @@ func (es *Extracts) ToString() string {
 		s += fmt.Sprintf("[ Extract: %s ] ", e.ToString())
 	}
 	return s
+}
+
+func ValuesOutput(result *Result, outType string) string {
+	outs := strings.Split(outType, ",")
+	for i, out := range outs {
+		outs[i] = result.Get(out)
+	}
+	return strings.Join(outs, "\t") + "\n"
+}
+
+func ColorOutput(result *Result) string {
+	s := fmt.Sprintf("[+] %s\t%s\t%s\t%s\t%s\t%s\t%s [%s] %s %s\n", result.GetURL(), result.Midware, result.Language, Blue(result.Frameworks.ToString()), result.Host, result.Cert, result.Hash, Yellow(result.HttpStat), Blue(result.Title), Red(result.Vulns.ToString()))
+	return s
+}
+
+func FullOutput(result *Result) string {
+	s := fmt.Sprintf("[+] %s\t%s\t%s\t%s\t%s\t%s\t%s [%s] %s %s %s\n", result.GetURL(), result.Midware, result.Language, result.Frameworks.ToString(), result.Host, result.Cert, result.Hash, result.HttpStat, result.Title, result.Vulns.ToString(), result.Extracts.ToString())
+	return s
+}
+
+func JsonOutput(result *Result) string {
+	jsons, _ := json.Marshal(result)
+	return string(jsons)
 }
