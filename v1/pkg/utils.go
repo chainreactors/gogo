@@ -170,6 +170,11 @@ var fileint = 1
 func GetFilename(config *Config, name string) string {
 	var basename string
 	var basepath string
+
+	if config.Filename != "" {
+		return config.Filename
+	}
+
 	if config.FilePath == "" {
 		basepath = utils.GetExcPath()
 	} else {
@@ -187,7 +192,7 @@ func GetFilename(config *Config, name string) string {
 	} else if config.Filenamef == "clear" {
 		basename = path.Join(basepath, getAutoFilename(config, name)+".txt")
 	} else {
-		return ""
+		return config.Filename
 	}
 	for IsExist(basename + utils.ToString(fileint)) {
 		fileint++

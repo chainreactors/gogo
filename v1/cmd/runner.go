@@ -9,7 +9,6 @@ import (
 	. "github.com/chainreactors/logs"
 	"net"
 	"os"
-	"path"
 	"regexp"
 	"strings"
 	"time"
@@ -35,6 +34,7 @@ type Runner struct {
 	Arp         bool
 	Outputf     string
 	FileOutputf string // 输出格式
+	//Filename    string
 	//filenameFormat    string // 文件名格式, clear, auto or hidden
 	FormatterFilename string // 待格式化文件名
 	filters           arrayFlags
@@ -160,9 +160,8 @@ func (r *Runner) init() {
 	}
 
 	// 加载配置文件中的全局变量
-	configLoader()
+	templatesLoader()
 	nucleiLoader(r.ExploitFile, r.payloads)
-	r.start = time.Now()
 }
 
 func (r *Runner) prepareConfig(config Config) *Config {
@@ -181,27 +180,28 @@ func (r *Runner) prepareConfig(config Config) *Config {
 		config.FileOutputf = "raw"
 	}
 
-	if config.Filename == "" {
-		config.Filename = GetFilename(&config, config.FileOutputf)
-	} else {
-		config.Filename = path.Join(config.FilePath, config.Filename)
-	}
+	//if config.Filename == "" {
+	//	config.Filename = GetFilename(&config, config.FileOutputf)
+	//} else {
+	//	config.Filename = path.Join(config.FilePath, config.Filename)
+	//}
 
-	if config.IsSmart() {
-		if r.NoScan && !r.AutoFile && !r.HiddenFile {
-			config.SmartFilename = config.Filename
-		} else {
-			config.SmartFilename = GetFilename(&config, "cidr")
-		}
-	}
+	//if config.IsSmart() {
+	//	if r.NoScan && !r.AutoFile && !r.HiddenFile {
+	//		config.SmartFilename = config.Filename
+	//	} else {
+	//		config.SmartFilename = GetFilename(&config, "cidr")
+	//	}
+	//}
 
-	if config.HasAlivedScan() {
-		config.AlivedFilename = GetFilename(&config, "alived")
-	}
+	//if config.HasAlivedScan() {
+	//	config.AlivedFilename = GetFilename(&config, "alived")
+	//}
 	return &config
 }
 
 func (r *Runner) run() {
+	r.start = time.Now()
 	if r.WorkFlowName == "" && !r.IsWorkFlow {
 		r.runWithCMD()
 	} else {
@@ -221,6 +221,19 @@ func (r *Runner) run() {
 
 func (r *Runner) runWithCMD() {
 	config := r.prepareConfig(r.config)
+
+	if config.Filename == "" && config.IsSmart() {
+		config.SmartFilename = GetFilename(config, "cidr")
+	}
+	if config.Filename == "" && config.HasAlivedScan() {
+		config.AlivedFilename = GetFilename(config, "alived")
+	}
+
+	if config.Filename != "" || config.Filenamef != "" {
+		Log.Warn("The result file has been specified, other files will not be created.")
+		config.Filename = GetFilename(config, config.FileOutputf)
+	}
+
 	RunTask(*InitConfig(config)) // 运行
 	r.close(config)
 }
@@ -231,25 +244,16 @@ func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) {
 			Log.Important("workflow " + workflow.Name + " starting")
 			config := workflow.PrepareConfig(r.config)
 
-			// 命令行覆盖workflow
-			if r.config.Filename != "" {
-				config.Filename = r.config.Filename
-			} else if r.AutoFile {
-				config.Filename = GetFilename(config, "json")
-				if config.IsSmartScan() {
-					config.SmartFilename = GetFilename(config, "cidr")
-				}
-				if config.HasAlivedScan() {
-					config.AlivedFilename = GetFilename(config, "alived")
-				}
-			} else if r.HiddenFile {
-				workflow.File = GetFilename(config, "json")
-				if config.IsSmartScan() {
-					config.SmartFilename = GetFilename(config, "cidr")
-				}
-				if config.HasAlivedScan() {
-					config.AlivedFilename = GetFilename(config, "alived")
-				}
+			if config.Filename == "" && config.IsSmart() {
+				config.SmartFilename = GetFilename(config, "cidr")
+			}
+			if config.Filename == "" && config.HasAlivedScan() {
+				config.AlivedFilename = GetFilename(config, "alived")
+			}
+
+			if config.Filename != "" || config.Filenamef != "" {
+				Log.Warn("The result file has been specified, other files will not be created.")
+				config.Filename = GetFilename(config, config.FileOutputf)
 			}
 
 			// 全局变量的处理
@@ -344,7 +348,7 @@ func nucleiLoader(pocfile string, payloads arrayFlags) {
 	TemplateMap = LoadNuclei(pocfile)
 }
 
-func configLoader() {
+func templatesLoader() {
 	LoadPortConfig()
 	AllFingers = LoadFinger("http")
 	Mmh3Fingers, Md5Fingers = LoadHashFinger(AllFingers)

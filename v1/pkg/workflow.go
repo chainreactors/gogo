@@ -36,13 +36,15 @@ func ParseWorkflowsFromInput(content []byte) []*Workflow {
 
 func (w *Workflow) PrepareConfig(rconfig Config) *Config {
 	var config = &Config{
-		IP:        w.IP,
-		IPlist:    w.IPlist,
-		Ports:     w.Ports,
-		Mod:       w.Mod,
-		IpProbe:   w.IpProbe,
-		SmartPort: w.SmartProbe,
-		FilePath:  w.Path,
+		IP:          w.IP,
+		IPlist:      w.IPlist,
+		Ports:       w.Ports,
+		Mod:         w.Mod,
+		IpProbe:     w.IpProbe,
+		SmartPort:   w.SmartProbe,
+		FilePath:    w.Path,
+		Outputf:     "full",
+		FileOutputf: "json",
 	}
 
 	if rconfig.FilePath != "" {
@@ -89,23 +91,23 @@ func (w *Workflow) PrepareConfig(rconfig Config) *Config {
 		config.IpProbe = rconfig.IpProbe
 	}
 
-	if w.File == "auto" {
-		config.Filenamef = "auto"
+	if rconfig.Outputf != "full" {
+		config.Outputf = rconfig.Outputf
 	}
 
-	if rconfig.FileOutputf != "default" {
-		config.FileOutputf = "json"
-	} else {
+	if rconfig.FileOutputf != "json" {
 		config.FileOutputf = rconfig.FileOutputf
 	}
 
-	if w.File != "" {
-		config.Filename = GetFilename(config, "json")
-		if config.IsSmart() {
-			config.SmartFilename = GetFilename(config, "cidr")
-		}
-		if config.HasAlivedScan() {
-			config.AlivedFilename = GetFilename(config, "alived")
+	if rconfig.Filename != "" {
+		config.Filename = rconfig.Filename
+	}
+
+	if rconfig.Filenamef != "" {
+		config.Filenamef = rconfig.Filenamef
+	} else if w.File != "" {
+		if w.File == "auto" {
+			config.Filenamef = "auto"
 		}
 	}
 
