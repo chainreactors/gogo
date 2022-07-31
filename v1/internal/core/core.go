@@ -60,7 +60,27 @@ func DefaultMod(targets interface{}, config Config) {
 	targetCh := targetGen.generatorDispatch(targets, config.Portlist)
 	//targetChannel := generatorDispatch(targets, config)
 	scanPool, _ := ants.NewPoolWithFunc(config.Threads, func(i interface{}) {
-		defaultScan(i.(targetConfig))
+		tc := i.(targetConfig)
+		result := tc.NewResult()
+		scan.Dispatch(result)
+		if result.Open {
+			Opt.AliveSum++
+			// 格式化title编码, 防止输出二进制数据
+			result.Title = AsciiEncode(result.Title)
+			Log.Console(output(result, config.Outputf))
+
+			if config.File != nil {
+				if !config.File.Initialized {
+					Log.Important("init file: " + config.File.Filename)
+				}
+				config.File.SafeWrite(output(result, config.FileOutputf))
+				if result.Extracts.Extractors != nil {
+					config.ExtractFile.SafeWrite(result.Extracts.ToResult())
+				}
+			}
+		} else if result.Error != "" {
+			Log.Debugf("%s tcp stat: %s, errmsg: %s", result.GetTarget(), portstat[result.ErrStat], result.Error)
+		}
 		wgs.Done()
 	})
 	defer scanPool.Release()
@@ -71,30 +91,6 @@ func DefaultMod(targets interface{}, config Config) {
 	}
 
 	wgs.Wait()
-}
-
-func defaultScan(tc targetConfig) {
-	result := tc.NewResult()
-	scan.Dispatch(result)
-
-	if result.Open {
-		Opt.AliveSum++
-		// 格式化title编码, 防止输出二进制数据
-		result.Title = AsciiEncode(result.Title)
-		Log.Console(output(result, Opt.Output))
-
-		if Opt.File != nil {
-			if !Opt.File.Initialized {
-				Log.Important("init file: " + Opt.File.Filename)
-			}
-			Opt.File.SafeWrite(output(result, Opt.FileOutput))
-			if result.Extracts.Extractors != nil {
-				Opt.ExtractFile.SafeWrite(result.Extracts.ToResult())
-			}
-		}
-	} else if result.Error != "" {
-		Log.Debugf("%s tcp stat: %s, errmsg: %s", result.GetTarget(), portstat[result.ErrStat], result.Error)
-	}
 }
 
 func SmartMod(target *ipcs.CIDR, config Config) {
@@ -130,7 +126,15 @@ func SmartMod(target *ipcs.CIDR, config Config) {
 
 	scanPool, _ := ants.NewPoolWithFunc(config.Threads, func(i interface{}) {
 		tc := i.(targetConfig)
-		smartScan(tc, temp, mask, config.Mod)
+		result := NewResult(tc.ip, tc.port)
+		result.SmartProbe = true
+		scan.Dispatch(result)
+
+		if result.Open {
+			cidrAlived(result.Ip, temp, mask, config.Mod)
+		} else if result.Error != "" {
+			Log.Debugf("tcp stat: %s, errmsg: %s", portstat[result.ErrStat], result.Error)
+		}
 		wg.Done()
 	})
 
@@ -154,11 +158,11 @@ func SmartMod(target *ipcs.CIDR, config Config) {
 		return
 	}
 
-	if Opt.SmartFile != nil && config.Mod != "sb" {
-		writeSmartResult(iplist.Strings())
+	if config.SmartFile != nil && config.Mod != "sb" {
+		WriteSmartResult(config.SmartFile, iplist.Strings())
 	}
-	if Opt.File != nil && config.Mod == "sb" {
-		Opt.File.SafeWrite(strings.Join(iplist.Strings(), "\n") + "\n")
+	if config.File != nil && config.Mod == "sb" {
+		config.File.SafeWrite(strings.Join(iplist.Strings(), "\n") + "\n")
 	}
 
 	if Opt.Noscan || config.Mod == "sb" {
@@ -191,18 +195,6 @@ func cidrAlived(ip string, temp *sync.Map, mask int, mod string) {
 		//	// 模式为sc时,b段将不会输出到文件,只输出c段
 		//	Opt.dataCh <- "\"" + cidr + "\""
 		//}
-	}
-}
-
-func smartScan(tc targetConfig, temp *sync.Map, mask int, mod string) {
-	result := NewResult(tc.ip, tc.port)
-	result.SmartProbe = true
-	scan.Dispatch(result)
-
-	if result.Open {
-		cidrAlived(result.Ip, temp, mask, mod)
-	} else {
-		Log.Debugf("tcp stat: %s, errmsg: %s", portstat[result.ErrStat], result.Error)
 	}
 }
 
@@ -282,8 +274,8 @@ func AliveMod(targets interface{}, config Config) {
 		return
 	}
 	Log.Importantf("found %d alived ips", len(iplist))
-	if Opt.AliveFile != nil {
-		writeAlivedResult(iplist.Strings())
+	if config.AliveFile != nil {
+		WriteAlivedResult(config.AliveFile, iplist.Strings())
 	}
 	DefaultMod(iplist, config)
 }

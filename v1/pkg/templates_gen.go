@@ -60,6 +60,11 @@ func recuLoadYamlFiles2JsonString(dir string, single bool) string {
 			print(file)
 			panic(err)
 		}
+
+		if tmp == nil {
+			continue
+		}
+
 		if single {
 			pocs = append(pocs, tmp)
 		} else {

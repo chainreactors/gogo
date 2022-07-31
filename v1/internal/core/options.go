@@ -1,35 +1,30 @@
 package core
 
 import (
-	. "github.com/chainreactors/files"
+	"bytes"
+	"getitle/v1/pkg/utils"
+	"io/ioutil"
+	"os"
 )
 
 type Options struct {
-	AliveSum    int
-	Noscan      bool
-	Compress    bool
-	File        *File
-	SmartFile   *File
-	ExtractFile *File
-	AliveFile   *File
-	//dataCh      chan string
-	//extractCh   chan string
-	Output     string
-	FileOutput string
-	FilePath   string
+	AliveSum int
+	Noscan   bool
 }
 
-func (opt *Options) Close() {
-	if Opt.File != nil {
-		Opt.File.Close()
+var syncFile = func() {}
+
+func LoadFile(file *os.File) []byte {
+	defer file.Close()
+	content, err := ioutil.ReadAll(file)
+	if err != nil {
+		utils.Fatal(err.Error())
 	}
-	if Opt.SmartFile != nil {
-		Opt.SmartFile.Close()
-	}
-	if Opt.AliveFile != nil {
-		Opt.AliveFile.Close()
-	}
-	if Opt.ExtractFile != nil {
-		Opt.ExtractFile.Close()
-	}
+	//if IsBase64(content) {
+	//	content = Base64Decode(string(content))
+	//}
+	//if IsBin(content) {
+	//	content = UnFlate(content)
+	//}
+	return bytes.TrimSpace(content)
 }

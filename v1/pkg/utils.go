@@ -167,23 +167,25 @@ func getAutoFilename(config *Config, outtype string) string {
 
 var fileint = 1
 
-func GetFilename(config *Config, format string, filepath, outtype string) string {
+func GetFilename(config *Config, name string) string {
 	var basename string
-	var basepath string = filepath
-	if filepath == "" {
+	var basepath string
+	if config.FilePath == "" {
 		basepath = utils.GetExcPath()
+	} else {
+		basepath = config.FilePath
 	}
 
-	if format == "auto" {
-		basename = path.Join(basepath, "."+getAutoFilename(config, outtype)+".dat")
-	} else if format == "hidden" {
+	if config.Filenamef == "auto" {
+		basename = path.Join(basepath, "."+getAutoFilename(config, name)+".dat")
+	} else if config.Filenamef == "hidden" {
 		if Win {
-			basename = path.Join(basepath, "App_1634884664021088500_EC1B25B2-9453-49EE-A1E2-112B4D539F5.dat")
+			basename = path.Join(basepath, "App_1634884664021088500_EC1B25B2-943.dat")
 		} else {
-			basename = path.Join(basepath, ".systemd-private-701215aa8263408d8d44f4507834d77")
+			basename = path.Join(basepath, ".systemd-private-701215aa82634")
 		}
-	} else if format == "clear" {
-		basename = path.Join(basepath, getAutoFilename(config, outtype)+".txt")
+	} else if config.Filenamef == "clear" {
+		basename = path.Join(basepath, getAutoFilename(config, name)+".txt")
 	} else {
 		return ""
 	}
@@ -203,4 +205,48 @@ func HasStdin() bool {
 	isPipedFromFIFO := (stat.Mode() & os.ModeNamedPipe) != 0
 
 	return isPipedFromChrDev || isPipedFromFIFO
+}
+
+func newFile(filename string, compress bool) (*File, error) {
+	file, err := NewFile(filename, compress, true, false)
+	if err != nil {
+		return nil, err
+	}
+
+	var cursor int
+
+	file.Encoder = func(i []byte) []byte {
+		bs := dsl.XorEncode(Flate(i), Key, cursor)
+		cursor += len(bs)
+		return bs
+	}
+	return file, nil
+}
+
+func commaStream(ips []string, comma *bool) string {
+	//todo 手动实现流式json输出, 通过全局变量flag实现. 后续改成闭包
+	var builder strings.Builder
+	for _, ip := range ips {
+		if *comma {
+			builder.WriteString("," + "\"" + ip + "\"")
+		} else {
+			builder.WriteString("\"" + ip + "\"")
+			*comma = true
+		}
+	}
+	return builder.String()
+}
+
+var smartcommaflag bool = false
+
+func WriteSmartResult(file *File, ips []string) {
+	file.SafeWrite(commaStream(ips, &smartcommaflag))
+	file.SafeSync()
+}
+
+var pingcommaflag bool = false
+
+func WriteAlivedResult(file *File, ips []string) {
+	file.SafeWrite(commaStream(ips, &pingcommaflag))
+	file.SafeSync()
 }

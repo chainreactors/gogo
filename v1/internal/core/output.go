@@ -28,7 +28,7 @@ func output(result *Result, outType string) string {
 	return out
 }
 
-func FormatOutput(filename string, outputfile string, autofile bool, filters []string) {
+func FormatOutput(filename string, outfilename, outf, outfilef string, filters []string) {
 	var outfunc func(s string)
 	var iscolor bool
 	var resultsdata *ResultsData
@@ -42,9 +42,8 @@ func FormatOutput(filename string, outputfile string, autofile bool, filters []s
 		file = Open(filename)
 	}
 
-	var fileformat string
-	if autofile {
-		fileformat = "clear"
+	if outfilef == "auto" {
+		outfilef = "clear"
 	}
 
 	data := LoadResultFile(file)
@@ -52,13 +51,13 @@ func FormatOutput(filename string, outputfile string, autofile bool, filters []s
 	case *ResultsData:
 		resultsdata = data.(*ResultsData)
 		fmt.Println(resultsdata.ToConfig())
-		if outputfile == "" {
-			outputfile = GetFilename(&resultsdata.Config, fileformat, Opt.FilePath, Opt.Output)
+		if outfilename == "" {
+			outfilename = GetFilename(&resultsdata.Config, outf)
 		}
 	case *SmartData:
 		smartdata = data.(*SmartData)
-		if outputfile == "" {
-			outputfile = GetFilename(&smartdata.Config, fileformat, Opt.FilePath, "cidr")
+		if outfilename == "" {
+			outfilename = GetFilename(&smartdata.Config, "cidr")
 		}
 	case []*Extracts:
 		extractsdata = data.([]*Extracts)
@@ -70,12 +69,12 @@ func FormatOutput(filename string, outputfile string, autofile bool, filters []s
 	}
 
 	// 初始化再输出文件
-	if outputfile != "" {
-		fileHandle, err := NewFile(outputfile, false, false, false)
+	if outfilename != "" {
+		fileHandle, err := NewFile(outfilename, false, false, false)
 		if err != nil {
 			utils.Fatal("" + err.Error())
 		}
-		fmt.Println("Output filename: " + outputfile)
+		fmt.Println("Output filename: " + outfilename)
 		defer fileHandle.Close()
 		outfunc = func(s string) {
 			fileHandle.Write(s)
@@ -94,17 +93,17 @@ func FormatOutput(filename string, outputfile string, autofile bool, filters []s
 			resultsdata.Filter(filter)
 		}
 
-		if Opt.Output == "c" {
+		if outf == "c" {
 			iscolor = true
 		}
 
-		if Opt.Output == "cs" {
+		if outf == "cs" {
 			outfunc(resultsdata.ToCobaltStrike())
-		} else if Opt.Output == "zombie" {
+		} else if outf == "zombie" {
 			outfunc(resultsdata.ToZombie())
-		} else if Opt.Output == "c" || Opt.Output == "full" {
+		} else if outf == "c" || outf == "full" {
 			outfunc(resultsdata.ToFormat(iscolor))
-		} else if Opt.Output == "json" {
+		} else if outf == "json" {
 			content, err := json.Marshal(resultsdata)
 			if err != nil {
 				fmt.Println(err.Error())
@@ -112,7 +111,7 @@ func FormatOutput(filename string, outputfile string, autofile bool, filters []s
 			}
 			outfunc(string(content))
 		} else {
-			outfunc(resultsdata.ToValues(Opt.Output))
+			outfunc(resultsdata.ToValues(outf))
 		}
 	} else if extractsdata != nil {
 		for _, extracts := range extractsdata {
@@ -125,7 +124,7 @@ func FormatOutput(filename string, outputfile string, autofile bool, filters []s
 			fmt.Println(s)
 		}
 	} else if textdata != "" {
-		if outputfile != "" {
+		if outfilename != "" {
 			outfunc(textdata)
 		}
 	}

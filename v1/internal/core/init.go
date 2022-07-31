@@ -14,7 +14,7 @@ import (
 var Opt = Options{
 	AliveSum: 0,
 	Noscan:   false,
-	Compress: true,
+	//Compress: true,
 }
 
 func InitConfig(config *Config) *Config {
@@ -56,10 +56,18 @@ func InitConfig(config *Config) *Config {
 	}
 
 	// 初始化文件操作
-	err = initFile(config)
+	err = config.InitFile()
 	if err != nil {
 		Fatal(err.Error())
 	}
+	syncFile = func() {
+		config.File.SafeSync()
+	}
+	//Opt.File = config.File
+	//Opt.AliveFile = config.AliveFile
+	//Opt.SmartFile = config.SmartFile
+	//Opt.ExtractFile = config.ExtractFile
+	//Opt.FileOutput = config.FileOutputf
 
 	if config.ListFile != "" || config.IsListInput {
 		// 如果从文件中读,初始化IP列表配置
@@ -135,6 +143,24 @@ func validate(config *Config) error {
 	//	fmt.Println("[-] error Smart . can not use File input")
 	//	os.Exit(0)
 	//}
+
+	legalFormat := []string{"url", "ip", "port", "frameworks", "framework", "vuln", "vulns", "protocol", "title", "target", "hash", "language", "host", "color", "c", "json", "j", "full", "jsonlines", "jl", "zombie"}
+	if config.FileOutputf != "default" {
+		for _, form := range strings.Split(config.FileOutputf, ",") {
+			if !SliceContains(legalFormat, form) {
+				Log.Warnf("illegal file output format: %s, Please use one or more of the following formats: %s", form, strings.Join(legalFormat, ", "))
+			}
+		}
+	}
+
+	if config.Outputf != "full" {
+		for _, form := range strings.Split(config.Outputf, ",") {
+			if !SliceContains(legalFormat, form) {
+				Log.Warnf("illegal output format: %s, Please use one or more of the following formats: %s", form, strings.Join(legalFormat, ", "))
+			}
+		}
+	}
+
 	var err error
 	if config.JsonFile != "" {
 		if config.Ports != "top1" {

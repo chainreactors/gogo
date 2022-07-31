@@ -34,7 +34,7 @@ func ParseWorkflowsFromInput(content []byte) []*Workflow {
 	return workflows
 }
 
-func (w *Workflow) PrepareConfig() *Config {
+func (w *Workflow) PrepareConfig(rconfig Config) *Config {
 	var config = &Config{
 		IP:        w.IP,
 		IPlist:    w.IPlist,
@@ -42,6 +42,28 @@ func (w *Workflow) PrepareConfig() *Config {
 		Mod:       w.Mod,
 		IpProbe:   w.IpProbe,
 		SmartPort: w.SmartProbe,
+		FilePath:  w.Path,
+	}
+
+	if rconfig.FilePath != "" {
+		config.FilePath = rconfig.FilePath
+	}
+
+	//if rconfig.FileOutputf == "default" && config.Mod == "sc" {
+	//	config.FileOutputf = "raw"
+	//}
+
+	// 一些workflow的参数, 允许被命令行参数覆盖
+	if rconfig.IP != "" {
+		config.IP = rconfig.IP
+	}
+
+	if rconfig.ListFile != "" {
+		config.ListFile = rconfig.ListFile
+	}
+
+	if rconfig.Ports != "" {
+		config.Ports = rconfig.Ports
 	}
 
 	if w.Arp {
@@ -55,14 +77,37 @@ func (w *Workflow) PrepareConfig() *Config {
 		config.Mod = "default"
 	}
 
+	if rconfig.Threads != 0 {
+		config.Threads = rconfig.Threads
+	}
+
+	if rconfig.SmartPort != "default" {
+		config.SmartPort = rconfig.SmartPort
+	}
+
+	if rconfig.IpProbe != "default" {
+		config.IpProbe = rconfig.IpProbe
+	}
+
+	if w.File == "auto" {
+		config.Filenamef = "auto"
+	}
+
+	if rconfig.FileOutputf != "default" {
+		config.FileOutputf = "json"
+	} else {
+		config.FileOutputf = rconfig.FileOutputf
+	}
+
 	if w.File != "" {
-		config.Filename = GetFilename(config, w.File, w.Path, "json")
+		config.Filename = GetFilename(config, "json")
 		if config.IsSmart() {
-			config.SmartFilename = GetFilename(config, w.File, w.Path, "cidr")
+			config.SmartFilename = GetFilename(config, "cidr")
 		}
 		if config.HasAlivedScan() {
-			config.AlivedFilename = GetFilename(config, w.File, w.Path, "alived")
+			config.AlivedFilename = GetFilename(config, "alived")
 		}
 	}
+
 	return config
 }

@@ -3,9 +3,9 @@ package cmd
 import (
 	"flag"
 	"fmt"
-	. "getitle/v1/internal/core"
 	. "getitle/v1/internal/scan"
 	"getitle/v1/pkg"
+	"github.com/chainreactors/logs"
 	"github.com/panjf2000/ants/v2"
 	"os"
 	"strings"
@@ -25,7 +25,7 @@ func CMD() {
 	//默认参数信息
 	// INPUT
 	flag.StringVar(&runner.config.IP, "ip", "", "")
-	flag.StringVar(&runner.Ports, "p", "", "")
+	flag.StringVar(&runner.config.Ports, "p", "", "")
 	flag.StringVar(&runner.config.ListFile, "l", "", "")
 	flag.StringVar(&runner.config.JsonFile, "j", "", "")
 	flag.StringVar(&runner.WorkFlowName, "w", "", "")
@@ -41,17 +41,17 @@ func CMD() {
 
 	// OUTPUT
 	flag.StringVar(&runner.config.Filename, "f", "", "")
-	flag.StringVar(&Opt.FilePath, "path", "", "")
+	flag.StringVar(&runner.config.FilePath, "path", "", "")
 	//flag.StringVar(&runner.config.ExcludeIPs, "eip", "", "")
-	flag.StringVar(&Opt.Output, "o", "full", "")
+	flag.StringVar(&runner.Outputf, "o", "default", "")
 	flag.BoolVar(&runner.Clean, "c", false, "")
-	flag.StringVar(&runner.FileOutput, "O", "default", "")
+	flag.StringVar(&runner.FileOutputf, "O", "default", "")
 	flag.BoolVar(&runner.Quiet, "q", false, "")
 	flag.Var(&runner.filters, "filter", "")
 	flag.StringVar(&runner.FormatterFilename, "F", "", "")
 	flag.BoolVar(&runner.AutoFile, "af", false, "")
 	flag.BoolVar(&runner.HiddenFile, "hf", false, "")
-	flag.BoolVar(&runner.Compress, "C", false, "")
+	flag.BoolVar(&runner.config.Compress, "C", false, "")
 
 	// CONFIG
 	flag.IntVar(&runner.config.Threads, "t", 0, "")
@@ -96,6 +96,7 @@ func CMD() {
 	runner.init()
 	runner.run()
 
+	logs.Log.Close(true)
 }
 
 type Value interface {

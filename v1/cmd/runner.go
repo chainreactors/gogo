@@ -22,20 +22,20 @@ func NewRunner() *Runner {
 }
 
 type Runner struct {
-	Ports             string
-	Version           bool // version level1
-	Version2          bool // version level2
-	Exploit           bool // 启用漏洞扫描
-	NoUpload          bool // 关闭文件回传
-	Compress          bool // 启用压缩
-	Clean             bool // 是否开启命令行输出扫描结果
-	Quiet             bool // 是否开启命令行输出日志
-	AutoFile          bool // 自动生成格式化文件名
-	HiddenFile        bool // 启用自动隐藏文件
-	Ping              bool
-	Arp               bool
-	FileOutput        string // 输出格式
-	FilenameFormat    string // 文件名格式, clear, auto or hidden
+	Version  bool // version level1
+	Version2 bool // version level2
+	Exploit  bool // 启用漏洞扫描
+	NoUpload bool // 关闭文件回传
+	//Compress          bool // 启用压缩
+	Clean       bool // 是否开启命令行输出扫描结果
+	Quiet       bool // 是否开启命令行输出日志
+	AutoFile    bool // 自动生成格式化文件名
+	HiddenFile  bool // 启用自动隐藏文件
+	Ping        bool
+	Arp         bool
+	Outputf     string
+	FileOutputf string // 输出格式
+	//filenameFormat    string // 文件名格式, clear, auto or hidden
 	FormatterFilename string // 待格式化文件名
 	filters           arrayFlags
 	payloads          arrayFlags
@@ -64,27 +64,20 @@ func (r *Runner) preInit() bool {
 	}
 	Log.LogFileName = ".sock.lock"
 	Log.Init()
-	legalFormat := []string{"url", "ip", "port", "frameworks", "framework", "vuln", "vulns", "protocol", "title", "target", "hash", "language", "host", "color", "c", "json", "j", "full", "jsonlines", "jl", "zombie"}
-	if r.FileOutput != "default" {
-		for _, form := range strings.Split(r.FileOutput, ",") {
-			if !SliceContains(legalFormat, form) {
-				Log.Warnf("illegal file output format: %s, Please use one or more of the following formats: %s", form, strings.Join(legalFormat, ", "))
-			}
-		}
+
+	if r.FileOutputf == "default" {
+		r.config.FileOutputf = "json"
 	}
 
-	if Opt.Output != "full" {
-		for _, form := range strings.Split(Opt.Output, ",") {
-			if !SliceContains(legalFormat, form) {
-				Log.Warnf("illegal output format: %s, Please use one or more of the following formats: %s", form, strings.Join(legalFormat, ", "))
-			}
-		}
+	if r.Outputf == "default" {
+		r.config.Outputf = "full"
 	}
 
+	r.config.Compress = !r.config.Compress
 	if r.AutoFile {
-		r.FilenameFormat = "auto"
+		r.config.Filenamef = "auto"
 	} else if r.HiddenFile {
-		r.FilenameFormat = "hidden"
+		r.config.Filenamef = "hidden"
 	}
 
 	// 一些特殊的分支, 这些分支将会直接退出程序
@@ -94,7 +87,7 @@ func (r *Runner) preInit() bool {
 	}
 
 	if r.FormatterFilename != "" {
-		FormatOutput(r.FormatterFilename, r.config.Filename, r.AutoFile, r.filters)
+		FormatOutput(r.FormatterFilename, r.config.Filename, r.config.Outputf, r.config.FileOutputf, r.filters)
 		return false
 	}
 	// 输出 config
@@ -131,10 +124,6 @@ func (r *Runner) init() {
 
 	if r.NoScan {
 		Opt.Noscan = r.NoScan
-	}
-
-	if r.Compress {
-		Opt.Compress = !Opt.Compress
 	}
 
 	if r.Clean {
@@ -177,10 +166,8 @@ func (r *Runner) init() {
 }
 
 func (r *Runner) prepareConfig(config Config) *Config {
-	if r.Ports == "" {
+	if r.config.Ports == "" {
 		config.Ports = "top1"
-	} else {
-		config.Ports = r.Ports
 	}
 
 	if r.Arp {
@@ -190,32 +177,26 @@ func (r *Runner) prepareConfig(config Config) *Config {
 		config.AliveSprayMod = append(config.AliveSprayMod, "icmp")
 	}
 
-	if r.FileOutput == "default" {
-		Opt.FileOutput = "json"
-	} else {
-		Opt.FileOutput = r.FileOutput
-	}
-
 	if config.Mod == "sc" {
-		Opt.FileOutput = "raw"
+		config.FileOutputf = "raw"
 	}
 
 	if config.Filename == "" {
-		config.Filename = GetFilename(&config, r.FilenameFormat, Opt.FilePath, Opt.FileOutput)
+		config.Filename = GetFilename(&config, config.FileOutputf)
 	} else {
-		config.Filename = path.Join(Opt.FilePath, config.Filename)
+		config.Filename = path.Join(config.FilePath, config.Filename)
 	}
 
 	if config.IsSmart() {
 		if r.NoScan && !r.AutoFile && !r.HiddenFile {
 			config.SmartFilename = config.Filename
 		} else {
-			config.SmartFilename = GetFilename(&config, r.FilenameFormat, Opt.FilePath, "cidr")
+			config.SmartFilename = GetFilename(&config, "cidr")
 		}
 	}
 
 	if config.HasAlivedScan() {
-		config.AlivedFilename = GetFilename(&config, r.FormatterFilename, Opt.FilePath, "alived")
+		config.AlivedFilename = GetFilename(&config, "alived")
 	}
 	return &config
 }
@@ -248,76 +229,32 @@ func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) {
 	if workflows := workflowMap.Choice(r.WorkFlowName); len(workflows) > 0 {
 		for _, workflow := range workflows {
 			Log.Important("workflow " + workflow.Name + " starting")
+			config := workflow.PrepareConfig(r.config)
 
-			if Opt.FilePath != "" {
-				workflow.Path = Opt.FilePath
-			}
-
-			if workflow.Mod == "sc" {
-				Opt.FileOutput = "raw"
-			}
-
-			// 一些workflow的参数, 允许被命令行参数覆盖
-			if r.config.IP != "" {
-				workflow.IP = r.config.IP
-			}
-
-			config := workflow.PrepareConfig()
-
+			// 命令行覆盖workflow
 			if r.config.Filename != "" {
 				config.Filename = r.config.Filename
 			} else if r.AutoFile {
-				config.Filename = GetFilename(config, "auto", workflow.Path, "json")
+				config.Filename = GetFilename(config, "json")
 				if config.IsSmartScan() {
-					config.SmartFilename = GetFilename(config, "auto", workflow.Path, "cidr")
+					config.SmartFilename = GetFilename(config, "cidr")
 				}
 				if config.HasAlivedScan() {
-					config.AlivedFilename = GetFilename(config, "auto", workflow.Path, "alived")
+					config.AlivedFilename = GetFilename(config, "alived")
 				}
 			} else if r.HiddenFile {
-				workflow.File = GetFilename(config, "hidden", workflow.Path, "json")
+				workflow.File = GetFilename(config, "json")
 				if config.IsSmartScan() {
-					config.SmartFilename = GetFilename(config, "hidden", workflow.Path, "cidr")
+					config.SmartFilename = GetFilename(config, "cidr")
 				}
 				if config.HasAlivedScan() {
-					config.AlivedFilename = GetFilename(config, "hidden", workflow.Path, "alived")
+					config.AlivedFilename = GetFilename(config, "alived")
 				}
-			}
-
-			// 一些workflow的参数, 允许被命令行参数覆盖
-			if r.config.IP != "" {
-				config.IP = r.config.IP
-			}
-
-			if r.config.ListFile != "" {
-				config.ListFile = r.config.ListFile
-			}
-
-			if r.Ports != "" {
-				config.Ports = r.Ports
-			}
-
-			if r.config.Threads != 0 {
-				config.Threads = r.config.Threads
-			}
-
-			if r.config.SmartPort != "default" {
-				config.SmartPort = r.config.SmartPort
-			}
-
-			if r.config.IpProbe != "default" {
-				config.IpProbe = r.config.IpProbe
 			}
 
 			// 全局变量的处理
 			if !r.NoScan {
 				Opt.Noscan = workflow.NoScan
-			}
-
-			if r.FileOutput == "default" && config.Mod != "sc" {
-				Opt.FileOutput = "json"
-			} else {
-				Opt.FileOutput = r.FileOutput
 			}
 
 			if r.Version {
@@ -347,7 +284,8 @@ func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) {
 }
 
 func (r *Runner) close(config *Config) {
-	Opt.Close() // 关闭result与extract写入管道
+	config.Close() // 关闭result与extract写入管道
+
 	if r.HiddenFile {
 		Chtime(config.Filename)
 		if config.SmartFilename != "" {
@@ -360,13 +298,13 @@ func (r *Runner) close(config *Config) {
 	Log.Important("Totally run: " + time.Since(r.start).String())
 
 	// 输出文件名
-	if Opt.File != nil && Opt.File.FileHandler != nil {
+	if config.File != nil && config.File.InitSuccess {
 		Log.Importantf("Results filename: " + config.Filename)
 	}
-	if Opt.SmartFile != nil && Opt.SmartFile.FileHandler != nil {
+	if config.SmartFile != nil && config.SmartFile.InitSuccess {
 		Log.Important("Smartscan result filename: " + config.SmartFilename)
 	}
-	if Opt.AliveFile != nil && Opt.AliveFile.FileHandler != nil {
+	if config.AliveFile != nil && config.AliveFile.Initialized {
 		Log.Important("Pingscan result filename: " + config.AlivedFilename)
 	}
 	if IsExist(config.Filename + "_extract") {
@@ -377,8 +315,6 @@ func (r *Runner) close(config *Config) {
 	//if connected && !r.NoUpload { // 如果出网则自动上传结果到云服务器
 	//	uploadfiles([]string{config.Filename, config.SmartFilename})
 	//}
-
-	Log.Close(true)
 }
 
 func (r *Runner) resetGlobals() {
