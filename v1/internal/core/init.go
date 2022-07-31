@@ -61,7 +61,9 @@ func InitConfig(config *Config) *Config {
 		Fatal(err.Error())
 	}
 	syncFile = func() {
-		config.File.SafeSync()
+		if config.File != nil {
+			config.File.SafeSync()
+		}
 	}
 	//Opt.File = config.File
 	//Opt.AliveFile = config.AliveFile
@@ -220,7 +222,6 @@ func RunTask(config Config) {
 	case "s", "f", "ss", "sc":
 		if config.CIDRs != nil {
 			for _, ip := range config.CIDRs {
-				Log.Important("Spraying : " + ip.String())
 				SmartMod(ip, config)
 			}
 			//} else {

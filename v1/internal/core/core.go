@@ -99,7 +99,7 @@ func SmartMod(target *ipcs.CIDR, config Config) {
 	Log.Importantf("Spraying %s with %s, Estimated to take %d seconds", target, config.Mod, spended)
 
 	// 初始化ip目标
-	Log.Importantf("SmartScan %s, Mod: %s", target, config.Mod)
+	//Log.Importantf("SmartScan %s, Mod: %s", target, config.Mod)
 	// 初始化mask
 	var mask int
 	switch config.Mod {

@@ -144,14 +144,15 @@ type targetGenerator struct {
 
 func (gen *targetGenerator) genFromDefault(cidrs ipcs.CIDRs, portlist []string) {
 	for _, cidr := range cidrs {
-		if cidr.Count() > 1 {
-			Log.Importantf("Scanning %s with %d ports", cidr.String(), len(portlist))
-		}
+		tmpalived := Opt.AliveSum
 		ch := gen.ipGenerator.generatorDispatch(cidr, "default")
 		for ip := range ch {
 			for _, port := range portlist {
 				gen.ch <- targetConfig{ip: ip, port: port, hosts: gen.hostsMap[ip]}
 			}
+		}
+		if cidr.Count() > 1 {
+			Log.Importantf("Scanned %s with %d ports, found %d ports", cidr.String(), len(portlist), Opt.AliveSum-tmpalived)
 		}
 		syncFile()
 	}
