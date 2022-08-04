@@ -67,10 +67,14 @@ func (r *Runner) preInit() bool {
 
 	if r.FileOutputf == "default" {
 		r.config.FileOutputf = "json"
+	} else {
+		r.config.FileOutputf = r.FileOutputf
 	}
 
 	if r.Outputf == "default" {
 		r.config.Outputf = "full"
+	} else {
+		r.config.Outputf = r.Outputf
 	}
 
 	r.config.Compress = !r.config.Compress
@@ -299,7 +303,7 @@ func (r *Runner) close(config *Config) {
 
 	// 任务统计
 	Log.Importantf("Alive sum: %d, Target sum : %d", Opt.AliveSum, scan.RunOpt.Sum)
-	Log.Important("Totally run: " + time.Since(r.start).String())
+	Log.Important("Totally: " + time.Since(r.start).String())
 
 	// 输出文件名
 	if config.File != nil && config.File.InitSuccess {

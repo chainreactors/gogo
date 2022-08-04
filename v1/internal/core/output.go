@@ -28,7 +28,7 @@ func output(result *Result, outType string) string {
 	return out
 }
 
-func FormatOutput(filename string, outfilename, outf, outfilef string, filters []string) {
+func FormatOutput(filename string, outfilename, outf, filenamef string, filters []string) {
 	var outfunc func(s string)
 	var iscolor bool
 	var resultsdata *ResultsData
@@ -42,8 +42,8 @@ func FormatOutput(filename string, outfilename, outf, outfilef string, filters [
 		file = Open(filename)
 	}
 
-	if outfilef == "auto" {
-		outfilef = "clear"
+	if filenamef == "auto" {
+		filenamef = "clear"
 	}
 
 	data := LoadResultFile(file)
