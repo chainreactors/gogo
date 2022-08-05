@@ -14,6 +14,7 @@ type Framework struct {
 	From    string `json:"ff"`
 	IsGuess bool   `json:"fg"`
 	IsFocus bool   `json:"ffc"`
+	Data    string `json:"-"`
 }
 
 func (f Framework) ToString() string {
@@ -106,6 +107,9 @@ func FingerMatcher(finger *Finger, level int, content string, sender func([]byte
 			frame, vuln := finger.ToResult(hasFrame, hasVuln, res, i)
 			if finger.Focus {
 				frame.IsFocus = true
+			}
+			if isactive && hasFrame && ishttp {
+				frame.Data = content
 			}
 			if frame.Version == "" && rule.Regexps.CompiledVersionRegexp != nil {
 				for _, reg := range rule.Regexps.CompiledVersionRegexp {

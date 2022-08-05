@@ -8,7 +8,6 @@ import (
 )
 
 func CollectSocketInfo(result *Result, socketContent []byte) {
-
 	content := string(socketContent)
 	result.Content = content
 	ishttp, statuscode := GetStatusCode(content)
@@ -29,16 +28,29 @@ func CollectSocketInfo(result *Result, socketContent []byte) {
 	result.AddExtracts(ExtractContent(content))
 }
 
-func CollectHttpInfo(result *Result, resp *http.Response, content, body string) {
+func CollectHttpInfo(result *Result, resp *http.Response, content string) {
 	result.Httpresp = resp
-	result.Body = body
-	result.Content = content
-	result.Protocol = resp.Request.URL.Scheme
-	result.HttpStat = utils2.ToString(resp.StatusCode)
-	result.Language = getHttpLanguage(resp)
-	result.Midware = resp.Header.Get("Server")
+	cs := strings.Index(content, "\r\n\r\n")
+	var body string
+	if cs != -1 {
+		body = content[cs+4:]
+	} else {
+		body = ""
+	}
+	//result.Content = content
+	if resp != nil {
+		result.Protocol = resp.Request.URL.Scheme
+		result.HttpStat = utils2.ToString(resp.StatusCode)
+		result.Language = getHttpLanguage(resp)
+		result.Midware = resp.Header.Get("Server")
+	}
+
 	result.Title = GetTitle(content)
-	result.Hash = dsl.Md5Hash([]byte(strings.TrimSpace(body)))[:4] // 因为头中经常有随机值, 因此hash通过body判断
+	if body != "" {
+		result.Hash = dsl.Md5Hash([]byte(strings.TrimSpace(body)))[:4] // 因为头中经常有随机值, 因此hash通过body判断
+	} else {
+		result.Hash = "0000"
+	}
 	result.AddExtracts(ExtractContent(content))
 }
 

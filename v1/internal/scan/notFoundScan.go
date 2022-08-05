@@ -20,7 +20,7 @@ func NotFoundScan(result *pkg.Result) {
 	if utils.ToString(resp.StatusCode) == result.HttpStat {
 		return
 	}
-	content, _ := pkg.GetHttpRaw(resp)
+	content := pkg.GetHttpRaw(resp)
 	if content == "" {
 		return
 	}

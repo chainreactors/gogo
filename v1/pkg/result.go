@@ -41,7 +41,6 @@ type Result struct {
 	Error      string         `json:"-"`
 	ErrStat    int            `json:"-"`
 	Content    string         `json:"-"`
-	Body       string         `json:"-"`
 }
 
 func NewResult(ip, port string) *Result {

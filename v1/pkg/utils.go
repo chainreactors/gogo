@@ -21,7 +21,7 @@ var (
 	Key  = []byte{}
 )
 
-func GetHttpRaw(resp *http.Response) (string, string) {
+func GetHttpRaw(resp *http.Response) string {
 	var raw string
 
 	raw += fmt.Sprintf("%s %s\r\n", resp.Proto, resp.Status)
@@ -33,11 +33,11 @@ func GetHttpRaw(resp *http.Response) (string, string) {
 	raw += "\r\n"
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return raw, ""
+		return raw
 	}
 	raw += string(body)
 	_ = resp.Body.Close()
-	return raw, string(body)
+	return raw
 }
 
 func GetBody(resp *http.Response) []byte {

@@ -13,8 +13,7 @@ func fingerScan(result *Result) {
 			url := result.GetURL() + string(sendData)
 			resp, err := conn.Get(url)
 			if err == nil {
-				content, _ := GetHttpRaw(resp)
-				return content, true
+				return GetHttpRaw(resp), true
 			} else {
 				return "", false
 			}
@@ -94,6 +93,9 @@ func getFramework(result *Result, fingermap FingerMapper, matcher func(*Result, 
 func httpFingerMatch(result *Result, finger *Finger, sender func(sendData []byte) (string, bool)) (*Framework, *Vuln) {
 	frame, vuln, ok := FingerMatcher(finger, RunOpt.VersionLevel, result.Content, sender)
 	if ok {
+		if frame.Data != "" {
+			CollectHttpInfo(result, nil, frame.Data)
+		}
 		return frame, vuln
 	}
 	return nil, nil
