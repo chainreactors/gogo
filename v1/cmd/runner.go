@@ -307,16 +307,16 @@ func (r *Runner) close(config *Config) {
 
 	// 输出文件名
 	if config.File != nil && config.File.InitSuccess {
-		Log.Importantf("Results filename: " + config.Filename)
+		Log.Importantf("Results: " + config.Filename)
 	}
 	if config.SmartFile != nil && config.SmartFile.InitSuccess {
-		Log.Important("Smartscan result filename: " + config.SmartFilename)
+		Log.Important("Smart result: " + config.SmartFilename)
 	}
 	if config.AliveFile != nil && config.AliveFile.Initialized {
-		Log.Important("Pingscan result filename: " + config.AlivedFilename)
+		Log.Important("Alived result: " + config.AlivedFilename)
 	}
 	if IsExist(config.Filename + "_extract") {
-		Log.Important("extractor result filename: " + config.Filename + "_extract")
+		Log.Important("extractor result: " + config.Filename + "_extract")
 	}
 
 	// 扫描结果文件自动上传
