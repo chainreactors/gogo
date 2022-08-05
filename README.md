@@ -80,8 +80,20 @@ Usage of ./getitle:
       -extracts 逗号分割的多个extractor预设
 ```
 
-## 二进制文件下载链接
+## DOWNLOAD
+### 版本号命名规则
+example: 1.1.1.1
 
+第一位数组为互不兼容的命令行UI或输出结果;
+
+第二位数字为代码结构或者功能上的更新;
+
+第三位数字为bug的修复或者小功能更新;
+
+第四位数字不一定每个版本都有, 为指纹或poc的更新.
+
+
+### release
 完全版本打包下载: https://github.com/chainreactors/getitle/releases/latest
 
 理论上支持全操作系统, 需要编译某些稍微罕见的特殊版本可以联系我帮忙编译.
