@@ -5,8 +5,11 @@ import (
 	"net"
 	"net/http"
 	"net/http/cookiejar"
+	"net/url"
 	"time"
 )
+
+var Proxy func(*http.Request) (*url.URL, error)
 
 type Configuration struct {
 	Timeout         int
@@ -35,6 +38,7 @@ func createClient(opt *Configuration) *http.Client {
 			//DualStack: true,
 		}).DialContext,
 		DisableKeepAlives: true,
+		Proxy:             Proxy,
 	}
 	var jar *cookiejar.Jar
 	if opt.CookieReuse {

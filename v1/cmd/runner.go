@@ -5,9 +5,12 @@ import (
 	. "getitle/v1/internal/core"
 	"getitle/v1/internal/scan"
 	. "getitle/v1/pkg"
+	nucleihttp "getitle/v1/pkg/nuclei/protocols/http"
 	. "getitle/v1/pkg/utils"
 	. "github.com/chainreactors/logs"
 	"net"
+	"net/http"
+	"net/url"
 	"os"
 	"regexp"
 	"strings"
@@ -50,6 +53,7 @@ type Runner struct {
 	NoScan            bool
 	IsWorkFlow        bool
 	Debug             bool
+	Proxy             string
 	iface             string
 	start             time.Time
 	config            Config
@@ -100,6 +104,16 @@ func (r *Runner) preInit() bool {
 		return false
 	}
 
+	if r.Debug && r.Proxy != "" {
+		Log.Importantf("DEBUG ONLY, set http proxy: " + r.Proxy)
+		uri, err := url.Parse(r.Proxy)
+		if err == nil {
+			Proxy = http.ProxyURL(uri)
+			nucleihttp.Proxy = Proxy
+		} else {
+			Log.Warnf("parse proxy error %s, skip proxy!", err.Error())
+		}
+	}
 	//if r.UploadFile != "" {
 	//	// 指定上传文件
 	//	uploadfiles(strings.Split(r.UploadFile, ","))
