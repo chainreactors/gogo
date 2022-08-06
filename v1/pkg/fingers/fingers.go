@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"getitle/v1/pkg/dsl"
 	"regexp"
+	"strings"
 )
 
 // common struct
@@ -130,6 +131,14 @@ func (r *Regexps) RegexpCompile() error {
 			return err
 		}
 		r.CompiledVersionRegexp = append(r.CompiledVersionRegexp, creg)
+	}
+
+	for i, b := range r.Body {
+		r.Body[i] = strings.ToLower(b)
+	}
+
+	for i, h := range r.Header {
+		r.Header[i] = strings.ToLower(h)
 	}
 	return nil
 }

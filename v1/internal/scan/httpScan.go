@@ -78,6 +78,7 @@ func socketHttp(result *pkg.Result) {
 	}
 
 	//获取状态码
+	result.Content = strings.ToLower(string(bs))
 	pkg.CollectSocketInfo(result, bs)
 
 	//所有30x,400,以及非http协议的开放端口都送到http包尝试获取更多信息

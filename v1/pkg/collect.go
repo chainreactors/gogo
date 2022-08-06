@@ -9,7 +9,6 @@ import (
 
 func CollectSocketInfo(result *Result, socketContent []byte) {
 	content := string(socketContent)
-	result.Content = content
 	ishttp, statuscode := GetStatusCode(content)
 	if ishttp {
 		var body string

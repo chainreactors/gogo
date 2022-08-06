@@ -104,14 +104,18 @@ func (r *Runner) preInit() bool {
 		return false
 	}
 
-	if r.Debug && r.Proxy != "" {
-		Log.Importantf("DEBUG ONLY, set http proxy: " + r.Proxy)
-		uri, err := url.Parse(r.Proxy)
-		if err == nil {
-			Proxy = http.ProxyURL(uri)
-			nucleihttp.Proxy = Proxy
+	if r.Proxy != "" {
+		if !r.Debug {
+			Log.Error("-proxy is debug only flag, please add -debug. skipped proxy")
 		} else {
-			Log.Warnf("parse proxy error %s, skip proxy!", err.Error())
+			Log.Importantf("DEBUG ONLY, set http proxy: " + r.Proxy)
+			uri, err := url.Parse(r.Proxy)
+			if err == nil {
+				Proxy = http.ProxyURL(uri)
+				nucleihttp.Proxy = Proxy
+			} else {
+				Log.Warnf("parse proxy error %s, skip proxy!", err.Error())
+			}
 		}
 	}
 	//if r.UploadFile != "" {

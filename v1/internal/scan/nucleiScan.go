@@ -11,12 +11,13 @@ import (
 //tamplate =
 func Nuclei(target string, result *Result) {
 
-	if RunOpt.Exploit == "auto" {
-		executeTemplates(result, result.Frameworks.GetNames(), target)
-	} else {
-		executeTemplates(result, strings.Split(RunOpt.Exploit, ","), target)
+	if RunOpt.Exploit != "none" {
+		if RunOpt.Exploit != "auto" {
+			executeTemplates(result, strings.Split(RunOpt.Exploit, ","), target)
+		} else {
+			executeTemplates(result, result.Frameworks.GetNames(), target)
+		}
 	}
-
 }
 
 func executeTemplates(result *Result, titles []string, target string) {
