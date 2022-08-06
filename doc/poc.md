@@ -30,6 +30,7 @@ https://github.com/projectdiscovery/nuclei-templates/blob/d6636f9169920d3ccefc69
 
 **step 1** 删除不必要的header, 仅保留如下信息, 并重新添加tags
 
+需要注意的是, tags填写的是fingers中存在的指纹, 如果指纹没有识别到, 将不会自动使用poc. 需要-E poc id 强制指定
 ```
 id: apollo-default-login
 
@@ -95,7 +96,9 @@ requests:
 
 指定ef文件加载poc
 
-`gt.exe -ef .\poc.json -ip 127.0.0.1 -e -p 80`
+`gt.exe -ef .\poc.json -ip 127.0.0.1 -e -p 80 -debug`
+
+如果需要配合burp调试, 请使用proxifier代理, 代理gt的流量到burp
 
 ![image-20220806194210422](img/run.png)
 
