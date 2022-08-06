@@ -395,6 +395,7 @@ SMB
 
 ### 手动编译
 下载项目
+
 `git clone --recurse-submodules https://github.com/chainreactors/getitle`
 
 生成 template.go
@@ -405,7 +406,7 @@ SMB
 
 `go build .`
 
-### make.bat:
+### build.bat:
 需要依赖gox
 
 `go get github.com/mitchellh/gox`
@@ -425,7 +426,7 @@ SMB
 
 ### full
 
-`./make.bat [key] ; ./obfuscate.bat ; release.bat `
+`./build.bat [key] ; ./obfuscate.bat ; release.bat `
 
 ## THANKS
 
