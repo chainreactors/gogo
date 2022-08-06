@@ -393,6 +393,16 @@ SMB
 **这些用法大概只覆盖了一半的使用场景, 更多的细节请阅读/doc目录下的设计文档**
 ## Make
 
+### 最简编译
+
+生成 template.go
+
+`go generate`
+
+编译
+
+`go build .`
+
 ### make.bat:
 需要依赖gox
 
@@ -400,7 +410,7 @@ SMB
 
 可以带两个参数, 第一个为版本号, 第二个为key, 不加则自动为空
 
-`make.bat [key]`
+`build.bat [key]`
 
 
 ### obfuscate.bat
