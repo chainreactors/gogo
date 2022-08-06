@@ -5,6 +5,7 @@ import (
 	"getitle/v1/pkg/fingers"
 	"getitle/v1/pkg/utils"
 	"github.com/chainreactors/logs"
+	"strings"
 )
 
 func NotFoundScan(result *pkg.Result) {
@@ -26,7 +27,7 @@ func NotFoundScan(result *pkg.Result) {
 	}
 
 	for _, finger := range pkg.AllFingers {
-		framework, _, ok := fingers.FingerMatcher(finger, 0, content, nil)
+		framework, _, ok := fingers.FingerMatcher(finger, 0, strings.ToLower(content), nil)
 		if ok {
 			framework.From = "404"
 			result.AddFramework(framework)

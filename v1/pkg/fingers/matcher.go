@@ -94,12 +94,14 @@ func FingerMatcher(finger *Finger, level int, content string, sender func([]byte
 		if finger.Protocol == "http" {
 			ishttp = true
 		}
+		var c string
+		var ok bool
 		if level >= rule.Level && rule.SendData != nil {
 			logs.Log.Debugf("active match with %s", rule.SendDataStr)
-			c, ok := sender(rule.SendData)
+			c, ok = sender(rule.SendData)
 			if ok {
 				isactive = true
-				content = c
+				content = strings.ToLower(c)
 			}
 		}
 		hasFrame, hasVuln, res := RuleMatcher(rule, content, ishttp)
@@ -109,7 +111,7 @@ func FingerMatcher(finger *Finger, level int, content string, sender func([]byte
 				frame.IsFocus = true
 			}
 			if isactive && hasFrame && ishttp {
-				frame.Data = content
+				frame.Data = c
 			}
 			if frame.Version == "" && rule.Regexps.CompiledVersionRegexp != nil {
 				for _, reg := range rule.Regexps.CompiledVersionRegexp {
@@ -154,7 +156,7 @@ func RuleMatcher(rule *Rule, content string, ishttp bool) (bool, bool, string) {
 
 	// body匹配
 	for _, bodyReg := range rule.Regexps.Body {
-		if strings.Contains(body, bodyReg) {
+		if strings.Contains(body, strings.ToLower(bodyReg)) {
 			return true, false, ""
 		}
 	}

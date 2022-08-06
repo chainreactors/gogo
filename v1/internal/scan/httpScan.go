@@ -134,7 +134,7 @@ func SystemHttp(target string, result *pkg.Result) {
 
 	result.Error = ""
 	content := pkg.GetHttpRaw(resp)
-	result.Content = content
+	result.Content = strings.ToLower(content)
 	pkg.CollectHttpInfo(result, resp, content)
 	return
 }
