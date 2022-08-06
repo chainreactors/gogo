@@ -21,7 +21,7 @@ def main(files, outfile):
     print("save to " + outfile)
     outfunc = partial(toFile, outfile)
     for file in files:
-        pocs.append(yaml.load(file.read()))
+        pocs.append(yaml.load(file.read(), Loader=yaml.FullLoader))
 
     outfunc(json.dumps(pocs))
 
