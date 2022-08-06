@@ -1,10 +1,78 @@
 package fingers
 
 import (
+	"fmt"
 	"getitle/v1/pkg/dsl"
+	"github.com/chainreactors/logs"
 	"regexp"
 	"strings"
 )
+
+type Framework struct {
+	Name    string `json:"ft"`
+	Version string `json:"fv"`
+	From    string `json:"ff"`
+	IsGuess bool   `json:"fg"`
+	IsFocus bool   `json:"ffc"`
+	Data    string `json:"-"`
+}
+
+func (f Framework) ToString() string {
+	var s = f.Name
+	if f.IsGuess {
+		s = "*" + s
+	} else if f.IsFocus {
+		s = "focus:" + s
+	}
+
+	if f.Version != "" {
+		s += ":" + strings.Replace(f.Version, ":", "_", -1)
+	}
+	if f.From != "" {
+		s += ":" + f.From
+	}
+	return s
+}
+
+const (
+	Info int = iota + 1
+	Medium
+	High
+	Critical
+)
+
+var serverityMap = map[string]int{
+	"info":     Info,
+	"medium":   Medium,
+	"high":     High,
+	"critical": Critical,
+}
+
+type Vuln struct {
+	Name     string                 `json:"vn"`
+	Payload  map[string]interface{} `json:"vp"`
+	Detail   map[string]interface{} `json:"vd"`
+	Severity string                 `json:"vs"`
+}
+
+func (v *Vuln) GetPayload() string {
+	return mapToString(v.Payload)
+}
+
+func (v *Vuln) GetDetail() string {
+	return mapToString(v.Detail)
+}
+
+func (v *Vuln) ToString() string {
+	s := v.Name
+	if payload := v.GetPayload(); payload != "" {
+		s += fmt.Sprintf(" payloads:%s", payload)
+	}
+	if detail := v.GetDetail(); detail != "" {
+		s += fmt.Sprintf(" payloads:%s", detail)
+	}
+	return s
+}
 
 func compiledMatch(reg *regexp.Regexp, s string) (string, bool) {
 	matched := reg.FindStringSubmatch(s)
@@ -18,16 +86,33 @@ func compiledMatch(reg *regexp.Regexp, s string) (string, bool) {
 	}
 }
 
-func FingerMatcher(finger *Finger, content string) (*Framework, *Vuln, bool) {
+func FingerMatcher(finger *Finger, level int, content string, sender func([]byte) (string, bool)) (*Framework, *Vuln, bool) {
 	// 只进行被动的指纹判断, 将无视rules中的senddata字段
 	for i, rule := range finger.Rules {
 		var ishttp bool
+		var isactive bool
 		if finger.Protocol == "http" {
 			ishttp = true
+		}
+		var c string
+		var ok bool
+		if level >= rule.Level && rule.SendData != nil {
+			logs.Log.Debugf("active match with %s", rule.SendDataStr)
+			c, ok = sender(rule.SendData)
+			if ok {
+				isactive = true
+				content = strings.ToLower(c)
+			}
 		}
 		hasFrame, hasVuln, res := RuleMatcher(rule, content, ishttp)
 		if hasFrame {
 			frame, vuln := finger.ToResult(hasFrame, hasVuln, res, i)
+			if finger.Focus {
+				frame.IsFocus = true
+			}
+			if isactive && hasFrame && ishttp {
+				frame.Data = c
+			}
 			if frame.Version == "" && rule.Regexps.CompiledVersionRegexp != nil {
 				for _, reg := range rule.Regexps.CompiledVersionRegexp {
 					res, _ := compiledMatch(reg, content)
@@ -36,6 +121,9 @@ func FingerMatcher(finger *Finger, content string) (*Framework, *Vuln, bool) {
 						break
 					}
 				}
+			}
+			if isactive {
+				frame.From = "active"
 			}
 			return frame, vuln, true
 		}
@@ -68,7 +156,7 @@ func RuleMatcher(rule *Rule, content string, ishttp bool) (bool, bool, string) {
 
 	// body匹配
 	for _, bodyReg := range rule.Regexps.Body {
-		if strings.Contains(body, bodyReg) {
+		if strings.Contains(body, strings.ToLower(bodyReg)) {
 			return true, false, ""
 		}
 	}

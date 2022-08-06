@@ -2,6 +2,7 @@ package core
 
 import (
 	. "getitle/v1/pkg"
+	"github.com/chainreactors/ipcs"
 	. "github.com/chainreactors/logs"
 	"strings"
 	"sync"
@@ -25,47 +26,48 @@ type IpGenerator struct {
 	excludeIP map[uint]bool
 }
 
-func (gen *IpGenerator) defaultIpGenerator(CIDR string) {
-	start, fin := getIpRange(CIDR)
+func (gen *IpGenerator) defaultIpGenerator(cidr *ipcs.CIDR) {
+	start, fin := cidr.Range()
 	for i := start; i <= fin; i++ {
 		// 如果是广播地址或网络地址,则跳过
 		if (i)%256 != 255 && (i)%256 != 0 && !gen.excludeIP[i] {
-			gen.ch <- Int2Ip(i)
+			gen.ch <- ipcs.Int2Ip(i)
 		}
 		if i%65536 == 0 {
-			Log.Importantf("Processing CIDR: %s/16", Int2Ip(i))
+			Log.Importantf("Processing CIDR: %s/16", ipcs.Int2Ip(i))
 		}
 	}
 }
 
-func (gen *IpGenerator) smartIpGenerator(cidr string) {
-	start, fin := getIpRange(cidr)
+func (gen *IpGenerator) smartIpGenerator(cidr *ipcs.CIDR) {
+	start, fin := cidr.Range()
 	var outIP string
 	var C, B uint
 
 	for C = 1; C < 255; C++ {
 		for B = 0; B <= (fin-start)/256; B++ {
-			outIP = Int2Ip(start + 256*B + C)
-			if isnotAlive(Int2Ip(start+256*B), gen.alivedMap) && !gen.excludeIP[start+256*B+C] {
+			outIP = ipcs.Int2Ip(start + 256*B + C)
+			//if isnotAlive(ipcs.Int2Ip(start+256*B), gen.alivedMap) && !gen.excludeIP[start+256*B+C] {
+			if isnotAlive(ipcs.Int2Ip(start+256*B), gen.alivedMap) {
 				gen.ch <- outIP
 			}
 		}
 	}
 }
 
-func (gen *IpGenerator) IPsGenerator(ips []string) {
-	for _, cidr := range ips {
-		tmpalive := Opt.AliveSum
-		gen.defaultIpGenerator(cidr)
-		if getMask(cidr) != 32 {
-			Log.Importantf("Processed CIDR: %s, found %d ports", cidr, Opt.AliveSum-tmpalive)
-			Opt.File.SafeSync()
-		}
-	}
-}
+//func (gen *IpGenerator) IPsGenerator(ips []string) {
+//	for _, cidr := range ips {
+//		tmpalive := Opt.AliveSum
+//		gen.defaultIpGenerator(cidr)
+//		if getMask(cidr) != 32 {
+//			Log.Importantf("Processed CIDR: %s, found %d ports", cidr, Opt.AliveSum-tmpalive)
+//			syncFile()
+//		}
+//	}
+//}
 
-func (gen *IpGenerator) sSmartGenerator(cidr string) {
-	start, fin := getIpRange(cidr)
+func (gen *IpGenerator) sSmartGenerator(cidr *ipcs.CIDR) {
+	start, fin := cidr.Range()
 	//ch := make(chan string)
 	startb := start / 65536 % 256
 	finb := fin / 65536 % 256
@@ -75,47 +77,43 @@ func (gen *IpGenerator) sSmartGenerator(cidr string) {
 		for b = 0; b <= finb-startb; b++ {
 			//println(int2ip(start + b*65536 + c*256 + 1))
 			//ip := int2ip(start + b*65536 + c + 1)
-			if isnotAlive(Int2Ip(start+b*65536+256), gen.alivedMap) {
+			if isnotAlive(ipcs.Int2Ip(start+b*65536+256), gen.alivedMap) {
 				//println(int2ip(start + b*65536 + c*256 + 1))
 				for _, p := range gen.ipProbe {
-					if !gen.excludeIP[start+b*65536+c*256+p] {
-						gen.ch <- Int2Ip(start + b*65536 + c*256 + p)
-					}
+					gen.ch <- ipcs.Int2Ip(start + b*65536 + c*256 + p)
+					//if !gen.excludeIP[start+b*65536+c*256+p] {
+					//
+					//}
 				}
 			}
 		}
 	}
 }
 
-func (gen *IpGenerator) generate(target interface{}, mod string) chan string {
+func (gen *IpGenerator) generatorDispatch(cidr *ipcs.CIDR, mod string) chan string {
 	gen.ch = make(chan string)
 
 	go func() {
-		switch target.(type) {
-		case []string:
-			cidrs := target.([]string)
-			gen.IPsGenerator(cidrs)
-		default:
-			cidr := target.(string)
-			mask := getMask(cidr)
-			switch mod {
-			case "s", "sb":
-				if mask <= 24 {
-					gen.smartIpGenerator(cidr)
-				} else {
-					gen.defaultIpGenerator(cidr)
-				}
-			case "ss", "sc":
-				if mask <= 16 {
-					gen.sSmartGenerator(cidr)
-				} else if mask > 16 && mask <= 24 {
-					gen.smartIpGenerator(cidr)
-				} else {
-					gen.defaultIpGenerator(cidr)
-				}
-			default:
-				gen.defaultIpGenerator(cidr)
+		mask := cidr.Mask
+		switch mod {
+		case "s", "sb":
+			if mask <= 24 {
+				gen.smartIpGenerator(cidr)
+				//} else {
+				//	gen.defaultIpGenerator(cidr)
 			}
+		case "ss", "sc":
+			if mask <= 16 {
+				gen.sSmartGenerator(cidr)
+				//} else if mask > 16 && mask <= 24 {
+				//	Log.Warnf("mask: %d, decline to smart mod", mask)
+				//	gen.smartIpGenerator(cidr)
+				//} else {
+				//	Log.Warnf("mask: %d, decline to default mod", mask)
+				//	gen.defaultIpGenerator(cidr)
+			}
+		default:
+			gen.defaultIpGenerator(cidr)
 		}
 		close(gen.ch)
 	}()
@@ -144,38 +142,48 @@ type targetGenerator struct {
 	ipGenerator *IpGenerator
 }
 
-func (gen *targetGenerator) genFromDefault(targets interface{}, portlist []string) {
-	ch := gen.ipGenerator.generate(targets, "default")
-	for ip := range ch {
-		for _, port := range portlist {
-			gen.ch <- targetConfig{ip: ip, port: port, hosts: gen.hostsMap[ip]}
-		}
-	}
-}
-
-func (gen *targetGenerator) genFromSpray(targets interface{}, portlist []string) {
-	var ch chan string
-	var tmpPorts []string
-	for _, port := range portlist {
-		tmpalive := Opt.AliveSum
-		switch targets.(type) {
-		case []string:
-			for _, cidr := range targets.([]string) {
-				ch = gen.ipGenerator.generate(cidr, "default")
-				for ip := range ch {
-					gen.ch <- targetConfig{ip: ip, port: port, hosts: gen.hostsMap[ip]}
-				}
-				Opt.File.SafeSync()
-			}
-		default:
-			ch = gen.ipGenerator.generate(targets.(string), "default")
-			for ip := range ch {
+func (gen *targetGenerator) genFromDefault(cidrs ipcs.CIDRs, portlist []string) {
+	for _, cidr := range cidrs {
+		tmpalived := Opt.AliveSum
+		ch := gen.ipGenerator.generatorDispatch(cidr, "default")
+		for ip := range ch {
+			for _, port := range portlist {
 				gen.ch <- targetConfig{ip: ip, port: port, hosts: gen.hostsMap[ip]}
 			}
 		}
+		if cidr.Count() > 1 {
+			Log.Importantf("Scanned %s with %d ports, found %d ports", cidr.String(), len(portlist), Opt.AliveSum-tmpalived)
+		}
+		syncFile()
+	}
+}
+
+func (gen *targetGenerator) genFromSpray(cidrs ipcs.CIDRs, portlist []string) {
+	//gen.ch = make(chan string)
+	var tmpPorts []string
+	for _, port := range portlist {
+		tmpalive := Opt.AliveSum
+
+		for _, cidr := range cidrs {
+			ch := gen.ipGenerator.generatorDispatch(cidr, "default")
+			for ip := range ch {
+				gen.ch <- targetConfig{ip: ip, port: port, hosts: gen.hostsMap[ip]}
+			}
+			syncFile()
+		}
+
+		//default:
+		//	ch = gen.ipGenerator.generatorDispatch(cidrs.(ipcs.CIDR), "default")
+		//	for ip := range ch {
+		//		gen.ch <- targetConfig{ip: ip, port: port, hosts: gen.hostsMap[ip]}
+		//	}
+		//}
 		tmpPorts = append(tmpPorts, port)
 		if Opt.AliveSum-tmpalive > 0 {
-			Log.Importantf("Processed Port: %s, found %d ports", strings.Join(tmpPorts, ","), Opt.AliveSum-tmpalive)
+			if len(tmpPorts) >= 100 {
+				tmpPorts = tmpPorts[:100]
+			}
+			Log.Importantf("Processed Port: %s, found %d ports", strings.Join(tmpPorts, ",")+"......, "+port, Opt.AliveSum-tmpalive)
 			tmpPorts = []string{}
 		}
 	}
@@ -187,17 +195,25 @@ func (gen *targetGenerator) genFromResult(results Results) {
 	}
 }
 
-func (gen *targetGenerator) generator(targets interface{}, portlist []string) chan targetConfig {
+func (gen *targetGenerator) generatorDispatch(targets interface{}, portlist []string) chan targetConfig {
 	gen.ch = make(chan targetConfig)
 	go func() {
 		switch targets.(type) {
 		case Results:
 			gen.genFromResult(targets.(Results))
 		default:
+			//ips := targets.(ipcs.CIDRs).Strings()
+			//addrs := ipcs.NewAddrs(ips, portlist)
 			if gen.spray { // 端口喷洒
-				gen.genFromSpray(targets, portlist)
+				//for addr := range addrs.GenerateWithPort(){
+				//	gen.ch <- targetConfig{addr: addr, hosts: gen.hostsMap[addr.IP.String()]}
+				//}
+				gen.genFromSpray(targets.(ipcs.CIDRs), portlist)
 			} else { // 默认模式 批量处理
-				gen.genFromDefault(targets, portlist)
+				//for addr := range addrs.GenerateWithIP(){
+				//	gen.ch <- targetConfig{addr: addr, hosts: gen.hostsMap[addr.IP.String()]}
+				//}
+				gen.genFromDefault(targets.(ipcs.CIDRs), portlist)
 			}
 		}
 		close(gen.ch)
@@ -206,11 +222,11 @@ func (gen *targetGenerator) generator(targets interface{}, portlist []string) ch
 	return gen.ch
 }
 
-func (gen *targetGenerator) smartGenerator(targets string, portlist []string, mod string) chan targetConfig {
+func (gen *targetGenerator) smartGenerator(cidr *ipcs.CIDR, portlist []string, mod string) chan targetConfig {
 	gen.ch = make(chan targetConfig)
 
 	go func() {
-		ch := gen.ipGenerator.generate(targets, mod)
+		ch := gen.ipGenerator.generatorDispatch(cidr, mod)
 		for ip := range ch {
 			for _, port := range portlist {
 				gen.ch <- targetConfig{ip: ip, port: port}

@@ -3,16 +3,43 @@ package scan
 import (
 	. "getitle/v1/pkg"
 	. "getitle/v1/pkg/fingers"
-	"github.com/chainreactors/logs"
-	"net"
 )
 
 func fingerScan(result *Result) {
 	//如果是http协议,则判断cms,如果是tcp则匹配规则库.暂时不考虑udp
 	if result.IsHttp() {
-		getFramework(result, HttpFingers, httpFingerMatch)
+		sender := func(sendData []byte) (string, bool) {
+			conn := result.GetHttpConn(RunOpt.Delay)
+			url := result.GetURL() + string(sendData)
+			resp, err := conn.Get(url)
+			if err == nil {
+				return GetHttpRaw(resp), true
+			} else {
+				return "", false
+			}
+		}
+
+		matcher := func(result *Result, finger *Finger) (*Framework, *Vuln) {
+			return httpFingerMatch(result, finger, sender)
+		}
+		getFramework(result, HttpFingers, matcher)
 	} else {
-		getFramework(result, TcpFingers, tcpFingerMatch)
+		sender := func(sendData []byte) (string, bool) {
+			conn, err := TcpSocketConn(result.GetTarget(), 2)
+			if err != nil {
+				return "", false
+			}
+			data, err := SocketSend(conn, sendData, 1024)
+			if err != nil {
+				return "", false
+			}
+			return string(data), true
+		}
+
+		matcher := func(result *Result, finger *Finger) (*Framework, *Vuln) {
+			return tcpFingerMatch(result, finger, sender)
+		}
+		getFramework(result, TcpFingers, matcher)
 	}
 	return
 }
@@ -51,85 +78,33 @@ func getFramework(result *Result, fingermap FingerMapper, matcher func(*Result, 
 			framework, vuln := matcher(result, finger)
 			if framework != nil {
 				result.AddFramework(framework)
+				if vuln != nil {
+					result.AddVuln(vuln)
+				}
 				if result.Protocol == "tcp" {
 					return
 				}
-			}
-			if vuln != nil {
-				result.AddVuln(vuln)
 			}
 		}
 	}
 	return
 }
 
-func httpFingerMatch(result *Result, finger *Finger) (*Framework, *Vuln) {
-	resp := result.Httpresp
-	content := result.Content
-	var body string
-	var rerequest bool
-	//var cookies map[string]string
-	for i, rule := range finger.Rules {
-		if RunOpt.VersionLevel >= 1 && rule.SendDataStr != "" {
-			// 如果level大于1,并且存在主动发包, 则重新获取resp与content
-			conn := result.GetHttpConn(RunOpt.Delay)
-			url := result.GetURL() + rule.SendDataStr
-			tmpresp, err := conn.Get(url)
-			if err == nil {
-				logs.Log.Debugf("request finger %s %d for %s", url, tmpresp.StatusCode, finger.Name)
-				resp = tmpresp
-				content, body = GetHttpRaw(resp)
-				rerequest = true
-			} else {
-				logs.Log.Debugf("request finger %s %s for %s", url, err.Error(), finger.Name)
-			}
+func httpFingerMatch(result *Result, finger *Finger, sender func(sendData []byte) (string, bool)) (*Framework, *Vuln) {
+	frame, vuln, ok := FingerMatcher(finger, RunOpt.VersionLevel, result.Content, sender)
+	if ok {
+		if frame.Data != "" {
+			CollectHttpInfo(result, nil, frame.Data)
 		}
-
-		hasFrame, hasVuln, res := RuleMatcher(rule, content, true)
-		if hasFrame {
-			frame, vuln := finger.ToResult(hasFrame, hasVuln, res, i)
-			if rerequest {
-				// 如果主动发包匹配到了指纹,则重新进行信息收集
-				frame.From = "active"
-				CollectHttpInfo(result, resp, content, body)
-			}
-			return frame, vuln
-		}
+		return frame, vuln
 	}
 	return nil, nil
 }
 
-func tcpFingerMatch(result *Result, finger *Finger) (*Framework, *Vuln) {
-	content := result.Content
-	var data []byte
-	var err error
-
-	for i, rule := range finger.Rules {
-		// 某些规则需要主动发送一个数据包探测
-		if rule.SendDataStr != "" && RunOpt.VersionLevel >= rule.Level {
-			logs.Log.Debugf("request finger %s for %s", result.GetTarget(), finger.Name)
-			var conn net.Conn
-			conn, err = TcpSocketConn(result.GetTarget(), 2)
-			if err != nil {
-				return nil, nil
-			}
-			data, err = SocketSend(conn, rule.SendData, 1024)
-			// 如果报错为EOF,则需要重新建立tcp连接
-			if err != nil {
-				return nil, nil
-			}
-		}
-		// 如果主动探测有回包,则正则匹配回包内容, 若主动探测没有返回内容,则直接跳过该规则
-		if len(data) != 0 {
-			content = string(data)
-		}
-
-		hasFrame, hasVuln, res := RuleMatcher(rule, content, false)
-		if hasFrame {
-			frame, vuln := finger.ToResult(hasFrame, hasVuln, res, i)
-			return frame, vuln
-		}
+func tcpFingerMatch(result *Result, finger *Finger, sender func(sendData []byte) (string, bool)) (*Framework, *Vuln) {
+	frame, vuln, ok := FingerMatcher(finger, RunOpt.VersionLevel, result.Content, sender)
+	if ok {
+		return frame, vuln
 	}
-
 	return nil, nil
 }

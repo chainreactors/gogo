@@ -78,10 +78,22 @@ Usage of ./getitle:
       -payload 用来自定义替换nuclei poc中的参数, 需要nuclei poc预定义占位符
       -extract 自定义需要提取的内存, 输入正则表达式, 支持一些常见的预设
       -extracts 逗号分割的多个extractor预设
-   ```
+```
 
-## 二进制文件下载链接
+## DOWNLOAD
+### 版本号命名规则
+example: 1.1.1.1
 
+第一位数组为互不兼容的命令行UI或输出结果;
+
+第二位数字为代码结构或者功能上的更新;
+
+第三位数字为bug的修复或者小功能更新;
+
+第四位数字不一定每个版本都有, 为指纹或poc的更新.
+
+
+### release
 完全版本打包下载: https://github.com/chainreactors/getitle/releases/latest
 
 理论上支持全操作系统, 需要编译某些稍微罕见的特殊版本可以联系我帮忙编译.
@@ -107,19 +119,15 @@ Usage of ./getitle:
 [mac](https://sangfor-release.oss-cn-shanghai.aliyuncs.com/fscan/darwin_amd64)
 
 ## QuickStart
-最简使用
+最简使用, 建议只在c段及以下场景使用, 大于b段则建议使用启发式扫描.
 
 `gt -k [key] -ip 192.168.1.1/24 -p win,db,top2 `
 
-一行内网全冲
-
-`gt -k [key] -w inter -e -v`
-
-使用工作流, 启发式扫描10段常见端口
+使用工作流, 快速配置扫描任务, 启发式扫描10段常见口
 
 `gt -k [key] -w 10`
 
-不适用工作流, 手动指定特定网段与配置
+手动指定特定网段与配置
 
 `gt -k [key] -ip 172.16.1.1/16 -m s -p all -e -v -af`
 
@@ -137,21 +145,6 @@ Usage of ./getitle:
 workflow 使用思维导图
 
 ![](doc/img/pipeline.png)
-
-### ~~手动组合参数~~ (保留文档, 已被workflow取代)
-参数使用较为复杂, 现在已经基本被淘汰, 仅在少数workflow没有覆盖的场景下手动指定
-
-**喷洒存活C段**
-
-`gt -k [key] -ip 172.16.0.0/16 -m s -no -af`
-
-**喷洒存活B段**
-
-`gt -k [key] -ip 10.0.0.0/8 -m ss -no -af`
-
-**递归下降喷洒C段(在A段中喷洒C段)**
-
-`gt -k [key] -ip 10.0.0.0/8 -m sc -af`
 
 ## 参数详解
 
@@ -213,11 +206,11 @@ gt -k yunzi -ip 81.68.175.32/28 -p top2
 
 #### 输出到文件
 
-通过`-f filename` 或 `-af` 或 `-hf` 指定输出的文件名, 则由命令行输出自动转为文件输出, 会关闭命令行的结果输出, 只保留进度输出(进度输出会同步到`.sock.lock`文件中). 适配webshell场景.
+通过`-f filename` 或 `-af` 或 `-hf` 指定输出的文件名, 则由命令行输出自动转为文件输出, 会关闭命令行的结果输出, 只保留进度输出(进度输出会同步到`.sock.lock`文件中). 适用于webshell场景等无交互式shell的场景.
 
 注1. 如果输出到文件, 文件默认路径与gt二进制文件同目录. 需要修改目录, 请指定`-path [path]`
 
-输出到文件的结果, 需要配合`-F filename`格式化. 效果如下:
+输出到文件的结果, 需要使用`-F filename`格式化. 效果如下:
 
 ```
  gt -k [key] -F .\.81.68.175.32_28_all_default_json.dat1
@@ -297,7 +290,7 @@ Exploit: none, Version level: 0
 
 -ipp (IP probe) 控制-ss模式中的B段喷洒的ip探针,-ss模式默认只扫描每个C段的第一个ip,例如192.168.1.1. 可以手动修改,指定`-ipp 1,254,253`
 
-## 额外功能
+## 拓展功能
 
 **标准使用场景**
 
@@ -311,7 +304,7 @@ Exploit: none, Version level: 0
 
 `./gt.exe -ip 172.16.1.1/24 -p top2 -s`
 
-**指纹识别**
+**主动指纹识别**
 
 当前包括数千条web指纹, 数百条favicon指纹以及数十条tcp指纹
 
@@ -319,7 +312,7 @@ Exploit: none, Version level: 0
 
 `./gt.exe -ip 192.168.1.1/24 -p top2 -v `
 
-**漏洞探测**
+**主动漏洞探测**
 
 getitle并非漏扫工具,因此不会支持sql注入,xss之类的通用漏洞探测功能.
 
@@ -328,6 +321,8 @@ getitle并非漏扫工具,因此不会支持sql注入,xss之类的通用漏洞�
 因为nuclei的中poc往往攻击性比较强, 因此需要手动修改适应红队环境
 
 目前已集成的pocs见v1/config/nuclei, 以及ms17010, shiro, snmp等特殊的漏洞
+
+为了更好的探测漏洞, 建议同时开启-v 主动指纹识别
 
 使用:
 
@@ -394,16 +389,31 @@ SMB
 
 因此也可以通过`-d 5 `(tcp默认为2s, tls为两倍tcp超时时间4s)来提高超时时间, 减少漏报.
 
+
+**这些用法大概只覆盖了一半的使用场景, 更多的细节请阅读/doc目录下的设计文档**
 ## Make
 
-### make.bat:
+### 手动编译
+下载项目
+
+`git clone --recurse-submodules https://github.com/chainreactors/getitle`
+
+生成 template.go
+
+`go generate`
+
+编译
+
+`go build .`
+
+### build.bat:
 需要依赖gox
 
 `go get github.com/mitchellh/gox`
 
 可以带两个参数, 第一个为版本号, 第二个为key, 不加则自动为空
 
-`make.bat [key]`
+`build.bat [key]`
 
 
 ### obfuscate.bat
@@ -416,7 +426,7 @@ SMB
 
 ### full
 
-`./make.bat [key] ; ./obfuscate.bat ; release.bat `
+`./build.bat [key] ; ./obfuscate.bat ; release.bat `
 
 ## THANKS
 
@@ -424,4 +434,3 @@ SMB
 * https://github.com/projectdiscovery/nuclei-templates
 * https://github.com/projectdiscovery/nuclei
 * https://github.com/JKme/cube
-    

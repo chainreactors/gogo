@@ -17,7 +17,6 @@ type decodeOptions struct {
 
 func main() {
 	var opt decodeOptions
-	logs.Log = logs.NewLogger(false, false)
 	flag.StringVar(&opt.xor_key, "k", "", "key")
 	flag.StringVar(&opt.filename, "F", "", "input filename")
 	flag.StringVar(&opt.outfilename, "f", "", "output filename")
@@ -25,12 +24,16 @@ func main() {
 	flag.StringVar(&opt.output, "o", "full", "output type")
 
 	flag.Parse()
+
+	var filef string
 	if opt.filename == "" {
 		logs.Log.Error("please input -F filename")
 		return
 	}
+	if opt.autofile {
+		filef = "auto"
+	}
 	pkg.Key = []byte(opt.xor_key)
 	logs.Log.Info("key: " + opt.xor_key)
-	core.Opt.Output = opt.output
-	core.FormatOutput(opt.filename, opt.outfilename, opt.autofile, nil)
+	core.FormatOutput(opt.filename, opt.outfilename, opt.output, filef, nil)
 }

@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"reflect"
 	"strings"
 )
 
@@ -24,6 +25,27 @@ func SliceUnique(ss []string) []string {
 		}
 	}
 	return res
+}
+
+func Unique(data interface{}) interface{} {
+	inArr := reflect.ValueOf(data)
+	if inArr.Kind() != reflect.Slice && inArr.Kind() != reflect.Array {
+		return data
+	}
+
+	existMap := make(map[interface{}]bool)
+	outArr := reflect.MakeSlice(inArr.Type(), 0, inArr.Len())
+
+	for i := 0; i < inArr.Len(); i++ {
+		iVal := inArr.Index(i)
+
+		if _, ok := existMap[iVal.Interface()]; !ok {
+			outArr = reflect.Append(outArr, inArr.Index(i))
+			existMap[iVal.Interface()] = true
+		}
+	}
+
+	return outArr.Interface()
 }
 
 func Str2uintlist(s string) []uint {

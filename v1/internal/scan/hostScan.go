@@ -6,7 +6,6 @@ import (
 	. "getitle/v1/pkg/fingers"
 	"github.com/chainreactors/logs"
 	"net/http"
-	"strings"
 )
 
 func hostScan(result *Result) {
@@ -29,8 +28,8 @@ func hostScan(result *Result) {
 		if resp.StatusCode != 200 {
 			continue
 		}
-		content, body := GetHttpRaw(resp)
-		hash := dsl.Md5Hash([]byte(strings.TrimSpace(body)))[:4] // 因为头中经常有随机值, 因此hash通过body判断
+		body := GetBody(resp)
+		hash := dsl.Md5Hash(body)[:4] // 因为头中经常有随机值, 因此hash通过body判断
 		if result.Hash != hash {
 			if result.CurrentHost == "" {
 				result.CurrentHost = host
@@ -38,7 +37,7 @@ func hostScan(result *Result) {
 			//if result.CurrentHost == "" {
 			result.Host = host
 			//}
-			vuln.Detail[host] = AsciiEncode(GetTitle(content))
+			vuln.Detail[host] = AsciiEncode(GetTitle(string(body)))
 		}
 	}
 	if len(vuln.Detail) > 0 {

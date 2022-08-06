@@ -15,43 +15,20 @@ func output(result *Result, outType string) string {
 
 	switch outType {
 	case "color", "c":
-		out = colorOutput(result)
+		out = ColorOutput(result)
 	case "json", "j":
-		out = jsonOutput(result)
+		out = JsonOutput(result)
 	case "jsonlines", "jl":
-		out = jsonOutput(result) + "\n"
+		out = JsonOutput(result) + "\n"
 	case "full":
-		out = fullOutput(result)
+		out = FullOutput(result)
 	default:
-		out = valuesOutput(result, outType)
+		out = ValuesOutput(result, outType)
 	}
 	return out
 }
 
-func valuesOutput(result *Result, outType string) string {
-	outs := strings.Split(outType, ",")
-	for i, out := range outs {
-		outs[i] = result.Get(out)
-	}
-	return strings.Join(outs, "\t") + "\n"
-}
-
-func colorOutput(result *Result) string {
-	s := fmt.Sprintf("[+] %s\t%s\t%s\t%s\t%s\t%s\t%s [%s] %s %s\n", result.GetURL(), result.Midware, result.Language, Blue(result.Frameworks.ToString()), result.Host, result.Cert, result.Hash, Yellow(result.HttpStat), Blue(result.Title), Red(result.Vulns.ToString()))
-	return s
-}
-
-func fullOutput(result *Result) string {
-	s := fmt.Sprintf("[+] %s\t%s\t%s\t%s\t%s\t%s\t%s [%s] %s %s %s\n", result.GetURL(), result.Midware, result.Language, result.Frameworks.ToString(), result.Host, result.Cert, result.Hash, result.HttpStat, result.Title, result.Vulns.ToString(), result.Extracts.ToString())
-	return s
-}
-
-func jsonOutput(result *Result) string {
-	jsons, _ := json.Marshal(result)
-	return string(jsons)
-}
-
-func FormatOutput(filename string, outputfile string, autofile bool, filters []string) {
+func FormatOutput(filename string, outfilename, outf, filenamef string, filters []string) {
 	var outfunc func(s string)
 	var iscolor bool
 	var resultsdata *ResultsData
@@ -65,9 +42,8 @@ func FormatOutput(filename string, outputfile string, autofile bool, filters []s
 		file = Open(filename)
 	}
 
-	var fileformat string
-	if autofile {
-		fileformat = "clear"
+	if filenamef == "auto" {
+		filenamef = "clear"
 	}
 
 	data := LoadResultFile(file)
@@ -75,13 +51,13 @@ func FormatOutput(filename string, outputfile string, autofile bool, filters []s
 	case *ResultsData:
 		resultsdata = data.(*ResultsData)
 		fmt.Println(resultsdata.ToConfig())
-		if outputfile == "" {
-			outputfile = GetFilename(&resultsdata.Config, fileformat, Opt.FilePath, Opt.Output)
+		if outfilename == "" {
+			outfilename = GetFilename(&resultsdata.Config, outf)
 		}
 	case *SmartData:
 		smartdata = data.(*SmartData)
-		if outputfile == "" {
-			outputfile = GetFilename(&smartdata.Config, fileformat, Opt.FilePath, "cidr")
+		if outfilename == "" {
+			outfilename = GetFilename(&smartdata.Config, "cidr")
 		}
 	case []*Extracts:
 		extractsdata = data.([]*Extracts)
@@ -93,12 +69,12 @@ func FormatOutput(filename string, outputfile string, autofile bool, filters []s
 	}
 
 	// 初始化再输出文件
-	if outputfile != "" {
-		fileHandle, err := NewFile(outputfile, false, false, false)
+	if outfilename != "" {
+		fileHandle, err := NewFile(outfilename, false, false, false)
 		if err != nil {
 			utils.Fatal("" + err.Error())
 		}
-		fmt.Println("Output filename: " + outputfile)
+		fmt.Println("Output filename: " + outfilename)
 		defer fileHandle.Close()
 		outfunc = func(s string) {
 			fileHandle.Write(s)
@@ -114,27 +90,20 @@ func FormatOutput(filename string, outputfile string, autofile bool, filters []s
 		return
 	} else if resultsdata != nil && resultsdata.Data != nil {
 		for _, filter := range filters {
-			// 过滤指定数据
-			if strings.Contains(filter, "::") {
-				kv := strings.Split(filter, "::")
-				resultsdata.Data = resultsdata.Data.Filter(kv[0], kv[1], "::")
-			} else if strings.Contains(filter, "==") {
-				kv := strings.Split(filter, "==")
-				resultsdata.Data = resultsdata.Data.Filter(kv[0], kv[1], "==")
-			}
+			resultsdata.Filter(filter)
 		}
 
-		if Opt.Output == "c" {
+		if outf == "c" {
 			iscolor = true
 		}
 
-		if Opt.Output == "cs" {
+		if outf == "cs" {
 			outfunc(resultsdata.ToCobaltStrike())
-		} else if Opt.Output == "zombie" {
+		} else if outf == "zombie" {
 			outfunc(resultsdata.ToZombie())
-		} else if Opt.Output == "c" || Opt.Output == "full" {
+		} else if outf == "c" || outf == "full" {
 			outfunc(resultsdata.ToFormat(iscolor))
-		} else if Opt.Output == "json" {
+		} else if outf == "json" {
 			content, err := json.Marshal(resultsdata)
 			if err != nil {
 				fmt.Println(err.Error())
@@ -142,7 +111,7 @@ func FormatOutput(filename string, outputfile string, autofile bool, filters []s
 			}
 			outfunc(string(content))
 		} else {
-			outfunc(resultsdata.ToValues(Opt.Output))
+			outfunc(resultsdata.ToValues(outf))
 		}
 	} else if extractsdata != nil {
 		for _, extracts := range extractsdata {
@@ -155,7 +124,7 @@ func FormatOutput(filename string, outputfile string, autofile bool, filters []s
 			fmt.Println(s)
 		}
 	} else if textdata != "" {
-		if outputfile != "" {
+		if outfilename != "" {
 			outfunc(textdata)
 		}
 	}

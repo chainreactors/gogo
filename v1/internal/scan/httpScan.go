@@ -6,6 +6,7 @@ import (
 	"github.com/chainreactors/logs"
 	"net/http"
 	"strings"
+	"time"
 )
 
 var headers = http.Header{
@@ -61,14 +62,23 @@ func socketHttp(result *pkg.Result) {
 	//} else {
 	//	host = fmt.Sprintf("%s:%s", result.CurrentHost, result.Port)
 	//}
-	senddataStr := fmt.Sprintf("GET /%s HTTP/1.1\r\nHost: %s\r\nConnection: Keep-Alive\r\n\r\n", result.Uri, target)
-	data, err := pkg.SocketSend(conn, []byte(senddataStr), 4096)
-	if err != nil {
-		result.Error = err.Error()
+	var bs []byte
+	buf := make([]byte, 4096)
+	_ = conn.SetReadDeadline(time.Now().Add(time.Duration(200) * time.Millisecond))
+	n, err := conn.Read(buf)
+	if err == nil {
+		bs = buf[:n]
+	} else {
+		_ = conn.SetReadDeadline(time.Now().Add(time.Duration(2) * time.Second))
+		senddataStr := fmt.Sprintf("GET /%s HTTP/1.1\r\nHost: %s\r\nConnection: Keep-Alive\r\n\r\n", result.Uri, target)
+		bs, err = pkg.SocketSend(conn, []byte(senddataStr), 4096)
+		if err != nil {
+			result.Error = err.Error()
+		}
 	}
 
 	//获取状态码
-	pkg.CollectSocketInfo(result, data)
+	pkg.CollectSocketInfo(result, bs)
 
 	//所有30x,400,以及非http协议的开放端口都送到http包尝试获取更多信息
 	if result.HttpStat == "400" || result.Protocol == "tcp" || strings.HasPrefix(result.HttpStat, "3") {
@@ -123,7 +133,8 @@ func SystemHttp(target string, result *pkg.Result) {
 	}
 
 	result.Error = ""
-	content, body := pkg.GetHttpRaw(resp)
-	pkg.CollectHttpInfo(result, resp, content, body)
+	content := pkg.GetHttpRaw(resp)
+	result.Content = strings.ToLower(content)
+	pkg.CollectHttpInfo(result, resp, content)
 	return
 }

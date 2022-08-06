@@ -23,7 +23,7 @@ func loadYamlFile2JsonString(filename string) string {
 	bs, _ := io.ReadAll(file)
 	jsonstr, err := yaml.YAMLToJSON(bs)
 	if err != nil {
-		panic(err.Error())
+		panic(filename + err.Error())
 	}
 
 	return Encode(jsonstr)
@@ -60,6 +60,11 @@ func recuLoadYamlFiles2JsonString(dir string, single bool) string {
 			print(file)
 			panic(err)
 		}
+
+		if tmp == nil {
+			continue
+		}
+
 		if single {
 			pocs = append(pocs, tmp)
 		} else {

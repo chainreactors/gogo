@@ -42,7 +42,8 @@ func mapToString(m map[string]interface{}) string {
 type Finger struct {
 	Name        string   `yaml:"name" json:"name"`
 	Protocol    string   `yaml:"protocol,omitempty" json:"protocol"`
-	Defaultport []string `yaml:"default_port,omitempty" json:"default_port,omitempty"`
+	DefaultPort []string `yaml:"default_port,omitempty" json:"default_port,omitempty"`
+	Focus       bool     `yaml:"focus,omitempty" json:"focus,omitempty"`
 	Rules       Rules    `yaml:"rule,omitempty" json:"rule,omitempty"`
 }
 
@@ -51,12 +52,12 @@ func (f *Finger) Compile(portHandler func([]string) []string) error {
 		f.Protocol = "http"
 	}
 
-	if len(f.Defaultport) == 0 {
+	if len(f.DefaultPort) == 0 {
 		if f.Protocol == "http" {
-			f.Defaultport = []string{"80"}
+			f.DefaultPort = []string{"80"}
 		}
 	} else {
-		f.Defaultport = portHandler(f.Defaultport)
+		f.DefaultPort = portHandler(f.DefaultPort)
 	}
 
 	err := f.Rules.Compile()
@@ -149,19 +150,17 @@ type Rule struct {
 	Level       int       `yaml:"level,omitempty" json:"level,omitempty"`
 }
 
-func (r *Rule) dataDecode() {
-	if r.SendDataStr != "" {
-		r.SendData = decode(r.SendDataStr)
-	}
-	// todo
-	// regexp decode
-}
-
 type Rules []*Rule
 
 func (rs Rules) Compile() error {
 	for _, r := range rs {
-		r.dataDecode()
+		if r.SendDataStr != "" {
+			r.SendData = decode(r.SendDataStr)
+			if r.Level == 0 {
+				r.Level = 1
+			}
+		}
+
 		if r.Regexps != nil {
 			err := r.Regexps.RegexpCompile()
 			if err != nil {
@@ -201,7 +200,7 @@ func (fs Fingers) Contain(f *Finger) bool {
 func (fs Fingers) GroupByPort() FingerMapper {
 	fingermap := make(FingerMapper)
 	for _, f := range fs {
-		for _, port := range f.Defaultport {
+		for _, port := range f.DefaultPort {
 			fingermap[port] = append(fingermap[port], f)
 		}
 	}
@@ -214,65 +213,4 @@ func LoadFingers(content []byte) (fingers Fingers, err error) {
 		return nil, err
 	}
 	return fingers, nil
-}
-
-type Framework struct {
-	Name    string `json:"ft"`
-	Version string `json:"fv"`
-	From    string `json:"ff"`
-	IsGuess bool   `json:"fg"`
-}
-
-func (f Framework) ToString() string {
-	var s = f.Name
-	if f.IsGuess {
-		s = "*" + s
-	}
-	if f.Version != "" {
-		s += " " + f.Version
-	}
-	if f.From != "" {
-		s += ":" + f.From
-	}
-	return s
-}
-
-const (
-	Info int = iota + 1
-	Medium
-	High
-	Critical
-)
-
-var serverityMap = map[string]int{
-	"info":     Info,
-	"medium":   Medium,
-	"high":     High,
-	"critical": Critical,
-}
-
-type Vuln struct {
-	Name     string                 `json:"vn"`
-	Payload  map[string]interface{} `json:"vp"`
-	Detail   map[string]interface{} `json:"vd"`
-	Severity string                 `json:"vs"`
-}
-
-func (v *Vuln) GetPayload() string {
-	return mapToString(v.Payload)
-}
-
-func (v *Vuln) GetDetail() string {
-	return mapToString(v.Detail)
-}
-
-func (v *Vuln) ToString() string {
-	s := v.Name
-	if payload := v.GetPayload(); payload != "" {
-		s += fmt.Sprintf(" payloads:%s", payload)
-	}
-	if detail := v.GetDetail(); detail != "" {
-		s += fmt.Sprintf(" payloads:%s", detail)
-	}
-	return s
 }

@@ -151,7 +151,6 @@ gt的指纹配置文件分为了四大块,分别是
 2. tcp指纹
 ```
 - name: redis
-  level: 1
   vuln: redis_unauthorized
   default_port:
     - '6379'

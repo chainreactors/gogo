@@ -12,7 +12,7 @@ import (
 func Nuclei(target string, result *Result) {
 
 	if RunOpt.Exploit == "auto" {
-		executeTemplates(result, result.Frameworks.GetTitles(), target)
+		executeTemplates(result, result.Frameworks.GetNames(), target)
 	} else {
 		executeTemplates(result, strings.Split(RunOpt.Exploit, ","), target)
 	}

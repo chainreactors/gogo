@@ -3,6 +3,7 @@ package pkg
 import (
 	"getitle/v1/pkg/fingers"
 	"getitle/v1/pkg/utils"
+	"github.com/chainreactors/ipcs"
 )
 
 var (
@@ -20,7 +21,7 @@ func LoadFinger(t string) fingers.Fingers {
 		utils.Fatal(err.Error())
 	}
 	for _, finger := range fs {
-		err := finger.Compile(portSliceHandler)
+		err := finger.Compile(ipcs.ParsePorts)
 		if err != nil {
 			utils.Fatal(err.Error())
 		}

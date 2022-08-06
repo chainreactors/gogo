@@ -61,19 +61,19 @@ func UdpSocketConn(target string, delay int) (net.Conn, error) {
 }
 
 func SocketSend(conn net.Conn, data []byte, max int) ([]byte, error) {
-	_ = conn.SetDeadline(time.Now().Add(time.Duration(2) * time.Second))
 	var err error
 	logs.Log.Debugf("send %s binary data: %q", conn.RemoteAddr().String(), data)
+	_ = conn.SetDeadline(time.Now().Add(time.Duration(2) * time.Second))
 	_, err = conn.Write(data)
 	if err != nil {
 		return []byte{}, err
 	}
 
 	buf := make([]byte, max)
-	time.Sleep(time.Duration(200) * time.Millisecond)
+	time.Sleep(time.Duration(300) * time.Millisecond)
 	n, err := conn.Read(buf)
 	if err != nil {
 		return []byte{}, err
 	}
-	return buf[:n], err
+	return buf[:n], nil
 }
