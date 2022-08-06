@@ -393,7 +393,9 @@ SMB
 **这些用法大概只覆盖了一半的使用场景, 更多的细节请阅读/doc目录下的设计文档**
 ## Make
 
-### 最简编译
+### 手动编译
+下载项目
+`git clone --recurse-submodules https://github.com/chainreactors/getitle`
 
 生成 template.go
 
