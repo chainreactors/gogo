@@ -109,3 +109,32 @@ requests:
 官方的poc仓库位于 https://github.com/chainreactors/getitle-templates/tree/master/nuclei
 
 提交对应的pr, 将poc放到合适的文件夹下. 下次release就会自动编译到二进制文件中.
+
+## 成为Contributors 
+
+如果不熟悉git使用, 直接将poc复现成功的截图与poc的yaml复制到issue中, 我会手动整理合并poc. 但这种方式可能不能在仓库的Contributors 中找到自己.
+
+
+使用pull request就能成为repo的Contributors.
+
+### pr使用
+
+首先在github上点击fork, fork getitle-templates 到自己的账号下
+
+然后 git clone fork之后的repo
+
+将编写好的poc 放到getitle-templates/nuclei/对应的目录下.
+
+在本地的文件夹下使用, git命令
+
+`git add .`
+
+`git commit -m "add [poc name]"`
+
+`git push origin master`
+
+这时候点开自己fork之后的repo, 就可以看到刚刚的提交.
+
+然后点击pull request, 将本地的commit 提交至官方的仓库.
+
+维护者看到pr或者issue后会review之后合并. 下个版本的getitle就能使用你提交的poc了.

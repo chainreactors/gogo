@@ -9,7 +9,7 @@ README Version 2.5.0
 Usage of ./getitle:
 
    -k string   key,启动密码(必须输入) 
-   -debug bool  输出每个请求的错误日志, 用来debug
+   -debug bool  输出每个请求的错误日志, 用来debug. 可以附加-proxy url, 使用代理调试指纹或poc(单独-proxy无法使用)
    
    INPUT params:
       -ip string   IP地址, 支持逗号分割的输入 like 192.168.1.1/24,172.16.1.1/24
@@ -123,18 +123,9 @@ example: 1.1.1.1
 
 `gt -k [key] -ip 192.168.1.1/24 -p win,db,top2 `
 
-使用工作流, 快速配置扫描任务, 启发式扫描10段常见口
-
-`gt -k [key] -w 10`
-
 手动指定特定网段与配置
 
 `gt -k [key] -ip 172.16.1.1/16 -m s -p all -e -v -af`
-
-查看全部可用工作流
-
-`gt -k [key] -P workflow`
-
 
 扫描结果格式化
 
@@ -142,6 +133,14 @@ example: 1.1.1.1
 
 
 ### workflow
+查看全部可用工作流
+
+`gt -k [key] -P workflow`
+
+使用工作流, 快速配置扫描任务, 启发式扫描10段常见端口
+
+`gt -k [key] -w 10`
+
 workflow 使用思维导图
 
 ![](doc/img/pipeline.png)
