@@ -273,6 +273,9 @@ func (request *Request) ExecuteRequestWithResults(reqURL string, dynamicValues m
 				}
 				return true, err
 			}
+			if generatedHttpRequest.request.Header.Get("User-Agent") == "" {
+				generatedHttpRequest.request.Header.Set("User-Agent", ua)
+			}
 			var gotOutput bool
 			err = request.executeRequest(generatedHttpRequest, dynamicValues, func(event *protocols.InternalWrappedEvent) {
 				// Add the extracts to the dynamic values if any.
