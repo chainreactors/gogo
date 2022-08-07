@@ -23,7 +23,7 @@ func Nuclei(target string, result *Result) {
 func executeTemplates(result *Result, titles []string, target string) {
 	var vulns []*Vuln
 	templates := choiceTemplates(titles)
-chainLoop:
+chainLoop: // 实现chain
 	for {
 		var chainsTemplates []*Template
 		for _, template := range templates { // 遍历所有poc

@@ -19,6 +19,7 @@ func shiroScan(result *Result) {
 		result.Error = err.Error()
 		return
 	}
+
 	logs.Log.Debug("http request shiro " + url)
 	deleteme := resp.Header.Get("Set-Cookie")
 	if strings.Contains(deleteme, "=deleteMe") {
@@ -27,6 +28,7 @@ func shiroScan(result *Result) {
 	} else {
 		return
 	}
+
 	req = setshirocookie(url, "/A29uyYfZg4mT+SUU/3eMAnRlgBWnVrveeiwZ/hz1LlF86NxSmq9dsWpS0U7Q2U+MjbAzaLBCsV7IHb7MQVFItU+ibEkDuyO7WoNGBM4ay8l+oBZo2W2mZcFXG3swJsGXxaZHua3m5jlJNKcCjqy9sX2oRZrm7eSABvUn71vY9NaohbC1i6+FKCRMW9s11/Q")
 	logs.Log.Debug("http request shiro default key " + url)
 	resp, err = conn.Do(req)
@@ -34,12 +36,12 @@ func shiroScan(result *Result) {
 		result.Error = err.Error()
 		return
 	}
+
 	deleteme = resp.Header.Get("Set-Cookie")
 	if isshiro && !strings.Contains(deleteme, "deleteMe") {
 		result.AddVuln(&Vuln{Name: "shiro_550", Payload: map[string]interface{}{"key": "kPH+bIxk5D2deZiIxcaaaA=="}, Severity: "critical"})
 	}
 	return
-
 }
 
 func setshirocookie(target string, v string) *http.Request {

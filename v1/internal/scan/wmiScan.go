@@ -17,11 +17,13 @@ func wmiScan(result *pkg.Result) {
 		return
 	}
 	defer conn.Close()
+
 	result.Open = true
 	ret, err := pkg.SocketSend(conn, data, 4096)
 	if err != nil {
 		return
 	}
+
 	off_ntlm := bytes.Index(ret, []byte("NTLMSSP"))
 	if off_ntlm != -1 {
 		result.Protocol = "wmi"

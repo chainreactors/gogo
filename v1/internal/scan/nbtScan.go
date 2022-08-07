@@ -63,11 +63,13 @@ func nbtScan(result *pkg.Result) {
 		return
 	}
 	defer conn.Close()
+
 	reply, err := pkg.SocketSend(conn, nbtdata, 1024)
 	if err != nil {
 		result.Error = err.Error()
 		return
 	}
+
 	result.Open = true
 	if len(reply) <= 58 {
 		return
@@ -78,6 +80,7 @@ func nbtScan(result *pkg.Result) {
 		result.Error = err.Error()
 		return
 	}
+
 	var name, group, unique string
 	var flag_bit []byte
 	data := reply[57:]
@@ -110,8 +113,8 @@ func nbtScan(result *pkg.Result) {
 				//fmt.Printf("%s\t%s\t%s\n",name,"U",UNIQUE_NAMES[string(flag_bit)])
 			}
 		}
-
 	}
+
 	msg := group + "\\" + unique
 	msg = strings.Replace(msg, "\x00", "", -1)
 	result.HttpStat = ""
