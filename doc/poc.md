@@ -14,11 +14,12 @@ nuclei更新交换, 一些较为新的特性getitle可能会落后几个月, 所
 ### 明确删除并且后续不会添加的功能
 部分功能会以简化的形式重新加入到getitle中
 1. dsl 包括match中dsl 以及request的例如`{{base64(base64string)}}`这样的动态生成的功能. 通过encode tag简单代替
-2. oast 需要dnslog, httplog之类的oast的功能, 可以通过探测接口是否存在做一个大致的匹配.
+2. oast与OOB,这类需要外带的功能, 可以通过探测接口是否存在做一个大致的匹配.
 3. workflow, 通过chain简单代替
 4. info中的大多数信息, 只保留最基本的信息, 并且不会输出, 建议只保留name, tag, severity三个字段
 5. pipeline
 6. Race conditions
+7. 除了regex之外的extractor. 因为引入多个解析库容易会变得臃肿
 ### 暂时不支持的功能, 但在计划表中的功能
 1. cookie reuse
 2. http redirect
