@@ -4,6 +4,38 @@ getitle的poc采用了nuclei的poc, 但删除了部分nuclei的语法. 例如dsl
 
 getitle 目前支持tcp(暂不支持tls tcp)与http协议的绝大部分nuclei poc
 
+## getitle与nuclei编写poc的注意事项
+nuclei 官方的poc编写教程 https://nuclei.projectdiscovery.io/templating-guide/
+
+getitle常用于特殊环境下, 因此删除了许多nuclei原有的功能, 例如dsl, oast以及除了http与tcp协议之外的漏洞探测.
+
+nuclei更新交换, 一些较为新的特性getitle可能会落后几个月, 所以建议只使用基本的规则, 编写最简的poc, 保证兼容性.
+
+### 明确删除并且后续不会添加的功能
+部分功能会以简化的形式重新加入到getitle中
+1. dsl 包括match中dsl 以及request的例如`{{base64(base64string)}}`这样的动态生成的功能. 通过encode tag简单代替
+2. oast 需要dnslog, httplog之类的oast的功能, 可以通过探测接口是否存在做一个大致的匹配.
+3. workflow, 通过chain简单代替
+4. info中的大多数信息, 只保留最基本的信息, 并且不会输出, 建议只保留name, tag, severity三个字段
+5. pipeline
+6. Race conditions
+### 暂时不支持的功能, 但在计划表中的功能
+1. cookie reuse
+2. http redirect
+3. variables
+4. Helper Functions 会简化之后再加入
+### nuclei中没有, 只能在getitle中使用的功能
+1. finger字段, 能绑定finger, 提供除了tag之外的绑定finger办法
+   ```
+   id: poc-id
+   finger: fingername
+   ```
+2. chain字段, 如果match成功后会执行的poc
+   ```
+   id: poc-id
+   chain: 实现
+   ```
+3. 通过命令行参数替换yaml中的payload, 后续将会支持从文件中读列表 
 ## 从nuclei templates 迁移poc
 
 https://github.com/projectdiscovery/nuclei-templates
@@ -83,8 +115,9 @@ requests:
 ```
 
 
+## 编写poc中没有的poc
 
-**测试**
+## 测试
 
 因为getitle为了缩减体积, 仅使用了标准json库, 所以需要先将yaml转为json
 
@@ -92,7 +125,6 @@ requests:
 
 `python yaml2json.py apollo-login.yml -f apollo-login.json` 
 
- 
 
 指定ef文件加载poc
 
@@ -104,20 +136,20 @@ requests:
 
 
 
-**提交poc**
+## 提交
 
 官方的poc仓库位于 https://github.com/chainreactors/getitle-templates/tree/master/nuclei
 
 提交对应的pr, 将poc放到合适的文件夹下. 下次release就会自动编译到二进制文件中.
 
-## 成为Contributors 
+### 成为Contributors
 
 如果不熟悉git使用, 直接将poc复现成功的截图与poc的yaml复制到issue中, 我会手动整理合并poc. 但这种方式可能不能在仓库的Contributors 中找到自己.
 
 
 使用pull request就能成为repo的Contributors.
 
-### pr使用
+### pull request
 
 首先在github上点击fork, fork getitle-templates 到自己的账号下
 
