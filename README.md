@@ -103,16 +103,16 @@ example: 1.1.1.1
 **windows**
 
 [windows32upx](https://sangfor-release.oss-cn-shanghai.aliyuncs.com/fscan/windows_386_upxs.exe)
- [windows32](https://sangfor-release.oss-cn-shanghai.aliyuncs.com/fscan/windows_386s.exe)
- [windows64](https://sangfor-release.oss-cn-shanghai.aliyuncs.com/fscan/windows_amd64s.exe)
- [windows64upx](https://sangfor-release.oss-cn-shanghai.aliyuncs.com/fscan/windows_amd64_upxs.exe)
+[windows32](https://sangfor-release.oss-cn-shanghai.aliyuncs.com/fscan/windows_386s.exe)
+[windows64](https://sangfor-release.oss-cn-shanghai.aliyuncs.com/fscan/windows_amd64s.exe)
+[windows64upx](https://sangfor-release.oss-cn-shanghai.aliyuncs.com/fscan/windows_amd64_upxs.exe)
 
 **linux**
 
 [linux_amd64](https://sangfor-release.oss-cn-shanghai.aliyuncs.com/fscan/linux_amd64)
- [linux_amd32](https://sangfor-release.oss-cn-shanghai.aliyuncs.com/fscan/linux_386)
- [linux_arm64](https://sangfor-release.oss-cn-shanghai.aliyuncs.com/fscan/linux_arm64)
- [linux_mips64](https://sangfor-release.oss-cn-shanghai.aliyuncs.com/fscan/linux_mips64)
+[linux_amd32](https://sangfor-release.oss-cn-shanghai.aliyuncs.com/fscan/linux_386)
+[linux_arm64](https://sangfor-release.oss-cn-shanghai.aliyuncs.com/fscan/linux_arm64)
+[linux_mips64](https://sangfor-release.oss-cn-shanghai.aliyuncs.com/fscan/linux_mips64)
 
 **mac**
 
@@ -123,7 +123,7 @@ example: 1.1.1.1
 
 `gt -k [key] -ip 192.168.1.1/24 -p win,db,top2 `
 
-手动指定特定网段与配置
+启发式扫描
 
 `gt -k [key] -ip 172.16.1.1/16 -m s -p all -e -v -af`
 
@@ -137,7 +137,7 @@ example: 1.1.1.1
 
 `gt -k [key] -P workflow`
 
-使用工作流, 快速配置扫描任务, 启发式扫描10段常见端口
+使用工作流, 自动配置启发式扫描, 启发式扫描10段常见端口
 
 `gt -k [key] -w 10`
 
@@ -280,6 +280,7 @@ Exploit: none, Version level: 0
 `-f file` 重新输出到文件, `-af` 输出到文件根据config自动生成文件名
 
 ### ~~启发式扫描配置~~ (保留文档, 已被workflow取代)
+如果在使用-w workflow的情况下, 继续添加-sp, -ipp, 可以覆盖workflow中的预设值, 提高workflow的灵活性
 
 -m s 为喷洒C段模式,子网掩码要小于24才能使用
 

@@ -9,7 +9,7 @@ nuclei 官方的poc编写教程 https://nuclei.projectdiscovery.io/templating-gu
 
 getitle常用于特殊环境下, 因此删除了许多nuclei原有的功能, 例如dsl, oast以及除了http与tcp协议之外的漏洞探测.
 
-nuclei更新交换, 一些较为新的特性getitle可能会落后几个月, 所以建议只使用基本的规则, 编写最简的poc, 保证兼容性.
+nuclei更新较快, 一般情况下getitle会落后nuclei最新版几个月, 所以建议只使用基本的规则, 编写最简的poc, 保证兼容性.
 
 ### 明确删除并且后续不会添加的功能
 部分功能会以简化的形式重新加入到getitle中
@@ -115,8 +115,6 @@ requests:
           - 302
 ```
 
-
-## 编写poc中没有的poc
 
 ## 测试
 
