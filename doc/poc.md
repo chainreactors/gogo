@@ -86,7 +86,7 @@ requests:
 
 **测试**
 
-因为getitle为了缩减体检, 仅使用了标准json库, 所以需要先将yaml转为json
+因为getitle为了缩减体积, 仅使用了标准json库, 所以需要先将yaml转为json
 
 使用自带的脚本 `yaml2json.py`.
 
