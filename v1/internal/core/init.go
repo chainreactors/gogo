@@ -14,7 +14,6 @@ import (
 var Opt = Options{
 	AliveSum: 0,
 	Noscan:   false,
-	//Compress: true,
 }
 
 func InitConfig(config *Config) *Config {
@@ -27,22 +26,20 @@ func InitConfig(config *Config) *Config {
 	config.VersionLevel = RunOpt.VersionLevel
 
 	if config.Threads == 0 { // if 默认线程
-		config.Threads = 4000
+		config.Threads = LinuxDefaultThreads
 		if Win {
 			//windows系统默认协程数为1000
-			config.Threads = 1000
+			config.Threads = WindowsDefaultThreads
 		} else {
 			// linux系统判断fd限制, 如果-t 大于fd限制,则将-t 设置到fd-100
 			if fdlimit := GetFdLimit(); config.Threads > fdlimit {
 				Log.Warnf("System fd limit: %d , Please exec 'ulimit -n 65535'", fdlimit)
-				//Log.Warnf("System fd limit: %d , Please exec 'ulimit -n 65535'", fdlimit)
-				//Log.Warnf("System fd limit: %d , Please exec 'ulimit -n 65535'", fdlimit)
 				Log.Warnf("Now set threads to %d", fdlimit-100)
 				config.Threads = fdlimit - 100
 			}
 		}
 		if config.JsonFile != "" {
-			config.Threads = 50
+			config.Threads = ReScanDefaultThreads
 		}
 	}
 
@@ -65,11 +62,6 @@ func InitConfig(config *Config) *Config {
 			config.File.SafeSync()
 		}
 	}
-	//Opt.File = config.File
-	//Opt.AliveFile = config.AliveFile
-	//Opt.SmartFile = config.SmartFile
-	//Opt.ExtractFile = config.ExtractFile
-	//Opt.FileOutput = config.FileOutputf
 
 	if config.ListFile != "" || config.IsListInput {
 		// 如果从文件中读,初始化IP列表配置
@@ -107,9 +99,9 @@ func InitConfig(config *Config) *Config {
 		config.SmartPortList = ipcs.ParsePort(config.SmartPort)
 	} else {
 		if config.Mod == SMART {
-			config.SmartPortList = []string{"80"}
-		} else if SliceContains([]string{SUPERSMART, SUPERSMARTB, "f"}, config.Mod) {
-			config.SmartPortList = []string{"icmp"}
+			config.SmartPortList = []string{DefaultPortProbe}
+		} else if SliceContains([]string{SUPERSMART, SUPERSMARTB}, config.Mod) {
+			config.SmartPortList = []string{SuperSmartPortProbe}
 		}
 	}
 
@@ -117,7 +109,7 @@ func InitConfig(config *Config) *Config {
 	if config.IpProbe != "default" {
 		config.IpProbeList = Str2uintlist(config.IpProbe)
 	} else {
-		config.IpProbeList = []uint{1}
+		config.IpProbeList = Str2uintlist(DefaultIpProbe)
 	}
 
 	// todo 排除ip功能等待重构
