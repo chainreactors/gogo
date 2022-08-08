@@ -96,13 +96,13 @@ func (gen *IpGenerator) generatorDispatch(cidr *ipcs.CIDR, mod string) chan stri
 	go func() {
 		mask := cidr.Mask
 		switch mod {
-		case "s", "sb":
+		case SMART, SUPERSMARTC:
 			if mask <= 24 {
 				gen.smartIpGenerator(cidr)
 				//} else {
 				//	gen.defaultIpGenerator(cidr)
 			}
-		case "ss", "sc":
+		case SUPERSMART, SUPERSMARTB:
 			if mask <= 16 {
 				gen.sSmartGenerator(cidr)
 				//} else if mask > 16 && mask <= 24 {

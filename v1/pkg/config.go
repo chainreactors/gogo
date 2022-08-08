@@ -10,6 +10,13 @@ import (
 	"strings"
 )
 
+const (
+	SMART       = "s"
+	SUPERSMART  = "ss"
+	SUPERSMARTC = "sb"
+	SUPERSMARTB = "sc"
+)
+
 type Config struct {
 	// ip
 	IP         string        `json:"ip"`
@@ -173,28 +180,28 @@ func (config *Config) IsScan() bool {
 }
 
 func (config *Config) IsSmart() bool {
-	if utils.SliceContains([]string{"ss", "s", "sc"}, config.Mod) {
+	if utils.SliceContains([]string{SUPERSMART, SMART, SUPERSMARTB}, config.Mod) {
 		return true
 	}
 	return false
 }
 
 func (config *Config) IsSmartScan() bool {
-	if utils.SliceContains([]string{"ss", "s"}, config.Mod) {
+	if utils.SliceContains([]string{SUPERSMART, SMART}, config.Mod) {
 		return true
 	}
 	return false
 }
 
 func (config *Config) IsASmart() bool {
-	if utils.SliceContains([]string{"ss", "sc"}, config.Mod) {
+	if utils.SliceContains([]string{SUPERSMART, SUPERSMARTB}, config.Mod) {
 		return true
 	}
 	return false
 }
 
 func (config *Config) IsBSmart() bool {
-	if utils.SliceContains([]string{"s", "sb"}, config.Mod) {
+	if utils.SliceContains([]string{SMART, SUPERSMARTC}, config.Mod) {
 		return true
 	}
 	return false

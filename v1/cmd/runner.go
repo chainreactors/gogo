@@ -198,7 +198,7 @@ func (r *Runner) prepareConfig(config Config) *Config {
 		config.AliveSprayMod = append(config.AliveSprayMod, "icmp")
 	}
 
-	if config.Mod == "sc" {
+	if config.Mod == SUPERSMARTB {
 		config.FileOutputf = "raw"
 	}
 

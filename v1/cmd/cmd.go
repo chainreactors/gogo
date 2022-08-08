@@ -56,7 +56,7 @@ func CMD() {
 	// CONFIG
 	flag.IntVar(&runner.config.Threads, "t", 0, "")
 	flag.StringVar(&runner.config.Mod, "m", "default", "")
-	flag.BoolVar(&runner.config.PortSpray, "s", false, "")
+	flag.BoolVar(&runner.config.PortSpray, pkg.SMART, false, "")
 	flag.BoolVar(&runner.Ping, "ping", false, "")
 	flag.BoolVar(&runner.Arp, "arp", false, "")
 	flag.StringVar(&runner.iface, "iface", "eth0", "")

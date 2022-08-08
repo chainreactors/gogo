@@ -106,9 +106,9 @@ func InitConfig(config *Config) *Config {
 	if config.SmartPort != "default" {
 		config.SmartPortList = ipcs.ParsePort(config.SmartPort)
 	} else {
-		if config.Mod == "s" {
+		if config.Mod == SMART {
 			config.SmartPortList = []string{"80"}
-		} else if SliceContains([]string{"ss", "sc", "f"}, config.Mod) {
+		} else if SliceContains([]string{SUPERSMART, SUPERSMARTB, "f"}, config.Mod) {
 			config.SmartPortList = []string{"icmp"}
 		}
 	}
@@ -141,7 +141,7 @@ func InitConfig(config *Config) *Config {
 
 func validate(config *Config) error {
 	// 一些命令行参数错误处理,如果check没过直接退出程序或输出警告
-	//if config.Mod == "ss" && config.ListFile != "" {
+	//if config.Mod == SUPERSMART && config.ListFile != "" {
 	//	fmt.Println("[-] error Smart . can not use File input")
 	//	os.Exit(0)
 	//}
@@ -219,7 +219,7 @@ func RunTask(config Config) {
 		createDefaultScan(config)
 	//case "a", "auto":
 	//	autoScan(config)
-	case "s", "f", "ss", "sc":
+	case SMART, "f", SUPERSMART, SUPERSMARTB:
 		if config.CIDRs != nil {
 			for _, ip := range config.CIDRs {
 				SmartMod(ip, config)
@@ -263,7 +263,7 @@ func guessSmartTime(cidr *ipcs.CIDR, config Config) int {
 	mask = cidr.Mask
 
 	var count int
-	if config.Mod == "s" || config.Mod == "sb" {
+	if config.Mod == SMART || config.Mod == SUPERSMARTC {
 		count = 2 << uint((32-mask)-1)
 	} else {
 		count = 2 << uint((32-mask)-9)

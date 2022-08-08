@@ -51,7 +51,7 @@ func (w *Workflow) PrepareConfig(rconfig Config) *Config {
 		config.FilePath = rconfig.FilePath
 	}
 
-	//if rconfig.FileOutputf == "default" && config.Mod == "sc" {
+	//if rconfig.FileOutputf == "default" && config.Mod == SUPERSMARTB {
 	//	config.FileOutputf = "raw"
 	//}
 
