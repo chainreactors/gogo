@@ -99,18 +99,10 @@ func (gen *IpGenerator) generatorDispatch(cidr *ipcs.CIDR, mod string) chan stri
 		case SMART, SUPERSMARTC:
 			if mask <= 24 {
 				gen.smartIpGenerator(cidr)
-				//} else {
-				//	gen.defaultIpGenerator(cidr)
 			}
 		case SUPERSMART, SUPERSMARTB:
 			if mask <= 16 {
 				gen.sSmartGenerator(cidr)
-				//} else if mask > 16 && mask <= 24 {
-				//	Log.Warnf("mask: %d, decline to smart mod", mask)
-				//	gen.smartIpGenerator(cidr)
-				//} else {
-				//	Log.Warnf("mask: %d, decline to default mod", mask)
-				//	gen.defaultIpGenerator(cidr)
 			}
 		default:
 			gen.defaultIpGenerator(cidr)
@@ -172,12 +164,6 @@ func (gen *targetGenerator) genFromSpray(cidrs ipcs.CIDRs, portlist []string) {
 			syncFile()
 		}
 
-		//default:
-		//	ch = gen.ipGenerator.generatorDispatch(cidrs.(ipcs.CIDR), "default")
-		//	for ip := range ch {
-		//		gen.ch <- targetConfig{ip: ip, port: port, hosts: gen.hostsMap[ip]}
-		//	}
-		//}
 		tmpPorts = append(tmpPorts, port)
 		if Opt.AliveSum-tmpalive > 0 {
 			if len(tmpPorts) >= 100 {
@@ -202,17 +188,9 @@ func (gen *targetGenerator) generatorDispatch(targets interface{}, portlist []st
 		case Results:
 			gen.genFromResult(targets.(Results))
 		default:
-			//ips := targets.(ipcs.CIDRs).Strings()
-			//addrs := ipcs.NewAddrs(ips, portlist)
 			if gen.spray { // 端口喷洒
-				//for addr := range addrs.GenerateWithPort(){
-				//	gen.ch <- targetConfig{addr: addr, hosts: gen.hostsMap[addr.IP.String()]}
-				//}
 				gen.genFromSpray(targets.(ipcs.CIDRs), portlist)
 			} else { // 默认模式 批量处理
-				//for addr := range addrs.GenerateWithIP(){
-				//	gen.ch <- targetConfig{addr: addr, hosts: gen.hostsMap[addr.IP.String()]}
-				//}
 				gen.genFromDefault(targets.(ipcs.CIDRs), portlist)
 			}
 		}

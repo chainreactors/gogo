@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"getitle/v1/pkg/utils"
 	. "github.com/chainreactors/files"
@@ -84,7 +85,8 @@ func (config *Config) InitIP() {
 			var host string
 			cidr, err := ipcs.ParseCIDR(ip)
 			if err != nil {
-				logs.Log.Warn("Parse Ip Failed, " + err.Error())
+				logs.Log.Warn("Parse Ip Failed, skipped, " + err.Error())
+				continue
 			}
 			config.CIDRs = append(config.CIDRs, cidr)
 			if cidr.IP.Host != "" {
@@ -151,11 +153,56 @@ func (config *Config) InitFile() error {
 	return nil
 }
 
-//func (config *Config) SyncFile() {
-//	if config.File != nil {
-//		config.File.SafeSync()
-//	}
-//}
+func (config *Config) Validate() error {
+	// 一些命令行参数错误处理,如果check没过直接退出程序或输出警告
+	legalFormat := []string{"url", "ip", "port", "frameworks", "framework", "vuln", "vulns", "protocol", "title", "target", "hash", "language", "host", "color", "c", "json", "j", "full", "jsonlines", "jl", "zombie"}
+	if config.FileOutputf != "default" {
+		for _, form := range strings.Split(config.FileOutputf, ",") {
+			if !utils.SliceContains(legalFormat, form) {
+				logs.Log.Warnf("illegal file output format: %s, Please use one or more of the following formats: %s", form, strings.Join(legalFormat, ", "))
+			}
+		}
+	}
+
+	if config.Outputf != "full" {
+		for _, form := range strings.Split(config.Outputf, ",") {
+			if !utils.SliceContains(legalFormat, form) {
+				logs.Log.Warnf("illegal output format: %s, Please use one or more of the following formats: %s", form, strings.Join(legalFormat, ", "))
+			}
+		}
+	}
+
+	var err error
+	if config.JsonFile != "" {
+		if config.Ports != "top1" {
+			logs.Log.Warn("json input can not config ports")
+		}
+		if config.Mod != "default" {
+			logs.Log.Warn("input json can not config . Mod,default scanning")
+		}
+	}
+
+	if config.IP == "" && config.ListFile == "" && config.JsonFile == "" && !config.IsJsonInput && !config.IsListInput { // 一些导致报错的参数组合
+		err = errors.New("cannot found target, please set -ip or -l or -j or stdin")
+	}
+
+	if config.JsonFile != "" && config.ListFile != "" {
+		err = errors.New("cannot set -j and -l flags at same time")
+	}
+
+	if !HasPingPriv() && (strings.Contains(config.Ports, "icmp") || strings.Contains(config.Ports, "ping") || utils.SliceContains(config.AliveSprayMod, "icmp")) {
+		logs.Log.Warn("current user is not root, icmp scan not work")
+	}
+
+	//if !Win && Root && (strings.Contains(config.Ports, "arp") || utils.SliceContains(config.AliveSprayMod, "arp")) {
+	//	logs.Log.Warn("current user is not root, arp scan maybe not work")
+	//}
+	//
+	//if Win && (strings.Contains(config.Ports, "arp") || utils.SliceContains(config.AliveSprayMod, "arp")) {
+	//	logs.Log.Warn("windows not support arp scan, skip all arp scan task")
+	//}
+	return err
+}
 
 func (config *Config) Close() {
 	if config.File != nil {
