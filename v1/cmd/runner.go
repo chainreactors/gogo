@@ -255,8 +255,11 @@ func (r *Runner) runWithCMD() {
 		Log.Warn("The result file has been specified, other files will not be created.")
 		config.Filename = GetFilename(config, config.FileOutputf)
 	}
-
-	RunTask(*InitConfig(config)) // 运行
+	preparedConfig, err := InitConfig(config)
+	if err != nil {
+		Fatal(err.Error())
+	}
+	RunTask(*preparedConfig) // 运行
 	r.close(config)
 }
 
@@ -299,8 +302,11 @@ func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) {
 				scan.RunOpt.Exploit = workflow.Exploit
 			}
 
-			config = InitConfig(config)
-			RunTask(*config) // 运行
+			preparedConfig, err := InitConfig(config)
+			if err != nil {
+				Fatal(err.Error())
+			}
+			RunTask(*preparedConfig) // 运行
 			r.close(config)
 			r.resetGlobals()
 		}

@@ -1,6 +1,7 @@
 package core
 
 import (
+	"fmt"
 	. "getitle/v1/internal/scan"
 	. "getitle/v1/pkg"
 	. "getitle/v1/pkg/utils"
@@ -15,10 +16,10 @@ var Opt = Options{
 	Noscan:   false,
 }
 
-func InitConfig(config *Config) *Config {
+func InitConfig(config *Config) (*Config, error) {
 	err := config.Validate()
 	if err != nil {
-		Fatal(err.Error())
+		return nil, err
 	}
 	// 初始化
 	config.Exploit = RunOpt.Exploit
@@ -54,7 +55,7 @@ func InitConfig(config *Config) *Config {
 	// 初始化文件操作
 	err = config.InitFile()
 	if err != nil {
-		Fatal(err.Error())
+		return nil, err
 	}
 	syncFile = func() {
 		if config.File != nil {
@@ -76,11 +77,14 @@ func InitConfig(config *Config) *Config {
 		case *SmartData:
 			config.IPlist = data.(*SmartData).Data
 		default:
-			Fatal("not support result type, maybe use -l flag")
+			return nil, fmt.Errorf("not support result type, maybe use -l flag")
 		}
 	}
 
-	config.InitIP()
+	err = config.InitIP()
+	if err != nil {
+		return nil, err
+	}
 	// 初始化端口配置
 	config.Portlist = ipcs.ParsePort(config.Ports)
 
@@ -127,7 +131,7 @@ func InitConfig(config *Config) *Config {
 	taskname := config.GetTargetName()
 	// 输出任务的基本信息
 	printTaskInfo(config, taskname)
-	return config
+	return config, nil
 }
 
 func printTaskInfo(config *Config, taskname string) {

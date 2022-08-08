@@ -68,7 +68,7 @@ type Config struct {
 	HostsMap       map[string][]string `json:"-"` // host映射表
 }
 
-func (config *Config) InitIP() {
+func (config *Config) InitIP() error {
 	config.HostsMap = make(map[string][]string)
 	// 优先处理ip
 	if config.IP != "" {
@@ -96,9 +96,10 @@ func (config *Config) InitIP() {
 
 		config.CIDRs = utils.Unique(config.CIDRs).(ipcs.CIDRs)
 		if len(config.CIDRs) == 0 {
-			utils.Fatal("all targets format error")
+			return fmt.Errorf("all targets format error")
 		}
 	}
+	return nil
 }
 
 func (config *Config) InitFile() error {
