@@ -211,13 +211,11 @@ func RunTask(config Config) {
 		createDefaultScan(config)
 	//case "a", "auto":
 	//	autoScan(config)
-	case SMART, "f", SUPERSMART, SUPERSMARTB:
+	case SMART, SUPERSMART, SUPERSMARTB:
 		if config.CIDRs != nil {
 			for _, ip := range config.CIDRs {
 				SmartMod(ip, config)
 			}
-			//} else {
-			//	createSmartScan(config.IP, config)
 		}
 	default:
 		createDefaultScan(config)
