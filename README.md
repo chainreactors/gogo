@@ -94,7 +94,7 @@ example: 1.1.1.1
 
 
 ### release
-完全版本打包下载: https://github.com/chainreactors/getitle/releases/latest
+完全版本打包下载: https://github.com/chainreactors/gogo/releases/latest
 
 理论上支持全操作系统, 需要编译某些稍微罕见的特殊版本可以联系我帮忙编译.
 
@@ -400,7 +400,7 @@ SMB
 ### 手动编译
 下载项目
 
-`git clone --recurse-submodules https://github.com/chainreactors/getitle`
+`git clone --recurse-submodules https://github.com/chainreactors/gogo`
 
 生成 template.go
 

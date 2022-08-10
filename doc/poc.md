@@ -137,7 +137,7 @@ requests:
 
 ## 提交
 
-官方的poc仓库位于 https://github.com/chainreactors/getitle-templates/tree/master/nuclei
+官方的poc仓库位于 https://github.com/chainreactors/gogo-templates/tree/master/nuclei
 
 提交对应的pr, 将poc放到合适的文件夹下. 下次release就会自动编译到二进制文件中.
 
@@ -150,11 +150,11 @@ requests:
 
 ### pull request
 
-首先在github上点击fork, fork getitle-templates 到自己的账号下
+首先在github上点击fork, fork gogo-templates 到自己的账号下
 
 然后 git clone fork之后的repo
 
-将编写好的poc 放到getitle-templates/nuclei/对应的目录下.
+将编写好的poc 放到gogo-templates/nuclei/对应的目录下.
 
 在本地的文件夹下使用, git命令
 
