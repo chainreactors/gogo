@@ -2,9 +2,9 @@ package core
 
 import (
 	"fmt"
-	. "getitle/v1/internal/scan"
-	. "getitle/v1/pkg"
-	. "getitle/v1/pkg/utils"
+	. "github.com/chainreactors/gogo/v1/internal/scan"
+	. "github.com/chainreactors/gogo/v1/pkg"
+	. "github.com/chainreactors/gogo/v1/pkg/utils"
 	"github.com/chainreactors/ipcs"
 	. "github.com/chainreactors/logs"
 	"os"

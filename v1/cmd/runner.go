@@ -2,11 +2,11 @@ package cmd
 
 import (
 	"fmt"
-	. "getitle/v1/internal/core"
-	"getitle/v1/internal/scan"
-	. "getitle/v1/pkg"
-	nucleihttp "getitle/v1/pkg/nuclei/protocols/http"
-	. "getitle/v1/pkg/utils"
+	. "github.com/chainreactors/gogo/v1/internal/core"
+	. "github.com/chainreactors/gogo/v1/internal/scan"
+	. "github.com/chainreactors/gogo/v1/pkg"
+	nucleihttp "github.com/chainreactors/gogo/v1/pkg/nuclei/protocols/http"
+	. "github.com/chainreactors/gogo/v1/pkg/utils"
 	. "github.com/chainreactors/logs"
 	"net"
 	"net/http"
@@ -130,18 +130,18 @@ func (r *Runner) init() {
 	// 初始化各种全局变量
 	// 初始化指纹优先级
 	if r.Version {
-		scan.RunOpt.VersionLevel = 1
+		RunOpt.VersionLevel = 1
 	} else if r.Version2 {
-		scan.RunOpt.VersionLevel = 2
+		RunOpt.VersionLevel = 2
 	} else {
-		scan.RunOpt.VersionLevel = 0
+		RunOpt.VersionLevel = 0
 	}
 
 	// 初始化漏洞
 	if r.Exploit {
-		scan.RunOpt.Exploit = "auto"
+		RunOpt.Exploit = "auto"
 	} else {
-		scan.RunOpt.Exploit = r.ExploitName
+		RunOpt.Exploit = r.ExploitName
 	}
 
 	if r.NoScan {
@@ -157,7 +157,7 @@ func (r *Runner) init() {
 			Log.Warn("no interface name input, use default interface name: eth0")
 		}
 		var err error
-		scan.RunOpt.Interface, err = net.InterfaceByName(r.iface)
+		RunOpt.Interface, err = net.InterfaceByName(r.iface)
 		if err != nil {
 			Log.Warn("interface error, " + err.Error())
 			//Log.Warn("interface error, " + err.Error())
@@ -287,19 +287,19 @@ func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) {
 			}
 
 			if r.Version {
-				scan.RunOpt.VersionLevel = 1
+				RunOpt.VersionLevel = 1
 			} else {
-				scan.RunOpt.VersionLevel = workflow.Version
+				RunOpt.VersionLevel = workflow.Version
 			}
 
-			if scan.RunOpt.Exploit != "none" {
+			if RunOpt.Exploit != "none" {
 				if r.Exploit {
-					scan.RunOpt.Exploit = "auto"
+					RunOpt.Exploit = "auto"
 				} else {
-					scan.RunOpt.Exploit = r.ExploitName
+					RunOpt.Exploit = r.ExploitName
 				}
 			} else {
-				scan.RunOpt.Exploit = workflow.Exploit
+				RunOpt.Exploit = workflow.Exploit
 			}
 
 			preparedConfig, err := InitConfig(config)
@@ -326,7 +326,7 @@ func (r *Runner) close(config *Config) {
 	}
 
 	// 任务统计
-	Log.Importantf("Alive sum: %d, Target sum : %d", Opt.AliveSum, scan.RunOpt.Sum)
+	Log.Importantf("Alive sum: %d, Target sum : %d", Opt.AliveSum, RunOpt.Sum)
 	Log.Important("Totally: " + time.Since(r.start).String())
 
 	// 输出文件名
@@ -351,8 +351,8 @@ func (r *Runner) close(config *Config) {
 
 func (r *Runner) resetGlobals() {
 	Opt.Noscan = false
-	scan.RunOpt.Exploit = "none"
-	scan.RunOpt.VersionLevel = 0
+	RunOpt.Exploit = "none"
+	RunOpt.VersionLevel = 0
 }
 
 func printConfigs(t string) {

@@ -3,8 +3,8 @@ package cmd
 import (
 	"flag"
 	"fmt"
-	. "getitle/v1/internal/scan"
-	"getitle/v1/pkg"
+	"github.com/chainreactors/gogo/v1/internal/scan"
+	"github.com/chainreactors/gogo/v1/pkg"
 	"github.com/chainreactors/logs"
 	"github.com/panjf2000/ants/v2"
 	"os"
@@ -60,9 +60,9 @@ func CMD() {
 	flag.BoolVar(&runner.Ping, "ping", false, "")
 	flag.BoolVar(&runner.Arp, "arp", false, "")
 	flag.StringVar(&runner.iface, "iface", "eth0", "")
-	flag.IntVar(&RunOpt.Delay, "d", 2, "")
-	flag.IntVar(&RunOpt.HttpsDelay, "D", 2, "")
-	flag.StringVar(&RunOpt.SuffixStr, "suffix", "", "")
+	flag.IntVar(&scan.RunOpt.Delay, "d", 2, "")
+	flag.IntVar(&scan.RunOpt.HttpsDelay, "D", 2, "")
+	flag.StringVar(&scan.RunOpt.SuffixStr, "suffix", "", "")
 	flag.Var(&runner.payloads, "payload", "")
 	flag.Var(&runner.extract, "extract", "")
 	flag.StringVar(&runner.extracts, "extracts", "", "")
@@ -71,7 +71,6 @@ func CMD() {
 	flag.BoolVar(&runner.Exploit, "e", false, "")
 	flag.StringVar(&runner.ExploitName, "E", "none", "")
 	flag.StringVar(&runner.ExploitFile, "ef", "", "")
-
 	// OTHER
 	key := flag.String("k", "", "")
 	flag.StringVar(&runner.Printer, "P", "", "")

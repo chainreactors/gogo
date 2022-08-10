@@ -1,7 +1,7 @@
 package protocols
 
 import (
-	"getitle/v1/pkg/nuclei"
+	"github.com/chainreactors/gogo/v1/pkg/utils"
 )
 
 // operators contains the operators that can be applied on protocols
@@ -95,7 +95,7 @@ func (operators *Operators) Execute(data map[string]interface{}, match matchFunc
 			if extractor.Name != "" {
 				result.Extracts[extractor.Name] = extractorResults
 			} else {
-				result.Extracts[nuclei.ToString(tmpname)] = extractorResults
+				result.Extracts[utils.ToString(tmpname)] = extractorResults
 				tmpname++
 			}
 		}

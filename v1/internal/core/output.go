@@ -3,9 +3,9 @@ package core
 import (
 	"encoding/json"
 	"fmt"
-	. "getitle/v1/pkg"
-	"getitle/v1/pkg/utils"
 	. "github.com/chainreactors/files"
+	. "github.com/chainreactors/gogo/v1/pkg"
+	"github.com/chainreactors/gogo/v1/pkg/utils"
 	"os"
 	"strings"
 )

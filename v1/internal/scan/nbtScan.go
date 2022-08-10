@@ -2,7 +2,7 @@ package scan
 
 import (
 	"encoding/hex"
-	"getitle/v1/pkg"
+	"github.com/chainreactors/gogo/v1/pkg"
 	"strconv"
 	"strings"
 )

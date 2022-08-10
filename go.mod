@@ -1,4 +1,4 @@
-module getitle
+module github.com/chainreactors/gogo
 
 go 1.17
 

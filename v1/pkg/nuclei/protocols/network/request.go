@@ -3,8 +3,9 @@ package network
 import (
 	"encoding/hex"
 	"errors"
-	"getitle/v1/pkg/nuclei"
-	protocols "getitle/v1/pkg/nuclei/protocols"
+	"github.com/chainreactors/gogo/v1/pkg/nuclei"
+	protocols "github.com/chainreactors/gogo/v1/pkg/nuclei/protocols"
+	"github.com/chainreactors/gogo/v1/pkg/utils"
 	"io"
 	"net"
 	"net/url"
@@ -24,7 +25,7 @@ func (request *Request) getMatchPart(part string, data protocols.InternalEvent) 
 	if !ok {
 		return "", false
 	}
-	itemStr := nuclei.ToString(item)
+	itemStr := utils.ToString(item)
 
 	return itemStr, true
 }
@@ -70,7 +71,7 @@ func (r *Request) ExecuteWithResults(input string, dynamicValues map[string]inte
 	if err != nil {
 		return err
 	}
-	dynamicValues = nuclei.MergeMaps(dynamicValues, map[string]interface{}{"Hostname": address})
+	dynamicValues = utils.MergeMaps(dynamicValues, map[string]interface{}{"Hostname": address})
 	for _, kv := range r.addresses {
 		variables := generateNetworkVariables(address)
 		actualAddress := nuclei.Replace(kv.address, variables)
@@ -100,7 +101,7 @@ func (r *Request) executeAddress(variables map[string]interface{}, actualAddress
 			if !ok {
 				break
 			}
-			value = nuclei.MergeMaps(value, payloads)
+			value = utils.MergeMaps(value, payloads)
 			if err := r.executeRequestWithPayloads(variables, actualAddress, address, input, shouldUseTLS, value, dynamicValues, callback); err != nil {
 				return err
 			}

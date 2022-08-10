@@ -2,7 +2,7 @@ package core
 
 import (
 	"fmt"
-	. "getitle/v1/pkg"
+	. "github.com/chainreactors/gogo/v1/pkg"
 	"strings"
 )
 

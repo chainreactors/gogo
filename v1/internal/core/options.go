@@ -2,7 +2,7 @@ package core
 
 import (
 	"bytes"
-	"getitle/v1/pkg/utils"
+	"github.com/chainreactors/gogo/v1/pkg/utils"
 	"io/ioutil"
 	"os"
 )

@@ -2,7 +2,7 @@ package fingers
 
 import (
 	"fmt"
-	"getitle/v1/pkg/dsl"
+	"github.com/chainreactors/gogo/v1/pkg/dsl"
 	"github.com/chainreactors/logs"
 	"regexp"
 	"strings"

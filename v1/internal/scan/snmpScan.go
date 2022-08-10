@@ -1,12 +1,12 @@
 package scan
 
 import (
-	"getitle/v1/pkg/fingers"
 	"github.com/alouca/gosnmp"
+	"github.com/chainreactors/gogo/v1/pkg/fingers"
 	"strings"
 
 	//"encoding/hex"
-	"getitle/v1/pkg"
+	"github.com/chainreactors/gogo/v1/pkg"
 )
 
 func snmpScan(result *pkg.Result) {

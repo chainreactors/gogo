@@ -2,7 +2,7 @@ package scan
 
 import (
 	"fmt"
-	"getitle/v1/pkg"
+	"github.com/chainreactors/gogo/v1/pkg"
 	"github.com/chainreactors/logs"
 	"net/http"
 	"strings"

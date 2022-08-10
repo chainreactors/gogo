@@ -6,7 +6,7 @@ package scan
 //Github: https://github.com/k8gege/LadonGo
 
 import (
-	"getitle/v1/pkg"
+	"github.com/chainreactors/gogo/v1/pkg"
 	"github.com/chainreactors/logs"
 	"net"
 	"time"

@@ -1,4 +1,4 @@
-# Getitle
+# gogo
 一个资产探测扫描器. 
 
 README Version 2.5.0
@@ -6,7 +6,7 @@ README Version 2.5.0
 ## Usage
 
 ```
-Usage of ./getitle:
+Usage of ./gogo:
 
    -k string   key,启动密码(必须输入) 
    -debug bool  输出每个请求的错误日志, 用来debug. 可以附加-proxy url, 使用代理调试指纹或poc(单独-proxy无法使用)
@@ -318,7 +318,7 @@ Exploit: none, Version level: 0
 
 **主动漏洞探测**
 
-getitle并非漏扫工具,因此不会支持sql注入,xss之类的通用漏洞探测功能.
+gogo并非漏扫工具,因此不会支持sql注入,xss之类的通用漏洞探测功能.
 
 为了支持内网更好的自动化, 集成了nuclei的poc, 可以用来编写poc批量执行某些特定的扫描任务, 一级一些默认口令登录的poc
 
@@ -334,7 +334,7 @@ getitle并非漏扫工具,因此不会支持sql注入,xss之类的通用漏洞�
 
 **高级启发式扫描** 
 
-[见getitle设计文档3-启发式扫描](doc/getitle设计文档3-启发式扫描.md)
+[见gogo设计文档3-启发式扫描](doc/gogo设计文档3-启发式扫描.md)
 
 
 **特殊端口支持**

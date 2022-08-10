@@ -1,18 +1,18 @@
 # 编写POC
 
-getitle的poc采用了nuclei的poc, 但删除了部分nuclei的语法. 例如dsl. 并且有部分较新的nuclei语法暂不支持. 
+gogo的poc采用了nuclei的poc, 但删除了部分nuclei的语法. 例如dsl. 并且有部分较新的nuclei语法暂不支持. 
 
-getitle 目前支持tcp(暂不支持tls tcp)与http协议的绝大部分nuclei poc
+gogo 目前支持tcp(暂不支持tls tcp)与http协议的绝大部分nuclei poc
 
-## getitle与nuclei编写poc的注意事项
+## gogo与nuclei编写poc的注意事项
 nuclei 官方的poc编写教程 https://nuclei.projectdiscovery.io/templating-guide/
 
-getitle常用于特殊环境下, 因此删除了许多nuclei原有的功能, 例如dsl, oast以及除了http与tcp协议之外的漏洞探测.
+gogo常用于特殊环境下, 因此删除了许多nuclei原有的功能, 例如dsl, oast以及除了http与tcp协议之外的漏洞探测.
 
-nuclei更新较快, 一般情况下getitle会落后nuclei最新版几个月, 所以建议只使用基本的规则, 编写最简的poc, 保证兼容性.
+nuclei更新较快, 一般情况下gogo会落后nuclei最新版几个月, 所以建议只使用基本的规则, 编写最简的poc, 保证兼容性.
 
 ### 明确删除并且后续不会添加的功能
-部分功能会以简化的形式重新加入到getitle中
+部分功能会以简化的形式重新加入到gogo中
 1. dsl 包括match中dsl 以及request的例如`{{base64(base64string)}}`这样的动态生成的功能. 通过encode tag简单代替
 2. oast与OOB,这类需要外带的功能, 可以通过探测接口是否存在做一个大致的匹配.
 3. workflow, 通过chain简单代替
@@ -25,7 +25,7 @@ nuclei更新较快, 一般情况下getitle会落后nuclei最新版几个月, 所
 2. http redirect
 3. variables
 4. Helper Functions 会简化之后再加入
-### nuclei中没有, 只能在getitle中使用的功能
+### nuclei中没有, 只能在gogo中使用的功能
 1. finger字段, 能绑定finger, 提供除了tag之外的绑定finger办法
    ```
    id: poc-id
@@ -41,9 +41,9 @@ nuclei更新较快, 一般情况下getitle会落后nuclei最新版几个月, 所
 
 https://github.com/projectdiscovery/nuclei-templates
 
-大部分poc仅需简单修改即可在getitle中使用.
+大部分poc仅需简单修改即可在gogo中使用.
 
-### 示例  迁移apollo-login poc 到getitle
+### 示例  迁移apollo-login poc 到gogo
 
 https://github.com/projectdiscovery/nuclei-templates/blob/d6636f9169920d3ccefc692bc1a6136e2deb9205/default-logins/apollo/apollo-default-login.yaml
 
@@ -55,9 +55,9 @@ https://github.com/projectdiscovery/nuclei-templates/blob/d6636f9169920d3ccefc69
 
 这个poc需要进行一些删减和改动. 
 
-1. 删除一些header信息, 并且根据getitle的指纹重新添加tags
+1. 删除一些header信息, 并且根据gogo的指纹重新添加tags
 2. 减少不必要的发包, apollo实际上只需要第一个signin的包即可确定是否成功
-3. dsl在getitle中已删除, 因为dsl不是必要功能, 大部分场景都能通过正则实现, dsl只是减少复杂场景的使用难度. 因此, 我们可以把这段dsl修改为匹配固定值
+3. dsl在gogo中已删除, 因为dsl不是必要功能, 大部分场景都能通过正则实现, dsl只是减少复杂场景的使用难度. 因此, 我们可以把这段dsl修改为匹配固定值
 
 
 
@@ -118,7 +118,7 @@ requests:
 
 ## 测试
 
-因为getitle为了缩减体积, 仅使用了标准json库, 所以需要先将yaml转为json
+因为gogo为了缩减体积, 仅使用了标准json库, 所以需要先将yaml转为json
 
 使用自带的脚本 `yaml2json.py`.
 
@@ -168,4 +168,4 @@ requests:
 
 然后点击pull request, 将本地的commit 提交至官方的仓库.
 
-维护者看到pr或者issue后会review之后合并. 下个版本的getitle就能使用你提交的poc了.
+维护者看到pr或者issue后会review之后合并. 下个版本的gogo就能使用你提交的poc了.

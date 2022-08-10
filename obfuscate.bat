@@ -1,4 +1,4 @@
-set name=getitle
+set name=gogo
 set cert_domain=www.dbappsecurity.com.cn
 
 @REM  go strip 去除编译信息

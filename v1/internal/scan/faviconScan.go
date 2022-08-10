@@ -1,9 +1,9 @@
 package scan
 
 import (
-	. "getitle/v1/pkg"
-	"getitle/v1/pkg/dsl"
-	. "getitle/v1/pkg/fingers"
+	. "github.com/chainreactors/gogo/v1/pkg"
+	"github.com/chainreactors/gogo/v1/pkg/dsl"
+	"github.com/chainreactors/gogo/v1/pkg/fingers"
 	"github.com/chainreactors/logs"
 )
 
@@ -27,14 +27,14 @@ func faviconScan(result *Result) {
 	// MD5 hash匹配
 	md5h := dsl.Md5Hash(content)
 	if Md5Fingers[md5h] != "" {
-		result.AddFramework(&Framework{Name: Md5Fingers[md5h], From: "ico"})
+		result.AddFramework(&fingers.Framework{Name: Md5Fingers[md5h], From: "ico"})
 		return
 	}
 
 	// mmh3 hash匹配,指纹来自kscan
 	mmh3h := dsl.Mmh3Hash32(content)
 	if Mmh3Fingers[mmh3h] != "" {
-		result.AddFramework(&Framework{Name: Mmh3Fingers[mmh3h], From: "ico"})
+		result.AddFramework(&fingers.Framework{Name: Mmh3Fingers[mmh3h], From: "ico"})
 		return
 	}
 	return

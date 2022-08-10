@@ -1,9 +1,9 @@
 package scan
 
 import (
-	. "getitle/v1/pkg"
-	"getitle/v1/pkg/dsl"
-	. "getitle/v1/pkg/fingers"
+	. "github.com/chainreactors/gogo/v1/pkg"
+	"github.com/chainreactors/gogo/v1/pkg/dsl"
+	"github.com/chainreactors/gogo/v1/pkg/fingers"
 	"github.com/chainreactors/logs"
 	"net/http"
 )
@@ -17,7 +17,7 @@ func hostScan(result *Result) {
 	}
 
 	req, _ := http.NewRequest("GET", url, nil)
-	vuln := &Vuln{Name: "host", Detail: map[string]interface{}{}, Severity: "info"}
+	vuln := &fingers.Vuln{Name: "host", Detail: map[string]interface{}{}, Severity: "info"}
 	for _, host := range result.HttpHosts {
 		req.Host = host
 		resp, err := conn.Do(req)

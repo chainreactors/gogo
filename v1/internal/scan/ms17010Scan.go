@@ -2,8 +2,8 @@ package scan
 
 import (
 	"encoding/binary"
-	. "getitle/v1/pkg"
-	. "getitle/v1/pkg/fingers"
+	. "github.com/chainreactors/gogo/v1/pkg"
+	"github.com/chainreactors/gogo/v1/pkg/fingers"
 	"strings"
 )
 
@@ -94,7 +94,7 @@ func ms17010Scan(result *Result) {
 
 	if reply[9] == 0x05 && reply[10] == 0x02 && reply[11] == 0x00 && reply[12] == 0xc0 {
 		result.Title = strings.Replace(os, "\x00", "", -1)
-		result.AddVuln(&Vuln{Name: "MS17-010", Severity: "critical"})
+		result.AddVuln(&fingers.Vuln{Name: "MS17-010", Severity: "critical"})
 
 		trans2SessionSetupRequest[28] = treeID[0]
 		trans2SessionSetupRequest[29] = treeID[1]
@@ -107,7 +107,7 @@ func ms17010Scan(result *Result) {
 			return
 		}
 		if reply[34] == 0x51 {
-			result.AddVuln(&Vuln{Name: "DOUBLEPULSAR", Severity: "critical"})
+			result.AddVuln(&fingers.Vuln{Name: "DOUBLEPULSAR", Severity: "critical"})
 		}
 	}
 	return

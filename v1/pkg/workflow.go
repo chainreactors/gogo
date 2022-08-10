@@ -2,7 +2,7 @@ package pkg
 
 import (
 	"encoding/json"
-	"getitle/v1/pkg/utils"
+	"github.com/chainreactors/gogo/v1/pkg/utils"
 )
 
 type Workflow struct {

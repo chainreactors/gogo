@@ -1,5 +1,5 @@
 ## description
-getitle 保留了大量可拓展的接口, 例如指纹, poc/exp, 工作流, 端口.
+gogo 保留了大量可拓展的接口, 例如指纹, poc/exp, 工作流, 端口.
 
 这些预设保存在`v1/config`目录下, 以yaml的形式保存与编辑, 但在编译的时候, 通过`updateconfig.py`自动将yaml转为压缩后的json格式. 兼顾方便与性能.
 

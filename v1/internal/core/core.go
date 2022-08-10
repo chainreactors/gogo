@@ -2,8 +2,8 @@ package core
 
 import (
 	"fmt"
-	"getitle/v1/internal/scan"
-	. "getitle/v1/pkg"
+	"github.com/chainreactors/gogo/v1/internal/scan"
+	. "github.com/chainreactors/gogo/v1/pkg"
 	"github.com/chainreactors/ipcs"
 	. "github.com/chainreactors/logs"
 	"github.com/panjf2000/ants/v2"

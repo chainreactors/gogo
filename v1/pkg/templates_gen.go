@@ -6,7 +6,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	. "getitle/v1/pkg"
 	"io"
 	"os"
 	"path/filepath"

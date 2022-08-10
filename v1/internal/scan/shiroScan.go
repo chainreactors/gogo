@@ -1,8 +1,8 @@
 package scan
 
 import (
-	. "getitle/v1/pkg"
-	. "getitle/v1/pkg/fingers"
+	. "github.com/chainreactors/gogo/v1/pkg"
+	"github.com/chainreactors/gogo/v1/pkg/fingers"
 	"github.com/chainreactors/logs"
 	"net/http"
 	"strings"
@@ -23,7 +23,7 @@ func shiroScan(result *Result) {
 	logs.Log.Debug("http request shiro " + url)
 	deleteme := resp.Header.Get("Set-Cookie")
 	if strings.Contains(deleteme, "=deleteMe") {
-		result.AddFramework(&Framework{Name: "shiro", From: "active"})
+		result.AddFramework(&fingers.Framework{Name: "shiro", From: "active"})
 		isshiro = true
 	} else {
 		return
@@ -39,7 +39,7 @@ func shiroScan(result *Result) {
 
 	deleteme = resp.Header.Get("Set-Cookie")
 	if isshiro && !strings.Contains(deleteme, "deleteMe") {
-		result.AddVuln(&Vuln{Name: "shiro_550", Payload: map[string]interface{}{"key": "kPH+bIxk5D2deZiIxcaaaA=="}, Severity: "critical"})
+		result.AddVuln(&fingers.Vuln{Name: "shiro_550", Payload: map[string]interface{}{"key": "kPH+bIxk5D2deZiIxcaaaA=="}, Severity: "critical"})
 	}
 	return
 }

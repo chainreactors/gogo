@@ -1,9 +1,9 @@
 package scan
 
 import (
-	"getitle/v1/pkg"
-	"getitle/v1/pkg/fingers"
-	"getitle/v1/pkg/utils"
+	"github.com/chainreactors/gogo/v1/pkg"
+	"github.com/chainreactors/gogo/v1/pkg/fingers"
+	"github.com/chainreactors/gogo/v1/pkg/utils"
 	"github.com/chainreactors/logs"
 	"strings"
 )

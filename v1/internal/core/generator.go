@@ -1,7 +1,7 @@
 package core
 
 import (
-	. "getitle/v1/pkg"
+	. "github.com/chainreactors/gogo/v1/pkg"
 	"github.com/chainreactors/ipcs"
 	. "github.com/chainreactors/logs"
 	"strings"
