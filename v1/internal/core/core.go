@@ -82,7 +82,10 @@ func DefaultMod(targets interface{}, config Config) {
 			Log.Debugf("%s tcp stat: %s, errmsg: %s", result.GetTarget(), portstat[result.ErrStat], result.Error)
 		}
 		wgs.Done()
-	})
+	}, ants.WithPanicHandler(func(error interface{}) {
+		Log.Errorf("unexcept error %v", error)
+		wgs.Done()
+	}))
 	defer scanPool.Release()
 
 	for t := range targetCh {

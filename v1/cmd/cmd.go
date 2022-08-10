@@ -6,7 +6,6 @@ import (
 	"github.com/chainreactors/gogo/v1/internal/scan"
 	"github.com/chainreactors/gogo/v1/pkg"
 	"github.com/chainreactors/logs"
-	"github.com/panjf2000/ants/v2"
 	"os"
 	"strings"
 )
@@ -15,7 +14,6 @@ var ver = ""
 var k = ""
 
 func CMD() {
-	defer ants.Release()
 	//connected = checkconn()
 	if !strings.Contains(strings.Join(os.Args, ""), k) {
 		//inforev()
