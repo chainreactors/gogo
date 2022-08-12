@@ -5,9 +5,9 @@ import (
 	"bytes"
 	"encoding/hex"
 	"errors"
-	. "getitle/v1/pkg"
-	"getitle/v1/pkg/utils"
 	"github.com/M09ic/go-ntlmssp"
+	. "github.com/chainreactors/gogo/v1/pkg"
+	"github.com/chainreactors/gogo/v1/pkg/utils"
 )
 
 var v1d1 = Decode("YmBgaP0f7OtUxMDAwCARfIIBBfz/B6aSGJgCnBX8XEPC/YO8FQKC/N2DHH0VDPUMGJh8HP18Hf3AzPDMvJT88mKFtPwihfD8ouz0ovzSgmIFYz3DRAYmH19DPaMIAwMjmBYjPUMGJr8QBR9fBQM9QyMGAAAAAP//")
@@ -46,8 +46,6 @@ func smbScan(result *Result) {
 	//ff534d42 SMBv1的标示
 	//fe534d42 SMBv2的标示
 	//先发送探测SMBv1的payload，不支持的SMBv1的时候返回为空，然后尝试发送SMBv2的探测数据包
-	//if hex.EncodeToString(r1[4:8]) == "ff534d42" {
-	//ret, err = smb1Scan(target)
 	ret, err = smb1Scan(target)
 	if err != nil && err.Error() == "conn failed" {
 		return

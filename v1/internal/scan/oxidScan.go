@@ -1,7 +1,7 @@
 package scan
 
 import (
-	"getitle/v1/pkg"
+	"github.com/chainreactors/gogo/v1/pkg"
 	"strings"
 )
 
@@ -14,8 +14,6 @@ func oxidScan(result *pkg.Result) {
 	target := result.GetTarget()
 	conn, err := pkg.TcpSocketConn(target, RunOpt.Delay)
 	if err != nil {
-
-		//fmt.Println(err)
 		result.Error = err.Error()
 		return
 	}
@@ -26,10 +24,12 @@ func oxidScan(result *pkg.Result) {
 	if err != nil {
 		return
 	}
+
 	recv, err = pkg.SocketSend(conn, oxid2, 4096)
 	if err != nil {
 		return
 	}
+
 	recvStr := string(recv)
 	if len(recvStr) < 42 {
 		return

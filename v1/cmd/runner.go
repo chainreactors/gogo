@@ -2,12 +2,15 @@ package cmd
 
 import (
 	"fmt"
-	. "getitle/v1/internal/core"
-	"getitle/v1/internal/scan"
-	. "getitle/v1/pkg"
-	. "getitle/v1/pkg/utils"
+	. "github.com/chainreactors/gogo/v1/internal/core"
+	. "github.com/chainreactors/gogo/v1/internal/scan"
+	. "github.com/chainreactors/gogo/v1/pkg"
+	nucleihttp "github.com/chainreactors/gogo/v1/pkg/nuclei/protocols/http"
+	. "github.com/chainreactors/gogo/v1/pkg/utils"
 	. "github.com/chainreactors/logs"
 	"net"
+	"net/http"
+	"net/url"
 	"os"
 	"regexp"
 	"strings"
@@ -50,6 +53,7 @@ type Runner struct {
 	NoScan            bool
 	IsWorkFlow        bool
 	Debug             bool
+	Proxy             string
 	iface             string
 	start             time.Time
 	config            Config
@@ -100,6 +104,20 @@ func (r *Runner) preInit() bool {
 		return false
 	}
 
+	if r.Proxy != "" {
+		if !r.Debug {
+			Log.Error("-proxy is debug only flag, please add -debug. skipped proxy")
+		} else {
+			Log.Importantf("DEBUG ONLY, set http proxy: " + r.Proxy)
+			uri, err := url.Parse(r.Proxy)
+			if err == nil {
+				Proxy = http.ProxyURL(uri)
+				nucleihttp.Proxy = Proxy
+			} else {
+				Log.Warnf("parse proxy error %s, skip proxy!", err.Error())
+			}
+		}
+	}
 	//if r.UploadFile != "" {
 	//	// 指定上传文件
 	//	uploadfiles(strings.Split(r.UploadFile, ","))
@@ -112,18 +130,18 @@ func (r *Runner) init() {
 	// 初始化各种全局变量
 	// 初始化指纹优先级
 	if r.Version {
-		scan.RunOpt.VersionLevel = 1
+		RunOpt.VersionLevel = 1
 	} else if r.Version2 {
-		scan.RunOpt.VersionLevel = 2
+		RunOpt.VersionLevel = 2
 	} else {
-		scan.RunOpt.VersionLevel = 0
+		RunOpt.VersionLevel = 0
 	}
 
 	// 初始化漏洞
 	if r.Exploit {
-		scan.RunOpt.Exploit = "auto"
+		RunOpt.Exploit = "auto"
 	} else {
-		scan.RunOpt.Exploit = r.ExploitName
+		RunOpt.Exploit = r.ExploitName
 	}
 
 	if r.NoScan {
@@ -139,7 +157,7 @@ func (r *Runner) init() {
 			Log.Warn("no interface name input, use default interface name: eth0")
 		}
 		var err error
-		scan.RunOpt.Interface, err = net.InterfaceByName(r.iface)
+		RunOpt.Interface, err = net.InterfaceByName(r.iface)
 		if err != nil {
 			Log.Warn("interface error, " + err.Error())
 			//Log.Warn("interface error, " + err.Error())
@@ -180,7 +198,7 @@ func (r *Runner) prepareConfig(config Config) *Config {
 		config.AliveSprayMod = append(config.AliveSprayMod, "icmp")
 	}
 
-	if config.Mod == "sc" {
+	if config.Mod == SUPERSMARTB {
 		config.FileOutputf = "raw"
 	}
 
@@ -237,8 +255,11 @@ func (r *Runner) runWithCMD() {
 		Log.Warn("The result file has been specified, other files will not be created.")
 		config.Filename = GetFilename(config, config.FileOutputf)
 	}
-
-	RunTask(*InitConfig(config)) // 运行
+	preparedConfig, err := InitConfig(config)
+	if err != nil {
+		Fatal(err.Error())
+	}
+	RunTask(*preparedConfig) // 运行
 	r.close(config)
 }
 
@@ -266,23 +287,26 @@ func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) {
 			}
 
 			if r.Version {
-				scan.RunOpt.VersionLevel = 1
+				RunOpt.VersionLevel = 1
 			} else {
-				scan.RunOpt.VersionLevel = workflow.Version
+				RunOpt.VersionLevel = workflow.Version
 			}
 
-			if scan.RunOpt.Exploit != "none" {
+			if RunOpt.Exploit != "none" {
 				if r.Exploit {
-					scan.RunOpt.Exploit = "auto"
+					RunOpt.Exploit = "auto"
 				} else {
-					scan.RunOpt.Exploit = r.ExploitName
+					RunOpt.Exploit = r.ExploitName
 				}
 			} else {
-				scan.RunOpt.Exploit = workflow.Exploit
+				RunOpt.Exploit = workflow.Exploit
 			}
 
-			config = InitConfig(config)
-			RunTask(*config) // 运行
+			preparedConfig, err := InitConfig(config)
+			if err != nil {
+				Fatal(err.Error())
+			}
+			RunTask(*preparedConfig) // 运行
 			r.close(config)
 			r.resetGlobals()
 		}
@@ -302,7 +326,7 @@ func (r *Runner) close(config *Config) {
 	}
 
 	// 任务统计
-	Log.Importantf("Alive sum: %d, Target sum : %d", Opt.AliveSum, scan.RunOpt.Sum)
+	Log.Importantf("Alive sum: %d, Target sum : %d", Opt.AliveSum, RunOpt.Sum)
 	Log.Important("Totally: " + time.Since(r.start).String())
 
 	// 输出文件名
@@ -327,8 +351,8 @@ func (r *Runner) close(config *Config) {
 
 func (r *Runner) resetGlobals() {
 	Opt.Noscan = false
-	scan.RunOpt.Exploit = "none"
-	scan.RunOpt.VersionLevel = 0
+	RunOpt.Exploit = "none"
+	RunOpt.VersionLevel = 0
 }
 
 func printConfigs(t string) {

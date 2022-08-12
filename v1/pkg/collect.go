@@ -1,15 +1,14 @@
 package pkg
 
 import (
-	"getitle/v1/pkg/dsl"
-	utils2 "getitle/v1/pkg/utils"
+	"github.com/chainreactors/gogo/v1/pkg/dsl"
+	utils2 "github.com/chainreactors/gogo/v1/pkg/utils"
 	"net/http"
 	"strings"
 )
 
 func CollectSocketInfo(result *Result, socketContent []byte) {
 	content := string(socketContent)
-	result.Content = content
 	ishttp, statuscode := GetStatusCode(content)
 	if ishttp {
 		var body string

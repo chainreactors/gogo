@@ -4,11 +4,15 @@ import (
 	"crypto/tls"
 	"net"
 	"net/http"
+	"net/url"
 	"time"
 )
 
+var Proxy func(*http.Request) (*url.URL, error)
+
 func HttpConn(delay int) *http.Client {
 	tr := &http.Transport{
+		Proxy: Proxy,
 		//TLSHandshakeTimeout : delay * time.Second,
 		TLSClientConfig: &tls.Config{
 			Renegotiation:      tls.RenegotiateOnceAsClient,
@@ -30,6 +34,7 @@ func HttpConn(delay int) *http.Client {
 		Timeout:       time.Duration(delay) * time.Second,
 		CheckRedirect: checkRedirect,
 	}
+
 	return conn
 }
 

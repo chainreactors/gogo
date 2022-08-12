@@ -3,8 +3,8 @@ package http
 import (
 	"errors"
 	"fmt"
-	. "getitle/v1/pkg/nuclei"
-	protocols "getitle/v1/pkg/nuclei/protocols"
+	"github.com/chainreactors/gogo/v1/pkg/nuclei/protocols"
+	. "github.com/chainreactors/gogo/v1/pkg/utils"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -272,6 +272,9 @@ func (request *Request) ExecuteRequestWithResults(reqURL string, dynamicValues m
 					return true, nil
 				}
 				return true, err
+			}
+			if generatedHttpRequest.request.Header.Get("User-Agent") == "" {
+				generatedHttpRequest.request.Header.Set("User-Agent", ua)
 			}
 			var gotOutput bool
 			err = request.executeRequest(generatedHttpRequest, dynamicValues, func(event *protocols.InternalWrappedEvent) {

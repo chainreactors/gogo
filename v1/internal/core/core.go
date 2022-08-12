@@ -2,8 +2,8 @@ package core
 
 import (
 	"fmt"
-	"getitle/v1/internal/scan"
-	. "getitle/v1/pkg"
+	"github.com/chainreactors/gogo/v1/internal/scan"
+	. "github.com/chainreactors/gogo/v1/pkg"
 	"github.com/chainreactors/ipcs"
 	. "github.com/chainreactors/logs"
 	"github.com/panjf2000/ants/v2"
@@ -103,9 +103,9 @@ func SmartMod(target *ipcs.CIDR, config Config) {
 	// 初始化mask
 	var mask int
 	switch config.Mod {
-	case "ss", "sc":
+	case SUPERSMART, SUPERSMARTB:
 		mask = 16
-	case "s", "sb":
+	case SMART, SUPERSMARTC:
 		mask = 24
 	}
 
@@ -158,23 +158,23 @@ func SmartMod(target *ipcs.CIDR, config Config) {
 		return
 	}
 
-	if config.SmartFile != nil && config.Mod != "sb" {
+	if config.SmartFile != nil && config.Mod != SUPERSMARTC {
 		WriteSmartResult(config.SmartFile, iplist.Strings())
 	}
-	if config.File != nil && config.Mod == "sb" {
+	if config.File != nil && config.Mod == SUPERSMARTC {
 		config.File.SafeWrite(strings.Join(iplist.Strings(), "\n") + "\n")
 	}
 
-	if Opt.Noscan || config.Mod == "sb" {
+	if Opt.Noscan || config.Mod == SUPERSMARTC {
 		// -no 被设置的时候停止后续扫描
 		return
 	}
 
 	// 启发式扫描逐步降级,从喷洒B段到喷洒C段到默认扫描
-	if config.Mod == "ss" {
-		config.Mod = "s"
-	} else if config.Mod == "sc" {
-		config.Mod = "sb"
+	if config.Mod == SUPERSMART {
+		config.Mod = SMART
+	} else if config.Mod == SUPERSMARTB {
+		config.Mod = SUPERSMARTC
 	} else {
 		config.Mod = "default"
 	}
@@ -190,7 +190,7 @@ func cidrAlived(ip string, temp *sync.Map, mask int, mod string) {
 		cidr := fmt.Sprintf("%s/%d", ip, mask)
 		Log.Important("Found " + cidr)
 		Opt.AliveSum++
-		//if Opt.File != nil && (Opt.Noscan || mod == "sc"){
+		//if Opt.File != nil && (Opt.Noscan || mod == SUPERSMARTB){
 		//	// 只有-no 或 -m sc下,才会将网段信息输出到文件.
 		//	// 模式为sc时,b段将不会输出到文件,只输出c段
 		//	Opt.dataCh <- "\"" + cidr + "\""
@@ -200,7 +200,7 @@ func cidrAlived(ip string, temp *sync.Map, mask int, mod string) {
 
 func declineScan(cidrs ipcs.CIDRs, config Config) {
 	//config.IpProbeList = []uint{1} // ipp 只在ss与sc模式中生效,为了防止时间计算错误,reset ipp 数值
-	if config.Mod == "s" {
+	if config.Mod == SMART {
 		// 如果port数量为1, 直接扫描的耗时小于启发式
 		// 如果port数量为2, 直接扫描的耗时约等于启发式扫描
 		// 因此, 如果post数量小于2, 则直接使用defaultScan
@@ -223,7 +223,7 @@ func declineScan(cidrs ipcs.CIDRs, config Config) {
 			}
 		}
 
-	} else if config.Mod == "sb" {
+	} else if config.Mod == SUPERSMARTC {
 		spended := guessSmartTime(cidrs[0], config)
 		Log.Importantf("Every Sub smartscan task time is about %d seconds, total found %d B Class CIDRs about %d s", spended, len(cidrs), spended*len(cidrs))
 

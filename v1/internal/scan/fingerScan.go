@@ -1,8 +1,8 @@
 package scan
 
 import (
-	. "getitle/v1/pkg"
-	. "getitle/v1/pkg/fingers"
+	. "github.com/chainreactors/gogo/v1/pkg"
+	"github.com/chainreactors/gogo/v1/pkg/fingers"
 )
 
 func fingerScan(result *Result) {
@@ -19,7 +19,7 @@ func fingerScan(result *Result) {
 			}
 		}
 
-		matcher := func(result *Result, finger *Finger) (*Framework, *Vuln) {
+		matcher := func(result *Result, finger *fingers.Finger) (*fingers.Framework, *fingers.Vuln) {
 			return httpFingerMatch(result, finger, sender)
 		}
 		getFramework(result, HttpFingers, matcher)
@@ -36,7 +36,7 @@ func fingerScan(result *Result) {
 			return string(data), true
 		}
 
-		matcher := func(result *Result, finger *Finger) (*Framework, *Vuln) {
+		matcher := func(result *Result, finger *fingers.Finger) (*fingers.Framework, *fingers.Vuln) {
 			return tcpFingerMatch(result, finger, sender)
 		}
 		getFramework(result, TcpFingers, matcher)
@@ -44,10 +44,10 @@ func fingerScan(result *Result) {
 	return
 }
 
-func getFramework(result *Result, fingermap FingerMapper, matcher func(*Result, *Finger) (*Framework, *Vuln)) {
+func getFramework(result *Result, fingermap fingers.FingerMapper, matcher func(*Result, *fingers.Finger) (*fingers.Framework, *fingers.Vuln)) {
 	// 优先匹配默认端口,第一次循环只匹配默认端口
 	//var fs Frameworks
-	var alreadyFrameworks Fingers
+	var alreadyFrameworks fingers.Fingers
 	for _, finger := range fingermap.GetFingers(result.Port) {
 		framework, vuln := matcher(result, finger)
 		alreadyFrameworks = append(alreadyFrameworks, finger)
@@ -90,8 +90,8 @@ func getFramework(result *Result, fingermap FingerMapper, matcher func(*Result, 
 	return
 }
 
-func httpFingerMatch(result *Result, finger *Finger, sender func(sendData []byte) (string, bool)) (*Framework, *Vuln) {
-	frame, vuln, ok := FingerMatcher(finger, RunOpt.VersionLevel, result.Content, sender)
+func httpFingerMatch(result *Result, finger *fingers.Finger, sender func(sendData []byte) (string, bool)) (*fingers.Framework, *fingers.Vuln) {
+	frame, vuln, ok := fingers.FingerMatcher(finger, RunOpt.VersionLevel, result.Content, sender)
 	if ok {
 		if frame.Data != "" {
 			CollectHttpInfo(result, nil, frame.Data)
@@ -101,8 +101,8 @@ func httpFingerMatch(result *Result, finger *Finger, sender func(sendData []byte
 	return nil, nil
 }
 
-func tcpFingerMatch(result *Result, finger *Finger, sender func(sendData []byte) (string, bool)) (*Framework, *Vuln) {
-	frame, vuln, ok := FingerMatcher(finger, RunOpt.VersionLevel, result.Content, sender)
+func tcpFingerMatch(result *Result, finger *fingers.Finger, sender func(sendData []byte) (string, bool)) (*fingers.Framework, *fingers.Vuln) {
+	frame, vuln, ok := fingers.FingerMatcher(finger, RunOpt.VersionLevel, result.Content, sender)
 	if ok {
 		return frame, vuln
 	}

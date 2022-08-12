@@ -6,7 +6,7 @@ package scan
 //Github: https://github.com/k8gege/LadonGo
 
 import (
-	"getitle/v1/pkg"
+	"github.com/chainreactors/gogo/v1/pkg"
 	"github.com/chainreactors/logs"
 	"net"
 	"time"
@@ -26,7 +26,8 @@ func icmpScan(result *pkg.Result) {
 		return
 	}
 	defer conn.Close()
-	conn.SetDeadline(time.Now().Add(delay * time.Second))
+
+	conn.SetDeadline(time.Now().Add(delay * time.Second)) // icmp 超时
 	id0, id1 := genidentifier(host)
 
 	var msg []byte = make([]byte, size+EchoRequestHeadLen)
@@ -36,12 +37,11 @@ func icmpScan(result *pkg.Result) {
 	msg[3] = 0                        // checksum
 	msg[4], msg[5] = id0, id1         //identifier[0] identifier[1]
 	msg[6], msg[7] = gensequence(seq) //sequence[0], sequence[1]
-
 	length := size + EchoRequestHeadLen
-
 	check := checkSum(msg[0:length])
 	msg[2] = byte(check >> 8)
 	msg[3] = byte(check & 255)
+
 	logs.Log.Debug("request icmp " + result.GetTarget())
 	_, err = conn.Write(msg[0:length])
 	if err != nil {
@@ -52,14 +52,12 @@ func icmpScan(result *pkg.Result) {
 	const ECHO_REPLY_HEAD_LEN = 20
 	var receive []byte = make([]byte, ECHO_REPLY_HEAD_LEN+length)
 	n, err := conn.Read(receive)
-
 	if err != nil {
 		result.Error = err.Error()
 		return
 	}
 
 	logs.Log.Debugf("[debug] %q", receive[:n])
-
 	if receive[ECHO_REPLY_HEAD_LEN+4] != msg[4] || receive[ECHO_REPLY_HEAD_LEN+5] != msg[5] || receive[ECHO_REPLY_HEAD_LEN+6] != msg[6] || receive[ECHO_REPLY_HEAD_LEN+7] != msg[7] || receive[ECHO_REPLY_HEAD_LEN] == 11 {
 		return
 	}

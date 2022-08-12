@@ -2,7 +2,7 @@ package scan
 
 import (
 	"fmt"
-	"getitle/v1/pkg"
+	"github.com/chainreactors/gogo/v1/pkg"
 	"github.com/chainreactors/logs"
 	"net/http"
 	"strings"
@@ -10,7 +10,7 @@ import (
 )
 
 var headers = http.Header{
-	"User-Agent": []string{"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4577.82 Safari/537.36"},
+	"User-Agent": []string{"Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0;"},
 }
 
 // -defalut
@@ -78,6 +78,7 @@ func socketHttp(result *pkg.Result) {
 	}
 
 	//获取状态码
+	result.Content = strings.ToLower(string(bs))
 	pkg.CollectSocketInfo(result, bs)
 
 	//所有30x,400,以及非http协议的开放端口都送到http包尝试获取更多信息

@@ -1,7 +1,7 @@
 package executer
 
 import (
-	"getitle/v1/pkg/nuclei/protocols"
+	"github.com/chainreactors/gogo/v1/pkg/nuclei/protocols"
 )
 
 type Executer struct {

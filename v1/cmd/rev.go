@@ -5,7 +5,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	. "getitle/v1/pkg"
+	. "github.com/chainreactors/gogo/v1/pkg"
 	. "github.com/chainreactors/logs"
 	"net"
 	"net/http"

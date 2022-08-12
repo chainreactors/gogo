@@ -2,8 +2,8 @@ package scan
 
 import (
 	"encoding/binary"
-	. "getitle/v1/pkg"
-	. "getitle/v1/pkg/fingers"
+	. "github.com/chainreactors/gogo/v1/pkg"
+	"github.com/chainreactors/gogo/v1/pkg/fingers"
 	"strings"
 )
 
@@ -26,6 +26,7 @@ func ms17010Scan(result *Result) {
 	result.Protocol = "smb"
 	result.Open = true
 	defer conn.Close()
+
 	_, err = conn.Write(negotiateProtocolRequest)
 	reply := make([]byte, 1024)
 	// let alone half packet
@@ -40,7 +41,6 @@ func ms17010Scan(result *Result) {
 	}
 
 	_, _ = conn.Write(sessionSetupRequest)
-
 	n, err := conn.Read(reply)
 	if err != nil || n < 36 {
 		result.Error = err.Error()
@@ -68,14 +68,13 @@ func ms17010Scan(result *Result) {
 				}
 			}
 		}
-
 	}
+
 	userID := reply[32:34]
 	treeConnectRequest[32] = userID[0]
 	treeConnectRequest[33] = userID[1]
 	// TODO change the target in tree path though it doesn't matter
-	_, _ = conn.Write(treeConnectRequest)
-
+	conn.Write(treeConnectRequest)
 	if n, err := conn.Read(reply); err != nil || n < 36 {
 		result.Error = err.Error()
 		return
@@ -92,9 +91,10 @@ func ms17010Scan(result *Result) {
 		result.Error = err.Error()
 		return
 	}
+
 	if reply[9] == 0x05 && reply[10] == 0x02 && reply[11] == 0x00 && reply[12] == 0xc0 {
 		result.Title = strings.Replace(os, "\x00", "", -1)
-		result.AddVuln(&Vuln{Name: "MS17-010", Severity: "critical"})
+		result.AddVuln(&fingers.Vuln{Name: "MS17-010", Severity: "critical"})
 
 		trans2SessionSetupRequest[28] = treeID[0]
 		trans2SessionSetupRequest[29] = treeID[1]
@@ -107,9 +107,8 @@ func ms17010Scan(result *Result) {
 			return
 		}
 		if reply[34] == 0x51 {
-			result.AddVuln(&Vuln{Name: "DOUBLEPULSAR", Severity: "critical"})
+			result.AddVuln(&fingers.Vuln{Name: "DOUBLEPULSAR", Severity: "critical"})
 		}
 	}
-
 	return
 }

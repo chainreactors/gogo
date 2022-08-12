@@ -50,7 +50,7 @@ linux版本很少被杀.
 **未查杀的杀软**
 * 腾讯
 * 火绒
-因此, release中保留了未upx版本的getitle, 可以自行免杀. 
+因此, release中保留了未upx版本的gogo, 可以自行免杀. 
 
 update date: 2022-3-11
 

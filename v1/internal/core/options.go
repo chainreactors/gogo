@@ -2,9 +2,18 @@ package core
 
 import (
 	"bytes"
-	"getitle/v1/pkg/utils"
+	"github.com/chainreactors/gogo/v1/pkg/utils"
 	"io/ioutil"
 	"os"
+)
+
+const (
+	LinuxDefaultThreads   = 4000
+	WindowsDefaultThreads = 1000
+	ReScanDefaultThreads  = 100
+	DefaultIpProbe        = "1,254"
+	DefaultPortProbe      = "80"
+	SuperSmartPortProbe   = "icmp"
 )
 
 type Options struct {

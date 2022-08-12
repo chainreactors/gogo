@@ -1,7 +1,7 @@
 package network
 
 import (
-	protocols "getitle/v1/pkg/nuclei/protocols"
+	protocols "github.com/chainreactors/gogo/v1/pkg/nuclei/protocols"
 	"net"
 	"strings"
 )

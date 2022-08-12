@@ -2,8 +2,9 @@ package http
 
 import (
 	"fmt"
-	"getitle/v1/pkg/nuclei"
-	"getitle/v1/pkg/nuclei/protocols"
+	"github.com/chainreactors/gogo/v1/pkg/nuclei"
+	"github.com/chainreactors/gogo/v1/pkg/nuclei/protocols"
+	"github.com/chainreactors/gogo/v1/pkg/utils"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -103,7 +104,7 @@ func (r *requestGenerator) Make(baseURL, data string, payloads, dynamicValues ma
 	// We get the next payload for the request.
 
 	for payloadName, payloadValue := range payloads {
-		payloads[payloadName] = nuclei.ToString(payloadValue)
+		payloads[payloadName] = utils.ToString(payloadValue)
 	}
 
 	parsed, err := url.Parse(baseURL)
@@ -118,8 +119,8 @@ func (r *requestGenerator) Make(baseURL, data string, payloads, dynamicValues ma
 	if !isRawRequest && strings.HasSuffix(parsed.Path, "/") && strings.Contains(data, "{{BaseURL}}/") {
 		trailingSlash = true
 	}
-	values := nuclei.MergeMaps(dynamicValues, generateVariables(parsed, trailingSlash))
-	values = nuclei.MergeMaps(payloads, values)
+	values := utils.MergeMaps(dynamicValues, generateVariables(parsed, trailingSlash))
+	values = utils.MergeMaps(payloads, values)
 
 	// If data contains \n it's a raw request, process it like raw. Else
 	// continue with the template based request flow.

@@ -3,7 +3,7 @@
 
 package scan
 
-import "getitle/v1/pkg"
+import "github.com/chainreactors/gogo/v1/pkg"
 
 func arpScan(result *pkg.Result) {
 	return

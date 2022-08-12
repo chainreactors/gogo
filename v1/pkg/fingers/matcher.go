@@ -2,7 +2,7 @@ package fingers
 
 import (
 	"fmt"
-	"getitle/v1/pkg/dsl"
+	"github.com/chainreactors/gogo/v1/pkg/dsl"
 	"github.com/chainreactors/logs"
 	"regexp"
 	"strings"
@@ -156,7 +156,7 @@ func RuleMatcher(rule *Rule, content string, ishttp bool) (bool, bool, string) {
 
 	// body匹配
 	for _, bodyReg := range rule.Regexps.Body {
-		if strings.Contains(body, strings.ToLower(bodyReg)) {
+		if strings.Contains(body, bodyReg) {
 			return true, false, ""
 		}
 	}

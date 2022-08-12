@@ -1,4 +1,4 @@
-# Getitle
+# gogo
 一个资产探测扫描器. 
 
 README Version 2.5.0
@@ -6,10 +6,10 @@ README Version 2.5.0
 ## Usage
 
 ```
-Usage of ./getitle:
+Usage of ./gogo:
 
    -k string   key,启动密码(必须输入) 
-   -debug bool  输出每个请求的错误日志, 用来debug
+   -debug bool  输出每个请求的错误日志, 用来debug. 可以附加-proxy url, 使用代理调试指纹或poc(单独-proxy无法使用)
    
    INPUT params:
       -ip string   IP地址, 支持逗号分割的输入 like 192.168.1.1/24,172.16.1.1/24
@@ -84,17 +84,17 @@ Usage of ./getitle:
 ### 版本号命名规则
 example: 1.1.1.1
 
-第一位数组为互不兼容的命令行UI或输出结果;
+第一位数字代表互不兼容的命令行UI或输出结果;
 
-第二位数字为代码结构或者功能上的更新;
+第二位数字代表代码结构或者功能上的更新;
 
-第三位数字为bug的修复或者小功能更新;
+第三位数字代表bug的修复或者小功能更新;
 
-第四位数字不一定每个版本都有, 为指纹或poc的更新.
+第四位数字不一定每个版本都有, 代表指纹或poc的更新.
 
 
 ### release
-完全版本打包下载: https://github.com/chainreactors/getitle/releases/latest
+完全版本打包下载: https://github.com/chainreactors/gogo/releases/latest
 
 理论上支持全操作系统, 需要编译某些稍微罕见的特殊版本可以联系我帮忙编译.
 
@@ -103,16 +103,16 @@ example: 1.1.1.1
 **windows**
 
 [windows32upx](https://sangfor-release.oss-cn-shanghai.aliyuncs.com/fscan/windows_386_upxs.exe)
- [windows32](https://sangfor-release.oss-cn-shanghai.aliyuncs.com/fscan/windows_386s.exe)
- [windows64](https://sangfor-release.oss-cn-shanghai.aliyuncs.com/fscan/windows_amd64s.exe)
- [windows64upx](https://sangfor-release.oss-cn-shanghai.aliyuncs.com/fscan/windows_amd64_upxs.exe)
+[windows32](https://sangfor-release.oss-cn-shanghai.aliyuncs.com/fscan/windows_386s.exe)
+[windows64](https://sangfor-release.oss-cn-shanghai.aliyuncs.com/fscan/windows_amd64s.exe)
+[windows64upx](https://sangfor-release.oss-cn-shanghai.aliyuncs.com/fscan/windows_amd64_upxs.exe)
 
 **linux**
 
 [linux_amd64](https://sangfor-release.oss-cn-shanghai.aliyuncs.com/fscan/linux_amd64)
- [linux_amd32](https://sangfor-release.oss-cn-shanghai.aliyuncs.com/fscan/linux_386)
- [linux_arm64](https://sangfor-release.oss-cn-shanghai.aliyuncs.com/fscan/linux_arm64)
- [linux_mips64](https://sangfor-release.oss-cn-shanghai.aliyuncs.com/fscan/linux_mips64)
+[linux_amd32](https://sangfor-release.oss-cn-shanghai.aliyuncs.com/fscan/linux_386)
+[linux_arm64](https://sangfor-release.oss-cn-shanghai.aliyuncs.com/fscan/linux_arm64)
+[linux_mips64](https://sangfor-release.oss-cn-shanghai.aliyuncs.com/fscan/linux_mips64)
 
 **mac**
 
@@ -123,18 +123,9 @@ example: 1.1.1.1
 
 `gt -k [key] -ip 192.168.1.1/24 -p win,db,top2 `
 
-使用工作流, 快速配置扫描任务, 启发式扫描10段常见口
-
-`gt -k [key] -w 10`
-
-手动指定特定网段与配置
+启发式扫描
 
 `gt -k [key] -ip 172.16.1.1/16 -m s -p all -e -v -af`
-
-查看全部可用工作流
-
-`gt -k [key] -P workflow`
-
 
 扫描结果格式化
 
@@ -142,6 +133,14 @@ example: 1.1.1.1
 
 
 ### workflow
+查看全部可用工作流
+
+`gt -k [key] -P workflow`
+
+使用工作流, 自动配置启发式扫描, 启发式扫描10段常见端口
+
+`gt -k [key] -w 10`
+
 workflow 使用思维导图
 
 ![](doc/img/pipeline.png)
@@ -274,9 +273,14 @@ Exploit: none, Version level: 0
 
 可以使用`-F 1.json -o ip` 来过滤出指定字段
 
-以及`-F 1.json -filter framework::redis -o ip`
+过滤指定字段的值`-F 1.json -filter framework::redis -o ip`
+
+`::` 为模糊匹配, `==` 为精准匹配.
+
+`-f file` 重新输出到文件, `-af` 输出到文件根据config自动生成文件名
 
 ### ~~启发式扫描配置~~ (保留文档, 已被workflow取代)
+如果在使用-w workflow的情况下, 继续添加-sp, -ipp, 可以覆盖workflow中的预设值, 提高workflow的灵活性
 
 -m s 为喷洒C段模式,子网掩码要小于24才能使用
 
@@ -314,7 +318,7 @@ Exploit: none, Version level: 0
 
 **主动漏洞探测**
 
-getitle并非漏扫工具,因此不会支持sql注入,xss之类的通用漏洞探测功能.
+gogo并非漏扫工具,因此不会支持sql注入,xss之类的通用漏洞探测功能.
 
 为了支持内网更好的自动化, 集成了nuclei的poc, 可以用来编写poc批量执行某些特定的扫描任务, 一级一些默认口令登录的poc
 
@@ -330,7 +334,7 @@ getitle并非漏扫工具,因此不会支持sql注入,xss之类的通用漏洞�
 
 **高级启发式扫描** 
 
-[见getitle设计文档3-启发式扫描](doc/getitle设计文档3-启发式扫描.md)
+[见gogo设计文档3-启发式扫描](doc/gogo设计文档3-启发式扫描.md)
 
 
 **特殊端口支持**
@@ -396,7 +400,7 @@ SMB
 ### 手动编译
 下载项目
 
-`git clone --recurse-submodules https://github.com/chainreactors/getitle`
+`git clone --recurse-submodules https://github.com/chainreactors/gogo`
 
 生成 template.go
 

@@ -1,10 +1,10 @@
 package core
 
 import (
-	"errors"
-	. "getitle/v1/internal/scan"
-	. "getitle/v1/pkg"
-	. "getitle/v1/pkg/utils"
+	"fmt"
+	. "github.com/chainreactors/gogo/v1/internal/scan"
+	. "github.com/chainreactors/gogo/v1/pkg"
+	. "github.com/chainreactors/gogo/v1/pkg/utils"
 	"github.com/chainreactors/ipcs"
 	. "github.com/chainreactors/logs"
 	"os"
@@ -14,35 +14,32 @@ import (
 var Opt = Options{
 	AliveSum: 0,
 	Noscan:   false,
-	//Compress: true,
 }
 
-func InitConfig(config *Config) *Config {
-	err := validate(config)
+func InitConfig(config *Config) (*Config, error) {
+	err := config.Validate()
 	if err != nil {
-		Fatal(err.Error())
+		return nil, err
 	}
 	// 初始化
 	config.Exploit = RunOpt.Exploit
 	config.VersionLevel = RunOpt.VersionLevel
 
 	if config.Threads == 0 { // if 默认线程
-		config.Threads = 4000
+		config.Threads = LinuxDefaultThreads
 		if Win {
 			//windows系统默认协程数为1000
-			config.Threads = 1000
+			config.Threads = WindowsDefaultThreads
 		} else {
 			// linux系统判断fd限制, 如果-t 大于fd限制,则将-t 设置到fd-100
 			if fdlimit := GetFdLimit(); config.Threads > fdlimit {
 				Log.Warnf("System fd limit: %d , Please exec 'ulimit -n 65535'", fdlimit)
-				//Log.Warnf("System fd limit: %d , Please exec 'ulimit -n 65535'", fdlimit)
-				//Log.Warnf("System fd limit: %d , Please exec 'ulimit -n 65535'", fdlimit)
 				Log.Warnf("Now set threads to %d", fdlimit-100)
 				config.Threads = fdlimit - 100
 			}
 		}
 		if config.JsonFile != "" {
-			config.Threads = 50
+			config.Threads = ReScanDefaultThreads
 		}
 	}
 
@@ -58,18 +55,13 @@ func InitConfig(config *Config) *Config {
 	// 初始化文件操作
 	err = config.InitFile()
 	if err != nil {
-		Fatal(err.Error())
+		return nil, err
 	}
 	syncFile = func() {
 		if config.File != nil {
 			config.File.SafeSync()
 		}
 	}
-	//Opt.File = config.File
-	//Opt.AliveFile = config.AliveFile
-	//Opt.SmartFile = config.SmartFile
-	//Opt.ExtractFile = config.ExtractFile
-	//Opt.FileOutput = config.FileOutputf
 
 	if config.ListFile != "" || config.IsListInput {
 		// 如果从文件中读,初始化IP列表配置
@@ -85,11 +77,14 @@ func InitConfig(config *Config) *Config {
 		case *SmartData:
 			config.IPlist = data.(*SmartData).Data
 		default:
-			Fatal("not support result type, maybe use -l flag")
+			return nil, fmt.Errorf("not support result type, maybe use -l flag")
 		}
 	}
 
-	config.InitIP()
+	err = config.InitIP()
+	if err != nil {
+		return nil, err
+	}
 	// 初始化端口配置
 	config.Portlist = ipcs.ParsePort(config.Ports)
 
@@ -106,10 +101,10 @@ func InitConfig(config *Config) *Config {
 	if config.SmartPort != "default" {
 		config.SmartPortList = ipcs.ParsePort(config.SmartPort)
 	} else {
-		if config.Mod == "s" {
-			config.SmartPortList = []string{"80"}
-		} else if SliceContains([]string{"ss", "sc", "f"}, config.Mod) {
-			config.SmartPortList = []string{"icmp"}
+		if config.Mod == SMART {
+			config.SmartPortList = []string{DefaultPortProbe}
+		} else if SliceContains([]string{SUPERSMART, SUPERSMARTB}, config.Mod) {
+			config.SmartPortList = []string{SuperSmartPortProbe}
 		}
 	}
 
@@ -117,7 +112,7 @@ func InitConfig(config *Config) *Config {
 	if config.IpProbe != "default" {
 		config.IpProbeList = Str2uintlist(config.IpProbe)
 	} else {
-		config.IpProbeList = []uint{1}
+		config.IpProbeList = Str2uintlist(DefaultIpProbe)
 	}
 
 	// todo 排除ip功能等待重构
@@ -136,63 +131,7 @@ func InitConfig(config *Config) *Config {
 	taskname := config.GetTargetName()
 	// 输出任务的基本信息
 	printTaskInfo(config, taskname)
-	return config
-}
-
-func validate(config *Config) error {
-	// 一些命令行参数错误处理,如果check没过直接退出程序或输出警告
-	//if config.Mod == "ss" && config.ListFile != "" {
-	//	fmt.Println("[-] error Smart . can not use File input")
-	//	os.Exit(0)
-	//}
-
-	legalFormat := []string{"url", "ip", "port", "frameworks", "framework", "vuln", "vulns", "protocol", "title", "target", "hash", "language", "host", "color", "c", "json", "j", "full", "jsonlines", "jl", "zombie"}
-	if config.FileOutputf != "default" {
-		for _, form := range strings.Split(config.FileOutputf, ",") {
-			if !SliceContains(legalFormat, form) {
-				Log.Warnf("illegal file output format: %s, Please use one or more of the following formats: %s", form, strings.Join(legalFormat, ", "))
-			}
-		}
-	}
-
-	if config.Outputf != "full" {
-		for _, form := range strings.Split(config.Outputf, ",") {
-			if !SliceContains(legalFormat, form) {
-				Log.Warnf("illegal output format: %s, Please use one or more of the following formats: %s", form, strings.Join(legalFormat, ", "))
-			}
-		}
-	}
-
-	var err error
-	if config.JsonFile != "" {
-		if config.Ports != "top1" {
-			Log.Warn("json input can not config ports")
-		}
-		if config.Mod != "default" {
-			Log.Warn("input json can not config . Mod,default scanning")
-		}
-	}
-
-	if config.IP == "" && config.ListFile == "" && config.JsonFile == "" && !config.IsJsonInput && !config.IsListInput { // 一些导致报错的参数组合
-		err = errors.New("cannot found target, please set -ip or -l or -j -or -a or stdin")
-	}
-
-	if config.JsonFile != "" && config.ListFile != "" {
-		err = errors.New("cannot set -j and -l flags at same time")
-	}
-
-	if !HasPingPriv() && (strings.Contains(config.Ports, "icmp") || strings.Contains(config.Ports, "ping") || SliceContains(config.AliveSprayMod, "icmp")) {
-		Log.Warn("current user is not root, icmp scan not work")
-	}
-
-	if !Win && Root && (strings.Contains(config.Ports, "arp") || SliceContains(config.AliveSprayMod, "arp")) {
-		Log.Warn("current user is not root, arp scan maybe not work")
-	}
-
-	if Win && (strings.Contains(config.Ports, "arp") || SliceContains(config.AliveSprayMod, "arp")) {
-		Log.Warn("windows not support arp scan, skip all arp scan task")
-	}
-	return err
+	return config, nil
 }
 
 func printTaskInfo(config *Config, taskname string) {
@@ -219,13 +158,11 @@ func RunTask(config Config) {
 		createDefaultScan(config)
 	//case "a", "auto":
 	//	autoScan(config)
-	case "s", "f", "ss", "sc":
+	case SMART, SUPERSMART, SUPERSMARTB:
 		if config.CIDRs != nil {
 			for _, ip := range config.CIDRs {
 				SmartMod(ip, config)
 			}
-			//} else {
-			//	createSmartScan(config.IP, config)
 		}
 	default:
 		createDefaultScan(config)
@@ -263,7 +200,7 @@ func guessSmartTime(cidr *ipcs.CIDR, config Config) int {
 	mask = cidr.Mask
 
 	var count int
-	if config.Mod == "s" || config.Mod == "sb" {
+	if config.Mod == SMART || config.Mod == SUPERSMARTC {
 		count = 2 << uint((32-mask)-1)
 	} else {
 		count = 2 << uint((32-mask)-9)

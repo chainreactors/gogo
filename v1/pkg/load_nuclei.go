@@ -3,10 +3,10 @@ package pkg
 import (
 	"encoding/json"
 	"fmt"
-	"getitle/v1/pkg/dsl"
-	"getitle/v1/pkg/nuclei/protocols"
-	. "getitle/v1/pkg/nuclei/templates"
-	"getitle/v1/pkg/utils"
+	"github.com/chainreactors/gogo/v1/pkg/dsl"
+	"github.com/chainreactors/gogo/v1/pkg/nuclei/protocols"
+	"github.com/chainreactors/gogo/v1/pkg/nuclei/templates"
+	"github.com/chainreactors/gogo/v1/pkg/utils"
 	"io/ioutil"
 	"strings"
 )
@@ -34,9 +34,9 @@ func ParserCmdPayload(payloads []string) *protocols.ExecuterOptions {
 	return options
 }
 
-var TemplateMap map[string][]*Template
+var TemplateMap map[string][]*templates.Template
 
-func LoadNuclei(filename string) map[string][]*Template {
+func LoadNuclei(filename string) map[string][]*templates.Template {
 	if filename == "" {
 		return LoadTemplates(LoadConfig("nuclei"))
 	} else {
@@ -54,14 +54,15 @@ func LoadNuclei(filename string) map[string][]*Template {
 	}
 }
 
-func LoadTemplates(content []byte) map[string][]*Template {
-	var templates []*Template
-	var templatemap = make(map[string][]*Template)
-	err := json.Unmarshal(content, &templates)
+func LoadTemplates(content []byte) map[string][]*templates.Template {
+	var t []*templates.Template
+
+	var templatemap = make(map[string][]*templates.Template)
+	err := json.Unmarshal(content, &t)
 	if err != nil {
 		utils.Fatal("nuclei config load FAIL!, " + err.Error())
 	}
-	for _, template := range templates {
+	for _, template := range t {
 		// 以指纹归类
 		err = template.Compile(*ExecuterOptions)
 		if err != nil {

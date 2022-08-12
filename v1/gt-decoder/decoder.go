@@ -2,8 +2,8 @@ package main
 
 import (
 	"flag"
-	"getitle/v1/internal/core"
-	"getitle/v1/pkg"
+	"github.com/chainreactors/gogo/v1/internal/core"
+	"github.com/chainreactors/gogo/v1/pkg"
 	"github.com/chainreactors/logs"
 )
 

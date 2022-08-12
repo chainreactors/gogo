@@ -1,4 +1,4 @@
-set name=getitle
+set name=gogo
 for /F %%i in ('git describe --abbrev^=0 --tags') do ( set gt_ver=%%i)
 @REM 上传到阿里云
 ossutil cp ./bin/%name%_windows_386_upxs.exe oss://sangfor-release/fscan/windows_386_upxs.exe -f

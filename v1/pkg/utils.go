@@ -2,9 +2,9 @@ package pkg
 
 import (
 	"fmt"
-	"getitle/v1/pkg/dsl"
-	"getitle/v1/pkg/utils"
 	. "github.com/chainreactors/files"
+	"github.com/chainreactors/gogo/v1/pkg/dsl"
+	"github.com/chainreactors/gogo/v1/pkg/utils"
 	"github.com/chainreactors/ipcs"
 	"io/ioutil"
 	"net/http"
