@@ -10,6 +10,7 @@ require (
 	github.com/chainreactors/logs v0.4.2
 	github.com/mdlayher/arp v0.0.0-20220512170110-6706a2966875
 	github.com/panjf2000/ants/v2 v2.5.0
+	github.com/pkg/errors v0.9.1
 	github.com/twmb/murmur3 v1.1.6
 )
 
