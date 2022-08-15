@@ -3,6 +3,7 @@ package cmd
 import (
 	"flag"
 	"fmt"
+	"github.com/chainreactors/gogo/v1/internal/core"
 	"github.com/chainreactors/gogo/v1/internal/scan"
 	"github.com/chainreactors/gogo/v1/pkg"
 	"github.com/chainreactors/logs"
@@ -76,6 +77,7 @@ func CMD() {
 	flag.StringVar(&runner.UploadFile, "uf", "", "")
 	flag.BoolVar(&runner.Ver, "version", false, "")
 	flag.BoolVar(&runner.Debug, "debug", false, "")
+	flag.BoolVar(&core.Opt.ScanDebug, "plugindebug", false, "")
 	flag.StringVar(&runner.Proxy, "proxy", "", "")
 	flag.Usage = func() { exit() }
 	flag.Parse()

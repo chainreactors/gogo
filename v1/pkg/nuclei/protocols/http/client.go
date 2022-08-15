@@ -20,7 +20,7 @@ type Configuration struct {
 }
 
 var DefaultOption = Configuration{
-	2,
+	3,
 	true,
 	3,
 	false,
