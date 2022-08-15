@@ -46,7 +46,7 @@ func DefaultMod(targets interface{}, config Config) {
 		}
 		wgs.Done()
 	}, ants.WithPanicHandler(func(err interface{}) {
-		if Opt.ScanDebug == true {
+		if Opt.PluginDebug == true {
 			debug.PrintStack()
 		}
 

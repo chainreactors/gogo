@@ -77,7 +77,7 @@ func CMD() {
 	flag.StringVar(&runner.UploadFile, "uf", "", "")
 	flag.BoolVar(&runner.Ver, "version", false, "")
 	flag.BoolVar(&runner.Debug, "debug", false, "")
-	flag.BoolVar(&core.Opt.ScanDebug, "plugindebug", false, "")
+	flag.BoolVar(&core.Opt.PluginDebug, "plugindebug", false, "")
 	flag.StringVar(&runner.Proxy, "proxy", "", "")
 	flag.Usage = func() { exit() }
 	flag.Parse()
