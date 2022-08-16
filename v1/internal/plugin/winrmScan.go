@@ -1,4 +1,4 @@
-package scan
+package plugin
 
 //func winrmScan(target string,result *pkg.Result) {
 //	//result = model.ProbeTaskResult{ProbeTask: task, Result: "", Err: nil}

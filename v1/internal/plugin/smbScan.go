@@ -1,4 +1,4 @@
-package scan
+package plugin
 
 // from https://github.com/JKme/cube/blob/cb84da1f305f1f6a92ae3011c7be9c0f998c3571/plugins/probe/ntlm_smb.go
 import (

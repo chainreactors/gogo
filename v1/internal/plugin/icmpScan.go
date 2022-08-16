@@ -1,4 +1,4 @@
-package scan
+package plugin
 
 //Ladon Scanner for golang
 //Author: k8gege

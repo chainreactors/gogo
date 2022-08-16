@@ -2,7 +2,7 @@ package core
 
 import (
 	"bytes"
-	"github.com/chainreactors/gogo/v1/internal/scan"
+	"github.com/chainreactors/gogo/v1/internal/plugin"
 	. "github.com/chainreactors/gogo/v1/pkg"
 	"github.com/chainreactors/gogo/v1/pkg/utils"
 	"io/ioutil"
@@ -38,8 +38,8 @@ func (tc *targetConfig) NewResult() *Result {
 		result.Frameworks = tc.fingers
 	}
 
-	if scan.RunOpt.SuffixStr != "" && !strings.HasPrefix(scan.RunOpt.SuffixStr, "/") {
-		result.Uri = "/" + scan.RunOpt.SuffixStr
+	if plugin.RunOpt.SuffixStr != "" && !strings.HasPrefix(plugin.RunOpt.SuffixStr, "/") {
+		result.Uri = "/" + plugin.RunOpt.SuffixStr
 	}
 	return result
 }

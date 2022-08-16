@@ -1,4 +1,4 @@
-package scan
+package plugin
 
 import (
 	"github.com/alouca/gosnmp"

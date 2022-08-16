@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/chainreactors/gogo/v1/internal/core"
-	"github.com/chainreactors/gogo/v1/internal/scan"
+	"github.com/chainreactors/gogo/v1/internal/plugin"
 	"github.com/chainreactors/gogo/v1/pkg"
 	"github.com/chainreactors/logs"
 	"os"
@@ -59,9 +59,9 @@ func CMD() {
 	flag.BoolVar(&runner.Ping, "ping", false, "")
 	flag.BoolVar(&runner.Arp, "arp", false, "")
 	flag.StringVar(&runner.iface, "iface", "eth0", "")
-	flag.IntVar(&scan.RunOpt.Delay, "d", 2, "")
-	flag.IntVar(&scan.RunOpt.HttpsDelay, "D", 2, "")
-	flag.StringVar(&scan.RunOpt.SuffixStr, "suffix", "", "")
+	flag.IntVar(&plugin.RunOpt.Delay, "d", 2, "")
+	flag.IntVar(&plugin.RunOpt.HttpsDelay, "D", 2, "")
+	flag.StringVar(&plugin.RunOpt.SuffixStr, "suffix", "", "")
 	flag.Var(&runner.payloads, "payload", "")
 	flag.Var(&runner.extract, "extract", "")
 	flag.StringVar(&runner.extracts, "extracts", "", "")

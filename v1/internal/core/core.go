@@ -2,7 +2,7 @@ package core
 
 import (
 	"fmt"
-	"github.com/chainreactors/gogo/v1/internal/scan"
+	"github.com/chainreactors/gogo/v1/internal/plugin"
 	. "github.com/chainreactors/gogo/v1/pkg"
 	"github.com/chainreactors/ipcs"
 	. "github.com/chainreactors/logs"
@@ -25,7 +25,7 @@ func DefaultMod(targets interface{}, config Config) {
 	scanPool, _ := ants.NewPoolWithFunc(config.Threads, func(i interface{}) {
 		tc := i.(targetConfig)
 		result := tc.NewResult()
-		scan.Dispatch(result)
+		plugin.Dispatch(result)
 		if result.Open {
 			Opt.AliveSum++
 			// 格式化title编码, 防止输出二进制数据
@@ -98,7 +98,7 @@ func SmartMod(target *ipcs.CIDR, config Config) {
 		tc := i.(targetConfig)
 		result := NewResult(tc.ip, tc.port)
 		result.SmartProbe = true
-		scan.Dispatch(result)
+		plugin.Dispatch(result)
 
 		if result.Open {
 			cidrAlived(result.Ip, temp, mask, config.Mod)
@@ -251,7 +251,7 @@ func AliveMod(targets interface{}, config Config) {
 
 func aliveScan(tc targetConfig, temp *sync.Map) {
 	result := NewResult(tc.ip, tc.port)
-	scan.Dispatch(result)
+	plugin.Dispatch(result)
 
 	if result.Open {
 		temp.Store(result.Ip, true)
