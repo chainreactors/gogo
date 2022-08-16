@@ -153,9 +153,9 @@ func (r *Runner) init() {
 	}
 
 	if !Win {
-		if r.iface == "eth0" {
-			Log.Warn("no interface name input, use default interface name: eth0")
-		}
+		//if r.iface == "eth0" {
+		//	Log.Warn("no interface name input, use default interface name: eth0")
+		//}
 		var err error
 		RunOpt.Interface, err = net.InterfaceByName(r.iface)
 		if err != nil {

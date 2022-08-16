@@ -15,7 +15,7 @@ import (
 
 func loadYamlFile2JsonString(filename string) string {
 	var err error
-	file, err := os.Open("v1/config/" + filename)
+	file, err := os.Open("v1/templates/" + filename)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -43,7 +43,7 @@ func visit(files *[]string) filepath.WalkFunc {
 
 func recuLoadYamlFiles2JsonString(dir string, single bool) string {
 	var files []string
-	err := filepath.Walk("v1/config/"+dir, visit(&files))
+	err := filepath.Walk("v1/templates/"+dir, visit(&files))
 	if err != nil {
 		panic(err)
 	}
