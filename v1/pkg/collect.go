@@ -20,10 +20,10 @@ func CollectSocketInfo(result *Result, socketContent []byte) {
 		result.HttpStat = statuscode
 		result.Protocol = "http"
 		result.Hash = dsl.Md5Hash([]byte(strings.TrimSpace(body)))[:4] // 因为头中经常有随机值, 因此hash通过body判断
-		result.Title = GetTitle(content)
 		result.Language = getSocketLanguage(content)
 		result.Midware, _ = CompiledMatch(CommonCompiled["server"], content)
 	}
+	result.Title = GetTitle(content)
 	result.AddExtracts(ExtractContent(content))
 }
 

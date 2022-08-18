@@ -110,7 +110,7 @@ type Regexps struct {
 
 func (r *Regexps) RegexpCompile() error {
 	for _, reg := range r.Regexp {
-		creg, err := compileRegexp(reg)
+		creg, err := compileRegexp("(?i)" + reg)
 		if err != nil {
 			return err
 		}

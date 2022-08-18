@@ -64,7 +64,7 @@ func socketHttp(result *pkg.Result) {
 	//}
 	var bs []byte
 	buf := make([]byte, 4096)
-	_ = conn.SetReadDeadline(time.Now().Add(time.Duration(200) * time.Millisecond))
+	_ = conn.SetReadDeadline(time.Now().Add(time.Duration(500) * time.Millisecond))
 	n, err := conn.Read(buf)
 	if err == nil {
 		bs = buf[:n]
