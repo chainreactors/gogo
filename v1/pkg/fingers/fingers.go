@@ -118,7 +118,7 @@ func (r *Regexps) RegexpCompile() error {
 	}
 
 	for _, reg := range r.Vuln {
-		creg, err := compileRegexp(reg)
+		creg, err := compileRegexp("(?i)" + reg)
 		if err != nil {
 			return err
 		}
