@@ -19,7 +19,7 @@ func CollectSocketInfo(result *Result, socketContent []byte) {
 
 		result.HttpStat = statuscode
 		result.Protocol = "http"
-		result.Hash = dsl.Md5Hash([]byte(strings.TrimSpace(body)))[:4] // 因为头中经常有随机值, 因此hash通过body判断
+		//result.Hash = dsl.Md5Hash([]byte(strings.TrimSpace(body)))[:4] // 因为头中经常有随机值, 因此hash通过body判断
 		result.Language = getSocketLanguage(content)
 		result.Midware, _ = CompiledMatch(CommonCompiled["server"], content)
 	}
@@ -45,11 +45,11 @@ func CollectHttpInfo(result *Result, resp *http.Response, content string) {
 	}
 
 	result.Title = GetTitle(content)
-	if body != "" {
-		result.Hash = dsl.Md5Hash([]byte(strings.TrimSpace(body)))[:4] // 因为头中经常有随机值, 因此hash通过body判断
-	} else {
-		result.Hash = "0000"
-	}
+	//if body != "" {
+	//	result.Hash = dsl.Md5Hash([]byte(strings.TrimSpace(body)))[:4] // 因为头中经常有随机值, 因此hash通过body判断
+	//} else {
+	//	result.Hash = "0000"
+	//}
 	result.AddExtracts(ExtractContent(content))
 }
 

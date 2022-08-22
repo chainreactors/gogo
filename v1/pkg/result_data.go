@@ -174,7 +174,7 @@ func (rd ResultsData) ToFormat(isColor bool) string {
 			if !(p.Port == "135 (oxid)" || p.Port == "137" || p.Port == "icmp" || p.Port == "arp") {
 				if isColor {
 					// 颜色输出
-					s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s\t%s\t%s\t%s [%s] %s %s %s\n",
+					s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s\t%s [%s] %s %s %s\n",
 						p.Protocol,
 						ip,
 						port,
@@ -182,15 +182,14 @@ func (rd ResultsData) ToFormat(isColor bool) string {
 						p.Language,
 						Blue(p.Frameworks.ToString()),
 						p.Host,
-						p.Cert,
-						p.Hash,
+						//p.Hash,
 						Yellow(p.HttpStat),
 						Blue(p.Title),
 						Red(p.Vulns.ToString()),
 						Blue(p.GetExtractStat()),
 					)
 				} else {
-					s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s\t%s\t%s\t%s [%s] %s %s %s\n",
+					s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s\t%s [%s] %s %s %s\n",
 						p.Protocol,
 						ip,
 						port,
@@ -198,8 +197,8 @@ func (rd ResultsData) ToFormat(isColor bool) string {
 						p.Language,
 						p.Frameworks.ToString(),
 						p.Host,
-						p.Cert,
-						p.Hash,
+						//p.Cert,
+						//p.Hash,
 						p.HttpStat,
 						p.Title,
 						p.Vulns.ToString(),
