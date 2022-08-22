@@ -31,7 +31,7 @@ type Socket struct {
 }
 
 func (s *Socket) Read(timeout int) ([]byte, error) {
-	var buf []byte
+	buf := make([]byte, 4096)
 	s.Conn.SetReadDeadline(time.Now().Add(time.Duration(timeout) * time.Second))
 	n, err := s.Conn.Read(buf)
 	if err != nil {

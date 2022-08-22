@@ -52,21 +52,9 @@ func initScan(result *pkg.Result) {
 		if result.SmartProbe {
 			return
 		}
-
 		result.HttpStat = "tcp"
 
-		//发送内容
-		//var host string
-		//if result.CurrentHost == "" {
-		//	host = target
-		//} else {
-		//	host = fmt.Sprintf("%s:%s", result.CurrentHost, result.Port)
-		//}
-
 		bs, err = conn.Read(1)
-		//buf := make([]byte, 4096)
-		//_ = conn.SetReadDeadline(time.Now().Add(time.Duration(500) * time.Millisecond))
-		//n, err := conn.Read(buf)
 		if err != nil {
 			senddataStr := fmt.Sprintf("GET /%s HTTP/1.1\r\nHost: %s\r\nConnection: Keep-Alive\r\n\r\n", result.Uri, target)
 			bs, err = conn.Request([]byte(senddataStr), 4096)
@@ -74,7 +62,6 @@ func initScan(result *pkg.Result) {
 				result.Error = err.Error()
 			}
 		}
-		//获取状态码
 		result.Content = strings.ToLower(string(bs))
 		pkg.CollectSocketInfo(result, bs)
 	} else {
@@ -122,9 +109,6 @@ func systemHttp(result *pkg.Result) {
 	conn := result.GetHttpConn(delay)
 	req, _ := http.NewRequest("GET", target, nil)
 	req.Header = headers
-	//if result.CurrentHost != "" {
-	//	req.Host = result.CurrentHost
-	//}
 
 	resp, err := conn.Do(req)
 	if err != nil {

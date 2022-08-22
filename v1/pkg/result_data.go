@@ -315,7 +315,7 @@ func LoadResultFile(file *os.File) interface{} {
 	}
 
 	if IsBase64(content) {
-		// stdin输入二进制文件支持base64编码之后的. base64 result.txt|gt -F stdin
+		// stdin输入二进制文件支持base64编码之后的. base64 result.txt|gogo -F stdin
 		// 如果直接输入解压缩之后的json文件,则跳过这个步骤
 		content = dsl.Base64Decode(string(content))
 	}

@@ -88,7 +88,7 @@ inter:
 
 里面的每个参数都可以使用对应的命令行参数进行覆盖, 具体的参数见README.md.
 
-例如:`gt -w 10 -p 1-65535 -e -v`
+例如:`gogo -w 10 -p 1-65535 -e -v`
 
 这样原来名字为10的workflow的端口被修改为1-65535, 并开启了version scan与exploit scan.
 
@@ -128,7 +128,7 @@ inter:
 
 我以为-F到这里以及圆满了, 后来新的需求又出现了.
 
-需要将gt扫描结果导入到cobalt strike的target, 将gt扫描结果导出到我们的弱口令爆破工具zombie中. 因此给-o 添加了两个特殊值, `-o zombie`与`-o cs`, 前者需要zombie -gt 读取我的结果, 后则需要gt对应的cs插件解析结果.
+需要将gt扫描结果导入到cobalt strike的target, 将gt扫描结果导出到我们的弱口令爆破工具zombie中. 因此给-o 添加了两个特殊值, `-o zombie`与`-o cs`, 前者需要zombie -gogo 读取我的结果, 后则需要gt对应的cs插件解析结果.
 
 同时, 因为需要针对某些特定服务打poc, 所以还需要一个过滤器 , 又添加了`-filter`参数, 可以通过`-fitler frameworks::weblogic`过滤出对应字段需要的值. 可以添加多个`-filter`依次过滤, 例如 `-filter 7001 -filter frameworks::weblogic` , 其中 `::`是模糊匹配, `==`是全等匹配.
 
