@@ -18,7 +18,7 @@ func ms17010Scan(result *Result) {
 	// connecting to a host in LAN if reachable should be very quick
 	result.Port = "445"
 	target := result.GetTarget()
-	conn, err := TcpSocketConn(target, RunOpt.Delay)
+	conn, err := NewSocket("tcp", target, RunOpt.Delay)
 	if err != nil {
 		result.Error = err.Error()
 		return
@@ -27,21 +27,23 @@ func ms17010Scan(result *Result) {
 	result.Open = true
 	defer conn.Close()
 
-	_, err = conn.Write(negotiateProtocolRequest)
-	reply := make([]byte, 1024)
+	reply, err := conn.Request(negotiateProtocolRequest, 1024)
+	n := len(reply)
+	//reply := make([]byte, 1024)
 	// let alone half packet
-	if n, err := conn.Read(reply); err != nil || n < 36 {
+	if err != nil || len(reply) < 36 {
 		result.Error = err.Error()
 		return
 	}
-
 	if binary.LittleEndian.Uint32(reply[9:13]) != 0 {
 		// status != 0
 		return
 	}
 
-	_, _ = conn.Write(sessionSetupRequest)
-	n, err := conn.Read(reply)
+	reply, err = conn.Request(sessionSetupRequest, 1024)
+	n = len(reply)
+	//_, _ = conn.Write(sessionSetupRequest)
+	//n, err := conn.Read(reply)
 	if err != nil || n < 36 {
 		result.Error = err.Error()
 		return
@@ -73,9 +75,10 @@ func ms17010Scan(result *Result) {
 	userID := reply[32:34]
 	treeConnectRequest[32] = userID[0]
 	treeConnectRequest[33] = userID[1]
-	// TODO change the target in tree path though it doesn't matter
-	conn.Write(treeConnectRequest)
-	if n, err := conn.Read(reply); err != nil || n < 36 {
+
+	reply, err = conn.Request(treeConnectRequest, 1024)
+	n = len(reply)
+	if err != nil || n < 36 {
 		result.Error = err.Error()
 		return
 	}
@@ -86,8 +89,9 @@ func ms17010Scan(result *Result) {
 	transNamedPipeRequest[32] = userID[0]
 	transNamedPipeRequest[33] = userID[1]
 
-	_, _ = conn.Write(transNamedPipeRequest)
-	if n, err := conn.Read(reply); err != nil || n < 36 {
+	reply, err = conn.Request(transNamedPipeRequest, 1024)
+	n = len(reply)
+	if err != nil || n < 36 {
 		result.Error = err.Error()
 		return
 	}
@@ -101,9 +105,9 @@ func ms17010Scan(result *Result) {
 		trans2SessionSetupRequest[32] = userID[0]
 		trans2SessionSetupRequest[33] = userID[1]
 
-		_, _ = conn.Write(trans2SessionSetupRequest)
-
-		if n, err := conn.Read(reply); err != nil || n < 36 {
+		reply, err = conn.Request(transNamedPipeRequest, 1024)
+		n = len(reply)
+		if err != nil || n < 36 {
 			return
 		}
 		if reply[34] == 0x51 {

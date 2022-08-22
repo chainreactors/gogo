@@ -8,6 +8,7 @@ import (
 	nucleihttp "github.com/chainreactors/gogo/v1/pkg/nuclei/protocols/http"
 	. "github.com/chainreactors/gogo/v1/pkg/utils"
 	. "github.com/chainreactors/logs"
+	"golang.org/x/net/proxy"
 	"net"
 	"net/http"
 	"net/url"
@@ -105,18 +106,33 @@ func (r *Runner) preInit() bool {
 	}
 
 	if r.Proxy != "" {
-		if !r.Debug {
-			Log.Error("-proxy is debug only flag, please add -debug. skipped proxy")
-		} else {
-			Log.Importantf("DEBUG ONLY, set http proxy: " + r.Proxy)
-			uri, err := url.Parse(r.Proxy)
-			if err == nil {
-				Proxy = http.ProxyURL(uri)
-				nucleihttp.Proxy = Proxy
-			} else {
-				Log.Warnf("parse proxy error %s, skip proxy!", err.Error())
+		uri, err := url.Parse(r.Proxy)
+		if err == nil {
+			ProxyUrl = uri
+			Proxy = http.ProxyURL(uri)
+			nucleihttp.Proxy = Proxy
+			ProxyDialTimeout = func(network, address string, duration time.Duration) (net.Conn, error) {
+				forward := &net.Dialer{Timeout: duration}
+				dial, err := proxy.FromURL(uri, forward)
+				if err != nil {
+					return nil, err
+				}
+				conn, err := dial.Dial(network, address)
+				if err != nil {
+					return nil, err
+				}
+				return conn, nil
 			}
+
+		} else {
+			Log.Warnf("parse proxy error %s, skip proxy!", err.Error())
 		}
+		//if !r.Debug {
+		//	Log.Error("-proxy is debug only flag, please add -debug. skipped proxy")
+		//} else {
+		//	Log.Importantf("DEBUG ONLY, set http proxy: " + r.Proxy)
+		//
+		//}
 	}
 	//if r.UploadFile != "" {
 	//	// 指定上传文件

@@ -6,94 +6,105 @@ import (
 	"github.com/chainreactors/logs"
 	"net/http"
 	"strings"
-	"time"
 )
 
 var headers = http.Header{
 	"User-Agent": []string{"Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0;"},
 }
 
-// -defalut
+// -default
 //socket进行对网站的连接
-func socketHttp(result *pkg.Result) {
-	var err error
-	target := result.GetTarget()
-	result.Protocol = "tcp"
-	conn, err := pkg.TcpSocketConn(target, RunOpt.Delay)
-	if err != nil {
-		// return open: 0, closed: 1, filtered: 2, noroute: 3, denied: 4, down: 5, error_host: 6, unkown: -1
-		errMsg := err.Error()
-		result.Error = errMsg
-		if strings.Contains(errMsg, "refused") {
-			result.ErrStat = 1
-		} else if strings.Contains(errMsg, "timeout") {
-			result.ErrStat = 2
-		} else if strings.Contains(errMsg, "no route to host") {
-			result.ErrStat = 3
-		} else if strings.Contains(errMsg, "permission denied") {
-			result.ErrStat = 4
-		} else if strings.Contains(errMsg, "host is down") {
-			result.ErrStat = 5
-		} else if strings.Contains(errMsg, "no such host") {
-			result.ErrStat = 6
-		} else if strings.Contains(errMsg, "network is unreachable") {
-			result.ErrStat = 6
-		} else if strings.Contains(errMsg, "The requested address is not valid in its context.") {
-			result.ErrStat = 6
-		} else {
-			result.ErrStat = -1
-		}
-		return
-	}
-	defer conn.Close()
-	result.Open = true
-
-	// 启发式扫描探测直接返回不需要后续处理
-	if result.SmartProbe {
-		return
-	}
-
-	result.HttpStat = "tcp"
-
-	//发送内容
-	//var host string
-	//if result.CurrentHost == "" {
-	//	host = target
-	//} else {
-	//	host = fmt.Sprintf("%s:%s", result.CurrentHost, result.Port)
-	//}
+func initScan(result *pkg.Result) {
 	var bs []byte
-	buf := make([]byte, 4096)
-	_ = conn.SetReadDeadline(time.Now().Add(time.Duration(500) * time.Millisecond))
-	n, err := conn.Read(buf)
-	if err == nil {
-		bs = buf[:n]
+	target := result.GetTarget()
+	if pkg.Proxy != nil && pkg.ProxyUrl.Scheme == "socks5" {
+		conn, err := pkg.NewSocket("tcp", target, RunOpt.Delay)
+		//conn, err := pkg.TcpSocketConn(target, RunOpt.Delay)
+		if err != nil {
+			// return open: 0, closed: 1, filtered: 2, noroute: 3, denied: 4, down: 5, error_host: 6, unkown: -1
+			errMsg := err.Error()
+			result.Error = errMsg
+			if strings.Contains(errMsg, "refused") {
+				result.ErrStat = 1
+			} else if strings.Contains(errMsg, "timeout") {
+				result.ErrStat = 2
+			} else if strings.Contains(errMsg, "no route to host") {
+				result.ErrStat = 3
+			} else if strings.Contains(errMsg, "permission denied") {
+				result.ErrStat = 4
+			} else if strings.Contains(errMsg, "host is down") {
+				result.ErrStat = 5
+			} else if strings.Contains(errMsg, "no such host") {
+				result.ErrStat = 6
+			} else if strings.Contains(errMsg, "network is unreachable") {
+				result.ErrStat = 6
+			} else if strings.Contains(errMsg, "The requested address is not valid in its context.") {
+				result.ErrStat = 6
+			} else {
+				result.ErrStat = -1
+			}
+			return
+		}
+		defer conn.Close()
+		result.Open = true
+
+		// 启发式扫描探测直接返回不需要后续处理
+		if result.SmartProbe {
+			return
+		}
+
+		result.HttpStat = "tcp"
+
+		//发送内容
+		//var host string
+		//if result.CurrentHost == "" {
+		//	host = target
+		//} else {
+		//	host = fmt.Sprintf("%s:%s", result.CurrentHost, result.Port)
+		//}
+
+		bs, err = conn.Read(1)
+		//buf := make([]byte, 4096)
+		//_ = conn.SetReadDeadline(time.Now().Add(time.Duration(500) * time.Millisecond))
+		//n, err := conn.Read(buf)
+		if err != nil {
+			senddataStr := fmt.Sprintf("GET /%s HTTP/1.1\r\nHost: %s\r\nConnection: Keep-Alive\r\n\r\n", result.Uri, target)
+			bs, err = conn.Request([]byte(senddataStr), 4096)
+			if err != nil {
+				result.Error = err.Error()
+			}
+		}
+		//获取状态码
+		result.Content = strings.ToLower(string(bs))
+		pkg.CollectSocketInfo(result, bs)
 	} else {
-		_ = conn.SetReadDeadline(time.Now().Add(time.Duration(2) * time.Second))
-		senddataStr := fmt.Sprintf("GET /%s HTTP/1.1\r\nHost: %s\r\nConnection: Keep-Alive\r\n\r\n", result.Uri, target)
-		bs, err = pkg.SocketSend(conn, []byte(senddataStr), 4096)
+		conn := result.GetHttpConn(RunOpt.Delay)
+		req, _ := http.NewRequest("GET", "http://"+target, nil)
+		resp, err := conn.Do(req)
 		if err != nil {
 			result.Error = err.Error()
+			return
 		}
+		result.Open = true
+		content := pkg.GetHttpRaw(resp)
+		result.Content = strings.ToLower(content)
+		pkg.CollectHttpInfo(result, resp, content)
 	}
-
-	//获取状态码
-	result.Content = strings.ToLower(string(bs))
-	pkg.CollectSocketInfo(result, bs)
 
 	//所有30x,400,以及非http协议的开放端口都送到http包尝试获取更多信息
 	if result.HttpStat == "400" || result.Protocol == "tcp" || strings.HasPrefix(result.HttpStat, "3") {
-		//return SystemHttp(target, result)
-		SystemHttp(target, result)
+		//return systemHttp(target, result)
+		systemHttp(result)
 	}
 	return
 }
 
 //使用封装好了http
-func SystemHttp(target string, result *pkg.Result) {
+func systemHttp(result *pkg.Result) {
 	var delay int
 	// 如果是400或者不可识别协议,则使用https
 	var ishttps bool
+	target := result.GetTarget()
 	if result.HttpStat == "400" || result.Protocol == "tcp" {
 		target = "https://" + target
 		ishttps = true

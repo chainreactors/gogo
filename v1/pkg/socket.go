@@ -1,32 +1,47 @@
 package pkg
 
 import (
-	"github.com/chainreactors/logs"
 	"net"
 	"time"
 )
 
-func NewSocket(target string, delay int, t string) Socket {
-	s := Socket{}
-	var conn net.Conn
-	if t == "tcp" {
-		conn, _ = net.DialTimeout("tcp", target, time.Duration(delay)*time.Second)
-	} else if t == "udp" {
-		conn, _ = net.DialTimeout("udp", target, time.Duration(delay)*time.Second)
-	} else {
-		return s
+func NewSocket(network, target string, delay int) (*Socket, error) {
+	s := &Socket{
+		Timeout: time.Duration(delay) * time.Second,
 	}
+	var conn net.Conn
+	var err error
+	if ProxyDialTimeout != nil {
+		conn, err = ProxyDialTimeout(network, target, s.Timeout)
+	} else {
+		conn, err = net.DialTimeout(network, target, s.Timeout)
+	}
+	if err != nil {
+		return nil, err
+	}
+
 	s.Conn = conn
-	return s
+	return s, nil
 }
 
 type Socket struct {
-	Conn  net.Conn
-	Count int
+	Conn    net.Conn
+	Count   int
+	Timeout time.Duration
+}
+
+func (s *Socket) Read(timeout int) ([]byte, error) {
+	var buf []byte
+	s.Conn.SetReadDeadline(time.Now().Add(time.Duration(timeout) * time.Second))
+	n, err := s.Conn.Read(buf)
+	if err != nil {
+		return nil, err
+	}
+	return buf[:n], nil
 }
 
 func (s *Socket) Request(data []byte, max int) ([]byte, error) {
-	_ = s.Conn.SetDeadline(time.Now().Add(time.Duration(2) * time.Second))
+	_ = s.Conn.SetDeadline(time.Now().Add(s.Timeout))
 	var err error
 	_, err = s.Conn.Write(data)
 	if err != nil {
@@ -34,7 +49,7 @@ func (s *Socket) Request(data []byte, max int) ([]byte, error) {
 	}
 	s.Count++
 	buf := make([]byte, max)
-	time.Sleep(time.Duration(200) * time.Millisecond)
+	time.Sleep(time.Duration(500) * time.Millisecond)
 	n, err := s.Conn.Read(buf)
 	if err != nil {
 		return []byte{}, err
@@ -42,38 +57,8 @@ func (s *Socket) Request(data []byte, max int) ([]byte, error) {
 	return buf[:n], err
 }
 
-func TcpSocketConn(target string, delay int) (net.Conn, error) {
-	conn, err := net.DialTimeout("tcp", target, time.Duration(delay)*time.Second)
-	if err != nil {
-		return nil, err
-	}
-	//_ = conn.SetDeadline(time.Now().Add(delay * time.Second))
-	return conn, err
+func (s *Socket) Close() {
+	s.Conn.Close()
 }
 
-func UdpSocketConn(target string, delay int) (net.Conn, error) {
-	conn, err := net.DialTimeout("udp", target, time.Duration(delay)*time.Second)
-	if err != nil {
-		return nil, err
-	}
-	//err = conn.SetDeadline(time.Now().Add(delay * time.Second))
-	return conn, err
-}
-
-func SocketSend(conn net.Conn, data []byte, max int) ([]byte, error) {
-	var err error
-	logs.Log.Debugf("send %s binary data: %q", conn.RemoteAddr().String(), data)
-	_ = conn.SetDeadline(time.Now().Add(time.Duration(2) * time.Second))
-	_, err = conn.Write(data)
-	if err != nil {
-		return []byte{}, err
-	}
-
-	buf := make([]byte, max)
-	time.Sleep(time.Duration(300) * time.Millisecond)
-	n, err := conn.Read(buf)
-	if err != nil {
-		return []byte{}, err
-	}
-	return buf[:n], nil
-}
+var ProxyDialTimeout func(network, address string, timeout time.Duration) (net.Conn, error)

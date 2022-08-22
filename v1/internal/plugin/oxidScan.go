@@ -12,20 +12,19 @@ var oxid2 = pkg.Decode("YmVgYBZgYGCQYGBgYGSAAVYGAAAAAP//")
 func oxidScan(result *pkg.Result) {
 	result.Port = "135"
 	target := result.GetTarget()
-	conn, err := pkg.TcpSocketConn(target, RunOpt.Delay)
+	conn, err := pkg.NewSocket("tcp", target, RunOpt.Delay)
 	if err != nil {
 		result.Error = err.Error()
 		return
 	}
 	defer conn.Close()
 	result.Open = true
-
-	recv, err := pkg.SocketSend(conn, oxid1, 4096)
+	recv, err := conn.Request(oxid1, 4096)
 	if err != nil {
 		return
 	}
 
-	recv, err = pkg.SocketSend(conn, oxid2, 4096)
+	recv, err = conn.Request(oxid2, 4096)
 	if err != nil {
 		return
 	}

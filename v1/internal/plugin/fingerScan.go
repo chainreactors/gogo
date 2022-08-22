@@ -24,12 +24,17 @@ func fingerScan(result *Result) {
 		}
 		getFramework(result, HttpFingers, matcher)
 	} else {
+		if Proxy != nil {
+			// 如果存在http代理，跳过tcp指纹识别
+			return
+		}
 		sender := func(sendData []byte) (string, bool) {
-			conn, err := TcpSocketConn(result.GetTarget(), 2)
+			conn, err := NewSocket("tcp", result.GetTarget(), RunOpt.Delay)
 			if err != nil {
 				return "", false
 			}
-			data, err := SocketSend(conn, sendData, 1024)
+			data, err := conn.Request(sendData, 1024)
+			//data, err := SocketSend(conn, sendData, 1024)
 			if err != nil {
 				return "", false
 			}
