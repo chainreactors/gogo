@@ -38,9 +38,6 @@ func InitConfig(config *Config) (*Config, error) {
 				config.Threads = fdlimit - 100
 			}
 		}
-		if config.JsonFile != "" {
-			config.Threads = ReScanDefaultThreads
-		}
 	}
 
 	var file *os.File
@@ -71,8 +68,10 @@ func InitConfig(config *Config) (*Config, error) {
 		data := LoadResultFile(file)
 		switch data.(type) {
 		case Results:
+			config.Threads = ReScanDefaultThreads
 			config.Results = data.(Results)
 		case *ResultsData:
+			config.Threads = ReScanDefaultThreads
 			config.Results = data.(*ResultsData).Data
 		case *SmartData:
 			config.IPlist = data.(*SmartData).Data
@@ -138,7 +137,7 @@ func printTaskInfo(config *Config, taskname string) {
 	// 输出任务的基本信息
 
 	Log.Importantf("Current goroutines: %d, Version Level: %d,Exploit Target: %s, PortSpray Scan: %t", config.Threads, RunOpt.VersionLevel, RunOpt.Exploit, config.PortSpray)
-	if config.JsonFile == "" {
+	if config.Results == nil {
 		Log.Importantf("Starting task %s ,total ports: %d , mod: %s", taskname, len(config.Portlist), config.Mod)
 		// 输出端口信息
 		if len(config.Portlist) > 500 {
