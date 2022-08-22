@@ -1,7 +1,7 @@
 package pkg
 
 import (
-	"github.com/chainreactors/gogo/v1/pkg/dsl"
+	//"github.com/chainreactors/gogo/v1/pkg/dsl"
 	utils2 "github.com/chainreactors/gogo/v1/pkg/utils"
 	"net/http"
 	"strings"
@@ -11,11 +11,11 @@ func CollectSocketInfo(result *Result, socketContent []byte) {
 	content := string(socketContent)
 	ishttp, statuscode := GetStatusCode(content)
 	if ishttp {
-		var body string
-		bodyIndex := strings.Index(content, "\r\n\r\n")
-		if bodyIndex != -1 {
-			body = content[bodyIndex:]
-		}
+		//var body string
+		//bodyIndex := strings.Index(content, "\r\n\r\n")
+		//if bodyIndex != -1 {
+		//	body = content[bodyIndex:]
+		//}
 
 		result.HttpStat = statuscode
 		result.Protocol = "http"
@@ -29,13 +29,13 @@ func CollectSocketInfo(result *Result, socketContent []byte) {
 
 func CollectHttpInfo(result *Result, resp *http.Response, content string) {
 	result.Httpresp = resp
-	cs := strings.Index(content, "\r\n\r\n")
-	var body string
-	if cs != -1 {
-		body = content[cs+4:]
-	} else {
-		body = ""
-	}
+	//cs := strings.Index(content, "\r\n\r\n")
+	//var body string
+	//if cs != -1 {
+	//	body = content[cs+4:]
+	//} else {
+	//	body = ""
+	//}
 	//result.Content = content
 	if resp != nil {
 		result.Protocol = resp.Request.URL.Scheme

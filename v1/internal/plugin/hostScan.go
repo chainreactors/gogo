@@ -2,7 +2,6 @@ package plugin
 
 import (
 	. "github.com/chainreactors/gogo/v1/pkg"
-	"github.com/chainreactors/gogo/v1/pkg/dsl"
 	"github.com/chainreactors/gogo/v1/pkg/fingers"
 	"github.com/chainreactors/logs"
 	"net/http"
@@ -29,8 +28,10 @@ func hostScan(result *Result) {
 			continue
 		}
 		body := GetBody(resp)
-		hash := dsl.Md5Hash(body)[:4] // 因为头中经常有随机值, 因此hash通过body判断
-		if result.Hash != hash {
+		oldbody, _, _ := SplitHttpRaw(result.Content)
+
+		//hash := dsl.Md5Hash(body)[:4] // 因为头中经常有随机值, 因此hash通过body判断
+		if len(oldbody) != len(body) {
 			if result.CurrentHost == "" {
 				result.CurrentHost = host
 			}
