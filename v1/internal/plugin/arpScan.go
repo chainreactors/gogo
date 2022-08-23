@@ -1,7 +1,7 @@
 //go:build !linux
 // +build !linux
 
-package scan
+package plugin
 
 import "github.com/chainreactors/gogo/v1/pkg"
 

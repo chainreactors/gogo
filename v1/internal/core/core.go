@@ -2,54 +2,17 @@ package core
 
 import (
 	"fmt"
-	"github.com/chainreactors/gogo/v1/internal/scan"
+	"github.com/chainreactors/gogo/v1/internal/plugin"
 	. "github.com/chainreactors/gogo/v1/pkg"
 	"github.com/chainreactors/ipcs"
 	. "github.com/chainreactors/logs"
 	"github.com/panjf2000/ants/v2"
 	"net"
+	"runtime/debug"
 	"sort"
 	"strings"
 	"sync"
 )
-
-type targetConfig struct {
-	ip      string
-	port    string
-	hosts   []string
-	fingers Frameworks
-}
-
-func (tc *targetConfig) NewResult() *Result {
-	result := NewResult(tc.ip, tc.port)
-	if tc.hosts != nil {
-		if len(tc.hosts) == 1 {
-			result.CurrentHost = tc.hosts[0]
-		}
-		result.HttpHosts = tc.hosts
-	}
-	if tc.fingers != nil {
-		result.Frameworks = tc.fingers
-	}
-
-	if scan.RunOpt.SuffixStr != "" && !strings.HasPrefix(scan.RunOpt.SuffixStr, "/") {
-		result.Uri = "/" + scan.RunOpt.SuffixStr
-	}
-	return result
-}
-
-// return open: 0, closed: 1, filtered: 2, noroute: 3, denied: 4, down: 5, error_host: 6, unkown: -1
-
-var portstat = map[int]string{
-	//0:  "open",
-	1:  "closed",
-	2:  "filtered|closed",
-	3:  "noroute",
-	4:  "denied",
-	5:  "down",
-	6:  "error_host",
-	-1: "unknown",
-}
 
 //直接扫描
 func DefaultMod(targets interface{}, config Config) {
@@ -62,7 +25,7 @@ func DefaultMod(targets interface{}, config Config) {
 	scanPool, _ := ants.NewPoolWithFunc(config.Threads, func(i interface{}) {
 		tc := i.(targetConfig)
 		result := tc.NewResult()
-		scan.Dispatch(result)
+		plugin.Dispatch(result)
 		if result.Open {
 			Opt.AliveSum++
 			// 格式化title编码, 防止输出二进制数据
@@ -82,7 +45,14 @@ func DefaultMod(targets interface{}, config Config) {
 			Log.Debugf("%s tcp stat: %s, errmsg: %s", result.GetTarget(), portstat[result.ErrStat], result.Error)
 		}
 		wgs.Done()
-	})
+	}, ants.WithPanicHandler(func(err interface{}) {
+		if Opt.PluginDebug == true {
+			debug.PrintStack()
+		}
+
+		Log.Errorf("unexcept error %v", err)
+		wgs.Done()
+	}))
 	defer scanPool.Release()
 
 	for t := range targetCh {
@@ -105,8 +75,14 @@ func SmartMod(target *ipcs.CIDR, config Config) {
 	switch config.Mod {
 	case SUPERSMART, SUPERSMARTB:
 		mask = 16
+		if config.SmartPort == "default" {
+			config.SmartPortList = []string{DefaultSuperSmartPortProbe}
+		}
 	case SMART, SUPERSMARTC:
 		mask = 24
+		if config.SmartPort == "default" {
+			config.SmartPortList = []string{DefaultSmartPortProbe}
+		}
 	}
 
 	var wg sync.WaitGroup
@@ -116,9 +92,9 @@ func SmartMod(target *ipcs.CIDR, config Config) {
 	temp := targetGen.ipGenerator.alivedMap
 
 	// 输出启发式扫描探针
-	probeconfig := fmt.Sprintf("Smart probe ports: %s , ", strings.Join(config.SmartPortList, ","))
+	probeconfig := fmt.Sprintf("Smart probe ports: %s ", strings.Join(config.SmartPortList, ","))
 	if config.IsASmart() {
-		probeconfig += "Smart IP probe: " + config.IpProbe
+		probeconfig += ", Smart IP probe: " + config.IpProbe
 	}
 	Log.Important(probeconfig)
 
@@ -128,7 +104,7 @@ func SmartMod(target *ipcs.CIDR, config Config) {
 		tc := i.(targetConfig)
 		result := NewResult(tc.ip, tc.port)
 		result.SmartProbe = true
-		scan.Dispatch(result)
+		plugin.Dispatch(result)
 
 		if result.Open {
 			cidrAlived(result.Ip, temp, mask, config.Mod)
@@ -137,7 +113,6 @@ func SmartMod(target *ipcs.CIDR, config Config) {
 		}
 		wg.Done()
 	})
-
 	defer scanPool.Release()
 	for t := range tcChannel {
 		wg.Add(1)
@@ -282,7 +257,7 @@ func AliveMod(targets interface{}, config Config) {
 
 func aliveScan(tc targetConfig, temp *sync.Map) {
 	result := NewResult(tc.ip, tc.port)
-	scan.Dispatch(result)
+	plugin.Dispatch(result)
 
 	if result.Open {
 		temp.Store(result.Ip, true)

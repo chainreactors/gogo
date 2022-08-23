@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+var ProxyUrl *url.URL
 var Proxy func(*http.Request) (*url.URL, error)
 
 func HttpConn(delay int) *http.Client {

@@ -2,7 +2,7 @@ package core
 
 import (
 	"fmt"
-	. "github.com/chainreactors/gogo/v1/internal/scan"
+	. "github.com/chainreactors/gogo/v1/internal/plugin"
 	. "github.com/chainreactors/gogo/v1/pkg"
 	. "github.com/chainreactors/gogo/v1/pkg/utils"
 	"github.com/chainreactors/ipcs"
@@ -37,9 +37,6 @@ func InitConfig(config *Config) (*Config, error) {
 				Log.Warnf("Now set threads to %d", fdlimit-100)
 				config.Threads = fdlimit - 100
 			}
-		}
-		if config.JsonFile != "" {
-			config.Threads = ReScanDefaultThreads
 		}
 	}
 
@@ -100,12 +97,12 @@ func InitConfig(config *Config) (*Config, error) {
 	// 初始化启发式扫描的端口探针
 	if config.SmartPort != "default" {
 		config.SmartPortList = ipcs.ParsePort(config.SmartPort)
-	} else {
-		if config.Mod == SMART {
-			config.SmartPortList = []string{DefaultPortProbe}
-		} else if SliceContains([]string{SUPERSMART, SUPERSMARTB}, config.Mod) {
-			config.SmartPortList = []string{SuperSmartPortProbe}
-		}
+		//} else {
+		//	if config.Mod == SMART {
+		//		config.SmartPortList = []string{DefaultSmartPortProbe}
+		//	} else if SliceContains([]string{SUPERSMART, SUPERSMARTB}, config.Mod) {
+		//		config.SmartPortList = []string{DefaultSuperSmartPortProbe}
+		//	}
 	}
 
 	// 初始化ss模式ip探针,默认ss默认只探测ip为1的c段,可以通过-ipp参数指定,例如-ipp 1,254,253
@@ -138,7 +135,7 @@ func printTaskInfo(config *Config, taskname string) {
 	// 输出任务的基本信息
 
 	Log.Importantf("Current goroutines: %d, Version Level: %d,Exploit Target: %s, PortSpray Scan: %t", config.Threads, RunOpt.VersionLevel, RunOpt.Exploit, config.PortSpray)
-	if config.JsonFile == "" {
+	if config.Results == nil {
 		Log.Importantf("Starting task %s ,total ports: %d , mod: %s", taskname, len(config.Portlist), config.Mod)
 		// 输出端口信息
 		if len(config.Portlist) > 500 {

@@ -1,4 +1,4 @@
-package scan
+package plugin
 
 import (
 	"github.com/chainreactors/gogo/v1/pkg"
@@ -51,7 +51,7 @@ func Dispatch(result *pkg.Result) {
 		}
 		return
 	} else {
-		socketHttp(result)
+		initScan(result)
 	}
 
 	if !result.Open || result.SmartProbe {

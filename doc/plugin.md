@@ -21,7 +21,6 @@ tcp指纹与http指纹为同一格式, md5与mmh3指纹为同一格式
 ```
 - name: redis   # 指纹名字, 匹配到的时候输出的值
   level: 1      # 0代表不需要主动发包, 1代表需要额外主动发起请求. 如果当前level为0则不会发送数据, 但是依旧会进行被动的指纹匹配.
- 
   default_port: # 指纹的默认端口, 加速匹配. tcp指纹如果匹配到第一个就会结束指纹匹配, http则会继续匹配, 所以默认端口对http没有特殊优化
     - '6379'
   protocol: tcp  # tcp/http, 默认为http
@@ -43,8 +42,8 @@ tcp指纹与http指纹为同一格式, md5与mmh3指纹为同一格式
           - [md5]
         mmh3: # 匹配body的mmh3hash
           - [mmh3]
-        send_data: "info\n" # 匹配指纹需要主动发送的数据, 只有当前level设置为1才会生效
-        vuln: redis_unauthorized # 某些漏洞也可以通过匹配关键字识别, 因此一些简单的poc使用指纹的方式实现, 复杂的poc请使用-e下的nuclei yaml配置
+    send_data: "info\n" # 匹配指纹需要主动发送的数据, 只有当前level设置为1才会生效
+    vuln: redis_unauthorized # 某些漏洞也可以通过匹配关键字识别, 因此一些简单的poc使用指纹的方式实现, 复杂的poc请使用-e下的nuclei yaml配置
   
 ```
 

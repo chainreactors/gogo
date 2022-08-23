@@ -1,7 +1,7 @@
 package pkg
 
 import (
-	"github.com/chainreactors/gogo/v1/pkg/dsl"
+	//"github.com/chainreactors/gogo/v1/pkg/dsl"
 	utils2 "github.com/chainreactors/gogo/v1/pkg/utils"
 	"net/http"
 	"strings"
@@ -11,31 +11,31 @@ func CollectSocketInfo(result *Result, socketContent []byte) {
 	content := string(socketContent)
 	ishttp, statuscode := GetStatusCode(content)
 	if ishttp {
-		var body string
-		bodyIndex := strings.Index(content, "\r\n\r\n")
-		if bodyIndex != -1 {
-			body = content[bodyIndex:]
-		}
+		//var body string
+		//bodyIndex := strings.Index(content, "\r\n\r\n")
+		//if bodyIndex != -1 {
+		//	body = content[bodyIndex:]
+		//}
 
 		result.HttpStat = statuscode
 		result.Protocol = "http"
-		result.Hash = dsl.Md5Hash([]byte(strings.TrimSpace(body)))[:4] // 因为头中经常有随机值, 因此hash通过body判断
-		result.Title = GetTitle(content)
+		//result.Hash = dsl.Md5Hash([]byte(strings.TrimSpace(body)))[:4] // 因为头中经常有随机值, 因此hash通过body判断
 		result.Language = getSocketLanguage(content)
 		result.Midware, _ = CompiledMatch(CommonCompiled["server"], content)
 	}
+	result.Title = GetTitle(content)
 	result.AddExtracts(ExtractContent(content))
 }
 
 func CollectHttpInfo(result *Result, resp *http.Response, content string) {
 	result.Httpresp = resp
-	cs := strings.Index(content, "\r\n\r\n")
-	var body string
-	if cs != -1 {
-		body = content[cs+4:]
-	} else {
-		body = ""
-	}
+	//cs := strings.Index(content, "\r\n\r\n")
+	//var body string
+	//if cs != -1 {
+	//	body = content[cs+4:]
+	//} else {
+	//	body = ""
+	//}
 	//result.Content = content
 	if resp != nil {
 		result.Protocol = resp.Request.URL.Scheme
@@ -45,11 +45,11 @@ func CollectHttpInfo(result *Result, resp *http.Response, content string) {
 	}
 
 	result.Title = GetTitle(content)
-	if body != "" {
-		result.Hash = dsl.Md5Hash([]byte(strings.TrimSpace(body)))[:4] // 因为头中经常有随机值, 因此hash通过body判断
-	} else {
-		result.Hash = "0000"
-	}
+	//if body != "" {
+	//	result.Hash = dsl.Md5Hash([]byte(strings.TrimSpace(body)))[:4] // 因为头中经常有随机值, 因此hash通过body判断
+	//} else {
+	//	result.Hash = "0000"
+	//}
 	result.AddExtracts(ExtractContent(content))
 }
 

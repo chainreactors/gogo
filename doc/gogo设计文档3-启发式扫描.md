@@ -1,5 +1,3 @@
-
-
 这几年遇到非常多的项目都需要在几天甚至几个小时内完成内网刷分的任务. 而没有之前报告或者内鬼报信的情况下, 内网资产测绘只能使用传统的扫描器一点一点探测, 性能与效率都非常低下. 好在fscan略微改善了条件, 将内网的探测从几个c段提高了整个b段, fscan利用go轻松打到了数千的并发,完成了之前难以实现的并发速度.但是面对一个a段甚至某些大型内网的数十个a段,还是无能为力.
 
 
@@ -7,9 +5,7 @@
 ## 启发式扫描原理
 根据经验我们会发现, 入口点的c段以及周边的几个c段通常会存在大量资产. 
 
-
 因此,可以做出猜想: 如果某个c段存在任意一个资产,那么这个c段就可能隐藏着更多资产. 
-
 
 而启发式扫描都是根据这个猜想进行的,对于一些实现细节还有优化,具体的下面会提到.
 
@@ -70,25 +66,25 @@ update:
 
 为了解决这个问题, 我给大部分使用场景添加了workflow解决方案, 现在大部分情况只需要一个参数就能解决了.
 
-1. 从B段中发现存活的C段(C段喷洒), `gt -ip 192.168.1.1/16 -m s -no` or `gt -w 192c`
-2. 从A段中发现存活的B段(B段喷洒), `gt -ip 10.1.1.1/8 -m ss -no` or `gt -w 10b`
-3. 从A段中发现存活的C段(A段的启发式C段喷洒), `gt -ip 10.1.1.1/8 -m sc` or `gt -w 10c`
-4. 自定义B段的C段喷洒, `gt -l b.txt -m s -no` or `gt -w c -l b.txt`
-5. 自定义A段的B段喷洒, `gt -l a.txt -m ss -no` or `gt -w b -l a.txt`
-6. 使用icmp协议发现A段中所有存活的IP,   `gt -ip 10.1.1.1/8 -m ss  -p icmp` or `gt -w 10ip`(单端口的-m ss扫描做了特殊的优化, 具体见:A段启发式扫描优化4 )
-7. 使用icmp协议发现A段中所有的数据库, `gt -ip 10.1.1.1/8 -m ss  -p db` or `gt -w 10 -p db` 禁止ping内网需要使用 `gt -w 10noping -p db`
-8. 使用80端口探测A段中所有的数据库, `gt -ip 10.1.1.1/8 -m ss  -sp 80 -p db` `gt -w 10 -sp 80 -p db`
-9. 自动化探测172,192,10等常见内网网段, `gt -m a -no`(已经弃用) or  `gt -w interc`
-10. 启发式扫描B段常见端口资产, `gt -ip 192.168.1.1/16 -m s -p win,top2,db` or `gt -w 192`
-11. 启发式扫描C段常见端口资产, `gt -ip 10.1.1.1/8 -m ss -p win,top2,db` or `gt -w 10`
+1. 从B段中发现存活的C段(C段喷洒), `gogo -ip 192.168.1.1/16 -m s -no` or `gogo -w 192c`
+2. 从A段中发现存活的B段(B段喷洒), `gogo -ip 10.1.1.1/8 -m ss -no` or `gogo -w 10b`
+3. 从A段中发现存活的C段(A段的启发式C段喷洒), `gogo -ip 10.1.1.1/8 -m sc` or `gogo -w 10c`
+4. 自定义B段的C段喷洒, `gogo -l b.txt -m s -no` or `gogo -w c -l b.txt`
+5. 自定义A段的B段喷洒, `gogo -l a.txt -m ss -no` or `gogo -w b -l a.txt`
+6. 使用icmp协议发现A段中所有存活的IP,   `gogo -ip 10.1.1.1/8 -m ss  -p icmp` or `gogo -w 10ip`(单端口的-m ss扫描做了特殊的优化, 具体见:A段启发式扫描优化4 )
+7. 使用icmp协议发现A段中所有的数据库, `gogo -ip 10.1.1.1/8 -m ss  -p db` or `gogo -w 10 -p db` 禁止ping内网需要使用 `gogo -w 10noping -p db`
+8. 使用80端口探测A段中所有的数据库, `gogo -ip 10.1.1.1/8 -m ss  -sp 80 -p db` `gogo -w 10 -sp 80 -p db`
+9. 自动化探测172,192,10等常见内网网段, `gogo -m a -no`(已经弃用) or  `gogo -w interc`
+10. 启发式扫描B段常见端口资产, `gogo -ip 192.168.1.1/16 -m s -p win,top2,db` or `gogo -w 192`
+11. 启发式扫描C段常见端口资产, `gogo -ip 10.1.1.1/8 -m ss -p win,top2,db` or `gogo -w 10`
 
 
 
 一些特殊情况的使用常见
 
-1. 假设80端口存在ACL的C段喷洒, `gt -ip 10.1.1.1/8 -m s -sp 22,445,icmp -no` or `gt -w 10c -sp 22,445,icmp`
-2. 假设网关ip为1,253,254的B段喷洒 ,`gt -ip 10.1.1.1/8 -m ss -ipp 1,253-254 -no ` or `gt -w 10b -ipp 1,253-254`
-3. 假设禁ping情况下, 网关ip为1,253,254的B段喷洒, `gt -ip 10.1.1.1/8 -m ss -sp 80,22 -ipp 1,253-254 -no ` or `gt -w 10b -sp 80,22 -ipp 1,253-254`
+1. 假设80端口存在ACL的C段喷洒, `gogo -ip 10.1.1.1/8 -m s -sp 22,445,icmp -no` or `gogo -w 10c -sp 22,445,icmp`
+2. 假设网关ip为1,253,254的B段喷洒 ,`gogo -ip 10.1.1.1/8 -m ss -ipp 1,253-254 -no ` or `gogo -w 10b -ipp 1,253-254`
+3. 假设禁ping情况下, 网关ip为1,253,254的B段喷洒, `gogo -ip 10.1.1.1/8 -m ss -sp 80,22 -ipp 1,253-254 -no ` or `gogo -w 10b -sp 80,22 -ipp 1,253-254`
 
 
 一些辅助参数
@@ -97,12 +93,12 @@ update:
 - -af 自动生成文件名
 - -hf 自动生成做了隐藏的文件名 
 - -F 格式化输出文件, 压缩加密的文件变成人类可读的文件, 存在一些子参数
-   - -o ip , 从扫描结果过滤自定义的内容输出, 例如 gt -F 1.dat -o ip 
-   - -f , 输出到文件, 例如,gt -F 1.dat -o ip -f ip.txt
-   - -af , 根据元数据自动生成格式化的文件名, 例如, gt -F 1.dat -af
+   - -o ip , 从扫描结果过滤自定义的内容输出, 例如 gogo -F 1.dat -o ip 
+   - -f , 输出到文件, 例如,gogo -F 1.dat -o ip -f ip.txt
+   - -af , 根据元数据自动生成格式化的文件名, 例如, gogo -F 1.dat -af
 - -P inter 输出-m a模式下自动探测的内网网段与探测配置
 
-如果是添加了-no参数,就不需要指定-o参数进行过滤了, 直接gt -F 1.dat 即可
+如果是添加了-no参数,就不需要指定-o参数进行过滤了, 直接gogo -F 1.dat 即可
 
 - -l 参数不需要先-F解密, 会自动判断是否被加密,并正确读取, 当然也可以直接读正常的文本进行扫描
 

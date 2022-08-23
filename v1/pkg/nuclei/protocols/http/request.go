@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/chainreactors/gogo/v1/pkg/nuclei/protocols"
 	. "github.com/chainreactors/gogo/v1/pkg/utils"
+	"github.com/chainreactors/logs"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -339,6 +340,7 @@ func (request *Request) ExecuteRequestWithResults(reqURL string, dynamicValues m
 func (r *Request) executeRequest(request *generatedRequest, dynamicValues map[string]interface{}, callback protocols.OutputEventCallback) error {
 	resp, err := r.httpClient.Do(request.request)
 	if err != nil {
+		logs.Log.Debugf("%s nuclei request failed, %s", request.request.URL, err.Error())
 		return err
 	}
 	data := respToMap(resp, request.request)

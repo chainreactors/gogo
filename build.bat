@@ -6,4 +6,4 @@ set gt_key=%1
 go get sigs.k8s.io/yaml
 go generate gogo.go
 
-gox.exe -osarch="linux/amd64 linux/arm64 linux/arm linux/386 windows/amd64 linux/mips64 windows/386 darwin/amd64" -ldflags="-s -w -X 'gogo/v1/cmd.ver=%gt_ver%' -X 'gogo/v1/cmd.k=%gt_key%'" -gcflags="-trimpath=$GOPATH" -asmflags="-trimpath=$GOPATH" -output=".\bin\%name%_{{.OS}}_{{.Arch}}" .
+gox.exe -osarch="linux/amd64 linux/arm64 linux/arm linux/386 windows/amd64 linux/mips64 windows/386 darwin/amd64" -ldflags="-s -w -X 'github.com/chainreactors/gogo/v1/cmd.ver=%gt_ver%' -X 'github.com/chainreactors/gogo/v1/cmd.k=%gt_key%'" -gcflags="-trimpath=$GOPATH" -asmflags="-trimpath=$GOPATH" -output=".\bin\%name%_{{.OS}}_{{.Arch}}" .

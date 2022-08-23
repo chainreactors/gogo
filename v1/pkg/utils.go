@@ -49,6 +49,16 @@ func GetBody(resp *http.Response) []byte {
 	return body
 }
 
+func SplitHttpRaw(content string) (body, header string, ok bool) {
+	cs := strings.Index(content, "\r\n\r\n")
+	if cs != -1 && len(content) >= cs+4 {
+		body = content[cs+4:]
+		header = content[:cs]
+		return body, header, true
+	}
+	return "", "", false
+}
+
 func AsciiEncode(s string) string {
 	s = strings.TrimSpace(s)
 	s = fmt.Sprintf("%q", s)

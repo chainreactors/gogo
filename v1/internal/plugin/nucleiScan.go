@@ -1,4 +1,4 @@
-package scan
+package plugin
 
 import (
 	. "github.com/chainreactors/gogo/v1/pkg"
@@ -10,11 +10,14 @@ import (
 
 //tamplate =
 func Nuclei(target string, result *Result) {
-
 	if RunOpt.Exploit != "none" {
 		if RunOpt.Exploit != "auto" {
 			executeTemplates(result, strings.Split(RunOpt.Exploit, ","), target)
 		} else {
+			titles := result.Frameworks.GetNames()
+			if result.IsHttp() {
+				titles = append(titles, "http")
+			}
 			executeTemplates(result, result.Frameworks.GetNames(), target)
 		}
 	}

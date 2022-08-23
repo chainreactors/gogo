@@ -13,12 +13,12 @@ import (
 )
 
 type Result struct {
-	Ip           string         `json:"i"` // ip
-	Port         string         `json:"p"` // port
-	Uri          string         `json:"u"` // uri
-	Os           string         `json:"o"` // os
-	Host         string         `json:"h"` // host
-	Cert         string         `json:"c"`
+	Ip   string `json:"i"` // ip
+	Port string `json:"p"` // port
+	Uri  string `json:"u"` // uri
+	Os   string `json:"o"` // os
+	Host string `json:"h"` // host
+	//Cert         string         `json:"c"`
 	HttpHosts    []string       `json:"-"`
 	CurrentHost  string         `json:"-"`
 	Title        string         `json:"t"` // title
@@ -31,8 +31,8 @@ type Result struct {
 	Extracts     *Extracts      `json:"-"`
 	ExtractsStat map[string]int `json:"ec"`
 	Protocol     string         `json:"r"` // protocol
-	Hash         string         `json:"hs"`
-	Open         bool           `json:"-"`
+	//Hash         string         `json:"hs"`
+	Open bool `json:"-"`
 	//FrameworksMap map[string]bool `json:"-"`
 	SmartProbe bool           `json:"-"`
 	TcpConn    *net.Conn      `json:"-"`
@@ -163,8 +163,8 @@ func (result *Result) Get(key string) string {
 		return result.GetBaseURL()
 	case "midware":
 		return result.Midware
-	case "hash":
-		return result.Hash
+	//case "hash":
+	//	return result.Hash
 	case "language":
 		return result.Language
 	case "protocol":
@@ -462,12 +462,12 @@ func ValuesOutput(result *Result, outType string) string {
 }
 
 func ColorOutput(result *Result) string {
-	s := fmt.Sprintf("[+] %s\t%s\t%s\t%s\t%s\t%s\t%s [%s] %s %s\n", result.GetURL(), result.Midware, result.Language, Blue(result.Frameworks.ToString()), result.Host, result.Cert, result.Hash, Yellow(result.HttpStat), Blue(result.Title), Red(result.Vulns.ToString()))
+	s := fmt.Sprintf("[+] %s\t%s\t%s\t%s\t%s [%s] %s %s\n", result.GetURL(), result.Midware, result.Language, Blue(result.Frameworks.ToString()), result.Host, Yellow(result.HttpStat), Blue(result.Title), Red(result.Vulns.ToString()))
 	return s
 }
 
 func FullOutput(result *Result) string {
-	s := fmt.Sprintf("[+] %s\t%s\t%s\t%s\t%s\t%s\t%s [%s] %s %s %s\n", result.GetURL(), result.Midware, result.Language, result.Frameworks.ToString(), result.Host, result.Cert, result.Hash, result.HttpStat, result.Title, result.Vulns.ToString(), result.Extracts.ToString())
+	s := fmt.Sprintf("[+] %s\t%s\t%s\t%s\t%s [%s] %s %s %s\n", result.GetURL(), result.Midware, result.Language, result.Frameworks.ToString(), result.Host, result.HttpStat, result.Title, result.Vulns.ToString(), result.Extracts.ToString())
 	return s
 }
 
