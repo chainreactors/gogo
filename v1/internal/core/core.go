@@ -75,8 +75,14 @@ func SmartMod(target *ipcs.CIDR, config Config) {
 	switch config.Mod {
 	case SUPERSMART, SUPERSMARTB:
 		mask = 16
+		if config.SmartPort == "default" {
+			config.SmartPortList = []string{DefaultSuperSmartPortProbe}
+		}
 	case SMART, SUPERSMARTC:
 		mask = 24
+		if config.SmartPort == "default" {
+			config.SmartPortList = []string{DefaultSmartPortProbe}
+		}
 	}
 
 	var wg sync.WaitGroup
