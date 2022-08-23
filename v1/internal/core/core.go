@@ -92,9 +92,9 @@ func SmartMod(target *ipcs.CIDR, config Config) {
 	temp := targetGen.ipGenerator.alivedMap
 
 	// 输出启发式扫描探针
-	probeconfig := fmt.Sprintf("Smart probe ports: %s , ", strings.Join(config.SmartPortList, ","))
+	probeconfig := fmt.Sprintf("Smart probe ports: %s ", strings.Join(config.SmartPortList, ","))
 	if config.IsASmart() {
-		probeconfig += "Smart IP probe: " + config.IpProbe
+		probeconfig += ", Smart IP probe: " + config.IpProbe
 	}
 	Log.Important(probeconfig)
 
