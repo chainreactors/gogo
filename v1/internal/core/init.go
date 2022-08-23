@@ -68,10 +68,8 @@ func InitConfig(config *Config) (*Config, error) {
 		data := LoadResultFile(file)
 		switch data.(type) {
 		case Results:
-			config.Threads = ReScanDefaultThreads
 			config.Results = data.(Results)
 		case *ResultsData:
-			config.Threads = ReScanDefaultThreads
 			config.Results = data.(*ResultsData).Data
 		case *SmartData:
 			config.IPlist = data.(*SmartData).Data
