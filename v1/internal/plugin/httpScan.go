@@ -17,7 +17,19 @@ var headers = http.Header{
 func initScan(result *pkg.Result) {
 	var bs []byte
 	target := result.GetTarget()
-	if pkg.Proxy != nil && pkg.ProxyUrl.Scheme == "socks5" {
+	if pkg.ProxyUrl != nil && strings.HasPrefix(pkg.ProxyUrl.Scheme, "http") {
+		conn := result.GetHttpConn(RunOpt.Delay)
+		req, _ := http.NewRequest("GET", "http://"+target, nil)
+		resp, err := conn.Do(req)
+		if err != nil {
+			result.Error = err.Error()
+			return
+		}
+		result.Open = true
+		content := pkg.GetHttpRaw(resp)
+		result.Content = strings.ToLower(content)
+		pkg.CollectHttpInfo(result, resp, content)
+	} else {
 		conn, err := pkg.NewSocket("tcp", target, RunOpt.Delay)
 		//conn, err := pkg.TcpSocketConn(target, RunOpt.Delay)
 		if err != nil {
@@ -64,18 +76,6 @@ func initScan(result *pkg.Result) {
 		}
 		result.Content = strings.ToLower(string(bs))
 		pkg.CollectSocketInfo(result, bs)
-	} else {
-		conn := result.GetHttpConn(RunOpt.Delay)
-		req, _ := http.NewRequest("GET", "http://"+target, nil)
-		resp, err := conn.Do(req)
-		if err != nil {
-			result.Error = err.Error()
-			return
-		}
-		result.Open = true
-		content := pkg.GetHttpRaw(resp)
-		result.Content = strings.ToLower(content)
-		pkg.CollectHttpInfo(result, resp, content)
 	}
 
 	//所有30x,400,以及非http协议的开放端口都送到http包尝试获取更多信息
@@ -117,7 +117,6 @@ func systemHttp(result *pkg.Result) {
 		return
 	}
 	logs.Log.Debugf("request %s , %d ", target, resp.StatusCode)
-
 	if resp.TLS != nil {
 		// 证书在错误处理之前, 因为有可能存在证书,但是服务已关闭
 		result.Protocol = "https"
