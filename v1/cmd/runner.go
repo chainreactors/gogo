@@ -214,10 +214,6 @@ func (r *Runner) prepareConfig(config Config) *Config {
 		config.AliveSprayMod = append(config.AliveSprayMod, "icmp")
 	}
 
-	if config.Mod == SUPERSMARTB {
-		config.FileOutputf = "raw"
-	}
-
 	//if config.Filename == "" {
 	//	config.Filename = GetFilename(&config, config.FileOutputf)
 	//} else {
@@ -259,7 +255,9 @@ func (r *Runner) run() {
 
 func (r *Runner) runWithCMD() {
 	config := r.prepareConfig(r.config)
-
+	if config.Mod == SUPERSMARTB {
+		config.FileOutputf = SUPERSMARTB
+	}
 	if config.Filename == "" && config.IsSmart() {
 		config.SmartFilename = GetFilename(config, "cidr")
 	}
@@ -284,6 +282,10 @@ func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) {
 		for _, workflow := range workflows {
 			Log.Important("workflow " + workflow.Name + " starting")
 			config := workflow.PrepareConfig(r.config)
+
+			if config.Mod == SUPERSMARTB {
+				config.FileOutputf = SUPERSMARTB
+			}
 
 			if config.Filename == "" && config.IsSmart() {
 				config.SmartFilename = GetFilename(config, "cidr")

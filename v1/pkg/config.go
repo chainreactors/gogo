@@ -127,6 +127,9 @@ func (config *Config) InitFile() error {
 				}
 				return res
 			}
+		} else if config.FileOutputf == SUPERSMARTB {
+			config.File.Write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("smart")))
+			config.File.ClosedAppend = "]}"
 		}
 		config.ExtractFile, err = newFile(config.Filename+"_extract", config.Compress)
 	}
@@ -156,7 +159,7 @@ func (config *Config) InitFile() error {
 
 func (config *Config) Validate() error {
 	// 一些命令行参数错误处理,如果check没过直接退出程序或输出警告
-	legalFormat := []string{"url", "ip", "port", "frameworks", "framework", "vuln", "vulns", "protocol", "title", "target", "hash", "language", "host", "color", "c", "json", "j", "full", "jsonlines", "jl", "zombie"}
+	legalFormat := []string{"url", "ip", "port", "frameworks", "framework", "vuln", "vulns", "protocol", "title", "target", "hash", "language", "host", "color", "c", "json", "j", "full", "jsonlines", "jl", "zombie", "sc"}
 	if config.FileOutputf != "default" {
 		for _, form := range strings.Split(config.FileOutputf, ",") {
 			if !utils.SliceContains(legalFormat, form) {

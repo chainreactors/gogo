@@ -137,7 +137,7 @@ func SmartMod(target *ipcs.CIDR, config Config) {
 		WriteSmartResult(config.SmartFile, iplist.Strings())
 	}
 	if config.File != nil && config.Mod == SUPERSMARTC {
-		config.File.SafeWrite(strings.Join(iplist.Strings(), "\n") + "\n")
+		WriteScReuslt(config.File, iplist.Strings())
 	}
 
 	if Opt.Noscan || config.Mod == SUPERSMARTC {
