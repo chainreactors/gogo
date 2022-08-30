@@ -79,12 +79,7 @@ func CMD() {
 
 	flag.Parse()
 	// 密钥
-	if *key != k {
-		//inforev()
-		exit()
-	} else {
-		pkg.Key = []byte(*key)
-	}
+	pkg.Key = []byte(*key)
 
 	if ok := runner.preInit(); !ok {
 		os.Exit(0)
