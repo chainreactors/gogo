@@ -3,6 +3,8 @@ name: goreleaser
 on:
   pull_request:
   push:
+    tags:
+      - 'v*.*.*'
 
 jobs:
   goreleaser:
