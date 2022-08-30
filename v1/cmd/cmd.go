@@ -81,6 +81,8 @@ func CMD() {
 	flag.BoolVar(&core.Opt.PluginDebug, "plugindebug", false, "print plugin debug stack")
 	flag.StringVar(&runner.Proxy, "proxy", "", "specify http/socks5 proxy")
 	flag.Usage = func() { exit() }
+	//flag.Usage = func() { core.PrintHelp() }
+
 	flag.Parse()
 	// 密钥
 	if *key != k {
