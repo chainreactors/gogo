@@ -28,8 +28,8 @@ func CMD() {
 	flag.BoolVar(&runner.IsWorkFlow, "W", false, "same as -w, input from stdin")
 
 	// SMART
-	flag.StringVar(&runner.config.SmartPort, "sp", "default", "smart port probe")
-	flag.StringVar(&runner.config.IpProbe, "ipp", "default", "smart ip probe")
+	flag.StringVar(&runner.config.SmartPort, "sp", pkg.Default, "smart port probe")
+	flag.StringVar(&runner.config.IpProbe, "ipp", pkg.Default, "smart ip probe")
 	flag.BoolVar(&runner.config.NoSpray, "ns", false, "force to close auto-spray")
 	flag.BoolVar(&runner.NoScan, "no", false, "force to close default-scan on smart mod")
 
@@ -37,9 +37,9 @@ func CMD() {
 	flag.StringVar(&runner.config.Filename, "f", "", "FILE, output filename")
 	flag.StringVar(&runner.config.FilePath, "path", "", "PATH, output file path")
 	//flag.StringVar(&runner.config.ExcludeIPs, "eip", "", "")
-	flag.StringVar(&runner.Outputf, "o", "default", "String,cmdline output format")
+	flag.StringVar(&runner.Outputf, "o", pkg.Default, "String,cmdline output format")
 	flag.BoolVar(&runner.Clean, "c", false, "close stdout output")
-	flag.StringVar(&runner.FileOutputf, "O", "default", "String, file output format")
+	flag.StringVar(&runner.FileOutputf, "O", pkg.Default, "String, file output format")
 	flag.BoolVar(&runner.Quiet, "q", false, "close log output")
 	flag.Var(&runner.filters, "filter", "String, filter result e.g -filter port::22")
 	flag.StringVar(&runner.FormatterFilename, "F", "", "String, Scanned result to be formatted")
@@ -49,7 +49,7 @@ func CMD() {
 
 	// CONFIG
 	flag.IntVar(&runner.config.Threads, "t", 0, "threads")
-	flag.StringVar(&runner.config.Mod, "m", "default", "scan mod")
+	flag.StringVar(&runner.config.Mod, "m", pkg.Default, "scan mod")
 	flag.BoolVar(&runner.config.PortSpray, "s", false, "open port spray generator")
 	flag.BoolVar(&runner.Ping, "ping", false, "alive pre-scan")
 	//flag.BoolVar(&runner.Arp, "arp", false, "")

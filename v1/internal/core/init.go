@@ -95,7 +95,7 @@ func InitConfig(config *Config) (*Config, error) {
 	}
 
 	// 初始化启发式扫描的端口探针
-	if config.SmartPort != "default" {
+	if config.SmartPort != Default {
 		config.SmartPortList = ipcs.ParsePort(config.SmartPort)
 		//} else {
 		//	if config.Mod == SMART {
@@ -106,7 +106,7 @@ func InitConfig(config *Config) (*Config, error) {
 	}
 
 	// 初始化ss模式ip探针,默认ss默认只探测ip为1的c段,可以通过-ipp参数指定,例如-ipp 1,254,253
-	if config.IpProbe != "default" {
+	if config.IpProbe != Default {
 		config.IpProbeList = Str2uintlist(config.IpProbe)
 	} else {
 		config.IpProbeList = Str2uintlist(DefaultIpProbe)
@@ -151,7 +151,7 @@ func printTaskInfo(config *Config, taskname string) {
 
 func RunTask(config Config) {
 	switch config.Mod {
-	case "default":
+	case Default:
 		createDefaultScan(config)
 	//case "a", "auto":
 	//	autoScan(config)

@@ -70,13 +70,13 @@ func (r *Runner) preInit() bool {
 	Log.LogFileName = ".sock.lock"
 	Log.Init()
 
-	if r.FileOutputf == "default" {
+	if r.FileOutputf == Default {
 		r.config.FileOutputf = "json"
 	} else {
 		r.config.FileOutputf = r.FileOutputf
 	}
 
-	if r.Outputf == "default" {
+	if r.Outputf == Default {
 		r.config.Outputf = "full"
 	} else {
 		r.config.Outputf = r.Outputf

@@ -75,12 +75,12 @@ func SmartMod(target *ipcs.CIDR, config Config) {
 	switch config.Mod {
 	case SUPERSMART, SUPERSMARTB:
 		mask = 16
-		if config.SmartPort == "default" {
+		if config.SmartPort == Default {
 			config.SmartPortList = []string{DefaultSuperSmartPortProbe}
 		}
 	case SMART, SUPERSMARTC:
 		mask = 24
-		if config.SmartPort == "default" {
+		if config.SmartPort == Default {
 			config.SmartPortList = []string{DefaultSmartPortProbe}
 		}
 	}
@@ -151,7 +151,7 @@ func SmartMod(target *ipcs.CIDR, config Config) {
 	} else if config.Mod == SUPERSMARTB {
 		config.Mod = SUPERSMARTC
 	} else {
-		config.Mod = "default"
+		config.Mod = Default
 	}
 	declineScan(iplist, config)
 }

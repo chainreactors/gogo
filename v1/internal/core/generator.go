@@ -137,7 +137,7 @@ type targetGenerator struct {
 func (gen *targetGenerator) genFromDefault(cidrs ipcs.CIDRs, portlist []string) {
 	for _, cidr := range cidrs {
 		tmpalived := Opt.AliveSum
-		ch := gen.ipGenerator.generatorDispatch(cidr, "default")
+		ch := gen.ipGenerator.generatorDispatch(cidr, Default)
 		for ip := range ch {
 			for _, port := range portlist {
 				gen.ch <- targetConfig{ip: ip, port: port, hosts: gen.hostsMap[ip]}
@@ -157,7 +157,7 @@ func (gen *targetGenerator) genFromSpray(cidrs ipcs.CIDRs, portlist []string) {
 		tmpalive := Opt.AliveSum
 
 		for _, cidr := range cidrs {
-			ch := gen.ipGenerator.generatorDispatch(cidr, "default")
+			ch := gen.ipGenerator.generatorDispatch(cidr, Default)
 			for ip := range ch {
 				gen.ch <- targetConfig{ip: ip, port: port, hosts: gen.hostsMap[ip]}
 			}

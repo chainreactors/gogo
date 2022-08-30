@@ -13,11 +13,9 @@ import (
 const (
 	LinuxDefaultThreads        = 4000
 	WindowsDefaultThreads      = 1000
-	ReScanDefaultThreads       = 100
 	DefaultIpProbe             = "1,254"
 	DefaultSmartPortProbe      = "80"
 	DefaultSuperSmartPortProbe = "icmp"
-	DefaultName                = "default"
 )
 
 type targetConfig struct {

@@ -16,6 +16,7 @@ const (
 	SUPERSMART  = "ss"
 	SUPERSMARTC = "sb"
 	SUPERSMARTB = "sc"
+	Default     = "default"
 )
 
 type Config struct {
@@ -160,7 +161,7 @@ func (config *Config) InitFile() error {
 func (config *Config) Validate() error {
 	// 一些命令行参数错误处理,如果check没过直接退出程序或输出警告
 	legalFormat := []string{"url", "ip", "port", "frameworks", "framework", "vuln", "vulns", "protocol", "title", "target", "hash", "language", "host", "color", "c", "json", "j", "full", "jsonlines", "jl", "zombie", "sc"}
-	if config.FileOutputf != "default" {
+	if config.FileOutputf != Default {
 		for _, form := range strings.Split(config.FileOutputf, ",") {
 			if !utils.SliceContains(legalFormat, form) {
 				logs.Log.Warnf("illegal file output format: %s, Please use one or more of the following formats: %s", form, strings.Join(legalFormat, ", "))
@@ -181,7 +182,7 @@ func (config *Config) Validate() error {
 		if config.Ports != "top1" {
 			logs.Log.Warn("json input can not config ports")
 		}
-		if config.Mod != "default" {
+		if config.Mod != Default {
 			logs.Log.Warn("input json can not config . Mod,default scanning")
 		}
 	}
