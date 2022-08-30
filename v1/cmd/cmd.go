@@ -8,18 +8,12 @@ import (
 	"github.com/chainreactors/gogo/v1/pkg"
 	"github.com/chainreactors/logs"
 	"os"
-	"strings"
 )
 
 var ver = ""
 var k = ""
 
 func CMD() {
-	//connected = checkconn()
-	if !strings.Contains(strings.Join(os.Args, ""), k) {
-		//inforev()
-		exit()
-	}
 	runner := NewRunner()
 	key := flag.String("k", "", "key")
 	//默认参数信息
