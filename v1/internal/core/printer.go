@@ -87,8 +87,8 @@ Usage of gogo:
             sc 以ss模式发现所有存活C段(但不会进行端口扫描)
       -l string  listfile, 从文件中读取任务,例如:-l ip.txt
       -j string	 jsonfile, 从输出的json中读取任务,例如:-j 1.json
-      -L bool    List_File_From_Pipe , 从管道中读数据的时候,指定数据类型为行分割的数据
-      -J bool    Json_File_From_Pipe 从管道中读数据的时候, 指定数据为前一次的扫描结果, 从传入管道前请base64, 否则可能因为EOF字符被截断
+      -L bool    Listfile_from_stdin , 从管道中读数据的时候,指定数据类型为行分割的数据
+      -J bool    Jsonfile_from_stdin 从管道中读数据的时候, 指定数据为前一次的扫描结果, 从传入管道前请base64, 否则可能因为EOF字符被截断
       -F file    Format, 格式化扫描结果
       -w string  workflow, 调用自动化配置的预设  
       
