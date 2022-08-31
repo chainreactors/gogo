@@ -11,7 +11,6 @@ import (
 )
 
 var ver = ""
-var k = ""
 
 func CMD() {
 	runner := NewRunner()
