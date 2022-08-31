@@ -59,3 +59,5 @@ release:
     owner: chainreactors
     name: gogo
   draft: true
+  extra_files:
+    - glob: package_{{ .Tag }}.zip
