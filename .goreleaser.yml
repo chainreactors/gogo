@@ -31,7 +31,7 @@ builds:
       - all=-trimpath={{.Env.GOPATH}}
     hooks:
       post:
-        - cmd: upx {{ .ProjectName }}*
+        - cmd: "upx {{ .ProjectName }}*"
           dir: "{{ dir .Path}}"
 
 archives:
@@ -42,7 +42,8 @@ archives:
       amd64_v1: amd64
     hooks:
       after:
-        - cmd: zip -j package_{{ .Tag }}.zip gogo* script/*.py LICENSE README.md
+        - cmd: "zip -j package_{{ .Tag }}.zip gogo* script/*.py LICENSE README.md"
+
 checksum:
   name_template: "{{ .ProjectName }}_checksums.txt"
 
@@ -60,4 +61,4 @@ release:
     name: gogo
   draft: true
   extra_files:
-    - glob: package_{{ .Tag }}.zip
+    - glob: "package_{{ .Tag }}.zip"
