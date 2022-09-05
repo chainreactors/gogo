@@ -5,6 +5,7 @@ before:
     - go mod tidy
     - go get sigs.k8s.io/yaml
     - go generate
+
 builds:
   -
     main: .
@@ -25,16 +26,14 @@ builds:
     ldflags: "-s -w -X 'github.com/chainreactors/gogo/cmd.ver={{ .Tag }}'"
     flags:
       - -trimpath
-      - -o
-      - "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
     asmflags:
       - all=-trimpath={{.Env.GOPATH}}
     gcflags:
       - all=-trimpath={{.Env.GOPATH}}
-    hooks:
-      post:
-        - cmd: "upx {{ .ProjectName }}*"
-          dir: "{{ dir .Path }}"
+#    hooks:
+#      post:
+#        - cmd: "upx {{ .ProjectName }}*"
+#          dir: "{{ dir .Path }}"
 
 archives:
   -
@@ -59,5 +58,3 @@ release:
     owner: chainreactors
     name: gogo
   draft: true
-  extra_files:
-    - glob: "package_{{ .Tag }}.zip"
