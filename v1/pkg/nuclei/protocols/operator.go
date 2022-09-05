@@ -1,7 +1,7 @@
 package protocols
 
 import (
-	"github.com/chainreactors/gogo/v1/pkg/utils"
+	"github.com/chainreactors/gogo/pkg/utils"
 )
 
 // operators contains the operators that can be applied on protocols

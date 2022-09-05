@@ -2,8 +2,8 @@ package core
 
 import (
 	"fmt"
-	"github.com/chainreactors/gogo/v1/internal/plugin"
-	. "github.com/chainreactors/gogo/v1/pkg"
+	"github.com/chainreactors/gogo/internal/plugin"
+	. "github.com/chainreactors/gogo/pkg"
 	"github.com/chainreactors/ipcs"
 	. "github.com/chainreactors/logs"
 	"github.com/panjf2000/ants/v2"

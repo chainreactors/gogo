@@ -1,10 +1,10 @@
 package templates
 
 import (
-	protocols "github.com/chainreactors/gogo/v1/pkg/nuclei/protocols"
-	"github.com/chainreactors/gogo/v1/pkg/nuclei/protocols/executer"
-	"github.com/chainreactors/gogo/v1/pkg/nuclei/protocols/http"
-	"github.com/chainreactors/gogo/v1/pkg/nuclei/protocols/network"
+	protocols "github.com/chainreactors/gogo/pkg/nuclei/protocols"
+	"github.com/chainreactors/gogo/pkg/nuclei/protocols/executer"
+	"github.com/chainreactors/gogo/pkg/nuclei/protocols/http"
+	"github.com/chainreactors/gogo/pkg/nuclei/protocols/network"
 	"strings"
 )
 

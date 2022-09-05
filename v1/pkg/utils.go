@@ -3,8 +3,8 @@ package pkg
 import (
 	"fmt"
 	. "github.com/chainreactors/files"
-	"github.com/chainreactors/gogo/v1/pkg/dsl"
-	"github.com/chainreactors/gogo/v1/pkg/utils"
+	"github.com/chainreactors/gogo/pkg/dsl"
+	"github.com/chainreactors/gogo/pkg/utils"
 	"github.com/chainreactors/ipcs"
 	"io/ioutil"
 	"net/http"

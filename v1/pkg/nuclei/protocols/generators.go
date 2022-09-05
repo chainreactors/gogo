@@ -2,7 +2,7 @@ package protocols
 
 import (
 	"errors"
-	"github.com/chainreactors/gogo/v1/pkg/utils"
+	"github.com/chainreactors/gogo/pkg/utils"
 	"strings"
 )
 

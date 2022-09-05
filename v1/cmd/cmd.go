@@ -3,9 +3,9 @@ package cmd
 import (
 	"flag"
 	"fmt"
-	"github.com/chainreactors/gogo/v1/internal/core"
-	"github.com/chainreactors/gogo/v1/internal/plugin"
-	"github.com/chainreactors/gogo/v1/pkg"
+	"github.com/chainreactors/gogo/internal/core"
+	"github.com/chainreactors/gogo/internal/plugin"
+	"github.com/chainreactors/gogo/pkg"
 	"github.com/chainreactors/logs"
 	"os"
 )

@@ -1,8 +1,8 @@
 package plugin
 
 import (
-	. "github.com/chainreactors/gogo/v1/pkg"
-	"github.com/chainreactors/gogo/v1/pkg/fingers"
+	. "github.com/chainreactors/gogo/pkg"
+	"github.com/chainreactors/gogo/pkg/fingers"
 	"github.com/chainreactors/logs"
 	"net/http"
 )

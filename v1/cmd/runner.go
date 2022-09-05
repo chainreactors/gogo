@@ -2,11 +2,11 @@ package cmd
 
 import (
 	"fmt"
-	. "github.com/chainreactors/gogo/v1/internal/core"
-	. "github.com/chainreactors/gogo/v1/internal/plugin"
-	. "github.com/chainreactors/gogo/v1/pkg"
-	nucleihttp "github.com/chainreactors/gogo/v1/pkg/nuclei/protocols/http"
-	. "github.com/chainreactors/gogo/v1/pkg/utils"
+	. "github.com/chainreactors/gogo/internal/core"
+	. "github.com/chainreactors/gogo/internal/plugin"
+	. "github.com/chainreactors/gogo/pkg"
+	nucleihttp "github.com/chainreactors/gogo/pkg/nuclei/protocols/http"
+	. "github.com/chainreactors/gogo/pkg/utils"
 	. "github.com/chainreactors/logs"
 	"golang.org/x/net/proxy"
 	"net"

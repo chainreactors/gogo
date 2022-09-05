@@ -1,7 +1,7 @@
 package nuclei
 
 import (
-	"github.com/chainreactors/gogo/v1/pkg/utils"
+	"github.com/chainreactors/gogo/pkg/utils"
 	"strings"
 )
 

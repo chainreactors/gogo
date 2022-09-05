@@ -2,7 +2,7 @@ package plugin
 
 import (
 	"fmt"
-	"github.com/chainreactors/gogo/v1/pkg"
+	"github.com/chainreactors/gogo/pkg"
 	"github.com/chainreactors/logs"
 	"net/http"
 	"strings"

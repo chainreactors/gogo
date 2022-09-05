@@ -3,9 +3,9 @@ package network
 import (
 	"encoding/hex"
 	"errors"
-	"github.com/chainreactors/gogo/v1/pkg/nuclei"
-	protocols "github.com/chainreactors/gogo/v1/pkg/nuclei/protocols"
-	"github.com/chainreactors/gogo/v1/pkg/utils"
+	"github.com/chainreactors/gogo/pkg/nuclei"
+	protocols "github.com/chainreactors/gogo/pkg/nuclei/protocols"
+	"github.com/chainreactors/gogo/pkg/utils"
 	"io"
 	"net"
 	"net/url"

@@ -2,9 +2,9 @@ package core
 
 import (
 	"bytes"
-	"github.com/chainreactors/gogo/v1/internal/plugin"
-	. "github.com/chainreactors/gogo/v1/pkg"
-	"github.com/chainreactors/gogo/v1/pkg/utils"
+	"github.com/chainreactors/gogo/internal/plugin"
+	. "github.com/chainreactors/gogo/pkg"
+	"github.com/chainreactors/gogo/pkg/utils"
 	"io/ioutil"
 	"os"
 	"strings"

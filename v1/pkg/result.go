@@ -3,8 +3,8 @@ package pkg
 import (
 	"encoding/json"
 	"fmt"
-	. "github.com/chainreactors/gogo/v1/pkg/fingers"
-	"github.com/chainreactors/gogo/v1/pkg/utils"
+	. "github.com/chainreactors/gogo/pkg/fingers"
+	"github.com/chainreactors/gogo/pkg/utils"
 	"net"
 	"net/http"
 	"strconv"

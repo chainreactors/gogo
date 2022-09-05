@@ -3,8 +3,8 @@ package plugin
 import (
 	"bytes"
 	"github.com/M09ic/go-ntlmssp"
-	"github.com/chainreactors/gogo/v1/pkg"
-	"github.com/chainreactors/gogo/v1/pkg/utils"
+	"github.com/chainreactors/gogo/pkg"
+	"github.com/chainreactors/gogo/pkg/utils"
 )
 
 var data = pkg.Decode("YmXgZhZgYGCoYNBgYGZgYNghsAPEZWAEY0aGBSAGAwPDAQjlBiJYYju6XsucFJz/goNBW8AjgYmBgYGLCaLAL8THNzg4AKyfvYljEQMaYGPcKMvAwMAPAAAA//8=")

@@ -6,7 +6,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	. "github.com/chainreactors/gogo/v1/pkg"
+	. "github.com/chainreactors/gogo/pkg"
 	"io"
 	"os"
 	"path/filepath"
