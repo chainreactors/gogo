@@ -1,4 +1,4 @@
-//go:generate go run v1/pkg/templates_gen.go
+//go:generate go run pkg/templates_gen.go
 package main
 
 import "github.com/chainreactors/gogo/cmd"
