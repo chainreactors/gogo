@@ -1,10 +1,10 @@
 ## description
 gogo 保留了大量可拓展的接口, 例如指纹, poc/exp, 工作流, 端口.
 
-这些预设保存在`v1/config`目录下, 以yaml的形式保存与编辑, 但在编译的时候, 通过`updateconfig.py`自动将yaml转为压缩后的json格式. 兼顾方便与性能.
+这些预设保存在`v2/config`目录下, 以yaml的形式保存与编辑, 但在编译的时候, 通过`updateconfig.py`自动将yaml转为压缩后的json格式. 兼顾方便与性能.
 
 ## 端口
-配置文件: `v1/config/port.yaml`
+配置文件: `v2/config/port.yaml`
 
 端口配置最为简单, 不需要讲解就能理解. 默认配置中有大量案例, 如果有新的默认端口预设, 可以提交issue或pr, 或者通过社交软件联系我.
 
@@ -15,7 +15,7 @@ gogo 保留了大量可拓展的接口, 例如指纹, poc/exp, 工作流, 端口
 
 tcp指纹与http指纹为同一格式, md5与mmh3指纹为同一格式
 ### tcp指纹/http指纹
-配置文件: `v1/config/httpfingers.yaml` 与 `v1/config/tcpfingers.yaml`
+配置文件: `v2/config/httpfingers.yaml` 与 `v2/config/tcpfingers.yaml`
 
 一个完整的配置:
 ```
@@ -54,7 +54,7 @@ tcp指纹与http指纹为同一格式, md5与mmh3指纹为同一格式
 todo: 从nmap中移植更多的tcp指纹
 
 ### md5/mmh3 指纹
-配置文件: `v1/config/md5fingers.yaml` 与 `v1/config/mmh3fingers.yaml`
+配置文件: `v2/config/md5fingers.yaml` 与 `v2/config/mmh3fingers.yaml`
 
 
 对于favicon的指纹识别, 做了特殊的优化, 使用md5/mmh3哈希表进行识别. 
@@ -62,7 +62,7 @@ todo: 从nmap中移植更多的tcp指纹
 可以使用httpx快速计算md5,mmh3 hash值, `echo [url]/favicon.ico | httpx -hash md5,mmh3`
 
 ## workflow
-配置文件: `v1/config/workflows.yaml`
+配置文件: `v2/config/workflows.yaml`
 
 
 

@@ -209,7 +209,7 @@ gogo并非漏扫工具,因此不会支持sql注入,xss之类的通用漏洞探�
 
 因为nuclei的中poc往往攻击性比较强, 因此需要手动修改适应红队环境
 
-目前已集成的pocs见v1/config/nuclei, 以及ms17010, shiro, snmp等特殊的漏洞
+目前已集成的pocs见v2/config/nuclei, 以及ms17010, shiro, snmp等特殊的漏洞
 
 为了更好的探测漏洞, 建议同时开启-v 主动指纹识别
 
@@ -287,7 +287,7 @@ SMB
 ```bash
 # download
 git clone --recurse-submodules https://github.com/chainreactors/gogo
-cd gogo/v1
+cd gogo/v2
 
 # sync dependency
 go mod tidy   
