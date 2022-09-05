@@ -301,39 +301,21 @@ SMB
 ## Make
 
 ### 手动编译
-下载项目
 
-`git clone --recurse-submodules https://github.com/chainreactors/gogo`
+```bash
+# download
+git clone --recurse-submodules https://github.com/chainreactors/gogo
+cd gogo/v1
 
-生成 template.go
+# sync dependency
+go mod tidy   
 
-`go generate`
+# generate template.go
+go generate
 
-编译
-
-`go build .`
-
-### build.bat:
-需要依赖gox
-
-`go get github.com/mitchellh/gox`
-
-可以带两个参数, 第一个为版本号, 第二个为key, 不加则自动为空
-
-`build.bat [key]`
-
-
-### obfuscate.bat
-发布前一些简单的混淆, 有更高明的手段可以忽略这部分
-
-使用go-strip 混淆函数名, 使用upx加壳, 使用limelighter伪造证书. 需要将这三个工具添加到环境变量.
-
-### release.bat 
-自动将单个文件上传到alioss, 将README.md 二进制文件和一些小工具打包.
-
-### full
-
-`./build.bat [key] ; ./obfuscate.bat ; release.bat `
+# build 
+go build .
+```
 
 ## THANKS
 
