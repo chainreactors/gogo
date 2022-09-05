@@ -31,4 +31,4 @@ gen
 /release
 /bbin
 /script
-/v1/pkg/templates.go
+/v2/pkg/templates.go

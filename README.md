@@ -3,24 +3,6 @@
 
 README Version 2.5.0
 
-## DOWNLOAD
-### 版本号命名规则
-example: 1.1.1.1
-
-第一位数字代表互不兼容的命令行UI或输出结果;
-
-第二位数字代表代码结构或者功能上的更新;
-
-第三位数字代表bug的修复或者小功能更新;
-
-第四位数字不一定每个版本都有, 代表指纹或poc的更新.
-
-
-### release
-完全版本打包下载: https://github.com/chainreactors/gogo/releases/latest
-
-理论上支持全操作系统, 需要编译某些稍微罕见的特殊版本可以联系我帮忙编译.
-
 ## QuickStart
 最简使用, 建议只在c段及以下场景使用, 大于b段则建议使用启发式扫描.
 
@@ -227,7 +209,7 @@ gogo并非漏扫工具,因此不会支持sql注入,xss之类的通用漏洞探�
 
 因为nuclei的中poc往往攻击性比较强, 因此需要手动修改适应红队环境
 
-目前已集成的pocs见v1/config/nuclei, 以及ms17010, shiro, snmp等特殊的漏洞
+目前已集成的pocs见v2/config/nuclei, 以及ms17010, shiro, snmp等特殊的漏洞
 
 为了更好的探测漏洞, 建议同时开启-v 主动指纹识别
 
@@ -297,43 +279,41 @@ SMB
 因此也可以通过`-d 5 `(tcp默认为2s, tls为两倍tcp超时时间4s)来提高超时时间, 减少漏报.
 
 
-**这些用法大概只覆盖了一半的使用场景, 更多的细节请阅读/doc目录下的设计文档**
+**这些用法大概只覆盖了一小半的使用场景, 更多的细节请阅读/doc目录下的设计文档**
 ## Make
 
 ### 手动编译
-下载项目
 
-`git clone --recurse-submodules https://github.com/chainreactors/gogo`
+```bash
+# download
+git clone --recurse-submodules https://github.com/chainreactors/gogo
+cd gogo/v2
 
-生成 template.go
+# sync dependency
+go mod tidy   
 
-`go generate`
+# generate template.go
+go generate
 
-编译
+# build 
+go build .
+```
+### 版本号命名规则
+example: 1.1.1.1
 
-`go build .`
+第一位数字代表互不兼容的命令行UI或输出结果;
 
-### build.bat:
-需要依赖gox
+第二位数字代表代码结构或者功能上的更新;
 
-`go get github.com/mitchellh/gox`
+第三位数字代表bug的修复或者小功能更新;
 
-可以带两个参数, 第一个为版本号, 第二个为key, 不加则自动为空
-
-`build.bat [key]`
+第四位数字不一定每个版本都有, 代表指纹或poc的更新.
 
 
-### obfuscate.bat
-发布前一些简单的混淆, 有更高明的手段可以忽略这部分
+### release
+下载: https://github.com/chainreactors/gogo/releases/latest
 
-使用go-strip 混淆函数名, 使用upx加壳, 使用limelighter伪造证书. 需要将这三个工具添加到环境变量.
-
-### release.bat 
-自动将单个文件上传到alioss, 将README.md 二进制文件和一些小工具打包.
-
-### full
-
-`./build.bat [key] ; ./obfuscate.bat ; release.bat `
+理论上支持全操作系统, 需要编译某些稍微罕见的特殊版本可以联系我帮忙编译.
 
 ## THANKS
 
