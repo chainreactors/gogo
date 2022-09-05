@@ -15,7 +15,7 @@ import (
 
 func loadYamlFile2JsonString(filename string) string {
 	var err error
-	file, err := os.Open("v1/templates/" + filename)
+	file, err := os.Open("templates/" + filename)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -43,7 +43,7 @@ func visit(files *[]string) filepath.WalkFunc {
 
 func recuLoadYamlFiles2JsonString(dir string, single bool) string {
 	var files []string
-	err := filepath.Walk("v1/templates/"+dir, visit(&files))
+	err := filepath.Walk("templates/"+dir, visit(&files))
 	if err != nil {
 		panic(err)
 	}
@@ -110,7 +110,7 @@ func LoadConfig(typ string)[]byte  {
 		loadYamlFile2JsonString("workflows.yaml"),
 		recuLoadYamlFiles2JsonString("nuclei", true),
 	)
-	f, err := os.OpenFile("v1/pkg/templates.go", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
+	f, err := os.OpenFile("pkg/templates.go", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 	if err != nil {
 		panic(err)
 	}

@@ -20,7 +20,7 @@ builds:
     ignore:
       - goos: windows
         goarch: arm64
-    ldflags: "-s -w -X 'github.com/chainreactors/gogo/v1/cmd.ver={{ .Tag }}'"
+    ldflags: "-s -w -X 'github.com/chainreactors/gogo/cmd.ver={{ .Tag }}'"
     flags:
       - -trimpath
       - -o
