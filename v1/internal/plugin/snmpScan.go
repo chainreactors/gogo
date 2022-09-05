@@ -2,11 +2,11 @@ package plugin
 
 import (
 	"github.com/alouca/gosnmp"
-	"github.com/chainreactors/gogo/v1/pkg/fingers"
+	"github.com/chainreactors/gogo/pkg/fingers"
 	"strings"
 
 	//"encoding/hex"
-	"github.com/chainreactors/gogo/v1/pkg"
+	"github.com/chainreactors/gogo/pkg"
 )
 
 func snmpScan(result *pkg.Result) {

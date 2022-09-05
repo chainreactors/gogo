@@ -2,7 +2,7 @@ package protocols
 
 import (
 	"fmt"
-	"github.com/chainreactors/gogo/v1/pkg/utils"
+	"github.com/chainreactors/gogo/pkg/utils"
 	"regexp"
 	"strings"
 )

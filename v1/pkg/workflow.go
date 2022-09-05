@@ -2,7 +2,7 @@ package pkg
 
 import (
 	"encoding/json"
-	"github.com/chainreactors/gogo/v1/pkg/utils"
+	"github.com/chainreactors/gogo/pkg/utils"
 )
 
 type Workflow struct {
@@ -51,7 +51,7 @@ func (w *Workflow) PrepareConfig(rconfig Config) *Config {
 		config.FilePath = rconfig.FilePath
 	}
 
-	//if rconfig.FileOutputf == "default" && config.Mod == SUPERSMARTB {
+	//if rconfig.FileOutputf == Default && config.Mod == SUPERSMARTB {
 	//	config.FileOutputf = "raw"
 	//}
 
@@ -76,18 +76,18 @@ func (w *Workflow) PrepareConfig(rconfig Config) *Config {
 	}
 
 	if w.Mod == "" {
-		config.Mod = "default"
+		config.Mod = Default
 	}
 
 	if rconfig.Threads != 0 {
 		config.Threads = rconfig.Threads
 	}
 
-	if rconfig.SmartPort != "default" {
+	if rconfig.SmartPort != Default {
 		config.SmartPort = rconfig.SmartPort
 	}
 
-	if rconfig.IpProbe != "default" {
+	if rconfig.IpProbe != Default {
 		config.IpProbe = rconfig.IpProbe
 	}
 

@@ -10,8 +10,8 @@ require (
 	github.com/chainreactors/logs v0.4.2
 	github.com/mdlayher/arp v0.0.0-20220512170110-6706a2966875
 	github.com/panjf2000/ants/v2 v2.5.0
-	github.com/pkg/errors v0.9.1
 	github.com/twmb/murmur3 v1.1.6
+	golang.org/x/net v0.0.0-20190603091049-60506f45cf65
 )
 
 require (
@@ -21,7 +21,6 @@ require (
 	github.com/mdlayher/packet v1.0.0 // indirect
 	github.com/mdlayher/socket v0.2.1 // indirect
 	golang.org/x/crypto v0.0.0-20200604202706-70a84ac30bf9 // indirect
-	golang.org/x/net v0.0.0-20190603091049-60506f45cf65 // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
 	golang.org/x/sys v0.0.0-20220209214540-3681064d5158 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect

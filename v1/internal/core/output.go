@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	. "github.com/chainreactors/files"
-	. "github.com/chainreactors/gogo/v1/pkg"
-	"github.com/chainreactors/gogo/v1/pkg/utils"
+	. "github.com/chainreactors/gogo/pkg"
+	"github.com/chainreactors/gogo/pkg/utils"
 	"os"
 	"strings"
 )

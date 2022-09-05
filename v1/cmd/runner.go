@@ -2,11 +2,11 @@ package cmd
 
 import (
 	"fmt"
-	. "github.com/chainreactors/gogo/v1/internal/core"
-	. "github.com/chainreactors/gogo/v1/internal/plugin"
-	. "github.com/chainreactors/gogo/v1/pkg"
-	nucleihttp "github.com/chainreactors/gogo/v1/pkg/nuclei/protocols/http"
-	. "github.com/chainreactors/gogo/v1/pkg/utils"
+	. "github.com/chainreactors/gogo/internal/core"
+	. "github.com/chainreactors/gogo/internal/plugin"
+	. "github.com/chainreactors/gogo/pkg"
+	nucleihttp "github.com/chainreactors/gogo/pkg/nuclei/protocols/http"
+	. "github.com/chainreactors/gogo/pkg/utils"
 	. "github.com/chainreactors/logs"
 	"golang.org/x/net/proxy"
 	"net"
@@ -70,13 +70,13 @@ func (r *Runner) preInit() bool {
 	Log.LogFileName = ".sock.lock"
 	Log.Init()
 
-	if r.FileOutputf == "default" {
+	if r.FileOutputf == Default {
 		r.config.FileOutputf = "json"
 	} else {
 		r.config.FileOutputf = r.FileOutputf
 	}
 
-	if r.Outputf == "default" {
+	if r.Outputf == Default {
 		r.config.Outputf = "full"
 	} else {
 		r.config.Outputf = r.Outputf
@@ -214,10 +214,6 @@ func (r *Runner) prepareConfig(config Config) *Config {
 		config.AliveSprayMod = append(config.AliveSprayMod, "icmp")
 	}
 
-	if config.Mod == SUPERSMARTB {
-		config.FileOutputf = "raw"
-	}
-
 	//if config.Filename == "" {
 	//	config.Filename = GetFilename(&config, config.FileOutputf)
 	//} else {
@@ -259,7 +255,9 @@ func (r *Runner) run() {
 
 func (r *Runner) runWithCMD() {
 	config := r.prepareConfig(r.config)
-
+	if config.Mod == SUPERSMARTB {
+		config.FileOutputf = SUPERSMARTB
+	}
 	if config.Filename == "" && config.IsSmart() {
 		config.SmartFilename = GetFilename(config, "cidr")
 	}
@@ -284,6 +282,10 @@ func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) {
 		for _, workflow := range workflows {
 			Log.Important("workflow " + workflow.Name + " starting")
 			config := workflow.PrepareConfig(r.config)
+
+			if config.Mod == SUPERSMARTB {
+				config.FileOutputf = SUPERSMARTB
+			}
 
 			if config.Filename == "" && config.IsSmart() {
 				config.SmartFilename = GetFilename(config, "cidr")

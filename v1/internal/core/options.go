@@ -2,9 +2,9 @@ package core
 
 import (
 	"bytes"
-	"github.com/chainreactors/gogo/v1/internal/plugin"
-	. "github.com/chainreactors/gogo/v1/pkg"
-	"github.com/chainreactors/gogo/v1/pkg/utils"
+	"github.com/chainreactors/gogo/internal/plugin"
+	. "github.com/chainreactors/gogo/pkg"
+	"github.com/chainreactors/gogo/pkg/utils"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -13,11 +13,9 @@ import (
 const (
 	LinuxDefaultThreads        = 4000
 	WindowsDefaultThreads      = 1000
-	ReScanDefaultThreads       = 100
 	DefaultIpProbe             = "1,254"
 	DefaultSmartPortProbe      = "80"
 	DefaultSuperSmartPortProbe = "icmp"
-	DefaultName                = "default"
 )
 
 type targetConfig struct {

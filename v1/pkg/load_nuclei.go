@@ -3,10 +3,10 @@ package pkg
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/chainreactors/gogo/v1/pkg/dsl"
-	"github.com/chainreactors/gogo/v1/pkg/nuclei/protocols"
-	"github.com/chainreactors/gogo/v1/pkg/nuclei/templates"
-	"github.com/chainreactors/gogo/v1/pkg/utils"
+	"github.com/chainreactors/gogo/pkg/dsl"
+	"github.com/chainreactors/gogo/pkg/nuclei/protocols"
+	"github.com/chainreactors/gogo/pkg/nuclei/templates"
+	"github.com/chainreactors/gogo/pkg/utils"
 	"io/ioutil"
 	"strings"
 )

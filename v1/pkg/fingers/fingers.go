@@ -3,7 +3,7 @@ package fingers
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/chainreactors/gogo/v1/pkg/dsl"
+	"github.com/chainreactors/gogo/pkg/dsl"
 	"regexp"
 	"strings"
 )

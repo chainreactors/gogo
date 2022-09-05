@@ -1,8 +1,8 @@
 package pkg
 
 import (
-	//"github.com/chainreactors/gogo/v1/pkg/dsl"
-	utils2 "github.com/chainreactors/gogo/v1/pkg/utils"
+	//"github.com/chainreactors/gogo/pkg/dsl"
+	utils2 "github.com/chainreactors/gogo/pkg/utils"
 	"net/http"
 	"strings"
 )

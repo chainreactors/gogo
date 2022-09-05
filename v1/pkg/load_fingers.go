@@ -1,8 +1,8 @@
 package pkg
 
 import (
-	"github.com/chainreactors/gogo/v1/pkg/fingers"
-	"github.com/chainreactors/gogo/v1/pkg/utils"
+	"github.com/chainreactors/gogo/pkg/fingers"
+	"github.com/chainreactors/gogo/pkg/utils"
 	"github.com/chainreactors/ipcs"
 )
 

@@ -1,7 +1,7 @@
 package fingers
 
 import (
-	"github.com/chainreactors/gogo/v1/pkg/dsl"
+	"github.com/chainreactors/gogo/pkg/dsl"
 	"github.com/chainreactors/logs"
 	"regexp"
 	"strings"

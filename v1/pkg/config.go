@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	. "github.com/chainreactors/files"
-	"github.com/chainreactors/gogo/v1/pkg/utils"
+	"github.com/chainreactors/gogo/pkg/utils"
 	"github.com/chainreactors/ipcs"
 	"github.com/chainreactors/logs"
 	"strings"
@@ -16,6 +16,7 @@ const (
 	SUPERSMART  = "ss"
 	SUPERSMARTC = "sb"
 	SUPERSMARTB = "sc"
+	Default     = "default"
 )
 
 type Config struct {
@@ -127,6 +128,9 @@ func (config *Config) InitFile() error {
 				}
 				return res
 			}
+		} else if config.FileOutputf == SUPERSMARTB {
+			config.File.Write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("smart")))
+			config.File.ClosedAppend = "]}"
 		}
 		config.ExtractFile, err = newFile(config.Filename+"_extract", config.Compress)
 	}
@@ -156,8 +160,8 @@ func (config *Config) InitFile() error {
 
 func (config *Config) Validate() error {
 	// 一些命令行参数错误处理,如果check没过直接退出程序或输出警告
-	legalFormat := []string{"url", "ip", "port", "frameworks", "framework", "vuln", "vulns", "protocol", "title", "target", "hash", "language", "host", "color", "c", "json", "j", "full", "jsonlines", "jl", "zombie"}
-	if config.FileOutputf != "default" {
+	legalFormat := []string{"url", "ip", "port", "frameworks", "framework", "vuln", "vulns", "protocol", "title", "target", "hash", "language", "host", "color", "c", "json", "j", "full", "jsonlines", "jl", "zombie", "sc"}
+	if config.FileOutputf != Default {
 		for _, form := range strings.Split(config.FileOutputf, ",") {
 			if !utils.SliceContains(legalFormat, form) {
 				logs.Log.Warnf("illegal file output format: %s, Please use one or more of the following formats: %s", form, strings.Join(legalFormat, ", "))
@@ -178,7 +182,7 @@ func (config *Config) Validate() error {
 		if config.Ports != "top1" {
 			logs.Log.Warn("json input can not config ports")
 		}
-		if config.Mod != "default" {
+		if config.Mod != Default {
 			logs.Log.Warn("input json can not config . Mod,default scanning")
 		}
 	}

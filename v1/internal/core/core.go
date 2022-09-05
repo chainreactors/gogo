@@ -2,8 +2,8 @@ package core
 
 import (
 	"fmt"
-	"github.com/chainreactors/gogo/v1/internal/plugin"
-	. "github.com/chainreactors/gogo/v1/pkg"
+	"github.com/chainreactors/gogo/internal/plugin"
+	. "github.com/chainreactors/gogo/pkg"
 	"github.com/chainreactors/ipcs"
 	. "github.com/chainreactors/logs"
 	"github.com/panjf2000/ants/v2"
@@ -75,12 +75,12 @@ func SmartMod(target *ipcs.CIDR, config Config) {
 	switch config.Mod {
 	case SUPERSMART, SUPERSMARTB:
 		mask = 16
-		if config.SmartPort == "default" {
+		if config.SmartPort == Default {
 			config.SmartPortList = []string{DefaultSuperSmartPortProbe}
 		}
 	case SMART, SUPERSMARTC:
 		mask = 24
-		if config.SmartPort == "default" {
+		if config.SmartPort == Default {
 			config.SmartPortList = []string{DefaultSmartPortProbe}
 		}
 	}
@@ -137,7 +137,7 @@ func SmartMod(target *ipcs.CIDR, config Config) {
 		WriteSmartResult(config.SmartFile, iplist.Strings())
 	}
 	if config.File != nil && config.Mod == SUPERSMARTC {
-		config.File.SafeWrite(strings.Join(iplist.Strings(), "\n") + "\n")
+		WriteScReuslt(config.File, iplist.Strings())
 	}
 
 	if Opt.Noscan || config.Mod == SUPERSMARTC {
@@ -151,7 +151,7 @@ func SmartMod(target *ipcs.CIDR, config Config) {
 	} else if config.Mod == SUPERSMARTB {
 		config.Mod = SUPERSMARTC
 	} else {
-		config.Mod = "default"
+		config.Mod = Default
 	}
 	declineScan(iplist, config)
 }

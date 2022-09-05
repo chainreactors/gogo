@@ -2,8 +2,8 @@ package main
 
 import (
 	"flag"
-	"github.com/chainreactors/gogo/v1/internal/core"
-	"github.com/chainreactors/gogo/v1/pkg"
+	"github.com/chainreactors/gogo/internal/core"
+	"github.com/chainreactors/gogo/pkg"
 	"github.com/chainreactors/logs"
 )
 

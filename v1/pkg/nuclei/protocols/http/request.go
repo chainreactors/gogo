@@ -3,8 +3,8 @@ package http
 import (
 	"errors"
 	"fmt"
-	"github.com/chainreactors/gogo/v1/pkg/nuclei/protocols"
-	. "github.com/chainreactors/gogo/v1/pkg/utils"
+	"github.com/chainreactors/gogo/pkg/nuclei/protocols"
+	. "github.com/chainreactors/gogo/pkg/utils"
 	"github.com/chainreactors/logs"
 	"io"
 	"io/ioutil"

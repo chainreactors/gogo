@@ -6,7 +6,7 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
-	"github.com/chainreactors/gogo/v1/pkg/utils"
+	"github.com/chainreactors/gogo/pkg/utils"
 	"github.com/twmb/murmur3"
 )
 

@@ -6,7 +6,7 @@ package plugin
 //Github: https://github.com/k8gege/LadonGo
 
 import (
-	"github.com/chainreactors/gogo/v1/pkg"
+	"github.com/chainreactors/gogo/pkg"
 	"github.com/chainreactors/logs"
 	"net"
 	"time"

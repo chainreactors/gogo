@@ -2,7 +2,7 @@ package pkg
 
 import (
 	"encoding/json"
-	"github.com/chainreactors/gogo/v1/pkg/utils"
+	"github.com/chainreactors/gogo/pkg/utils"
 	"github.com/chainreactors/ipcs"
 	"regexp"
 	"strings"
@@ -66,16 +66,16 @@ func LoadWorkFlow() WorkflowMap {
 	for _, w := range workflows {
 		// 参数默认值
 		if w.IpProbe == "" {
-			w.IpProbe = "default"
+			w.IpProbe = Default
 		}
 		if w.SmartProbe == "" {
-			w.SmartProbe = "default"
+			w.SmartProbe = Default
 		}
 		if w.Ports == "" {
 			w.Ports = "top1"
 		}
 		if w.Mod == "" {
-			w.Mod = "default"
+			w.Mod = Default
 		}
 		if w.File == "" {
 			w.File = "auto"

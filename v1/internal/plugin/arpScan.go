@@ -3,7 +3,7 @@
 
 package plugin
 
-import "github.com/chainreactors/gogo/v1/pkg"
+import "github.com/chainreactors/gogo/pkg"
 
 func arpScan(result *pkg.Result) {
 	return

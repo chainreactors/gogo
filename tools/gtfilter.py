@@ -21,7 +21,7 @@ class ResultJson:
         "frameworks": "f",
         "framework": "f",
         "app": "f",
-        "hash": "hs",
+#         "hash": "hs",
         "vulns": "v",
         "vuln": "v",
         "protocol": "r",

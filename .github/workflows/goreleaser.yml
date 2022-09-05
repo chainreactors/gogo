@@ -1,0 +1,36 @@
+name: goreleaser
+
+on:
+  pull_request:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+
+jobs:
+  goreleaser:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: ${{secrets.TOKEN}}
+          submodules: recursive
+      -
+        name: Set up Go
+        uses: actions/setup-go@v3
+      -
+        name: Install upx
+        run: sudo apt install upx -y
+      -
+        name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v3
+        with:
+          distribution: goreleaser
+          version: latest
+          args: release --rm-dist
+          workdir: v1/
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}

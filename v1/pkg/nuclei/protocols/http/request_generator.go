@@ -2,9 +2,9 @@ package http
 
 import (
 	"fmt"
-	"github.com/chainreactors/gogo/v1/pkg/nuclei"
-	"github.com/chainreactors/gogo/v1/pkg/nuclei/protocols"
-	"github.com/chainreactors/gogo/v1/pkg/utils"
+	"github.com/chainreactors/gogo/pkg/nuclei"
+	"github.com/chainreactors/gogo/pkg/nuclei/protocols"
+	"github.com/chainreactors/gogo/pkg/utils"
 	"io/ioutil"
 	"net"
 	"net/http"

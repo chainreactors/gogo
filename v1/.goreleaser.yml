@@ -1,0 +1,64 @@
+project_name: gogo
+
+before:
+  hooks:
+    - go mod tidy
+    - go get sigs.k8s.io/yaml
+    - go generate
+builds:
+  -
+    main: .
+    binary: gogo
+    goos:
+      - windows
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - "386"
+      - arm64
+    ignore:
+      - goos: windows
+        goarch: arm64
+    ldflags: "-s -w -X 'github.com/chainreactors/gogo/v1/cmd.ver={{ .Tag }}'"
+    flags:
+      - -trimpath
+      - -o
+      - "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+    asmflags:
+      - all=-trimpath={{.Env.GOPATH}}
+    gcflags:
+      - all=-trimpath={{.Env.GOPATH}}
+    hooks:
+      post:
+        - cmd: "upx {{ .ProjectName }}*"
+          dir: "{{ dir .Path}}"
+
+archives:
+  -
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+    format: binary
+    replacements:
+      amd64_v1: amd64
+#    hooks:
+#      after:
+#        - cmd: "zip -j package_{{ .Tag }}.zip gogo* script/*.py LICENSE README.md"
+
+checksum:
+  name_template: "{{ .ProjectName }}_checksums.txt"
+
+changelog:
+  sort: desc
+  filters:
+    exclude:
+      - '^MERGE'
+      - "{{ .Tag }}"
+      - "^docs"
+
+release:
+  github:
+    owner: chainreactors
+    name: gogo
+  draft: true
+  extra_files:
+    - glob: "package_{{ .Tag }}.zip"

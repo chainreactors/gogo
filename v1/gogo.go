@@ -1,7 +1,7 @@
 //go:generate go run v1/pkg/templates_gen.go
 package main
 
-import "github.com/chainreactors/gogo/v1/cmd"
+import "github.com/chainreactors/gogo/cmd"
 
 func main() {
 	//f, _ := os.Create("cpu.txt")
