@@ -5,6 +5,7 @@ import (
 	"fmt"
 	. "github.com/chainreactors/gogo/v2/pkg/fingers"
 	"github.com/chainreactors/gogo/v2/pkg/utils"
+	"github.com/chainreactors/logs"
 	"net"
 	"net/http"
 	"strconv"
@@ -462,7 +463,7 @@ func ValuesOutput(result *Result, outType string) string {
 }
 
 func ColorOutput(result *Result) string {
-	s := fmt.Sprintf("[+] %s\t%s\t%s\t%s\t%s [%s] %s %s\n", result.GetURL(), result.Midware, result.Language, Blue(result.Frameworks.ToString()), result.Host, Yellow(result.HttpStat), Blue(result.Title), Red(result.Vulns.ToString()))
+	s := fmt.Sprintf("[+] %s\t%s\t%s\t%s\t%s [%s] %s %s\n", result.GetURL(), result.Midware, result.Language, logs.Blue(result.Frameworks.ToString()), result.Host, logs.Yellow(result.HttpStat), logs.Blue(result.Title), logs.Red(result.Vulns.ToString()))
 	return s
 }
 
