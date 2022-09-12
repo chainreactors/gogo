@@ -12,7 +12,7 @@ import (
 
 var ver = ""
 
-func CMD() {
+func Gogo() {
 	runner := NewRunner()
 	key := flag.String("k", "", "key")
 	//默认参数信息

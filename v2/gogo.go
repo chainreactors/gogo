@@ -7,5 +7,5 @@ func main() {
 	//f, _ := os.Create("cpu.txt")
 	//pprof.StartCPUProfile(f)
 	//defer pprof.StopCPUProfile()
-	cmd.CMD()
+	cmd.Gogo()
 }
