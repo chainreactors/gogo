@@ -1,11 +1,13 @@
 package pkg
 
 import (
+	"encoding/json"
 	"fmt"
 	. "github.com/chainreactors/files"
 	"github.com/chainreactors/gogo/v2/pkg/dsl"
 	"github.com/chainreactors/gogo/v2/pkg/utils"
 	"github.com/chainreactors/ipcs"
+	"github.com/chainreactors/logs"
 	"io/ioutil"
 	"net/http"
 	"regexp"
@@ -145,4 +147,27 @@ func sortIP(ips []string) []string {
 		return ipcs.Ip2Int(ips[i]) < ipcs.Ip2Int(ips[j])
 	})
 	return ips
+}
+
+func ValuesOutput(result *Result, outType string) string {
+	outs := strings.Split(outType, ",")
+	for i, out := range outs {
+		outs[i] = result.Get(out)
+	}
+	return strings.Join(outs, "\t") + "\n"
+}
+
+func ColorOutput(result *Result) string {
+	s := fmt.Sprintf("[+] %s\t%s\t%s\t%s\t%s [%s] %s %s\n", result.GetURL(), result.Midware, result.Language, logs.Blue(result.Frameworks.ToString()), result.Host, logs.Yellow(result.HttpStat), logs.Blue(result.Title), logs.Red(result.Vulns.ToString()))
+	return s
+}
+
+func FullOutput(result *Result) string {
+	s := fmt.Sprintf("[+] %s\t%s\t%s\t%s\t%s [%s] %s %s %s\n", result.GetURL(), result.Midware, result.Language, result.Frameworks.ToString(), result.Host, result.HttpStat, result.Title, result.Vulns.ToString(), result.Extracts.ToString())
+	return s
+}
+
+func JsonOutput(result *Result) string {
+	jsons, _ := json.Marshal(result)
+	return string(jsons)
 }
