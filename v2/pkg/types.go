@@ -53,24 +53,8 @@ func (fs Frameworks) IsFocus() bool {
 	return false
 }
 
-type Extract struct {
-	Name          string   `json:"name"`
-	ExtractResult []string `json:"extract_result"`
-}
-
-func (e *Extract) ToString() string {
-	if len(e.ExtractResult) == 1 {
-		if len(e.ExtractResult[0]) > 30 {
-			return fmt.Sprintf("%s:%s ... %d bytes", e.Name, AsciiEncode(e.ExtractResult[0][:30]), len(e.ExtractResult[0]))
-		}
-		return fmt.Sprintf("%s:%s", e.Name, AsciiEncode(e.ExtractResult[0]))
-	} else {
-		return fmt.Sprintf("%s:%d items", e.Name, len(e.ExtractResult))
-	}
-}
-
-func NewExtract(name string, extractResult interface{}) *Extract {
-	var e = &Extract{
+func NewExtracted(name string, extractResult interface{}) *Extracted {
+	var e = &Extracted{
 		Name: name,
 	}
 	switch extractResult.(type) {
@@ -84,14 +68,30 @@ func NewExtract(name string, extractResult interface{}) *Extract {
 	return e
 }
 
-type Extracts struct {
-	Target       string     `json:"target"`
-	MatchedNames []string   `json:"-"`
-	Extractors   []*Extract `json:"extracts"`
+type Extracted struct {
+	Name          string   `json:"name"`
+	ExtractResult []string `json:"extract_result"`
 }
 
-func (e *Extracts) ToResult() string {
-	s, err := json.Marshal(e)
+func (e *Extracted) ToString() string {
+	if len(e.ExtractResult) == 1 {
+		if len(e.ExtractResult[0]) > 30 {
+			return fmt.Sprintf("%s:%s ... %d bytes", e.Name, AsciiEncode(e.ExtractResult[0][:30]), len(e.ExtractResult[0]))
+		}
+		return fmt.Sprintf("%s:%s", e.Name, AsciiEncode(e.ExtractResult[0]))
+	} else {
+		return fmt.Sprintf("%s:%d items", e.Name, len(e.ExtractResult))
+	}
+}
+
+type Extracts struct {
+	Target       string       `json:"target"`
+	MatchedNames []string     `json:"-"`
+	Extractors   []*Extracted `json:"extracts"`
+}
+
+func (es *Extracts) ToResult() string {
+	s, err := json.Marshal(es)
 	if err != nil {
 		return err.Error()
 	}

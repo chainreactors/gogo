@@ -89,12 +89,12 @@ func (result *Result) AddFrameworks(f []*Framework) {
 	//}
 }
 
-func (result *Result) AddExtract(extract *Extract) {
+func (result *Result) AddExtract(extract *Extracted) {
 	result.Extracts.Extractors = append(result.Extracts.Extractors, extract)
 	result.ExtractsStat[extract.Name] = len(extract.ExtractResult)
 }
 
-func (result *Result) AddExtracts(extracts []*Extract) {
+func (result *Result) AddExtracts(extracts []*Extracted) {
 	for _, extract := range extracts {
 		result.Extracts.Extractors = append(result.Extracts.Extractors, extract)
 		result.ExtractsStat[extract.Name] = len(extract.ExtractResult)
