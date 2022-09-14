@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/chainreactors/gogo/v2/pkg/dsl"
+	"github.com/chainreactors/logs"
 	"regexp"
 	"strings"
 )
@@ -48,51 +49,96 @@ type Finger struct {
 	Rules       Rules    `yaml:"rule,omitempty" json:"rule,omitempty"`
 }
 
-func (f *Finger) Compile(portHandler func([]string) []string) error {
-	if f.Protocol == "" {
-		f.Protocol = "http"
+func (finger *Finger) Compile(portHandler func([]string) []string) error {
+	if finger.Protocol == "" {
+		finger.Protocol = "http"
 	}
 
-	if len(f.DefaultPort) == 0 {
-		if f.Protocol == "http" {
-			f.DefaultPort = []string{"80"}
+	if len(finger.DefaultPort) == 0 {
+		if finger.Protocol == "http" {
+			finger.DefaultPort = []string{"80"}
 		}
 	} else {
-		f.DefaultPort = portHandler(f.DefaultPort)
+		finger.DefaultPort = portHandler(finger.DefaultPort)
 	}
 
-	err := f.Rules.Compile()
+	err := finger.Rules.Compile()
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (f *Finger) ToResult(hasFrame, hasVuln bool, res string, index int) (frame *Framework, vuln *Vuln) {
-	if index+1 > len(f.Rules) {
+func (finger *Finger) ToResult(hasFrame, hasVuln bool, res string, index int) (frame *Framework, vuln *Vuln) {
+	if index+1 > len(finger.Rules) {
 		return nil, nil
 	}
 
 	if hasFrame {
 		if res != "" {
-			frame = &Framework{Name: f.Name, Version: res}
-		} else if f.Rules[index].Version != "" {
-			frame = &Framework{Name: f.Name, Version: res}
+			frame = &Framework{Name: finger.Name, Version: res}
+		} else if finger.Rules[index].Version != "" {
+			frame = &Framework{Name: finger.Name, Version: res}
 		} else {
-			frame = &Framework{Name: f.Name}
+			frame = &Framework{Name: finger.Name}
 		}
 	}
 
 	if hasVuln {
-		if f.Rules[index].Vuln != "" {
-			vuln = &Vuln{Name: f.Rules[index].Vuln, Severity: "high"}
-		} else if f.Rules[index].Info != "" {
-			vuln = &Vuln{Name: f.Rules[index].Info, Severity: "info"}
+		if finger.Rules[index].Vuln != "" {
+			vuln = &Vuln{Name: finger.Rules[index].Vuln, Severity: "high"}
+		} else if finger.Rules[index].Info != "" {
+			vuln = &Vuln{Name: finger.Rules[index].Info, Severity: "info"}
 		} else {
-			vuln = &Vuln{Name: f.Name, Severity: "info"}
+			vuln = &Vuln{Name: finger.Name, Severity: "info"}
 		}
 	}
 	return frame, vuln
+}
+
+func (finger *Finger) Match(content string, level int, sender func([]byte) (string, bool)) (*Framework, *Vuln, bool) {
+	// 只进行被动的指纹判断, 将无视rules中的senddata字段
+	for i, rule := range finger.Rules {
+		var ishttp bool
+		var isactive bool
+		if finger.Protocol == "http" {
+			ishttp = true
+		}
+		var c string
+		var ok bool
+		if level >= rule.Level && rule.SendData != nil {
+			logs.Log.Debugf("active match with %s", rule.SendDataStr)
+			c, ok = sender(rule.SendData)
+			if ok {
+				isactive = true
+				content = strings.ToLower(c)
+			}
+		}
+		hasFrame, hasVuln, res := RuleMatcher(rule, content, ishttp)
+		if hasFrame {
+			frame, vuln := finger.ToResult(hasFrame, hasVuln, res, i)
+			if finger.Focus {
+				frame.IsFocus = true
+			}
+			if isactive && hasFrame && ishttp {
+				frame.Data = c
+			}
+			if frame.Version == "" && rule.Regexps.CompiledVersionRegexp != nil {
+				for _, reg := range rule.Regexps.CompiledVersionRegexp {
+					res, _ := compiledMatch(reg, content)
+					if res != "" {
+						frame.Version = res
+						break
+					}
+				}
+			}
+			if isactive {
+				frame.From = "active"
+			}
+			return frame, vuln, true
+		}
+	}
+	return nil, nil, false
 }
 
 type Regexps struct {
@@ -157,6 +203,71 @@ type Rule struct {
 	Info        string    `yaml:"info,omitempty" json:"info,omitempty"`
 	Vuln        string    `yaml:"vuln,omitempty" json:"vuln,omitempty"`
 	Level       int       `yaml:"level,omitempty" json:"level,omitempty"`
+}
+
+func (rule *Rule) Match(content string, ishttp bool) (bool, bool, string) {
+	// 漏洞匹配优先
+	if rule.Regexps == nil {
+		return false, false, ""
+	}
+	for _, reg := range rule.Regexps.CompiledVulnRegexp {
+		res, ok := compiledMatch(reg, content)
+		if ok {
+			return true, true, res
+		}
+	}
+
+	var body, header string
+	if ishttp {
+		cs := strings.Index(content, "\r\n\r\n")
+		if cs != -1 {
+			body = content[cs+4:]
+			header = content[:cs]
+		}
+	} else {
+		body = content
+	}
+
+	// body匹配
+	for _, bodyReg := range rule.Regexps.Body {
+		if strings.Contains(body, bodyReg) {
+			return true, false, ""
+		}
+	}
+
+	// 正则匹配
+	for _, reg := range rule.Regexps.CompliedRegexp {
+		res, ok := compiledMatch(reg, content)
+		if ok {
+			return true, false, res
+		}
+	}
+
+	// MD5 匹配
+	for _, md5s := range rule.Regexps.MD5 {
+		if md5s == dsl.Md5Hash([]byte(content)) {
+			return true, false, ""
+		}
+	}
+
+	// mmh3 匹配
+	for _, mmh3s := range rule.Regexps.MMH3 {
+		if mmh3s == dsl.Mmh3Hash32([]byte(content)) {
+			return true, false, ""
+		}
+	}
+
+	// http头匹配, http协议特有的匹配
+	if !ishttp {
+		return false, false, ""
+	}
+
+	for _, headerReg := range rule.Regexps.Header {
+		if strings.Contains(header, headerReg) {
+			return true, false, ""
+		}
+	}
+	return false, false, ""
 }
 
 type Rules []*Rule

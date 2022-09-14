@@ -21,32 +21,32 @@ const (
 
 type Config struct {
 	// ip
-	IP         string        `json:"ip"`
+	IP         string        `json:"ip" short:"i" long:"ip"`
 	IPlist     []string      `json:"ips"`
 	CIDRs      ipcs.CIDRs    `json:"-"`
 	ExcludeIPs string        `json:"-"`
 	ExcludeMap map[uint]bool `json:"-"`
 
 	// port and probe
-	Ports         string   `json:"ports"` // 预设字符串
-	Portlist      []string `json:"-"`     // 处理完的端口列表
-	SmartPort     string   `json:"-"`     // 启发式扫描预设探针
-	SmartPortList []string `json:"-"`     // 启发式扫描预设探针
-	IpProbe       string   `json:"-"`
+	Ports         string   `json:"ports" short:"p"`                        // 预设字符串
+	Portlist      []string `json:"-"`                                      // 处理完的端口列表
+	SmartPort     string   `json:"-" long:"smart-probe" default:"default"` // 启发式扫描预设探针
+	SmartPortList []string `json:"-"`                                      // 启发式扫描预设探针
+	IpProbe       string   `json:"-" long:"ip-probe" default:"default"`
 	IpProbeList   []uint   `json:"-"`
 
 	// file
-	JsonFile    string `json:"json_file"` // gt的结果json文件,可以再次读入扫描
-	ListFile    string `json:"list_file"` // 目标ip列表
-	IsListInput bool   `json:"-"`         // 从标准输入中读
-	IsJsonInput bool   `json:"-"`         // 从标准输入中读
+	JsonFile    string `json:"json_file" short:"j"`             // gt的结果json文件,可以再次读入扫描
+	ListFile    string `json:"list_file" short:"l" long:"list"` // 目标ip列表
+	IsListInput bool   `json:"-" short:"L"`                     // 从标准输入中读
+	IsJsonInput bool   `json:"-" short:"J"`                     // 从标准输入中读
 
 	// misc
-	Threads       int      `json:"threads"` // 线程数
-	Mod           string   `json:"mod"`     // 扫描模式
+	Threads       int      `json:"threads" short:"t"` // 线程数
+	Mod           string   `json:"mod" short:"m"`     // 扫描模式
 	AliveSprayMod []string `json:"alive_spray"`
 	PortSpray     bool     `json:"port_spray"`
-	NoSpray       bool     `json:"-"`
+	NoSpray       bool     `json:"-" long:"no-spray"`
 	Exploit       string   `json:"exploit"`
 	JsonType      string   `json:"json_type"`
 	VersionLevel  int      `json:"version_level"`
@@ -54,8 +54,8 @@ type Config struct {
 
 	// output
 	//Output         string              `json:"-"`
-	FilePath       string              `json:"-"`
-	Filename       string              `json:"-"`
+	FilePath       string              `json:"-" long:"path"`
+	Filename       string              `json:"-" short:"f"`
 	SmartFilename  string              `json:"-"`
 	AlivedFilename string              `json:"-"`
 	File           *File               `json:"-"`
