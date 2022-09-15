@@ -4,6 +4,7 @@ import (
 	"fmt"
 	. "github.com/chainreactors/gogo/v2/internal/plugin"
 	. "github.com/chainreactors/gogo/v2/pkg"
+	"github.com/chainreactors/gogo/v2/pkg/fingers"
 	nucleihttp "github.com/chainreactors/gogo/v2/pkg/nuclei/protocols/http"
 	. "github.com/chainreactors/gogo/v2/pkg/utils"
 	. "github.com/chainreactors/logs"
@@ -187,13 +188,13 @@ func (r *Runner) Init() {
 	if r.Extracts != "" {
 		exts := strings.Split(r.Extracts, ",")
 		for _, extract := range exts {
-			if reg, ok := PresetExtracts[extract]; ok {
+			if reg, ok := fingers.PresetExtracts[extract]; ok {
 				Extractors[extract] = reg
 			}
 		}
 	}
 	for _, extract := range r.Extract {
-		if reg, ok := PresetExtracts[extract]; ok {
+		if reg, ok := fingers.PresetExtracts[extract]; ok {
 			Extractors[extract] = reg
 		} else {
 			Extractors[extract] = CompileRegexp(extract)

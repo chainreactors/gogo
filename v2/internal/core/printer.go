@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 	. "github.com/chainreactors/gogo/v2/pkg"
+	"github.com/chainreactors/gogo/v2/pkg/fingers"
 	"strings"
 )
 
@@ -53,7 +54,7 @@ func PrintWorkflow() {
 
 func PrintExtract() {
 	fmt.Println("name\tregexp")
-	for name, extract := range PresetExtracts {
+	for name, extract := range fingers.PresetExtracts {
 		fmt.Printf("%s\t%q\n", name, extract.String())
 	}
 }
