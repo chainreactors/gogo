@@ -25,7 +25,7 @@ builds:
         goarch: "386"
     ldflags: "-s -w -X 'github.com/chainreactors/gogo/v2/internal/core.ver=={{ .Tag }}'"
     flags:
-      - -trimpath -tags forceposix
+      - -trimpath
     asmflags:
       - all=-trimpath={{.Env.GOPATH}}
     gcflags:
