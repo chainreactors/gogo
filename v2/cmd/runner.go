@@ -20,44 +20,20 @@ import (
 
 func NewRunner() *Runner {
 	return &Runner{
-		config: Config{},
+		Config: Config{},
 	}
 }
 
 type Runner struct {
-	Version  bool // version level1
-	Version2 bool // version level2
-	Exploit  bool // 启用漏洞扫描
-	NoUpload bool // 关闭文件回传
-	//Compress          bool // 启用压缩
-	Clean       bool // 是否开启命令行输出扫描结果
-	Quiet       bool // 是否开启命令行输出日志
-	AutoFile    bool // 自动生成格式化文件名
-	HiddenFile  bool // 启用自动隐藏文件
-	Ping        bool
-	Arp         bool
-	Outputf     string
-	FileOutputf string // 输出格式
-	//Filename    string
-	//filenameFormat    string // 文件名格式, clear, auto or hidden
-	FormatterFilename string // 待格式化文件名
-	filters           arrayFlags
-	payloads          arrayFlags
-	extract           arrayFlags
-	extracts          string
-	ExploitName       string // 指定漏扫poc名字
-	ExploitFile       string // 指定漏扫文件
-	Printer           string // 输出特定的预设
-	UploadFile        string // 上传特定的文件名
-	WorkFlowName      string
-	Ver               bool // 输出版本号
-	NoScan            bool
-	IsWorkFlow        bool
-	Debug             bool
-	Proxy             string
-	iface             string
-	start             time.Time
-	config            Config
+	InputOption  `group:"Input Options"`
+	OutputOption `group:"Output Options"`
+	MiscOption   `group:"Miscellaneous Options"`
+	SmartOption  `group:"Smart Options"`
+	ConfigOption `group:"Configuration Options"`
+	//Arp          bool
+
+	start  time.Time
+	Config Config
 }
 
 func (r *Runner) preInit() bool {
@@ -70,23 +46,49 @@ func (r *Runner) preInit() bool {
 	Log.LogFileName = ".sock.lock"
 	Log.Init()
 
+	RunOpt = RunnerOpts{
+		Delay:      r.Delay,
+		HttpsDelay: r.HttpsDelay,
+		SuffixStr:  r.SuffixStr,
+	}
+	Opt.PluginDebug = r.PluginDebug
+	Key = []byte(r.Key)
+
+	r.Config = Config{
+		IP:          r.IP,
+		Ports:       r.Ports,
+		ListFile:    r.ListFile,
+		JsonFile:    r.JsonFile,
+		IsListInput: r.IsListInput,
+		IsJsonInput: r.IsJsonInput,
+		SmartPort:   r.SmartPort,
+		IpProbe:     r.IpProbe,
+		NoSpray:     r.NoSpray,
+		Filename:    r.Filename,
+		FilePath:    r.FilePath,
+		Compress:    r.Compress,
+		Threads:     r.Threads,
+		PortSpray:   r.PortSpray,
+		Mod:         r.Mod,
+	}
+
 	if r.FileOutputf == Default {
-		r.config.FileOutputf = "json"
+		r.Config.FileOutputf = "json"
 	} else {
-		r.config.FileOutputf = r.FileOutputf
+		r.Config.FileOutputf = r.FileOutputf
 	}
 
 	if r.Outputf == Default {
-		r.config.Outputf = "full"
+		r.Config.Outputf = "full"
 	} else {
-		r.config.Outputf = r.Outputf
+		r.Config.Outputf = r.Outputf
 	}
 
-	r.config.Compress = !r.config.Compress
+	r.Config.Compress = !r.Config.Compress
 	if r.AutoFile {
-		r.config.Filenamef = "auto"
+		r.Config.Filenamef = "auto"
 	} else if r.HiddenFile {
-		r.config.Filenamef = "hidden"
+		r.Config.Filenamef = "hidden"
 	}
 
 	// 一些特殊的分支, 这些分支将会直接退出程序
@@ -96,10 +98,10 @@ func (r *Runner) preInit() bool {
 	}
 
 	if r.FormatterFilename != "" {
-		FormatOutput(r.FormatterFilename, r.config.Filename, r.config.Outputf, r.config.FileOutputf, r.filters)
+		FormatOutput(r.FormatterFilename, r.Config.Filename, r.Config.Outputf, r.Config.FileOutputf, r.filters)
 		return false
 	}
-	// 输出 config
+	// 输出 Config
 	if r.Printer != "" {
 		printConfigs(r.Printer)
 		return false
@@ -147,8 +149,8 @@ func (r *Runner) init() {
 	// 初始化指纹优先级
 	if r.Version {
 		RunOpt.VersionLevel = 1
-	} else if r.Version2 {
-		RunOpt.VersionLevel = 2
+		//} else if r.Version2 {
+		//	RunOpt.VersionLevel = 2
 	} else {
 		RunOpt.VersionLevel = 0
 	}
@@ -168,18 +170,18 @@ func (r *Runner) init() {
 		Log.Clean = !Log.Clean
 	}
 
-	if !Win {
-		//if r.iface == "eth0" {
-		//	Log.Warn("no interface name input, use default interface name: eth0")
-		//}
-		var err error
-		RunOpt.Interface, err = net.InterfaceByName(r.iface)
-		if err != nil {
-			Log.Warn("interface error, " + err.Error())
-			//Log.Warn("interface error, " + err.Error())
-			//Log.Warn("interface error, " + err.Error())
-		}
-	}
+	//if !Win {
+	//	//if r.iface == "eth0" {
+	//	//	Log.Warn("no interface name input, use default interface name: eth0")
+	//	//}
+	//	var err error
+	//	RunOpt.Interface, err = net.InterfaceByName(r.iface)
+	//	if err != nil {
+	//		Log.Warn("interface error, " + err.Error())
+	//		//Log.Warn("interface error, " + err.Error())
+	//		//Log.Warn("interface error, " + err.Error())
+	//	}
+	//}
 
 	if r.extracts != "" {
 		exts := strings.Split(r.extracts, ",")
@@ -203,33 +205,34 @@ func (r *Runner) init() {
 }
 
 func (r *Runner) prepareConfig(config Config) *Config {
-	if r.config.Ports == "" {
+	if r.Config.Ports == "" {
 		config.Ports = "top1"
 	}
 
-	if r.Arp {
-		config.AliveSprayMod = append(config.AliveSprayMod, "arp")
-	}
+	//if r.Arp {
+	//	config.AliveSprayMod = append(config.AliveSprayMod, "arp")
+	//}
+
 	if r.Ping {
 		config.AliveSprayMod = append(config.AliveSprayMod, "icmp")
 	}
 
-	//if config.Filename == "" {
-	//	config.Filename = GetFilename(&config, config.FileOutputf)
+	//if Config.Filename == "" {
+	//	Config.Filename = GetFilename(&Config, Config.FileOutputf)
 	//} else {
-	//	config.Filename = path.Join(config.FilePath, config.Filename)
+	//	Config.Filename = path.Join(Config.FilePath, Config.Filename)
 	//}
 
-	//if config.IsSmart() {
+	//if Config.IsSmart() {
 	//	if r.NoScan && !r.AutoFile && !r.HiddenFile {
-	//		config.SmartFilename = config.Filename
+	//		Config.SmartFilename = Config.Filename
 	//	} else {
-	//		config.SmartFilename = GetFilename(&config, "cidr")
+	//		Config.SmartFilename = GetFilename(&Config, "cidr")
 	//	}
 	//}
 
-	//if config.HasAlivedScan() {
-	//	config.AlivedFilename = GetFilename(&config, "alived")
+	//if Config.HasAlivedScan() {
+	//	Config.AlivedFilename = GetFilename(&Config, "alived")
 	//}
 	return &config
 }
@@ -254,7 +257,7 @@ func (r *Runner) run() {
 }
 
 func (r *Runner) runWithCMD() {
-	config := r.prepareConfig(r.config)
+	config := r.prepareConfig(r.Config)
 	if config.Mod == SUPERSMARTB {
 		config.FileOutputf = SUPERSMARTB
 	}
@@ -281,7 +284,7 @@ func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) {
 	if workflows := workflowMap.Choice(r.WorkFlowName); len(workflows) > 0 {
 		for _, workflow := range workflows {
 			Log.Important("workflow " + workflow.Name + " starting")
-			config := workflow.PrepareConfig(r.config)
+			config := workflow.PrepareConfig(r.Config)
 
 			if config.Mod == SUPERSMARTB {
 				config.FileOutputf = SUPERSMARTB
@@ -363,7 +366,7 @@ func (r *Runner) close(config *Config) {
 
 	// 扫描结果文件自动上传
 	//if connected && !r.NoUpload { // 如果出网则自动上传结果到云服务器
-	//	uploadfiles([]string{config.Filename, config.SmartFilename})
+	//	uploadfiles([]string{Config.Filename, Config.SmartFilename})
 	//}
 }
 
@@ -378,7 +381,7 @@ func printConfigs(t string) {
 		LoadPortConfig()
 		Printportconfig()
 	} else if t == "nuclei" {
-		nucleiLoader("", arrayFlags{})
+		nucleiLoader("", nil)
 		PrintNucleiPoc()
 	} else if t == "workflow" {
 		PrintWorkflow()
@@ -389,7 +392,7 @@ func printConfigs(t string) {
 	}
 }
 
-func nucleiLoader(pocfile string, payloads arrayFlags) {
+func nucleiLoader(pocfile string, payloads []string) {
 	ExecuterOptions = ParserCmdPayload(payloads)
 	TemplateMap = LoadNuclei(pocfile)
 }

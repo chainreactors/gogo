@@ -6,25 +6,25 @@ README Version 2.5.0
 ## QuickStart
 最简使用, 建议只在c段及以下场景使用, 大于b段则建议使用启发式扫描.
 
-`gogo -k [key] -ip 192.168.1.1/24 -p win,db,top2 `
+`gogo -i 192.168.1.1/24 -p win,db,top2 `
 
 启发式扫描
 
-`gogo -k [key] -ip 172.16.1.1/16 -m s -p all -e -v -af`
+`gogo -i 172.16.1.1/16 -m s -p all -e -v --af`
 
 扫描结果格式化
 
-`gogo -k [key] -F result.dat`
+`gogo -F result.dat`
 
 
 ### workflow
 查看全部可用工作流
 
-`gogo -k [key] -P workflow`
+`gogo -P workflow`
 
 使用工作流, 自动配置启发式扫描, 启发式扫描10段常见端口
 
-`gogo -k [key] -w 10`
+`gogo -w 10`
 
 workflow 使用思维导图
 
@@ -37,7 +37,7 @@ workflow 使用思维导图
 ### target输入
 允许多种类似的输入, 有不同的效果, 在不同的环境下使用
 
-1. 直接输入cidr,参数-ip 1.1.1.1/24, 支持逗号分割
+1. 直接输入cidr,参数-i 1.1.1.1/24, 支持逗号分割
 2. 从文件中读ip列表, 参数 -l 1.txt
 3. 从结果中读任务列表,参数 -j 1.json
 4. 从管道中读取列表, -L
@@ -65,7 +65,7 @@ gt对两种场景分别设计了不同的输出逻辑.
 
 命令行full格式输出结果如下:
 ```
-gogo -k yunzi -ip 81.68.175.32/28 -p top2
+gogo -k yunzi-i 81.68.175.32/28 -p top2
 [*] Current goroutines: 1000, Version Level: 0,Exploit Target: none, PortSpray Scan: false ,2022-07-07 07:07.07
 [*] Starting task 81.68.175.32/28 ,total ports: 100 , mod: default ,2022-07-07 07:07.07
 [*] ports: 80,81,82,83,84,85,86,87,88,89,90,443,1080,2000,2001,3000,3001,4443,4430,5000,5001,5601,6000,6001,6002,6003,7000,7001,7002,7003,9000,9001,9002,9003,8080,8081,8082,8083,8084,8085,8086,8087,8088,8089,8090,8000,8001,8002,8003,8004,8005,8006,8007,8008,8009,8010,8011,8012,8013,8014,8015,8016,8017,8018,8019,8020,6443,8443,9443,8787,7080,8070,7070,7443,9080,9081,9082,9083,5555,6666,7777,9999,6868,8888,8889,9090,9091,8091,8099,8763,8848,8161,8060,8899,800,801,888,10000,10001,10080 ,2022-07-07 07:07.07
@@ -90,14 +90,14 @@ gogo -k yunzi -ip 81.68.175.32/28 -p top2
 
 #### 输出到文件
 
-通过`-f filename` 或 `-af` 或 `-hf` 指定输出的文件名, 则由命令行输出自动转为文件输出, 会关闭命令行的结果输出, 只保留进度输出(进度输出会同步到`.sock.lock`文件中). 适用于webshell场景等无交互式shell的场景.
+通过`-f filename` 或 `--af` 或 `--hf` 指定输出的文件名, 则由命令行输出自动转为文件输出, 会关闭命令行的结果输出, 只保留进度输出(进度输出会同步到`.sock.lock`文件中). 适用于webshell场景等无交互式shell的场景.
 
-注1. 如果输出到文件, 文件默认路径与gt二进制文件同目录. 需要修改目录, 请指定`-path [path]`
+注1. 如果输出到文件, 文件默认路径与gt二进制文件同目录. 需要修改目录, 请指定`--path [path]`
 
 输出到文件的结果, 需要使用`-F filename`格式化. 效果如下:
 
 ```
- gogo -k [key] -F .\.81.68.175.32_28_all_default_json.dat1
+ gogo  -F .\.81.68.175.32_28_all_default_json.dat1
 Scan Target: 81.68.175.32/28, Ports: all, Mod: default
 Exploit: none, Version level: 0
 
@@ -158,14 +158,14 @@ Exploit: none, Version level: 0
 
 可以使用`-F 1.json -o ip` 来过滤出指定字段
 
-过滤指定字段的值`-F 1.json -filter framework::redis -o ip`
+过滤指定字段的值`-F 1.json --filter framework::redis -o ip`
 
 `::` 为模糊匹配, `==` 为精准匹配.
 
-`-f file` 重新输出到文件, `-af` 输出到文件根据config自动生成文件名
+`-f file` 重新输出到文件, `--af` 输出到文件根据config自动生成文件名
 
 ### ~~启发式扫描配置~~ (保留文档, 已被workflow取代)
-如果在使用-w workflow的情况下, 继续添加-sp, -ipp, 可以覆盖workflow中的预设值, 提高workflow的灵活性
+如果在使用-w workflow的情况下, 继续添加-sp,-ip, 可以覆盖workflow中的预设值, 提高workflow的灵活性
 
 -m s 为喷洒C段模式,子网掩码要小于24才能使用
 
@@ -173,11 +173,11 @@ Exploit: none, Version level: 0
 
 -m sc 为在A段中收集存活C段, 子网掩码要小于16才能使用
 
--no 只进行启发式扫描,在喷洒到网段后不进行全扫描. 可以配合-f参数将启发式扫描喷洒到的网段输出到文件.例如 `-s -no -f aliveC.txt`
+--no 只进行启发式扫描,在喷洒到网段后不进行全扫描. 可以配合-f参数将启发式扫描喷洒到的网段输出到文件.例如 `-s --no -f aliveC.txt`
 
--sp (smart probe)控制启发式扫描的探针,默认为icmp协议,可以手动指定为其他配置,例如`-sp 80,icmp,445 ` 来在禁ping的环境下使用
+--sp (smart probe)控制启发式扫描的探针,默认为icmp协议,可以手动指定为其他配置,例如`--sp 80,icmp,445 ` 来在禁ping的环境下使用
 
--ipp (IP probe) 控制-ss模式中的B段喷洒的ip探针,-ss模式默认只扫描每个C段的第一个ip,例如192.168.1.1. 可以手动修改,指定`-ipp 1,254,253`
+--ipp (IP probe) 控制-ss模式中的B段喷洒的ip探针,-ss模式默认只扫描每个C段的第一个ip,例如192.168.1.1. 可以手动修改,指定`--ipp 1,254,253`
 
 ## 拓展功能
 
@@ -185,13 +185,13 @@ Exploit: none, Version level: 0
 
 指定网段, 指定目标端口
 
-`./gt.exe -ip 172.16.1.1/24 -p top2,db,mail,jboss,1000-1009,12345,54321`
+`./gt.exe-i 172.16.1.1/24 -p top2,db,mail,jboss,1000-1009,12345,54321`
 
 **端口Spray模式**
 
 任务生成器会以端口优先生成任务, 而非默认的ip优先.
 
-`./gt.exe -ip 172.16.1.1/24 -p top2 -s`
+`./gt.exe -i 172.16.1.1/24 -p top2 -s`
 
 **主动指纹识别**
 
@@ -199,7 +199,7 @@ Exploit: none, Version level: 0
 
 默认情况下只收集不主动发包的指纹. 如需进行主动的指纹识别, 需要添加-v参数.
 
-`./gt.exe -ip 192.168.1.1/24 -p top2 -v `
+`./gt.exe -i 192.168.1.1/24 -p top2 -v `
 
 **主动漏洞探测**
 
@@ -215,7 +215,7 @@ gogo并非漏扫工具,因此不会支持sql注入,xss之类的通用漏洞探�
 
 使用:
 
-`./gt.exe -ip 192.168.1.1/24 -p top2 -v -e`
+`./gt.exe -i 192.168.1.1/24 -p top2 -v -e`
 
 **高级启发式扫描** 
 
@@ -227,29 +227,29 @@ gogo并非漏扫工具,因此不会支持sql注入,xss之类的通用漏洞探�
 部分特殊端口以插件的形式支持, 而非默认的探测端口状态. 可以收集一些额外的信息.
 
 WMI
-`./gt.exe -ip 172.16.1.1/24 -p wmi`
+`./gt.exe -i 172.16.1.1/24 -p wmi`
 
 OXID:
 
-`./gt.exe -ip 172.16.1.1/24 -p oxid`
+`./gt.exe -i 172.16.1.1/24 -p oxid`
 
 NBTScan
 
-`./gt.exe -ip 172.16.1.1/24 -p nbt`
+`./gt.exe -i 172.16.1.1/24 -p nbt`
 
 PING
 
-`./gt.exe -ip 172.16.1.1/24 -p icmp`
+`./gt.exe -i 172.16.1.1/24 -p icmp`
 
 snmp
 
-`./gt.exe -ip 172.16.1.1/24 -p snmp`
+`./gt.exe -i 172.16.1.1/24 -p snmp`
 
 SMB
-`./gt.exe -ip 172.16.1.1/24 -p smb`
+`./gt.exe -i 172.16.1.1/24 -p smb`
 
 可以任意组合使用,例如:
-`./gt.exe -ip 172.16.1.1/24 -p smb,wmi,oxid,nbt,icmp,80,443,top2`
+`./gt.exe -i 172.16.1.1/24 -p smb,wmi,oxid,nbt,icmp,80,443,top2`
 
 ## 注意事项
 
@@ -317,7 +317,7 @@ example: 1.1.1.1
 
 ## THANKS
 
-* https://github.com/k8gege/LadonGo
 * https://github.com/projectdiscovery/nuclei-templates
 * https://github.com/projectdiscovery/nuclei
+* https://github.com/k8gege/LadonGo
 * https://github.com/JKme/cube

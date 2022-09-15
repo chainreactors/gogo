@@ -53,7 +53,6 @@ type Config struct {
 	Compress      bool     `json:"-"`
 
 	// output
-	//Output         string              `json:"-"`
 	FilePath       string              `json:"-"`
 	Filename       string              `json:"-"`
 	SmartFilename  string              `json:"-"`

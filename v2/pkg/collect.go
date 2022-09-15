@@ -67,13 +67,13 @@ func GetTitle(content string) string {
 	}
 }
 
-func ExtractContent(content string) []*Extract {
-	var extracts []*Extract
+func ExtractContent(content string) []*Extracted {
+	var extracts []*Extracted
 	if content != "" {
 		for name, extract := range Extractors {
 			extractStr, ok := CompiledAllMatch(extract, content)
 			if ok && extractStr != nil {
-				extracts = append(extracts, NewExtract(name, extractStr))
+				extracts = append(extracts, NewExtracted(name, extractStr))
 			}
 		}
 	}
