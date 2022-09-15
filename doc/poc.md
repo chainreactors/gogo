@@ -259,9 +259,9 @@ requests:
 
 指定ef文件加载poc
 
-`gt.exe -ef .\poc.json -ip 127.0.0.1 -e -p 80 -debug`
+`gogo.exe -ef .\poc.json -ip 127.0.0.1 -e -p 80 -debug`
 
-如果需要配合burp调试, 请使用proxifier代理, 代理gt的流量到burp
+如果需要配合burp调试, 请使用proxifier代理, 代理gogo的流量到burp
 
 ![image-20220806194210422](img/run.png)
 

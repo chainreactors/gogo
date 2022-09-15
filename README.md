@@ -1,41 +1,41 @@
 # gogo
-专注内网自动化的扫描引擎
+可控可拓展的自动化的扫描引擎
 
 README Version 2.5.0
 
 ## QuickStart
-最简使用, 建议只在c段及以下场景使用, 大于b段则建议使用启发式扫描.
+最简使用, 指定网段进行默认扫描, 并在命令行输出
 
 `gogo -i 192.168.1.1/24 -p win,db,top2 `
 
-启发式扫描
+当目标范围的子网掩码小于24时, 建议启用 smart模式扫描(原理见doc), 例如子网掩码为16时(输出结果较多, 建议开启--af输出到文件, 命令行只输出日志)
 
-`gogo -i 172.16.1.1/16 -m s -p all -e -v --af`
+`gogo -i 172.16.1.1/16 -m s -p top2,win,db --af`
 
-扫描结果格式化
+这个命令有些复杂, 但不用担心, 可以使用workflow代替. `gogo -w s -i 172.16.1.1/16`, --af的意思为自动生成文件, 使用-w时为自动开启.
+
+当目标范围的子网掩码小于24, 建议启用 supersmart模式扫描, 例如:
+
+`gogo -i 10.0.0.0/8 -m ss -p top2,win,db --af`
+
+这种常见的预设基本已经被集成到workflow中, 例如使用supersmart mod 扫描10段内网, `gogo -w 10`即可. 如果时自定义网段, 则是`gogo -w ss -i 11.0.0.0/8`
+
+可以使用`-P workflow`查看所有的workflow预设, 更快捷的使用gogo.
+
+如果指定了--af或者-w, 默认的输出结果为deflate算法压缩后的json文件, 可以使用-F格式化扫描结果
 
 `gogo -F result.dat`
 
 
 ### workflow
-查看全部可用工作流
-
-`gogo -P workflow`
-
-使用工作流, 自动配置启发式扫描, 启发式扫描10段常见端口
-
-`gogo -w 10`
-
 workflow 使用思维导图
 
 ![](doc/img/pipeline.png)
 
 ## 参数详解
-
-所有用法都需输入-k [密钥]
-
-### target输入
-允许多种类似的输入, 有不同的效果, 在不同的环境下使用
+gogo的参数相当复杂, 为了适应各种各样的场景花了不少心思, 也因此导致gogo有一定的使用门槛和学习成本. 需要对网络扫描有一点的了解才能更好的使用gogo.
+### 目标输入
+允许多种形式的输入, 适应各种各样的场景
 
 1. 直接输入cidr,参数-i 1.1.1.1/24, 支持逗号分割
 2. 从文件中读ip列表, 参数 -l 1.txt
@@ -45,7 +45,7 @@ workflow 使用思维导图
 
 ### 端口配置
 
-gt支持非常灵活的端口配置
+gogo支持非常灵活的端口配置
 
 参看端口预设,参数 -P port
 
@@ -55,7 +55,7 @@ gt支持非常灵活的端口配置
 
 输出分为两大类,输出到文件或输出到命令行. 在webshell场景下,通常无法输出到命令行, 因此需要输出到文件.
 
-gt对两种场景分别设计了不同的输出逻辑.
+gogo对两种场景分别设计了不同的输出逻辑.
 
 #### 输出到命令行
 
@@ -92,7 +92,7 @@ gogo -k yunzi-i 81.68.175.32/28 -p top2
 
 通过`-f filename` 或 `--af` 或 `--hf` 指定输出的文件名, 则由命令行输出自动转为文件输出, 会关闭命令行的结果输出, 只保留进度输出(进度输出会同步到`.sock.lock`文件中). 适用于webshell场景等无交互式shell的场景.
 
-注1. 如果输出到文件, 文件默认路径与gt二进制文件同目录. 需要修改目录, 请指定`--path [path]`
+注1. 如果输出到文件, 文件默认路径与gogo二进制文件同目录. 需要修改目录, 请指定`--path [path]`
 
 输出到文件的结果, 需要使用`-F filename`格式化. 效果如下:
 
@@ -164,34 +164,13 @@ Exploit: none, Version level: 0
 
 `-f file` 重新输出到文件, `--af` 输出到文件根据config自动生成文件名
 
-### ~~启发式扫描配置~~ (保留文档, 已被workflow取代)
-如果在使用-w workflow的情况下, 继续添加-sp,-ip, 可以覆盖workflow中的预设值, 提高workflow的灵活性
-
--m s 为喷洒C段模式,子网掩码要小于24才能使用
-
--m ss 为喷洒B段模式, 子网掩码要小于16才能使用
-
--m sc 为在A段中收集存活C段, 子网掩码要小于16才能使用
-
---no 只进行启发式扫描,在喷洒到网段后不进行全扫描. 可以配合-f参数将启发式扫描喷洒到的网段输出到文件.例如 `-s --no -f aliveC.txt`
-
---sp (smart probe)控制启发式扫描的探针,默认为icmp协议,可以手动指定为其他配置,例如`--sp 80,icmp,445 ` 来在禁ping的环境下使用
-
---ipp (IP probe) 控制-ss模式中的B段喷洒的ip探针,-ss模式默认只扫描每个C段的第一个ip,例如192.168.1.1. 可以手动修改,指定`--ipp 1,254,253`
-
-## 拓展功能
-
-**标准使用场景**
-
-指定网段, 指定目标端口
-
-`./gt.exe-i 172.16.1.1/24 -p top2,db,mail,jboss,1000-1009,12345,54321`
+## 进阶功能
 
 **端口Spray模式**
 
 任务生成器会以端口优先生成任务, 而非默认的ip优先.
 
-`./gt.exe -i 172.16.1.1/24 -p top2 -s`
+`./gogo.exe -i 172.16.1.1/24 -p top2 -s`
 
 **主动指纹识别**
 
@@ -199,7 +178,7 @@ Exploit: none, Version level: 0
 
 默认情况下只收集不主动发包的指纹. 如需进行主动的指纹识别, 需要添加-v参数.
 
-`./gt.exe -i 192.168.1.1/24 -p top2 -v `
+`./gogo.exe -i 192.168.1.1/24 -p top2 -v `
 
 **主动漏洞探测**
 
@@ -215,7 +194,7 @@ gogo并非漏扫工具,因此不会支持sql注入,xss之类的通用漏洞探�
 
 使用:
 
-`./gt.exe -i 192.168.1.1/24 -p top2 -v -e`
+`./gogo.exe -i 192.168.1.1/24 -p top2 -v -e`
 
 **高级启发式扫描** 
 
@@ -227,29 +206,29 @@ gogo并非漏扫工具,因此不会支持sql注入,xss之类的通用漏洞探�
 部分特殊端口以插件的形式支持, 而非默认的探测端口状态. 可以收集一些额外的信息.
 
 WMI
-`./gt.exe -i 172.16.1.1/24 -p wmi`
+`./gogo.exe -i 172.16.1.1/24 -p wmi`
 
 OXID:
 
-`./gt.exe -i 172.16.1.1/24 -p oxid`
+`./gogo.exe -i 172.16.1.1/24 -p oxid`
 
 NBTScan
 
-`./gt.exe -i 172.16.1.1/24 -p nbt`
+`./gogo.exe -i 172.16.1.1/24 -p nbt`
 
 PING
 
-`./gt.exe -i 172.16.1.1/24 -p icmp`
+`./gogo.exe -i 172.16.1.1/24 -p icmp`
 
 snmp
 
-`./gt.exe -i 172.16.1.1/24 -p snmp`
+`./gogo.exe -i 172.16.1.1/24 -p snmp`
 
 SMB
-`./gt.exe -i 172.16.1.1/24 -p smb`
+`./gogo.exe -i 172.16.1.1/24 -p smb`
 
 可以任意组合使用,例如:
-`./gt.exe -i 172.16.1.1/24 -p smb,wmi,oxid,nbt,icmp,80,443,top2`
+`./gogo.exe -i 172.16.1.1/24 -p smb,wmi,oxid,nbt,icmp,80,443,top2`
 
 ## 注意事项
 
@@ -298,26 +277,14 @@ go generate
 # build 
 go build .
 ```
-### 版本号命名规则
-example: 1.1.1.1
-
-第一位数字代表互不兼容的命令行UI或输出结果;
-
-第二位数字代表代码结构或者功能上的更新;
-
-第三位数字代表bug的修复或者小功能更新;
-
-第四位数字不一定每个版本都有, 代表指纹或poc的更新.
-
 
 ### release
 下载: https://github.com/chainreactors/gogo/releases/latest
 
-理论上支持全操作系统, 需要编译某些稍微罕见的特殊版本可以联系我帮忙编译.
+理论上支持包括windows 2003在内的全操作系统, 需要编译某些稍微罕见的特殊版本可以联系我帮忙编译.
 
 ## THANKS
 
 * https://github.com/projectdiscovery/nuclei-templates
 * https://github.com/projectdiscovery/nuclei
-* https://github.com/k8gege/LadonGo
 * https://github.com/JKme/cube
