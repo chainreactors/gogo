@@ -2,9 +2,9 @@ package plugin
 
 import (
 	. "github.com/chainreactors/gogo/v2/pkg"
-	"github.com/chainreactors/gogo/v2/pkg/dsl"
 	"github.com/chainreactors/gogo/v2/pkg/fingers"
 	"github.com/chainreactors/logs"
+	"github.com/chainreactors/parsers"
 )
 
 // -v
@@ -22,17 +22,17 @@ func faviconScan(result *Result) {
 	if resp.StatusCode != 200 {
 		return
 	}
-	content := GetBody(resp)
+	content := parsers.ReadBody(resp)
 
 	// MD5 hash匹配
-	md5h := dsl.Md5Hash(content)
+	md5h := parsers.Md5Hash(content)
 	if Md5Fingers[md5h] != "" {
 		result.AddFramework(&fingers.Framework{Name: Md5Fingers[md5h], From: "ico"})
 		return
 	}
 
 	// mmh3 hash匹配,指纹来自kscan
-	mmh3h := dsl.Mmh3Hash32(content)
+	mmh3h := parsers.Mmh3Hash32(content)
 	if Mmh3Fingers[mmh3h] != "" {
 		result.AddFramework(&fingers.Framework{Name: Mmh3Fingers[mmh3h], From: "ico"})
 		return

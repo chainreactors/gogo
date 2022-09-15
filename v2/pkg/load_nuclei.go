@@ -3,10 +3,10 @@ package pkg
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/chainreactors/gogo/v2/pkg/dsl"
 	"github.com/chainreactors/gogo/v2/pkg/nuclei/protocols"
 	"github.com/chainreactors/gogo/v2/pkg/nuclei/templates"
 	"github.com/chainreactors/gogo/v2/pkg/utils"
+	"github.com/chainreactors/parsers"
 	"io/ioutil"
 	"strings"
 )
@@ -48,7 +48,7 @@ func LoadNuclei(filename string) map[string][]*templates.Template {
 				utils.Fatal(err.Error())
 			}
 		} else {
-			content = dsl.Base64Decode(filename)
+			content = parsers.Base64Decode(filename)
 		}
 		return LoadTemplates(content)
 	}

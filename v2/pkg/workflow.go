@@ -41,7 +41,7 @@ func (w *Workflow) PrepareConfig(rconfig Config) *Config {
 		Ports:       w.Ports,
 		Mod:         w.Mod,
 		IpProbe:     w.IpProbe,
-		SmartPort:   w.SmartProbe,
+		PortProbe:   w.SmartProbe,
 		FilePath:    w.Path,
 		Outputf:     "full",
 		FileOutputf: "json",
@@ -83,8 +83,8 @@ func (w *Workflow) PrepareConfig(rconfig Config) *Config {
 		config.Threads = rconfig.Threads
 	}
 
-	if rconfig.SmartPort != Default {
-		config.SmartPort = rconfig.SmartPort
+	if rconfig.PortProbe != Default {
+		config.PortProbe = rconfig.PortProbe
 	}
 
 	if rconfig.IpProbe != Default {

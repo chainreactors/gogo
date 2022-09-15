@@ -5,11 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	. "github.com/chainreactors/files"
-	"github.com/chainreactors/gogo/v2/pkg/dsl"
 	"github.com/chainreactors/gogo/v2/pkg/fingers"
 	"github.com/chainreactors/gogo/v2/pkg/utils"
 	"github.com/chainreactors/ipcs"
 	. "github.com/chainreactors/logs"
+	"github.com/chainreactors/parsers"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -316,11 +316,11 @@ func LoadResultFile(file *os.File) interface{} {
 	if IsBase64(content) {
 		// stdin输入二进制文件支持base64编码之后的. base64 result.txt|gogo -F stdin
 		// 如果直接输入解压缩之后的json文件,则跳过这个步骤
-		content = dsl.Base64Decode(string(content))
+		content = parsers.Base64Decode(string(content))
 	}
 
 	if IsBin(content) {
-		content = dsl.XorEncode(content, Key, 0)
+		content = parsers.XorEncode(content, Key, 0)
 		if unflated := UnFlate(content); len(unflated) == 0 {
 			Log.Error("deflate failed, incorrect key")
 			return content

@@ -18,6 +18,7 @@ func initScan(result *pkg.Result) {
 	var bs []byte
 	target := result.GetTarget()
 	if pkg.ProxyUrl != nil && strings.HasPrefix(pkg.ProxyUrl.Scheme, "http") {
+		// 如果是http代理, 则使用http库代替socket
 		conn := result.GetHttpConn(RunOpt.Delay)
 		req, _ := http.NewRequest("GET", "http://"+target, nil)
 		resp, err := conn.Do(req)
@@ -26,9 +27,7 @@ func initScan(result *pkg.Result) {
 			return
 		}
 		result.Open = true
-		content := pkg.GetHttpRaw(resp)
-		result.Content = strings.ToLower(content)
-		pkg.CollectHttpInfo(result, resp, content)
+		pkg.CollectHttpInfo(result, resp)
 	} else {
 		conn, err := pkg.NewSocket("tcp", target, RunOpt.Delay)
 		//conn, err := pkg.TcpSocketConn(target, RunOpt.Delay)
@@ -74,13 +73,11 @@ func initScan(result *pkg.Result) {
 				result.Error = err.Error()
 			}
 		}
-		result.Content = strings.ToLower(string(bs))
 		pkg.CollectSocketInfo(result, bs)
 	}
 
 	//所有30x,400,以及非http协议的开放端口都送到http包尝试获取更多信息
 	if result.HttpStat == "400" || result.Protocol == "tcp" || strings.HasPrefix(result.HttpStat, "3") {
-		//return systemHttp(target, result)
 		systemHttp(result)
 	}
 	return
@@ -128,8 +125,6 @@ func systemHttp(result *pkg.Result) {
 	}
 
 	result.Error = ""
-	content := pkg.GetHttpRaw(resp)
-	result.Content = strings.ToLower(content)
-	pkg.CollectHttpInfo(result, resp, content)
+	pkg.CollectHttpInfo(result, resp)
 	return
 }

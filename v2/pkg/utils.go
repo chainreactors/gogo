@@ -4,12 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	. "github.com/chainreactors/files"
-	"github.com/chainreactors/gogo/v2/pkg/dsl"
 	"github.com/chainreactors/gogo/v2/pkg/utils"
 	"github.com/chainreactors/ipcs"
 	"github.com/chainreactors/logs"
-	"io/ioutil"
-	"net/http"
+	"github.com/chainreactors/parsers"
 	"regexp"
 	"sort"
 	"strings"
@@ -21,54 +19,6 @@ var (
 	Key  = []byte{}
 )
 
-func GetHttpRaw(resp *http.Response) string {
-	var raw string
-
-	raw += fmt.Sprintf("%s %s\r\n", resp.Proto, resp.Status)
-	for k, v := range resp.Header {
-		for _, i := range v {
-			raw += fmt.Sprintf("%s: %s\r\n", k, i)
-		}
-	}
-	raw += "\r\n"
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return raw
-	}
-	raw += string(body)
-	_ = resp.Body.Close()
-	return raw
-}
-
-func GetBody(resp *http.Response) []byte {
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return []byte{}
-	}
-	_ = resp.Body.Close()
-	return body
-}
-
-func SplitHttpRaw(content string) (body, header string, ok bool) {
-	cs := strings.Index(content, "\r\n\r\n")
-	if cs != -1 && len(content) >= cs+4 {
-		body = content[cs+4:]
-		header = content[:cs]
-		return body, header, true
-	}
-	return "", "", false
-}
-
-func GetHeaderstr(resp *http.Response) string {
-	var headerstr = ""
-	for k, v := range resp.Header {
-		for _, i := range v {
-			headerstr += fmt.Sprintf("%s: %s\r\n", k, i)
-		}
-	}
-	return headerstr
-}
-
 func CompileRegexp(s string) *regexp.Regexp {
 	reg, err := regexp.Compile(s)
 	if err != nil {
@@ -78,20 +28,20 @@ func CompileRegexp(s string) *regexp.Regexp {
 }
 
 func Decode(input string) []byte {
-	b := dsl.Base64Decode(input)
+	b := parsers.Base64Decode(input)
 	return UnFlate(b)
 }
 
 func FileDecode(input string) []byte {
-	b := dsl.Base64Decode(input)
-	b = dsl.XorEncode(b, Key, 0)
+	b := parsers.Base64Decode(input)
+	b = parsers.XorEncode(b, Key, 0)
 	return UnFlate(b)
 }
 
 func Encode(input []byte) string {
 	s := Flate(input)
-	s = dsl.XorEncode(s, Key, 0)
-	return dsl.Base64Encode(s)
+	s = parsers.XorEncode(s, Key, 0)
+	return parsers.Base64Encode(s)
 }
 
 func HasPingPriv() bool {

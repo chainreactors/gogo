@@ -10,9 +10,17 @@ github.com/chainreactors/ipcs v0.0.9 h1:4Onroq7gXLG5SLCCgNDx3JmtLxB4XgepGdHCtLp1
 github.com/chainreactors/ipcs v0.0.9/go.mod h1:E9M3Ohyq0TYQLlV4i2dbM9ThBZB1Nnd7Oexoie2xLII=
 github.com/chainreactors/logs v0.5.0 h1:6CwTR1KaqZS0quIQRU3Ceq/gBoV0+seUF8gUJTrZvew=
 github.com/chainreactors/logs v0.5.0/go.mod h1:Y0EtAnoF0kiASIJUnXN0pcOt420iRpHOAnOhEphzRHA=
+github.com/chainreactors/parsers v0.0.1 h1:GrfY4sfdv9TMuYNSKq3Jak2PO4AMJcDRAHocSb8DEx0=
+github.com/chainreactors/parsers v0.0.1/go.mod h1:pJ7As+BbXlC9SHBPCE4edc9xYPh5xik+YtKGHRclKx0=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
+github.com/go-dedup/megophone v0.0.0-20170830025436-f01be21026f5 h1:4U+x+EB1P66zwYgTjxWXSOT8vF+651Ksr1lojiCZnT8=
+github.com/go-dedup/megophone v0.0.0-20170830025436-f01be21026f5/go.mod h1:poR/Cp00iqtqu9ltFwl6C00sKC0HY13u/Gh05ZBmP54=
+github.com/go-dedup/simhash v0.0.0-20170904020510-9ecaca7b509c h1:mucYYQn+sMGNSxidhleonzAdwL203RxhjJGnxQU4NWU=
+github.com/go-dedup/simhash v0.0.0-20170904020510-9ecaca7b509c/go.mod h1:gO3u2bjRAgUaLdQd2XK+3oooxrheOAx1BzS7WmPzw1s=
+github.com/go-dedup/text v0.0.0-20170907015346-8bb1b95e3cb7 h1:11wFcswN+37U+ByjxdKzsRY5KzNqqq5Uk5ztxnLOc7w=
+github.com/go-dedup/text v0.0.0-20170907015346-8bb1b95e3cb7/go.mod h1:wSsK4VOECOSfSYTzkBFw+iGY7wj59e7X96ABtNj9aCQ=
 github.com/google/go-cmp v0.5.6/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
 github.com/google/go-cmp v0.5.7 h1:81/ik6ipDQS2aGcBfIN5dHDB36BwrStyeAQquSYCV4o=
 github.com/google/go-cmp v0.5.7/go.mod h1:n+brtR0CgQNWTVd5ZUFpTBC8YFBDLK/h/bpaJ8/DtOE=

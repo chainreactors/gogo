@@ -38,7 +38,7 @@ builds:
 archives:
   -
     name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
-    format: binary
+    format: zip
     replacements:
       amd64_v1: amd64
 

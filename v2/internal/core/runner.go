@@ -13,7 +13,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"regexp"
 	"strings"
 	"time"
 )
@@ -63,7 +62,7 @@ func (r *Runner) PreInit() bool {
 		JsonFile:    r.JsonFile,
 		IsListInput: r.IsListInput,
 		IsJsonInput: r.IsJsonInput,
-		SmartPort:   r.SmartPort,
+		PortProbe:   r.SmartPort,
 		IpProbe:     r.IpProbe,
 		NoSpray:     r.NoSpray,
 		Filename:    r.Filename,
@@ -388,10 +387,4 @@ func templatesLoader() {
 	Mmh3Fingers, Md5Fingers = LoadHashFinger(AllFingers)
 	TcpFingers = LoadFinger("tcp").GroupByPort()
 	HttpFingers = AllFingers.GroupByPort()
-	CommonCompiled = map[string]*regexp.Regexp{
-		"title":     CompileRegexp("(?Uis)<title>(.*)</title>"),
-		"server":    CompileRegexp("(?i)Server: ([\x20-\x7e]+)"),
-		"xpb":       CompileRegexp("(?i)X-Powered-By: ([\x20-\x7e]+)"),
-		"sessionid": CompileRegexp("(?i) (.*SESS.*?ID)"),
-	}
 }

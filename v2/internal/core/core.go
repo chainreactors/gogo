@@ -17,10 +17,10 @@ import (
 //直接扫描
 func DefaultMod(targets interface{}, config Config) {
 	// 输出预估时间
-	Log.Importantf("Default Scan time is about %d seconds", guessTime(targets, len(config.Portlist), config.Threads))
+	Log.Importantf("Default Scan time is about %d seconds", guessTime(targets, len(config.PortList), config.Threads))
 	var wgs sync.WaitGroup
 	targetGen := NewTargetGenerator(config)
-	targetCh := targetGen.generatorDispatch(targets, config.Portlist)
+	targetCh := targetGen.generatorDispatch(targets, config.PortList)
 	//targetChannel := generatorDispatch(targets, config)
 	scanPool, _ := ants.NewPoolWithFunc(config.Threads, func(i interface{}) {
 		tc := i.(targetConfig)
@@ -74,13 +74,13 @@ func SmartMod(target *ipcs.CIDR, config Config) {
 	switch config.Mod {
 	case SUPERSMART, SUPERSMARTB:
 		mask = 16
-		if config.SmartPort == Default {
-			config.SmartPortList = []string{DefaultSuperSmartPortProbe}
+		if config.PortProbe == Default {
+			config.PortProbeList = []string{DefaultSuperSmartPortProbe}
 		}
 	case SMART, SUPERSMARTC:
 		mask = 24
-		if config.SmartPort == Default {
-			config.SmartPortList = []string{DefaultSmartPortProbe}
+		if config.PortProbe == Default {
+			config.PortProbeList = []string{DefaultSmartPortProbe}
 		}
 	}
 
@@ -91,13 +91,13 @@ func SmartMod(target *ipcs.CIDR, config Config) {
 	temp := targetGen.ipGenerator.alivedMap
 
 	// 输出启发式扫描探针
-	probeconfig := fmt.Sprintf("Smart probe ports: %s ", strings.Join(config.SmartPortList, ","))
+	probeconfig := fmt.Sprintf("Smart port probes: %s ", strings.Join(config.PortProbeList, ","))
 	if config.IsASmart() {
-		probeconfig += ", Smart IP probe: " + config.IpProbe
+		probeconfig += ", Smart IP probes: " + fmt.Sprintf("%v", config.IpProbeList)
 	}
 	Log.Important(probeconfig)
 
-	tcChannel := targetGen.smartGenerator(target, config.SmartPortList, config.Mod)
+	tcChannel := targetGen.smartGenerator(target, config.PortProbeList, config.Mod)
 
 	scanPool, _ := ants.NewPoolWithFunc(config.Threads, func(i interface{}) {
 		tc := i.(targetConfig)
@@ -178,7 +178,7 @@ func declineScan(cidrs ipcs.CIDRs, config Config) {
 		// 如果port数量为1, 直接扫描的耗时小于启发式
 		// 如果port数量为2, 直接扫描的耗时约等于启发式扫描
 		// 因此, 如果post数量小于2, 则直接使用defaultScan
-		if len(config.Portlist) < 3 {
+		if len(config.PortList) < 3 {
 			Log.Important("port count less than 3, skipped smart scan.")
 
 			if config.HasAlivedScan() {

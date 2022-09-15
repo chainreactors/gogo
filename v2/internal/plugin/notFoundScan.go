@@ -5,6 +5,7 @@ import (
 	"github.com/chainreactors/gogo/v2/pkg/fingers"
 	"github.com/chainreactors/gogo/v2/pkg/utils"
 	"github.com/chainreactors/logs"
+	"github.com/chainreactors/parsers"
 	"strings"
 )
 
@@ -22,7 +23,7 @@ func NotFoundScan(result *pkg.Result) {
 	if utils.ToString(resp.StatusCode) == result.HttpStat {
 		return
 	}
-	content := pkg.GetHttpRaw(resp)
+	content := string(parsers.ReadRaw(resp))
 	if content == "" {
 		return
 	}

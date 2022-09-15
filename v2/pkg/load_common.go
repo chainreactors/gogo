@@ -5,7 +5,6 @@ import (
 	"github.com/chainreactors/gogo/v2/pkg/fingers"
 	"github.com/chainreactors/gogo/v2/pkg/utils"
 	"github.com/chainreactors/ipcs"
-	"regexp"
 	"strings"
 )
 
@@ -14,8 +13,7 @@ var (
 	PortMap = ipcs.PortMap
 	TagMap  = ipcs.TagMap
 	//WorkFlowMap    map[string][]*Workflow
-	CommonCompiled map[string]*regexp.Regexp
-	Extractors     = make(fingers.Extractors)
+	Extractors = make(fingers.Extractors)
 )
 
 type PortFinger struct {

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/chainreactors/gogo/v2/pkg/fingers"
 	"github.com/chainreactors/gogo/v2/pkg/utils"
+	"github.com/chainreactors/parsers"
 	"net"
 	"net/http"
 	"strconv"
@@ -33,13 +34,13 @@ type Result struct {
 	//Hash         string         `json:"hs"`
 	Open bool `json:"-"`
 	//FrameworksMap map[string]bool `json:"-"`
-	SmartProbe bool           `json:"-"`
-	TcpConn    *net.Conn      `json:"-"`
-	HttpConn   *http.Client   `json:"-"`
-	Httpresp   *http.Response `json:"-"`
-	Error      string         `json:"-"`
-	ErrStat    int            `json:"-"`
-	Content    string         `json:"-"`
+	SmartProbe bool              `json:"-"`
+	TcpConn    *net.Conn         `json:"-"`
+	HttpConn   *http.Client      `json:"-"`
+	Httpresp   *parsers.Response `json:"-"`
+	Error      string            `json:"-"`
+	ErrStat    int               `json:"-"`
+	Content    string            `json:"-"`
 }
 
 func NewResult(ip, port string) *Result {
