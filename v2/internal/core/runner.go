@@ -26,9 +26,9 @@ func NewRunner() *Runner {
 var ver = ""
 
 type Runner struct {
+	MiscOption   `group:"Miscellaneous Options"`
 	InputOption  `group:"Input Options"`
 	OutputOption `group:"Output Options"`
-	MiscOption   `group:"Miscellaneous Options"`
 	SmartOption  `group:"Smart Options"`
 	ConfigOption `group:"Configuration Options"`
 	//Arp          bool
