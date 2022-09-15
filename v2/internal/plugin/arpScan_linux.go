@@ -30,7 +30,7 @@ func arpScan(result *pkg.Result) {
 	//	return
 	//}
 	//result.Open = true
-	//result.HttpStat = "arp"
+	//result.Status = "arp"
 	//result.Protocol = "arp"
 	//result.Title = mac.String()
 	return

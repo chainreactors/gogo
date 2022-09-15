@@ -57,6 +57,7 @@ type MiscOption struct {
 	Debug       bool   `long:"debug" description:"Bool, show debug info"`
 	PluginDebug bool   `long:"plugin-debug" description:"Bool, show plugin debug stack"`
 	Proxy       string `long:"proxy" description:"String, socks5 proxy url, e.g. socks5://127.0.0.1:11111"`
+	Dump        bool   `long:"dump" description:"dump all packet"`
 }
 
 type ConfigOption struct {

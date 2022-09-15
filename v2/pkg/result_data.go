@@ -64,7 +64,7 @@ func (imap IPMapResult) getWindowsInfo() windowsInfo {
 		wininfo.hostname = imap["137"].Host
 	}
 
-	wininfo.netbiosstat = imap["137"].HttpStat
+	wininfo.netbiosstat = imap["137"].Status
 	wininfo.networks = strings.Split(imap["135 (oxid)"].Title, ",")
 	return wininfo
 }
@@ -183,7 +183,7 @@ func (rd ResultsData) ToFormat(isColor bool) string {
 						Blue(p.Frameworks.ToString()),
 						p.Host,
 						//p.Hash,
-						Yellow(p.HttpStat),
+						Yellow(p.Status),
 						Blue(p.Title),
 						Red(p.Vulns.ToString()),
 						Blue(p.GetExtractStat()),
@@ -199,7 +199,7 @@ func (rd ResultsData) ToFormat(isColor bool) string {
 						p.Host,
 						//p.Cert,
 						//p.Hash,
-						p.HttpStat,
+						p.Status,
 						p.Title,
 						p.Vulns.ToString(),
 						p.GetExtractStat(),

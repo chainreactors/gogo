@@ -6,11 +6,11 @@ import (
 )
 
 type Framework struct {
-	Name    string `json:"ft"`
-	Version string `json:"fv"`
-	From    string `json:"ff"`
-	IsGuess bool   `json:"fg"`
-	IsFocus bool   `json:"ffc"`
+	Name    string `json:"name"`
+	Version string `json:"version"`
+	From    string `json:"from"`
+	IsGuess bool   `json:"is_guess"`
+	IsFocus bool   `json:"is_focus"`
 	Data    string `json:"-"`
 }
 
@@ -46,10 +46,10 @@ var SeverityMap = map[string]int{
 }
 
 type Vuln struct {
-	Name     string                 `json:"vn"`
-	Payload  map[string]interface{} `json:"vp"`
-	Detail   map[string]interface{} `json:"vd"`
-	Severity string                 `json:"vs"`
+	Name     string                 `json:"name"`
+	Payload  map[string]interface{} `json:"payload"`
+	Detail   map[string]interface{} `json:"detail"`
+	Severity string                 `json:"severity"`
 }
 
 func (v *Vuln) GetPayload() string {

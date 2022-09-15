@@ -13,24 +13,26 @@ import (
 )
 
 type Result struct {
-	Ip   string `json:"i"` // ip
-	Port string `json:"p"` // port
-	Uri  string `json:"u"` // uri
-	Os   string `json:"o"` // os
-	Host string `json:"h"` // host
+	// baseinfo
+	Ip       string `json:"ip"`             // ip
+	Port     string `json:"port"`           // port
+	Protocol string `json:"protocol"`       // protocol
+	Status   string `json:"status"`         // http_stat
+	Uri      string `json:"uri,omitempty"`  // uri
+	Os       string `json:"os,omitempty"`   // os
+	Host     string `json:"host,omitempty"` // host
+
 	//Cert         string         `json:"c"`
-	HttpHosts    []string       `json:"-"`
-	CurrentHost  string         `json:"-"`
-	Title        string         `json:"t"` // title
-	Path         string         `json:"path"`
-	Midware      string         `json:"m"` // midware
-	HttpStat     string         `json:"s"` // http_stat
-	Language     string         `json:"l"` // language
-	Frameworks   Frameworks     `json:"f"` // framework
-	Vulns        Vulns          `json:"v"`
+	HttpHosts   []string `json:"-"`
+	CurrentHost string   `json:"-"`
+	Title       string   `json:"title"`   // title
+	Midware     string   `json:"midware"` // midware
+
+	Language     string         `json:"language"`             // language
+	Frameworks   Frameworks     `json:"frameworks,omitempty"` // framework
+	Vulns        Vulns          `json:"vulns,omitempty"`
 	Extracts     *Extracts      `json:"-"`
-	ExtractsStat map[string]int `json:"ec"`
-	Protocol     string         `json:"r"` // protocol
+	ExtractsStat map[string]int `json:"extracts_stat,omitempty"`
 	//Hash         string         `json:"hs"`
 	Open bool `json:"-"`
 	//FrameworksMap map[string]bool `json:"-"`
@@ -48,7 +50,7 @@ func NewResult(ip, port string) *Result {
 		Ip:           ip,
 		Port:         port,
 		Protocol:     "tcp",
-		HttpStat:     "tcp",
+		Status:       "tcp",
 		Extracts:     &Extracts{},
 		ExtractsStat: map[string]int{},
 	}
@@ -180,9 +182,9 @@ func (result *Result) errHandler() {
 		return
 	}
 	if strings.Contains(result.Error, "wsasend") || strings.Contains(result.Error, "wsarecv") {
-		result.HttpStat = "reset"
+		result.Status = "reset"
 	} else if result.Error == "EOF" {
-		result.HttpStat = "EOF"
+		result.Status = "EOF"
 	} else if strings.Contains(result.Error, "http: server gave HTTP response to HTTPS client") {
 		result.Protocol = "http"
 	} else if strings.Contains(result.Error, "first record does not look like a TLS handshake") {

@@ -20,7 +20,7 @@ func NotFoundScan(result *pkg.Result) {
 	}
 
 	logs.Log.Debugf("request 404page %s %d", url, resp.StatusCode)
-	if utils.ToString(resp.StatusCode) == result.HttpStat {
+	if utils.ToString(resp.StatusCode) == result.Status {
 		return
 	}
 	content := string(parsers.ReadRaw(resp))

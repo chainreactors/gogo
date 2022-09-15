@@ -15,7 +15,7 @@ func suffixScan(result *pkg.Result) {
 	//	return
 	//}
 	//result.Protocol = resp.Request.URL.Scheme
-	//result.HttpStat = strconv.Itoa(resp.StatusCode)
+	//result.Status = strconv.Itoa(resp.StatusCode)
 	//result.Content = string(parsers.ReadBody(resp))
 	//result.Httpresp = resp
 	//

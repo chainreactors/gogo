@@ -64,7 +64,7 @@ func icmpScan(result *pkg.Result) {
 
 	result.Open = true
 	result.Protocol = "icmp"
-	result.HttpStat = "icmp"
+	result.Status = "icmp"
 	return
 }
 

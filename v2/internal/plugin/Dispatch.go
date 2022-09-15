@@ -76,7 +76,7 @@ func Dispatch(result *pkg.Result) {
 		}
 
 		faviconScan(result)
-		if result.HttpStat != "404" {
+		if result.Status != "404" {
 			NotFoundScan(result)
 		}
 	} else {

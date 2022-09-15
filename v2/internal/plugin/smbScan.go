@@ -54,15 +54,15 @@ func smbScan(result *Result) {
 	if ret == nil {
 		result.Open = true
 		if ret, err = smb2Scan(target); ret != nil {
-			result.HttpStat = "SMB2"
+			result.Status = "SMB2"
 		} else {
 			result.Protocol = "tcp"
-			result.HttpStat = "tcp"
+			result.Status = "tcp"
 			return
 		}
 	} else {
 		result.Open = true
-		result.HttpStat = "SMB1"
+		result.Status = "SMB1"
 	}
 
 	result.Protocol = "smb"

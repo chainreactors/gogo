@@ -13,7 +13,7 @@ func CollectSocketInfo(result *Result, socketContent []byte) {
 	ishttp, statuscode := GetStatusCode(content)
 	if ishttp {
 		result.Httpresp = parsers.NewResponseWithRaw(socketContent)
-		result.HttpStat = statuscode
+		result.Status = statuscode
 		result.Protocol = "http"
 		result.Language = result.Httpresp.Language
 		result.Midware = result.Httpresp.Server
@@ -29,7 +29,7 @@ func CollectHttpInfo(result *Result, resp *http.Response) {
 		result.Httpresp = parsers.NewResponse(resp)
 		result.Content = strings.ToLower(string(result.Httpresp.RawContent))
 		result.Protocol = resp.Request.URL.Scheme
-		result.HttpStat = utils.ToString(resp.StatusCode)
+		result.Status = utils.ToString(resp.StatusCode)
 		result.Language = result.Httpresp.Language
 		result.Midware = result.Httpresp.Server
 		result.Title = result.Httpresp.Title

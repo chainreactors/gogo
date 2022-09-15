@@ -63,7 +63,7 @@ func initScan(result *pkg.Result) {
 		if result.SmartProbe {
 			return
 		}
-		result.HttpStat = "tcp"
+		result.Status = "tcp"
 
 		bs, err = conn.Read(1)
 		if err != nil {
@@ -77,7 +77,7 @@ func initScan(result *pkg.Result) {
 	}
 
 	//所有30x,400,以及非http协议的开放端口都送到http包尝试获取更多信息
-	if result.HttpStat == "400" || result.Protocol == "tcp" || strings.HasPrefix(result.HttpStat, "3") {
+	if result.Status == "400" || result.Protocol == "tcp" || strings.HasPrefix(result.Status, "3") {
 		systemHttp(result)
 	}
 	return
@@ -89,7 +89,7 @@ func systemHttp(result *pkg.Result) {
 	// 如果是400或者不可识别协议,则使用https
 	var ishttps bool
 	target := result.GetTarget()
-	if result.HttpStat == "400" || result.Protocol == "tcp" {
+	if result.Status == "400" || result.Protocol == "tcp" {
 		target = "https://" + target
 		ishttps = true
 	} else {
@@ -100,7 +100,7 @@ func systemHttp(result *pkg.Result) {
 		target += "/" + RunOpt.SuffixStr
 	}
 	//如果是https或者30x跳转,则增加超时时间
-	if ishttps || strings.HasPrefix(result.HttpStat, "3") {
+	if ishttps || strings.HasPrefix(result.Status, "3") {
 		delay = RunOpt.Delay + RunOpt.HttpsDelay
 	}
 	conn := result.GetHttpConn(delay)

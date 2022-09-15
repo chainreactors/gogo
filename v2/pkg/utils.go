@@ -67,12 +67,12 @@ func ValuesOutput(result *Result, outType string) string {
 }
 
 func ColorOutput(result *Result) string {
-	s := fmt.Sprintf("[+] %s\t%s\t%s\t%s\t%s [%s] %s %s\n", result.GetURL(), result.Midware, result.Language, logs.Blue(result.Frameworks.ToString()), result.Host, logs.Yellow(result.HttpStat), logs.Blue(result.Title), logs.Red(result.Vulns.ToString()))
+	s := fmt.Sprintf("[+] %s\t%s\t%s\t%s\t%s [%s] %s %s\n", result.GetURL(), result.Midware, result.Language, logs.Blue(result.Frameworks.ToString()), result.Host, logs.Yellow(result.Status), logs.Blue(result.Title), logs.Red(result.Vulns.ToString()))
 	return s
 }
 
 func FullOutput(result *Result) string {
-	s := fmt.Sprintf("[+] %s\t%s\t%s\t%s\t%s [%s] %s %s %s\n", result.GetURL(), result.Midware, result.Language, result.Frameworks.ToString(), result.Host, result.HttpStat, result.Title, result.Vulns.ToString(), result.Extracts.ToString())
+	s := fmt.Sprintf("[+] %s\t%s\t%s\t%s\t%s [%s] %s %s %s\n", result.GetURL(), result.Midware, result.Language, result.Frameworks.ToString(), result.Host, result.Status, result.Title, result.Vulns.ToString(), result.Extracts.ToString())
 	return s
 }
 

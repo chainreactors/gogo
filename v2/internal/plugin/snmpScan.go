@@ -25,7 +25,7 @@ func snmpScan(result *pkg.Result) {
 
 	result.Open = true
 	result.Protocol = "snmp"
-	result.HttpStat = "snmp"
+	result.Status = "snmp"
 	if len(resp.Variables) > 0 {
 		result.AddVuln(&fingers.Vuln{Name: "snmp_default_auth", Payload: map[string]interface{}{"auth": "public"}, Severity: "info"})
 		result.Title = strings.Split(resp.Variables[0].Value.(string), "#")[0]

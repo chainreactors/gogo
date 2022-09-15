@@ -118,12 +118,12 @@ func nbtScan(result *pkg.Result) {
 
 	msg := group + "\\" + unique
 	msg = strings.Replace(msg, "\x00", "", -1)
-	result.HttpStat = ""
+	result.Status = ""
 	if Share {
-		result.HttpStat += "sharing"
+		result.Status += "sharing"
 	}
 	if DC {
-		result.HttpStat += "DC"
+		result.Status += "DC"
 	}
 	result.Host = msg
 	result.Protocol = "NetBIOS"
