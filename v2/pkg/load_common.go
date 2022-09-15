@@ -19,11 +19,11 @@ var (
 )
 
 var PresetExtracts = map[string]*regexp.Regexp{
-	"url":      regexp.MustCompile("^(http(s)?:\\/\\/)[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+(:[0-9]{1,5})?[-a-zA-Z0-9()@:%_\\\\\\+\\.~#?&//=]*$"),
+	"url":      regexp.MustCompile(`(http|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&:\/~\+#]*[\w\-\@?^=%&\/~\+#])?`),
 	"ip":       regexp.MustCompile("((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})(\\.((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})){3}"),
-	"mail":     regexp.MustCompile("^([A-Za-z0-9_\\-\\.\u4e00-\u9fa5])+\\@([A-Za-z0-9_\\-\\.])+\\.([A-Za-z]{2,8})$"),
-	"idcard":   regexp.MustCompile("^(\\d{15}$)|(^\\d{17}([0-9]|[xX]))$"),
-	"phone":    regexp.MustCompile("^(\\+?0?86\\-?)?1[3-9]\\d{9}$"),
+	"mail":     regexp.MustCompile("([A-Za-z0-9_\\-\\.\u4e00-\u9fa5])+\\@([A-Za-z0-9_\\-\\.])+\\.([A-Za-z]{2,8})"),
+	"idcard":   regexp.MustCompile("(\\d{15}$)|(^\\d{17}([0-9]|[xX]))"),
+	"phone":    regexp.MustCompile("(\\+?0?86\\-?)?1[3-9]\\d{9}"),
 	"header":   regexp.MustCompile("(?U)^HTTP(?:.|\n)*[\r\n]{4}"),
 	"body":     regexp.MustCompile("[\\r\\n]{4}[\\w\\W]*"),
 	"cookie":   regexp.MustCompile("(?i)Set-Cookie.*"),
