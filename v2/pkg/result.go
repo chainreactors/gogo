@@ -2,7 +2,7 @@ package pkg
 
 import (
 	"fmt"
-	. "github.com/chainreactors/gogo/v2/pkg/fingers"
+	"github.com/chainreactors/gogo/v2/pkg/fingers"
 	"github.com/chainreactors/gogo/v2/pkg/utils"
 	"net"
 	"net/http"
@@ -64,37 +64,37 @@ func (result *Result) GetHttpConn(delay int) *http.Client {
 	return result.HttpConn
 }
 
-func (result *Result) AddVuln(vuln *Vuln) {
+func (result *Result) AddVuln(vuln *fingers.Vuln) {
 	if vuln.Severity == "" {
 		vuln.Severity = "high"
 	}
 	result.Vulns = append(result.Vulns, vuln)
 }
 
-func (result *Result) AddVulns(vulns []*Vuln) {
+func (result *Result) AddVulns(vulns []*fingers.Vuln) {
 	for _, v := range vulns {
 		result.AddVuln(v)
 	}
 }
 
-func (result *Result) AddFramework(f *Framework) {
+func (result *Result) AddFramework(f *fingers.Framework) {
 	result.Frameworks = append(result.Frameworks, f)
 	//result.FrameworksMap[f.ToString()] = true
 }
 
-func (result *Result) AddFrameworks(f []*Framework) {
+func (result *Result) AddFrameworks(f []*fingers.Framework) {
 	result.Frameworks = append(result.Frameworks, f...)
 	//for _, framework := range f {
 	//result.FrameworksMap[framework.ToString()] = true
 	//}
 }
 
-func (result *Result) AddExtract(extract *Extracted) {
+func (result *Result) AddExtract(extract *fingers.Extracted) {
 	result.Extracts.Extractors = append(result.Extracts.Extractors, extract)
 	result.ExtractsStat[extract.Name] = len(extract.ExtractResult)
 }
 
-func (result *Result) AddExtracts(extracts []*Extracted) {
+func (result *Result) AddExtracts(extracts []*fingers.Extracted) {
 	for _, extract := range extracts {
 		result.Extracts.Extractors = append(result.Extracts.Extractors, extract)
 		result.ExtractsStat[extract.Name] = len(extract.ExtractResult)
@@ -123,7 +123,7 @@ func (result Result) NoFramework() bool {
 func (result *Result) GuessFramework() {
 	for _, v := range PortMap.Get(result.Port) {
 		if TagMap.Get(v) == nil && !utils.SliceContains([]string{"top1", "top2", "top3", "other", "windows"}, v) {
-			result.AddFramework(&Framework{Name: v, IsGuess: true})
+			result.AddFramework(&fingers.Framework{Name: v, IsGuess: true})
 		}
 	}
 }
@@ -227,7 +227,7 @@ func (result Result) GetFirstFramework() string {
 func (result *Result) AddNTLMInfo(m map[string]string, t string) {
 	result.Title = m["MsvAvNbDomainName"] + "/" + m["MsvAvNbComputerName"]
 	result.Host = strings.Trim(m["MsvAvDnsDomainName"], "\x00") + "/" + m["MsvAvDnsComputerName"]
-	result.AddFramework(&Framework{Name: t, Version: m["Version"]})
+	result.AddFramework(&fingers.Framework{Name: t, Version: m["Version"]})
 }
 
 func (result Result) toZombie() zombiemeta {

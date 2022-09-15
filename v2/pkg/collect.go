@@ -2,7 +2,7 @@ package pkg
 
 import (
 	//"github.com/chainreactors/gogo/pkg/dsl"
-	utils2 "github.com/chainreactors/gogo/v2/pkg/utils"
+	"github.com/chainreactors/gogo/v2/pkg/utils"
 	"net/http"
 	"strings"
 )
@@ -21,25 +21,18 @@ func CollectSocketInfo(result *Result, socketContent []byte) {
 		result.Protocol = "http"
 		//result.Hash = dsl.Md5Hash([]byte(strings.TrimSpace(body)))[:4] // 因为头中经常有随机值, 因此hash通过body判断
 		result.Language = getSocketLanguage(content)
-		result.Midware, _ = CompiledMatch(CommonCompiled["server"], content)
+		result.Midware, _ = utils.CompiledMatch(CommonCompiled["server"], content)
 	}
 	result.Title = GetTitle(content)
-	result.AddExtracts(ExtractContent(content))
+	result.AddExtracts(Extractors.Extract(content))
 }
 
 func CollectHttpInfo(result *Result, resp *http.Response, content string) {
 	result.Httpresp = resp
-	//cs := strings.Index(content, "\r\n\r\n")
-	//var body string
-	//if cs != -1 {
-	//	body = content[cs+4:]
-	//} else {
-	//	body = ""
-	//}
-	//result.Content = content
+
 	if resp != nil {
 		result.Protocol = resp.Request.URL.Scheme
-		result.HttpStat = utils2.ToString(resp.StatusCode)
+		result.HttpStat = utils.ToString(resp.StatusCode)
 		result.Language = getHttpLanguage(resp)
 		result.Midware = resp.Header.Get("Server")
 	}
@@ -50,14 +43,14 @@ func CollectHttpInfo(result *Result, resp *http.Response, content string) {
 	//} else {
 	//	result.Hash = "0000"
 	//}
-	result.AddExtracts(ExtractContent(content))
+	result.AddExtracts(Extractors.Extract(content))
 }
 
 func GetTitle(content string) string {
 	if content == "" {
 		return ""
 	}
-	title, ok := CompiledMatch(CommonCompiled["title"], content)
+	title, ok := utils.CompiledMatch(CommonCompiled["title"], content)
 	if ok {
 		return title
 	} else if len(content) > 13 {
@@ -67,18 +60,18 @@ func GetTitle(content string) string {
 	}
 }
 
-func ExtractContent(content string) []*Extracted {
-	var extracts []*Extracted
-	if content != "" {
-		for name, extract := range Extractors {
-			extractStr, ok := CompiledAllMatch(extract, content)
-			if ok && extractStr != nil {
-				extracts = append(extracts, NewExtracted(name, extractStr))
-			}
-		}
-	}
-	return extracts
-}
+//func ExtractContent(content string) []*Extracted {
+//	var extracts []*Extracted
+//	if content != "" {
+//		for name, extract := range Extractors {
+//			extractStr, ok := CompiledAllMatch(extract, content)
+//			if ok && extractStr != nil {
+//				extracts = append(extracts, NewExtracted(name, extractStr))
+//			}
+//		}
+//	}
+//	return extracts
+//}
 
 // TODO 重构
 func getHttpLanguage(resp *http.Response) string {
@@ -101,12 +94,12 @@ func getHttpLanguage(resp *http.Response) string {
 }
 
 func getSocketLanguage(content string) string {
-	powered, ok := CompiledMatch(CommonCompiled["xpb"], content)
+	powered, ok := utils.CompiledMatch(CommonCompiled["xpb"], content)
 	if ok {
 		return powered
 	}
 
-	sessionid, ok := CompiledMatch(CommonCompiled["sessionid"], content)
+	sessionid, ok := utils.CompiledMatch(CommonCompiled["sessionid"], content)
 	if ok {
 		switch sessionid {
 		case "JSESSIONID":
@@ -144,5 +137,5 @@ func FormatCertDomains(domains []string) []string {
 		}
 		hosts = append(hosts, domain)
 	}
-	return utils2.SliceUnique(hosts)
+	return utils.SliceUnique(hosts)
 }

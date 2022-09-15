@@ -2,6 +2,7 @@ package plugin
 
 import (
 	"github.com/chainreactors/gogo/v2/pkg"
+	"github.com/chainreactors/gogo/v2/pkg/utils"
 	"net"
 )
 
@@ -98,6 +99,7 @@ func Dispatch(result *pkg.Result) {
 	if result.Httpresp != nil && !result.Httpresp.Close {
 		_ = result.Httpresp.Body.Close()
 	}
+	result.Title = utils.AsciiEncode(result.Title)
 	return
 }
 

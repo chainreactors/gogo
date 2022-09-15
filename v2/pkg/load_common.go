@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"encoding/json"
+	"github.com/chainreactors/gogo/v2/pkg/fingers"
 	"github.com/chainreactors/gogo/v2/pkg/utils"
 	"github.com/chainreactors/ipcs"
 	"regexp"
@@ -14,7 +15,7 @@ var (
 	TagMap  = ipcs.TagMap
 	//WorkFlowMap    map[string][]*Workflow
 	CommonCompiled map[string]*regexp.Regexp
-	Extractors     = make(map[string]*regexp.Regexp)
+	Extractors     = make(fingers.Extractors)
 )
 
 var PresetExtracts = map[string]*regexp.Regexp{

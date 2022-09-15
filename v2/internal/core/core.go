@@ -29,7 +29,6 @@ func DefaultMod(targets interface{}, config Config) {
 		if result.Open {
 			Opt.AliveSum++
 			// 格式化title编码, 防止输出二进制数据
-			result.Title = AsciiEncode(result.Title)
 			Log.Console(output(result, config.Outputf))
 
 			if config.File != nil {

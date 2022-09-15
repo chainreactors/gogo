@@ -38,7 +38,7 @@ const (
 	Critical
 )
 
-var serverityMap = map[string]int{
+var SeverityMap = map[string]int{
 	"info":     Info,
 	"medium":   Medium,
 	"high":     High,
