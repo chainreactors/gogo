@@ -62,7 +62,7 @@ func (r *Runner) PreInit() bool {
 		JsonFile:    r.JsonFile,
 		IsListInput: r.IsListInput,
 		IsJsonInput: r.IsJsonInput,
-		PortProbe:   r.SmartPort,
+		PortProbe:   r.PortProbe,
 		IpProbe:     r.IpProbe,
 		NoSpray:     r.NoSpray,
 		Filename:    r.Filename,

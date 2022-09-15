@@ -21,11 +21,11 @@ const (
 
 type Config struct {
 	// ip
-	IP         string        `json:"ip"`
-	IPlist     []string      `json:"ips"`
-	CIDRs      ipcs.CIDRs    `json:"-"`
-	ExcludeIPs string        `json:"-"`
-	ExcludeMap map[uint]bool `json:"-"`
+	IP     string     `json:"ip"`
+	IPlist []string   `json:"ips"`
+	CIDRs  ipcs.CIDRs `json:"-"`
+	//ExcludeIPs string        `json:"-"`
+	//ExcludeMap map[uint]bool `json:"-"`
 
 	// port and probe
 	Ports         string   `json:"ports"` // 预设字符串

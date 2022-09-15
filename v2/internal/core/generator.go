@@ -11,7 +11,7 @@ import (
 func NewIpGenerator(config Config) *IpGenerator {
 	var alivemap sync.Map
 	gen := IpGenerator{
-		excludeIP: config.ExcludeMap,
+		//excludeIP: config.ExcludeMap,
 		alivedMap: &alivemap,
 		ipProbe:   config.IpProbeList,
 	}

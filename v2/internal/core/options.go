@@ -46,7 +46,7 @@ type SmartOption struct {
 	Mod       string `short:"m" long:"mod" choice:"s" choice:"ss" choice:"default" choice:"sc" default:"default" description:"String, smart mod"` // 扫描模式
 	Ping      bool   `long:"ping" description:"Bool, alive pre-scan"`
 	NoScan    bool   `long:"no" description:"Bool, no-plugin, only smart scan"`
-	SmartPort string `long:"sp" default:"default" description:"String, smart-port-probe"` // 启发式扫描预设探针
+	PortProbe string `long:"sp" default:"default" description:"String, smart-port-probe"` // 启发式扫描预设探针
 	IpProbe   string `long:"ipp"  default:"default" description:"String, IP-probe"`
 }
 
