@@ -206,10 +206,6 @@ func (r *Runner) Init() {
 }
 
 func (r *Runner) PrepareConfig(config Config) *Config {
-	if r.Config.Ports == "" {
-		config.Ports = "top1"
-	}
-
 	//if r.Arp {
 	//	config.AliveSprayMod = append(config.AliveSprayMod, "arp")
 	//}
