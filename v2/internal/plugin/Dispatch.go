@@ -15,9 +15,7 @@ type RunnerOpts struct {
 	Interface    *net.Interface
 }
 
-var RunOpt = RunnerOpts{
-	Sum: 0,
-}
+var RunOpt RunnerOpts
 
 func Dispatch(result *pkg.Result) {
 	RunOpt.Sum++
