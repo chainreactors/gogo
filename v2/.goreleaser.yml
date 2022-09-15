@@ -23,7 +23,7 @@ builds:
         goarch: arm64
       - goos: darwin
         goarch: "386"
-    ldflags: "-s -w -X 'github.com/chainreactors/gogo/cmd.ver={{ .Tag }}'"
+    ldflags: "-s -w -X 'github.com/chainreactors/gogo/v2/internal/core.ver=={{ .Tag }}'"
     flags:
       - -trimpath -tags forceposix
     asmflags:

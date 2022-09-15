@@ -1,8 +1,7 @@
-package cmd
+package core
 
 import (
 	"fmt"
-	. "github.com/chainreactors/gogo/v2/internal/core"
 	. "github.com/chainreactors/gogo/v2/internal/plugin"
 	. "github.com/chainreactors/gogo/v2/pkg"
 	nucleihttp "github.com/chainreactors/gogo/v2/pkg/nuclei/protocols/http"
@@ -24,6 +23,8 @@ func NewRunner() *Runner {
 	}
 }
 
+var ver = ""
+
 type Runner struct {
 	InputOption  `group:"Input Options"`
 	OutputOption `group:"Output Options"`
@@ -36,7 +37,7 @@ type Runner struct {
 	Config Config
 }
 
-func (r *Runner) preInit() bool {
+func (r *Runner) PreInit() bool {
 	// 初始化日志工具"
 	if r.Debug {
 		Log = NewLogger(0, r.Quiet)
@@ -98,7 +99,7 @@ func (r *Runner) preInit() bool {
 	}
 
 	if r.FormatterFilename != "" {
-		FormatOutput(r.FormatterFilename, r.Config.Filename, r.Config.Outputf, r.Config.FileOutputf, r.filters)
+		FormatOutput(r.FormatterFilename, r.Config.Filename, r.Config.Outputf, r.Config.FileOutputf, r.Filters)
 		return false
 	}
 	// 输出 Config
@@ -144,7 +145,7 @@ func (r *Runner) preInit() bool {
 	return true
 }
 
-func (r *Runner) init() {
+func (r *Runner) Init() {
 	// 初始化各种全局变量
 	// 初始化指纹优先级
 	if r.Version {
@@ -183,15 +184,15 @@ func (r *Runner) init() {
 	//	}
 	//}
 
-	if r.extracts != "" {
-		exts := strings.Split(r.extracts, ",")
+	if r.Extracts != "" {
+		exts := strings.Split(r.Extracts, ",")
 		for _, extract := range exts {
 			if reg, ok := PresetExtracts[extract]; ok {
 				Extractors[extract] = reg
 			}
 		}
 	}
-	for _, extract := range r.extract {
+	for _, extract := range r.Extract {
 		if reg, ok := PresetExtracts[extract]; ok {
 			Extractors[extract] = reg
 		} else {
@@ -201,10 +202,10 @@ func (r *Runner) init() {
 
 	// 加载配置文件中的全局变量
 	templatesLoader()
-	nucleiLoader(r.ExploitFile, r.payloads)
+	nucleiLoader(r.ExploitFile, r.Payloads)
 }
 
-func (r *Runner) prepareConfig(config Config) *Config {
+func (r *Runner) PrepareConfig(config Config) *Config {
 	if r.Config.Ports == "" {
 		config.Ports = "top1"
 	}
@@ -217,27 +218,10 @@ func (r *Runner) prepareConfig(config Config) *Config {
 		config.AliveSprayMod = append(config.AliveSprayMod, "icmp")
 	}
 
-	//if Config.Filename == "" {
-	//	Config.Filename = GetFilename(&Config, Config.FileOutputf)
-	//} else {
-	//	Config.Filename = path.Join(Config.FilePath, Config.Filename)
-	//}
-
-	//if Config.IsSmart() {
-	//	if r.NoScan && !r.AutoFile && !r.HiddenFile {
-	//		Config.SmartFilename = Config.Filename
-	//	} else {
-	//		Config.SmartFilename = GetFilename(&Config, "cidr")
-	//	}
-	//}
-
-	//if Config.HasAlivedScan() {
-	//	Config.AlivedFilename = GetFilename(&Config, "alived")
-	//}
 	return &config
 }
 
-func (r *Runner) run() {
+func (r *Runner) Run() {
 	r.start = time.Now()
 	if r.WorkFlowName == "" && !r.IsWorkFlow {
 		r.runWithCMD()
@@ -257,7 +241,7 @@ func (r *Runner) run() {
 }
 
 func (r *Runner) runWithCMD() {
-	config := r.prepareConfig(r.Config)
+	config := r.PrepareConfig(r.Config)
 	if config.Mod == SUPERSMARTB {
 		config.FileOutputf = SUPERSMARTB
 	}
@@ -277,7 +261,7 @@ func (r *Runner) runWithCMD() {
 		Fatal(err.Error())
 	}
 	RunTask(*preparedConfig) // 运行
-	r.close(config)
+	r.Close(config)
 }
 
 func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) {
@@ -328,15 +312,15 @@ func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) {
 				Fatal(err.Error())
 			}
 			RunTask(*preparedConfig) // 运行
-			r.close(config)
-			r.resetGlobals()
+			r.Close(config)
+			r.ResetGlobals()
 		}
 	} else {
 		Fatal("not fount workflow " + r.WorkFlowName)
 	}
 }
 
-func (r *Runner) close(config *Config) {
+func (r *Runner) Close(config *Config) {
 	config.Close() // 关闭result与extract写入管道
 
 	if r.HiddenFile {
@@ -370,7 +354,7 @@ func (r *Runner) close(config *Config) {
 	//}
 }
 
-func (r *Runner) resetGlobals() {
+func (r *Runner) ResetGlobals() {
 	Opt.Noscan = false
 	RunOpt.Exploit = "none"
 	RunOpt.VersionLevel = 0
@@ -385,10 +369,10 @@ func printConfigs(t string) {
 		PrintNucleiPoc()
 	} else if t == "workflow" {
 		PrintWorkflow()
-	} else if t == "extract" {
+	} else if t == "Extract" {
 		PrintExtract()
 	} else {
-		fmt.Println("choice port|nuclei|workflow|extract")
+		fmt.Println("choice port|nuclei|workflow|Extract")
 	}
 }
 
