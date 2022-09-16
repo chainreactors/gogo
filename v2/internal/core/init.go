@@ -193,15 +193,3 @@ func guessSmartTime(cidr *ipcs.CIDR, config Config) int {
 
 	return (spc*ippc*count)/(config.Threads)*2 + 2
 }
-
-func createDefaultScan(config Config) {
-	if config.Results != nil {
-		DefaultMod(config.Results, config)
-	} else {
-		if config.HasAlivedScan() {
-			AliveMod(config.CIDRs, config)
-		} else {
-			DefaultMod(config.CIDRs, config)
-		}
-	}
-}

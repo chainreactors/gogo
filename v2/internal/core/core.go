@@ -152,61 +152,7 @@ func SmartMod(target *ipcs.CIDR, config Config) {
 	} else {
 		config.Mod = Default
 	}
-	declineScan(iplist, config)
-}
-
-func cidrAlived(ip string, temp *sync.Map, mask int, mod string) {
-	i, _ := ipcs.ParseIP(ip)
-	alivecidr := i.Mask(mask).String()
-	_, ok := temp.Load(alivecidr)
-	if !ok {
-		temp.Store(alivecidr, 1)
-		cidr := fmt.Sprintf("%s/%d", ip, mask)
-		Log.Important("Found " + cidr)
-		Opt.AliveSum++
-		//if Opt.File != nil && (Opt.Noscan || mod == SUPERSMARTB){
-		//	// 只有-no 或 -m sc下,才会将网段信息输出到文件.
-		//	// 模式为sc时,b段将不会输出到文件,只输出c段
-		//	Opt.dataCh <- "\"" + cidr + "\""
-		//}
-	}
-}
-
-func declineScan(cidrs ipcs.CIDRs, config Config) {
-	//config.IpProbeList = []uint{1} // ipp 只在ss与sc模式中生效,为了防止时间计算错误,reset ipp 数值
-	if config.Mod == SMART {
-		// 如果port数量为1, 直接扫描的耗时小于启发式
-		// 如果port数量为2, 直接扫描的耗时约等于启发式扫描
-		// 因此, 如果post数量小于2, 则直接使用defaultScan
-		if len(config.PortList) < 3 {
-			Log.Important("port count less than 3, skipped smart scan.")
-
-			if config.HasAlivedScan() {
-				AliveMod(cidrs, config)
-			} else {
-				DefaultMod(cidrs, config)
-			}
-		} else {
-			spended := guessSmartTime(cidrs[0], config)
-			Log.Importantf("Every Sub smartscan task time is about %d seconds, total found %d B Class CIDRs about %d s", spended, len(cidrs), spended*len(cidrs))
-			for _, ip := range cidrs {
-				tmpalive := Opt.AliveSum
-				SmartMod(ip, config)
-				Log.Importantf("Found %d assets from CIDR %s", Opt.AliveSum-tmpalive, ip)
-				syncFile()
-			}
-		}
-
-	} else if config.Mod == SUPERSMARTC {
-		spended := guessSmartTime(cidrs[0], config)
-		Log.Importantf("Every Sub smartscan task time is about %d seconds, total found %d B Class CIDRs about %d s", spended, len(cidrs), spended*len(cidrs))
-
-		for _, ip := range cidrs {
-			SmartMod(ip, config)
-		}
-	} else {
-		DefaultMod(cidrs, config)
-	}
+	createDeclineScan(iplist, config)
 }
 
 func AliveMod(targets interface{}, config Config) {
@@ -261,5 +207,67 @@ func aliveScan(tc targetConfig, temp *sync.Map) {
 	if result.Open {
 		temp.Store(result.Ip, true)
 		Opt.AliveSum++
+	}
+}
+
+func cidrAlived(ip string, temp *sync.Map, mask int, mod string) {
+	i, _ := ipcs.ParseIP(ip)
+	alivecidr := i.Mask(mask).String()
+	_, ok := temp.Load(alivecidr)
+	if !ok {
+		temp.Store(alivecidr, 1)
+		cidr := fmt.Sprintf("%s/%d", ip, mask)
+		Log.Important("Found " + cidr)
+		Opt.AliveSum++
+		//if Opt.File != nil && (Opt.Noscan || mod == SUPERSMARTB){
+		//	// 只有-no 或 -m sc下,才会将网段信息输出到文件.
+		//	// 模式为sc时,b段将不会输出到文件,只输出c段
+		//	Opt.dataCh <- "\"" + cidr + "\""
+		//}
+	}
+}
+
+func createDefaultScan(config Config) {
+	if config.Results != nil {
+		DefaultMod(config.Results, config)
+	} else {
+		if config.HasAlivedScan() {
+			AliveMod(config.CIDRs, config)
+		} else {
+			DefaultMod(config.CIDRs, config)
+		}
+	}
+}
+
+func createDeclineScan(cidrs ipcs.CIDRs, config Config) {
+	//config.IpProbeList = []uint{1} // ipp 只在ss与sc模式中生效,为了防止时间计算错误,reset ipp 数值
+	if config.Mod == SMART {
+		// 如果port数量为1, 直接扫描的耗时小于启发式
+		// 如果port数量为2, 直接扫描的耗时约等于启发式扫描
+		// 因此, 如果post数量小于2, 则直接使用defaultScan
+		if len(config.PortList) < 3 {
+			Log.Important("port count less than 3, skipped smart scan.")
+
+			createDefaultScan(config)
+		} else {
+			spended := guessSmartTime(cidrs[0], config)
+			Log.Importantf("Every Sub smartscan task time is about %d seconds, total found %d B Class CIDRs about %d s", spended, len(cidrs), spended*len(cidrs))
+			for _, ip := range cidrs {
+				tmpalive := Opt.AliveSum
+				SmartMod(ip, config)
+				Log.Importantf("Found %d assets from CIDR %s", Opt.AliveSum-tmpalive, ip)
+				syncFile()
+			}
+		}
+
+	} else if config.Mod == SUPERSMARTC {
+		spended := guessSmartTime(cidrs[0], config)
+		Log.Importantf("Every Sub smartscan task time is about %d seconds, total found %d B Class CIDRs about %d s", spended, len(cidrs), spended*len(cidrs))
+
+		for _, ip := range cidrs {
+			SmartMod(ip, config)
+		}
+	} else {
+		createDefaultScan(config)
 	}
 }

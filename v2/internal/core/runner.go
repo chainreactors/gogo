@@ -55,49 +55,13 @@ func (r *Runner) PreInit() bool {
 	Opt.PluginDebug = r.PluginDebug
 	Key = []byte(r.Key)
 
-	r.Config = Config{
-		IP:          r.IP,
-		Ports:       r.Ports,
-		ListFile:    r.ListFile,
-		JsonFile:    r.JsonFile,
-		IsListInput: r.IsListInput,
-		IsJsonInput: r.IsJsonInput,
-		PortProbe:   r.PortProbe,
-		IpProbe:     r.IpProbe,
-		NoSpray:     r.NoSpray,
-		Filename:    r.Filename,
-		FilePath:    r.FilePath,
-		Compress:    r.Compress,
-		Threads:     r.Threads,
-		PortSpray:   r.PortSpray,
-		Mod:         r.Mod,
-	}
-
-	if r.FileOutputf == Default {
-		r.Config.FileOutputf = "json"
-	} else {
-		r.Config.FileOutputf = r.FileOutputf
-	}
-
-	if r.Outputf == Default {
-		r.Config.Outputf = "full"
-	} else {
-		r.Config.Outputf = r.Outputf
-	}
-
-	r.Config.Compress = !r.Config.Compress
-	if r.AutoFile {
-		r.Config.Filenamef = "auto"
-	} else if r.HiddenFile {
-		r.Config.Filenamef = "hidden"
-	}
-
 	// 一些特殊的分支, 这些分支将会直接退出程序
 	if r.Ver {
 		fmt.Println(ver)
 		return false
 	}
 
+	r.PrepareConfig()
 	if r.FormatterFilename != "" {
 		FormatOutput(r.FormatterFilename, r.Config.Filename, r.Config.Outputf, r.Config.FileOutputf, r.Filters)
 		return false
@@ -205,16 +169,48 @@ func (r *Runner) Init() {
 	nucleiLoader(r.ExploitFile, r.Payloads)
 }
 
-func (r *Runner) PrepareConfig(config Config) *Config {
-	//if r.Arp {
-	//	config.AliveSprayMod = append(config.AliveSprayMod, "arp")
-	//}
-
-	if r.Ping {
-		config.AliveSprayMod = append(config.AliveSprayMod, "icmp")
+func (r *Runner) PrepareConfig() {
+	r.Config = Config{
+		IP:          r.IP,
+		Ports:       r.Ports,
+		ListFile:    r.ListFile,
+		JsonFile:    r.JsonFile,
+		IsListInput: r.IsListInput,
+		IsJsonInput: r.IsJsonInput,
+		PortProbe:   r.PortProbe,
+		IpProbe:     r.IpProbe,
+		NoSpray:     r.NoSpray,
+		Filename:    r.Filename,
+		FilePath:    r.FilePath,
+		Compress:    r.Compress,
+		Threads:     r.Threads,
+		PortSpray:   r.PortSpray,
+		Mod:         r.Mod,
 	}
 
-	return &config
+	if r.FileOutputf == Default {
+		r.Config.FileOutputf = "json"
+	} else {
+		r.Config.FileOutputf = r.FileOutputf
+	}
+
+	if r.Outputf == Default {
+		r.Config.Outputf = "full"
+	} else {
+		r.Config.Outputf = r.Outputf
+	}
+
+	r.Config.Compress = !r.Config.Compress
+	if r.AutoFile {
+		r.Config.Filenamef = "auto"
+	} else if r.HiddenFile {
+		r.Config.Filenamef = "hidden"
+	}
+
+	if r.Ping {
+		r.Config.AliveSprayMod = append(r.Config.AliveSprayMod, "icmp")
+	}
+
 }
 
 func (r *Runner) Run() {
@@ -237,27 +233,27 @@ func (r *Runner) Run() {
 }
 
 func (r *Runner) runWithCMD() {
-	config := r.PrepareConfig(r.Config)
+	config := r.Config
 	if config.Mod == SUPERSMARTB {
 		config.FileOutputf = SUPERSMARTB
 	}
 	if config.Filename == "" && config.IsSmart() {
-		config.SmartFilename = GetFilename(config, "cidr")
+		config.SmartFilename = GetFilename(&config, "cidr")
 	}
 	if config.Filename == "" && config.HasAlivedScan() {
-		config.AlivedFilename = GetFilename(config, "alived")
+		config.AlivedFilename = GetFilename(&config, "alived")
 	}
 
 	if config.Filename != "" || config.Filenamef != "" {
 		Log.Warn("The result file has been specified, other files will not be created.")
-		config.Filename = GetFilename(config, config.FileOutputf)
+		config.Filename = GetFilename(&config, config.FileOutputf)
 	}
-	preparedConfig, err := InitConfig(config)
+	preparedConfig, err := InitConfig(&config)
 	if err != nil {
 		Fatal(err.Error())
 	}
 	RunTask(*preparedConfig) // 运行
-	r.Close(config)
+	r.Close(&config)
 }
 
 func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) {
