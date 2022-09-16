@@ -41,7 +41,7 @@ func DefaultMod(targets interface{}, config Config) {
 				}
 			}
 		} else if result.Error != "" {
-			Log.Debugf("%s tcp stat: %s, errmsg: %s", result.GetTarget(), portstat[result.ErrStat], result.Error)
+			Log.Debugf("%s stat: %s, errmsg: %s", result.GetTarget(), portstat[result.ErrStat], result.Error)
 		}
 		wgs.Done()
 	}, ants.WithPanicHandler(func(err interface{}) {

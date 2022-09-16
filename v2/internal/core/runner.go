@@ -327,8 +327,8 @@ func (r *Runner) Close(config *Config) {
 	}
 
 	// 任务统计
-	Log.Importantf("Alive sum: %d, Target sum : %d", Opt.AliveSum, RunOpt.Sum)
-	Log.Important("Totally: " + time.Since(r.start).String())
+	Log.Importantf("Alived: %d, Totoal : %d", Opt.AliveSum, RunOpt.Sum)
+	Log.Important("Time consuming: " + time.Since(r.start).String())
 
 	// 输出文件名
 	if config.File != nil && config.File.InitSuccess {

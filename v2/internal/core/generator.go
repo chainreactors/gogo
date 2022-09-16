@@ -23,14 +23,14 @@ type IpGenerator struct {
 	ch        chan string
 	alivedMap *sync.Map
 	ipProbe   []uint
-	excludeIP map[uint]bool
+	//excludeIP map[uint]bool
 }
 
 func (gen *IpGenerator) defaultIpGenerator(cidr *ipcs.CIDR) {
 	start, fin := cidr.Range()
 	for i := start; i <= fin; i++ {
 		// 如果是广播地址或网络地址,则跳过
-		if (i)%256 != 255 && (i)%256 != 0 && !gen.excludeIP[i] {
+		if (i)%256 != 255 && (i)%256 != 0 {
 			gen.ch <- ipcs.Int2Ip(i)
 		}
 		if i%65536 == 0 {
