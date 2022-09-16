@@ -4,8 +4,6 @@ go 1.10
 
 require (
 	github.com/M09ic/go-ntlmssp v1.2.9
-	github.com/alouca/gologger v0.0.0-20120904114645-7d4b7291de9c // indirect
-	github.com/alouca/gosnmp v0.0.0-20170620005048-04d83944c9ab
 	github.com/chainreactors/files v0.2.0
 	github.com/chainreactors/ipcs v0.0.9
 	github.com/chainreactors/logs v0.5.0
