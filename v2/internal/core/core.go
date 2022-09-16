@@ -144,14 +144,6 @@ func SmartMod(target *ipcs.CIDR, config Config) {
 		return
 	}
 
-	// 启发式扫描逐步降级,从喷洒B段到喷洒C段到默认扫描
-	if config.Mod == SUPERSMART {
-		config.Mod = SMART
-	} else if config.Mod == SUPERSMARTB {
-		config.Mod = SUPERSMARTC
-	} else {
-		config.Mod = Default
-	}
 	createDeclineScan(iplist, config)
 }
 
@@ -240,14 +232,15 @@ func createDefaultScan(config Config) {
 }
 
 func createDeclineScan(cidrs ipcs.CIDRs, config Config) {
+	// 启发式扫描逐步降级,从喷洒B段到喷洒C段到默认扫描
 	//config.IpProbeList = []uint{1} // ipp 只在ss与sc模式中生效,为了防止时间计算错误,reset ipp 数值
-	if config.Mod == SMART {
+	if config.Mod == SUPERSMART {
 		// 如果port数量为1, 直接扫描的耗时小于启发式
 		// 如果port数量为2, 直接扫描的耗时约等于启发式扫描
 		// 因此, 如果post数量小于2, 则直接使用defaultScan
+		config.Mod = SMART
 		if len(config.PortList) < 3 {
 			Log.Important("port count less than 3, skipped smart scan.")
-
 			createDefaultScan(config)
 		} else {
 			spended := guessSmartTime(cidrs[0], config)
@@ -260,7 +253,8 @@ func createDeclineScan(cidrs ipcs.CIDRs, config Config) {
 			}
 		}
 
-	} else if config.Mod == SUPERSMARTC {
+	} else if config.Mod == SUPERSMARTB {
+		config.Mod = SUPERSMARTC
 		spended := guessSmartTime(cidrs[0], config)
 		Log.Importantf("Every Sub smartscan task time is about %d seconds, total found %d B Class CIDRs about %d s", spended, len(cidrs), spended*len(cidrs))
 
@@ -268,6 +262,7 @@ func createDeclineScan(cidrs ipcs.CIDRs, config Config) {
 			SmartMod(ip, config)
 		}
 	} else {
+		config.Mod = Default
 		createDefaultScan(config)
 	}
 }
