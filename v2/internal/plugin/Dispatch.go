@@ -32,9 +32,9 @@ func Dispatch(result *pkg.Result) {
 	} else if result.Port == "icmp" || result.Port == "ping" {
 		icmpScan(result)
 		return
-	} else if result.Port == "arp" && !pkg.Win {
-		arpScan(result)
-		return
+		//} else if result.Port == "arp" && !pkg.Win {
+		//	arpScan(result)
+		//	return
 	} else if result.Port == "snmp" || result.Port == "161" {
 		snmpScan(result)
 		return
