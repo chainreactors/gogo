@@ -141,8 +141,6 @@ func RunTask(config Config) {
 	switch config.Mod {
 	case Default:
 		createDefaultScan(config)
-	//case "a", "auto":
-	//	autoScan(config)
 	case SMART, SUPERSMART, SUPERSMARTB:
 		if config.CIDRs != nil {
 			for _, ip := range config.CIDRs {

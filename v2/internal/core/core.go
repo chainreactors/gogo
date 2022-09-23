@@ -143,7 +143,6 @@ func SmartMod(target *ipcs.CIDR, config Config) {
 		// -no 被设置的时候停止后续扫描
 		return
 	}
-
 	createDeclineScan(iplist, config)
 }
 
@@ -236,7 +235,11 @@ func createDeclineScan(cidrs ipcs.CIDRs, config Config) {
 		config.Mod = SMART
 		if len(config.PortList) < 3 {
 			Log.Important("port count less than 3, skipped smart scan.")
-			createDefaultScan(config)
+			if config.HasAlivedScan() {
+				AliveMod(config.CIDRs, config)
+			} else {
+				DefaultMod(config.CIDRs, config)
+			}
 		} else {
 			spended := guessSmartTime(cidrs[0], config)
 			Log.Importantf("Every Sub smartscan task time is about %d seconds, total found %d B Class CIDRs about %d s", spended, len(cidrs), spended*len(cidrs))
@@ -258,6 +261,10 @@ func createDeclineScan(cidrs ipcs.CIDRs, config Config) {
 		}
 	} else {
 		config.Mod = Default
-		createDefaultScan(config)
+		if config.HasAlivedScan() {
+			AliveMod(cidrs, config)
+		} else {
+			DefaultMod(cidrs, config)
+		}
 	}
 }
