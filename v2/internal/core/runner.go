@@ -31,7 +31,6 @@ type Runner struct {
 	OutputOption `group:"Output Options"`
 	SmartOption  `group:"Smart Options"`
 	ConfigOption `group:"Configuration Options"`
-	//Arp          bool
 
 	start  time.Time
 	Config Config
@@ -94,18 +93,7 @@ func (r *Runner) PreInit() bool {
 		} else {
 			Log.Warnf("parse proxy error %s, skip proxy!", err.Error())
 		}
-		//if !r.Debug {
-		//	Log.Error("-proxy is debug only flag, please add -debug. skipped proxy")
-		//} else {
-		//	Log.Importantf("DEBUG ONLY, set http proxy: " + r.Proxy)
-		//
-		//}
 	}
-	//if r.UploadFile != "" {
-	//	// 指定上传文件
-	//	uploadfiles(strings.Split(r.UploadFile, ","))
-	//	return false
-	//}
 	return true
 }
 
@@ -323,11 +311,6 @@ func (r *Runner) Close(config *Config) {
 	if IsExist(config.Filename + "_extract") {
 		Log.Important("extractor result: " + config.Filename + "_extract")
 	}
-
-	// 扫描结果文件自动上传
-	//if connected && !r.NoUpload { // 如果出网则自动上传结果到云服务器
-	//	uploadfiles([]string{Config.Filename, Config.SmartFilename})
-	//}
 }
 
 func (r *Runner) ResetGlobals() {

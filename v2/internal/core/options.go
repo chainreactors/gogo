@@ -22,11 +22,11 @@ type InputOption struct {
 	IP                string `short:"i" long:"ip" description:"IP/CIDR, support comma-split ip/cidr, e.g. 192.168.1.1/24,172.16.1.1/24"`
 	Ports             string `short:"p" long:"port" default:"top1" description:"Port, support comma-split preset('-P port' show all preset), range, alias port, e.g. top2,mysql,12345,10000-10100,oxid,smb"`
 	ListFile          string `short:"l" long:"list" description:"File,  previous results file e.g. -j 1.dat1 or list of colon-split ip:port, e.g. 123.123.123.123:123"`
-	IsListInput       bool   `short:"L" description:"same as -l, input from stdin"`
+	IsListInput       bool   `short:"L" description:"Bool, same as -l, input from stdin"`
 	JsonFile          string `short:"j" long:"json" description:"File,  list of IP/CIDR"`
-	IsJsonInput       bool   `short:"J" description:"same as -j, input from stdin"`
+	IsJsonInput       bool   `short:"J" description:"Bool, same as -j, input from stdin"`
 	WorkFlowName      string `short:"w" long:"workflow" description:"String, workflow name('-P workflow' show all workflow)"`
-	IsWorkFlow        bool   `short:"W" description:"same as -w, input from stdin"`
+	IsWorkFlow        bool   `short:"W" description:"Bool, same as -w, input from stdin"`
 	FormatterFilename string `short:"F" long:"format" description:"File, to be formatted result file"` // 待格式化文件名
 }
 
