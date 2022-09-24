@@ -61,6 +61,7 @@ type Config struct {
 	SmartFile      *File               `json:"-"`
 	ExtractFile    *File               `json:"-"`
 	AliveFile      *File               `json:"-"`
+	Tee            bool                `json:"-"`
 	Outputf        string              `json:"-"`
 	FileOutputf    string              `json:"-"`
 	Filenamef      string              `json:"-"`
@@ -106,7 +107,12 @@ func (config *Config) InitFile() error {
 	var err error
 	// 初始化res文件handler
 	if config.Filename != "" {
-		logs.Log.Clean = !logs.Log.Clean
+		if config.Tee {
+			logs.Log.Clean = false
+		} else {
+			logs.Log.Clean = true
+		}
+
 		// 创建output的filehandle
 		config.File, err = newFile(config.Filename, config.Compress)
 		if err != nil {

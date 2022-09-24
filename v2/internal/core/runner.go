@@ -131,23 +131,6 @@ func (r *Runner) Init() {
 		Opt.Noscan = r.NoScan
 	}
 
-	if r.Clean {
-		Log.Clean = !Log.Clean
-	}
-
-	//if !Win {
-	//	//if r.iface == "eth0" {
-	//	//	Log.Warn("no interface name input, use default interface name: eth0")
-	//	//}
-	//	var err error
-	//	RunOpt.Interface, err = net.InterfaceByName(r.iface)
-	//	if err != nil {
-	//		Log.Warn("interface error, " + err.Error())
-	//		//Log.Warn("interface error, " + err.Error())
-	//		//Log.Warn("interface error, " + err.Error())
-	//	}
-	//}
-
 	if r.Extracts != "" {
 		exts := strings.Split(r.Extracts, ",")
 		for _, extract := range exts {
@@ -186,6 +169,7 @@ func (r *Runner) PrepareConfig() {
 		Threads:     r.Threads,
 		PortSpray:   r.PortSpray,
 		Mod:         r.Mod,
+		Tee:         r.Tee,
 	}
 
 	if r.FileOutputf == Default {

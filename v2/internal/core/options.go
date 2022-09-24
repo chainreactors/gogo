@@ -38,8 +38,8 @@ type OutputOption struct {
 	AutoFile    bool   `long:"af" description:"Bool, auto choice filename"`                                                     // 自动生成格式化文件名
 	HiddenFile  bool   `long:"hf" description:"Bool, auto choice hidden filename"`                                              // 启用自动隐藏文件
 	Compress    bool   `short:"C" long:"compress" description:"Bool, close compress output file"`
-	Clean       bool   `short:"c" long:"clean" description:"Bool, close stdout output"` // 是否开启命令行输出扫描结果
-	Quiet       bool   `short:"q" long:"quiet" description:"Bool, close log output"`    // 是否开启命令行输出日志
+	Tee         bool   `long:"tee" description:"Bool, keep console output"`          // 是否开启命令行输出扫描结果
+	Quiet       bool   `short:"q" long:"quiet" description:"Bool, close log output"` // 是否开启命令行输出日志
 }
 
 type SmartOption struct {
