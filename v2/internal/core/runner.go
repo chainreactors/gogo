@@ -52,6 +52,8 @@ func (r *Runner) PreInit() bool {
 		SuffixStr:  r.SuffixStr,
 	}
 	Opt.PluginDebug = r.PluginDebug
+	NoGuess = r.NoGuess
+
 	Key = []byte(r.Key)
 
 	// 一些特殊的分支, 这些分支将会直接退出程序

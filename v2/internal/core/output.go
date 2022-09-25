@@ -28,7 +28,7 @@ func output(result *Result, outType string) string {
 	return out
 }
 
-func FormatOutput(filename string, outfilename, outf, filenamef string, filters []string) {
+func FormatOutput(filename, outFilename, outf, filenamef string, filters []string) {
 	var outfunc func(s string)
 	var iscolor bool
 	var resultsdata *ResultsData
@@ -51,13 +51,13 @@ func FormatOutput(filename string, outfilename, outf, filenamef string, filters 
 	case *ResultsData:
 		resultsdata = data.(*ResultsData)
 		fmt.Println(resultsdata.ToConfig())
-		if outfilename == "" {
-			outfilename = GetFilename(&resultsdata.Config, outf)
+		if outFilename == "" {
+			outFilename = GetFilename(&resultsdata.Config, outf)
 		}
 	case *SmartData:
 		smartdata = data.(*SmartData)
-		if outfilename == "" {
-			outfilename = GetFilename(&smartdata.Config, "cidr")
+		if outFilename == "" {
+			outFilename = GetFilename(&smartdata.Config, "cidr")
 		}
 	case []*Extracts:
 		extractsdata = data.([]*Extracts)
@@ -69,12 +69,12 @@ func FormatOutput(filename string, outfilename, outf, filenamef string, filters 
 	}
 
 	// 初始化再输出文件
-	if outfilename != "" {
-		fileHandle, err := NewFile(outfilename, false, false, false)
+	if outFilename != "" {
+		fileHandle, err := NewFile(outFilename, false, false, false)
 		if err != nil {
 			utils.Fatal("" + err.Error())
 		}
-		fmt.Println("Output filename: " + outfilename)
+		fmt.Println("Output filename: " + outFilename)
 		defer fileHandle.Close()
 		outfunc = func(s string) {
 			fileHandle.Write(s)
@@ -124,7 +124,7 @@ func FormatOutput(filename string, outfilename, outf, filenamef string, filters 
 			fmt.Println(s)
 		}
 	} else if textdata != "" {
-		if outfilename != "" {
+		if outFilename != "" {
 			outfunc(textdata)
 		}
 	}

@@ -40,6 +40,7 @@ type OutputOption struct {
 	Compress    bool   `short:"C" long:"compress" description:"Bool, close compress output file"`
 	Tee         bool   `long:"tee" description:"Bool, keep console output"`          // 是否开启命令行输出扫描结果
 	Quiet       bool   `short:"q" long:"quiet" description:"Bool, close log output"` // 是否开启命令行输出日志
+	NoGuess     bool   `long:"no-guess" description:"Bool, not guess framework on -F "`
 }
 
 type SmartOption struct {
