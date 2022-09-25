@@ -133,7 +133,7 @@ func (finger *Finger) Match(content string, level int, sender func([]byte) (stri
 				}
 			}
 			if isactive {
-				frame.From = "active"
+				frame.From = ACTIVE
 			}
 			return frame, vuln, true
 		}

@@ -88,23 +88,10 @@ func Dispatch(result *pkg.Result) {
 	}
 
 	// 如果exploit参数不为none,则进行漏洞探测
-	if RunOpt.Exploit != "none" {
-		ExploitDispatch(result)
-	}
-
-	result.Title = utils.AsciiEncode(result.Title)
-	return
-}
-
-func ExploitDispatch(result *pkg.Result) {
-	//if result.IsHttp() && (RunOpt.Exploit == "auto" || RunOpt.Exploit == "shiro") {
-	//	// todo 将shiro改造成nuclei poc
-	//	shiroScan(result)
-	//}
-
-	if result.IsHttp() {
+	if RunOpt.Exploit != "none" && result.IsHttp() {
 		Nuclei(result.GetHostBaseURL(), result)
 	}
 
+	result.Title = utils.AsciiEncode(result.Title)
 	return
 }

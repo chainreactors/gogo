@@ -37,7 +37,7 @@ func (fs Frameworks) ToString() string {
 func (fs Frameworks) GetNames() []string {
 	var titles []string
 	for _, f := range fs {
-		if !f.IsGuess {
+		if f.From != fingers.GUESS {
 			titles = append(titles, f.Name)
 		}
 	}

@@ -5,28 +5,40 @@ import (
 	"strings"
 )
 
+const (
+	None = iota
+	ACTIVE
+	ICO
+	NOTFOUND
+	GUESS
+)
+
+var fromMap = map[int]string{
+	ACTIVE:   "active",
+	ICO:      "ico",
+	NOTFOUND: "404",
+	GUESS:    "guess",
+}
+
 type Framework struct {
 	Name    string `json:"name"`
 	Version string `json:"version"`
-	From    string `json:"from"`
-	IsGuess bool   `json:"is_guess"`
+	From    int    `json:"from"`
 	IsFocus bool   `json:"is_focus"`
 	Data    string `json:"-"`
 }
 
 func (f Framework) ToString() string {
 	var s = f.Name
-	if f.IsGuess {
-		s = "*" + s
-	} else if f.IsFocus {
+	if f.IsFocus {
 		s = "focus:" + s
 	}
 
 	if f.Version != "" {
 		s += ":" + strings.Replace(f.Version, ":", "_", -1)
 	}
-	if f.From != "" {
-		s += ":" + f.From
+	if f.From != None {
+		s += ":" + fromMap[f.From]
 	}
 	return s
 }
