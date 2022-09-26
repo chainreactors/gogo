@@ -5,28 +5,40 @@ import (
 	"strings"
 )
 
+const (
+	None = iota
+	ACTIVE
+	ICO
+	NOTFOUND
+	GUESS
+)
+
+var fromMap = map[int]string{
+	ACTIVE:   "active",
+	ICO:      "ico",
+	NOTFOUND: "404",
+	GUESS:    "guess",
+}
+
 type Framework struct {
-	Name    string `json:"ft"`
-	Version string `json:"fv"`
-	From    string `json:"ff"`
-	IsGuess bool   `json:"fg"`
-	IsFocus bool   `json:"ffc"`
+	Name    string `json:"name"`
+	Version string `json:"version"`
+	From    int    `json:"from"`
+	IsFocus bool   `json:"is_focus"`
 	Data    string `json:"-"`
 }
 
 func (f Framework) ToString() string {
 	var s = f.Name
-	if f.IsGuess {
-		s = "*" + s
-	} else if f.IsFocus {
+	if f.IsFocus {
 		s = "focus:" + s
 	}
 
 	if f.Version != "" {
 		s += ":" + strings.Replace(f.Version, ":", "_", -1)
 	}
-	if f.From != "" {
-		s += ":" + f.From
+	if f.From != None {
+		s += ":" + fromMap[f.From]
 	}
 	return s
 }
@@ -38,7 +50,7 @@ const (
 	Critical
 )
 
-var serverityMap = map[string]int{
+var SeverityMap = map[string]int{
 	"info":     Info,
 	"medium":   Medium,
 	"high":     High,
@@ -46,10 +58,10 @@ var serverityMap = map[string]int{
 }
 
 type Vuln struct {
-	Name     string                 `json:"vn"`
-	Payload  map[string]interface{} `json:"vp"`
-	Detail   map[string]interface{} `json:"vd"`
-	Severity string                 `json:"vs"`
+	Name     string                 `json:"name"`
+	Payload  map[string]interface{} `json:"payload,omitempty"`
+	Detail   map[string]interface{} `json:"detail,omitempty"`
+	Severity string                 `json:"severity"`
 }
 
 func (v *Vuln) GetPayload() string {

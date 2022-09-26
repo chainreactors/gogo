@@ -1,33 +1,34 @@
 package plugin
 
 import (
-	"github.com/alouca/gosnmp"
+	"bytes"
 	"github.com/chainreactors/gogo/v2/pkg/fingers"
-	"strings"
-
+	"github.com/chainreactors/parsers"
 	//"encoding/hex"
 	"github.com/chainreactors/gogo/v2/pkg"
 )
 
+var snmpPublicData = parsers.UnHexlify("302902010104067075626c6963a01c02049acb0442020100020100300e300c06082b060102010101000500")
+
 func snmpScan(result *pkg.Result) {
-	var err error
 	result.Port = "161"
-	s, err := gosnmp.NewGoSNMP(result.GetTarget(), "public", gosnmp.Version2c, int64(RunOpt.Delay+2))
+	conn, err := pkg.NewSocket("udp", result.GetTarget(), RunOpt.Delay)
 	if err != nil {
-		//log.Fatal(err)
+		result.Error = err.Error()
+		return
+	}
+	data, err := conn.Request(snmpPublicData, 4096)
+	if err != nil {
+		result.Error = err.Error()
 		return
 	}
 
-	resp, err := s.Get(".1.3.6.1.2.1.1.1.0")
-	if err != nil {
-		return
+	if i := bytes.Index(data, []byte{0x4, 0x11}); i != -1 && len(data) > i+2 {
+		result.Title = string(data[i+2:])
 	}
 
 	result.Open = true
 	result.Protocol = "snmp"
-	result.HttpStat = "snmp"
-	if len(resp.Variables) > 0 {
-		result.AddVuln(&fingers.Vuln{Name: "snmp_default_auth", Payload: map[string]interface{}{"auth": "public"}, Severity: "info"})
-		result.Title = strings.Split(resp.Variables[0].Value.(string), "#")[0]
-	}
+	result.Status = "snmp"
+	result.AddVuln(&fingers.Vuln{Name: "snmp_public_auth", Payload: map[string]interface{}{"auth": "public"}, Severity: "info"})
 }

@@ -3,8 +3,8 @@ package fingers
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/chainreactors/gogo/v2/pkg/dsl"
 	"github.com/chainreactors/logs"
+	"github.com/chainreactors/parsers"
 	"regexp"
 	"strings"
 )
@@ -13,9 +13,9 @@ import (
 func decode(s string) []byte {
 	var bs []byte
 	if s[:4] == "b64|" {
-		bs = dsl.Base64Decode(s[4:])
+		bs = parsers.Base64Decode(s[4:])
 	} else if s[:5] == "hex|" {
-		bs = dsl.UnHexlify(s[5:])
+		bs = parsers.UnHexlify(s[5:])
 	} else {
 		bs = []byte(s)
 	}
@@ -133,7 +133,7 @@ func (finger *Finger) Match(content string, level int, sender func([]byte) (stri
 				}
 			}
 			if isactive {
-				frame.From = "active"
+				frame.From = ACTIVE
 			}
 			return frame, vuln, true
 		}
@@ -245,14 +245,14 @@ func (rule *Rule) Match(content string, ishttp bool) (bool, bool, string) {
 
 	// MD5 匹配
 	for _, md5s := range rule.Regexps.MD5 {
-		if md5s == dsl.Md5Hash([]byte(content)) {
+		if md5s == parsers.Md5Hash([]byte(content)) {
 			return true, false, ""
 		}
 	}
 
 	// mmh3 匹配
 	for _, mmh3s := range rule.Regexps.MMH3 {
-		if mmh3s == dsl.Mmh3Hash32([]byte(content)) {
+		if mmh3s == parsers.Mmh3Hash32([]byte(content)) {
 			return true, false, ""
 		}
 	}

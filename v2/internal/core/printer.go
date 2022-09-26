@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 	. "github.com/chainreactors/gogo/v2/pkg"
+	"github.com/chainreactors/gogo/v2/pkg/fingers"
 	"strings"
 )
 
@@ -42,18 +43,18 @@ func PrintNucleiPoc() {
 }
 
 func PrintWorkflow() {
-	fmt.Println("name\tindex\tip         \tport     \tmod\tping\tarp\tsmartPort\tsmartIp\tversion\texploit\toutputFile\toutputPath")
+	fmt.Println("name\tindex\tip         \tport     \tmod\tping\tsmartPort\tsmartIp\tversion\texploit\toutputFile\toutputPath")
 	for name, workflows := range LoadWorkFlow() {
 		fmt.Println(name + ": ")
 		for i, w := range workflows {
-			fmt.Printf("\t%-d\t%-15s\t%-10s\t%-s\t%-t\t%-t\t%-10s\t%-10s\t%-5d\t%-10s\t%-10s\t%-10s\t%-10s\n", i, w.IP, w.Ports, w.Mod, w.Ping, w.Arp, w.SmartProbe, w.IpProbe, w.Version, w.Exploit, w.File, w.Path, w.Description)
+			fmt.Printf("\t%-d\t%-15s\t%-10s\t%-s\t%-t\t%-10s\t%-10s\t%-5d\t%-10s\t%-10s\t%-10s\t%-10s\n", i, w.IP, w.Ports, w.Mod, w.Ping, w.SmartProbe, w.IpProbe, w.Version, w.Exploit, w.File, w.Path, w.Description)
 		}
 	}
 }
 
 func PrintExtract() {
 	fmt.Println("name\tregexp")
-	for name, extract := range PresetExtracts {
+	for name, extract := range fingers.PresetExtracts {
 		fmt.Printf("%s\t%q\n", name, extract.String())
 	}
 }

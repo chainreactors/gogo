@@ -5,6 +5,7 @@ import (
 	"github.com/chainreactors/gogo/v2/pkg/fingers"
 	"github.com/chainreactors/gogo/v2/pkg/utils"
 	"github.com/chainreactors/logs"
+	"github.com/chainreactors/parsers"
 	"strings"
 )
 
@@ -19,10 +20,10 @@ func NotFoundScan(result *pkg.Result) {
 	}
 
 	logs.Log.Debugf("request 404page %s %d", url, resp.StatusCode)
-	if utils.ToString(resp.StatusCode) == result.HttpStat {
+	if utils.ToString(resp.StatusCode) == result.Status {
 		return
 	}
-	content := pkg.GetHttpRaw(resp)
+	content := string(parsers.ReadRaw(resp))
 	if content == "" {
 		return
 	}
@@ -30,7 +31,7 @@ func NotFoundScan(result *pkg.Result) {
 	for _, finger := range pkg.AllFingers {
 		framework, _, ok := fingers.FingerMatcher(finger, strings.ToLower(content), 0, nil)
 		if ok {
-			framework.From = "404"
+			framework.From = fingers.NOTFOUND
 			result.AddFramework(framework)
 		}
 	}

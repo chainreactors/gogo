@@ -83,10 +83,10 @@ func InitConfig(config *Config) (*Config, error) {
 		return nil, err
 	}
 	// 初始化端口配置
-	config.Portlist = ipcs.ParsePort(config.Ports)
+	config.PortList = ipcs.ParsePort(config.Ports)
 
 	// 如果指定端口超过100,则自动启用spray
-	if len(config.Portlist) > 500 && !config.NoSpray {
+	if len(config.PortList) > 500 && !config.NoSpray {
 		if config.CIDRs.Count() == 1 {
 			config.PortSpray = false
 		} else {
@@ -95,13 +95,13 @@ func InitConfig(config *Config) (*Config, error) {
 	}
 
 	// 初始化启发式扫描的端口探针
-	if config.SmartPort != Default {
-		config.SmartPortList = ipcs.ParsePort(config.SmartPort)
+	if config.PortProbe != Default {
+		config.PortProbeList = ipcs.ParsePort(config.PortProbe)
 		//} else {
 		//	if config.Mod == SMART {
-		//		config.SmartPortList = []string{DefaultSmartPortProbe}
+		//		config.PortProbeList = []string{DefaultSmartPortProbe}
 		//	} else if SliceContains([]string{SUPERSMART, SUPERSMARTB}, config.Mod) {
-		//		config.SmartPortList = []string{DefaultSuperSmartPortProbe}
+		//		config.PortProbeList = []string{DefaultSuperSmartPortProbe}
 		//	}
 	}
 
@@ -111,18 +111,6 @@ func InitConfig(config *Config) (*Config, error) {
 	} else {
 		config.IpProbeList = Str2uintlist(DefaultIpProbe)
 	}
-
-	// todo 排除ip功能等待重构
-	//if config.ExcludeIPs != "" {
-	//	config.ExcludeMap = make(map[uint]bool)
-	//	for _, ip := range strings.Split(config.ExcludeIPs, ",") {
-	//		ip, _ = ParseCIDR(ip)
-	//		start, end := getIpRange(ip)
-	//		for i := start; i <= end; i++ {
-	//			config.ExcludeMap[i] = true
-	//		}
-	//	}
-	//}
 
 	// 初始已完成,输出任务基本信息
 	taskname := config.GetTargetName()
@@ -136,12 +124,12 @@ func printTaskInfo(config *Config, taskname string) {
 
 	Log.Importantf("Current goroutines: %d, Version Level: %d,Exploit Target: %s, PortSpray Scan: %t", config.Threads, RunOpt.VersionLevel, RunOpt.Exploit, config.PortSpray)
 	if config.Results == nil {
-		Log.Importantf("Starting task %s ,total ports: %d , mod: %s", taskname, len(config.Portlist), config.Mod)
+		Log.Importantf("Starting task %s ,total ports: %d , mod: %s", taskname, len(config.PortList), config.Mod)
 		// 输出端口信息
-		if len(config.Portlist) > 500 {
-			Log.Important("too much ports , only show top 500 ports: " + strings.Join(config.Portlist[:500], ",") + "......")
+		if len(config.PortList) > 500 {
+			Log.Important("too much ports , only show top 500 ports: " + strings.Join(config.PortList[:500], ",") + "......")
 		} else {
-			Log.Important("ports: " + strings.Join(config.Portlist, ","))
+			Log.Important("ports: " + strings.Join(config.PortList, ","))
 		}
 	} else {
 		Log.Importantf("Starting results task: %s ,total target: %d", taskname, len(config.Results))
@@ -153,8 +141,6 @@ func RunTask(config Config) {
 	switch config.Mod {
 	case Default:
 		createDefaultScan(config)
-	//case "a", "auto":
-	//	autoScan(config)
 	case SMART, SUPERSMART, SUPERSMARTB:
 		if config.CIDRs != nil {
 			for _, ip := range config.CIDRs {
@@ -188,7 +174,7 @@ func guessTime(targets interface{}, portcount, thread int) int {
 func guessSmartTime(cidr *ipcs.CIDR, config Config) int {
 	var spc, ippc int
 	var mask int
-	spc = len(config.SmartPortList)
+	spc = len(config.PortProbeList)
 	if config.IsBSmart() {
 		ippc = 1
 	} else {
@@ -204,16 +190,4 @@ func guessSmartTime(cidr *ipcs.CIDR, config Config) int {
 	}
 
 	return (spc*ippc*count)/(config.Threads)*2 + 2
-}
-
-func createDefaultScan(config Config) {
-	if config.Results != nil {
-		DefaultMod(config.Results, config)
-	} else {
-		if config.HasAlivedScan() {
-			AliveMod(config.CIDRs, config)
-		} else {
-			DefaultMod(config.CIDRs, config)
-		}
-	}
 }

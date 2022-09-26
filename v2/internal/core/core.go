@@ -17,10 +17,10 @@ import (
 //直接扫描
 func DefaultMod(targets interface{}, config Config) {
 	// 输出预估时间
-	Log.Importantf("Default Scan time is about %d seconds", guessTime(targets, len(config.Portlist), config.Threads))
+	Log.Importantf("Default Scan time is about %d seconds", guessTime(targets, len(config.PortList), config.Threads))
 	var wgs sync.WaitGroup
 	targetGen := NewTargetGenerator(config)
-	targetCh := targetGen.generatorDispatch(targets, config.Portlist)
+	targetCh := targetGen.generatorDispatch(targets, config.PortList)
 	//targetChannel := generatorDispatch(targets, config)
 	scanPool, _ := ants.NewPoolWithFunc(config.Threads, func(i interface{}) {
 		tc := i.(targetConfig)
@@ -29,7 +29,6 @@ func DefaultMod(targets interface{}, config Config) {
 		if result.Open {
 			Opt.AliveSum++
 			// 格式化title编码, 防止输出二进制数据
-			result.Title = AsciiEncode(result.Title)
 			Log.Console(output(result, config.Outputf))
 
 			if config.File != nil {
@@ -42,7 +41,7 @@ func DefaultMod(targets interface{}, config Config) {
 				}
 			}
 		} else if result.Error != "" {
-			Log.Debugf("%s tcp stat: %s, errmsg: %s", result.GetTarget(), portstat[result.ErrStat], result.Error)
+			Log.Debugf("%s stat: %s, errmsg: %s", result.GetTarget(), portstat[result.ErrStat], result.Error)
 		}
 		wgs.Done()
 	}, ants.WithPanicHandler(func(err interface{}) {
@@ -75,13 +74,13 @@ func SmartMod(target *ipcs.CIDR, config Config) {
 	switch config.Mod {
 	case SUPERSMART, SUPERSMARTB:
 		mask = 16
-		if config.SmartPort == Default {
-			config.SmartPortList = []string{DefaultSuperSmartPortProbe}
+		if config.PortProbe == Default {
+			config.PortProbeList = []string{DefaultSuperSmartPortProbe}
 		}
 	case SMART, SUPERSMARTC:
 		mask = 24
-		if config.SmartPort == Default {
-			config.SmartPortList = []string{DefaultSmartPortProbe}
+		if config.PortProbe == Default {
+			config.PortProbeList = []string{DefaultSmartPortProbe}
 		}
 	}
 
@@ -92,13 +91,13 @@ func SmartMod(target *ipcs.CIDR, config Config) {
 	temp := targetGen.ipGenerator.alivedMap
 
 	// 输出启发式扫描探针
-	probeconfig := fmt.Sprintf("Smart probe ports: %s ", strings.Join(config.SmartPortList, ","))
+	probeconfig := fmt.Sprintf("Smart port probes: %s ", strings.Join(config.PortProbeList, ","))
 	if config.IsASmart() {
-		probeconfig += ", Smart IP probe: " + config.IpProbe
+		probeconfig += ", Smart IP probes: " + fmt.Sprintf("%v", config.IpProbeList)
 	}
 	Log.Important(probeconfig)
 
-	tcChannel := targetGen.smartGenerator(target, config.SmartPortList, config.Mod)
+	tcChannel := targetGen.smartGenerator(target, config.PortProbeList, config.Mod)
 
 	scanPool, _ := ants.NewPoolWithFunc(config.Threads, func(i interface{}) {
 		tc := i.(targetConfig)
@@ -144,70 +143,7 @@ func SmartMod(target *ipcs.CIDR, config Config) {
 		// -no 被设置的时候停止后续扫描
 		return
 	}
-
-	// 启发式扫描逐步降级,从喷洒B段到喷洒C段到默认扫描
-	if config.Mod == SUPERSMART {
-		config.Mod = SMART
-	} else if config.Mod == SUPERSMARTB {
-		config.Mod = SUPERSMARTC
-	} else {
-		config.Mod = Default
-	}
-	declineScan(iplist, config)
-}
-
-func cidrAlived(ip string, temp *sync.Map, mask int, mod string) {
-	i, _ := ipcs.ParseIP(ip)
-	alivecidr := i.Mask(mask).String()
-	_, ok := temp.Load(alivecidr)
-	if !ok {
-		temp.Store(alivecidr, 1)
-		cidr := fmt.Sprintf("%s/%d", ip, mask)
-		Log.Important("Found " + cidr)
-		Opt.AliveSum++
-		//if Opt.File != nil && (Opt.Noscan || mod == SUPERSMARTB){
-		//	// 只有-no 或 -m sc下,才会将网段信息输出到文件.
-		//	// 模式为sc时,b段将不会输出到文件,只输出c段
-		//	Opt.dataCh <- "\"" + cidr + "\""
-		//}
-	}
-}
-
-func declineScan(cidrs ipcs.CIDRs, config Config) {
-	//config.IpProbeList = []uint{1} // ipp 只在ss与sc模式中生效,为了防止时间计算错误,reset ipp 数值
-	if config.Mod == SMART {
-		// 如果port数量为1, 直接扫描的耗时小于启发式
-		// 如果port数量为2, 直接扫描的耗时约等于启发式扫描
-		// 因此, 如果post数量小于2, 则直接使用defaultScan
-		if len(config.Portlist) < 3 {
-			Log.Important("port count less than 3, skipped smart scan.")
-
-			if config.HasAlivedScan() {
-				AliveMod(cidrs, config)
-			} else {
-				DefaultMod(cidrs, config)
-			}
-		} else {
-			spended := guessSmartTime(cidrs[0], config)
-			Log.Importantf("Every Sub smartscan task time is about %d seconds, total found %d B Class CIDRs about %d s", spended, len(cidrs), spended*len(cidrs))
-			for _, ip := range cidrs {
-				tmpalive := Opt.AliveSum
-				SmartMod(ip, config)
-				Log.Importantf("Found %d assets from CIDR %s", Opt.AliveSum-tmpalive, ip)
-				syncFile()
-			}
-		}
-
-	} else if config.Mod == SUPERSMARTC {
-		spended := guessSmartTime(cidrs[0], config)
-		Log.Importantf("Every Sub smartscan task time is about %d seconds, total found %d B Class CIDRs about %d s", spended, len(cidrs), spended*len(cidrs))
-
-		for _, ip := range cidrs {
-			SmartMod(ip, config)
-		}
-	} else {
-		DefaultMod(cidrs, config)
-	}
+	createDeclineScan(iplist, config)
 }
 
 func AliveMod(targets interface{}, config Config) {
@@ -262,5 +198,73 @@ func aliveScan(tc targetConfig, temp *sync.Map) {
 	if result.Open {
 		temp.Store(result.Ip, true)
 		Opt.AliveSum++
+	}
+}
+
+func cidrAlived(ip string, temp *sync.Map, mask int, mod string) {
+	i, _ := ipcs.ParseIP(ip)
+	alivecidr := i.Mask(mask).String()
+	_, ok := temp.Load(alivecidr)
+	if !ok {
+		temp.Store(alivecidr, 1)
+		cidr := fmt.Sprintf("%s/%d", ip, mask)
+		Log.Important("Found " + cidr)
+		Opt.AliveSum++
+	}
+}
+
+func createDefaultScan(config Config) {
+	if config.Results != nil {
+		DefaultMod(config.Results, config)
+	} else {
+		if config.HasAlivedScan() {
+			AliveMod(config.CIDRs, config)
+		} else {
+			DefaultMod(config.CIDRs, config)
+		}
+	}
+}
+
+func createDeclineScan(cidrs ipcs.CIDRs, config Config) {
+	// 启发式扫描逐步降级,从喷洒B段到喷洒C段到默认扫描
+	//config.IpProbeList = []uint{1} // ipp 只在ss与sc模式中生效,为了防止时间计算错误,reset ipp 数值
+	if config.Mod == SUPERSMART {
+		// 如果port数量为1, 直接扫描的耗时小于启发式
+		// 如果port数量为2, 直接扫描的耗时约等于启发式扫描
+		// 因此, 如果post数量小于2, 则直接使用defaultScan
+		config.Mod = SMART
+		if len(config.PortList) < 3 {
+			Log.Important("port count less than 3, skipped smart scan.")
+			if config.HasAlivedScan() {
+				AliveMod(config.CIDRs, config)
+			} else {
+				DefaultMod(config.CIDRs, config)
+			}
+		} else {
+			spended := guessSmartTime(cidrs[0], config)
+			Log.Importantf("Every Sub smartscan task time is about %d seconds, total found %d B Class CIDRs about %d s", spended, len(cidrs), spended*len(cidrs))
+			for _, ip := range cidrs {
+				tmpalive := Opt.AliveSum
+				SmartMod(ip, config)
+				Log.Importantf("Found %d assets from CIDR %s", Opt.AliveSum-tmpalive, ip)
+				syncFile()
+			}
+		}
+
+	} else if config.Mod == SUPERSMARTB {
+		config.Mod = SUPERSMARTC
+		spended := guessSmartTime(cidrs[0], config)
+		Log.Importantf("Every Sub smartscan task time is about %d seconds, total found %d B Class CIDRs about %d s", spended, len(cidrs), spended*len(cidrs))
+
+		for _, ip := range cidrs {
+			SmartMod(ip, config)
+		}
+	} else {
+		config.Mod = Default
+		if config.HasAlivedScan() {
+			AliveMod(cidrs, config)
+		} else {
+			DefaultMod(cidrs, config)
+		}
 	}
 }

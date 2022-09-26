@@ -21,17 +21,17 @@ const (
 
 type Config struct {
 	// ip
-	IP         string        `json:"ip"`
-	IPlist     []string      `json:"ips"`
-	CIDRs      ipcs.CIDRs    `json:"-"`
-	ExcludeIPs string        `json:"-"`
-	ExcludeMap map[uint]bool `json:"-"`
+	IP     string     `json:"ip"`
+	IPlist []string   `json:"ips"`
+	CIDRs  ipcs.CIDRs `json:"-"`
+	//ExcludeIPs string        `json:"-"`
+	//ExcludeMap map[uint]bool `json:"-"`
 
 	// port and probe
 	Ports         string   `json:"ports"` // 预设字符串
-	Portlist      []string `json:"-"`     // 处理完的端口列表
-	SmartPort     string   `json:"-"`     // 启发式扫描预设探针
-	SmartPortList []string `json:"-"`     // 启发式扫描预设探针
+	PortList      []string `json:"-"`     // 处理完的端口列表
+	PortProbe     string   `json:"-"`     // 启发式扫描预设探针
+	PortProbeList []string `json:"-"`     // 启发式扫描预设探针
 	IpProbe       string   `json:"-"`
 	IpProbeList   []uint   `json:"-"`
 
@@ -61,6 +61,7 @@ type Config struct {
 	SmartFile      *File               `json:"-"`
 	ExtractFile    *File               `json:"-"`
 	AliveFile      *File               `json:"-"`
+	Tee            bool                `json:"-"`
 	Outputf        string              `json:"-"`
 	FileOutputf    string              `json:"-"`
 	Filenamef      string              `json:"-"`
@@ -106,7 +107,12 @@ func (config *Config) InitFile() error {
 	var err error
 	// 初始化res文件handler
 	if config.Filename != "" {
-		logs.Log.Clean = !logs.Log.Clean
+		if config.Tee {
+			logs.Log.Clean = false
+		} else {
+			logs.Log.Clean = true
+		}
+
 		// 创建output的filehandle
 		config.File, err = newFile(config.Filename, config.Compress)
 		if err != nil {

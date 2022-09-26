@@ -2,8 +2,9 @@ package pkg
 
 import (
 	"fmt"
-	. "github.com/chainreactors/gogo/v2/pkg/fingers"
+	"github.com/chainreactors/gogo/v2/pkg/fingers"
 	"github.com/chainreactors/gogo/v2/pkg/utils"
+	"github.com/chainreactors/parsers"
 	"net"
 	"net/http"
 	"strconv"
@@ -12,34 +13,36 @@ import (
 )
 
 type Result struct {
-	Ip   string `json:"i"` // ip
-	Port string `json:"p"` // port
-	Uri  string `json:"u"` // uri
-	Os   string `json:"o"` // os
-	Host string `json:"h"` // host
+	// baseinfo
+	Ip       string `json:"ip"`             // ip
+	Port     string `json:"port"`           // port
+	Protocol string `json:"protocol"`       // protocol
+	Status   string `json:"status"`         // http_stat
+	Uri      string `json:"uri,omitempty"`  // uri
+	Os       string `json:"os,omitempty"`   // os
+	Host     string `json:"host,omitempty"` // host
+
 	//Cert         string         `json:"c"`
-	HttpHosts    []string       `json:"-"`
-	CurrentHost  string         `json:"-"`
-	Title        string         `json:"t"` // title
-	Path         string         `json:"path"`
-	Midware      string         `json:"m"` // midware
-	HttpStat     string         `json:"s"` // http_stat
-	Language     string         `json:"l"` // language
-	Frameworks   Frameworks     `json:"f"` // framework
-	Vulns        Vulns          `json:"v"`
+	HttpHosts   []string `json:"-"`
+	CurrentHost string   `json:"-"`
+	Title       string   `json:"title"`   // title
+	Midware     string   `json:"midware"` // midware
+
+	Language     string         `json:"language"`             // language
+	Frameworks   Frameworks     `json:"frameworks,omitempty"` // framework
+	Vulns        Vulns          `json:"vulns,omitempty"`
 	Extracts     *Extracts      `json:"-"`
-	ExtractsStat map[string]int `json:"ec"`
-	Protocol     string         `json:"r"` // protocol
+	ExtractsStat map[string]int `json:"extracts_stat,omitempty"`
 	//Hash         string         `json:"hs"`
 	Open bool `json:"-"`
 	//FrameworksMap map[string]bool `json:"-"`
-	SmartProbe bool           `json:"-"`
-	TcpConn    *net.Conn      `json:"-"`
-	HttpConn   *http.Client   `json:"-"`
-	Httpresp   *http.Response `json:"-"`
-	Error      string         `json:"-"`
-	ErrStat    int            `json:"-"`
-	Content    string         `json:"-"`
+	SmartProbe bool              `json:"-"`
+	TcpConn    *net.Conn         `json:"-"`
+	HttpConn   *http.Client      `json:"-"`
+	Httpresp   *parsers.Response `json:"-"`
+	Error      string            `json:"-"`
+	ErrStat    int               `json:"-"`
+	Content    string            `json:"-"`
 }
 
 func NewResult(ip, port string) *Result {
@@ -47,7 +50,7 @@ func NewResult(ip, port string) *Result {
 		Ip:           ip,
 		Port:         port,
 		Protocol:     "tcp",
-		HttpStat:     "tcp",
+		Status:       "tcp",
 		Extracts:     &Extracts{},
 		ExtractsStat: map[string]int{},
 	}
@@ -64,37 +67,37 @@ func (result *Result) GetHttpConn(delay int) *http.Client {
 	return result.HttpConn
 }
 
-func (result *Result) AddVuln(vuln *Vuln) {
+func (result *Result) AddVuln(vuln *fingers.Vuln) {
 	if vuln.Severity == "" {
 		vuln.Severity = "high"
 	}
 	result.Vulns = append(result.Vulns, vuln)
 }
 
-func (result *Result) AddVulns(vulns []*Vuln) {
+func (result *Result) AddVulns(vulns []*fingers.Vuln) {
 	for _, v := range vulns {
 		result.AddVuln(v)
 	}
 }
 
-func (result *Result) AddFramework(f *Framework) {
+func (result *Result) AddFramework(f *fingers.Framework) {
 	result.Frameworks = append(result.Frameworks, f)
 	//result.FrameworksMap[f.ToString()] = true
 }
 
-func (result *Result) AddFrameworks(f []*Framework) {
+func (result *Result) AddFrameworks(f []*fingers.Framework) {
 	result.Frameworks = append(result.Frameworks, f...)
 	//for _, framework := range f {
 	//result.FrameworksMap[framework.ToString()] = true
 	//}
 }
 
-func (result *Result) AddExtract(extract *Extracted) {
+func (result *Result) AddExtract(extract *fingers.Extracted) {
 	result.Extracts.Extractors = append(result.Extracts.Extractors, extract)
 	result.ExtractsStat[extract.Name] = len(extract.ExtractResult)
 }
 
-func (result *Result) AddExtracts(extracts []*Extracted) {
+func (result *Result) AddExtracts(extracts []*fingers.Extracted) {
 	for _, extract := range extracts {
 		result.Extracts.Extractors = append(result.Extracts.Extractors, extract)
 		result.ExtractsStat[extract.Name] = len(extract.ExtractResult)
@@ -123,7 +126,7 @@ func (result Result) NoFramework() bool {
 func (result *Result) GuessFramework() {
 	for _, v := range PortMap.Get(result.Port) {
 		if TagMap.Get(v) == nil && !utils.SliceContains([]string{"top1", "top2", "top3", "other", "windows"}, v) {
-			result.AddFramework(&Framework{Name: v, IsGuess: true})
+			result.AddFramework(&fingers.Framework{Name: v, From: fingers.GUESS})
 		}
 	}
 }
@@ -179,9 +182,9 @@ func (result *Result) errHandler() {
 		return
 	}
 	if strings.Contains(result.Error, "wsasend") || strings.Contains(result.Error, "wsarecv") {
-		result.HttpStat = "reset"
+		result.Status = "reset"
 	} else if result.Error == "EOF" {
-		result.HttpStat = "EOF"
+		result.Status = "EOF"
 	} else if strings.Contains(result.Error, "http: server gave HTTP response to HTTPS client") {
 		result.Protocol = "http"
 	} else if strings.Contains(result.Error, "first record does not look like a TLS handshake") {
@@ -227,7 +230,7 @@ func (result Result) GetFirstFramework() string {
 func (result *Result) AddNTLMInfo(m map[string]string, t string) {
 	result.Title = m["MsvAvNbDomainName"] + "/" + m["MsvAvNbComputerName"]
 	result.Host = strings.Trim(m["MsvAvDnsDomainName"], "\x00") + "/" + m["MsvAvDnsComputerName"]
-	result.AddFramework(&Framework{Name: t, Version: m["Version"]})
+	result.AddFramework(&fingers.Framework{Name: t, Version: m["Version"]})
 }
 
 func (result Result) toZombie() zombiemeta {

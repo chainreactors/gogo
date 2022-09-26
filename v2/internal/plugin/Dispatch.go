@@ -2,6 +2,7 @@ package plugin
 
 import (
 	"github.com/chainreactors/gogo/v2/pkg"
+	"github.com/chainreactors/gogo/v2/pkg/utils"
 	"net"
 )
 
@@ -31,9 +32,9 @@ func Dispatch(result *pkg.Result) {
 	} else if result.Port == "icmp" || result.Port == "ping" {
 		icmpScan(result)
 		return
-	} else if result.Port == "arp" && !pkg.Win {
-		arpScan(result)
-		return
+		//} else if result.Port == "arp" && !pkg.Win {
+		//	arpScan(result)
+		//	return
 	} else if result.Port == "snmp" || result.Port == "161" {
 		snmpScan(result)
 		return
@@ -75,7 +76,7 @@ func Dispatch(result *pkg.Result) {
 		}
 
 		faviconScan(result)
-		if result.HttpStat != "404" {
+		if result.Status != "404" {
 			NotFoundScan(result)
 		}
 	} else {
@@ -87,29 +88,10 @@ func Dispatch(result *pkg.Result) {
 	}
 
 	// 如果exploit参数不为none,则进行漏洞探测
-	if RunOpt.Exploit != "none" {
-		ExploitDispatch(result)
-	}
-
-	//if result.IsHttp() && result.Host == "" {
-	//	result.Host = result.CurrentHost
-	//}
-
-	if result.Httpresp != nil && !result.Httpresp.Close {
-		_ = result.Httpresp.Body.Close()
-	}
-	return
-}
-
-func ExploitDispatch(result *pkg.Result) {
-	if result.IsHttp() && (RunOpt.Exploit == "auto" || RunOpt.Exploit == "shiro") {
-		// todo 将shiro改造成nuclei poc
-		shiroScan(result)
-	}
-
-	if (!result.NoFramework() || RunOpt.Exploit != "auto") && result.IsHttp() {
+	if RunOpt.Exploit != "none" && result.IsHttp() {
 		Nuclei(result.GetHostBaseURL(), result)
 	}
 
+	result.Title = utils.AsciiEncode(result.Title)
 	return
 }

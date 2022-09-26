@@ -18,7 +18,7 @@ func Nuclei(target string, result *Result) {
 			if result.IsHttp() {
 				titles = append(titles, "http")
 			}
-			executeTemplates(result, result.Frameworks.GetNames(), target)
+			executeTemplates(result, titles, target)
 		}
 	}
 }
@@ -34,7 +34,7 @@ chainLoop: // 实现chain
 			res, ok := template.Execute(target)
 			if ok {
 				for name, extract := range res.Extracts {
-					result.AddExtract(NewExtracted(name, extract))
+					result.AddExtract(fingers.NewExtracted(name, extract))
 				}
 				vulns = append(vulns, &fingers.Vuln{Name: template.Id, Payload: res.PayloadValues, Detail: res.DynamicValues, Severity: template.Info.Severity})
 				chainsTemplates = append(chainsTemplates, diffTemplates(ts, choiceTemplates(template.Chains))...)

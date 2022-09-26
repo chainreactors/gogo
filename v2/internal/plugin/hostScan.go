@@ -3,7 +3,9 @@ package plugin
 import (
 	. "github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/gogo/v2/pkg/fingers"
+	"github.com/chainreactors/gogo/v2/pkg/utils"
 	"github.com/chainreactors/logs"
+	"github.com/chainreactors/parsers"
 	"net/http"
 )
 
@@ -27,8 +29,8 @@ func hostScan(result *Result) {
 		if resp.StatusCode != 200 {
 			continue
 		}
-		body := GetBody(resp)
-		oldbody, _, _ := SplitHttpRaw(result.Content)
+		body := parsers.ReadBody(resp)
+		oldbody, _, _ := parsers.SplitHttpRaw([]byte(result.Content))
 
 		//hash := dsl.Md5Hash(body)[:4] // 因为头中经常有随机值, 因此hash通过body判断
 		if len(oldbody) != len(body) {
@@ -38,7 +40,7 @@ func hostScan(result *Result) {
 			//if result.CurrentHost == "" {
 			result.Host = host
 			//}
-			vuln.Detail[host] = AsciiEncode(GetTitle(string(body)))
+			vuln.Detail[host] = utils.AsciiEncode(parsers.MatchTitle(string(body)))
 		}
 	}
 	if len(vuln.Detail) > 0 {

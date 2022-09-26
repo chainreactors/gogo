@@ -3,8 +3,8 @@ package pkg
 import (
 	"fmt"
 	. "github.com/chainreactors/files"
-	"github.com/chainreactors/gogo/v2/pkg/dsl"
 	"github.com/chainreactors/gogo/v2/pkg/utils"
+	"github.com/chainreactors/parsers"
 	"os"
 	"path"
 	"strings"
@@ -50,7 +50,7 @@ func newFile(filename string, compress bool) (*File, error) {
 	var cursor int
 
 	file.Encoder = func(i []byte) []byte {
-		bs := dsl.XorEncode(Flate(i), Key, cursor)
+		bs := parsers.XorEncode(Flate(i), Key, cursor)
 		cursor += len(bs)
 		return bs
 	}

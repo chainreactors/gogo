@@ -5,11 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	. "github.com/chainreactors/files"
-	"github.com/chainreactors/gogo/v2/pkg/dsl"
 	"github.com/chainreactors/gogo/v2/pkg/fingers"
 	"github.com/chainreactors/gogo/v2/pkg/utils"
 	"github.com/chainreactors/ipcs"
 	. "github.com/chainreactors/logs"
+	"github.com/chainreactors/parsers"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -64,7 +64,7 @@ func (imap IPMapResult) getWindowsInfo() windowsInfo {
 		wininfo.hostname = imap["137"].Host
 	}
 
-	wininfo.netbiosstat = imap["137"].HttpStat
+	wininfo.netbiosstat = imap["137"].Status
 	wininfo.networks = strings.Split(imap["135 (oxid)"].Title, ",")
 	return wininfo
 }
@@ -171,7 +171,7 @@ func (rd ResultsData) ToFormat(isColor bool) string {
 		s += fmt.Sprintf("[+] %s %s\n", ip, wininfo.toString())
 		for port, p := range pfs[ip] {
 			// 跳过OXID与NetBois
-			if !(p.Port == "135 (oxid)" || p.Port == "137" || p.Port == "icmp" || p.Port == "arp") {
+			if !(p.Port == "135 (oxid)" || p.Port == "137" || p.Port == "icmp") {
 				if isColor {
 					// 颜色输出
 					s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s\t%s [%s] %s %s %s\n",
@@ -183,7 +183,7 @@ func (rd ResultsData) ToFormat(isColor bool) string {
 						Blue(p.Frameworks.ToString()),
 						p.Host,
 						//p.Hash,
-						Yellow(p.HttpStat),
+						Yellow(p.Status),
 						Blue(p.Title),
 						Red(p.Vulns.ToString()),
 						Blue(p.GetExtractStat()),
@@ -199,7 +199,7 @@ func (rd ResultsData) ToFormat(isColor bool) string {
 						p.Host,
 						//p.Cert,
 						//p.Hash,
-						p.HttpStat,
+						p.Status,
 						p.Title,
 						p.Vulns.ToString(),
 						p.GetExtractStat(),
@@ -316,11 +316,11 @@ func LoadResultFile(file *os.File) interface{} {
 	if IsBase64(content) {
 		// stdin输入二进制文件支持base64编码之后的. base64 result.txt|gogo -F stdin
 		// 如果直接输入解压缩之后的json文件,则跳过这个步骤
-		content = dsl.Base64Decode(string(content))
+		content = parsers.Base64Decode(string(content))
 	}
 
 	if IsBin(content) {
-		content = dsl.XorEncode(content, Key, 0)
+		content = parsers.XorEncode(content, Key, 0)
 		if unflated := UnFlate(content); len(unflated) == 0 {
 			Log.Error("deflate failed, incorrect key")
 			return content

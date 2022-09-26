@@ -3,6 +3,7 @@ package plugin
 import (
 	. "github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/gogo/v2/pkg/fingers"
+	"github.com/chainreactors/parsers"
 )
 
 func fingerScan(result *Result) {
@@ -13,7 +14,7 @@ func fingerScan(result *Result) {
 			url := result.GetURL() + string(sendData)
 			resp, err := conn.Get(url)
 			if err == nil {
-				return GetHttpRaw(resp), true
+				return string(parsers.ReadRaw(resp)), true
 			} else {
 				return "", false
 			}
@@ -99,7 +100,7 @@ func httpFingerMatch(result *Result, finger *fingers.Finger, sender func(sendDat
 	frame, vuln, ok := fingers.FingerMatcher(finger, result.Content, RunOpt.VersionLevel, sender)
 	if ok {
 		if frame.Data != "" {
-			CollectHttpInfo(result, nil, frame.Data)
+			result.Title = parsers.MatchTitle(frame.Data)
 		}
 		return frame, vuln
 	}

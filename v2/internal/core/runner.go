@@ -1,10 +1,10 @@
-package cmd
+package core
 
 import (
 	"fmt"
-	. "github.com/chainreactors/gogo/v2/internal/core"
 	. "github.com/chainreactors/gogo/v2/internal/plugin"
 	. "github.com/chainreactors/gogo/v2/pkg"
+	"github.com/chainreactors/gogo/v2/pkg/fingers"
 	nucleihttp "github.com/chainreactors/gogo/v2/pkg/nuclei/protocols/http"
 	. "github.com/chainreactors/gogo/v2/pkg/utils"
 	. "github.com/chainreactors/logs"
@@ -13,7 +13,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"regexp"
 	"strings"
 	"time"
 )
@@ -24,19 +23,20 @@ func NewRunner() *Runner {
 	}
 }
 
+var ver = ""
+
 type Runner struct {
+	MiscOption   `group:"Miscellaneous Options"`
 	InputOption  `group:"Input Options"`
 	OutputOption `group:"Output Options"`
-	MiscOption   `group:"Miscellaneous Options"`
 	SmartOption  `group:"Smart Options"`
 	ConfigOption `group:"Configuration Options"`
-	//Arp          bool
 
 	start  time.Time
 	Config Config
 }
 
-func (r *Runner) preInit() bool {
+func (r *Runner) PreInit() bool {
 	// 初始化日志工具"
 	if r.Debug {
 		Log = NewLogger(0, r.Quiet)
@@ -52,44 +52,9 @@ func (r *Runner) preInit() bool {
 		SuffixStr:  r.SuffixStr,
 	}
 	Opt.PluginDebug = r.PluginDebug
+	NoGuess = r.NoGuess
+
 	Key = []byte(r.Key)
-
-	r.Config = Config{
-		IP:          r.IP,
-		Ports:       r.Ports,
-		ListFile:    r.ListFile,
-		JsonFile:    r.JsonFile,
-		IsListInput: r.IsListInput,
-		IsJsonInput: r.IsJsonInput,
-		SmartPort:   r.SmartPort,
-		IpProbe:     r.IpProbe,
-		NoSpray:     r.NoSpray,
-		Filename:    r.Filename,
-		FilePath:    r.FilePath,
-		Compress:    r.Compress,
-		Threads:     r.Threads,
-		PortSpray:   r.PortSpray,
-		Mod:         r.Mod,
-	}
-
-	if r.FileOutputf == Default {
-		r.Config.FileOutputf = "json"
-	} else {
-		r.Config.FileOutputf = r.FileOutputf
-	}
-
-	if r.Outputf == Default {
-		r.Config.Outputf = "full"
-	} else {
-		r.Config.Outputf = r.Outputf
-	}
-
-	r.Config.Compress = !r.Config.Compress
-	if r.AutoFile {
-		r.Config.Filenamef = "auto"
-	} else if r.HiddenFile {
-		r.Config.Filenamef = "hidden"
-	}
 
 	// 一些特殊的分支, 这些分支将会直接退出程序
 	if r.Ver {
@@ -97,8 +62,9 @@ func (r *Runner) preInit() bool {
 		return false
 	}
 
+	r.PrepareConfig()
 	if r.FormatterFilename != "" {
-		FormatOutput(r.FormatterFilename, r.Config.Filename, r.Config.Outputf, r.Config.FileOutputf, r.filters)
+		FormatOutput(r.FormatterFilename, r.Config.Filename, r.Config.Outputf, r.Config.FileOutputf, r.Filters)
 		return false
 	}
 	// 输出 Config
@@ -129,22 +95,11 @@ func (r *Runner) preInit() bool {
 		} else {
 			Log.Warnf("parse proxy error %s, skip proxy!", err.Error())
 		}
-		//if !r.Debug {
-		//	Log.Error("-proxy is debug only flag, please add -debug. skipped proxy")
-		//} else {
-		//	Log.Importantf("DEBUG ONLY, set http proxy: " + r.Proxy)
-		//
-		//}
 	}
-	//if r.UploadFile != "" {
-	//	// 指定上传文件
-	//	uploadfiles(strings.Split(r.UploadFile, ","))
-	//	return false
-	//}
 	return true
 }
 
-func (r *Runner) init() {
+func (r *Runner) Init() {
 	// 初始化各种全局变量
 	// 初始化指纹优先级
 	if r.Version {
@@ -166,33 +121,16 @@ func (r *Runner) init() {
 		Opt.Noscan = r.NoScan
 	}
 
-	if r.Clean {
-		Log.Clean = !Log.Clean
-	}
-
-	//if !Win {
-	//	//if r.iface == "eth0" {
-	//	//	Log.Warn("no interface name input, use default interface name: eth0")
-	//	//}
-	//	var err error
-	//	RunOpt.Interface, err = net.InterfaceByName(r.iface)
-	//	if err != nil {
-	//		Log.Warn("interface error, " + err.Error())
-	//		//Log.Warn("interface error, " + err.Error())
-	//		//Log.Warn("interface error, " + err.Error())
-	//	}
-	//}
-
-	if r.extracts != "" {
-		exts := strings.Split(r.extracts, ",")
+	if r.Extracts != "" {
+		exts := strings.Split(r.Extracts, ",")
 		for _, extract := range exts {
-			if reg, ok := PresetExtracts[extract]; ok {
+			if reg, ok := fingers.PresetExtracts[extract]; ok {
 				Extractors[extract] = reg
 			}
 		}
 	}
-	for _, extract := range r.extract {
-		if reg, ok := PresetExtracts[extract]; ok {
+	for _, extract := range r.Extract {
+		if reg, ok := fingers.PresetExtracts[extract]; ok {
 			Extractors[extract] = reg
 		} else {
 			Extractors[extract] = CompileRegexp(extract)
@@ -201,43 +139,55 @@ func (r *Runner) init() {
 
 	// 加载配置文件中的全局变量
 	templatesLoader()
-	nucleiLoader(r.ExploitFile, r.payloads)
+	nucleiLoader(r.ExploitFile, r.Payloads)
 }
 
-func (r *Runner) prepareConfig(config Config) *Config {
-	if r.Config.Ports == "" {
-		config.Ports = "top1"
+func (r *Runner) PrepareConfig() {
+	r.Config = Config{
+		IP:          r.IP,
+		Ports:       r.Ports,
+		ListFile:    r.ListFile,
+		JsonFile:    r.JsonFile,
+		IsListInput: r.IsListInput,
+		IsJsonInput: r.IsJsonInput,
+		PortProbe:   r.PortProbe,
+		IpProbe:     r.IpProbe,
+		NoSpray:     r.NoSpray,
+		Filename:    r.Filename,
+		FilePath:    r.FilePath,
+		Compress:    r.Compress,
+		Threads:     r.Threads,
+		PortSpray:   r.PortSpray,
+		Mod:         r.Mod,
+		Tee:         r.Tee,
 	}
 
-	//if r.Arp {
-	//	config.AliveSprayMod = append(config.AliveSprayMod, "arp")
-	//}
+	if r.FileOutputf == Default {
+		r.Config.FileOutputf = "json"
+	} else {
+		r.Config.FileOutputf = r.FileOutputf
+	}
+
+	if r.Outputf == Default {
+		r.Config.Outputf = "full"
+	} else {
+		r.Config.Outputf = r.Outputf
+	}
+
+	r.Config.Compress = !r.Config.Compress
+	if r.AutoFile {
+		r.Config.Filenamef = "auto"
+	} else if r.HiddenFile {
+		r.Config.Filenamef = "hidden"
+	}
 
 	if r.Ping {
-		config.AliveSprayMod = append(config.AliveSprayMod, "icmp")
+		r.Config.AliveSprayMod = append(r.Config.AliveSprayMod, "icmp")
 	}
 
-	//if Config.Filename == "" {
-	//	Config.Filename = GetFilename(&Config, Config.FileOutputf)
-	//} else {
-	//	Config.Filename = path.Join(Config.FilePath, Config.Filename)
-	//}
-
-	//if Config.IsSmart() {
-	//	if r.NoScan && !r.AutoFile && !r.HiddenFile {
-	//		Config.SmartFilename = Config.Filename
-	//	} else {
-	//		Config.SmartFilename = GetFilename(&Config, "cidr")
-	//	}
-	//}
-
-	//if Config.HasAlivedScan() {
-	//	Config.AlivedFilename = GetFilename(&Config, "alived")
-	//}
-	return &config
 }
 
-func (r *Runner) run() {
+func (r *Runner) Run() {
 	r.start = time.Now()
 	if r.WorkFlowName == "" && !r.IsWorkFlow {
 		r.runWithCMD()
@@ -257,27 +207,27 @@ func (r *Runner) run() {
 }
 
 func (r *Runner) runWithCMD() {
-	config := r.prepareConfig(r.Config)
+	config := r.Config
 	if config.Mod == SUPERSMARTB {
 		config.FileOutputf = SUPERSMARTB
 	}
 	if config.Filename == "" && config.IsSmart() {
-		config.SmartFilename = GetFilename(config, "cidr")
+		config.SmartFilename = GetFilename(&config, "cidr")
 	}
 	if config.Filename == "" && config.HasAlivedScan() {
-		config.AlivedFilename = GetFilename(config, "alived")
+		config.AlivedFilename = GetFilename(&config, "alived")
 	}
 
 	if config.Filename != "" || config.Filenamef != "" {
 		Log.Warn("The result file has been specified, other files will not be created.")
-		config.Filename = GetFilename(config, config.FileOutputf)
+		config.Filename = GetFilename(&config, config.FileOutputf)
 	}
-	preparedConfig, err := InitConfig(config)
+	preparedConfig, err := InitConfig(&config)
 	if err != nil {
 		Fatal(err.Error())
 	}
 	RunTask(*preparedConfig) // 运行
-	r.close(config)
+	r.Close(&config)
 }
 
 func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) {
@@ -328,15 +278,15 @@ func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) {
 				Fatal(err.Error())
 			}
 			RunTask(*preparedConfig) // 运行
-			r.close(config)
-			r.resetGlobals()
+			r.Close(config)
+			r.ResetGlobals()
 		}
 	} else {
 		Fatal("not fount workflow " + r.WorkFlowName)
 	}
 }
 
-func (r *Runner) close(config *Config) {
+func (r *Runner) Close(config *Config) {
 	config.Close() // 关闭result与extract写入管道
 
 	if r.HiddenFile {
@@ -347,8 +297,8 @@ func (r *Runner) close(config *Config) {
 	}
 
 	// 任务统计
-	Log.Importantf("Alive sum: %d, Target sum : %d", Opt.AliveSum, RunOpt.Sum)
-	Log.Important("Totally: " + time.Since(r.start).String())
+	Log.Importantf("Alived: %d, Totoal : %d", Opt.AliveSum, RunOpt.Sum)
+	Log.Important("Time consuming: " + time.Since(r.start).String())
 
 	// 输出文件名
 	if config.File != nil && config.File.InitSuccess {
@@ -363,14 +313,9 @@ func (r *Runner) close(config *Config) {
 	if IsExist(config.Filename + "_extract") {
 		Log.Important("extractor result: " + config.Filename + "_extract")
 	}
-
-	// 扫描结果文件自动上传
-	//if connected && !r.NoUpload { // 如果出网则自动上传结果到云服务器
-	//	uploadfiles([]string{Config.Filename, Config.SmartFilename})
-	//}
 }
 
-func (r *Runner) resetGlobals() {
+func (r *Runner) ResetGlobals() {
 	Opt.Noscan = false
 	RunOpt.Exploit = "none"
 	RunOpt.VersionLevel = 0
@@ -385,10 +330,10 @@ func printConfigs(t string) {
 		PrintNucleiPoc()
 	} else if t == "workflow" {
 		PrintWorkflow()
-	} else if t == "extract" {
+	} else if t == "Extract" {
 		PrintExtract()
 	} else {
-		fmt.Println("choice port|nuclei|workflow|extract")
+		fmt.Println("choice port|nuclei|workflow|Extract")
 	}
 }
 
@@ -403,10 +348,4 @@ func templatesLoader() {
 	Mmh3Fingers, Md5Fingers = LoadHashFinger(AllFingers)
 	TcpFingers = LoadFinger("tcp").GroupByPort()
 	HttpFingers = AllFingers.GroupByPort()
-	CommonCompiled = map[string]*regexp.Regexp{
-		"title":     CompileRegexp("(?Uis)<title>(.*)</title>"),
-		"server":    CompileRegexp("(?i)Server: ([\x20-\x7e]+)"),
-		"xpb":       CompileRegexp("(?i)X-Powered-By: ([\x20-\x7e]+)"),
-		"sessionid": CompileRegexp("(?i) (.*SESS.*?ID)"),
-	}
 }
