@@ -232,16 +232,17 @@ func (rd ResultsData) ToCobaltStrike() string {
 }
 
 func (rd ResultsData) ToZombie() string {
-	var filtedres Results
-
-	for k, _ := range zombiemap {
-		filtedres = append(filtedres, rd.Data.Filter("frameworks", k, "::")...)
+	var zms []zombiemeta
+	for _, r := range rd.Data {
+		if service, ok := zombiemap[r.GetFirstFramework()]; ok {
+			zms = append(zms, zombiemeta{
+				IP:      r.Ip,
+				Port:    r.Port,
+				Service: service,
+			})
+		}
 	}
-	zms := make([]zombiemeta, len(filtedres))
 
-	for i, result := range filtedres {
-		zms[i] = result.toZombie()
-	}
 	s, err := json.Marshal(zms)
 	if err != nil {
 		utils.Fatal("" + err.Error())

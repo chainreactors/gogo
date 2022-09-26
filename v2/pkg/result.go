@@ -7,7 +7,6 @@ import (
 	"github.com/chainreactors/parsers"
 	"net"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -233,16 +232,7 @@ func (result *Result) AddNTLMInfo(m map[string]string, t string) {
 	result.AddFramework(&fingers.Framework{Name: t, Version: m["Version"]})
 }
 
-func (result Result) toZombie() zombiemeta {
-	port, _ := strconv.Atoi(result.Port)
-	return zombiemeta{
-		IP:     result.Ip,
-		Port:   port,
-		Server: zombiemap[strings.ToLower(result.GetFirstFramework())],
-	}
-}
-
-func (result Result) Filter(k, v, op string) bool {
+func (result *Result) Filter(k, v, op string) bool {
 	var matchfunc func(string, string) bool
 	if op == "::" {
 		matchfunc = strings.Contains
@@ -257,9 +247,9 @@ func (result Result) Filter(k, v, op string) bool {
 }
 
 type zombiemeta struct {
-	IP     string `json:"IP"`
-	Port   int    `json:"Port"`
-	Server string `json:"Server"`
+	IP      string `json:"ip"`
+	Port    string `json:"port"`
+	Service string `json:"service"`
 }
 
 type Results []*Result
