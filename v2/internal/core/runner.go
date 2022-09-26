@@ -213,6 +213,11 @@ func (r *Runner) runWithCMD() {
 	if config.Mod == SUPERSMARTB {
 		config.FileOutputf = SUPERSMARTB
 	}
+
+	if config.Filename != "" {
+		logs.Log.Warn("The result file has been specified, other files will not be created.")
+	}
+
 	if config.Filename == "" && config.IsSmart() {
 		config.SmartFilename = GetFilename(&config, "cidr")
 	}
@@ -220,10 +225,10 @@ func (r *Runner) runWithCMD() {
 		config.AlivedFilename = GetFilename(&config, "alived")
 	}
 
-	if config.Filename != "" || config.Filenamef != "" {
-		logs.Log.Warn("The result file has been specified, other files will not be created.")
+	if config.Filenamef != "" {
 		config.Filename = GetFilename(&config, config.FileOutputf)
 	}
+
 	preparedConfig, err := InitConfig(&config)
 	if err != nil {
 		Fatal(err.Error())
@@ -242,6 +247,10 @@ func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) {
 				config.FileOutputf = SUPERSMARTB
 			}
 
+			if config.Filename != "" {
+				logs.Log.Warn("The result file has been specified, other files will not be created.")
+			}
+
 			if config.Filename == "" && config.IsSmart() {
 				config.SmartFilename = GetFilename(config, "cidr")
 			}
@@ -249,8 +258,7 @@ func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) {
 				config.AlivedFilename = GetFilename(config, "alived")
 			}
 
-			if config.Filename != "" || config.Filenamef != "" {
-				logs.Log.Warn("The result file has been specified, other files will not be created.")
+			if config.Filenamef != "" {
 				config.Filename = GetFilename(config, config.FileOutputf)
 			}
 
