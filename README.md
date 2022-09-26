@@ -18,7 +18,9 @@ README Version 2.5.0
 
 `gogo -i 10.0.0.0/8 -m ss -p top2,win,db --af`
 
-这种常见的预设基本已经被集成到workflow中, 例如使用supersmart mod 扫描10段内网, `gogo -w 10`即可. 如果时自定义网段, 则是`gogo -w ss -i 11.0.0.0/8`
+常用的配置已经被集成到workflow中, 例如使用supersmart mod 扫描10段内网, `gogo -w 10`即可. 如果需要自定义网段, 则是`gogo -w ss -i 11.0.0.0/8` .
+
+workflow中的预设参数优先级低于命令行输入, 因此可以通过命令行覆盖workflow中的参数. 因此可以使用`gogo -w 10 -i 11.0.0.0/8` 代替上面的例子.
 
 可以使用`-P workflow`查看所有的workflow预设, 更快捷的使用gogo.
 
