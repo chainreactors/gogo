@@ -121,8 +121,7 @@ func InitConfig(config *Config) (*Config, error) {
 
 func printTaskInfo(config *Config, taskname string) {
 	// 输出任务的基本信息
-
-	Log.Importantf("Current goroutines: %d, Version Level: %d,Exploit Target: %s, PortSpray Scan: %t", config.Threads, RunOpt.VersionLevel, RunOpt.Exploit, config.PortSpray)
+	Log.Importantf("Current goroutines: %d, Version Level: %d,Exploit: %s, PortSpray Scan: %t", config.Threads, RunOpt.VersionLevel, RunOpt.Exploit, config.PortSpray)
 	if config.Results == nil {
 		Log.Importantf("Starting task %s ,total ports: %d , mod: %s", taskname, len(config.PortList), config.Mod)
 		// 输出端口信息
@@ -133,7 +132,6 @@ func printTaskInfo(config *Config, taskname string) {
 		}
 	} else {
 		Log.Importantf("Starting results task: %s ,total target: %d", taskname, len(config.Results))
-		//progressLog(fmt.Sprintf("Json . task time is about %d seconds", (len(config.Results)/config.Threads)*4+4))
 	}
 }
 
