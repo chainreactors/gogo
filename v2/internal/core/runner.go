@@ -7,7 +7,7 @@ import (
 	"github.com/chainreactors/gogo/v2/pkg/fingers"
 	nucleihttp "github.com/chainreactors/gogo/v2/pkg/nuclei/protocols/http"
 	. "github.com/chainreactors/gogo/v2/pkg/utils"
-	. "github.com/chainreactors/logs"
+	"github.com/chainreactors/logs"
 	"golang.org/x/net/proxy"
 	"net"
 	"net/http"
@@ -37,14 +37,16 @@ type Runner struct {
 }
 
 func (r *Runner) PreInit() bool {
-	// 初始化日志工具"
-	if r.Debug {
-		Log = NewLogger(0, r.Quiet)
+	// 初始化日志工具
+	if r.Quiet {
+		logs.Log = logs.NewLogger(10, true)
 	} else {
-		Log = NewLogger(1, r.Quiet)
+		if r.Debug {
+			logs.Log = logs.NewLogger(logs.Debug, false)
+		}
+		logs.Log.LogFileName = ".sock.lock"
+		logs.Log.Init()
 	}
-	Log.LogFileName = ".sock.lock"
-	Log.Init()
 
 	RunOpt = RunnerOpts{
 		Delay:      r.Delay,
@@ -93,7 +95,7 @@ func (r *Runner) PreInit() bool {
 			}
 
 		} else {
-			Log.Warnf("parse proxy error %s, skip proxy!", err.Error())
+			logs.Log.Warnf("parse proxy error %s, skip proxy!", err.Error())
 		}
 	}
 	return true
@@ -211,6 +213,11 @@ func (r *Runner) runWithCMD() {
 	if config.Mod == SUPERSMARTB {
 		config.FileOutputf = SUPERSMARTB
 	}
+
+	if config.Filename != "" {
+		logs.Log.Warn("The result file has been specified, other files will not be created.")
+	}
+
 	if config.Filename == "" && config.IsSmart() {
 		config.SmartFilename = GetFilename(&config, "cidr")
 	}
@@ -218,10 +225,10 @@ func (r *Runner) runWithCMD() {
 		config.AlivedFilename = GetFilename(&config, "alived")
 	}
 
-	if config.Filename != "" || config.Filenamef != "" {
-		Log.Warn("The result file has been specified, other files will not be created.")
+	if config.Filenamef != "" {
 		config.Filename = GetFilename(&config, config.FileOutputf)
 	}
+
 	preparedConfig, err := InitConfig(&config)
 	if err != nil {
 		Fatal(err.Error())
@@ -233,11 +240,15 @@ func (r *Runner) runWithCMD() {
 func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) {
 	if workflows := workflowMap.Choice(r.WorkFlowName); len(workflows) > 0 {
 		for _, workflow := range workflows {
-			Log.Important("workflow " + workflow.Name + " starting")
+			logs.Log.Important("workflow " + workflow.Name + " starting")
 			config := workflow.PrepareConfig(r.Config)
 
 			if config.Mod == SUPERSMARTB {
 				config.FileOutputf = SUPERSMARTB
+			}
+
+			if config.Filename != "" {
+				logs.Log.Warn("The result file has been specified, other files will not be created.")
 			}
 
 			if config.Filename == "" && config.IsSmart() {
@@ -247,8 +258,7 @@ func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) {
 				config.AlivedFilename = GetFilename(config, "alived")
 			}
 
-			if config.Filename != "" || config.Filenamef != "" {
-				Log.Warn("The result file has been specified, other files will not be created.")
+			if config.Filenamef != "" {
 				config.Filename = GetFilename(config, config.FileOutputf)
 			}
 
@@ -297,21 +307,21 @@ func (r *Runner) Close(config *Config) {
 	}
 
 	// 任务统计
-	Log.Importantf("Alived: %d, Totoal : %d", Opt.AliveSum, RunOpt.Sum)
-	Log.Important("Time consuming: " + time.Since(r.start).String())
+	logs.Log.Importantf("Alived: %d, Totoal : %d", Opt.AliveSum, RunOpt.Sum)
+	logs.Log.Important("Time consuming: " + time.Since(r.start).String())
 
 	// 输出文件名
 	if config.File != nil && config.File.InitSuccess {
-		Log.Importantf("Results: " + config.Filename)
+		logs.Log.Importantf("Results: " + config.Filename)
 	}
 	if config.SmartFile != nil && config.SmartFile.InitSuccess {
-		Log.Important("Smart result: " + config.SmartFilename)
+		logs.Log.Important("Smart result: " + config.SmartFilename)
 	}
 	if config.AliveFile != nil && config.AliveFile.Initialized {
-		Log.Important("Alived result: " + config.AlivedFilename)
+		logs.Log.Important("Alived result: " + config.AlivedFilename)
 	}
 	if IsExist(config.Filename + "_extract") {
-		Log.Important("extractor result: " + config.Filename + "_extract")
+		logs.Log.Important("extractor result: " + config.Filename + "_extract")
 	}
 }
 
