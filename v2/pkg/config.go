@@ -136,6 +136,8 @@ func (config *Config) InitFile() error {
 		} else if config.FileOutputf == SUPERSMARTB {
 			config.File.Write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("smart")))
 			config.File.ClosedAppend = "]}"
+		} else if config.FileOutputf == "csv" {
+			config.File.Write("ip,port,url,status,title,host,language,midware,frame,vuln,extract\n")
 		}
 		config.ExtractFile, err = newFile(config.Filename+"_extract", config.Compress)
 	}

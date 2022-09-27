@@ -250,6 +250,15 @@ func (rd ResultsData) ToZombie() string {
 	return string(s)
 }
 
+func (rd ResultsData) ToCsv() string {
+	var s strings.Builder
+	s.WriteString("ip,port,url,status,title,host,language,midware,frame,vuln,extract\n")
+	for _, r := range rd.Data {
+		s.WriteString(CsvOutput(r))
+	}
+	return s.String()
+}
+
 func autofixjson(content []byte) []byte {
 	if string(content[len(content)-2:]) != "]}" {
 		content = append(content, "]}"...)

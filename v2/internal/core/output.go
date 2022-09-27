@@ -112,6 +112,8 @@ func FormatOutput(filename, outFilename, outf, filenamef string, filters []strin
 				return
 			}
 			outfunc(string(content))
+		} else if outf == "csv" {
+			outfunc(resultsdata.ToCsv())
 		} else {
 			outfunc(resultsdata.ToValues(outf))
 		}
