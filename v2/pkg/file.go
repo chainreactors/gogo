@@ -81,8 +81,13 @@ func IsExist(filename string) bool {
 
 func Open(filename string) *os.File {
 	f, err := os.Open(filename)
+	if err == nil {
+		return f
+	}
+
+	f, err = os.Open(path.Join(GetExcPath(), filename))
 	if err != nil {
-		utils.Fatal("" + err.Error())
+		utils.Fatal(filename + err.Error())
 	}
 	return f
 }
