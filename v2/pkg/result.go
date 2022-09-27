@@ -13,25 +13,26 @@ import (
 
 type Result struct {
 	// baseinfo
-	Ip       string `json:"ip"`             // ip
-	Port     string `json:"port"`           // port
-	Protocol string `json:"protocol"`       // protocol
-	Status   string `json:"status"`         // http_stat
-	Uri      string `json:"uri,omitempty"`  // uri
-	Os       string `json:"os,omitempty"`   // os
-	Host     string `json:"host,omitempty"` // host
+	Ip   string `json:"ip"`             // ip
+	Port string `json:"port"`           // port
+	Uri  string `json:"uri,omitempty"`  // uri
+	Os   string `json:"os,omitempty"`   // os
+	Host string `json:"host,omitempty"` // host
 
 	//Cert         string         `json:"c"`
 	HttpHosts   []string `json:"-"`
 	CurrentHost string   `json:"-"`
-	Title       string   `json:"title"`   // title
-	Midware     string   `json:"midware"` // midware
 
-	Language     string         `json:"language"`             // language
+	// language
 	Frameworks   Frameworks     `json:"frameworks,omitempty"` // framework
 	Vulns        Vulns          `json:"vulns,omitempty"`
 	Extracts     *Extracts      `json:"-"`
 	ExtractsStat map[string]int `json:"extracts_stat,omitempty"`
+	Protocol     string         `json:"protocol"` // protocol
+	Status       string         `json:"status"`   // http_stat
+	Language     string         `json:"language"`
+	Title        string         `json:"title"`   // title
+	Midware      string         `json:"midware"` // midware
 	//Hash         string         `json:"hs"`
 	Open bool `json:"-"`
 	//FrameworksMap map[string]bool `json:"-"`
