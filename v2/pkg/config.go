@@ -165,7 +165,7 @@ func (config *Config) InitFile() error {
 
 func (config *Config) Validate() error {
 	// 一些命令行参数错误处理,如果check没过直接退出程序或输出警告
-	legalFormat := []string{"url", "ip", "port", "frameworks", "framework", "vuln", "vulns", "protocol", "title", "target", "hash", "language", "host", "color", "c", "json", "j", "full", "jsonlines", "jl", "zombie", "sc"}
+	legalFormat := []string{"url", "ip", "port", "frameworks", "framework", "vuln", "vulns", "protocol", "title", "target", "hash", "language", "host", "color", "c", "json", "j", "full", "jsonlines", "jl", "zombie", "sc", "csv", "status", "os"}
 	if config.FileOutputf != Default {
 		for _, form := range strings.Split(config.FileOutputf, ",") {
 			if !utils.SliceContains(legalFormat, form) {

@@ -22,6 +22,8 @@ func output(result *Result, outType string) string {
 		out = JsonOutput(result) + "\n"
 	case "full":
 		out = FullOutput(result)
+	case "csv":
+		out = CsvOutput(result)
 	default:
 		out = ValuesOutput(result, outType)
 	}

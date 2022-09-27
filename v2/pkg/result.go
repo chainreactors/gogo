@@ -11,6 +11,19 @@ import (
 	"time"
 )
 
+func NewResult(ip, port string) *Result {
+	var result = Result{
+		Ip:           ip,
+		Port:         port,
+		Protocol:     "tcp",
+		Status:       "tcp",
+		Extracts:     &Extracts{},
+		ExtractsStat: map[string]int{},
+	}
+	result.Extracts.Target = result.GetTarget()
+	return &result
+}
+
 type Result struct {
 	// baseinfo
 	Ip   string `json:"ip"`             // ip
@@ -43,19 +56,6 @@ type Result struct {
 	Error      string            `json:"-"`
 	ErrStat    int               `json:"-"`
 	Content    string            `json:"-"`
-}
-
-func NewResult(ip, port string) *Result {
-	var result = Result{
-		Ip:           ip,
-		Port:         port,
-		Protocol:     "tcp",
-		Status:       "tcp",
-		Extracts:     &Extracts{},
-		ExtractsStat: map[string]int{},
-	}
-	result.Extracts.Target = result.GetTarget()
-	return &result
 }
 
 func (result *Result) GetHttpConn(delay int) *http.Client {
@@ -116,7 +116,7 @@ func (result *Result) GetExtractStat() string {
 	}
 }
 
-func (result Result) NoFramework() bool {
+func (result *Result) NoFramework() bool {
 	if len(result.Frameworks) == 0 {
 		return true
 	}
@@ -131,14 +131,14 @@ func (result *Result) GuessFramework() {
 	}
 }
 
-func (result Result) IsHttp() bool {
+func (result *Result) IsHttp() bool {
 	if strings.HasPrefix(result.Protocol, "http") {
 		return true
 	}
 	return false
 }
 
-func (result Result) IsHttps() bool {
+func (result *Result) IsHttps() bool {
 	if strings.HasPrefix(result.Protocol, "https") {
 		return true
 	}
@@ -151,6 +151,8 @@ func (result *Result) Get(key string) string {
 		return result.Ip
 	case "port":
 		return result.Port
+	case "status", "stat":
+		return result.Status
 	case "frameworks", "framework", "frame":
 		return result.Frameworks.ToString()
 	case "vulns", "vuln":
@@ -171,6 +173,10 @@ func (result *Result) Get(key string) string {
 		return result.Language
 	case "protocol":
 		return result.Protocol
+	case "os":
+		return result.Os
+	case "extract":
+		return result.Extracts.ToString()
 	default:
 		return ""
 	}
@@ -192,11 +198,11 @@ func (result *Result) errHandler() {
 	}
 }
 
-func (result Result) GetBaseURL() string {
+func (result *Result) GetBaseURL() string {
 	return fmt.Sprintf("%s://%s:%s", result.Protocol, result.Ip, result.Port)
 }
 
-func (result Result) GetHostBaseURL() string {
+func (result *Result) GetHostBaseURL() string {
 	if result.CurrentHost == "" {
 		return result.GetBaseURL()
 	} else {
@@ -204,7 +210,7 @@ func (result Result) GetHostBaseURL() string {
 	}
 }
 
-func (result Result) GetURL() string {
+func (result *Result) GetURL() string {
 	if result.IsHttp() {
 		return result.GetBaseURL() + result.Uri
 	} else {
@@ -212,15 +218,15 @@ func (result Result) GetURL() string {
 	}
 }
 
-func (result Result) GetHostURL() string {
+func (result *Result) GetHostURL() string {
 	return result.GetHostBaseURL() + result.Uri
 }
 
-func (result Result) GetTarget() string {
+func (result *Result) GetTarget() string {
 	return fmt.Sprintf("%s:%s", result.Ip, result.Port)
 }
 
-func (result Result) GetFirstFramework() string {
+func (result *Result) GetFirstFramework() string {
 	if !result.NoFramework() {
 		return result.Frameworks[0].Name
 	}
