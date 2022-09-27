@@ -53,14 +53,6 @@ tcp指纹与http指纹为同一格式, md5与mmh3指纹为同一格式
 
 todo: 从nmap中移植更多的tcp指纹
 
-### md5/mmh3 指纹
-配置文件: `v2/config/md5fingers.yaml` 与 `v2/config/mmh3fingers.yaml`
-
-
-对于favicon的指纹识别, 做了特殊的优化, 使用md5/mmh3哈希表进行识别. 
-
-可以使用httpx快速计算md5,mmh3 hash值, `echo [url]/favicon.ico | httpx -hash md5,mmh3`
-
 ## workflow
 配置文件: `v2/config/workflows.yaml`
 
