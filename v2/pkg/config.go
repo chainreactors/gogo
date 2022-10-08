@@ -12,11 +12,11 @@ import (
 )
 
 const (
-	SMART       = "s"
-	SUPERSMART  = "ss"
-	SUPERSMARTC = "sb"
-	SUPERSMARTB = "sc"
-	Default     = "default"
+	SMART       = "s"       // 使用port-probe探测存活的c段, 递归下降到default
+	SUPERSMART  = "ss"      // 使用ip-probe探测存活的b段, 递归下降到s
+	SUPERSMARTC = "sb"      // 使用port-probe探测到c段后退出
+	SUPERSMARTB = "sc"      // 使用ip-probe探测存活的b段,. 递归下降到sb
+	Default     = "default" // 扫描完后退出
 )
 
 type Config struct {
@@ -24,8 +24,6 @@ type Config struct {
 	IP     string     `json:"ip"`
 	IPlist []string   `json:"ips"`
 	CIDRs  ipcs.CIDRs `json:"-"`
-	//ExcludeIPs string        `json:"-"`
-	//ExcludeMap map[uint]bool `json:"-"`
 
 	// port and probe
 	Ports         string   `json:"ports"` // 预设字符串
