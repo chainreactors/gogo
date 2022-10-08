@@ -92,7 +92,7 @@ func SmartMod(target *ipcs.CIDR, config Config) {
 
 	// 输出启发式扫描探针
 	probeconfig := fmt.Sprintf("Smart port probes: %s ", strings.Join(config.PortProbeList, ","))
-	if config.IsASmart() {
+	if config.IsBSmart() {
 		probeconfig += ", Smart IP probes: " + fmt.Sprintf("%v", config.IpProbeList)
 	}
 	Log.Important(probeconfig)
@@ -132,11 +132,11 @@ func SmartMod(target *ipcs.CIDR, config Config) {
 		return
 	}
 
-	if config.SmartFile != nil && config.Mod != SUPERSMARTC {
-		WriteSmartResult(config.SmartFile, iplist.Strings())
+	if config.IsBSmart() {
+		WriteSmartResult(config.SmartBFile, iplist.Strings())
 	}
-	if config.File != nil && config.Mod == SUPERSMARTC {
-		WriteScReuslt(config.File, iplist.Strings())
+	if config.IsCSmart() {
+		WriteSmartResult(config.SmartCFile, iplist.Strings())
 	}
 
 	if Opt.Noscan || config.Mod == SUPERSMARTC {

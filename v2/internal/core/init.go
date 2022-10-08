@@ -138,6 +138,8 @@ func RunTask(config Config) {
 			for _, ip := range config.CIDRs {
 				SmartMod(ip, config)
 			}
+		} else {
+			Log.Warn("no validate ip/cidr")
 		}
 	default:
 		createDefaultScan(config)
@@ -167,7 +169,7 @@ func guessSmartTime(cidr *ipcs.CIDR, config Config) int {
 	var spc, ippc int
 	var mask int
 	spc = len(config.PortProbeList)
-	if config.IsBSmart() {
+	if config.IsCSmart() {
 		ippc = 1
 	} else {
 		ippc = len(config.IpProbeList)

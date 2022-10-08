@@ -340,7 +340,7 @@ func LoadResultFile(file *os.File) interface{} {
 	}
 
 	content = bytes.TrimSpace(content) // 去除前后空格
-	if bytes.Contains(content, []byte("\"smart\",")) || bytes.Contains(content, []byte("\"ping\",")) {
+	if bytes.Contains(content, []byte("\"smartb\",")) || bytes.Contains(content, []byte("\"smartc\",")) || bytes.Contains(content, []byte("\"ping\",")) {
 		// 解析启发式扫描结果
 		content = autofixjson(content)
 		data, err = loadSmartResult(content)

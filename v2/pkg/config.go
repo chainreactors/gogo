@@ -55,10 +55,12 @@ type Config struct {
 	// output
 	FilePath       string              `json:"-"`
 	Filename       string              `json:"-"`
-	SmartFilename  string              `json:"-"`
+	SmartBFilename string              `json:"-"`
+	SmartCFilename string              `json:"-"`
 	AlivedFilename string              `json:"-"`
 	File           *File               `json:"-"`
-	SmartFile      *File               `json:"-"`
+	SmartBFile     *File               `json:"-"`
+	SmartCFile     *File               `json:"-"`
 	ExtractFile    *File               `json:"-"`
 	AliveFile      *File               `json:"-"`
 	Tee            bool                `json:"-"`
@@ -142,15 +144,25 @@ func (config *Config) InitFile() error {
 		config.ExtractFile, err = newFile(config.Filename+"_extract", config.Compress)
 	}
 
-	// -af 参数下的启发式扫描结果handler初始化
-	if config.SmartFilename != "" {
-		config.SmartFile, err = newFile(config.SmartFilename, config.Compress)
+	// -af 参数下的启发式扫描结果file初始化
+	if config.SmartBFilename != "" {
+		config.SmartBFile, err = newFile(config.SmartBFilename, config.Compress)
 		if err != nil {
 			return err
 		}
 
-		config.SmartFile.Write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("smart")))
-		config.SmartFile.ClosedAppend = "]}"
+		config.SmartBFile.Write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("smartb")))
+		config.SmartBFile.ClosedAppend = "]}"
+	}
+
+	if config.SmartCFilename != "" {
+		config.SmartCFile, err = newFile(config.SmartCFilename, config.Compress)
+		if err != nil {
+			return err
+		}
+
+		config.SmartCFile.Write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("smartc")))
+		config.SmartCFile.ClosedAppend = "]}"
 	}
 
 	if config.AlivedFilename != "" {
@@ -220,8 +232,8 @@ func (config *Config) Close() {
 	if config.File != nil {
 		config.File.Close()
 	}
-	if config.SmartFile != nil {
-		config.SmartFile.Close()
+	if config.SmartBFile != nil {
+		config.SmartBFile.Close()
 	}
 	if config.AliveFile != nil {
 		config.AliveFile.Close()
@@ -232,7 +244,7 @@ func (config *Config) Close() {
 }
 
 func (config *Config) IsScan() bool {
-	if config.IP != "" || config.ListFile != "" || config.JsonFile != "" || config.Mod == "a" {
+	if config.IP != "" || config.ListFile != "" || config.JsonFile != "" {
 		return true
 	}
 	return false
@@ -245,21 +257,14 @@ func (config *Config) IsSmart() bool {
 	return false
 }
 
-func (config *Config) IsSmartScan() bool {
-	if utils.SliceContains([]string{SUPERSMART, SMART}, config.Mod) {
-		return true
-	}
-	return false
-}
-
-func (config *Config) IsASmart() bool {
+func (config *Config) IsBSmart() bool {
 	if utils.SliceContains([]string{SUPERSMART, SUPERSMARTB}, config.Mod) {
 		return true
 	}
 	return false
 }
 
-func (config *Config) IsBSmart() bool {
+func (config *Config) IsCSmart() bool {
 	if utils.SliceContains([]string{SMART, SUPERSMARTC}, config.Mod) {
 		return true
 	}

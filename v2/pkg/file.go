@@ -15,18 +15,17 @@ var pingcommaflag bool
 var sccommaflag bool
 
 func WriteSmartResult(file *File, ips []string) {
-	file.SafeWrite(commaStream(ips, &smartcommaflag))
-	file.SafeSync()
+	if file != nil {
+		file.SafeWrite(commaStream(ips, &smartcommaflag))
+		file.SafeSync()
+	}
 }
 
 func WriteAlivedResult(file *File, ips []string) {
-	file.SafeWrite(commaStream(ips, &pingcommaflag))
-	file.SafeSync()
-}
-
-func WriteScReuslt(file *File, ips []string) {
-	file.SafeWrite(commaStream(ips, &sccommaflag))
-	file.SafeSync()
+	if file != nil {
+		file.SafeWrite(commaStream(ips, &pingcommaflag))
+		file.SafeSync()
+	}
 }
 
 func HasStdin() bool {
@@ -108,14 +107,14 @@ func GetFilename(config *Config, name string) string {
 	var basename string
 	var basepath string
 
-	if config.Filename != "" {
-		return config.Filename
-	}
-
 	if config.FilePath == "" {
 		basepath = utils.GetExcPath()
 	} else {
 		basepath = config.FilePath
+	}
+
+	if config.Filename != "" {
+		return config.Filename
 	}
 
 	if config.Filenamef == "auto" {
