@@ -216,13 +216,6 @@ func (config *Config) Validate() error {
 		logs.Log.Warn("current user is not root, icmp scan not work")
 	}
 
-	//if !Win && Root && (strings.Contains(config.Ports, "arp") || utils.SliceContains(config.AliveSprayMod, "arp")) {
-	//	logs.Log.Warn("current user is not root, arp scan maybe not work")
-	//}
-	//
-	//if Win && (strings.Contains(config.Ports, "arp") || utils.SliceContains(config.AliveSprayMod, "arp")) {
-	//	logs.Log.Warn("windows not support arp scan, skip all arp scan task")
-	//}
 	return err
 }
 

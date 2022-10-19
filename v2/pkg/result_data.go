@@ -234,11 +234,11 @@ func (rd ResultsData) ToCobaltStrike() string {
 func (rd ResultsData) ToZombie() string {
 	var zms []zombiemeta
 	for _, r := range rd.Data {
-		if service, ok := zombiemap[r.GetFirstFramework()]; ok {
+		if service, ok := zombiemap[strings.ToLower(r.GetFirstFramework())]; ok {
 			zms = append(zms, zombiemeta{
 				IP:      r.Ip,
 				Port:    r.Port,
-				Service: service,
+				Service: strings.ToLower(service),
 			})
 		}
 	}
