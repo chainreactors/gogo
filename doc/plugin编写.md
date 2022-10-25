@@ -1,8 +1,9 @@
 ## description
-gogo 保留了大量可拓展的接口, 例如指纹, poc/exp, 工作流, 端口.
+gogo 保留了大量可拓展接口, 例如指纹, poc/exp, 工作流, 端口.
 
-这些预设保存在`v2/config`目录下, 以yaml的形式保存与编辑, 但在编译的时候, 通过`updateconfig.py`自动将yaml转为压缩后的json格式. 兼顾方便与性能.
+这些预设保存在`v2/config`目录下, 以yaml的形式保存与编辑, 但在编译的时候会自动转为json并压缩打包到二进制文件中.
 
+绝大部分插件都可以使现有的框架能完成, 如果有较为复杂的需求, 例如ms17010探测. 可以在`/v2/internal/plugin`中添加.
 ## 端口
 配置文件: `v2/config/port.yaml`
 
@@ -14,6 +15,7 @@ gogo 保留了大量可拓展的接口, 例如指纹, poc/exp, 工作流, 端口
 指纹分为tcp指纹, http指纹, md5指纹, mmh3指纹.
 
 tcp指纹与http指纹为同一格式, md5与mmh3指纹为同一格式
+
 ### tcp指纹/http指纹
 配置文件: `v2/config/httpfingers.yaml` 与 `v2/config/tcpfingers.yaml`
 
@@ -51,10 +53,47 @@ tcp指纹与http指纹为同一格式, md5与mmh3指纹为同一格式
 
 在两个配置文件中包含大量案例, 可以参考.
 
-todo: 从nmap中移植更多的tcp指纹
+todo: 从nmap中移植更多常见的tcp指纹
 
 ## workflow
+
 配置文件: `v2/config/workflows.yaml`
+
+一个完整的示例, 
+```yaml
+- name: "192"         // 名字, 通过-w调用的标识符
+  description: "对192.168.1.1/16使用完整的启发式扫描" // 描述
+  ip: 192.168.0.0/16  // 指定的ip
+  iplist:             //指定的ip列表, 与ip二选一
+    - 192.168.0.0/16 
+  ports: top2,win,db  // 端口配置, 与命令行用法相同, 默认值 'top1'
+  mod: s              // 模式, 与命令行用法相同, 默认值 'default'
+  ping: true          // ping启发探测,等同于命令行的--ping 默认值 'false'
+  no-scan: false      // 设置为true则只进行启发式扫描, 不会进行端口扫描. 默认值 'false', 等同于命令行--no
+  ipprobe: default    // ip探针, 只可使用于-m ss的场景下, 默认值 'default', 等同于命令行的--ipp default
+  portprobe: default  // 端口探针, 只可使用于启发式扫描场景下, 默认值 'default', 等同于命令行的--sp default
+  exploit: none       // 是否启用漏扫, 默认值 'none', 等同于命令行的-e 或 -E  
+  verbose: 0          // 是否启用主动指纹识别, 默认值 '0', 等同于-v
+  file: auto          // 输出文件位置, 默认值 'auto', 等同于-f
+  path: .             // 输出文件路径, 默认值 '.', 等同于--path
+  tags:               // 将多个name划分为组, 通过-w tags name即可调用多个workflow
+    - inter
+```
+
+如果没有填相应的值,则采用默认值. 
+
+如果使用-w参数, 但只想改变某几个参数, 可直接使用-w workflowname的同时, 使用命令行参数进行覆盖, 命令行参数的优先级大于workflow.
+
+## poc 
+
+见[poc编写](poc编写.md)
+
+## plugin
+
+每个端口探测生命周期有一个贯穿始终的result变量, 在dispatch中添加触发某个插件的逻辑, 并在插件的具体实现中修改result变量即可完成插件的编写. 
+
+没有做过多的抽象, 希望最核心的可拓展能力还是以yaml的dsl为主. 
+
 
 
 
