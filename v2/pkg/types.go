@@ -73,9 +73,12 @@ func (es *Extracts) ToResult() string {
 }
 
 func (es *Extracts) ToString() string {
-	var s string
-	for _, e := range es.Extractors {
-		s += fmt.Sprintf("[ Extract: %s ] ", e.ToString())
+	if es == nil {
+		return ""
 	}
-	return s
+	var s strings.Builder
+	for _, e := range es.Extractors {
+		s.WriteString(fmt.Sprintf("[ Extract: %s ] ", e.ToString()))
+	}
+	return s.String()
 }

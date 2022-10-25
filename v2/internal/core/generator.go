@@ -11,7 +11,6 @@ import (
 func NewIpGenerator(config Config) *IpGenerator {
 	var alivemap sync.Map
 	gen := IpGenerator{
-		//excludeIP: config.ExcludeMap,
 		alivedMap: &alivemap,
 		ipProbe:   config.IpProbeList,
 	}
@@ -47,24 +46,12 @@ func (gen *IpGenerator) smartIpGenerator(cidr *ipcs.CIDR) {
 	for C = 1; C < 255; C++ {
 		for B = 0; B <= (fin-start)/256; B++ {
 			outIP = ipcs.Int2Ip(start + 256*B + C)
-			//if isnotAlive(ipcs.Int2Ip(start+256*B), gen.alivedMap) && !gen.excludeIP[start+256*B+C] {
 			if isnotAlive(ipcs.Int2Ip(start+256*B), gen.alivedMap) {
 				gen.ch <- outIP
 			}
 		}
 	}
 }
-
-//func (gen *IpGenerator) IPsGenerator(ips []string) {
-//	for _, cidr := range ips {
-//		tmpalive := Opt.AliveSum
-//		gen.defaultIpGenerator(cidr)
-//		if getMask(cidr) != 32 {
-//			Log.Importantf("Processed CIDR: %s, found %d ports", cidr, Opt.AliveSum-tmpalive)
-//			syncFile()
-//		}
-//	}
-//}
 
 func (gen *IpGenerator) sSmartGenerator(cidr *ipcs.CIDR) {
 	start, fin := cidr.Range()
@@ -75,15 +62,9 @@ func (gen *IpGenerator) sSmartGenerator(cidr *ipcs.CIDR) {
 	//go func() {
 	for c = 0; c < 255; c++ {
 		for b = 0; b <= finb-startb; b++ {
-			//println(int2ip(start + b*65536 + c*256 + 1))
-			//ip := int2ip(start + b*65536 + c + 1)
 			if isnotAlive(ipcs.Int2Ip(start+b*65536+256), gen.alivedMap) {
-				//println(int2ip(start + b*65536 + c*256 + 1))
 				for _, p := range gen.ipProbe {
 					gen.ch <- ipcs.Int2Ip(start + b*65536 + c*256 + p)
-					//if !gen.excludeIP[start+b*65536+c*256+p] {
-					//
-					//}
 				}
 			}
 		}
@@ -169,7 +150,11 @@ func (gen *targetGenerator) genFromSpray(cidrs ipcs.CIDRs, portlist []string) {
 			if len(tmpPorts) >= 100 {
 				tmpPorts = tmpPorts[:100]
 			}
-			Log.Importantf("Processed Port: %s, found %d ports", strings.Join(tmpPorts, ",")+"......, "+port, Opt.AliveSum-tmpalive)
+			if len(tmpPorts) > 10 {
+				Log.Importantf("Processed Port: %s, found %d ports", strings.Join(tmpPorts, ",")+"......, "+port, Opt.AliveSum-tmpalive)
+			} else {
+				Log.Importantf("Processed Port: %s, found %d ports", strings.Join(tmpPorts, ","), Opt.AliveSum-tmpalive)
+			}
 			tmpPorts = []string{}
 		}
 	}

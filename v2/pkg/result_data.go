@@ -234,11 +234,11 @@ func (rd ResultsData) ToCobaltStrike() string {
 func (rd ResultsData) ToZombie() string {
 	var zms []zombiemeta
 	for _, r := range rd.Data {
-		if service, ok := zombiemap[r.GetFirstFramework()]; ok {
+		if service, ok := zombiemap[strings.ToLower(r.GetFirstFramework())]; ok {
 			zms = append(zms, zombiemeta{
 				IP:      r.Ip,
 				Port:    r.Port,
-				Service: service,
+				Service: strings.ToLower(service),
 			})
 		}
 	}
@@ -248,6 +248,15 @@ func (rd ResultsData) ToZombie() string {
 		utils.Fatal("" + err.Error())
 	}
 	return string(s)
+}
+
+func (rd ResultsData) ToCsv() string {
+	var s strings.Builder
+	s.WriteString("ip,port,url,status,title,host,language,midware,frame,vuln,extract\n")
+	for _, r := range rd.Data {
+		s.WriteString(CsvOutput(r))
+	}
+	return s.String()
 }
 
 func autofixjson(content []byte) []byte {
@@ -331,7 +340,7 @@ func LoadResultFile(file *os.File) interface{} {
 	}
 
 	content = bytes.TrimSpace(content) // 去除前后空格
-	if bytes.Contains(content, []byte("\"smart\",")) || bytes.Contains(content, []byte("\"ping\",")) {
+	if bytes.Contains(content, []byte("\"smartb\",")) || bytes.Contains(content, []byte("\"smartc\",")) || bytes.Contains(content, []byte("\"ping\",")) {
 		// 解析启发式扫描结果
 		content = autofixjson(content)
 		data, err = loadSmartResult(content)

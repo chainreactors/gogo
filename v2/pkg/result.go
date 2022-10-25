@@ -11,39 +11,6 @@ import (
 	"time"
 )
 
-type Result struct {
-	// baseinfo
-	Ip       string `json:"ip"`             // ip
-	Port     string `json:"port"`           // port
-	Protocol string `json:"protocol"`       // protocol
-	Status   string `json:"status"`         // http_stat
-	Uri      string `json:"uri,omitempty"`  // uri
-	Os       string `json:"os,omitempty"`   // os
-	Host     string `json:"host,omitempty"` // host
-
-	//Cert         string         `json:"c"`
-	HttpHosts   []string `json:"-"`
-	CurrentHost string   `json:"-"`
-	Title       string   `json:"title"`   // title
-	Midware     string   `json:"midware"` // midware
-
-	Language     string         `json:"language"`             // language
-	Frameworks   Frameworks     `json:"frameworks,omitempty"` // framework
-	Vulns        Vulns          `json:"vulns,omitempty"`
-	Extracts     *Extracts      `json:"-"`
-	ExtractsStat map[string]int `json:"extracts_stat,omitempty"`
-	//Hash         string         `json:"hs"`
-	Open bool `json:"-"`
-	//FrameworksMap map[string]bool `json:"-"`
-	SmartProbe bool              `json:"-"`
-	TcpConn    *net.Conn         `json:"-"`
-	HttpConn   *http.Client      `json:"-"`
-	Httpresp   *parsers.Response `json:"-"`
-	Error      string            `json:"-"`
-	ErrStat    int               `json:"-"`
-	Content    string            `json:"-"`
-}
-
 func NewResult(ip, port string) *Result {
 	var result = Result{
 		Ip:           ip,
@@ -55,6 +22,40 @@ func NewResult(ip, port string) *Result {
 	}
 	result.Extracts.Target = result.GetTarget()
 	return &result
+}
+
+type Result struct {
+	// baseinfo
+	Ip   string `json:"ip"`             // ip
+	Port string `json:"port"`           // port
+	Uri  string `json:"uri,omitempty"`  // uri
+	Os   string `json:"os,omitempty"`   // os
+	Host string `json:"host,omitempty"` // host
+
+	//Cert         string         `json:"c"`
+	HttpHosts   []string `json:"-"`
+	CurrentHost string   `json:"-"`
+
+	// language
+	Frameworks   Frameworks     `json:"frameworks,omitempty"` // framework
+	Vulns        Vulns          `json:"vulns,omitempty"`
+	Extracts     *Extracts      `json:"-"`
+	ExtractsStat map[string]int `json:"extracts_stat,omitempty"`
+	Protocol     string         `json:"protocol"` // protocol
+	Status       string         `json:"status"`   // http_stat
+	Language     string         `json:"language"`
+	Title        string         `json:"title"`   // title
+	Midware      string         `json:"midware"` // midware
+	//Hash         string         `json:"hs"`
+	Open bool `json:"-"`
+	//FrameworksMap map[string]bool `json:"-"`
+	SmartProbe bool              `json:"-"`
+	TcpConn    *net.Conn         `json:"-"`
+	HttpConn   *http.Client      `json:"-"`
+	Httpresp   *parsers.Response `json:"-"`
+	Error      string            `json:"-"`
+	ErrStat    int               `json:"-"`
+	Content    string            `json:"-"`
 }
 
 func (result *Result) GetHttpConn(delay int) *http.Client {
@@ -115,7 +116,7 @@ func (result *Result) GetExtractStat() string {
 	}
 }
 
-func (result Result) NoFramework() bool {
+func (result *Result) NoFramework() bool {
 	if len(result.Frameworks) == 0 {
 		return true
 	}
@@ -130,14 +131,14 @@ func (result *Result) GuessFramework() {
 	}
 }
 
-func (result Result) IsHttp() bool {
+func (result *Result) IsHttp() bool {
 	if strings.HasPrefix(result.Protocol, "http") {
 		return true
 	}
 	return false
 }
 
-func (result Result) IsHttps() bool {
+func (result *Result) IsHttps() bool {
 	if strings.HasPrefix(result.Protocol, "https") {
 		return true
 	}
@@ -150,6 +151,8 @@ func (result *Result) Get(key string) string {
 		return result.Ip
 	case "port":
 		return result.Port
+	case "status", "stat":
+		return result.Status
 	case "frameworks", "framework", "frame":
 		return result.Frameworks.ToString()
 	case "vulns", "vuln":
@@ -170,6 +173,10 @@ func (result *Result) Get(key string) string {
 		return result.Language
 	case "protocol":
 		return result.Protocol
+	case "os":
+		return result.Os
+	case "extract":
+		return result.Extracts.ToString()
 	default:
 		return ""
 	}
@@ -191,11 +198,11 @@ func (result *Result) errHandler() {
 	}
 }
 
-func (result Result) GetBaseURL() string {
+func (result *Result) GetBaseURL() string {
 	return fmt.Sprintf("%s://%s:%s", result.Protocol, result.Ip, result.Port)
 }
 
-func (result Result) GetHostBaseURL() string {
+func (result *Result) GetHostBaseURL() string {
 	if result.CurrentHost == "" {
 		return result.GetBaseURL()
 	} else {
@@ -203,7 +210,7 @@ func (result Result) GetHostBaseURL() string {
 	}
 }
 
-func (result Result) GetURL() string {
+func (result *Result) GetURL() string {
 	if result.IsHttp() {
 		return result.GetBaseURL() + result.Uri
 	} else {
@@ -211,15 +218,15 @@ func (result Result) GetURL() string {
 	}
 }
 
-func (result Result) GetHostURL() string {
+func (result *Result) GetHostURL() string {
 	return result.GetHostBaseURL() + result.Uri
 }
 
-func (result Result) GetTarget() string {
+func (result *Result) GetTarget() string {
 	return fmt.Sprintf("%s:%s", result.Ip, result.Port)
 }
 
-func (result Result) GetFirstFramework() string {
+func (result *Result) GetFirstFramework() string {
 	if !result.NoFramework() {
 		return result.Frameworks[0].Name
 	}

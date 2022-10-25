@@ -12,4 +12,5 @@ require (
 	github.com/panjf2000/ants/v2 v2.5.0
 	golang.org/x/net v0.0.0-20190603091049-60506f45cf65
 	golang.org/x/sys v0.0.0-20220209214540-3681064d5158 // indirect
+	sigs.k8s.io/yaml v1.3.0 // indirect
 )

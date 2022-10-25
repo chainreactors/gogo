@@ -22,6 +22,8 @@ func output(result *Result, outType string) string {
 		out = JsonOutput(result) + "\n"
 	case "full":
 		out = FullOutput(result)
+	case "csv":
+		out = CsvOutput(result)
 	default:
 		out = ValuesOutput(result, outType)
 	}
@@ -110,6 +112,8 @@ func FormatOutput(filename, outFilename, outf, filenamef string, filters []strin
 				return
 			}
 			outfunc(string(content))
+		} else if outf == "csv" {
+			outfunc(resultsdata.ToCsv())
 		} else {
 			outfunc(resultsdata.ToValues(outf))
 		}

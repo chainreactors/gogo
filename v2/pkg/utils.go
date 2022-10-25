@@ -80,3 +80,11 @@ func JsonOutput(result *Result) string {
 	jsons, _ := json.Marshal(result)
 	return string(jsons)
 }
+
+func CsvOutput(result *Result) string {
+	return fmt.Sprintf("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n", result.Ip, result.Port, result.GetURL(), result.Status, slashComma(result.Title), result.Host, result.Language, slashComma(result.Midware), slashComma(result.Frameworks.ToString()), slashComma(result.Vulns.ToString()), slashComma(result.Extracts.ToString()))
+}
+
+func slashComma(s string) string {
+	return strings.Replace(s, ",", "\\,", -1)
+}

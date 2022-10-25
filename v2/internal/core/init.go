@@ -97,12 +97,6 @@ func InitConfig(config *Config) (*Config, error) {
 	// 初始化启发式扫描的端口探针
 	if config.PortProbe != Default {
 		config.PortProbeList = ipcs.ParsePort(config.PortProbe)
-		//} else {
-		//	if config.Mod == SMART {
-		//		config.PortProbeList = []string{DefaultSmartPortProbe}
-		//	} else if SliceContains([]string{SUPERSMART, SUPERSMARTB}, config.Mod) {
-		//		config.PortProbeList = []string{DefaultSuperSmartPortProbe}
-		//	}
 	}
 
 	// 初始化ss模式ip探针,默认ss默认只探测ip为1的c段,可以通过-ipp参数指定,例如-ipp 1,254,253
@@ -144,6 +138,8 @@ func RunTask(config Config) {
 			for _, ip := range config.CIDRs {
 				SmartMod(ip, config)
 			}
+		} else {
+			Log.Warn("no validate ip/cidr")
 		}
 	default:
 		createDefaultScan(config)
@@ -173,7 +169,7 @@ func guessSmartTime(cidr *ipcs.CIDR, config Config) int {
 	var spc, ippc int
 	var mask int
 	spc = len(config.PortProbeList)
-	if config.IsBSmart() {
+	if config.IsCSmart() {
 		ippc = 1
 	} else {
 		ippc = len(config.IpProbeList)

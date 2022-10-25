@@ -21,7 +21,6 @@ func DefaultMod(targets interface{}, config Config) {
 	var wgs sync.WaitGroup
 	targetGen := NewTargetGenerator(config)
 	targetCh := targetGen.generatorDispatch(targets, config.PortList)
-	//targetChannel := generatorDispatch(targets, config)
 	scanPool, _ := ants.NewPoolWithFunc(config.Threads, func(i interface{}) {
 		tc := i.(targetConfig)
 		result := tc.NewResult()
@@ -67,8 +66,6 @@ func SmartMod(target *ipcs.CIDR, config Config) {
 	spended := guessSmartTime(target, config)
 	Log.Importantf("Spraying %s with %s, Estimated to take %d seconds", target, config.Mod, spended)
 
-	// 初始化ip目标
-	//Log.Importantf("SmartScan %s, Mod: %s", target, config.Mod)
 	// 初始化mask
 	var mask int
 	switch config.Mod {
@@ -92,7 +89,7 @@ func SmartMod(target *ipcs.CIDR, config Config) {
 
 	// 输出启发式扫描探针
 	probeconfig := fmt.Sprintf("Smart port probes: %s ", strings.Join(config.PortProbeList, ","))
-	if config.IsASmart() {
+	if config.IsBSmart() {
 		probeconfig += ", Smart IP probes: " + fmt.Sprintf("%v", config.IpProbeList)
 	}
 	Log.Important(probeconfig)
@@ -132,11 +129,11 @@ func SmartMod(target *ipcs.CIDR, config Config) {
 		return
 	}
 
-	if config.SmartFile != nil && config.Mod != SUPERSMARTC {
-		WriteSmartResult(config.SmartFile, iplist.Strings())
+	if config.IsBSmart() {
+		WriteSmartResult(config.SmartBFile, iplist.Strings())
 	}
-	if config.File != nil && config.Mod == SUPERSMARTC {
-		WriteScReuslt(config.File, iplist.Strings())
+	if config.IsCSmart() {
+		WriteSmartResult(config.SmartCFile, iplist.Strings())
 	}
 
 	if Opt.Noscan || config.Mod == SUPERSMARTC {
@@ -227,7 +224,6 @@ func createDefaultScan(config Config) {
 
 func createDeclineScan(cidrs ipcs.CIDRs, config Config) {
 	// 启发式扫描逐步降级,从喷洒B段到喷洒C段到默认扫描
-	//config.IpProbeList = []uint{1} // ipp 只在ss与sc模式中生效,为了防止时间计算错误,reset ipp 数值
 	if config.Mod == SUPERSMART {
 		// 如果port数量为1, 直接扫描的耗时小于启发式
 		// 如果port数量为2, 直接扫描的耗时约等于启发式扫描
