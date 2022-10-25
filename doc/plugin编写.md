@@ -12,12 +12,12 @@ gogo 保留了大量可拓展接口, 例如指纹, poc/exp, 工作流, 端口.
 值得一提的是, `name`与`type` 都会被gt作为-p参数下可选择的预设, 例如db预设, 就是通过type的方式给多组端口都加上了这个tag. 通过-p db 即可选用所有的数据库默认端口.
 
 ## 指纹
-指纹分为tcp指纹, http指纹, md5指纹, mmh3指纹.
+指纹分为tcp指纹, http指纹
 
-tcp指纹与http指纹为同一格式, md5与mmh3指纹为同一格式
+tcp指纹与http指纹为同一格式, 但通过不同的文件进行管理
 
 ### tcp指纹/http指纹
-配置文件: `v2/config/httpfingers.yaml` 与 `v2/config/tcpfingers.yaml`
+配置文件: `v2/config/http/*` 与 `v2/config/tcpfingers.yaml`
 
 一个完整的配置:
 ```
@@ -35,7 +35,7 @@ tcp指纹与http指纹为同一格式, md5与mmh3指纹为同一格式
           - "-ERR"
           - "-DENIED"
 
-       # 除了regexp, 还支持其他类型的匹配, 包括以下方式
+       # 除了正则, 还支持其他类型的匹配, 包括以下方式
         header: # 仅http协议可用, 匹配header中包含的数据
           - string
         body: # 包含匹配, 非正则表达式
@@ -49,7 +49,7 @@ tcp指纹与http指纹为同一格式, md5与mmh3指纹为同一格式
   
 ```
 
-为了压缩体积, 没有指定的参数会设置默认值.
+为了压缩体积, 没有特别指定的参数可以留空会使用默认值.
 
 在两个配置文件中包含大量案例, 可以参考.
 
