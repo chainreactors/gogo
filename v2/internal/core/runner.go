@@ -104,7 +104,7 @@ func (r *Runner) PreInit() bool {
 func (r *Runner) Init() {
 	// 初始化各种全局变量
 	// 初始化指纹优先级
-	if r.Version {
+	if r.Verbose {
 		RunOpt.VersionLevel = 1
 		//} else if r.Version2 {
 		//	RunOpt.VersionLevel = 2
@@ -269,10 +269,10 @@ func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) {
 				Opt.Noscan = workflow.NoScan
 			}
 
-			if r.Version {
+			if r.Verbose {
 				RunOpt.VersionLevel = 1
 			} else {
-				RunOpt.VersionLevel = workflow.Version
+				RunOpt.VersionLevel = workflow.Verbose
 			}
 
 			if RunOpt.Exploit != "none" {

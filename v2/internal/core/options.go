@@ -64,7 +64,7 @@ type MiscOption struct {
 type ConfigOption struct {
 	Threads     int      `short:"t" long:"thread" description:"Int, concurrent thread number,linux default: 4000, windows default: 1000"` // 线程数
 	Exploit     bool     `short:"e" long:"exploit" description:"Bool,enable nuclei exploit scan"`                                         // 启用漏洞扫描
-	Version     bool     `short:"v" long:"verbose" description:"Bool, enable active finger scan"`                                         // version level1
+	Verbose     bool     `short:"v" long:"verbose" description:"Bool, enable active finger scan"`                                         // version level1
 	PortSpray   bool     `short:"s" long:"spray" description:"Bool, enable port-first spray generator. if ports number > 500, auto enable"`
 	NoSpray     bool     `long:"no-spray" description:"Bool, force to close spray"`
 	ExploitName string   `short:"E" long:"exploit-name" description:"String, specify nuclei template name"` // 指定漏扫poc名字

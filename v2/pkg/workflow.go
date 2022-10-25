@@ -17,7 +17,7 @@ type Workflow struct {
 	IpProbe     string   `json:"ipprobe"`
 	SmartProbe  string   `json:"portprobe"`
 	Exploit     string   `json:"exploit"`
-	Version     int      `json:"version"`
+	Verbose     int      `json:"verbose"`
 	File        string   `json:"file"`
 	Path        string   `json:"path"`
 	Tags        []string `json:"tags"`

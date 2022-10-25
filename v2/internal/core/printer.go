@@ -47,7 +47,7 @@ func PrintWorkflow() {
 	for name, workflows := range LoadWorkFlow() {
 		fmt.Println(name + ": ")
 		for i, w := range workflows {
-			fmt.Printf("\t%-d\t%-15s\t%-10s\t%-s\t%-t\t%-10s\t%-10s\t%-5d\t%-10s\t%-10s\t%-10s\t%-10s\n", i, w.IP, w.Ports, w.Mod, w.Ping, w.SmartProbe, w.IpProbe, w.Version, w.Exploit, w.File, w.Path, w.Description)
+			fmt.Printf("\t%-d\t%-15s\t%-10s\t%-s\t%-t\t%-10s\t%-10s\t%-5d\t%-10s\t%-10s\t%-10s\t%-10s\n", i, w.IP, w.Ports, w.Mod, w.Ping, w.SmartProbe, w.IpProbe, w.Verbose, w.Exploit, w.File, w.Path, w.Description)
 		}
 	}
 }
