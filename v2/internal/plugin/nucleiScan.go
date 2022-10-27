@@ -36,7 +36,7 @@ chainLoop: // 实现chain
 				for name, extract := range res.Extracts {
 					result.AddExtract(fingers.NewExtracted(name, extract))
 				}
-				vulns = append(vulns, &fingers.Vuln{Name: template.Id, Payload: res.PayloadValues, Detail: res.DynamicValues, Severity: template.Info.Severity})
+				vulns = append(vulns, &fingers.Vuln{Name: template.Id, Payload: res.PayloadValues, Detail: res.DynamicValues, SeverityLevel: fingers.SeverityMap[template.Info.Severity]})
 				chainsTemplates = append(chainsTemplates, diffTemplates(ts, choiceTemplates(template.Chains))...)
 			}
 		}

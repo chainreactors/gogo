@@ -87,11 +87,11 @@ func (finger *Finger) ToResult(hasFrame, hasVuln bool, res string, index int) (f
 
 	if hasVuln {
 		if finger.Rules[index].Vuln != "" {
-			vuln = &Vuln{Name: finger.Rules[index].Vuln, Severity: "high"}
+			vuln = &Vuln{Name: finger.Rules[index].Vuln, SeverityLevel: HIGH}
 		} else if finger.Rules[index].Info != "" {
-			vuln = &Vuln{Name: finger.Rules[index].Info, Severity: "info"}
+			vuln = &Vuln{Name: finger.Rules[index].Info, SeverityLevel: INFO}
 		} else {
-			vuln = &Vuln{Name: finger.Name, Severity: "info"}
+			vuln = &Vuln{Name: finger.Name, SeverityLevel: INFO}
 		}
 	}
 	return frame, vuln

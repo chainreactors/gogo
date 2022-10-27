@@ -13,7 +13,7 @@ const (
 	GUESS
 )
 
-var fromMap = map[int]string{
+var FrameFromMap = map[int]string{
 	ACTIVE:   "active",
 	ICO:      "ico",
 	NOTFOUND: "404",
@@ -23,7 +23,8 @@ var fromMap = map[int]string{
 type Framework struct {
 	Name    string `json:"name"`
 	Version string `json:"version"`
-	From    int    `json:"from"`
+	From    int    `json:"-"`
+	FromStr string `json:"from"`
 	IsFocus bool   `json:"is_focus"`
 	Data    string `json:"-"`
 }
@@ -38,30 +39,31 @@ func (f Framework) ToString() string {
 		s += ":" + strings.Replace(f.Version, ":", "_", -1)
 	}
 	if f.From != None {
-		s += ":" + fromMap[f.From]
+		s += ":" + f.FromStr
 	}
 	return s
 }
 
 const (
-	Info int = iota + 1
-	Medium
-	High
-	Critical
+	INFO int = iota + 1
+	MEDIUM
+	HIGH
+	CRITRICAL
 )
 
 var SeverityMap = map[string]int{
-	"info":     Info,
-	"medium":   Medium,
-	"high":     High,
-	"critical": Critical,
+	"info":     INFO,
+	"medium":   MEDIUM,
+	"high":     HIGH,
+	"critical": CRITRICAL,
 }
 
 type Vuln struct {
-	Name     string                 `json:"name"`
-	Payload  map[string]interface{} `json:"payload,omitempty"`
-	Detail   map[string]interface{} `json:"detail,omitempty"`
-	Severity string                 `json:"severity"`
+	Name          string                 `json:"name"`
+	Payload       map[string]interface{} `json:"payload,omitempty"`
+	Detail        map[string]interface{} `json:"detail,omitempty"`
+	Severity      string                 `json:"severity"`
+	SeverityLevel int                    `json:"-"`
 }
 
 func (v *Vuln) GetPayload() string {
