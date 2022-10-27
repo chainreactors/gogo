@@ -362,8 +362,8 @@ func nucleiLoader(pocfile string, payloads []string) {
 
 func templatesLoader() {
 	LoadPortConfig()
-	AllFingers = LoadFinger("http")
-	Mmh3Fingers, Md5Fingers = LoadHashFinger(AllFingers)
+	AllHttpFingers = LoadFinger("http")
+	Mmh3Fingers, Md5Fingers = LoadHashFinger(AllHttpFingers)
 	TcpFingers = LoadFinger("tcp").GroupByPort()
-	HttpFingers = AllFingers.GroupByPort()
+	HttpFingers = AllHttpFingers.GroupByPort()
 }

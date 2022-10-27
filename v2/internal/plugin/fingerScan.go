@@ -52,7 +52,6 @@ func fingerScan(result *Result) {
 
 func getFramework(result *Result, fingermap fingers.FingerMapper, matcher func(*Result, *fingers.Finger) (*fingers.Framework, *fingers.Vuln)) {
 	// 优先匹配默认端口,第一次循环只匹配默认端口
-	//var fs Frameworks
 	var alreadyFrameworks fingers.Fingers
 	for _, finger := range fingermap.GetFingers(result.Port) {
 		framework, vuln := matcher(result, finger)
@@ -70,12 +69,12 @@ func getFramework(result *Result, fingermap fingers.FingerMapper, matcher func(*
 		}
 	}
 
-	for port, fingers := range fingermap {
+	for port, fs := range fingermap {
 		if port == result.Port {
 			// 跳过已经扫过的默认端口
 			continue
 		}
-		for _, finger := range fingers {
+		for _, finger := range fs {
 			if alreadyFrameworks.Contain(finger) {
 				continue
 			} else {
