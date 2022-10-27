@@ -15,17 +15,17 @@ func output(result *Result, outType string) string {
 
 	switch outType {
 	case "color", "c":
-		out = ColorOutput(result)
+		out = result.ColorOutput()
 	case "json", "j":
-		out = JsonOutput(result)
+		out = result.JsonOutput()
 	case "jsonlines", "jl":
-		out = JsonOutput(result) + "\n"
+		out = result.JsonOutput() + "\n"
 	case "full":
-		out = FullOutput(result)
+		out = result.FullOutput()
 	case "csv":
-		out = CsvOutput(result)
+		out = result.CsvOutput()
 	default:
-		out = ValuesOutput(result, outType)
+		out = result.ValuesOutput(outType)
 	}
 	return out
 }

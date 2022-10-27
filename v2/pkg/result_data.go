@@ -84,7 +84,7 @@ type ResultsData struct {
 	Data   Results `json:"data"`
 }
 
-func (rd ResultsData) groupByIP() map[string]IPMapResult {
+func (rd *ResultsData) groupByIP() map[string]IPMapResult {
 	pfs := make(map[string]IPMapResult)
 	//ipfs := make(map[string]ipformat)
 	for _, result := range rd.Data {
@@ -96,7 +96,7 @@ func (rd ResultsData) groupByIP() map[string]IPMapResult {
 	return pfs
 }
 
-func (rd ResultsData) groupBySortedIP() (map[string]IPMapResult, []string) {
+func (rd *ResultsData) groupBySortedIP() (map[string]IPMapResult, []string) {
 	pfs := rd.groupByIP()
 	ips := make([]string, len(pfs))
 	var i = 0
@@ -131,7 +131,7 @@ func (rd *ResultsData) Filter(name string) {
 	rd.Data = results
 }
 
-func (rd ResultsData) ToConfig() string {
+func (rd *ResultsData) ToConfig() string {
 	// 输出配置信息
 	var configstr string
 	configstr = fmt.Sprintf("Scan Target: %s, Ports: %s, Mod: %s \n", rd.Config.GetTargetName(), rd.Config.Ports, rd.Config.Mod)
@@ -142,7 +142,7 @@ func (rd ResultsData) ToConfig() string {
 	return configstr
 }
 
-func (rd ResultsData) ToValues(outType string) string {
+func (rd *ResultsData) ToValues(outType string) string {
 	outs := strings.Split(outType, ",")
 	outvalues := make([][]string, len(outs))
 	ss := make([]string, len(rd.Data))
@@ -160,7 +160,7 @@ func (rd ResultsData) ToValues(outType string) string {
 	return strings.Join(ss, "\n")
 }
 
-func (rd ResultsData) ToFormat(isColor bool) string {
+func (rd *ResultsData) ToFormat(isColor bool) string {
 	var s string
 
 	pfs, ips := rd.groupBySortedIP()
@@ -211,7 +211,7 @@ func (rd ResultsData) ToFormat(isColor bool) string {
 	return s
 }
 
-func (rd ResultsData) ToCobaltStrike() string {
+func (rd *ResultsData) ToCobaltStrike() string {
 	var s string
 	pfs := rd.groupByIP()
 	for ip, imap := range pfs {
@@ -231,7 +231,7 @@ func (rd ResultsData) ToCobaltStrike() string {
 	return s
 }
 
-func (rd ResultsData) ToZombie() string {
+func (rd *ResultsData) ToZombie() string {
 	var zms []zombiemeta
 	for _, r := range rd.Data {
 		if service, ok := zombiemap[strings.ToLower(r.GetFirstFramework())]; ok {
@@ -250,11 +250,11 @@ func (rd ResultsData) ToZombie() string {
 	return string(s)
 }
 
-func (rd ResultsData) ToCsv() string {
+func (rd *ResultsData) ToCsv() string {
 	var s strings.Builder
 	s.WriteString("ip,port,url,status,title,host,language,midware,frame,vuln,extract\n")
 	for _, r := range rd.Data {
-		s.WriteString(CsvOutput(r))
+		s.WriteString(r.CsvOutput())
 	}
 	return s.String()
 }

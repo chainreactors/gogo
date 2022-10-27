@@ -1,9 +1,11 @@
 package pkg
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/chainreactors/gogo/v2/pkg/fingers"
 	"github.com/chainreactors/gogo/v2/pkg/utils"
+	"github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
 	"net"
 	"net/http"
@@ -81,15 +83,14 @@ func (result *Result) AddVulns(vulns []*fingers.Vuln) {
 }
 
 func (result *Result) AddFramework(f *fingers.Framework) {
+	f.FromStr = fingers.FrameFromMap[f.From]
 	result.Frameworks = append(result.Frameworks, f)
-	//result.FrameworksMap[f.ToString()] = true
 }
 
-func (result *Result) AddFrameworks(f []*fingers.Framework) {
-	result.Frameworks = append(result.Frameworks, f...)
-	//for _, framework := range f {
-	//result.FrameworksMap[framework.ToString()] = true
-	//}
+func (result *Result) AddFrameworks(fs []*fingers.Framework) {
+	for _, f := range fs {
+		result.AddFramework(f)
+	}
 }
 
 func (result *Result) AddExtract(extract *fingers.Extracted) {
@@ -114,13 +115,6 @@ func (result *Result) GetExtractStat() string {
 	} else {
 		return ""
 	}
-}
-
-func (result *Result) NoFramework() bool {
-	if len(result.Frameworks) == 0 {
-		return true
-	}
-	return false
 }
 
 func (result *Result) GuessFramework() {
@@ -226,11 +220,49 @@ func (result *Result) GetTarget() string {
 	return fmt.Sprintf("%s:%s", result.Ip, result.Port)
 }
 
+func (result *Result) NoFramework() bool {
+	if len(result.Frameworks) == 0 {
+		return true
+	}
+	return false
+}
+
 func (result *Result) GetFirstFramework() string {
 	if !result.NoFramework() {
 		return result.Frameworks[0].Name
 	}
 	return ""
+}
+
+func (result *Result) ColorOutput() string {
+	s := fmt.Sprintf("[+] %s\t%s\t%s\t%s\t%s [%s] %s %s\n", result.GetURL(), result.Midware, result.Language, logs.Blue(result.Frameworks.ToString()), result.Host, logs.Yellow(result.Status), logs.Blue(result.Title), logs.Red(result.Vulns.ToString()))
+	return s
+}
+
+func (result *Result) FullOutput() string {
+	s := fmt.Sprintf("[+] %s\t%s\t%s\t%s\t%s [%s] %s %s %s\n", result.GetURL(), result.Midware, result.Language, result.Frameworks.ToString(), result.Host, result.Status, result.Title, result.Vulns.ToString(), result.Extracts.ToString())
+	return s
+}
+
+func (result *Result) JsonOutput() string {
+	jsons, _ := json.Marshal(result)
+	return string(jsons)
+}
+
+func (result *Result) CsvOutput() string {
+	return fmt.Sprintf("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n", result.Ip, result.Port, result.GetURL(), result.Status, slashComma(result.Title), result.Host, result.Language, slashComma(result.Midware), slashComma(result.Frameworks.ToString()), slashComma(result.Vulns.ToString()), slashComma(result.Extracts.ToString()))
+}
+
+func (result *Result) ValuesOutput(outType string) string {
+	outs := strings.Split(outType, ",")
+	for i, out := range outs {
+		outs[i] = result.Get(out)
+	}
+	return strings.Join(outs, "\t") + "\n"
+}
+
+func slashComma(s string) string {
+	return strings.Replace(s, ",", "\\,", -1)
 }
 
 func (result *Result) AddNTLMInfo(m map[string]string, t string) {
@@ -272,9 +304,9 @@ func (rs Results) Filter(k, v, op string) Results {
 	return filtedres
 }
 
-func (results Results) GetValues(key string) []string {
-	values := make([]string, len(results))
-	for i, result := range results {
+func (rs Results) GetValues(key string) []string {
+	values := make([]string, len(rs))
+	for i, result := range rs {
 		//if focus && !result.Frameworks.IsFocus() {
 		//	// 如果需要focus, 则跳过非focus标记的framework
 		//	continue
