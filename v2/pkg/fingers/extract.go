@@ -26,7 +26,7 @@ func (e Extractors) Extract(content string) (extracts []*Extracted) {
 	}
 
 	for name, extract := range e {
-		extractStr, ok := utils.CompiledAllMatch(extract, content)
+		extractStr, ok := compiledAllMatch(extract, content)
 		if ok && extractStr != nil {
 			extracts = append(extracts, NewExtracted(name, extractStr))
 		}

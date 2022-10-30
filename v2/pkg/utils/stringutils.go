@@ -2,7 +2,6 @@ package utils
 
 import (
 	"fmt"
-	"regexp"
 	"strconv"
 	"strings"
 )
@@ -65,36 +64,10 @@ func AsciiEncode(s string) string {
 	return s
 }
 
-func Match(regexpstr string, s string) (string, bool) {
-	reg, err := regexp.Compile(regexpstr)
-	if err != nil {
-		return "", false
+func CleanSpiltCFLR(s string) []string {
+	ss := strings.Split(s, "\n")
+	for i := 0; i < len(ss); i++ {
+		ss[i] = strings.Trim(ss[i], "\r")
 	}
-	res := reg.FindStringSubmatch(s)
-	if len(res) == 1 {
-		return "", true
-	} else if len(res) == 2 {
-		return res[1], true
-	}
-	return "", false
-}
-
-func CompiledMatch(reg *regexp.Regexp, s string) (string, bool) {
-	matched := reg.FindStringSubmatch(s)
-	if matched == nil {
-		return "", false
-	}
-	if len(matched) == 1 {
-		return "", true
-	} else {
-		return strings.TrimSpace(matched[1]), true
-	}
-}
-
-func CompiledAllMatch(reg *regexp.Regexp, s string) ([]string, bool) {
-	matchedes := reg.FindAllString(s, -1)
-	if matchedes == nil {
-		return nil, false
-	}
-	return matchedes, true
+	return ss
 }
