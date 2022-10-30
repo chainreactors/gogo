@@ -13,7 +13,7 @@ import (
 var (
 	Win  = utils.IsWin()
 	Root = utils.IsRoot()
-	Key  = []byte{}
+	//Key  = []byte{}
 )
 
 func CompileRegexp(s string) *regexp.Regexp {

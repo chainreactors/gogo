@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+	"github.com/chainreactors/files"
 	. "github.com/chainreactors/gogo/v2/internal/plugin"
 	. "github.com/chainreactors/gogo/v2/pkg"
 	. "github.com/chainreactors/gogo/v2/pkg/utils"
@@ -42,9 +43,15 @@ func InitConfig(config *Config) (*Config, error) {
 
 	var file *os.File
 	if config.ListFile != "" {
-		file = Open(config.ListFile)
+		file, err = files.Open(config.ListFile)
+		if err != nil {
+			Fatal(err.Error())
+		}
 	} else if config.JsonFile != "" {
-		file = Open(config.JsonFile)
+		file, err = files.Open(config.JsonFile)
+		if err != nil {
+			Fatal(err.Error())
+		}
 	} else if HasStdin() {
 		file = os.Stdin
 	}

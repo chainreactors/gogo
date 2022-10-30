@@ -9,10 +9,9 @@ import (
 	"github.com/chainreactors/gogo/v2/pkg/utils"
 	"github.com/chainreactors/ipcs"
 	. "github.com/chainreactors/logs"
-	"github.com/chainreactors/parsers"
-	"io/ioutil"
 	"os"
 	"strings"
+	"unicode"
 )
 
 var winport = []string{"445", "135", "137"}
@@ -318,26 +317,7 @@ func loadSmartResult(content []byte) (*SmartData, error) {
 
 func LoadResultFile(file *os.File) interface{} {
 	var data interface{}
-	content, err := ioutil.ReadAll(file)
-	if err != nil {
-		utils.Fatal("" + err.Error())
-	}
-
-	if IsBase64(content) {
-		// stdin输入二进制文件支持base64编码之后的. base64 result.txt|gogo -F stdin
-		// 如果直接输入解压缩之后的json文件,则跳过这个步骤
-		content = parsers.Base64Decode(string(content))
-	}
-
-	if IsBin(content) {
-		content = parsers.XorEncode(content, Key, 0)
-		if unflated := UnFlate(content); len(unflated) == 0 {
-			Log.Error("deflate failed, incorrect key")
-			return content
-		} else {
-			content = unflated
-		}
-	}
+	content, err := DecryptFile(file, Key)
 
 	content = bytes.TrimSpace(content) // 去除前后空格
 	if bytes.Contains(content, []byte("\"smartb\",")) || bytes.Contains(content, []byte("\"smartc\",")) || bytes.Contains(content, []byte("\"ping\",")) {
@@ -415,9 +395,8 @@ func isClearResult(content []byte) bool {
 }
 
 func IsBase64(content []byte) bool {
-	b64bytes := []byte("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=")
 	for _, i := range content {
-		if !bytes.Contains(b64bytes, []byte{i}) {
+		if !unicode.IsPrint(rune(i)) {
 			return false
 		}
 	}

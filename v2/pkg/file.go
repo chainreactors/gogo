@@ -12,7 +12,6 @@ import (
 
 var smartcommaflag bool
 var pingcommaflag bool
-var sccommaflag bool
 
 func WriteSmartResult(file *File, ips []string) {
 	if file != nil {
@@ -78,18 +77,18 @@ func IsExist(filename string) bool {
 	return exist
 }
 
-func Open(filename string) *os.File {
-	f, err := os.Open(filename)
-	if err == nil {
-		return f
-	}
-
-	f, err = os.Open(path.Join(GetExcPath(), filename))
-	if err != nil {
-		utils.Fatal(filename + err.Error())
-	}
-	return f
-}
+//func Open(filename string) *os.File {
+//	f, err := os.Open(filename)
+//	if err == nil {
+//		return f
+//	}
+//
+//	f, err = os.Open(path.Join(GetExcPath(), filename))
+//	if err != nil {
+//		utils.Fatal(filename + err.Error())
+//	}
+//	return f
+//}
 
 func getAutoFilename(config *Config, outtype string) string {
 	var basename string

@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+	"github.com/chainreactors/files"
 	. "github.com/chainreactors/gogo/v2/internal/plugin"
 	. "github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/gogo/v2/pkg/fingers"
@@ -56,7 +57,7 @@ func (r *Runner) PreInit() bool {
 	Opt.PluginDebug = r.PluginDebug
 	NoGuess = r.NoGuess
 
-	Key = []byte(r.Key)
+	files.Key = []byte(r.Key)
 
 	// 一些特殊的分支, 这些分支将会直接退出程序
 	if r.Ver {
@@ -199,7 +200,11 @@ func (r *Runner) Run() {
 			workflowMap["tmp"] = ParseWorkflowsFromInput(LoadFile(os.Stdin))
 			r.WorkFlowName = "tmp"
 		} else if IsExist(r.WorkFlowName) {
-			workflowMap["tmp"] = ParseWorkflowsFromInput(LoadFile(Open(r.WorkFlowName)))
+			file, err := files.Open(r.WorkFlowName)
+			if err != nil {
+				Fatal(err.Error())
+			}
+			workflowMap["tmp"] = ParseWorkflowsFromInput(LoadFile(file))
 			r.WorkFlowName = "tmp"
 		} else {
 			workflowMap = LoadWorkFlow()

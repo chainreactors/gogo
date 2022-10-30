@@ -38,10 +38,14 @@ func FormatOutput(filename, outFilename, outf, filenamef string, filters []strin
 	var extractsdata []*Extracts
 	var textdata string
 	var file *os.File
+	var err error
 	if filename == "stdin" {
 		file = os.Stdin
 	} else {
-		file = Open(filename)
+		file, err = Open(filename)
+		if err != nil {
+			utils.Fatal(err.Error())
+		}
 	}
 
 	if filenamef == "auto" {
