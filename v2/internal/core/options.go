@@ -71,6 +71,7 @@ type ConfigOption struct {
 	ExploitFile string   `long:"ef" description:"String, load specified templates file "`                   // 指定漏扫文件
 	Filters     []string `long:"filter" description:"String, filter formatting(-F) results "`
 	Payloads    []string `long:"payload" description:"String, specify nuclei payload"`
+	AttackType  string   `long:"attack-type" description:"nuclei attack types, sniper|clusterbomb|pitchfork" choice:"pitchfork" choice:"clusterbomb" choice:"sniper"`
 	Extract     []string `long:"extract" description:"String, custom Extract regexp"`
 	Extracts    string   `long:"extracts" description:"String, choice preset Extract regexp, e.g. --Extracts ip,url"`
 	Delay       int      `short:"d" long:"timeout" default:"2" description:"Int, socket and http timeout"`

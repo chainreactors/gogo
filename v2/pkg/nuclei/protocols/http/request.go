@@ -232,10 +232,17 @@ func (r *Request) Compile(options *protocols.ExecuterOptions) error {
 	}
 
 	if len(r.Payloads) > 0 {
-		attackType := r.AttackType
-		if attackType == "" {
+		var attackType string
+		if r.options.Options.AttackType != "" {
+			attackType = r.options.Options.AttackType
+		} else if len(r.options.Options.VarsPayload) > 0 {
+			attackType = "clusterbomb"
+		} else if r.AttackType != "" {
+			attackType = r.AttackType
+		} else {
 			attackType = "sniper"
 		}
+
 		r.attackType = protocols.StringToType[attackType]
 		// 允许使用命令行定义对应的参数, 会替换对应的参数, 如果参数的数量对不上可能会报错
 		for k, v := range r.options.Options.VarsPayload {

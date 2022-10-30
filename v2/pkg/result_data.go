@@ -317,7 +317,8 @@ func loadSmartResult(content []byte) (*SmartData, error) {
 
 func LoadResultFile(file *os.File) interface{} {
 	var data interface{}
-	content, err := DecryptFile(file, Key)
+	var err error
+	content := DecryptFile(file, Key)
 
 	content = bytes.TrimSpace(content) // 去除前后空格
 	if bytes.Contains(content, []byte("\"smartb\",")) || bytes.Contains(content, []byte("\"smartc\",")) || bytes.Contains(content, []byte("\"ping\",")) {
@@ -334,7 +335,7 @@ func LoadResultFile(file *os.File) interface{} {
 	} else if !IsJson(content) {
 		// 解析按行分割的 ip:port:framework 输入
 		var results Results
-		for _, target := range strings.Split(string(content), "\n") {
+		for _, target := range utils.CleanSpiltCFLR(string(content)) {
 			var result *Result
 			if strings.Contains(target, ":") {
 				if strings.Contains(target, "http") {

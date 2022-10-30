@@ -142,6 +142,9 @@ func (r *Runner) Init() {
 
 	// 加载配置文件中的全局变量
 	templatesLoader()
+	if r.AttackType != "" {
+		ExecuterOptions.Options.AttackType = r.AttackType
+	}
 	nucleiLoader(r.ExploitFile, r.Payloads)
 }
 
