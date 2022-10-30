@@ -15,13 +15,7 @@ func (vs Vulns) ToString() string {
 	var s string
 
 	for _, vuln := range vs {
-		var severity string
-		if vuln.Severity == "" {
-			severity = "high"
-		} else {
-			severity = vuln.Severity
-		}
-		s += fmt.Sprintf("[ %s: %s ] ", severity, vuln.ToString())
+		s += fmt.Sprintf("[ %s: %s ] ", vuln.Severity, vuln.ToString())
 	}
 	return s
 }

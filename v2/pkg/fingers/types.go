@@ -48,14 +48,14 @@ const (
 	INFO int = iota + 1
 	MEDIUM
 	HIGH
-	CRITRICAL
+	CRITICAL
 )
 
 var SeverityMap = map[string]int{
 	"info":     INFO,
 	"medium":   MEDIUM,
 	"high":     HIGH,
-	"critical": CRITRICAL,
+	"critical": CRITICAL,
 }
 
 type Vuln struct {
