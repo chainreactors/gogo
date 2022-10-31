@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/chainreactors/ipcs"
 	"github.com/chainreactors/logs"
-	"github.com/chainreactors/parsers"
+	. "github.com/chainreactors/parsers"
 	"regexp"
 	"strings"
 )
@@ -14,9 +14,9 @@ import (
 func decode(s string) []byte {
 	var bs []byte
 	if s[:4] == "b64|" {
-		bs = parsers.Base64Decode(s[4:])
+		bs = Base64Decode(s[4:])
 	} else if s[:5] == "hex|" {
-		bs = parsers.UnHexlify(s[5:])
+		bs = UnHexlify(s[5:])
 	} else {
 		bs = []byte(s)
 	}
@@ -246,14 +246,14 @@ func (rule *Rule) Match(content string, ishttp bool) (bool, bool, string) {
 
 	// MD5 匹配
 	for _, md5s := range rule.Regexps.MD5 {
-		if md5s == parsers.Md5Hash([]byte(content)) {
+		if md5s == Md5Hash([]byte(content)) {
 			return true, false, ""
 		}
 	}
 
 	// mmh3 匹配
 	for _, mmh3s := range rule.Regexps.MMH3 {
-		if mmh3s == parsers.Mmh3Hash32([]byte(content)) {
+		if mmh3s == Mmh3Hash32([]byte(content)) {
 			return true, false, ""
 		}
 	}

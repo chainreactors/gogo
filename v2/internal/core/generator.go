@@ -4,6 +4,7 @@ import (
 	. "github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/ipcs"
 	. "github.com/chainreactors/logs"
+	"github.com/chainreactors/parsers"
 	"strings"
 	"sync"
 )
@@ -160,9 +161,9 @@ func (gen *targetGenerator) genFromSpray(cidrs ipcs.CIDRs, portlist []string) {
 	}
 }
 
-func (gen *targetGenerator) genFromResult(results Results) {
+func (gen *targetGenerator) genFromResult(results parsers.GOGOResults) {
 	for _, result := range results {
-		gen.ch <- targetConfig{result.Ip, result.Port, result.HttpHosts, result.Frameworks}
+		gen.ch <- targetConfig{ip: result.Ip, port: result.Port, fingers: result.Frameworks}
 	}
 }
 
@@ -170,8 +171,8 @@ func (gen *targetGenerator) generatorDispatch(targets interface{}, portlist []st
 	gen.ch = make(chan targetConfig)
 	go func() {
 		switch targets.(type) {
-		case Results:
-			gen.genFromResult(targets.(Results))
+		case parsers.GOGOResults:
+			gen.genFromResult(targets.(parsers.GOGOResults))
 		default:
 			if gen.spray { // 端口喷洒
 				gen.genFromSpray(targets.(ipcs.CIDRs), portlist)

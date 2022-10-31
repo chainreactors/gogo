@@ -31,13 +31,13 @@ func Decode(input string) []byte {
 
 func FileDecode(input string) []byte {
 	b := parsers.Base64Decode(input)
-	b = parsers.XorEncode(b, Key, 0)
+	b = XorEncode(b, Key, 0)
 	return UnFlate(b)
 }
 
 func Encode(input []byte) string {
 	s := Flate(input)
-	s = parsers.XorEncode(s, Key, 0)
+	s = XorEncode(s, Key, 0)
 	return parsers.Base64Encode(s)
 }
 

@@ -9,49 +9,6 @@ import (
 
 var NoGuess bool
 
-type Vulns []*fingers.Vuln
-
-func (vs Vulns) ToString() string {
-	var s string
-
-	for _, vuln := range vs {
-		s += fmt.Sprintf("[ %s: %s ] ", vuln.Severity, vuln.ToString())
-	}
-	return s
-}
-
-type Frameworks []*fingers.Framework
-
-func (fs Frameworks) ToString() string {
-	frameworkStrs := make([]string, len(fs))
-	for i, f := range fs {
-		if f.From == fingers.GUESS {
-			continue
-		}
-		frameworkStrs[i] = f.ToString()
-	}
-	return strings.Join(frameworkStrs, "||")
-}
-
-func (fs Frameworks) GetNames() []string {
-	var titles []string
-	for _, f := range fs {
-		if f.From != fingers.GUESS {
-			titles = append(titles, f.Name)
-		}
-	}
-	return titles
-}
-
-func (fs Frameworks) IsFocus() bool {
-	for _, f := range fs {
-		if f.IsFocus {
-			return true
-		}
-	}
-	return false
-}
-
 type Extracts struct {
 	Target       string               `json:"target"`
 	MatchedNames []string             `json:"-"`

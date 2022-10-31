@@ -2,7 +2,6 @@ package plugin
 
 import (
 	. "github.com/chainreactors/gogo/v2/pkg"
-	"github.com/chainreactors/gogo/v2/pkg/fingers"
 	"github.com/chainreactors/gogo/v2/pkg/utils"
 	"github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
@@ -18,7 +17,7 @@ func hostScan(result *Result) {
 	}
 
 	req, _ := http.NewRequest("GET", url, nil)
-	vuln := &fingers.Vuln{Name: "host", Detail: map[string]interface{}{}, SeverityLevel: fingers.INFO}
+	vuln := &parsers.Vuln{Name: "host", Detail: map[string]interface{}{}, SeverityLevel: parsers.SeverityINFO}
 	for _, host := range result.HttpHosts {
 		req.Host = host
 		resp, err := conn.Do(req)

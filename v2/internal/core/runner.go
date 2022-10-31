@@ -9,6 +9,7 @@ import (
 	nucleihttp "github.com/chainreactors/gogo/v2/pkg/nuclei/protocols/http"
 	. "github.com/chainreactors/gogo/v2/pkg/utils"
 	"github.com/chainreactors/logs"
+	"github.com/chainreactors/parsers"
 	"golang.org/x/net/proxy"
 	"net"
 	"net/http"
@@ -150,10 +151,15 @@ func (r *Runner) Init() {
 
 func (r *Runner) PrepareConfig() {
 	r.Config = Config{
-		IP:          r.IP,
-		Ports:       r.Ports,
-		ListFile:    r.ListFile,
-		JsonFile:    r.JsonFile,
+		GOGOConfig: &parsers.GOGOConfig{
+			IP:        r.IP,
+			Ports:     r.Ports,
+			ListFile:  r.ListFile,
+			JsonFile:  r.JsonFile,
+			Threads:   r.Threads,
+			PortSpray: r.PortSpray,
+			Mod:       r.Mod,
+		},
 		IsListInput: r.IsListInput,
 		IsJsonInput: r.IsJsonInput,
 		PortProbe:   r.PortProbe,
@@ -162,9 +168,6 @@ func (r *Runner) PrepareConfig() {
 		Filename:    r.Filename,
 		FilePath:    r.FilePath,
 		Compress:    r.Compress,
-		Threads:     r.Threads,
-		PortSpray:   r.PortSpray,
-		Mod:         r.Mod,
 		Tee:         r.Tee,
 	}
 

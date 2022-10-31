@@ -3,6 +3,7 @@ package pkg
 import (
 	"encoding/json"
 	"github.com/chainreactors/gogo/v2/pkg/utils"
+	"github.com/chainreactors/parsers"
 )
 
 type Workflow struct {
@@ -35,10 +36,12 @@ func ParseWorkflowsFromInput(content []byte) []*Workflow {
 
 func (w *Workflow) PrepareConfig(rconfig Config) *Config {
 	var config = &Config{
-		IP:          w.IP,
-		IPlist:      w.IPlist,
-		Ports:       w.Ports,
-		Mod:         w.Mod,
+		GOGOConfig: &parsers.GOGOConfig{
+			IP:     w.IP,
+			IPlist: w.IPlist,
+			Ports:  w.Ports,
+			Mod:    w.Mod,
+		},
 		IpProbe:     w.IpProbe,
 		PortProbe:   w.SmartProbe,
 		FilePath:    w.Path,

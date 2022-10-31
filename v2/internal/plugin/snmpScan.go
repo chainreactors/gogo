@@ -30,5 +30,5 @@ func snmpScan(result *pkg.Result) {
 	result.Open = true
 	result.Protocol = "snmp"
 	result.Status = "snmp"
-	result.AddVuln(&fingers.Vuln{Name: "snmp_public_auth", Payload: map[string]interface{}{"auth": "public"}, SeverityLevel: fingers.INFO})
+	result.AddVuln(&parsers.Vuln{Name: "snmp_public_auth", Payload: map[string]interface{}{"auth": "public"}, SeverityLevel: fingers.INFO})
 }

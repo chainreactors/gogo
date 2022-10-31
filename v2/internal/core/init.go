@@ -8,6 +8,7 @@ import (
 	. "github.com/chainreactors/gogo/v2/pkg/utils"
 	"github.com/chainreactors/ipcs"
 	. "github.com/chainreactors/logs"
+	"github.com/chainreactors/parsers"
 	"os"
 	"strings"
 )
@@ -74,8 +75,8 @@ func InitConfig(config *Config) (*Config, error) {
 		// 如果输入的json不为空,则从json中加载result,并返回结果
 		data := LoadResultFile(file)
 		switch data.(type) {
-		case Results:
-			config.Results = data.(Results)
+		case parsers.GOGOResults:
+			config.Results = data.(parsers.GOGOResults)
 		case *ResultsData:
 			config.Results = data.(*ResultsData).Data
 		case *SmartData:
@@ -163,8 +164,8 @@ func guessTime(targets interface{}, portcount, thread int) int {
 		}
 	case ipcs.CIDR:
 		ipcount += int(targets.(ipcs.CIDR).Count())
-	case Results:
-		ipcount = len(targets.(Results))
+	case parsers.GOGOResults:
+		ipcount = len(targets.(parsers.GOGOResults))
 		portcount = 1
 	default:
 	}

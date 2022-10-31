@@ -5,6 +5,7 @@ import (
 	"github.com/chainreactors/gogo/v2/internal/plugin"
 	. "github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/gogo/v2/pkg/utils"
+	"github.com/chainreactors/parsers"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -83,7 +84,7 @@ type targetConfig struct {
 	ip      string
 	port    string
 	hosts   []string
-	fingers Frameworks
+	fingers parsers.Frameworks
 }
 
 func (tc *targetConfig) NewResult() *Result {

@@ -1,11 +1,9 @@
 package pkg
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/chainreactors/gogo/v2/pkg/fingers"
 	"github.com/chainreactors/gogo/v2/pkg/utils"
-	"github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
 	"net"
 	"net/http"
@@ -14,42 +12,33 @@ import (
 )
 
 func NewResult(ip, port string) *Result {
-	var result = Result{
-		Ip:           ip,
-		Port:         port,
-		Protocol:     "tcp",
-		Status:       "tcp",
-		Extracts:     &Extracts{},
-		ExtractsStat: map[string]int{},
+	result := &Result{
+		GOGOResult: &parsers.GOGOResult{
+			Ip:       ip,
+			Port:     port,
+			Protocol: "tcp",
+			Status:   "tcp",
+		},
 	}
-	result.Extracts.Target = result.GetTarget()
-	return &result
+	return result
+}
+
+func ToResult(result *parsers.GOGOResult) *Result {
+	return &Result{
+		GOGOResult: result,
+	}
 }
 
 type Result struct {
-	// baseinfo
-	Ip   string `json:"ip"`             // ip
-	Port string `json:"port"`           // port
-	Uri  string `json:"uri,omitempty"`  // uri
-	Os   string `json:"os,omitempty"`   // os
-	Host string `json:"host,omitempty"` // host
-
-	//Cert         string         `json:"c"`
+	*parsers.GOGOResult
 	HttpHosts   []string `json:"-"`
 	CurrentHost string   `json:"-"`
 
 	// language
-	Frameworks   Frameworks     `json:"frameworks,omitempty"` // framework
-	Vulns        Vulns          `json:"vulns,omitempty"`
-	Extracts     *Extracts      `json:"-"`
-	ExtractsStat map[string]int `json:"extracts_stat,omitempty"`
-	Protocol     string         `json:"protocol"` // protocol
-	Status       string         `json:"status"`   // http_stat
-	Language     string         `json:"language"`
-	Title        string         `json:"title"`   // title
-	Midware      string         `json:"midware"` // midware
-	//Hash         string         `json:"hs"`
-	Open bool `json:"-"`
+
+	Extracts   *Extracts           `json:"-"`
+	Extracteds map[string][]string `json:"extracts_stat,omitempty"`
+	Open       bool                `json:"-"`
 	//FrameworksMap map[string]bool `json:"-"`
 	SmartProbe bool              `json:"-"`
 	TcpConn    *net.Conn         `json:"-"`
@@ -69,25 +58,27 @@ func (result *Result) GetHttpConn(delay int) *http.Client {
 	return result.HttpConn
 }
 
-func (result *Result) AddVuln(vuln *fingers.Vuln) {
+func (result *Result) AddVuln(vuln *parsers.Vuln) {
 	if vuln.Severity == "" {
-		vuln.Severity = "high"
+		vuln.Severity = parsers.SeverityMap[vuln.SeverityLevel]
 	}
 	result.Vulns = append(result.Vulns, vuln)
 }
 
-func (result *Result) AddVulns(vulns []*fingers.Vuln) {
+func (result *Result) AddVulns(vulns []*parsers.Vuln) {
 	for _, v := range vulns {
 		result.AddVuln(v)
 	}
 }
 
-func (result *Result) AddFramework(f *fingers.Framework) {
-	f.FromStr = fingers.FrameFromMap[f.From]
+func (result *Result) AddFramework(f *parsers.Framework) {
+	if f.FromStr == "" {
+		f.FromStr = parsers.FrameFromMap[f.From]
+	}
 	result.Frameworks = append(result.Frameworks, f)
 }
 
-func (result *Result) AddFrameworks(fs []*fingers.Framework) {
+func (result *Result) AddFrameworks(fs []*parsers.Framework) {
 	for _, f := range fs {
 		result.AddFramework(f)
 	}
@@ -95,41 +86,22 @@ func (result *Result) AddFrameworks(fs []*fingers.Framework) {
 
 func (result *Result) AddExtract(extract *fingers.Extracted) {
 	result.Extracts.Extractors = append(result.Extracts.Extractors, extract)
-	result.ExtractsStat[extract.Name] = len(extract.ExtractResult)
+	result.Extracteds[extract.Name] = extract.ExtractResult
 }
 
 func (result *Result) AddExtracts(extracts []*fingers.Extracted) {
 	for _, extract := range extracts {
 		result.Extracts.Extractors = append(result.Extracts.Extractors, extract)
-		result.ExtractsStat[extract.Name] = len(extract.ExtractResult)
-	}
-}
-
-func (result *Result) GetExtractStat() string {
-	if len(result.ExtractsStat) > 0 {
-		var s []string
-		for name, length := range result.ExtractsStat {
-			s = append(s, fmt.Sprintf("%s:%ditems", name, length))
-		}
-		return fmt.Sprintf("[ extracts: %s ]", strings.Join(s, ", "))
-	} else {
-		return ""
+		result.Extracteds[extract.Name] = extract.ExtractResult
 	}
 }
 
 func (result *Result) GuessFramework() {
 	for _, v := range PortMap.Get(result.Port) {
 		if TagMap.Get(v) == nil && !utils.SliceContains([]string{"top1", "top2", "top3", "other", "windows"}, v) {
-			result.AddFramework(&fingers.Framework{Name: v, From: fingers.GUESS})
+			result.AddFramework(&parsers.Framework{Name: v, From: fingers.GUESS})
 		}
 	}
-}
-
-func (result *Result) IsHttp() bool {
-	if strings.HasPrefix(result.Protocol, "http") {
-		return true
-	}
-	return false
 }
 
 func (result *Result) IsHttps() bool {
@@ -137,43 +109,6 @@ func (result *Result) IsHttps() bool {
 		return true
 	}
 	return false
-}
-
-func (result *Result) Get(key string) string {
-	switch key {
-	case "ip":
-		return result.Ip
-	case "port":
-		return result.Port
-	case "status", "stat":
-		return result.Status
-	case "frameworks", "framework", "frame":
-		return result.Frameworks.ToString()
-	case "vulns", "vuln":
-		return result.Vulns.ToString()
-	case "host":
-		return result.Host
-	case "title":
-		return result.Title
-	case "target":
-		return result.GetTarget()
-	case "url":
-		return result.GetBaseURL()
-	case "midware":
-		return result.Midware
-	//case "hash":
-	//	return result.Hash
-	case "language":
-		return result.Language
-	case "protocol":
-		return result.Protocol
-	case "os":
-		return result.Os
-	case "extract":
-		return result.Extracts.ToString()
-	default:
-		return ""
-	}
 }
 
 //从错误中收集信息
@@ -192,10 +127,6 @@ func (result *Result) errHandler() {
 	}
 }
 
-func (result *Result) GetBaseURL() string {
-	return fmt.Sprintf("%s://%s:%s", result.Protocol, result.Ip, result.Port)
-}
-
 func (result *Result) GetHostBaseURL() string {
 	if result.CurrentHost == "" {
 		return result.GetBaseURL()
@@ -204,114 +135,12 @@ func (result *Result) GetHostBaseURL() string {
 	}
 }
 
-func (result *Result) GetURL() string {
-	if result.IsHttp() {
-		return result.GetBaseURL() + result.Uri
-	} else {
-		return result.GetBaseURL()
-	}
-}
-
 func (result *Result) GetHostURL() string {
 	return result.GetHostBaseURL() + result.Uri
-}
-
-func (result *Result) GetTarget() string {
-	return fmt.Sprintf("%s:%s", result.Ip, result.Port)
-}
-
-func (result *Result) NoFramework() bool {
-	if len(result.Frameworks) == 0 {
-		return true
-	}
-	return false
-}
-
-func (result *Result) GetFirstFramework() string {
-	if !result.NoFramework() {
-		return result.Frameworks[0].Name
-	}
-	return ""
-}
-
-func (result *Result) ColorOutput() string {
-	s := fmt.Sprintf("[+] %s\t%s\t%s\t%s\t%s [%s] %s %s\n", result.GetURL(), result.Midware, result.Language, logs.Blue(result.Frameworks.ToString()), result.Host, logs.Yellow(result.Status), logs.Blue(result.Title), logs.Red(result.Vulns.ToString()))
-	return s
-}
-
-func (result *Result) FullOutput() string {
-	s := fmt.Sprintf("[+] %s\t%s\t%s\t%s\t%s [%s] %s %s %s\n", result.GetURL(), result.Midware, result.Language, result.Frameworks.ToString(), result.Host, result.Status, result.Title, result.Vulns.ToString(), result.Extracts.ToString())
-	return s
-}
-
-func (result *Result) JsonOutput() string {
-	jsons, _ := json.Marshal(result)
-	return string(jsons)
-}
-
-func (result *Result) CsvOutput() string {
-	return fmt.Sprintf("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n", result.Ip, result.Port, result.GetURL(), result.Status, slashComma(result.Title), result.Host, result.Language, slashComma(result.Midware), slashComma(result.Frameworks.ToString()), slashComma(result.Vulns.ToString()), slashComma(result.Extracts.ToString()))
-}
-
-func (result *Result) ValuesOutput(outType string) string {
-	outs := strings.Split(outType, ",")
-	for i, out := range outs {
-		outs[i] = result.Get(out)
-	}
-	return strings.Join(outs, "\t") + "\n"
-}
-
-func slashComma(s string) string {
-	return strings.Replace(s, ",", "\\,", -1)
 }
 
 func (result *Result) AddNTLMInfo(m map[string]string, t string) {
 	result.Title = m["MsvAvNbDomainName"] + "/" + m["MsvAvNbComputerName"]
 	result.Host = strings.Trim(m["MsvAvDnsDomainName"], "\x00") + "/" + m["MsvAvDnsComputerName"]
-	result.AddFramework(&fingers.Framework{Name: t, Version: m["Version"]})
-}
-
-func (result *Result) Filter(k, v, op string) bool {
-	var matchfunc func(string, string) bool
-	if op == "::" {
-		matchfunc = strings.Contains
-	} else {
-		matchfunc = strings.EqualFold
-	}
-
-	if matchfunc(strings.ToLower(result.Get(k)), v) {
-		return true
-	}
-	return false
-}
-
-type zombiemeta struct {
-	IP      string `json:"ip"`
-	Port    string `json:"port"`
-	Service string `json:"service"`
-}
-
-type Results []*Result
-
-func (rs Results) Filter(k, v, op string) Results {
-	var filtedres Results
-
-	for _, result := range rs {
-		if result.Filter(k, v, op) {
-			filtedres = append(filtedres, result)
-		}
-	}
-	return filtedres
-}
-
-func (rs Results) GetValues(key string) []string {
-	values := make([]string, len(rs))
-	for i, result := range rs {
-		//if focus && !result.Frameworks.IsFocus() {
-		//	// 如果需要focus, 则跳过非focus标记的framework
-		//	continue
-		//}
-		values[i] = result.Get(key)
-	}
-	return values
+	result.AddFramework(&parsers.Framework{Name: t, Version: m["Version"]})
 }
