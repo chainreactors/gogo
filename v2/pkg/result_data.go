@@ -237,9 +237,6 @@ func LoadResultFile(file *os.File) interface{} {
 		// 解析扫描结果
 		content = autofixjson(content)
 		data, err = LoadResult(content)
-		//} else if bytes.Contains(content, []byte("\"extract_result")) {
-		//	解析extract结果
-		//data, err = LoadExtracts(content)
 	} else if !IsJson(content) {
 		// 解析按行分割的 ip:port:framework 输入
 		var results parsers.GOGOResults

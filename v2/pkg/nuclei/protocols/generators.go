@@ -18,7 +18,8 @@ func loadPayloads(payloads map[string]interface{}) (map[string][]string, error) 
 			elements := strings.Split(pt, "\n")
 			//golint:gomnd // this is not a magic number
 			loadedPayloads[name] = elements
-
+		case []string:
+			loadedPayloads[name] = pt
 		case interface{}:
 			s := make([]string, len(payload.([]interface{})))
 			for i, v := range pt.([]interface{}) {

@@ -15,7 +15,7 @@ import (
 
 var _ protocols.Request = &Request{}
 
-func (request *Request) getMatchPart(part string, data protocols.InternalEvent) (string, bool) {
+func (r *Request) getMatchPart(part string, data protocols.InternalEvent) (string, bool) {
 	switch part {
 	case "body", "all", "":
 		part = "data"
@@ -50,8 +50,8 @@ func (r *Request) Match(data map[string]interface{}, matcher *protocols.Matcher)
 }
 
 // Extract performs extracting operation for an extractor on model and returns true or false.
-func (request *Request) Extract(data map[string]interface{}, extractor *protocols.Extractor) map[string]struct{} {
-	itemStr, ok := request.getMatchPart(extractor.Part, data)
+func (r *Request) Extract(data map[string]interface{}, extractor *protocols.Extractor) map[string]struct{} {
+	itemStr, ok := r.getMatchPart(extractor.Part, data)
 	if !ok {
 		return nil
 	}

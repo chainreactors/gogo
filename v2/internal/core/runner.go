@@ -115,10 +115,10 @@ func (r *Runner) Init() {
 	}
 
 	// 初始化漏洞
-	if r.Exploit {
-		RunOpt.Exploit = "auto"
-	} else {
+	if r.ExploitName != "" {
 		RunOpt.Exploit = r.ExploitName
+	} else if r.Exploit {
+		RunOpt.Exploit = "auto"
 	}
 
 	if r.NoScan {

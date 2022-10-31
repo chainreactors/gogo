@@ -99,8 +99,8 @@ func (r *Request) Match(data map[string]interface{}, matcher *protocols.Matcher)
 }
 
 // Extract performs extracting operation for an extractor on model and returns true or false.
-func (request *Request) Extract(data map[string]interface{}, extractor *protocols.Extractor) map[string]struct{} {
-	item, ok := request.getMatchPart(extractor.Part, data)
+func (r *Request) Extract(data map[string]interface{}, extractor *protocols.Extractor) map[string]struct{} {
+	item, ok := r.getMatchPart(extractor.Part, data)
 	if !ok {
 		return nil
 	}
@@ -114,7 +114,7 @@ func (request *Request) Extract(data map[string]interface{}, extractor *protocol
 }
 
 // getMatchPart returns the match part honoring "all" matchers + others.
-func (request *Request) getMatchPart(part string, data protocols.InternalEvent) (string, bool) {
+func (r *Request) getMatchPart(part string, data protocols.InternalEvent) (string, bool) {
 	if part == "" {
 		part = "body"
 	}
@@ -267,8 +267,8 @@ func (r *Request) ExecuteWithResults(input string, dynamicValues map[string]inte
 	return nil
 }
 
-func (request *Request) ExecuteRequestWithResults(reqURL string, dynamicValues map[string]interface{}, callback protocols.OutputEventCallback) error {
-	generator := request.newGenerator()
+func (r *Request) ExecuteRequestWithResults(reqURL string, dynamicValues map[string]interface{}, callback protocols.OutputEventCallback) error {
+	generator := r.newGenerator()
 	requestCount := 1
 	var requestErr error
 	for {
@@ -285,7 +285,7 @@ func (request *Request) ExecuteRequestWithResults(reqURL string, dynamicValues m
 				generatedHttpRequest.request.Header.Set("User-Agent", ua)
 			}
 			var gotOutput bool
-			err = request.executeRequest(generatedHttpRequest, dynamicValues, func(event *protocols.InternalWrappedEvent) {
+			err = r.executeRequest(generatedHttpRequest, dynamicValues, func(event *protocols.InternalWrappedEvent) {
 				// Add the extracts to the dynamic values if any.
 				if event.OperatorsResult != nil {
 					gotOutput = true
@@ -306,7 +306,7 @@ func (request *Request) ExecuteRequestWithResults(reqURL string, dynamicValues m
 			//request.options.Progress.IncrementRequests()
 
 			// If this was a match, and we want to stop at first match, skip all further requests.
-			if request.StopAtFirstMatch && gotOutput {
+			if r.StopAtFirstMatch && gotOutput {
 				return true, nil
 			}
 			return false, nil
