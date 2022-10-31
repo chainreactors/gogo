@@ -35,7 +35,6 @@ func FormatOutput(filename, outFilename, outf, filenamef string, filters []strin
 	var iscolor bool
 	var resultsdata *ResultsData
 	var smartdata *SmartData
-	var extractsdata []*Extracts
 	var textdata string
 	var file *os.File
 	var err error
@@ -58,16 +57,13 @@ func FormatOutput(filename, outFilename, outf, filenamef string, filters []strin
 		resultsdata = data.(*ResultsData)
 		fmt.Println(resultsdata.ToConfig())
 		if outFilename == "" {
-			outFilename = GetFilename(&resultsdata.Config, outf)
+			outFilename = GetFilename(resultsdata.GetConfig(), outf)
 		}
 	case *SmartData:
 		smartdata = data.(*SmartData)
 		if outFilename == "" {
 			outFilename = GetFilename(&smartdata.Config, "cidr")
 		}
-	case []*Extracts:
-		extractsdata = data.([]*Extracts)
-		//ConsoleLog("parser extracts successfully")
 	case []byte:
 		textdata = string(data.([]byte))
 	default:
@@ -118,18 +114,10 @@ func FormatOutput(filename, outFilename, outf, filenamef string, filters []strin
 			outfunc(string(content))
 		} else if outf == "csv" {
 			outfunc(resultsdata.ToCsv())
+		} else if outf == "extract" {
+			outfunc(resultsdata.ToExtracteds())
 		} else {
 			outfunc(resultsdata.ToValues(outf))
-		}
-	} else if extractsdata != nil {
-		for _, extracts := range extractsdata {
-			var s string
-			s += fmt.Sprintf("[+] %s\n", extracts.Target)
-			for _, extract := range extracts.Extractors {
-				s += fmt.Sprintf(" \t * %s \n\t\t", extract.Name)
-				s += strings.Join(extract.ExtractResult, "\n\t\t") + "\n"
-			}
-			fmt.Println(s)
 		}
 	} else if textdata != "" {
 		if outFilename != "" {

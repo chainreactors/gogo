@@ -23,8 +23,6 @@ const (
 type Config struct {
 	*parsers.GOGOConfig
 	// ip
-	//IP     string     `json:"ip"`
-	//IPlist []string   `json:"ips"`
 	CIDRs ipcs.CIDRs `json:"-"`
 
 	// port and probe
@@ -36,20 +34,11 @@ type Config struct {
 	IpProbeList   []uint   `json:"-"`
 
 	// file
-	//JsonFile    string `json:"json_file"` // gt的结果json文件,可以再次读入扫描
-	//ListFile    string `json:"list_file"` // 目标ip列表
 	IsListInput bool `json:"-"` // 从标准输入中读
 	IsJsonInput bool `json:"-"` // 从标准输入中读
 
-	// misc
-	//Threads       int      `json:"threads"` // 线程数
-	//Mod           string   `json:"mod"`     // 扫描模式
-	//AliveSprayMod []string `json:"alive_spray"`
-	//PortSpray     bool     `json:"port_spray"`
 	NoSpray bool `json:"-"`
-	//Exploit       string   `json:"exploit"`
-	//JsonType      string   `json:"json_type"`
-	//VersionLevel  int      `json:"version_level"`
+
 	Compress bool `json:"-"`
 
 	// output
@@ -61,7 +50,6 @@ type Config struct {
 	File           *File               `json:"-"`
 	SmartBFile     *File               `json:"-"`
 	SmartCFile     *File               `json:"-"`
-	ExtractFile    *File               `json:"-"`
 	AliveFile      *File               `json:"-"`
 	Tee            bool                `json:"-"`
 	Outputf        string              `json:"-"`
@@ -141,7 +129,6 @@ func (config *Config) InitFile() error {
 		} else if config.FileOutputf == "csv" {
 			config.File.Write("ip,port,url,status,title,host,language,midware,frame,vuln,extract\n")
 		}
-		config.ExtractFile, err = newFile(config.Filename+"_extract", config.Compress)
 	}
 
 	// -af 参数下的启发式扫描结果file初始化
@@ -230,9 +217,6 @@ func (config *Config) Close() {
 	}
 	if config.AliveFile != nil {
 		config.AliveFile.Close()
-	}
-	if config.ExtractFile != nil {
-		config.ExtractFile.Close()
 	}
 }
 

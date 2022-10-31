@@ -36,9 +36,7 @@ type Result struct {
 
 	// language
 
-	Extracts   *Extracts           `json:"-"`
-	Extracteds map[string][]string `json:"extracts_stat,omitempty"`
-	Open       bool                `json:"-"`
+	Open bool `json:"-"`
 	//FrameworksMap map[string]bool `json:"-"`
 	SmartProbe bool              `json:"-"`
 	TcpConn    *net.Conn         `json:"-"`
@@ -85,14 +83,15 @@ func (result *Result) AddFrameworks(fs []*parsers.Framework) {
 }
 
 func (result *Result) AddExtract(extract *fingers.Extracted) {
-	result.Extracts.Extractors = append(result.Extracts.Extractors, extract)
+	if result.Extracteds == nil {
+		result.Extracteds = map[string][]string{}
+	}
 	result.Extracteds[extract.Name] = extract.ExtractResult
 }
 
 func (result *Result) AddExtracts(extracts []*fingers.Extracted) {
 	for _, extract := range extracts {
-		result.Extracts.Extractors = append(result.Extracts.Extractors, extract)
-		result.Extracteds[extract.Name] = extract.ExtractResult
+		result.AddExtract(extract)
 	}
 }
 

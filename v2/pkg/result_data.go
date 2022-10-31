@@ -68,7 +68,10 @@ func (imap IPMapResult) isWin() bool {
 
 type ResultsData struct {
 	*parsers.GOGOData
-	Config Config
+}
+
+func (rd *ResultsData) GetConfig() *Config {
+	return &Config{GOGOConfig: &rd.Config}
 }
 
 func (rd *ResultsData) groupByIP() map[string]IPMapResult {
@@ -145,6 +148,23 @@ func (rd *ResultsData) ToFormat(isColor bool) string {
 	return s
 }
 
+func (rd *ResultsData) ToExtracteds() string {
+	var s strings.Builder
+	for _, result := range rd.Data {
+		if len(result.Extracteds) == 0 {
+			continue
+		}
+		s.WriteString("[+] ")
+		s.WriteString(result.GetTarget())
+		s.WriteString("\n")
+		for name, extract := range result.Extracteds {
+			s.WriteString(fmt.Sprintf(" \t * %s \n\t\t", name))
+			s.WriteString(strings.Join(extract, "\n\t\t") + "\n")
+		}
+	}
+	return s.String()
+}
+
 func (rd *ResultsData) ToCobaltStrike() string {
 	var s string
 	pfs := rd.groupByIP()
@@ -187,25 +207,6 @@ func LoadResult(content []byte) (*ResultsData, error) {
 	return resultsdata, nil
 }
 
-type extractTmp struct {
-	extracts Extracts
-}
-
-func LoadExtracts(content []byte) ([]*Extracts, error) {
-	var err error
-	var extractss []*Extracts
-
-	for _, res := range bytes.Split(content, []byte{'\n'}) {
-		var extracts *Extracts
-		err = json.Unmarshal(res, &extracts)
-		if err != nil {
-			return nil, err
-		}
-		extractss = append(extractss, extracts)
-	}
-	return extractss, nil
-}
-
 type SmartData struct {
 	Config Config   `json:"config"`
 	Data   []string `json:"data"`
@@ -236,9 +237,9 @@ func LoadResultFile(file *os.File) interface{} {
 		// 解析扫描结果
 		content = autofixjson(content)
 		data, err = LoadResult(content)
-	} else if bytes.Contains(content, []byte("\"extract_result")) {
-		// 解析extract结果
-		data, err = LoadExtracts(content)
+		//} else if bytes.Contains(content, []byte("\"extract_result")) {
+		//	解析extract结果
+		//data, err = LoadExtracts(content)
 	} else if !IsJson(content) {
 		// 解析按行分割的 ip:port:framework 输入
 		var results parsers.GOGOResults

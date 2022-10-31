@@ -14,6 +14,7 @@ var (
 	Win  = utils.IsWin()
 	Root = utils.IsRoot()
 	//Key  = []byte{}
+	NoGuess = false
 )
 
 func CompileRegexp(s string) *regexp.Regexp {

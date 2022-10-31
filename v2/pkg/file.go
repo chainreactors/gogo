@@ -76,19 +76,6 @@ func IsExist(filename string) bool {
 	return exist
 }
 
-//func Open(filename string) *os.File {
-//	f, err := os.Open(filename)
-//	if err == nil {
-//		return f
-//	}
-//
-//	f, err = os.Open(path.Join(GetExcPath(), filename))
-//	if err != nil {
-//		utils.Fatal(filename + err.Error())
-//	}
-//	return f
-//}
-
 func getAutoFilename(config *Config, outtype string) string {
 	var basename string
 	target := strings.Replace(config.GetTargetName(), "/", "_", -1)
