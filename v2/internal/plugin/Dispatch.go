@@ -88,7 +88,7 @@ func Dispatch(result *pkg.Result) {
 	}
 
 	// 如果exploit参数不为none,则进行漏洞探测
-	if RunOpt.Exploit != "none" && result.IsHttp() {
+	if RunOpt.Exploit != "none" {
 		Nuclei(result.GetHostBaseURL(), result)
 	}
 
