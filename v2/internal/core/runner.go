@@ -168,6 +168,7 @@ func (r *Runner) PrepareConfig() {
 		FilePath:    r.FilePath,
 		Compress:    r.Compress,
 		Tee:         r.Tee,
+		Filters:     r.Filters,
 	}
 
 	if r.FileOutputf == Default {

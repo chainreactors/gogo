@@ -7,7 +7,7 @@ require (
 	github.com/chainreactors/files v0.2.3
 	github.com/chainreactors/ipcs v0.0.9
 	github.com/chainreactors/logs v0.6.1
-	github.com/chainreactors/parsers v0.1.7
+	github.com/chainreactors/parsers v0.1.8
 	github.com/jessevdk/go-flags v1.5.0
 	github.com/panjf2000/ants/v2 v2.5.0
 	golang.org/x/net v0.0.0-20190603091049-60506f45cf65

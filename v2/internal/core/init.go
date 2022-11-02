@@ -86,6 +86,11 @@ func InitConfig(config *Config) (*Config, error) {
 		}
 	}
 
+	if config.Results != nil {
+		for _, filter := range config.Filters {
+			config.Results = config.Results.FilterWithString(filter)
+		}
+	}
 	err = config.InitIP()
 	if err != nil {
 		return nil, err

@@ -7,8 +7,8 @@ github.com/chainreactors/ipcs v0.0.9 h1:4Onroq7gXLG5SLCCgNDx3JmtLxB4XgepGdHCtLp1
 github.com/chainreactors/ipcs v0.0.9/go.mod h1:E9M3Ohyq0TYQLlV4i2dbM9ThBZB1Nnd7Oexoie2xLII=
 github.com/chainreactors/logs v0.6.1 h1:+wLVqxErUyWYayAx6x+m5LA6jQBiHcLdTAJtiOUMoZU=
 github.com/chainreactors/logs v0.6.1/go.mod h1:Y0EtAnoF0kiASIJUnXN0pcOt420iRpHOAnOhEphzRHA=
-github.com/chainreactors/parsers v0.1.7 h1:zUDKEkYddTuijJTXI4hVJrnnPzqnUNd7ASw9pkGCNf0=
-github.com/chainreactors/parsers v0.1.7/go.mod h1:Z9weht+lnFCk7UcwqFu6lXpS7u5vttiy0AJYOAyCCLA=
+github.com/chainreactors/parsers v0.1.8 h1:i2ULyhthD4yYNWlef+82mNvRHz5zboJdt6qHsEs+nA4=
+github.com/chainreactors/parsers v0.1.8/go.mod h1:Z9weht+lnFCk7UcwqFu6lXpS7u5vttiy0AJYOAyCCLA=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

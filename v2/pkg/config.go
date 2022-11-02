@@ -36,10 +36,8 @@ type Config struct {
 	// file
 	IsListInput bool `json:"-"` // 从标准输入中读
 	IsJsonInput bool `json:"-"` // 从标准输入中读
-
-	NoSpray bool `json:"-"`
-
-	Compress bool `json:"-"`
+	NoSpray     bool `json:"-"`
+	Compress    bool `json:"-"`
 
 	// output
 	FilePath       string              `json:"-"`
@@ -57,6 +55,7 @@ type Config struct {
 	Filenamef      string              `json:"-"`
 	Results        parsers.GOGOResults `json:"-"` // json反序列化后的内网,保存在内存中
 	HostsMap       map[string][]string `json:"-"` // host映射表
+	Filters        []string            `json:"-"`
 }
 
 func (config *Config) InitIP() error {
