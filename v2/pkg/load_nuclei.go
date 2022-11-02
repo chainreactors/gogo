@@ -27,7 +27,7 @@ func ParserCmdPayload(payloads []string) *protocols.ExecuterOptions {
 			//content := files.LoadCommonArg(payload[i+1:])
 			var content []byte
 			if f, err := files.Open(payload[i+1:]); err != nil {
-				content, _ = parsers.DSLParser(payload[i+1:])
+				content = []byte(payload[i+1:])
 			} else {
 				content = files.DecryptFile(f, nil)
 			}

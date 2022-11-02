@@ -6,6 +6,7 @@ import (
 	"github.com/chainreactors/gogo/v2/pkg/nuclei/protocols"
 	. "github.com/chainreactors/gogo/v2/pkg/utils"
 	"github.com/chainreactors/logs"
+	"github.com/chainreactors/parsers"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -249,6 +250,17 @@ func (r *Request) Compile(options *protocols.ExecuterOptions) error {
 			if _, ok := r.Payloads[k]; ok {
 				r.Payloads[k] = v
 			}
+		}
+		for k, payload := range r.Payloads {
+			switch payload.(type) {
+			case []string:
+				tmp := make([]string, len(payload.([]string)))
+				for i, p := range payload.([]string) {
+					tmp[i], _ = parsers.DSLParserToString(ToString(p))
+				}
+				r.Payloads[k] = tmp
+			}
+
 		}
 		r.generator, err = protocols.New(r.Payloads, r.attackType)
 		if err != nil {
