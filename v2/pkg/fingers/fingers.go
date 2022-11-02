@@ -63,7 +63,7 @@ func (finger *Finger) Compile(portHandler func([]string) []string) error {
 		finger.DefaultPort = portHandler(finger.DefaultPort)
 	}
 
-	err := finger.Rules.Compile()
+	err := finger.Rules.Compile(finger.Name)
 	if err != nil {
 		return err
 	}
@@ -128,6 +128,7 @@ func (finger *Finger) Match(content string, level int, sender func([]byte) (stri
 				for _, reg := range rule.Regexps.CompiledVersionRegexp {
 					res, _ := compiledMatch(reg, content)
 					if res != "" {
+						logs.Log.Debugf("%s version hit, regexp: %s", finger.Name, reg.String())
 						frame.Version = res
 						break
 					}
@@ -151,11 +152,12 @@ type Regexps struct {
 	CompliedRegexp        []*regexp.Regexp `yaml:"-" json:"-"`
 	CompiledVulnRegexp    []*regexp.Regexp `yaml:"-" json:"-"`
 	CompiledVersionRegexp []*regexp.Regexp `yaml:"-" json:"-"`
+	FingerName            string           `yaml:"-" json:"-"`
 	Header                []string         `yaml:"header,omitempty" json:"header,omitempty"`
 	Vuln                  []string         `yaml:"vuln,omitempty" json:"vuln,omitempty"`
 }
 
-func (r *Regexps) RegexpCompile() error {
+func (r *Regexps) Compile() error {
 	for _, reg := range r.Regexp {
 		creg, err := compileRegexp("(?i)" + reg)
 		if err != nil {
@@ -204,6 +206,7 @@ type Rule struct {
 	Info        string    `yaml:"info,omitempty" json:"info,omitempty"`
 	Vuln        string    `yaml:"vuln,omitempty" json:"vuln,omitempty"`
 	Level       int       `yaml:"level,omitempty" json:"level,omitempty"`
+	FingerName  string    `yaml:"-" json:"-"`
 }
 
 func (rule *Rule) Match(content string, ishttp bool) (bool, bool, string) {
@@ -232,6 +235,7 @@ func (rule *Rule) Match(content string, ishttp bool) (bool, bool, string) {
 	// body匹配
 	for _, bodyReg := range rule.Regexps.Body {
 		if strings.Contains(body, bodyReg) {
+			logs.Log.Debugf("%s finger hit, body: %s", rule.FingerName, bodyReg)
 			return true, false, ""
 		}
 	}
@@ -240,6 +244,7 @@ func (rule *Rule) Match(content string, ishttp bool) (bool, bool, string) {
 	for _, reg := range rule.Regexps.CompliedRegexp {
 		res, ok := compiledMatch(reg, content)
 		if ok {
+			logs.Log.Debugf("%s finger hit, regexp: %s", rule.FingerName, reg.String())
 			return true, false, res
 		}
 	}
@@ -247,6 +252,7 @@ func (rule *Rule) Match(content string, ishttp bool) (bool, bool, string) {
 	// MD5 匹配
 	for _, md5s := range rule.Regexps.MD5 {
 		if md5s == Md5Hash([]byte(content)) {
+			logs.Log.Debugf("%s finger hit, md5: %s", rule.FingerName, md5s)
 			return true, false, ""
 		}
 	}
@@ -254,6 +260,7 @@ func (rule *Rule) Match(content string, ishttp bool) (bool, bool, string) {
 	// mmh3 匹配
 	for _, mmh3s := range rule.Regexps.MMH3 {
 		if mmh3s == Mmh3Hash32([]byte(content)) {
+			logs.Log.Debugf("%s finger hit, mmh3: %s", rule.FingerName, mmh3s)
 			return true, false, ""
 		}
 	}
@@ -263,8 +270,9 @@ func (rule *Rule) Match(content string, ishttp bool) (bool, bool, string) {
 		return false, false, ""
 	}
 
-	for _, headerReg := range rule.Regexps.Header {
-		if strings.Contains(header, headerReg) {
+	for _, headerStr := range rule.Regexps.Header {
+		if strings.Contains(header, headerStr) {
+			logs.Log.Debugf("%s finger hit, header: %s", rule.FingerName, headerStr)
 			return true, false, ""
 		}
 	}
@@ -273,8 +281,12 @@ func (rule *Rule) Match(content string, ishttp bool) (bool, bool, string) {
 
 type Rules []*Rule
 
-func (rs Rules) Compile() error {
+func (rs Rules) Compile(name string) error {
 	for _, r := range rs {
+		if r.Version == "" {
+			r.Version = "_"
+		}
+		r.FingerName = name
 		if r.SendDataStr != "" {
 			r.SendData = decode(r.SendDataStr)
 			if r.Level == 0 {
@@ -283,7 +295,7 @@ func (rs Rules) Compile() error {
 		}
 
 		if r.Regexps != nil {
-			err := r.Regexps.RegexpCompile()
+			err := r.Regexps.Compile()
 			if err != nil {
 				return err
 			}

@@ -316,6 +316,9 @@ func (r *Request) ExecuteRequestWithResults(reqURL string, dynamicValues map[str
 		if !ok {
 			break
 		}
+		if len(payloads) > 0 {
+			logs.Log.Debugf("payloads: %s", MaptoString(payloads))
+		}
 		var gotErr error
 		var skip bool
 
