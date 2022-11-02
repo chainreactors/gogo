@@ -10,19 +10,6 @@ import (
 	"strings"
 )
 
-// common struct
-func decode(s string) []byte {
-	var bs []byte
-	if s[:4] == "b64|" {
-		bs = Base64Decode(s[4:])
-	} else if s[:5] == "hex|" {
-		bs = UnHexlify(s[5:])
-	} else {
-		bs = []byte(s)
-	}
-	return bs
-}
-
 func compileRegexp(s string) (*regexp.Regexp, error) {
 	reg, err := regexp.Compile(s)
 	if err != nil {
@@ -202,11 +189,34 @@ type Rule struct {
 	Favicon     *Favicons `yaml:"favicon,omitempty" json:"favicon,omitempty"`
 	Regexps     *Regexps  `yaml:"regexps,omitempty" json:"regexps,omitempty"`
 	SendDataStr string    `yaml:"send_data,omitempty" json:"send_data,omitempty"`
-	SendData    senddata  `yaml:"-,omitempty" json:"-,omitempty"`
+	SendData    senddata  `yaml:"-" json:"-"`
 	Info        string    `yaml:"info,omitempty" json:"info,omitempty"`
 	Vuln        string    `yaml:"vuln,omitempty" json:"vuln,omitempty"`
 	Level       int       `yaml:"level,omitempty" json:"level,omitempty"`
 	FingerName  string    `yaml:"-" json:"-"`
+}
+
+func (rs Rules) Compile(name string) error {
+	for _, r := range rs {
+		if r.Version == "" {
+			r.Version = "_"
+		}
+		r.FingerName = name
+		if r.SendDataStr != "" {
+			r.SendData = DSLParser(r.SendDataStr)
+			if r.Level == 0 {
+				r.Level = 1
+			}
+		}
+
+		if r.Regexps != nil {
+			err := r.Regexps.Compile()
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 func (rule *Rule) Match(content string, ishttp bool) (bool, bool, string) {
@@ -280,29 +290,6 @@ func (rule *Rule) Match(content string, ishttp bool) (bool, bool, string) {
 }
 
 type Rules []*Rule
-
-func (rs Rules) Compile(name string) error {
-	for _, r := range rs {
-		if r.Version == "" {
-			r.Version = "_"
-		}
-		r.FingerName = name
-		if r.SendDataStr != "" {
-			r.SendData = decode(r.SendDataStr)
-			if r.Level == 0 {
-				r.Level = 1
-			}
-		}
-
-		if r.Regexps != nil {
-			err := r.Regexps.Compile()
-			if err != nil {
-				return err
-			}
-		}
-	}
-	return nil
-}
 
 type senddata []byte
 
