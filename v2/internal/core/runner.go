@@ -213,7 +213,11 @@ func (r *Runner) Run() {
 			workflowMap["tmp"] = ParseWorkflowsFromInput(LoadFile(file))
 			r.WorkFlowName = "tmp"
 		} else {
-			workflowMap = LoadWorkFlow()
+			if bs, ok := parsers.DSLParser(r.WorkFlowName); ok {
+				workflowMap["tmp"] = ParseWorkflowsFromInput(bs)
+			} else {
+				workflowMap = LoadWorkFlow()
+			}
 		}
 		r.runWithWorkFlow(workflowMap)
 	}

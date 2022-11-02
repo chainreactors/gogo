@@ -203,7 +203,7 @@ func (rs Rules) Compile(name string) error {
 		}
 		r.FingerName = name
 		if r.SendDataStr != "" {
-			r.SendData = DSLParser(r.SendDataStr)
+			r.SendData, _ = DSLParser(r.SendDataStr)
 			if r.Level == 0 {
 				r.Level = 1
 			}

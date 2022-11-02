@@ -6,6 +6,16 @@ import (
 	"github.com/chainreactors/parsers"
 )
 
+func ParseWorkflowsFromInput(content []byte) []*Workflow {
+	var workflows []*Workflow
+	var err error
+	err = json.Unmarshal(content, &workflows)
+	if err != nil {
+		utils.Fatal("workflow load FAIL, " + err.Error())
+	}
+	return workflows
+}
+
 type Workflow struct {
 	Name        string   `json:"name"`
 	Description string   `json:"description"`
@@ -22,16 +32,6 @@ type Workflow struct {
 	File        string   `json:"file"`
 	Path        string   `json:"path"`
 	Tags        []string `json:"tags"`
-}
-
-func ParseWorkflowsFromInput(content []byte) []*Workflow {
-	var workflows []*Workflow
-	var err error
-	err = json.Unmarshal(content, &workflows)
-	if err != nil {
-		utils.Fatal("workflow load FAIL, " + err.Error())
-	}
-	return workflows
 }
 
 func (w *Workflow) PrepareConfig(rconfig Config) *Config {
