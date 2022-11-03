@@ -86,10 +86,16 @@ func InitConfig(config *Config) (*Config, error) {
 		}
 	}
 
-	if config.Results != nil {
+	if config.Results != nil && config.Filters != nil {
+		var results parsers.GOGOResults
 		for _, filter := range config.Filters {
-			config.Results = config.Results.FilterWithString(filter)
+			if config.FilterOr {
+				results = append(results, config.Results.FilterWithString(filter)...)
+			} else {
+				results = results.FilterWithString(filter)
+			}
 		}
+		config.Results = results
 	}
 	err = config.InitIP()
 	if err != nil {

@@ -6,6 +6,7 @@ import (
 	. "github.com/chainreactors/files"
 	. "github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/gogo/v2/pkg/utils"
+	"github.com/chainreactors/parsers"
 	"os"
 	"strings"
 )
@@ -30,12 +31,12 @@ func output(result *Result, outType string) string {
 	return out
 }
 
-func FormatOutput(filename, outFilename, outf, filenamef string, filters []string) {
+func FormatOutput(filename, outFilename, outf, filenamef string, filters []string, filterOr bool) {
 	var outfunc func(s string)
 	var iscolor bool
-	var resultsdata *ResultsData
-	var smartdata *SmartData
-	var textdata string
+	var rd *ResultsData
+	var sd *SmartData
+	var text string
 	var file *os.File
 	var err error
 	if filename == "stdin" {
@@ -54,18 +55,18 @@ func FormatOutput(filename, outFilename, outf, filenamef string, filters []strin
 	data := LoadResultFile(file)
 	switch data.(type) {
 	case *ResultsData:
-		resultsdata = data.(*ResultsData)
-		fmt.Println(resultsdata.ToConfig())
+		rd = data.(*ResultsData)
+		fmt.Println(rd.ToConfig())
 		if outFilename == "" {
-			outFilename = GetFilename(resultsdata.GetConfig(), outf)
+			outFilename = GetFilename(rd.GetConfig(), outf)
 		}
 	case *SmartData:
-		smartdata = data.(*SmartData)
+		sd = data.(*SmartData)
 		if outFilename == "" {
-			outFilename = GetFilename(&smartdata.Config, "cidr")
+			outFilename = GetFilename(&sd.Config, "cidr")
 		}
 	case []byte:
-		textdata = string(data.([]byte))
+		text = string(data.([]byte))
 	default:
 		return
 	}
@@ -87,12 +88,20 @@ func FormatOutput(filename, outFilename, outf, filenamef string, filters []strin
 		}
 	}
 
-	if smartdata != nil && smartdata.Data != nil {
-		outfunc(strings.Join(smartdata.Data, "\n"))
+	if sd != nil && sd.Data != nil {
+		outfunc(strings.Join(sd.Data, "\n"))
 		return
-	} else if resultsdata != nil && resultsdata.Data != nil {
-		for _, filter := range filters {
-			resultsdata.Filter(filter)
+	} else if rd != nil && rd.Data != nil {
+		if len(filters) > 0 {
+			var results parsers.GOGOResults
+			for _, filter := range filters {
+				if filterOr {
+					results = append(results, rd.Filter(filter)...)
+				} else {
+					results = results.FilterWithString(filter)
+				}
+			}
+			rd.Data = results
 		}
 
 		if outf == "c" {
@@ -100,28 +109,28 @@ func FormatOutput(filename, outFilename, outf, filenamef string, filters []strin
 		}
 
 		if outf == "cs" {
-			outfunc(resultsdata.ToCobaltStrike())
+			outfunc(rd.ToCobaltStrike())
 		} else if outf == "zombie" {
-			outfunc(resultsdata.ToZombie())
+			outfunc(rd.ToZombie())
 		} else if outf == "c" || outf == "full" {
-			outfunc(resultsdata.ToFormat(iscolor))
+			outfunc(rd.ToFormat(iscolor))
 		} else if outf == "json" {
-			content, err := json.Marshal(resultsdata)
+			content, err := json.Marshal(rd)
 			if err != nil {
 				fmt.Println(err.Error())
 				return
 			}
 			outfunc(string(content))
 		} else if outf == "csv" {
-			outfunc(resultsdata.ToCsv())
+			outfunc(rd.ToCsv())
 		} else if outf == "extract" {
-			outfunc(resultsdata.ToExtracteds())
+			outfunc(rd.ToExtracteds())
 		} else {
-			outfunc(resultsdata.ToValues(outf))
+			outfunc(rd.ToValues(outf))
 		}
-	} else if textdata != "" {
+	} else if text != "" {
 		if outFilename != "" {
-			outfunc(textdata)
+			outfunc(text)
 		}
 	}
 }

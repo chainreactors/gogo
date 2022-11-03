@@ -56,6 +56,7 @@ type Config struct {
 	Results        parsers.GOGOResults `json:"-"` // json反序列化后的内网,保存在内存中
 	HostsMap       map[string][]string `json:"-"` // host映射表
 	Filters        []string            `json:"-"`
+	FilterOr       bool                `json:"-"`
 }
 
 func (config *Config) InitIP() error {

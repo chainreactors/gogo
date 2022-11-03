@@ -67,7 +67,7 @@ func (r *Runner) PreInit() bool {
 
 	r.PrepareConfig()
 	if r.FormatterFilename != "" {
-		FormatOutput(r.FormatterFilename, r.Config.Filename, r.Config.Outputf, r.Config.FileOutputf, r.Filters)
+		FormatOutput(r.FormatterFilename, r.Config.Filename, r.Config.Outputf, r.Config.FileOutputf, r.Filters, r.FilterOr)
 		return false
 	}
 	// 输出 Config
@@ -169,6 +169,7 @@ func (r *Runner) PrepareConfig() {
 		Compress:    r.Compress,
 		Tee:         r.Tee,
 		Filters:     r.Filters,
+		FilterOr:    r.FilterOr,
 	}
 
 	if r.FileOutputf == Default {
