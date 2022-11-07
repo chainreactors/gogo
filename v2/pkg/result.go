@@ -57,9 +57,6 @@ func (result *Result) GetHttpConn(delay int) *http.Client {
 }
 
 func (result *Result) AddVuln(vuln *parsers.Vuln) {
-	if vuln.Severity == "" {
-		vuln.Severity = parsers.SeverityMap[vuln.SeverityLevel]
-	}
 	result.Vulns = append(result.Vulns, vuln)
 }
 
@@ -70,9 +67,6 @@ func (result *Result) AddVulns(vulns []*parsers.Vuln) {
 }
 
 func (result *Result) AddFramework(f *parsers.Framework) {
-	if f.FromStr == "" {
-		f.FromStr = parsers.FrameFromMap[f.From]
-	}
 	result.Frameworks = append(result.Frameworks, f)
 }
 
