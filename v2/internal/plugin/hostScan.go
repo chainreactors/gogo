@@ -33,7 +33,6 @@ func hostScan(result *Result) {
 		body := parsers.ReadBody(resp)
 		title := parsers.MatchTitle(string(body))
 
-		//hash := dsl.Md5Hash(body)[:4] // 因为头中经常有随机值, 因此hash通过body判断
 		if result.Title != title {
 			if result.CurrentHost == "" {
 				result.CurrentHost = host
