@@ -68,7 +68,7 @@ func (w *Workflow) PrepareConfig(rconfig Config) *Config {
 		config.ListFile = rconfig.ListFile
 	}
 
-	if rconfig.Ports != "" {
+	if rconfig.Ports != "top1" {
 		config.Ports = rconfig.Ports
 	}
 
