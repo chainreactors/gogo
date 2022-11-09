@@ -1,8 +1,9 @@
 github.com/M09ic/go-ntlmssp v1.2.9 h1:VVpoldqbRlmyhxrVsJBy0qjAF1RSq89kSLEie/IWRew=
 github.com/M09ic/go-ntlmssp v1.2.9/go.mod h1:yMNEF6ulbFipt3CakMhcmcNVACshPRG4Ap4l00V+mMs=
 github.com/chainreactors/files v0.2.0/go.mod h1:/Xa9YXhjBlaC33JTD6ZTJFig6pcplak2IDcovf42/6A=
-github.com/chainreactors/files v0.2.3 h1:rDU53H9BPFyQWuIsjZdTm4m7e2/SSemobaU2QUVfLow=
 github.com/chainreactors/files v0.2.3/go.mod h1:/Xa9YXhjBlaC33JTD6ZTJFig6pcplak2IDcovf42/6A=
+github.com/chainreactors/files v0.2.4 h1:R0iCqjWLcwwLoSi87FpgUlpxZAd+W4ZLQF3lkoLWZi0=
+github.com/chainreactors/files v0.2.4/go.mod h1:/Xa9YXhjBlaC33JTD6ZTJFig6pcplak2IDcovf42/6A=
 github.com/chainreactors/ipcs v0.0.9 h1:4Onroq7gXLG5SLCCgNDx3JmtLxB4XgepGdHCtLp1Ows=
 github.com/chainreactors/ipcs v0.0.9/go.mod h1:E9M3Ohyq0TYQLlV4i2dbM9ThBZB1Nnd7Oexoie2xLII=
 github.com/chainreactors/logs v0.6.1 h1:+wLVqxErUyWYayAx6x+m5LA6jQBiHcLdTAJtiOUMoZU=

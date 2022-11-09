@@ -4,7 +4,7 @@ go 1.10
 
 require (
 	github.com/M09ic/go-ntlmssp v1.2.9
-	github.com/chainreactors/files v0.2.3
+	github.com/chainreactors/files v0.2.4
 	github.com/chainreactors/ipcs v0.0.9
 	github.com/chainreactors/logs v0.6.1
 	github.com/chainreactors/parsers v0.2.5

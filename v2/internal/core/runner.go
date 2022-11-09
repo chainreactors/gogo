@@ -166,7 +166,7 @@ func (r *Runner) PrepareConfig() {
 		NoSpray:     r.NoSpray,
 		Filename:    r.Filename,
 		FilePath:    r.FilePath,
-		Compress:    r.Compress,
+		Compress:    !r.Compress,
 		Tee:         r.Tee,
 		Filters:     r.Filters,
 		FilterOr:    r.FilterOr,
@@ -184,7 +184,6 @@ func (r *Runner) PrepareConfig() {
 		r.Config.Outputf = r.Outputf
 	}
 
-	r.Config.Compress = !r.Config.Compress
 	if r.AutoFile {
 		r.Config.Filenamef = "auto"
 	} else if r.HiddenFile {
@@ -280,6 +279,11 @@ func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) {
 				config.Filename = GetFilename(config, config.FileOutputf)
 			}
 
+			if r.Compress {
+				config.Compress = false
+			} else {
+				config.Compress = true
+			}
 			// 全局变量的处理
 			if !r.NoScan {
 				Opt.Noscan = workflow.NoScan
