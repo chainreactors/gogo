@@ -20,7 +20,7 @@ func fingerScan(result *Result) {
 			}
 		}
 
-		matcher := func(result *Result, finger *fingers.Finger) (*fingers.Framework, *fingers.Vuln) {
+		matcher := func(result *Result, finger *fingers.Finger) (*parsers.Framework, *parsers.Vuln) {
 			return httpFingerMatch(result, finger, sender)
 		}
 		getFramework(result, HttpFingers, matcher)
@@ -42,7 +42,7 @@ func fingerScan(result *Result) {
 			return string(data), true
 		}
 
-		matcher := func(result *Result, finger *fingers.Finger) (*fingers.Framework, *fingers.Vuln) {
+		matcher := func(result *Result, finger *fingers.Finger) (*parsers.Framework, *parsers.Vuln) {
 			return tcpFingerMatch(result, finger, sender)
 		}
 		getFramework(result, TcpFingers, matcher)
@@ -50,9 +50,8 @@ func fingerScan(result *Result) {
 	return
 }
 
-func getFramework(result *Result, fingermap fingers.FingerMapper, matcher func(*Result, *fingers.Finger) (*fingers.Framework, *fingers.Vuln)) {
+func getFramework(result *Result, fingermap fingers.FingerMapper, matcher func(*Result, *fingers.Finger) (*parsers.Framework, *parsers.Vuln)) {
 	// 优先匹配默认端口,第一次循环只匹配默认端口
-	//var fs Frameworks
 	var alreadyFrameworks fingers.Fingers
 	for _, finger := range fingermap.GetFingers(result.Port) {
 		framework, vuln := matcher(result, finger)
@@ -70,12 +69,12 @@ func getFramework(result *Result, fingermap fingers.FingerMapper, matcher func(*
 		}
 	}
 
-	for port, fingers := range fingermap {
+	for port, fs := range fingermap {
 		if port == result.Port {
 			// 跳过已经扫过的默认端口
 			continue
 		}
-		for _, finger := range fingers {
+		for _, finger := range fs {
 			if alreadyFrameworks.Contain(finger) {
 				continue
 			} else {
@@ -96,7 +95,7 @@ func getFramework(result *Result, fingermap fingers.FingerMapper, matcher func(*
 	return
 }
 
-func httpFingerMatch(result *Result, finger *fingers.Finger, sender func(sendData []byte) (string, bool)) (*fingers.Framework, *fingers.Vuln) {
+func httpFingerMatch(result *Result, finger *fingers.Finger, sender func(sendData []byte) (string, bool)) (*parsers.Framework, *parsers.Vuln) {
 	frame, vuln, ok := fingers.FingerMatcher(finger, result.Content, RunOpt.VersionLevel, sender)
 	if ok {
 		if frame.Data != "" {
@@ -107,7 +106,7 @@ func httpFingerMatch(result *Result, finger *fingers.Finger, sender func(sendDat
 	return nil, nil
 }
 
-func tcpFingerMatch(result *Result, finger *fingers.Finger, sender func(sendData []byte) (string, bool)) (*fingers.Framework, *fingers.Vuln) {
+func tcpFingerMatch(result *Result, finger *fingers.Finger, sender func(sendData []byte) (string, bool)) (*parsers.Framework, *parsers.Vuln) {
 	frame, vuln, ok := fingers.FingerMatcher(finger, result.Content, RunOpt.VersionLevel, sender)
 	if ok {
 		return frame, vuln

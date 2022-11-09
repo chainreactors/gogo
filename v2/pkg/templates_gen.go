@@ -6,6 +6,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/chainreactors/files"
 	. "github.com/chainreactors/gogo/v2/pkg"
 	"io"
 	"os"
@@ -82,7 +83,7 @@ func recuLoadYamlFiles2JsonString(dir string, single bool) string {
 }
 
 func main() {
-	Key = []byte(os.Getenv("gt_key"))
+	files.Key = []byte(os.Getenv("gt_key"))
 	fmt.Println("key: " + os.Getenv("gt_key"))
 	template := `package pkg
 

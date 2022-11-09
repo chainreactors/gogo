@@ -5,33 +5,15 @@ import (
 	"encoding/json"
 	"fmt"
 	. "github.com/chainreactors/files"
-	"github.com/chainreactors/gogo/v2/pkg/fingers"
 	"github.com/chainreactors/gogo/v2/pkg/utils"
 	"github.com/chainreactors/ipcs"
 	. "github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
-	"io/ioutil"
 	"os"
 	"strings"
 )
 
 var winport = []string{"445", "135", "137"}
-var zombiemap = map[string]string{
-	"mariadb":   "MYSQL",
-	"mysql":     "MYSQL",
-	"rdp":       "RDP",
-	"oracle":    "ORACLE",
-	"sqlserver": "MSSQL",
-	"mssql":     "MSSQL",
-	"smb":       "SMB",
-	"redis":     "REDIS",
-	"vnc":       "VNC",
-	//"elasticsearch": "ELASTICSEARCH",
-	"postgresql": "POSTGRESQL",
-	"mongo":      "MONGO",
-	"ssh":        "SSH",
-	"ftp":        "FTP",
-}
 
 type windowsInfo struct {
 	hostname    string
@@ -44,28 +26,34 @@ func (wininfo windowsInfo) toString() string {
 	return fmt.Sprintf("%s %s %s %s", wininfo.version, wininfo.hostname, wininfo.netbiosstat, strings.Join(wininfo.networks, ","))
 }
 
-type IPMapResult map[string]Result
+type IPMapResult map[string]*parsers.GOGOResult
 
+func (imap IPMapResult) Get(port string) *parsers.GOGOResult {
+	if result, ok := imap[port]; ok {
+		return result
+	}
+	return &parsers.GOGOResult{}
+}
 func (imap IPMapResult) getWindowsInfo() windowsInfo {
 	var wininfo = windowsInfo{}
-	if len(imap["445"].Vulns) != 0 {
+	if imap.Get("445").Vulns != nil {
 		wininfo.version = imap["445"].Title
-	} else if imap["445"].Frameworks != nil {
+	} else if imap.Get("445").Frameworks != nil {
 		wininfo.version = imap["445"].Frameworks[0].Version
-	} else if imap["135"].Frameworks != nil {
+	} else if imap.Get("135").Frameworks != nil {
 		wininfo.version = imap["135"].Frameworks[0].Version
 	}
 
-	if imap["445"].Host != "" {
+	if imap.Get("445").Host != "" {
 		wininfo.hostname = imap["445"].Host
-	} else if imap["135"].Host != "" {
-		wininfo.hostname = imap["445"].Host
+	} else if imap.Get("135").Host != "" {
+		wininfo.hostname = imap["135"].Host
 	} else {
-		wininfo.hostname = imap["137"].Host
+		wininfo.hostname = imap.Get("137").Host
 	}
 
-	wininfo.netbiosstat = imap["137"].Status
-	wininfo.networks = strings.Split(imap["135 (oxid)"].Title, ",")
+	wininfo.netbiosstat = imap.Get("137").Status
+	wininfo.networks = strings.Split(imap.Get("135 (oxid)").Title, ",")
 	return wininfo
 }
 
@@ -79,24 +67,26 @@ func (imap IPMapResult) isWin() bool {
 }
 
 type ResultsData struct {
-	Config Config  `json:"config"`
-	IP     string  `json:"ip"`
-	Data   Results `json:"data"`
+	*parsers.GOGOData
 }
 
-func (rd ResultsData) groupByIP() map[string]IPMapResult {
+func (rd *ResultsData) GetConfig() *Config {
+	return &Config{GOGOConfig: &rd.Config}
+}
+
+func (rd *ResultsData) groupByIP() map[string]IPMapResult {
 	pfs := make(map[string]IPMapResult)
 	//ipfs := make(map[string]ipformat)
 	for _, result := range rd.Data {
 		if pfs[result.Ip] == nil {
-			pfs[result.Ip] = make(map[string]Result)
+			pfs[result.Ip] = make(IPMapResult)
 		}
-		pfs[result.Ip][result.Port] = *result
+		pfs[result.Ip][result.Port] = result
 	}
 	return pfs
 }
 
-func (rd ResultsData) groupBySortedIP() (map[string]IPMapResult, []string) {
+func (rd *ResultsData) groupBySortedIP() (map[string]IPMapResult, []string) {
 	pfs := rd.groupByIP()
 	ips := make([]string, len(pfs))
 	var i = 0
@@ -107,60 +97,7 @@ func (rd ResultsData) groupBySortedIP() (map[string]IPMapResult, []string) {
 	return pfs, sortIP(ips)
 }
 
-func (rd *ResultsData) Filter(name string) {
-	var results Results
-	if name == "focus" {
-		results = rd.Data.Filter("frame", "focus", "::")
-	} else if name == "vuln" {
-		results = rd.Data.Filter("vuln", "high", "::")
-		results = append(results, rd.Data.Filter("vuln", "critical", "::")...)
-	} else if name == "domain" {
-		//rd.Data = rd.Data.Filter()
-		//} else if name == "network" {
-		//results = rd.Data.Filter()
-	} else {
-		// 过滤指定数据
-		if strings.Contains(name, "::") {
-			kv := strings.Split(name, "::")
-			results = rd.Data.Filter(kv[0], kv[1], "::")
-		} else if strings.Contains(name, "==") {
-			kv := strings.Split(name, "==")
-			results = rd.Data.Filter(kv[0], kv[1], "==")
-		}
-	}
-	rd.Data = results
-}
-
-func (rd ResultsData) ToConfig() string {
-	// 输出配置信息
-	var configstr string
-	configstr = fmt.Sprintf("Scan Target: %s, Ports: %s, Mod: %s \n", rd.Config.GetTargetName(), rd.Config.Ports, rd.Config.Mod)
-	configstr += fmt.Sprintf("Exploit: %s, Version level: %d \n", rd.Config.Exploit, rd.Config.VersionLevel)
-	if rd.IP != "" {
-		configstr += fmt.Sprintf("Internet IP: %s", rd.IP)
-	}
-	return configstr
-}
-
-func (rd ResultsData) ToValues(outType string) string {
-	outs := strings.Split(outType, ",")
-	outvalues := make([][]string, len(outs))
-	ss := make([]string, len(rd.Data))
-	for i, out := range outs {
-		outvalues[i] = rd.Data.GetValues(out)
-	}
-
-	for i := 0; i < len(ss); i++ {
-		for j := 0; j < len(outvalues); j++ {
-			ss[i] += outvalues[j][i] + "\t"
-		}
-		strings.TrimSpace(ss[i])
-	}
-
-	return strings.Join(ss, "\n")
-}
-
-func (rd ResultsData) ToFormat(isColor bool) string {
+func (rd *ResultsData) ToFormat(isColor bool) string {
 	var s string
 
 	pfs, ips := rd.groupBySortedIP()
@@ -171,7 +108,7 @@ func (rd ResultsData) ToFormat(isColor bool) string {
 		s += fmt.Sprintf("[+] %s %s\n", ip, wininfo.toString())
 		for port, p := range pfs[ip] {
 			// 跳过OXID与NetBois
-			if !(p.Port == "135 (oxid)" || p.Port == "137" || p.Port == "icmp") {
+			if !(p.Port == "icmp") {
 				if isColor {
 					// 颜色输出
 					s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s\t%s [%s] %s %s %s\n",
@@ -211,7 +148,24 @@ func (rd ResultsData) ToFormat(isColor bool) string {
 	return s
 }
 
-func (rd ResultsData) ToCobaltStrike() string {
+func (rd *ResultsData) ToExtracteds() string {
+	var s strings.Builder
+	for _, result := range rd.Data {
+		if len(result.Extracteds) == 0 {
+			continue
+		}
+		s.WriteString("[+] ")
+		s.WriteString(result.GetTarget())
+		s.WriteString("\n")
+		for name, extract := range result.Extracteds {
+			s.WriteString(fmt.Sprintf(" \t * %s \n\t\t", name))
+			s.WriteString(strings.Join(extract, "\n\t\t") + "\n")
+		}
+	}
+	return s.String()
+}
+
+func (rd *ResultsData) ToCobaltStrike() string {
 	var s string
 	pfs := rd.groupByIP()
 	for ip, imap := range pfs {
@@ -229,34 +183,6 @@ func (rd ResultsData) ToCobaltStrike() string {
 		}
 	}
 	return s
-}
-
-func (rd ResultsData) ToZombie() string {
-	var zms []zombiemeta
-	for _, r := range rd.Data {
-		if service, ok := zombiemap[strings.ToLower(r.GetFirstFramework())]; ok {
-			zms = append(zms, zombiemeta{
-				IP:      r.Ip,
-				Port:    r.Port,
-				Service: strings.ToLower(service),
-			})
-		}
-	}
-
-	s, err := json.Marshal(zms)
-	if err != nil {
-		utils.Fatal("" + err.Error())
-	}
-	return string(s)
-}
-
-func (rd ResultsData) ToCsv() string {
-	var s strings.Builder
-	s.WriteString("ip,port,url,status,title,host,language,midware,frame,vuln,extract\n")
-	for _, r := range rd.Data {
-		s.WriteString(CsvOutput(r))
-	}
-	return s.String()
 }
 
 func autofixjson(content []byte) []byte {
@@ -281,25 +207,6 @@ func LoadResult(content []byte) (*ResultsData, error) {
 	return resultsdata, nil
 }
 
-type extractTmp struct {
-	extracts Extracts
-}
-
-func LoadExtracts(content []byte) ([]*Extracts, error) {
-	var err error
-	var extractss []*Extracts
-
-	for _, res := range bytes.Split(content, []byte{'\n'}) {
-		var extracts *Extracts
-		err = json.Unmarshal(res, &extracts)
-		if err != nil {
-			return nil, err
-		}
-		extractss = append(extractss, extracts)
-	}
-	return extractss, nil
-}
-
 type SmartData struct {
 	Config Config   `json:"config"`
 	Data   []string `json:"data"`
@@ -318,26 +225,8 @@ func loadSmartResult(content []byte) (*SmartData, error) {
 
 func LoadResultFile(file *os.File) interface{} {
 	var data interface{}
-	content, err := ioutil.ReadAll(file)
-	if err != nil {
-		utils.Fatal("" + err.Error())
-	}
-
-	if IsBase64(content) {
-		// stdin输入二进制文件支持base64编码之后的. base64 result.txt|gogo -F stdin
-		// 如果直接输入解压缩之后的json文件,则跳过这个步骤
-		content = parsers.Base64Decode(string(content))
-	}
-
-	if IsBin(content) {
-		content = parsers.XorEncode(content, Key, 0)
-		if unflated := UnFlate(content); len(unflated) == 0 {
-			Log.Error("deflate failed, incorrect key")
-			return content
-		} else {
-			content = unflated
-		}
-	}
+	var err error
+	content := DecryptFile(file, Key)
 
 	content = bytes.TrimSpace(content) // 去除前后空格
 	if bytes.Contains(content, []byte("\"smartb\",")) || bytes.Contains(content, []byte("\"smartc\",")) || bytes.Contains(content, []byte("\"ping\",")) {
@@ -348,14 +237,11 @@ func LoadResultFile(file *os.File) interface{} {
 		// 解析扫描结果
 		content = autofixjson(content)
 		data, err = LoadResult(content)
-	} else if bytes.Contains(content, []byte("\"extract_result")) {
-		// 解析extract结果
-		data, err = LoadExtracts(content)
 	} else if !IsJson(content) {
 		// 解析按行分割的 ip:port:framework 输入
-		var results Results
-		for _, target := range strings.Split(string(content), "\n") {
-			var result *Result
+		var results parsers.GOGOResults
+		for _, target := range utils.CleanSpiltCFLR(string(content)) {
+			var result *parsers.GOGOResult
 			if strings.Contains(target, ":") {
 				if strings.Contains(target, "http") {
 					if strings.HasPrefix(target, "http://") {
@@ -377,16 +263,16 @@ func LoadResultFile(file *os.File) interface{} {
 				if len(targetpair) >= 2 {
 					if !ipcs.IsIpv4(host) {
 						if parsedIP, err := ipcs.ParseIP(host); err != nil {
-							result = NewResult(parsedIP.String(), targetpair[1])
-							result.HttpHosts = []string{host}
+							result = parsers.NewGOGOResult(parsedIP.String(), targetpair[1])
+							result.Host = host
 						}
 					} else {
-						result = NewResult(host, targetpair[1])
+						result = parsers.NewGOGOResult(host, targetpair[1])
 					}
 				}
 
 				if len(targetpair) == 3 {
-					result.AddFramework(&fingers.Framework{Name: targetpair[2]})
+					result.Frameworks = []*parsers.Framework{&parsers.Framework{Name: targetpair[2]}}
 				}
 				if result != nil {
 					results = append(results, result)
@@ -405,32 +291,6 @@ func LoadResultFile(file *os.File) interface{} {
 		return content
 	}
 	return data
-}
-
-func isClearResult(content []byte) bool {
-	if bytes.Equal(content[0:9], []byte("{\"config\"")) {
-		return true
-	}
-	return false
-}
-
-func IsBase64(content []byte) bool {
-	b64bytes := []byte("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=")
-	for _, i := range content {
-		if !bytes.Contains(b64bytes, []byte{i}) {
-			return false
-		}
-	}
-	return true
-}
-
-func IsBin(content []byte) bool {
-	for _, i := range content {
-		if i < 9 {
-			return true
-		}
-	}
-	return false
 }
 
 func IsJson(content []byte) bool {

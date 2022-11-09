@@ -6,6 +6,7 @@ import (
 	. "github.com/chainreactors/files"
 	. "github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/gogo/v2/pkg/utils"
+	"github.com/chainreactors/parsers"
 	"os"
 	"strings"
 )
@@ -15,33 +16,36 @@ func output(result *Result, outType string) string {
 
 	switch outType {
 	case "color", "c":
-		out = ColorOutput(result)
+		out = result.ColorOutput()
 	case "json", "j":
-		out = JsonOutput(result)
+		out = result.JsonOutput()
 	case "jsonlines", "jl":
-		out = JsonOutput(result) + "\n"
+		out = result.JsonOutput() + "\n"
 	case "full":
-		out = FullOutput(result)
+		out = result.FullOutput()
 	case "csv":
-		out = CsvOutput(result)
+		out = result.CsvOutput()
 	default:
-		out = ValuesOutput(result, outType)
+		out = result.ValuesOutput(outType)
 	}
 	return out
 }
 
-func FormatOutput(filename, outFilename, outf, filenamef string, filters []string) {
+func FormatOutput(filename, outFilename, outf, filenamef string, filters []string, filterOr bool) {
 	var outfunc func(s string)
 	var iscolor bool
-	var resultsdata *ResultsData
-	var smartdata *SmartData
-	var extractsdata []*Extracts
-	var textdata string
+	var rd *ResultsData
+	var sd *SmartData
+	var text string
 	var file *os.File
+	var err error
 	if filename == "stdin" {
 		file = os.Stdin
 	} else {
-		file = Open(filename)
+		file, err = Open(filename)
+		if err != nil {
+			utils.Fatal(err.Error())
+		}
 	}
 
 	if filenamef == "auto" {
@@ -51,21 +55,18 @@ func FormatOutput(filename, outFilename, outf, filenamef string, filters []strin
 	data := LoadResultFile(file)
 	switch data.(type) {
 	case *ResultsData:
-		resultsdata = data.(*ResultsData)
-		fmt.Println(resultsdata.ToConfig())
+		rd = data.(*ResultsData)
+		fmt.Println(rd.ToConfig())
 		if outFilename == "" {
-			outFilename = GetFilename(&resultsdata.Config, outf)
+			outFilename = GetFilename(rd.GetConfig(), outf)
 		}
 	case *SmartData:
-		smartdata = data.(*SmartData)
+		sd = data.(*SmartData)
 		if outFilename == "" {
-			outFilename = GetFilename(&smartdata.Config, "cidr")
+			outFilename = GetFilename(&sd.Config, "cidr")
 		}
-	case []*Extracts:
-		extractsdata = data.([]*Extracts)
-		//ConsoleLog("parser extracts successfully")
 	case []byte:
-		textdata = string(data.([]byte))
+		text = string(data.([]byte))
 	default:
 		return
 	}
@@ -87,12 +88,20 @@ func FormatOutput(filename, outFilename, outf, filenamef string, filters []strin
 		}
 	}
 
-	if smartdata != nil && smartdata.Data != nil {
-		outfunc(strings.Join(smartdata.Data, "\n"))
+	if sd != nil && sd.Data != nil {
+		outfunc(strings.Join(sd.Data, "\n"))
 		return
-	} else if resultsdata != nil && resultsdata.Data != nil {
-		for _, filter := range filters {
-			resultsdata.Filter(filter)
+	} else if rd != nil && rd.Data != nil {
+		if len(filters) > 0 {
+			var results parsers.GOGOResults
+			for _, filter := range filters {
+				if filterOr {
+					results = append(results, rd.Filter(filter)...)
+				} else {
+					results = results.FilterWithString(filter)
+				}
+			}
+			rd.Data = results
 		}
 
 		if outf == "c" {
@@ -100,36 +109,28 @@ func FormatOutput(filename, outFilename, outf, filenamef string, filters []strin
 		}
 
 		if outf == "cs" {
-			outfunc(resultsdata.ToCobaltStrike())
+			outfunc(rd.ToCobaltStrike())
 		} else if outf == "zombie" {
-			outfunc(resultsdata.ToZombie())
+			outfunc(rd.ToZombie())
 		} else if outf == "c" || outf == "full" {
-			outfunc(resultsdata.ToFormat(iscolor))
+			outfunc(rd.ToFormat(iscolor))
 		} else if outf == "json" {
-			content, err := json.Marshal(resultsdata)
+			content, err := json.Marshal(rd)
 			if err != nil {
 				fmt.Println(err.Error())
 				return
 			}
 			outfunc(string(content))
 		} else if outf == "csv" {
-			outfunc(resultsdata.ToCsv())
+			outfunc(rd.ToCsv())
+		} else if outf == "extract" {
+			outfunc(rd.ToExtracteds())
 		} else {
-			outfunc(resultsdata.ToValues(outf))
+			outfunc(rd.ToValues(outf))
 		}
-	} else if extractsdata != nil {
-		for _, extracts := range extractsdata {
-			var s string
-			s += fmt.Sprintf("[+] %s\n", extracts.Target)
-			for _, extract := range extracts.Extractors {
-				s += fmt.Sprintf(" \t * %s \n\t\t", extract.Name)
-				s += strings.Join(extract.ExtractResult, "\n\t\t") + "\n"
-			}
-			fmt.Println(s)
-		}
-	} else if textdata != "" {
+	} else if text != "" {
 		if outFilename != "" {
-			outfunc(textdata)
+			outfunc(text)
 		}
 	}
 }

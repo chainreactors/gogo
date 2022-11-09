@@ -5,6 +5,7 @@ import (
 	"github.com/chainreactors/gogo/v2/pkg/fingers"
 	"github.com/chainreactors/gogo/v2/pkg/nuclei/templates"
 	"github.com/chainreactors/logs"
+	"github.com/chainreactors/parsers"
 	"strings"
 )
 
@@ -24,7 +25,7 @@ func Nuclei(target string, result *Result) {
 }
 
 func executeTemplates(result *Result, titles []string, target string) {
-	var vulns []*fingers.Vuln
+	var vulns []*parsers.Vuln
 	ts := choiceTemplates(titles)
 chainLoop: // 实现chain
 	for {
@@ -36,7 +37,7 @@ chainLoop: // 实现chain
 				for name, extract := range res.Extracts {
 					result.AddExtract(fingers.NewExtracted(name, extract))
 				}
-				vulns = append(vulns, &fingers.Vuln{Name: template.Id, Payload: res.PayloadValues, Detail: res.DynamicValues, Severity: template.Info.Severity})
+				vulns = append(vulns, &parsers.Vuln{Name: template.Id, Payload: res.PayloadValues, Detail: res.DynamicValues, SeverityLevel: parsers.GetSeverityLevel(template.Info.Severity)})
 				chainsTemplates = append(chainsTemplates, diffTemplates(ts, choiceTemplates(template.Chains))...)
 			}
 		}

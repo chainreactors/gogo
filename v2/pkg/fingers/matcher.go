@@ -1,6 +1,7 @@
 package fingers
 
 import (
+	"github.com/chainreactors/parsers"
 	"regexp"
 	"strings"
 )
@@ -17,7 +18,15 @@ func compiledMatch(reg *regexp.Regexp, s string) (string, bool) {
 	}
 }
 
-func FingerMatcher(finger *Finger, content string, level int, sender func([]byte) (string, bool)) (*Framework, *Vuln, bool) {
+func compiledAllMatch(reg *regexp.Regexp, s string) ([]string, bool) {
+	matchedes := reg.FindAllString(s, -1)
+	if matchedes == nil {
+		return nil, false
+	}
+	return matchedes, true
+}
+
+func FingerMatcher(finger *Finger, content string, level int, sender func([]byte) (string, bool)) (*parsers.Framework, *parsers.Vuln, bool) {
 	return finger.Match(content, level, sender)
 }
 

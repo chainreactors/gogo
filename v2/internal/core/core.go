@@ -35,9 +35,6 @@ func DefaultMod(targets interface{}, config Config) {
 					Log.Important("init file: " + config.File.Filename)
 				}
 				config.File.SafeWrite(output(result, config.FileOutputf))
-				if result.Extracts.Extractors != nil {
-					config.ExtractFile.SafeWrite(result.Extracts.ToResult())
-				}
 			}
 		} else if result.Error != "" {
 			Log.Debugf("%s stat: %s, errmsg: %s", result.GetTarget(), portstat[result.ErrStat], result.Error)

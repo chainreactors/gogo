@@ -2,12 +2,14 @@ package core
 
 import (
 	"fmt"
+	"github.com/chainreactors/files"
 	. "github.com/chainreactors/gogo/v2/internal/plugin"
 	. "github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/gogo/v2/pkg/fingers"
 	nucleihttp "github.com/chainreactors/gogo/v2/pkg/nuclei/protocols/http"
 	. "github.com/chainreactors/gogo/v2/pkg/utils"
 	"github.com/chainreactors/logs"
+	"github.com/chainreactors/parsers"
 	"golang.org/x/net/proxy"
 	"net"
 	"net/http"
@@ -54,9 +56,8 @@ func (r *Runner) PreInit() bool {
 		SuffixStr:  r.SuffixStr,
 	}
 	Opt.PluginDebug = r.PluginDebug
-	NoGuess = r.NoGuess
-
-	Key = []byte(r.Key)
+	parsers.NoGuess = r.NoGuess
+	files.Key = []byte(r.Key)
 
 	// 一些特殊的分支, 这些分支将会直接退出程序
 	if r.Ver {
@@ -66,7 +67,7 @@ func (r *Runner) PreInit() bool {
 
 	r.PrepareConfig()
 	if r.FormatterFilename != "" {
-		FormatOutput(r.FormatterFilename, r.Config.Filename, r.Config.Outputf, r.Config.FileOutputf, r.Filters)
+		FormatOutput(r.FormatterFilename, r.Config.Filename, r.Config.Outputf, r.Config.FileOutputf, r.Filters, r.FilterOr)
 		return false
 	}
 	// 输出 Config
@@ -113,10 +114,10 @@ func (r *Runner) Init() {
 	}
 
 	// 初始化漏洞
-	if r.Exploit {
-		RunOpt.Exploit = "auto"
-	} else {
+	if r.ExploitName != "" {
 		RunOpt.Exploit = r.ExploitName
+	} else if r.Exploit {
+		RunOpt.Exploit = "auto"
 	}
 
 	if r.NoScan {
@@ -141,15 +142,23 @@ func (r *Runner) Init() {
 
 	// 加载配置文件中的全局变量
 	templatesLoader()
+	if r.AttackType != "" {
+		ExecuterOptions.Options.AttackType = r.AttackType
+	}
 	nucleiLoader(r.ExploitFile, r.Payloads)
 }
 
 func (r *Runner) PrepareConfig() {
 	r.Config = Config{
-		IP:          r.IP,
-		Ports:       r.Ports,
-		ListFile:    r.ListFile,
-		JsonFile:    r.JsonFile,
+		GOGOConfig: &parsers.GOGOConfig{
+			IP:        r.IP,
+			Ports:     r.Ports,
+			ListFile:  r.ListFile,
+			JsonFile:  r.JsonFile,
+			Threads:   r.Threads,
+			PortSpray: r.PortSpray,
+			Mod:       r.Mod,
+		},
 		IsListInput: r.IsListInput,
 		IsJsonInput: r.IsJsonInput,
 		PortProbe:   r.PortProbe,
@@ -157,11 +166,10 @@ func (r *Runner) PrepareConfig() {
 		NoSpray:     r.NoSpray,
 		Filename:    r.Filename,
 		FilePath:    r.FilePath,
-		Compress:    r.Compress,
-		Threads:     r.Threads,
-		PortSpray:   r.PortSpray,
-		Mod:         r.Mod,
+		Compress:    !r.Compress,
 		Tee:         r.Tee,
+		Filters:     r.Filters,
+		FilterOr:    r.FilterOr,
 	}
 
 	if r.FileOutputf == Default {
@@ -176,7 +184,6 @@ func (r *Runner) PrepareConfig() {
 		r.Config.Outputf = r.Outputf
 	}
 
-	r.Config.Compress = !r.Config.Compress
 	if r.AutoFile {
 		r.Config.Filenamef = "auto"
 	} else if r.HiddenFile {
@@ -199,10 +206,18 @@ func (r *Runner) Run() {
 			workflowMap["tmp"] = ParseWorkflowsFromInput(LoadFile(os.Stdin))
 			r.WorkFlowName = "tmp"
 		} else if IsExist(r.WorkFlowName) {
-			workflowMap["tmp"] = ParseWorkflowsFromInput(LoadFile(Open(r.WorkFlowName)))
+			file, err := files.Open(r.WorkFlowName)
+			if err != nil {
+				Fatal(err.Error())
+			}
+			workflowMap["tmp"] = ParseWorkflowsFromInput(LoadFile(file))
 			r.WorkFlowName = "tmp"
 		} else {
-			workflowMap = LoadWorkFlow()
+			if bs, ok := parsers.DSLParser(r.WorkFlowName); ok {
+				workflowMap["tmp"] = ParseWorkflowsFromInput(bs)
+			} else {
+				workflowMap = LoadWorkFlow()
+			}
 		}
 		r.runWithWorkFlow(workflowMap)
 	}
@@ -264,6 +279,11 @@ func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) {
 				config.Filename = GetFilename(config, config.FileOutputf)
 			}
 
+			if r.Compress {
+				config.Compress = false
+			} else {
+				config.Compress = true
+			}
 			// 全局变量的处理
 			if !r.NoScan {
 				Opt.Noscan = workflow.NoScan
@@ -362,8 +382,8 @@ func nucleiLoader(pocfile string, payloads []string) {
 
 func templatesLoader() {
 	LoadPortConfig()
-	AllFingers = LoadFinger("http")
-	Mmh3Fingers, Md5Fingers = LoadHashFinger(AllFingers)
+	AllHttpFingers = LoadFinger("http")
+	Mmh3Fingers, Md5Fingers = LoadHashFinger(AllHttpFingers)
 	TcpFingers = LoadFinger("tcp").GroupByPort()
-	HttpFingers = AllFingers.GroupByPort()
+	HttpFingers = AllHttpFingers.GroupByPort()
 }

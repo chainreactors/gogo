@@ -8,6 +8,7 @@ import (
 	"github.com/chainreactors/gogo/v2/pkg/utils"
 	"github.com/chainreactors/ipcs"
 	"github.com/chainreactors/logs"
+	"github.com/chainreactors/parsers"
 	"strings"
 )
 
@@ -20,35 +21,23 @@ const (
 )
 
 type Config struct {
+	*parsers.GOGOConfig
 	// ip
-	IP     string     `json:"ip"`
-	IPlist []string   `json:"ips"`
-	CIDRs  ipcs.CIDRs `json:"-"`
+	CIDRs ipcs.CIDRs `json:"-"`
 
 	// port and probe
-	Ports         string   `json:"ports"` // 预设字符串
-	PortList      []string `json:"-"`     // 处理完的端口列表
-	PortProbe     string   `json:"-"`     // 启发式扫描预设探针
-	PortProbeList []string `json:"-"`     // 启发式扫描预设探针
+	//Ports         string   `json:"ports"` // 预设字符串
+	PortList      []string `json:"-"` // 处理完的端口列表
+	PortProbe     string   `json:"-"` // 启发式扫描预设探针
+	PortProbeList []string `json:"-"` // 启发式扫描预设探针
 	IpProbe       string   `json:"-"`
 	IpProbeList   []uint   `json:"-"`
 
 	// file
-	JsonFile    string `json:"json_file"` // gt的结果json文件,可以再次读入扫描
-	ListFile    string `json:"list_file"` // 目标ip列表
-	IsListInput bool   `json:"-"`         // 从标准输入中读
-	IsJsonInput bool   `json:"-"`         // 从标准输入中读
-
-	// misc
-	Threads       int      `json:"threads"` // 线程数
-	Mod           string   `json:"mod"`     // 扫描模式
-	AliveSprayMod []string `json:"alive_spray"`
-	PortSpray     bool     `json:"port_spray"`
-	NoSpray       bool     `json:"-"`
-	Exploit       string   `json:"exploit"`
-	JsonType      string   `json:"json_type"`
-	VersionLevel  int      `json:"version_level"`
-	Compress      bool     `json:"-"`
+	IsListInput bool `json:"-"` // 从标准输入中读
+	IsJsonInput bool `json:"-"` // 从标准输入中读
+	NoSpray     bool `json:"-"`
+	Compress    bool `json:"-"`
 
 	// output
 	FilePath       string              `json:"-"`
@@ -59,14 +48,15 @@ type Config struct {
 	File           *File               `json:"-"`
 	SmartBFile     *File               `json:"-"`
 	SmartCFile     *File               `json:"-"`
-	ExtractFile    *File               `json:"-"`
 	AliveFile      *File               `json:"-"`
 	Tee            bool                `json:"-"`
 	Outputf        string              `json:"-"`
 	FileOutputf    string              `json:"-"`
 	Filenamef      string              `json:"-"`
-	Results        Results             `json:"-"` // json反序列化后的内网,保存在内存中
+	Results        parsers.GOGOResults `json:"-"` // json反序列化后的内网,保存在内存中
 	HostsMap       map[string][]string `json:"-"` // host映射表
+	Filters        []string            `json:"-"`
+	FilterOr       bool                `json:"-"`
 }
 
 func (config *Config) InitIP() error {
@@ -139,7 +129,6 @@ func (config *Config) InitFile() error {
 		} else if config.FileOutputf == "csv" {
 			config.File.Write("ip,port,url,status,title,host,language,midware,frame,vuln,extract\n")
 		}
-		config.ExtractFile, err = newFile(config.Filename+"_extract", config.Compress)
 	}
 
 	// -af 参数下的启发式扫描结果file初始化
@@ -228,9 +217,6 @@ func (config *Config) Close() {
 	}
 	if config.AliveFile != nil {
 		config.AliveFile.Close()
-	}
-	if config.ExtractFile != nil {
-		config.ExtractFile.Close()
 	}
 }
 

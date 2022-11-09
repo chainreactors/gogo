@@ -3,6 +3,7 @@ package pkg
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/chainreactors/files"
 	"github.com/chainreactors/gogo/v2/pkg/nuclei/protocols"
 	"github.com/chainreactors/gogo/v2/pkg/nuclei/templates"
 	"github.com/chainreactors/gogo/v2/pkg/utils"
@@ -20,10 +21,17 @@ func ParserCmdPayload(payloads []string) *protocols.ExecuterOptions {
 		},
 	}
 
-	var vars = make(map[string][]interface{})
+	var vars = make(map[string]interface{})
 	for _, payload := range payloads {
-		if i := strings.Index(payload, ":"); i != -1 {
-			vars[payload[:i]] = append(vars[payload[:i]], payload[i+1:])
+		if i := strings.Index(payload, "="); i != -1 {
+			//content := files.LoadCommonArg(payload[i+1:])
+			var content []byte
+			if f, err := files.Open(payload[i+1:]); err != nil {
+				content = []byte(payload[i+1:])
+			} else {
+				content = files.DecryptFile(f, nil)
+			}
+			vars[payload[:i]] = utils.CleanSpiltCFLR(string(content))
 		} else {
 			fmt.Println("[warn] incorrect format, skip " + payload)
 		}

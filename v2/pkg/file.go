@@ -2,9 +2,8 @@ package pkg
 
 import (
 	"fmt"
-	. "github.com/chainreactors/files"
+	"github.com/chainreactors/files"
 	"github.com/chainreactors/gogo/v2/pkg/utils"
-	"github.com/chainreactors/parsers"
 	"os"
 	"path"
 	"strings"
@@ -12,16 +11,15 @@ import (
 
 var smartcommaflag bool
 var pingcommaflag bool
-var sccommaflag bool
 
-func WriteSmartResult(file *File, ips []string) {
+func WriteSmartResult(file *files.File, ips []string) {
 	if file != nil {
 		file.SafeWrite(commaStream(ips, &smartcommaflag))
 		file.SafeSync()
 	}
 }
 
-func WriteAlivedResult(file *File, ips []string) {
+func WriteAlivedResult(file *files.File, ips []string) {
 	if file != nil {
 		file.SafeWrite(commaStream(ips, &pingcommaflag))
 		file.SafeSync()
@@ -40,8 +38,8 @@ func HasStdin() bool {
 	return isPipedFromChrDev || isPipedFromFIFO
 }
 
-func newFile(filename string, compress bool) (*File, error) {
-	file, err := NewFile(filename, compress, true, false)
+func newFile(filename string, compress bool) (*files.File, error) {
+	file, err := files.NewFile(filename, compress, true, false)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +47,7 @@ func newFile(filename string, compress bool) (*File, error) {
 	var cursor int
 
 	file.Encoder = func(i []byte) []byte {
-		bs := parsers.XorEncode(Flate(i), Key, cursor)
+		bs := files.XorEncode(files.Flate(i), files.Key, cursor)
 		cursor += len(bs)
 		return bs
 	}
@@ -76,19 +74,6 @@ func IsExist(filename string) bool {
 		exist = false
 	}
 	return exist
-}
-
-func Open(filename string) *os.File {
-	f, err := os.Open(filename)
-	if err == nil {
-		return f
-	}
-
-	f, err = os.Open(path.Join(GetExcPath(), filename))
-	if err != nil {
-		utils.Fatal(filename + err.Error())
-	}
-	return f
 }
 
 func getAutoFilename(config *Config, outtype string) string {

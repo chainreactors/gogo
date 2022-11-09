@@ -3,15 +3,14 @@ package pkg
 import (
 	"github.com/chainreactors/gogo/v2/pkg/fingers"
 	"github.com/chainreactors/gogo/v2/pkg/utils"
-	"github.com/chainreactors/ipcs"
 )
 
 var (
-	Md5Fingers  map[string]string
-	Mmh3Fingers map[string]string
-	AllFingers  fingers.Fingers
-	TcpFingers  fingers.FingerMapper
-	HttpFingers fingers.FingerMapper
+	Md5Fingers     map[string]string
+	Mmh3Fingers    map[string]string
+	AllHttpFingers fingers.Fingers
+	TcpFingers     fingers.FingerMapper
+	HttpFingers    fingers.FingerMapper
 )
 
 //加载指纹到全局变量
@@ -19,12 +18,6 @@ func LoadFinger(t string) fingers.Fingers {
 	fs, err := fingers.LoadFingers(LoadConfig(t))
 	if err != nil {
 		utils.Fatal(err.Error())
-	}
-	for _, finger := range fs {
-		err := finger.Compile(ipcs.ParsePorts)
-		if err != nil {
-			utils.Fatal(err.Error())
-		}
 	}
 	return fs
 }

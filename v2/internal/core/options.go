@@ -5,6 +5,7 @@ import (
 	"github.com/chainreactors/gogo/v2/internal/plugin"
 	. "github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/gogo/v2/pkg/utils"
+	"github.com/chainreactors/parsers"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -70,7 +71,9 @@ type ConfigOption struct {
 	ExploitName string   `short:"E" long:"exploit-name" description:"String, specify nuclei template name"` // 指定漏扫poc名字
 	ExploitFile string   `long:"ef" description:"String, load specified templates file "`                   // 指定漏扫文件
 	Filters     []string `long:"filter" description:"String, filter formatting(-F) results "`
+	FilterOr    bool     `long:"filter-or" description:"FilterOr"`
 	Payloads    []string `long:"payload" description:"String, specify nuclei payload"`
+	AttackType  string   `long:"attack-type" description:"nuclei attack types, sniper|clusterbomb|pitchfork" choice:"pitchfork" choice:"clusterbomb" choice:"sniper"`
 	Extract     []string `long:"extract" description:"String, custom Extract regexp"`
 	Extracts    string   `long:"extracts" description:"String, choice preset Extract regexp, e.g. --Extracts ip,url"`
 	Delay       int      `short:"d" long:"timeout" default:"2" description:"Int, socket and http timeout"`
@@ -82,7 +85,7 @@ type targetConfig struct {
 	ip      string
 	port    string
 	hosts   []string
-	fingers Frameworks
+	fingers parsers.Frameworks
 }
 
 func (tc *targetConfig) NewResult() *Result {

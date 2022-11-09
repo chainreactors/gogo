@@ -3,24 +3,12 @@ package fingers
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/chainreactors/ipcs"
 	"github.com/chainreactors/logs"
-	"github.com/chainreactors/parsers"
+	. "github.com/chainreactors/parsers"
 	"regexp"
 	"strings"
 )
-
-// common struct
-func decode(s string) []byte {
-	var bs []byte
-	if s[:4] == "b64|" {
-		bs = parsers.Base64Decode(s[4:])
-	} else if s[:5] == "hex|" {
-		bs = parsers.UnHexlify(s[5:])
-	} else {
-		bs = []byte(s)
-	}
-	return bs
-}
 
 func compileRegexp(s string) (*regexp.Regexp, error) {
 	reg, err := regexp.Compile(s)
@@ -62,7 +50,7 @@ func (finger *Finger) Compile(portHandler func([]string) []string) error {
 		finger.DefaultPort = portHandler(finger.DefaultPort)
 	}
 
-	err := finger.Rules.Compile()
+	err := finger.Rules.Compile(finger.Name)
 	if err != nil {
 		return err
 	}
@@ -86,11 +74,11 @@ func (finger *Finger) ToResult(hasFrame, hasVuln bool, res string, index int) (f
 
 	if hasVuln {
 		if finger.Rules[index].Vuln != "" {
-			vuln = &Vuln{Name: finger.Rules[index].Vuln, Severity: "high"}
+			vuln = &Vuln{Name: finger.Rules[index].Vuln, SeverityLevel: HIGH}
 		} else if finger.Rules[index].Info != "" {
-			vuln = &Vuln{Name: finger.Rules[index].Info, Severity: "info"}
+			vuln = &Vuln{Name: finger.Rules[index].Info, SeverityLevel: INFO}
 		} else {
-			vuln = &Vuln{Name: finger.Name, Severity: "info"}
+			vuln = &Vuln{Name: finger.Name, SeverityLevel: INFO}
 		}
 	}
 	return frame, vuln
@@ -127,6 +115,7 @@ func (finger *Finger) Match(content string, level int, sender func([]byte) (stri
 				for _, reg := range rule.Regexps.CompiledVersionRegexp {
 					res, _ := compiledMatch(reg, content)
 					if res != "" {
+						logs.Log.Debugf("%s version hit, regexp: %s", finger.Name, reg.String())
 						frame.Version = res
 						break
 					}
@@ -150,11 +139,12 @@ type Regexps struct {
 	CompliedRegexp        []*regexp.Regexp `yaml:"-" json:"-"`
 	CompiledVulnRegexp    []*regexp.Regexp `yaml:"-" json:"-"`
 	CompiledVersionRegexp []*regexp.Regexp `yaml:"-" json:"-"`
+	FingerName            string           `yaml:"-" json:"-"`
 	Header                []string         `yaml:"header,omitempty" json:"header,omitempty"`
 	Vuln                  []string         `yaml:"vuln,omitempty" json:"vuln,omitempty"`
 }
 
-func (r *Regexps) RegexpCompile() error {
+func (r *Regexps) Compile() error {
 	for _, reg := range r.Regexp {
 		creg, err := compileRegexp("(?i)" + reg)
 		if err != nil {
@@ -199,10 +189,34 @@ type Rule struct {
 	Favicon     *Favicons `yaml:"favicon,omitempty" json:"favicon,omitempty"`
 	Regexps     *Regexps  `yaml:"regexps,omitempty" json:"regexps,omitempty"`
 	SendDataStr string    `yaml:"send_data,omitempty" json:"send_data,omitempty"`
-	SendData    senddata  `yaml:"-,omitempty" json:"-,omitempty"`
+	SendData    senddata  `yaml:"-" json:"-"`
 	Info        string    `yaml:"info,omitempty" json:"info,omitempty"`
 	Vuln        string    `yaml:"vuln,omitempty" json:"vuln,omitempty"`
 	Level       int       `yaml:"level,omitempty" json:"level,omitempty"`
+	FingerName  string    `yaml:"-" json:"-"`
+}
+
+func (rs Rules) Compile(name string) error {
+	for _, r := range rs {
+		if r.Version == "" {
+			r.Version = "_"
+		}
+		r.FingerName = name
+		if r.SendDataStr != "" {
+			r.SendData, _ = DSLParser(r.SendDataStr)
+			if r.Level == 0 {
+				r.Level = 1
+			}
+		}
+
+		if r.Regexps != nil {
+			err := r.Regexps.Compile()
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 func (rule *Rule) Match(content string, ishttp bool) (bool, bool, string) {
@@ -231,6 +245,7 @@ func (rule *Rule) Match(content string, ishttp bool) (bool, bool, string) {
 	// body匹配
 	for _, bodyReg := range rule.Regexps.Body {
 		if strings.Contains(body, bodyReg) {
+			logs.Log.Debugf("%s finger hit, body: %s", rule.FingerName, bodyReg)
 			return true, false, ""
 		}
 	}
@@ -239,20 +254,23 @@ func (rule *Rule) Match(content string, ishttp bool) (bool, bool, string) {
 	for _, reg := range rule.Regexps.CompliedRegexp {
 		res, ok := compiledMatch(reg, content)
 		if ok {
+			logs.Log.Debugf("%s finger hit, regexp: %s", rule.FingerName, reg.String())
 			return true, false, res
 		}
 	}
 
 	// MD5 匹配
 	for _, md5s := range rule.Regexps.MD5 {
-		if md5s == parsers.Md5Hash([]byte(content)) {
+		if md5s == Md5Hash([]byte(content)) {
+			logs.Log.Debugf("%s finger hit, md5: %s", rule.FingerName, md5s)
 			return true, false, ""
 		}
 	}
 
 	// mmh3 匹配
 	for _, mmh3s := range rule.Regexps.MMH3 {
-		if mmh3s == parsers.Mmh3Hash32([]byte(content)) {
+		if mmh3s == Mmh3Hash32([]byte(content)) {
+			logs.Log.Debugf("%s finger hit, mmh3: %s", rule.FingerName, mmh3s)
 			return true, false, ""
 		}
 	}
@@ -262,8 +280,9 @@ func (rule *Rule) Match(content string, ishttp bool) (bool, bool, string) {
 		return false, false, ""
 	}
 
-	for _, headerReg := range rule.Regexps.Header {
-		if strings.Contains(header, headerReg) {
+	for _, headerStr := range rule.Regexps.Header {
+		if strings.Contains(header, headerStr) {
+			logs.Log.Debugf("%s finger hit, header: %s", rule.FingerName, headerStr)
 			return true, false, ""
 		}
 	}
@@ -271,25 +290,6 @@ func (rule *Rule) Match(content string, ishttp bool) (bool, bool, string) {
 }
 
 type Rules []*Rule
-
-func (rs Rules) Compile() error {
-	for _, r := range rs {
-		if r.SendDataStr != "" {
-			r.SendData = decode(r.SendDataStr)
-			if r.Level == 0 {
-				r.Level = 1
-			}
-		}
-
-		if r.Regexps != nil {
-			err := r.Regexps.RegexpCompile()
-			if err != nil {
-				return err
-			}
-		}
-	}
-	return nil
-}
 
 type senddata []byte
 
@@ -331,6 +331,13 @@ func LoadFingers(content []byte) (fingers Fingers, err error) {
 	err = json.Unmarshal(content, &fingers)
 	if err != nil {
 		return nil, err
+	}
+
+	for _, finger := range fingers {
+		err := finger.Compile(ipcs.ParsePorts)
+		if err != nil {
+			return nil, err
+		}
 	}
 	return fingers, nil
 }

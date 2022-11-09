@@ -6,6 +6,7 @@ import (
 	"github.com/chainreactors/gogo/v2/pkg/nuclei/protocols"
 	. "github.com/chainreactors/gogo/v2/pkg/utils"
 	"github.com/chainreactors/logs"
+	"github.com/chainreactors/parsers"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -99,8 +100,8 @@ func (r *Request) Match(data map[string]interface{}, matcher *protocols.Matcher)
 }
 
 // Extract performs extracting operation for an extractor on model and returns true or false.
-func (request *Request) Extract(data map[string]interface{}, extractor *protocols.Extractor) map[string]struct{} {
-	item, ok := request.getMatchPart(extractor.Part, data)
+func (r *Request) Extract(data map[string]interface{}, extractor *protocols.Extractor) map[string]struct{} {
+	item, ok := r.getMatchPart(extractor.Part, data)
 	if !ok {
 		return nil
 	}
@@ -114,7 +115,7 @@ func (request *Request) Extract(data map[string]interface{}, extractor *protocol
 }
 
 // getMatchPart returns the match part honoring "all" matchers + others.
-func (request *Request) getMatchPart(part string, data protocols.InternalEvent) (string, bool) {
+func (r *Request) getMatchPart(part string, data protocols.InternalEvent) (string, bool) {
 	if part == "" {
 		part = "body"
 	}
@@ -232,16 +233,34 @@ func (r *Request) Compile(options *protocols.ExecuterOptions) error {
 	}
 
 	if len(r.Payloads) > 0 {
-		attackType := r.AttackType
-		if attackType == "" {
+		var attackType string
+		if r.options.Options.AttackType != "" {
+			attackType = r.options.Options.AttackType
+		} else if len(r.options.Options.VarsPayload) > 0 {
+			attackType = "clusterbomb"
+		} else if r.AttackType != "" {
+			attackType = r.AttackType
+		} else {
 			attackType = "sniper"
 		}
+
 		r.attackType = protocols.StringToType[attackType]
 		// 允许使用命令行定义对应的参数, 会替换对应的参数, 如果参数的数量对不上可能会报错
 		for k, v := range r.options.Options.VarsPayload {
 			if _, ok := r.Payloads[k]; ok {
 				r.Payloads[k] = v
 			}
+		}
+		for k, payload := range r.Payloads {
+			switch payload.(type) {
+			case []string:
+				tmp := make([]string, len(payload.([]string)))
+				for i, p := range payload.([]string) {
+					tmp[i], _ = parsers.DSLParserToString(ToString(p))
+				}
+				r.Payloads[k] = tmp
+			}
+
 		}
 		r.generator, err = protocols.New(r.Payloads, r.attackType)
 		if err != nil {
@@ -260,8 +279,8 @@ func (r *Request) ExecuteWithResults(input string, dynamicValues map[string]inte
 	return nil
 }
 
-func (request *Request) ExecuteRequestWithResults(reqURL string, dynamicValues map[string]interface{}, callback protocols.OutputEventCallback) error {
-	generator := request.newGenerator()
+func (r *Request) ExecuteRequestWithResults(reqURL string, dynamicValues map[string]interface{}, callback protocols.OutputEventCallback) error {
+	generator := r.newGenerator()
 	requestCount := 1
 	var requestErr error
 	for {
@@ -278,7 +297,7 @@ func (request *Request) ExecuteRequestWithResults(reqURL string, dynamicValues m
 				generatedHttpRequest.request.Header.Set("User-Agent", ua)
 			}
 			var gotOutput bool
-			err = request.executeRequest(generatedHttpRequest, dynamicValues, func(event *protocols.InternalWrappedEvent) {
+			err = r.executeRequest(generatedHttpRequest, dynamicValues, func(event *protocols.InternalWrappedEvent) {
 				// Add the extracts to the dynamic values if any.
 				if event.OperatorsResult != nil {
 					gotOutput = true
@@ -299,7 +318,7 @@ func (request *Request) ExecuteRequestWithResults(reqURL string, dynamicValues m
 			//request.options.Progress.IncrementRequests()
 
 			// If this was a match, and we want to stop at first match, skip all further requests.
-			if request.StopAtFirstMatch && gotOutput {
+			if r.StopAtFirstMatch && gotOutput {
 				return true, nil
 			}
 			return false, nil
@@ -308,6 +327,9 @@ func (request *Request) ExecuteRequestWithResults(reqURL string, dynamicValues m
 		inputData, payloads, ok := generator.nextValue()
 		if !ok {
 			break
+		}
+		if len(payloads) > 0 {
+			logs.Log.Debugf("payloads: %s", MaptoString(payloads))
 		}
 		var gotErr error
 		var skip bool
