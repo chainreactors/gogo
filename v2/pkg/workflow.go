@@ -47,6 +47,8 @@ func (w *Workflow) PrepareConfig(rconfig Config) *Config {
 		FilePath:    w.Path,
 		Outputf:     "full",
 		FileOutputf: "json",
+		Tee:         rconfig.Tee,
+		Compress:    rconfig.Compress,
 	}
 
 	if rconfig.FilePath != "" {
