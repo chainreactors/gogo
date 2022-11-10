@@ -133,11 +133,5 @@ func LoadFile(file *os.File) []byte {
 	if err != nil {
 		utils.Fatal(err.Error())
 	}
-	//if IsBase64(content) {
-	//	content = Base64Decode(string(content))
-	//}
-	//if IsBin(content) {
-	//	content = UnFlate(content)
-	//}
 	return bytes.TrimSpace(content)
 }

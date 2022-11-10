@@ -32,9 +32,6 @@ func Dispatch(result *pkg.Result) {
 	} else if result.Port == "icmp" || result.Port == "ping" {
 		icmpScan(result)
 		return
-		//} else if result.Port == "arp" && !pkg.Win {
-		//	arpScan(result)
-		//	return
 	} else if result.Port == "snmp" || result.Port == "161" {
 		snmpScan(result)
 		return
@@ -60,13 +57,6 @@ func Dispatch(result *pkg.Result) {
 
 	// 指纹识别, 会根据versionlevel自动选择合适的指纹
 	fingerScan(result)
-
-	// 指定payload扫描
-	//	根据指定的payload进行探测, 探测完后即结束
-	//if result.IsHttp() && RunOpt.SuffixStr != "" {
-	//suffixScan(result)
-	//return
-	//}
 
 	//主动信息收集
 	if RunOpt.VersionLevel > 0 && result.IsHttp() {
