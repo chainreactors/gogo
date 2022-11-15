@@ -55,7 +55,7 @@ type SmartOption struct {
 type MiscOption struct {
 	Key         string `short:"k" long:"key" description:"String, file encrypt key"`
 	Ver         bool   `long:"version" description:"Bool, show version"`                                                                     // 输出版本号
-	Printer     string `short:"P" choice:"port" choice:"workflow" choice:"nuclei" choice:"Extract" description:"String, show preset config"` // 输出特定的预设
+	Printer     string `short:"P" choice:"port" choice:"workflow" choice:"nuclei" choice:"extract" description:"String, show preset config"` // 输出特定的预设
 	Debug       bool   `long:"debug" description:"Bool, show debug info"`
 	PluginDebug bool   `long:"plugin-debug" description:"Bool, show plugin debug stack"`
 	Proxy       string `long:"proxy" description:"String, socks5 proxy url, e.g. socks5://127.0.0.1:11111"`
