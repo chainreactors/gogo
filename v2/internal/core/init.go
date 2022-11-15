@@ -88,6 +88,9 @@ func InitConfig(config *Config) (*Config, error) {
 
 	if config.Results != nil && config.Filters != nil {
 		var results parsers.GOGOResults
+		if !config.FilterOr {
+			results = config.Results
+		}
 		for _, filter := range config.Filters {
 			if config.FilterOr {
 				results = append(results, config.Results.FilterWithString(filter)...)

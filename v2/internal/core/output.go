@@ -94,11 +94,14 @@ func FormatOutput(filename, outFilename, outf, filenamef string, filters []strin
 	} else if rd != nil && rd.Data != nil {
 		if len(filters) > 0 {
 			var results parsers.GOGOResults
+			if !filterOr {
+				results = rd.Data
+			}
 			for _, filter := range filters {
 				if filterOr {
 					results = append(results, rd.Filter(filter)...)
 				} else {
-					results = results.FilterWithString(filter)
+					results = rd.Data.FilterWithString(filter)
 				}
 			}
 			rd.Data = results
