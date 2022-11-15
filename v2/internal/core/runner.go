@@ -363,10 +363,10 @@ func printConfigs(t string) {
 		PrintNucleiPoc()
 	} else if t == "workflow" {
 		PrintWorkflow()
-	} else if t == "Extract" {
+	} else if t == "extract" {
 		PrintExtract()
 	} else {
-		fmt.Println("choice port|nuclei|workflow|Extract")
+		fmt.Println("choice port|nuclei|workflow|extract")
 	}
 }
 
