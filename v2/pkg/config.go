@@ -215,6 +215,9 @@ func (config *Config) Close() {
 	if config.SmartBFile != nil {
 		config.SmartBFile.Close()
 	}
+	if config.SmartCFile != nil {
+		config.SmartCFile.Close()
+	}
 	if config.AliveFile != nil {
 		config.AliveFile.Close()
 	}
