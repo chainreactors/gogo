@@ -30,8 +30,8 @@ func hostScan(result *Result) {
 		if strings.HasPrefix(strconv.Itoa(resp.StatusCode), "40") {
 			continue
 		}
-		body := parsers.ReadBody(resp)
-		title := parsers.MatchTitle(string(body))
+		raw := parsers.ReadRaw(resp)
+		title := parsers.MatchTitle(string(raw))
 
 		if result.Title != title {
 			if result.CurrentHost == "" {
