@@ -279,11 +279,6 @@ func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) {
 				config.Filename = GetFilename(config, config.FileOutputf)
 			}
 
-			if r.Compress {
-				config.Compress = false
-			} else {
-				config.Compress = true
-			}
 			// 全局变量的处理
 			if !r.NoScan {
 				Opt.Noscan = workflow.NoScan

@@ -35,6 +35,7 @@ type Finger struct {
 	DefaultPort []string `yaml:"default_port,omitempty" json:"default_port,omitempty"`
 	Focus       bool     `yaml:"focus,omitempty" json:"focus,omitempty"`
 	Rules       Rules    `yaml:"rule,omitempty" json:"rule,omitempty"`
+	Tag         string   `yaml:"tag,omitempty" json:"tag,omitempty"`
 }
 
 func (finger *Finger) Compile(portHandler func([]string) []string) error {
@@ -124,6 +125,7 @@ func (finger *Finger) Match(content string, level int, sender func([]byte) (stri
 			if isactive {
 				frame.From = ACTIVE
 			}
+			frame.Tag = finger.Tag
 			return frame, vuln, true
 		}
 	}

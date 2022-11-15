@@ -47,6 +47,8 @@ func (w *Workflow) PrepareConfig(rconfig Config) *Config {
 		FilePath:    w.Path,
 		Outputf:     "full",
 		FileOutputf: "json",
+		Tee:         rconfig.Tee,
+		Compress:    rconfig.Compress,
 	}
 
 	if rconfig.FilePath != "" {
@@ -66,7 +68,7 @@ func (w *Workflow) PrepareConfig(rconfig Config) *Config {
 		config.ListFile = rconfig.ListFile
 	}
 
-	if rconfig.Ports != "" {
+	if rconfig.Ports != "top1" {
 		config.Ports = rconfig.Ports
 	}
 
