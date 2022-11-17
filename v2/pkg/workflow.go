@@ -37,11 +37,14 @@ type Workflow struct {
 func (w *Workflow) PrepareConfig(rconfig Config) *Config {
 	var config = &Config{
 		GOGOConfig: &parsers.GOGOConfig{
-			IP:     w.IP,
-			IPlist: w.IPlist,
-			Ports:  w.Ports,
-			Mod:    w.Mod,
+			IP:       w.IP,
+			IPlist:   w.IPlist,
+			ListFile: rconfig.ListFile,
+			JsonFile: rconfig.JsonFile,
+			Ports:    w.Ports,
+			Mod:      w.Mod,
 		},
+
 		IpProbe:     w.IpProbe,
 		PortProbe:   w.SmartProbe,
 		FilePath:    w.Path,

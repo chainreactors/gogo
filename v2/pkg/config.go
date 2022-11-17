@@ -87,7 +87,7 @@ func (config *Config) InitIP() error {
 
 		config.CIDRs = utils.Unique(config.CIDRs).(ipcs.CIDRs)
 		if len(config.CIDRs) == 0 {
-			return fmt.Errorf("all targets format error")
+			return fmt.Errorf("all targets format error, exit!")
 		}
 	}
 	return nil
