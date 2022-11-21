@@ -57,6 +57,7 @@ type Config struct {
 	HostsMap       map[string][]string `json:"-"` // host映射表
 	Filters        []string            `json:"-"`
 	FilterOr       bool                `json:"-"`
+	OutputFilters  [][]string          `json:"-"`
 }
 
 func (config *Config) InitIP() error {

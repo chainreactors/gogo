@@ -27,6 +27,14 @@ func DefaultMod(targets interface{}, config Config) {
 		plugin.Dispatch(result)
 		if result.Open {
 			Opt.AliveSum++
+			if len(config.OutputFilters) > 0 {
+				for _, filter := range config.OutputFilters {
+					if !result.Filter(filter[0], filter[1], filter[2]) {
+						Log.Debug("[filtered] " + output(result, config.Outputf))
+						return
+					}
+				}
+			}
 			// 格式化title编码, 防止输出二进制数据
 			Log.Console(output(result, config.Outputf))
 

@@ -32,16 +32,17 @@ type InputOption struct {
 }
 
 type OutputOption struct {
-	Filename    string `short:"f" long:"file" description:"String, output filename"`
-	FilePath    string `long:"path" description:"String, output file path"`
-	Outputf     string `short:"o" long:"output" default:"default" description:"String,cmdline output format, default: full"`
-	FileOutputf string `short:"O" long:"file-output" default:"default" description:"String, file output format, default: json"` // 输出格式
-	AutoFile    bool   `long:"af" description:"Bool, auto choice filename"`                                                     // 自动生成格式化文件名
-	HiddenFile  bool   `long:"hf" description:"Bool, auto choice hidden filename"`                                              // 启用自动隐藏文件
-	Compress    bool   `short:"C" long:"compress" description:"Bool, close compress output file"`
-	Tee         bool   `long:"tee" description:"Bool, keep console output"`          // 是否开启命令行输出扫描结果
-	Quiet       bool   `short:"q" long:"quiet" description:"Bool, close log output"` // 是否开启命令行输出日志
-	NoGuess     bool   `long:"no-guess" description:"Bool, not guess framework on -F "`
+	Filename      string   `short:"f" long:"file" description:"String, output filename"`
+	FilePath      string   `long:"path" description:"String, output file path"`
+	Outputf       string   `short:"o" long:"output" default:"default" description:"String,cmdline output format, default: full"`
+	FileOutputf   string   `short:"O" long:"file-output" default:"default" description:"String, file output format, default: json"` // 输出格式
+	OutputFilters []string `long:"output-filter" description:"String, When scanning filter the output"`
+	AutoFile      bool     `long:"af" description:"Bool, auto choice filename"`        // 自动生成格式化文件名
+	HiddenFile    bool     `long:"hf" description:"Bool, auto choice hidden filename"` // 启用自动隐藏文件
+	Compress      bool     `short:"C" long:"compress" description:"Bool, close compress output file"`
+	Tee           bool     `long:"tee" description:"Bool, keep console output"`          // 是否开启命令行输出扫描结果
+	Quiet         bool     `short:"q" long:"quiet" description:"Bool, close log output"` // 是否开启命令行输出日志
+	NoGuess       bool     `long:"no-guess" description:"Bool, not guess framework on -F "`
 }
 
 type SmartOption struct {

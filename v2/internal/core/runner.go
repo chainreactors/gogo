@@ -184,6 +184,13 @@ func (r *Runner) PrepareConfig() {
 		r.Config.Outputf = r.Outputf
 	}
 
+	for _, filterStr := range r.OutputFilters {
+		k, v, op := parseFilterString(filterStr)
+		if op != "" {
+			r.Config.OutputFilters = append(r.Config.OutputFilters, []string{k, v, op})
+		}
+	}
+
 	if r.AutoFile {
 		r.Config.Filenamef = "auto"
 	} else if r.HiddenFile {
@@ -381,4 +388,21 @@ func templatesLoader() {
 	Mmh3Fingers, Md5Fingers = LoadHashFinger(AllHttpFingers)
 	TcpFingers = LoadFinger("tcp").GroupByPort()
 	HttpFingers = AllHttpFingers.GroupByPort()
+}
+
+func parseFilterString(s string) (k, v, op string) {
+	if strings.Contains(s, "::") {
+		kv := strings.Split(s, "::")
+		return kv[0], kv[1], "::"
+	} else if strings.Contains(s, "==") {
+		kv := strings.Split(s, "==")
+		return kv[0], kv[1], "=="
+	} else if strings.Contains(s, "!=") {
+		kv := strings.Split(s, "!=")
+		return kv[0], kv[1], "!="
+	} else if strings.Contains(s, "!:") {
+		kv := strings.Split(s, "!:")
+		return kv[0], kv[1], "!:"
+	}
+	return "", "", ""
 }
