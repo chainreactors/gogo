@@ -9,6 +9,7 @@ import (
 	"github.com/chainreactors/ipcs"
 	"github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
+	"path"
 	"strings"
 )
 
@@ -274,9 +275,9 @@ func (config *Config) GetTarget() string {
 func (config *Config) GetTargetName() string {
 	var target string
 	if config.ListFile != "" {
-		target = config.ListFile
+		target = path.Base(config.ListFile)
 	} else if config.JsonFile != "" {
-		target = config.JsonFile
+		target = path.Base(config.JsonFile)
 	} else if config.Mod == "a" {
 		target = "auto"
 	} else if config.IP != "" {
