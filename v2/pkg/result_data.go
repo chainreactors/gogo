@@ -39,9 +39,9 @@ func (imap IPMapResult) getWindowsInfo() windowsInfo {
 	if imap.Get("445").Vulns != nil {
 		wininfo.version = imap["445"].Title
 	} else if imap.Get("445").Frameworks != nil {
-		wininfo.version = imap["445"].Frameworks[0].Version
+		wininfo.version = imap["445"].GetFirstFramework().Version
 	} else if imap.Get("135").Frameworks != nil {
-		wininfo.version = imap["135"].Frameworks[0].Version
+		wininfo.version = imap["135"].GetFirstFramework().Version
 	}
 
 	if imap.Get("445").Host != "" {
@@ -117,12 +117,12 @@ func (rd *ResultsData) ToFormat(isColor bool) string {
 						port,
 						p.Midware,
 						p.Language,
-						Blue(p.Frameworks.ToString()),
+						Blue(p.Frameworks.String()),
 						p.Host,
 						//p.Hash,
 						Yellow(p.Status),
 						Blue(p.Title),
-						Red(p.Vulns.ToString()),
+						Red(p.Vulns.String()),
 						Blue(p.GetExtractStat()),
 					)
 				} else {
@@ -132,13 +132,13 @@ func (rd *ResultsData) ToFormat(isColor bool) string {
 						port,
 						p.Midware,
 						p.Language,
-						p.Frameworks.ToString(),
+						p.Frameworks.String(),
 						p.Host,
 						//p.Cert,
 						//p.Hash,
 						p.Status,
 						p.Title,
-						p.Vulns.ToString(),
+						p.Vulns.String(),
 						p.GetExtractStat(),
 					)
 				}
@@ -272,7 +272,7 @@ func LoadResultFile(file *os.File) interface{} {
 				}
 
 				if len(targetpair) == 3 {
-					result.Frameworks = []*parsers.Framework{&parsers.Framework{Name: targetpair[2]}}
+					result.Frameworks = map[string]*parsers.Framework{targetpair[2]: &parsers.Framework{Name: targetpair[2]}}
 				}
 				if result != nil {
 					results = append(results, result)

@@ -13,20 +13,9 @@ import (
 
 func NewResult(ip, port string) *Result {
 	result := &Result{
-		GOGOResult: &parsers.GOGOResult{
-			Ip:       ip,
-			Port:     port,
-			Protocol: "tcp",
-			Status:   "tcp",
-		},
+		GOGOResult: parsers.NewGOGOResult(ip, port),
 	}
 	return result
-}
-
-func ToResult(result *parsers.GOGOResult) *Result {
-	return &Result{
-		GOGOResult: result,
-	}
 }
 
 type Result struct {
@@ -67,7 +56,10 @@ func (result *Result) AddVulns(vulns []*parsers.Vuln) {
 }
 
 func (result *Result) AddFramework(f *parsers.Framework) {
-	result.Frameworks = append(result.Frameworks, f)
+	if result.Frameworks == nil {
+		result.Frameworks = make(parsers.Frameworks)
+	}
+	result.Frameworks.Add(f)
 }
 
 func (result *Result) AddFrameworks(fs []*parsers.Framework) {
