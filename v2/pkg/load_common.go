@@ -19,7 +19,7 @@ var (
 type PortFinger struct {
 	Name  string   `json:"name"`
 	Ports []string `json:"ports"`
-	Type  []string `json:"type"`
+	Tags  []string `json:"tags"`
 }
 
 func LoadPortConfig() {
@@ -32,7 +32,7 @@ func LoadPortConfig() {
 	for _, v := range portfingers {
 		v.Ports = ipcs.ParsePorts(v.Ports)
 		ipcs.NameMap.Append(v.Name, v.Ports...)
-		for _, t := range v.Type {
+		for _, t := range v.Tags {
 			ipcs.TagMap.Append(t, v.Ports...)
 		}
 		for _, p := range v.Ports {

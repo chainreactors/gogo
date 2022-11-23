@@ -25,8 +25,8 @@ type Workflow struct {
 	Mod         string   `json:"mod"`
 	Ping        bool     `json:"ping"`
 	NoScan      bool     `json:"no-scan"`
-	IpProbe     string   `json:"ipprobe"`
-	SmartProbe  string   `json:"portprobe"`
+	IpProbe     string   `json:"ip-probe"`
+	SmartProbe  string   `json:"port-probe"`
 	Exploit     string   `json:"exploit"`
 	Verbose     int      `json:"verbose"`
 	File        string   `json:"file"`
