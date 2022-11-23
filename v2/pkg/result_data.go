@@ -4,14 +4,22 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	. "github.com/chainreactors/files"
+	"github.com/chainreactors/files"
 	"github.com/chainreactors/gogo/v2/pkg/utils"
 	"github.com/chainreactors/ipcs"
 	. "github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
 	"os"
+	"sort"
 	"strings"
 )
+
+func sortIP(ips []string) []string {
+	sort.Slice(ips, func(i, j int) bool {
+		return ipcs.Ip2Int(ips[i]) < ipcs.Ip2Int(ips[j])
+	})
+	return ips
+}
 
 var winport = []string{"445", "135", "137"}
 
@@ -226,7 +234,7 @@ func loadSmartResult(content []byte) (*SmartData, error) {
 func LoadResultFile(file *os.File) interface{} {
 	var data interface{}
 	var err error
-	content := DecryptFile(file, Key)
+	content := files.DecryptFile(file, files.Key)
 
 	content = bytes.TrimSpace(content) // 去除前后空格
 	if bytes.Contains(content, []byte("\"smartb\",")) || bytes.Contains(content, []byte("\"smartc\",")) || bytes.Contains(content, []byte("\"ping\",")) {

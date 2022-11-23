@@ -4,10 +4,8 @@ import (
 	"fmt"
 	. "github.com/chainreactors/files"
 	"github.com/chainreactors/gogo/v2/pkg/utils"
-	"github.com/chainreactors/ipcs"
 	"github.com/chainreactors/parsers"
 	"regexp"
-	"sort"
 )
 
 var (
@@ -40,11 +38,4 @@ func HasPingPriv() bool {
 		return true
 	}
 	return false
-}
-
-func sortIP(ips []string) []string {
-	sort.Slice(ips, func(i, j int) bool {
-		return ipcs.Ip2Int(ips[i]) < ipcs.Ip2Int(ips[j])
-	})
-	return ips
 }
