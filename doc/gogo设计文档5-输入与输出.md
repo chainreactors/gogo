@@ -1,5 +1,3 @@
-在各种使用场景下, 有不同的输入与输出需求, 非常复杂, 为此gogo还添加了一个python脚本来辅助工作.
-
 
 因为不断添加需求, 输入与输出也是出bug最多的功能. 现在逻辑上最混乱的也是这个部分.
 ## 输入
@@ -145,8 +143,8 @@ inter:
 * language, 语言
 * os, 操作系统
 * title, 标题
-* framework, 指纹
-* vuln, 漏洞
+* frameworks, 别名frame, 指纹
+* vulns, 别名vuln, 漏洞
 
 可以自由组合, 例如`-o ip,url,title`, 输出格式将会时tab分割的三个字段.
 
