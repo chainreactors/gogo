@@ -29,12 +29,6 @@ func Decode(input string) []byte {
 	return UnFlate(b)
 }
 
-func FileDecode(input string) []byte {
-	b := parsers.Base64Decode(input)
-	b = XorEncode(b, Key, 0)
-	return UnFlate(b)
-}
-
 func Encode(input []byte) string {
 	s := Flate(input)
 	s = XorEncode(s, Key, 0)
