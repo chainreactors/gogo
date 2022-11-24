@@ -1,6 +1,7 @@
 package core
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/chainreactors/files"
 	. "github.com/chainreactors/gogo/v2/internal/plugin"
@@ -9,13 +10,20 @@ import (
 	"github.com/chainreactors/ipcs"
 	. "github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
+	"io/ioutil"
 	"os"
 	"strings"
 )
 
-var Opt = Options{
-	AliveSum: 0,
-	Noscan:   false,
+var syncFile = func() {}
+
+func LoadFile(file *os.File) []byte {
+	defer file.Close()
+	content, err := ioutil.ReadAll(file)
+	if err != nil {
+		Fatal(err.Error())
+	}
+	return bytes.TrimSpace(content)
 }
 
 func InitConfig(config *Config) (*Config, error) {

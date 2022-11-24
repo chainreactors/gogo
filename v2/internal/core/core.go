@@ -6,6 +6,7 @@ import (
 	. "github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/ipcs"
 	. "github.com/chainreactors/logs"
+	"github.com/chainreactors/parsers"
 	"github.com/panjf2000/ants/v2"
 	"net"
 	"runtime/debug"
@@ -13,6 +14,31 @@ import (
 	"strings"
 	"sync"
 )
+
+type targetConfig struct {
+	ip      string
+	port    string
+	hosts   []string
+	fingers parsers.Frameworks
+}
+
+func (tc *targetConfig) NewResult() *Result {
+	result := NewResult(tc.ip, tc.port)
+	if tc.hosts != nil {
+		if len(tc.hosts) == 1 {
+			result.CurrentHost = tc.hosts[0]
+		}
+		result.HttpHosts = tc.hosts
+	}
+	if tc.fingers != nil {
+		result.Frameworks = tc.fingers
+	}
+
+	if plugin.RunOpt.SuffixStr != "" && !strings.HasPrefix(plugin.RunOpt.SuffixStr, "/") {
+		result.Uri = "/" + plugin.RunOpt.SuffixStr
+	}
+	return result
+}
 
 //直接扫描
 func DefaultMod(targets interface{}, config Config) {
