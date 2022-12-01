@@ -33,9 +33,6 @@ func (gen *IpGenerator) defaultIpGenerator(cidr *ipcs.CIDR) {
 		if (i)%256 != 255 && (i)%256 != 0 {
 			gen.ch <- ipcs.Int2Ip(i)
 		}
-		if i%65536 == 0 {
-			Log.Importantf("Processing CIDR: %s/16", ipcs.Int2Ip(i))
-		}
 	}
 }
 

@@ -56,9 +56,6 @@ func (result *Result) AddVulns(vulns []*parsers.Vuln) {
 }
 
 func (result *Result) AddFramework(f *parsers.Framework) {
-	if result.Frameworks == nil {
-		result.Frameworks = make(parsers.Frameworks)
-	}
 	result.Frameworks.Add(f)
 }
 
