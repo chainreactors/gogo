@@ -57,6 +57,7 @@ func DefaultMod(targets interface{}, config Config) {
 				for _, filter := range config.OutputFilters {
 					if !result.Filter(filter[0], filter[1], filter[2]) {
 						Log.Debug("[filtered] " + output(result, config.Outputf))
+						wgs.Done()
 						return
 					}
 				}
