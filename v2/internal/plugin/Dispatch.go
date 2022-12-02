@@ -3,7 +3,6 @@ package plugin
 import (
 	"github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/gogo/v2/pkg/utils"
-	"net"
 )
 
 type RunnerOpts struct {
@@ -13,7 +12,7 @@ type RunnerOpts struct {
 	Delay        int
 	HttpsDelay   int
 	SuffixStr    string
-	Interface    *net.Interface
+	Debug        bool
 }
 
 var RunOpt RunnerOpts
@@ -59,7 +58,7 @@ func Dispatch(result *pkg.Result) {
 	fingerScan(result)
 
 	//主动信息收集
-	if RunOpt.VersionLevel > 0 && result.IsHttp() {
+	if RunOpt.VersionLevel > 0 && result.IsHttp {
 		// favicon指纹只有-v大于0并且为http服务才启用
 		if result.HttpHosts != nil {
 			hostScan(result)
@@ -71,7 +70,7 @@ func Dispatch(result *pkg.Result) {
 		}
 	} else {
 		// 如果versionlevel为0 ,或者非http服务, 则使用默认端口猜测指纹.
-		if !result.IsHttp() && result.NoFramework() {
+		if !result.IsHttp && result.NoFramework() {
 			// 通过默认端口号猜测服务,不具备准确性
 			result.GuessFramework()
 		}

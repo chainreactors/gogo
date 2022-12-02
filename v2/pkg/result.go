@@ -24,8 +24,8 @@ type Result struct {
 	CurrentHost string   `json:"-"`
 
 	// language
-
-	Open bool `json:"-"`
+	IsHttp bool `json:"-"`
+	Open   bool `json:"-"`
 	//FrameworksMap map[string]bool `json:"-"`
 	SmartProbe bool              `json:"-"`
 	TcpConn    *net.Conn         `json:"-"`

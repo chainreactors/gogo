@@ -15,6 +15,7 @@ func CollectSocketInfo(result *Result, socketContent []byte) {
 		result.Httpresp = parsers.NewResponseWithRaw(socketContent)
 		result.Status = statuscode
 		result.Protocol = "http"
+		result.IsHttp = true
 		result.Language = result.Httpresp.Language
 		result.Midware = result.Httpresp.Server
 		result.Title = result.Httpresp.Title

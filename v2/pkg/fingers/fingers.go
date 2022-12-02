@@ -2,7 +2,6 @@ package fingers
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/chainreactors/ipcs"
 	"github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
@@ -16,17 +15,6 @@ func compileRegexp(s string) (*regexp.Regexp, error) {
 		return nil, err
 	}
 	return reg, nil
-}
-
-func mapToString(m map[string]interface{}) string {
-	if m == nil || len(m) == 0 {
-		return ""
-	}
-	var s string
-	for k, v := range m {
-		s += fmt.Sprintf(" %s:%s ", k, v.(string))
-	}
-	return s
 }
 
 type Finger struct {
