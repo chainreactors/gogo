@@ -304,20 +304,7 @@ func (d senddata) IsNull() bool {
 
 type FingerMapper map[string][]*Finger
 
-func (fm FingerMapper) GetFingers(port string) []*Finger {
-	return fm[port]
-}
-
 type Fingers []*Finger
-
-func (fs Fingers) Contain(f *Finger) bool {
-	for _, finger := range fs {
-		if f == finger {
-			return true
-		}
-	}
-	return false
-}
 
 func (fs Fingers) GroupByPort() FingerMapper {
 	fingermap := make(FingerMapper)
