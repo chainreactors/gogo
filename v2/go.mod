@@ -3,7 +3,7 @@ module github.com/chainreactors/gogo/v2
 go 1.10
 
 require (
-	github.com/M09ic/go-ntlmssp v1.2.9
+	github.com/M09ic/go-ntlmssp v1.2.10-0.20221207030820-de2792a93fef
 	github.com/chainreactors/files v0.2.4
 	github.com/chainreactors/ipcs v0.0.9
 	github.com/chainreactors/logs v0.6.1

@@ -122,6 +122,9 @@ func (result *Result) GetHostURL() string {
 }
 
 func (result *Result) AddNTLMInfo(m map[string]string, t string) {
+	if m == nil {
+		return
+	}
 	result.Title = m["MsvAvNbDomainName"] + "/" + m["MsvAvNbComputerName"]
 	result.Host = strings.Trim(m["MsvAvDnsDomainName"], "\x00") + "/" + m["MsvAvDnsComputerName"]
 	result.AddFramework(&parsers.Framework{Name: t, Version: m["Version"]})
