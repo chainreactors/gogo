@@ -94,10 +94,6 @@ func DefaultMod(targets interface{}, config Config) {
 }
 
 func SmartMod(target *ipcs.CIDR, config Config) {
-	// 输出预估时间
-	spended := guessSmartTime(target, config)
-	Log.Importantf("Spraying %s with %s, Estimated to take %d seconds", target, config.Mod, spended)
-
 	// 初始化mask
 	var mask int
 	switch config.Mod {
@@ -112,7 +108,8 @@ func SmartMod(target *ipcs.CIDR, config Config) {
 			config.PortProbeList = []string{DefaultSmartPortProbe}
 		}
 	}
-
+	spended := guessSmartTime(target, config)
+	Log.Importantf("Spraying %s with %s, Estimated to take %d seconds", target, config.Mod, spended)
 	var wg sync.WaitGroup
 
 	//var ipChannel chan string

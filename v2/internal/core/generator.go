@@ -1,6 +1,7 @@
 package core
 
 import (
+	"github.com/chainreactors/gogo/v2/internal/plugin"
 	. "github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/ipcs"
 	. "github.com/chainreactors/logs"
@@ -23,7 +24,6 @@ type IpGenerator struct {
 	ch        chan string
 	alivedMap *sync.Map
 	ipProbe   []uint
-	//excludeIP map[uint]bool
 }
 
 func (gen *IpGenerator) defaultIpGenerator(cidr *ipcs.CIDR) {
@@ -120,6 +120,9 @@ func (gen *targetGenerator) genFromDefault(cidrs ipcs.CIDRs, portlist []string) 
 		for ip := range ch {
 			for _, port := range portlist {
 				gen.ch <- targetConfig{ip: ip, port: port, hosts: gen.hostsMap[ip]}
+				if plugin.RunOpt.Sum%65535 == 0 {
+					Log.Importantf("Current processing %s:%s, number: %d", ip, port, plugin.RunOpt.Sum)
+				}
 			}
 		}
 		if cidr.Count() > 1 {
