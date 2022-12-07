@@ -80,7 +80,7 @@ func DefaultMod(targets interface{}, config Config) {
 			debug.PrintStack()
 		}
 
-		Log.Errorf("unexcept error %v", err)
+		Log.Errorf("unexcept error, %v", err)
 		wgs.Done()
 	}))
 	defer scanPool.Release()
@@ -160,7 +160,7 @@ func SmartMod(target *ipcs.CIDR, config Config) {
 	} else {
 		return
 	}
-
+	Log.Importantf("smart scan: %s finished, found %d alive cidrs", target, len(iplist))
 	if config.IsBSmart() {
 		WriteSmartResult(config.SmartBFile, iplist.Strings())
 	}

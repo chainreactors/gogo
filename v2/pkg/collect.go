@@ -26,15 +26,17 @@ func CollectSocketInfo(result *Result, socketContent []byte) {
 }
 
 func CollectHttpInfo(result *Result, resp *http.Response) {
-	if resp != nil {
-		result.Httpresp = parsers.NewResponse(resp)
-		result.Content = strings.ToLower(string(result.Httpresp.RawContent))
-		result.Protocol = resp.Request.URL.Scheme
-		result.Status = utils.ToString(resp.StatusCode)
-		result.Language = result.Httpresp.Language
-		result.Midware = result.Httpresp.Server
-		result.Title = result.Httpresp.Title
+	if resp == nil {
+		return
 	}
+	result.IsHttp = true
+	result.Httpresp = parsers.NewResponse(resp)
+	result.Content = strings.ToLower(string(result.Httpresp.RawContent))
+	result.Protocol = resp.Request.URL.Scheme
+	result.Status = utils.ToString(resp.StatusCode)
+	result.Language = result.Httpresp.Language
+	result.Midware = result.Httpresp.Server
+	result.Title = result.Httpresp.Title
 	result.AddExtracts(Extractors.Extract(result.Content))
 }
 
