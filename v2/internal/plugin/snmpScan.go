@@ -22,8 +22,6 @@ func snmpScan(result *pkg.Result) {
 		result.Error = err.Error()
 		return
 	}
-	j := bytes.Index(data, []byte{0x4, 0x11})
-	println(j)
 	if i := bytes.Index(data, []byte{0x0, 0x4}); i != -1 && len(data) > i+3 {
 		result.Title = string(data[i+3:])
 	}
