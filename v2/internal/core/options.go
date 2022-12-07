@@ -50,7 +50,7 @@ type OutputOption struct {
 type SmartOption struct {
 	Mod       string `short:"m" long:"mod" choice:"s" choice:"ss" choice:"default" choice:"sc" default:"default" description:"String, smart mod"` // 扫描模式
 	Ping      bool   `long:"ping" description:"Bool, alive pre-scan"`
-	NoScan    bool   `long:"no" description:"Bool, no-plugin, only smart scan"`
+	NoScan    bool   `long:"no" description:"Bool, just smart scan, return before default scan task"`
 	PortProbe string `long:"sp" default:"default" description:"String, smart-port-probe, smart mod default: 80, supersmart mod default: icmp"` // 启发式扫描预设探针
 	IpProbe   string `long:"ipp"  default:"default" description:"String, IP-probe, default: 1,254"`
 }

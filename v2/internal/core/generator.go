@@ -120,7 +120,7 @@ func (gen *targetGenerator) genFromDefault(cidrs ipcs.CIDRs, portlist []string) 
 		for ip := range ch {
 			for _, port := range portlist {
 				gen.ch <- targetConfig{ip: ip, port: port, hosts: gen.hostsMap[ip]}
-				if plugin.RunOpt.Sum%65535 == 0 {
+				if plugin.RunOpt.Sum%65535 == 65534 {
 					Log.Importantf("Current processing %s:%s, number: %d", ip, port, plugin.RunOpt.Sum)
 				}
 			}
