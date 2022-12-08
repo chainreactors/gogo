@@ -85,14 +85,8 @@ gogo -i 81.68.175.32/28 -p top2
 [+] http://81.68.175.34:80      nginx           宝塔||nginx                     f0fa [200] 没有找到站点
 [+] http://81.68.175.34:8888    nginx           nginx                   d41d [403] HTTP/1.1 403
 [+] http://81.68.175.34:3001    nginx           webpack||nginx                  4a9b [200] shop_mall
-[+] http://81.68.175.37:80      Microsoft-IIS/10.0              iis10                   c80f [200] HTTP/1.1 200
-[+] http://81.68.175.36:80      nginx   PHP     nginx                   babe [200] 风闻客栈24小时发卡中心 - 风闻客栈24小时发卡中心
-[+] http://81.68.175.38:80                      webpack                 c581 [200] Vue App
-[+] http://81.68.175.45:80      Apache          宝塔                    f0fa [200] 没有找到站点
-[+] http://81.68.175.43:80      nginx/1.9.9             nginx                   7cd7 [200] 首页 - 世界名画欣赏
-[+] http://81.68.175.45:888     Apache                                  ae22 [403] 403 Forbidden
-[+] http://81.68.175.45:8888    nginx           宝塔面板||nginx                 c0f6 [200] 安全入口校验失败
-[*] Alive sum: 12, Target sum : 1594 ,2022-07-07 07:07.07
+[+] http://81.68.175.37:80      Microsoft-IIS/10.0              iis10                   c80f [200] HTTP/1.1 200             c0f6 [200] 安全入口校验失败
+[*] Alive sum: 5, Target sum : 1594 ,2022-07-07 07:07.07
 [*] Totally run: 4.0441884s ,2022-07-07 07:07.07
 ```
 
@@ -133,35 +127,6 @@ Exploit: none, Version level: 0
 [+] 81.68.175.36
         http://81.68.175.36:80  nginx   PHP     nginx                   babe [200] 风闻客栈24小时发卡中心 - 风闻客栈24小时发卡中心
         tcp://81.68.175.36:22                   *ssh                     [tcp]
-[+] 81.68.175.37
-        http://81.68.175.37:80  Microsoft-IIS/10.0              iis10                   c80f [200] HTTP/1.1 200
-[+] 81.68.175.38
-        tcp://81.68.175.38:22                   *ssh                     [tcp]
-        http://81.68.175.38:80                  webpack                 c581 [200] Vue App
-[+] 81.68.175.39
-        tcp://81.68.175.39:3389                 *rdp                     [tcp]
-[+] 81.68.175.40
-        http://81.68.175.40:47001       Microsoft-HTTPAPI/2.0           microsoft-httpapi                       e702 [404] Not Found
-        http://81.68.175.40:5985        Microsoft-HTTPAPI/2.0           microsoft-httpapi                       e702 [404] Not Found
-        tcp://81.68.175.40:3389                 *rdp                     [tcp]
-[+] 81.68.175.41
-        tcp://81.68.175.41:3389                 *rdp                     [tcp]
-[+] 81.68.175.42
-        http://81.68.175.42:47001       Microsoft-HTTPAPI/2.0           microsoft-httpapi                       e702 [404] Not Found
-        http://81.68.175.42:5985        Microsoft-HTTPAPI/2.0           microsoft-httpapi                       e702 [404] Not Found
-        tcp://81.68.175.42:3389                 *rdp                     [tcp]
-[+] 81.68.175.43
-        http://81.68.175.43:80  nginx/1.9.9             nginx                   7cd7 [200] 首页 - 世界名画欣赏
-        tcp://81.68.175.43:22                   *ssh                     [tcp]
-[+] 81.68.175.44
-        http://81.68.175.44:47001       Microsoft-HTTPAPI/2.0           microsoft-httpapi                       e702 [404] Not Found
-        tcp://81.68.175.44:3389                 *rdp                     [tcp]
-[+] 81.68.175.45
-        tcp://81.68.175.45:22                   *ssh                     [tcp]
-        http://81.68.175.45:80  Apache          宝塔                    f0fa [200] 没有找到站点
-        http://81.68.175.45:888 Apache                                  ae22 [403] 403 Forbidden
-        tcp://81.68.175.45:21                   ftp                      [tcp]
-        http://81.68.175.45:8888        nginx           宝塔面板||nginx                 c0f6 [200] 安全入口校验失败
 ...
 ...
 ```
