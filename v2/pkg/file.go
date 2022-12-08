@@ -78,11 +78,13 @@ func IsExist(filename string) bool {
 
 func getAutoFilename(config *Config, outtype string) string {
 	var basename string
-	target := strings.Replace(config.GetTargetName(), "/", "_", -1)
+	target := strings.Replace(config.GetTargetName(), "/", ".", -1)
 	target = strings.Replace(target, ":", "", -1)
 	target = strings.Replace(target, "\\", "_", -1)
-	if len(target) > 17 {
-		target = target[:17]
+	if len(target) > 10 {
+		if i := strings.IndexAny(target, "_"); i != -1 {
+			target = target[:i]
+		}
 	}
 	ports := strings.Replace(config.Ports, ",", "_", -1)
 	basename = fmt.Sprintf("%s_%s_%s_%s", target, ports, config.Mod, outtype)
