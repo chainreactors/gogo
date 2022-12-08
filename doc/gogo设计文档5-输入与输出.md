@@ -86,7 +86,7 @@ inter:
 
 里面的每个参数都可以使用对应的命令行参数进行覆盖, 具体的参数见README.md.
 
-例如:`gogo -w 10 -p 1-65535 -e -v`
+例如:`gogo -w 10 -p 1-65535 -ev`
 
 这样原来名字为10的workflow的端口被修改为1-65535, 并开启了version scan与exploit scan.
 

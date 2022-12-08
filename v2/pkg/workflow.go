@@ -58,10 +58,6 @@ func (w *Workflow) PrepareConfig(rconfig Config) *Config {
 		config.FilePath = rconfig.FilePath
 	}
 
-	//if rconfig.FileOutputf == Default && config.Mod == SUPERSMARTB {
-	//	config.FileOutputf = "raw"
-	//}
-
 	// 一些workflow的参数, 允许被命令行参数覆盖
 	if rconfig.IP != "" {
 		config.IP = rconfig.IP
