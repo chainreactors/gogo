@@ -334,7 +334,7 @@ func (r *Runner) Close(config *Config) {
 	}
 
 	// 任务统计
-	logs.Log.Importantf("Alived: %d, Totoal : %d", Opt.AliveSum, RunOpt.Sum)
+	logs.Log.Importantf("Alived: %d, Total: %d", Opt.AliveSum, RunOpt.Sum)
 	logs.Log.Important("Time consuming: " + time.Since(r.start).String())
 
 	// 输出文件名
