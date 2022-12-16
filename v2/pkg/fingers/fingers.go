@@ -47,7 +47,7 @@ func (finger *Finger) Compile(portHandler func([]string) []string) error {
 }
 
 func (finger *Finger) ToResult(hasFrame, hasVuln bool, res string, index int) (frame *parsers.Framework, vuln *parsers.Vuln) {
-	if index+1 > len(finger.Rules) {
+	if index >= len(finger.Rules) {
 		return nil, nil
 	}
 
@@ -55,7 +55,7 @@ func (finger *Finger) ToResult(hasFrame, hasVuln bool, res string, index int) (f
 		if res != "" {
 			frame = &parsers.Framework{Name: finger.Name, Version: res}
 		} else if finger.Rules[index].Version != "" {
-			frame = &parsers.Framework{Name: finger.Name, Version: res}
+			frame = &parsers.Framework{Name: finger.Name, Version: finger.Rules[index].Version}
 		} else {
 			frame = &parsers.Framework{Name: finger.Name}
 		}
