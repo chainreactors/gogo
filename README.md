@@ -192,7 +192,7 @@ gogo并非漏扫工具,因此不会支持sql注入,xss之类的通用漏洞探�
 
 nuclei的中poc往往攻击性比较强, poc移植到gogo之前会进行一些修改和复现, 因此不打算一口气移植全部的nuclei poc
 
-目前已集成的pocs见v2/config/nuclei, 以及ms17010, shiro, snmp等特殊的漏洞
+目前已集成的pocs见v2/templates/nuclei, 以及ms17010, shiro, snmp等特殊的漏洞
 
 nuclei poc将会根据指纹识别的情况自动调用, 而非一口气全打过去, 为了更好的探测漏洞, 建议同时开启-v 主动指纹识别
 
