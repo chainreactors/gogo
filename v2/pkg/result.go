@@ -13,20 +13,9 @@ import (
 
 func NewResult(ip, port string) *Result {
 	result := &Result{
-		GOGOResult: &parsers.GOGOResult{
-			Ip:       ip,
-			Port:     port,
-			Protocol: "tcp",
-			Status:   "tcp",
-		},
+		GOGOResult: parsers.NewGOGOResult(ip, port),
 	}
 	return result
-}
-
-func ToResult(result *parsers.GOGOResult) *Result {
-	return &Result{
-		GOGOResult: result,
-	}
 }
 
 type Result struct {
@@ -35,8 +24,8 @@ type Result struct {
 	CurrentHost string   `json:"-"`
 
 	// language
-
-	Open bool `json:"-"`
+	IsHttp bool `json:"-"`
+	Open   bool `json:"-"`
 	//FrameworksMap map[string]bool `json:"-"`
 	SmartProbe bool              `json:"-"`
 	TcpConn    *net.Conn         `json:"-"`
@@ -67,7 +56,7 @@ func (result *Result) AddVulns(vulns []*parsers.Vuln) {
 }
 
 func (result *Result) AddFramework(f *parsers.Framework) {
-	result.Frameworks = append(result.Frameworks, f)
+	result.Frameworks.Add(f)
 }
 
 func (result *Result) AddFrameworks(fs []*parsers.Framework) {
@@ -133,6 +122,9 @@ func (result *Result) GetHostURL() string {
 }
 
 func (result *Result) AddNTLMInfo(m map[string]string, t string) {
+	if m == nil {
+		return
+	}
 	result.Title = m["MsvAvNbDomainName"] + "/" + m["MsvAvNbComputerName"]
 	result.Host = strings.Trim(m["MsvAvDnsDomainName"], "\x00") + "/" + m["MsvAvDnsComputerName"]
 	result.AddFramework(&parsers.Framework{Name: t, Version: m["Version"]})

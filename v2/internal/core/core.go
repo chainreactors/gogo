@@ -6,6 +6,7 @@ import (
 	. "github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/ipcs"
 	. "github.com/chainreactors/logs"
+	"github.com/chainreactors/parsers"
 	"github.com/panjf2000/ants/v2"
 	"net"
 	"runtime/debug"
@@ -13,6 +14,31 @@ import (
 	"strings"
 	"sync"
 )
+
+type targetConfig struct {
+	ip      string
+	port    string
+	hosts   []string
+	fingers parsers.Frameworks
+}
+
+func (tc *targetConfig) NewResult() *Result {
+	result := NewResult(tc.ip, tc.port)
+	if tc.hosts != nil {
+		if len(tc.hosts) == 1 {
+			result.CurrentHost = tc.hosts[0]
+		}
+		result.HttpHosts = tc.hosts
+	}
+	if tc.fingers != nil {
+		result.Frameworks = tc.fingers
+	}
+
+	if plugin.RunOpt.SuffixStr != "" && !strings.HasPrefix(plugin.RunOpt.SuffixStr, "/") {
+		result.Uri = "/" + plugin.RunOpt.SuffixStr
+	}
+	return result
+}
 
 //直接扫描
 func DefaultMod(targets interface{}, config Config) {
@@ -27,6 +53,15 @@ func DefaultMod(targets interface{}, config Config) {
 		plugin.Dispatch(result)
 		if result.Open {
 			Opt.AliveSum++
+			if len(config.OutputFilters) > 0 {
+				for _, filter := range config.OutputFilters {
+					if !result.Filter(filter[0], filter[1], filter[2]) {
+						Log.Debug("[filtered] " + output(result, config.Outputf))
+						wgs.Done()
+						return
+					}
+				}
+			}
 			// 格式化title编码, 防止输出二进制数据
 			Log.Console(output(result, config.Outputf))
 
@@ -45,7 +80,7 @@ func DefaultMod(targets interface{}, config Config) {
 			debug.PrintStack()
 		}
 
-		Log.Errorf("unexcept error %v", err)
+		Log.Errorf("unexcept error, %v", err)
 		wgs.Done()
 	}))
 	defer scanPool.Release()
@@ -59,10 +94,6 @@ func DefaultMod(targets interface{}, config Config) {
 }
 
 func SmartMod(target *ipcs.CIDR, config Config) {
-	// 输出预估时间
-	spended := guessSmartTime(target, config)
-	Log.Importantf("Spraying %s with %s, Estimated to take %d seconds", target, config.Mod, spended)
-
 	// 初始化mask
 	var mask int
 	switch config.Mod {
@@ -77,7 +108,8 @@ func SmartMod(target *ipcs.CIDR, config Config) {
 			config.PortProbeList = []string{DefaultSmartPortProbe}
 		}
 	}
-
+	spended := guessSmartTime(target, config)
+	Log.Importantf("Spraying %s with %s, Estimated to take %d seconds", target, config.Mod, spended)
 	var wg sync.WaitGroup
 
 	//var ipChannel chan string
@@ -125,7 +157,7 @@ func SmartMod(target *ipcs.CIDR, config Config) {
 	} else {
 		return
 	}
-
+	Log.Importantf("smart scan: %s finished, found %d alive cidrs", target, len(iplist))
 	if config.IsBSmart() {
 		WriteSmartResult(config.SmartBFile, iplist.Strings())
 	}

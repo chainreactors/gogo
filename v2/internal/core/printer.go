@@ -4,7 +4,9 @@ import (
 	"fmt"
 	. "github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/gogo/v2/pkg/fingers"
+	"os"
 	"strings"
+	"text/tabwriter"
 )
 
 func Printportconfig() {
@@ -42,14 +44,34 @@ func PrintNucleiPoc() {
 	}
 }
 
-func PrintWorkflow() {
-	fmt.Println("name\tindex\tip         \tport     \tmod\tping\tsmartPort\tsmartIp\tversion\texploit\toutputFile\toutputPath")
-	for name, workflows := range LoadWorkFlow() {
-		fmt.Println(name + ": ")
-		for i, w := range workflows {
-			fmt.Printf("\t%-d\t%-15s\t%-10s\t%-s\t%-t\t%-10s\t%-10s\t%-5d\t%-10s\t%-10s\t%-10s\t%-10s\n", i, w.IP, w.Ports, w.Mod, w.Ping, w.SmartProbe, w.IpProbe, w.Verbose, w.Exploit, w.File, w.Path, w.Description)
+func Pad(s string, length int) string {
+	if len(s) < length {
+		for i := 0; i < length-len(s); i++ {
+			s += " "
 		}
 	}
+	return s
+}
+
+func PrintWorkflow() {
+	// 创建一个tabwriter.Writer对象
+	table := new(tabwriter.Writer)
+
+	// 设置单元格对齐方式
+	table.Init(os.Stdout, 4, 8, 0, '\t', tabwriter.AlignRight)
+
+	// 输出表头
+	fmt.Fprint(table, "index\tip          \tport     \tmod\tping\tport-probe\tip-probe\tversion\texploit\toutputFile\toutputPath\n")
+	for name, workflows := range LoadWorkFlow() {
+		fmt.Fprint(table, name+": \n")
+		for i, w := range workflows {
+			if w.IP == "" {
+				w.IP = "(to be input)"
+			}
+			fmt.Fprintf(table, "%d\t%s\t%s\t%s\t%t\t%s\t%s\t%d\t%s\t%s\t%s\t%s\n", i, w.IP, Pad(w.Ports, 15), w.Mod, w.Ping, Pad(w.SmartProbe, 12), Pad(w.IpProbe, 12), w.Verbose, w.Exploit, w.File, w.Path, w.Description)
+		}
+	}
+	table.Flush()
 }
 
 func PrintExtract() {

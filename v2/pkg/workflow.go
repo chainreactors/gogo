@@ -25,8 +25,8 @@ type Workflow struct {
 	Mod         string   `json:"mod"`
 	Ping        bool     `json:"ping"`
 	NoScan      bool     `json:"no-scan"`
-	IpProbe     string   `json:"ipprobe"`
-	SmartProbe  string   `json:"portprobe"`
+	IpProbe     string   `json:"ip-probe"`
+	SmartProbe  string   `json:"port-probe"`
 	Exploit     string   `json:"exploit"`
 	Verbose     int      `json:"verbose"`
 	File        string   `json:"file"`
@@ -37,11 +37,14 @@ type Workflow struct {
 func (w *Workflow) PrepareConfig(rconfig Config) *Config {
 	var config = &Config{
 		GOGOConfig: &parsers.GOGOConfig{
-			IP:     w.IP,
-			IPlist: w.IPlist,
-			Ports:  w.Ports,
-			Mod:    w.Mod,
+			IP:       w.IP,
+			IPlist:   w.IPlist,
+			ListFile: rconfig.ListFile,
+			JsonFile: rconfig.JsonFile,
+			Ports:    w.Ports,
+			Mod:      w.Mod,
 		},
+
 		IpProbe:     w.IpProbe,
 		PortProbe:   w.SmartProbe,
 		FilePath:    w.Path,
@@ -54,10 +57,6 @@ func (w *Workflow) PrepareConfig(rconfig Config) *Config {
 	if rconfig.FilePath != "" {
 		config.FilePath = rconfig.FilePath
 	}
-
-	//if rconfig.FileOutputf == Default && config.Mod == SUPERSMARTB {
-	//	config.FileOutputf = "raw"
-	//}
 
 	// 一些workflow的参数, 允许被命令行参数覆盖
 	if rconfig.IP != "" {

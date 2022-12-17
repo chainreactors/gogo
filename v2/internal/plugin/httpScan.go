@@ -35,24 +35,26 @@ func initScan(result *pkg.Result) {
 			// return open: 0, closed: 1, filtered: 2, noroute: 3, denied: 4, down: 5, error_host: 6, unkown: -1
 			errMsg := err.Error()
 			result.Error = errMsg
-			if strings.Contains(errMsg, "refused") {
-				result.ErrStat = 1
-			} else if strings.Contains(errMsg, "timeout") {
-				result.ErrStat = 2
-			} else if strings.Contains(errMsg, "no route to host") {
-				result.ErrStat = 3
-			} else if strings.Contains(errMsg, "permission denied") {
-				result.ErrStat = 4
-			} else if strings.Contains(errMsg, "host is down") {
-				result.ErrStat = 5
-			} else if strings.Contains(errMsg, "no such host") {
-				result.ErrStat = 6
-			} else if strings.Contains(errMsg, "network is unreachable") {
-				result.ErrStat = 6
-			} else if strings.Contains(errMsg, "The requested address is not valid in its context.") {
-				result.ErrStat = 6
-			} else {
-				result.ErrStat = -1
+			if RunOpt.Debug {
+				if strings.Contains(errMsg, "refused") {
+					result.ErrStat = 1
+				} else if strings.Contains(errMsg, "timeout") {
+					result.ErrStat = 2
+				} else if strings.Contains(errMsg, "no route to host") {
+					result.ErrStat = 3
+				} else if strings.Contains(errMsg, "permission denied") {
+					result.ErrStat = 4
+				} else if strings.Contains(errMsg, "host is down") {
+					result.ErrStat = 5
+				} else if strings.Contains(errMsg, "no such host") {
+					result.ErrStat = 6
+				} else if strings.Contains(errMsg, "network is unreachable") {
+					result.ErrStat = 6
+				} else if strings.Contains(errMsg, "The requested address is not valid in its context.") {
+					result.ErrStat = 6
+				} else {
+					result.ErrStat = -1
+				}
 			}
 			return
 		}

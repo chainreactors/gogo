@@ -2,10 +2,9 @@ package fingers
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/chainreactors/ipcs"
 	"github.com/chainreactors/logs"
-	. "github.com/chainreactors/parsers"
+	"github.com/chainreactors/parsers"
 	"regexp"
 	"strings"
 )
@@ -18,24 +17,13 @@ func compileRegexp(s string) (*regexp.Regexp, error) {
 	return reg, nil
 }
 
-func mapToString(m map[string]interface{}) string {
-	if m == nil || len(m) == 0 {
-		return ""
-	}
-	var s string
-	for k, v := range m {
-		s += fmt.Sprintf(" %s:%s ", k, v.(string))
-	}
-	return s
-}
-
 type Finger struct {
 	Name        string   `yaml:"name" json:"name"`
 	Protocol    string   `yaml:"protocol,omitempty" json:"protocol"`
 	DefaultPort []string `yaml:"default_port,omitempty" json:"default_port,omitempty"`
 	Focus       bool     `yaml:"focus,omitempty" json:"focus,omitempty"`
 	Rules       Rules    `yaml:"rule,omitempty" json:"rule,omitempty"`
-	Tag         string   `yaml:"tag,omitempty" json:"tag,omitempty"`
+	Tags        []string `yaml:"tag,omitempty" json:"tag,omitempty"`
 }
 
 func (finger *Finger) Compile(portHandler func([]string) []string) error {
@@ -58,34 +46,34 @@ func (finger *Finger) Compile(portHandler func([]string) []string) error {
 	return nil
 }
 
-func (finger *Finger) ToResult(hasFrame, hasVuln bool, res string, index int) (frame *Framework, vuln *Vuln) {
-	if index+1 > len(finger.Rules) {
+func (finger *Finger) ToResult(hasFrame, hasVuln bool, res string, index int) (frame *parsers.Framework, vuln *parsers.Vuln) {
+	if index >= len(finger.Rules) {
 		return nil, nil
 	}
 
 	if hasFrame {
 		if res != "" {
-			frame = &Framework{Name: finger.Name, Version: res}
+			frame = &parsers.Framework{Name: finger.Name, Version: res}
 		} else if finger.Rules[index].Version != "" {
-			frame = &Framework{Name: finger.Name, Version: res}
+			frame = &parsers.Framework{Name: finger.Name, Version: finger.Rules[index].Version}
 		} else {
-			frame = &Framework{Name: finger.Name}
+			frame = &parsers.Framework{Name: finger.Name}
 		}
 	}
 
 	if hasVuln {
 		if finger.Rules[index].Vuln != "" {
-			vuln = &Vuln{Name: finger.Rules[index].Vuln, SeverityLevel: HIGH}
+			vuln = &parsers.Vuln{Name: finger.Rules[index].Vuln, SeverityLevel: HIGH}
 		} else if finger.Rules[index].Info != "" {
-			vuln = &Vuln{Name: finger.Rules[index].Info, SeverityLevel: INFO}
+			vuln = &parsers.Vuln{Name: finger.Rules[index].Info, SeverityLevel: INFO}
 		} else {
-			vuln = &Vuln{Name: finger.Name, SeverityLevel: INFO}
+			vuln = &parsers.Vuln{Name: finger.Name, SeverityLevel: INFO}
 		}
 	}
 	return frame, vuln
 }
 
-func (finger *Finger) Match(content string, level int, sender func([]byte) (string, bool)) (*Framework, *Vuln, bool) {
+func (finger *Finger) Match(content string, level int, sender func([]byte) (string, bool)) (*parsers.Framework, *parsers.Vuln, bool) {
 	// 只进行被动的指纹判断, 将无视rules中的senddata字段
 	for i, rule := range finger.Rules {
 		var ishttp bool
@@ -125,7 +113,7 @@ func (finger *Finger) Match(content string, level int, sender func([]byte) (stri
 			if isactive {
 				frame.From = ACTIVE
 			}
-			frame.Tag = finger.Tag
+			frame.Tags = finger.Tags
 			return frame, vuln, true
 		}
 	}
@@ -205,7 +193,7 @@ func (rs Rules) Compile(name string) error {
 		}
 		r.FingerName = name
 		if r.SendDataStr != "" {
-			r.SendData, _ = DSLParser(r.SendDataStr)
+			r.SendData, _ = parsers.DSLParser(r.SendDataStr)
 			if r.Level == 0 {
 				r.Level = 1
 			}
@@ -263,7 +251,7 @@ func (rule *Rule) Match(content string, ishttp bool) (bool, bool, string) {
 
 	// MD5 匹配
 	for _, md5s := range rule.Regexps.MD5 {
-		if md5s == Md5Hash([]byte(content)) {
+		if md5s == parsers.Md5Hash([]byte(content)) {
 			logs.Log.Debugf("%s finger hit, md5: %s", rule.FingerName, md5s)
 			return true, false, ""
 		}
@@ -271,7 +259,7 @@ func (rule *Rule) Match(content string, ishttp bool) (bool, bool, string) {
 
 	// mmh3 匹配
 	for _, mmh3s := range rule.Regexps.MMH3 {
-		if mmh3s == Mmh3Hash32([]byte(content)) {
+		if mmh3s == parsers.Mmh3Hash32([]byte(content)) {
 			logs.Log.Debugf("%s finger hit, mmh3: %s", rule.FingerName, mmh3s)
 			return true, false, ""
 		}
@@ -304,20 +292,7 @@ func (d senddata) IsNull() bool {
 
 type FingerMapper map[string][]*Finger
 
-func (fm FingerMapper) GetFingers(port string) []*Finger {
-	return fm[port]
-}
-
 type Fingers []*Finger
-
-func (fs Fingers) Contain(f *Finger) bool {
-	for _, finger := range fs {
-		if f == finger {
-			return true
-		}
-	}
-	return false
-}
 
 func (fs Fingers) GroupByPort() FingerMapper {
 	fingermap := make(FingerMapper)

@@ -184,6 +184,13 @@ func (r *Runner) PrepareConfig() {
 		r.Config.Outputf = r.Outputf
 	}
 
+	for _, filterStr := range r.OutputFilters {
+		k, v, op := parseFilterString(filterStr)
+		if op != "" {
+			r.Config.OutputFilters = append(r.Config.OutputFilters, []string{k, v, op})
+		}
+	}
+
 	if r.AutoFile {
 		r.Config.Filenamef = "auto"
 	} else if r.HiddenFile {
@@ -327,7 +334,7 @@ func (r *Runner) Close(config *Config) {
 	}
 
 	// 任务统计
-	logs.Log.Importantf("Alived: %d, Totoal : %d", Opt.AliveSum, RunOpt.Sum)
+	logs.Log.Importantf("Alived: %d, Total: %d", Opt.AliveSum, RunOpt.Sum)
 	logs.Log.Important("Time consuming: " + time.Since(r.start).String())
 
 	// 输出文件名
@@ -363,10 +370,10 @@ func printConfigs(t string) {
 		PrintNucleiPoc()
 	} else if t == "workflow" {
 		PrintWorkflow()
-	} else if t == "Extract" {
+	} else if t == "extract" {
 		PrintExtract()
 	} else {
-		fmt.Println("choice port|nuclei|workflow|Extract")
+		fmt.Println("choice port|nuclei|workflow|extract")
 	}
 }
 
@@ -381,4 +388,21 @@ func templatesLoader() {
 	Mmh3Fingers, Md5Fingers = LoadHashFinger(AllHttpFingers)
 	TcpFingers = LoadFinger("tcp").GroupByPort()
 	HttpFingers = AllHttpFingers.GroupByPort()
+}
+
+func parseFilterString(s string) (k, v, op string) {
+	if strings.Contains(s, "::") {
+		kv := strings.Split(s, "::")
+		return kv[0], kv[1], "::"
+	} else if strings.Contains(s, "==") {
+		kv := strings.Split(s, "==")
+		return kv[0], kv[1], "=="
+	} else if strings.Contains(s, "!=") {
+		kv := strings.Split(s, "!=")
+		return kv[0], kv[1], "!="
+	} else if strings.Contains(s, "!:") {
+		kv := strings.Split(s, "!:")
+		return kv[0], kv[1], "!:"
+	}
+	return "", "", ""
 }

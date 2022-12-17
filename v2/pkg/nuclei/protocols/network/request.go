@@ -171,7 +171,10 @@ func (r *Request) executeRequestWithPayloads(variables map[string]interface{}, a
 
 		if input.Read > 0 {
 			buffer := make([]byte, input.Read)
-			n, _ := conn.Read(buffer)
+			n, err := conn.Read(buffer)
+			if err != nil {
+				return err
+			}
 			responseBuilder.Write(buffer[:n])
 
 			bufferStr := string(buffer[:n])
@@ -230,7 +233,7 @@ func (r *Request) executeRequestWithPayloads(variables map[string]interface{}, a
 		}
 	} else {
 		final = make([]byte, bufferSize)
-		time.Sleep(time.Duration(r.ReadSize/10) * time.Millisecond)
+		time.Sleep(1000 * time.Millisecond)
 		n, err = conn.Read(final)
 		if err != nil && err != io.EOF {
 			return err

@@ -16,7 +16,7 @@ func Nuclei(target string, result *Result) {
 			executeTemplates(result, strings.Split(RunOpt.Exploit, ","), target)
 		} else {
 			titles := result.Frameworks.GetNames()
-			if result.IsHttp() {
+			if result.IsHttp {
 				titles = append(titles, "http")
 			}
 			executeTemplates(result, titles, target)

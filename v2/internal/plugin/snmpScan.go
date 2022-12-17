@@ -3,6 +3,7 @@ package plugin
 import (
 	"bytes"
 	"github.com/chainreactors/gogo/v2/pkg/fingers"
+	"github.com/chainreactors/gogo/v2/pkg/utils"
 	"github.com/chainreactors/parsers"
 	//"encoding/hex"
 	"github.com/chainreactors/gogo/v2/pkg"
@@ -22,9 +23,8 @@ func snmpScan(result *pkg.Result) {
 		result.Error = err.Error()
 		return
 	}
-
-	if i := bytes.Index(data, []byte{0x4, 0x11}); i != -1 && len(data) > i+2 {
-		result.Title = string(data[i+2:])
+	if i := bytes.Index(data, []byte{0x0, 0x4}); i != -1 && len(data) > i+3 {
+		result.Title = utils.AsciiEncode(string(data[i+3:]))
 	}
 
 	result.Open = true

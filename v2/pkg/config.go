@@ -9,6 +9,7 @@ import (
 	"github.com/chainreactors/ipcs"
 	"github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
+	"path"
 	"strings"
 )
 
@@ -57,6 +58,7 @@ type Config struct {
 	HostsMap       map[string][]string `json:"-"` // host映射表
 	Filters        []string            `json:"-"`
 	FilterOr       bool                `json:"-"`
+	OutputFilters  [][]string          `json:"-"`
 }
 
 func (config *Config) InitIP() error {
@@ -87,7 +89,7 @@ func (config *Config) InitIP() error {
 
 		config.CIDRs = utils.Unique(config.CIDRs).(ipcs.CIDRs)
 		if len(config.CIDRs) == 0 {
-			return fmt.Errorf("all targets format error")
+			return fmt.Errorf("all targets format error, exit!")
 		}
 	}
 	return nil
@@ -166,7 +168,7 @@ func (config *Config) InitFile() error {
 
 func (config *Config) Validate() error {
 	// 一些命令行参数错误处理,如果check没过直接退出程序或输出警告
-	legalFormat := []string{"url", "ip", "port", "frameworks", "framework", "vuln", "vulns", "protocol", "title", "target", "hash", "language", "host", "color", "c", "json", "j", "full", "jsonlines", "jl", "zombie", "sc", "csv", "status", "os"}
+	legalFormat := []string{"url", "ip", "port", "frameworks", "framework", "frame", "vuln", "vulns", "protocol", "scheme", "title", "target", "hash", "language", "host", "cert", "color", "c", "json", "j", "full", "jsonlines", "jl", "zombie", "sc", "csv", "status", "os"}
 	if config.FileOutputf != Default {
 		for _, form := range strings.Split(config.FileOutputf, ",") {
 			if !utils.SliceContains(legalFormat, form) {
@@ -273,9 +275,9 @@ func (config *Config) GetTarget() string {
 func (config *Config) GetTargetName() string {
 	var target string
 	if config.ListFile != "" {
-		target = config.ListFile
+		target = path.Base(config.ListFile)
 	} else if config.JsonFile != "" {
-		target = config.JsonFile
+		target = path.Base(config.JsonFile)
 	} else if config.Mod == "a" {
 		target = "auto"
 	} else if config.IP != "" {
