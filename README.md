@@ -17,9 +17,17 @@ README Version 2.5.0
 * 几乎不依赖第三方库, 纯原生go编写
 
 ## QuickStart
+完整的文档与教程位于wiki: https://chainreactors.github.io/wiki/gogo/
+
 最简使用, 指定网段进行默认扫描, 并在命令行输出
 
 `gogo -i 192.168.1.1/24 -p win,db,top2 `
+
+一些常用的端口配置:
+* `-p -`  等于`-p 1-65535`
+* `-p all` port.yaml中的所有端口
+* `-p common` 内网常用端口
+* `-p top2,top3` 外网常见web端口
 
 当目标范围的子网掩码小于24时, 建议启用 smart模式扫描(原理见doc), 例如子网掩码为16时(输出结果较多, 建议开启--af输出到文件, 命令行只输出日志)
 
@@ -41,52 +49,12 @@ workflow中的预设参数优先级低于命令行输入, 因此可以通过命�
 
 `gogo -F result.dat`
 
+## 示例
 
-### workflow
-workflow 使用思维导图
+**一个简单的任务**
 
-![](doc/img/pipeline.png)
+`gogo -i 81.68.175.32/28 -p top2`
 
-关于细节的介绍见: [见gogo设计文档3-可控的扫描流程](doc/gogo设计文档3-可控的扫描流程.md)
-
-## 参数详解
-gogo的参数相当复杂, 为了适应各种各样的场景添加了非常多的各种用途的参数, 因此导致gogo有一定的使用门槛和学习成本. 需要对自动化与扫描有一点的基本的了解才能更好的使用gogo. (之后会通过几篇文章介绍内网自动化探测的一些经验与技巧)
-### 输入
-允许多种形式的输入, 适应各种各样的场景
-
-1. 直接输入cidr,参数-i 1.1.1.1/24, 支持逗号分割
-2. 从文件中读ip列表, 参数 -l 1.txt
-3. 从结果中读任务列表,参数 -j 1.json , 混淆加密后的文件也能自动解码, 如果存在密钥, 请带上-k参数
-4. 从管道中读取列表, -L
-5. 从管道中读取结果, -J
-
-### 端口配置
-
-gogo支持非常灵活的端口配置
-
-参看端口预设,参数 -P port
-
-使用端口预设灵活配置端口: `-p top2,http,1-1000,65534`
-
-一些常用的端口配置:
-* `-p -`  等于`-p 1-65535`
-* `-p all` port.yaml中的所有端口
-* `-p common` 内网常用端口
-* `-p top2,top3` 外网常见web端口
-
-### 输出
-
-输出分为两大类,输出到文件或输出到命令行. 在webshell场景下,通常无法输出到命令行, 因此需要输出到文件.
-
-gogo对两种场景分别设计了不同的输出逻辑.
-
-#### 输出到命令行
-
-默认即可输出到命令行,但是在选择输出到文件的时候会关闭命令行输出.如果不想关闭命令行输出, 可以使用`--tee`手动开启
-
-命令行输出通过`-o full`控制输出格式, 常见的输出格式有:full(default), jsonlines, 以及ip, url, target 等单独或多个字段的组合
-
-命令行full格式输出结果如下:
 ```
 gogo -i 81.68.175.32/28 -p top2
 [*] Current goroutines: 1000, Version Level: 0,Exploit Target: none, PortSpray Scan: false ,2022-07-07 07:07.07
@@ -105,19 +73,14 @@ gogo -i 81.68.175.32/28 -p top2
 
 如果要联动其他工具, 可以指定`-q/--quiet`关闭日志信息, 只保留输出结果.
 
-#### 输出到文件
+**输出到文件**
 
-通过`-f filename` 或 `--af` 指定输出的文件名, 则由命令行输出自动转为文件输出, 会关闭命令行的结果输出, 只保留进度输出(进度输出会同步到`.sock.lock`文件中). 适用于webshell场景等无交互式shell的场景.
+`gogo -i 81.68.175.32 --af`
 
-因为启发式扫描下会生成多个文件, 可以通过`--af` (auto-filename) 自动选择文件名.
+可以看到在gogo二进制文件同目录下, 生成了`.81.68.175.32_28_all_default_json.dat1`, 该文件是deflate压缩的json文件.
 
-输出到文件的格式通过大写的`-O`指定, 常见的输出格式有:json(default), jsonlines, csv
+通过gogo格式化该文件, 获得human-like的结果
 
-注1. 如果输出到文件, 默认会输出到与gogo二进制文件同目录. 如需修改所有文件的输出目录, 请指定`--path [path]`
-
-输出到文件的结果, 需要使用`-F filename`格式化. 效果如下:
-
-#### 格式化结果
 ```
  gogo  -F .\.81.68.175.32_28_all_default_json.dat1
 Scan Target: 81.68.175.32/28, Ports: all, Mod: default
@@ -151,7 +114,6 @@ Exploit: none, Version level: 0
 
 * `-o jl` , 一行一个json, 可以通过管道传给jq实时处理
 * `-o color` , 带颜色的输出
-* `-o url` 以url格式输出
 
 并且可以通过--filter过滤出想要的结果
 
@@ -161,74 +123,7 @@ Exploit: none, Version level: 0
 
 `-F 1.json -f file` 重新输出到文件, `--af` 输出到文件根据config自动生成文件名
 
-经过几个版本迭代的输出系统已经能支持绝大部分场景的工作, 全部的-o与--filter用法请见 [输入与输出](doc/gogo设计文档5-输入与输出.md)
-## 进阶功能
-
-**端口Spray模式**
-
-任务生成器会以端口优先生成任务, 而非默认的ip优先.
-
-`./gogo.exe -i 172.16.1.1/24 -p top2 -s`
-
-**主动指纹识别**
-
-当前包括数千条web指纹, 数百条favicon指纹以及数十条tcp指纹
-
-默认情况下只收集不主动发包的指纹. 如需进行主动的指纹识别, 需要添加-v参数. http协议的主动指纹识别已自动适配keep-alive
-
-`./gogo.exe -i 192.168.1.1/24 -p top2 -v `
-
-指纹识别将会标注指纹来源, 有以下几种情况:
-* active 通过主动发包获取
-* ico 通过favicon获取
-* 404 通过随机目录获取
-* guess 只作用于tcp指纹, 根据服务默认端口号猜测
-
-**主动漏洞探测**
-
-gogo并非漏扫工具,因此不会支持sql注入,xss之类的通用漏洞探测功能.
-
-为了支持内网更好的自动化, 集成了nuclei的poc, 可以用来编写poc批量执行某些特定的扫描任务, 以及一些默认口令登录的poc
-
-nuclei的中poc往往攻击性比较强, poc移植到gogo之前会进行一些修改和复现, 因此不打算一口气移植全部的nuclei poc
-
-目前已集成的pocs见v2/templates/nuclei, 以及ms17010, shiro, snmp等特殊的漏洞
-
-nuclei poc将会根据指纹识别的情况自动调用, 而非一口气全打过去, 为了更好的探测漏洞, 建议同时开启-v 主动指纹识别
-
-使用:
-
-`./gogo.exe -i 192.168.1.1/24 -p top2 -ev`
-
-
-**特殊端口支持**
-
-部分特殊端口以插件的形式支持, 而非默认的探测端口状态. 可以收集一些额外的信息.
-
-WMI
-`./gogo.exe -i 172.16.1.1/24 -p wmi`
-
-OXID:
-
-`./gogo.exe -i 172.16.1.1/24 -p oxid`
-
-NBTScan
-
-`./gogo.exe -i 172.16.1.1/24 -p nbt`
-
-PING
-
-`./gogo.exe -i 172.16.1.1/24 -p icmp`
-
-snmp
-
-`./gogo.exe -i 172.16.1.1/24 -p snmp`
-
-SMB
-`./gogo.exe -i 172.16.1.1/24 -p smb`
-
-可以任意组合使用,例如:
-`./gogo.exe -i 172.16.1.1/24 -p smb,wmi,oxid,nbt,icmp,80,443,top2`
+关于输入输出以及各种高级用法请见gogo的wiki
 
 ## 注意事项
 
@@ -258,7 +153,7 @@ SMB
 
 未来也许会实现auto-tune, 自动调整并发速率
 
-**这些用法大概只覆盖了一小半的使用场景, 更多的细节请阅读/doc目录下的设计文档**
+**这些用法大概只覆盖了一小半的使用场景, 请[阅读文档](https://chainreactors.github.io/wiki/gogo/)**
 
 ## Make
 
@@ -285,7 +180,6 @@ go build .
 理论上支持包括windows 2003在内的全操作系统, 某些稍微罕见的特殊版本可以联系我帮忙编译.
 
 ## THANKS
-
 * https://github.com/projectdiscovery/nuclei-templates
 * https://github.com/projectdiscovery/nuclei
 * https://github.com/JKme/cube
