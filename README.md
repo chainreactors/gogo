@@ -17,7 +17,7 @@ README Version 2.5.0
 * 几乎不依赖第三方库, 纯原生go编写
 
 ## QuickStart
-完整的文档与教程位于wiki: 
+完整的文档与教程位于wiki: https://chainreactors.github.io/wiki/gogo/
 
 最简使用, 指定网段进行默认扫描, 并在命令行输出
 
@@ -153,7 +153,7 @@ Exploit: none, Version level: 0
 
 未来也许会实现auto-tune, 自动调整并发速率
 
-**这些用法大概只覆盖了一小半的使用场景, 请阅读文档**
+**这些用法大概只覆盖了一小半的使用场景, 请[阅读文档](https://chainreactors.github.io/wiki/gogo/)**
 
 ## Make
 
