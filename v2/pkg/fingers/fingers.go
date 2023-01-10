@@ -54,7 +54,7 @@ func (finger *Finger) ToResult(hasFrame, hasVuln bool, res string, index int) (f
 	if hasFrame {
 		if res != "" {
 			frame = &parsers.Framework{Name: finger.Name, Version: res}
-		} else if finger.Rules[index].Version != "" {
+		} else if finger.Rules[index].Version != "_" {
 			frame = &parsers.Framework{Name: finger.Name, Version: finger.Rules[index].Version}
 		} else {
 			frame = &parsers.Framework{Name: finger.Name}
