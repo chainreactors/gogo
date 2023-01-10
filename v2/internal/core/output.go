@@ -57,12 +57,15 @@ func FormatOutput(filename, outFilename, outf, filenamef string, filters []strin
 	case *ResultsData:
 		rd = data.(*ResultsData)
 		fmt.Println(rd.ToConfig())
-		if outFilename == "" {
-			outFilename = GetFilename(rd.GetConfig(), outf)
+		if filenamef == "clear" {
+			config := rd.GetConfig()
+			config.Filenamef = filenamef
+			outFilename = GetFilename(config, outf)
 		}
 	case *SmartData:
 		sd = data.(*SmartData)
-		if outFilename == "" {
+		if filenamef == "clear" {
+			sd.Config.Filenamef = filenamef
 			outFilename = GetFilename(&sd.Config, "cidr")
 		}
 	case []byte:

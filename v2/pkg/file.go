@@ -120,6 +120,11 @@ func GetFilename(config *Config, name string) string {
 	} else {
 		return config.Filename
 	}
+
+	if !IsExist(basename) {
+		return basename
+	}
+
 	for IsExist(basename + utils.ToString(fileint)) {
 		fileint++
 	}
