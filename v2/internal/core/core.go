@@ -101,7 +101,7 @@ func SmartMod(target *ipcs.CIDR, config Config) {
 		if config.PortProbe == Default {
 			config.PortProbeList = []string{DefaultSuperSmartPortProbe}
 		}
-	case SMART, SUPERSMARTC:
+	default:
 		mask = 24
 		if config.PortProbe == Default {
 			config.PortProbeList = []string{DefaultSmartPortProbe}
@@ -131,7 +131,7 @@ func SmartMod(target *ipcs.CIDR, config Config) {
 		plugin.Dispatch(result)
 
 		if result.Open {
-			cidrAlived(result.Ip, temp, mask, config.Mod)
+			cidrAlived(result.Ip, temp, mask)
 		} else if result.Error != "" {
 			Log.Debugf("tcp stat: %s, errmsg: %s", portstat[result.ErrStat], result.Error)
 		}
@@ -156,7 +156,7 @@ func SmartMod(target *ipcs.CIDR, config Config) {
 	} else {
 		return
 	}
-	Log.Importantf("smart scan: %s finished, found %d alive cidrs", target, len(iplist))
+	Log.Importantf("Smart scan: %s finished, found %d alive cidrs", target, len(iplist))
 	if config.IsBSmart() {
 		WriteSmartResult(config.SmartBFile, iplist.Strings())
 	}
@@ -185,7 +185,6 @@ func AliveMod(targets interface{}, config Config) {
 	targetGen := NewTargetGenerator(config)
 	alivedmap := targetGen.ipGenerator.alivedMap
 	targetCh := targetGen.generatorDispatch(targets, config.AliveSprayMod)
-	//targetChannel := generatorDispatch(targets, config)
 	scanPool, _ := ants.NewPoolWithFunc(config.Threads, func(i interface{}) {
 		aliveScan(i.(targetConfig), alivedmap)
 		wgs.Done()
@@ -226,14 +225,13 @@ func aliveScan(tc targetConfig, temp *sync.Map) {
 	}
 }
 
-func cidrAlived(ip string, temp *sync.Map, mask int, mod string) {
-	i, _ := ipcs.ParseIP(ip)
-	alivecidr := i.Mask(mask).String()
+func cidrAlived(ip string, temp *sync.Map, mask int) {
+	i := net.ParseIP(ip)
+	alivecidr := i.Mask(net.CIDRMask(mask, 32)).String()
 	_, ok := temp.Load(alivecidr)
 	if !ok {
 		temp.Store(alivecidr, 1)
-		cidr := fmt.Sprintf("%s/%d", ip, mask)
-		Log.Important("Found " + cidr)
+		Log.Importantf("Found %s/%d", ip, mask)
 		Opt.AliveSum++
 	}
 }
