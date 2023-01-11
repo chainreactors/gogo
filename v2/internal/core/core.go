@@ -80,7 +80,6 @@ func DefaultMod(targets interface{}, config Config) {
 			debug.PrintStack()
 		}
 
-		Log.Errorf("unexcept error, %v", err)
 		wgs.Done()
 	}))
 	defer scanPool.Release()
