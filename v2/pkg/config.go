@@ -196,7 +196,7 @@ func (config *Config) Validate() error {
 	}
 
 	if config.IP == "" && config.ListFile == "" && config.JsonFile == "" && !config.IsJsonInput && !config.IsListInput { // 一些导致报错的参数组合
-		err = errors.New("cannot found target, please set -ip or -l or -j or stdin")
+		err = errors.New("no any target, please set -ip or -l or -j or stdin")
 	}
 
 	if config.JsonFile != "" && config.ListFile != "" {

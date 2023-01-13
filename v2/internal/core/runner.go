@@ -28,11 +28,12 @@ func NewRunner() *Runner {
 var ver = ""
 
 type Runner struct {
-	MiscOption   `group:"Miscellaneous Options"`
-	InputOption  `group:"Input Options"`
-	OutputOption `group:"Output Options"`
-	SmartOption  `group:"Smart Options"`
-	ConfigOption `group:"Configuration Options"`
+	MiscOption    `group:"Miscellaneous Options"`
+	InputOption   `group:"Input Options"`
+	OutputOption  `group:"Output Options"`
+	SmartOption   `group:"Smart Options"`
+	AdvanceOption `group:"Advance Options"`
+	ConfigOption  `group:"Configuration Options"`
 
 	start  time.Time
 	Config Config
