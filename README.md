@@ -1,5 +1,5 @@
 # gogo
-高度可控可拓展的自动化的扫描引擎, 为红队[设计](/wiki/gogo/design/).
+高度可控可拓展的自动化的扫描引擎, 为红队[设计](https://chainreactors.github.io/wiki/gogo/design/).
 
 ## Features
 * 自由的端口配置
@@ -121,7 +121,7 @@ Exploit: none, Version level: 0
 
 `-F 1.json -f file` 重新输出到文件, `--af` 输出到文件根据config自动生成文件名
 
-关于输入输出以及各种高级用法请见[gogo的wiki](/wiki/gogo/start/#output)
+关于输入输出以及各种高级用法请见[gogo的wiki](https://chainreactors.github.io/wiki/gogo/start/#output)
 
 ## 注意事项
 
