@@ -28,11 +28,12 @@ func NewRunner() *Runner {
 var ver = ""
 
 type Runner struct {
-	MiscOption   `group:"Miscellaneous Options"`
-	InputOption  `group:"Input Options"`
-	OutputOption `group:"Output Options"`
-	SmartOption  `group:"Smart Options"`
-	ConfigOption `group:"Configuration Options"`
+	MiscOption    `group:"Miscellaneous Options"`
+	InputOption   `group:"Input Options"`
+	OutputOption  `group:"Output Options"`
+	SmartOption   `group:"Smart Options"`
+	AdvanceOption `group:"Advance Options"`
+	ConfigOption  `group:"Configuration Options"`
 
 	start  time.Time
 	Config Config
@@ -67,7 +68,7 @@ func (r *Runner) PreInit() bool {
 
 	r.PrepareConfig()
 	if r.FormatterFilename != "" {
-		FormatOutput(r.FormatterFilename, r.Config.Filename, r.Config.Outputf, r.Config.FileOutputf, r.Filters, r.FilterOr)
+		FormatOutput(r.FormatterFilename, r.Config.Filename, r.Config.Outputf, r.Config.Filenamef, r.Filters, r.FilterOr)
 		return false
 	}
 	// 输出 Config

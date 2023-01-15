@@ -3,6 +3,7 @@ package plugin
 import (
 	"github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/gogo/v2/pkg/utils"
+	"github.com/chainreactors/logs"
 )
 
 type RunnerOpts struct {
@@ -18,6 +19,11 @@ type RunnerOpts struct {
 var RunOpt RunnerOpts
 
 func Dispatch(result *pkg.Result) {
+	defer func() {
+		if err := recover(); err != nil {
+			logs.Log.Errorf("scan %s unexcept error, %v", result.GetTarget(), err)
+		}
+	}()
 	RunOpt.Sum++
 	if result.Port == "137" || result.Port == "nbt" {
 		nbtScan(result)
