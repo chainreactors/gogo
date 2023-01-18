@@ -2,7 +2,6 @@ package plugin
 
 import (
 	. "github.com/chainreactors/gogo/v2/pkg"
-	"github.com/chainreactors/gogo/v2/pkg/utils"
 	"github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
 	"net/http"
@@ -38,7 +37,7 @@ func hostScan(result *Result) {
 				result.CurrentHost = host
 			}
 			result.Host = host
-			vuln.Detail[host] = utils.AsciiEncode(title)
+			vuln.Detail[host] = title
 		}
 	}
 	if len(vuln.Detail) > 0 {

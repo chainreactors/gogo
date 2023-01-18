@@ -2,7 +2,6 @@ package plugin
 
 import (
 	"github.com/chainreactors/gogo/v2/pkg"
-	"github.com/chainreactors/gogo/v2/pkg/utils"
 	"strings"
 )
 
@@ -44,7 +43,7 @@ func oxidScan(result *pkg.Result) {
 	hostname_list := strings.Split(packet_v2, "\x07")
 
 	result.Host = hostname_list[0]
-	result.Title += utils.AsciiEncode(strings.Join(hostname_list[1:], ","))
+	result.Title += strings.Join(hostname_list[1:], ",")
 	result.Status = "OXID"
 	result.Port = "135 (oxid)"
 	result.Protocol = "wmi"

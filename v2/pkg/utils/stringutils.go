@@ -57,13 +57,6 @@ func ToInt(s string) int {
 	return i
 }
 
-func AsciiEncode(s string) string {
-	s = strings.TrimSpace(s)
-	s = fmt.Sprintf("%q", s)
-	s = strings.Trim(s, "\"")
-	return s
-}
-
 func CleanSpiltCFLR(s string) []string {
 	ss := strings.Split(s, "\n")
 	for i := 0; i < len(ss); i++ {

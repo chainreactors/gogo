@@ -14,6 +14,8 @@ github.com/chainreactors/parsers v0.2.9-0.20221208020818-5c6cddc7f1d4 h1:Ni/p/P/
 github.com/chainreactors/parsers v0.2.9-0.20221208020818-5c6cddc7f1d4/go.mod h1:Z9weht+lnFCk7UcwqFu6lXpS7u5vttiy0AJYOAyCCLA=
 github.com/chainreactors/parsers v0.2.9-0.20221210155102-cc0814762410 h1:K7EV0wtUuN6Rvh/MgqaBXyElD3guPsgNR5kF8nrV7iw=
 github.com/chainreactors/parsers v0.2.9-0.20221210155102-cc0814762410/go.mod h1:Z9weht+lnFCk7UcwqFu6lXpS7u5vttiy0AJYOAyCCLA=
+github.com/chainreactors/parsers v0.2.9-0.20230117063421-a463730bca48 h1:zuCauWp/Em+hQoHkwymOsHjHm7sp9ydxhcymQVuY/+o=
+github.com/chainreactors/parsers v0.2.9-0.20230117063421-a463730bca48/go.mod h1:Z9weht+lnFCk7UcwqFu6lXpS7u5vttiy0AJYOAyCCLA=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

@@ -2,7 +2,7 @@ package fingers
 
 import (
 	"fmt"
-	"github.com/chainreactors/gogo/v2/pkg/utils"
+	"github.com/chainreactors/parsers"
 	"regexp"
 )
 
@@ -57,9 +57,9 @@ type Extracted struct {
 func (e *Extracted) ToString() string {
 	if len(e.ExtractResult) == 1 {
 		if len(e.ExtractResult[0]) > 30 {
-			return fmt.Sprintf("%s:%s ... %d bytes", e.Name, utils.AsciiEncode(e.ExtractResult[0][:30]), len(e.ExtractResult[0]))
+			return fmt.Sprintf("%s:%s ... %d bytes", e.Name, parsers.AsciiEncode(e.ExtractResult[0][:30]), len(e.ExtractResult[0]))
 		}
-		return fmt.Sprintf("%s:%s", e.Name, utils.AsciiEncode(e.ExtractResult[0]))
+		return fmt.Sprintf("%s:%s", e.Name, parsers.AsciiEncode(e.ExtractResult[0]))
 	} else {
 		return fmt.Sprintf("%s:%d items", e.Name, len(e.ExtractResult))
 	}
