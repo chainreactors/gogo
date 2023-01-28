@@ -1,7 +1,7 @@
 package nuclei
 
 import (
-	"github.com/chainreactors/gogo/v2/pkg/utils"
+	"github.com/chainreactors/parsers/iutils"
 	"strings"
 )
 
@@ -22,14 +22,14 @@ func Replace(template string, values map[string]interface{}) string {
 		builder.WriteString(markerParenthesisClose)
 		replacerItems = append(replacerItems, builder.String())
 		builder.Reset()
-		replacerItems = append(replacerItems, utils.ToString(val))
+		replacerItems = append(replacerItems, iutils.ToString(val))
 
 		builder.WriteString(markerGeneral)
 		builder.WriteString(key)
 		builder.WriteString(markerGeneral)
 		replacerItems = append(replacerItems, builder.String())
 		builder.Reset()
-		replacerItems = append(replacerItems, utils.ToString(val))
+		replacerItems = append(replacerItems, iutils.ToString(val))
 	}
 	replacer := strings.NewReplacer(replacerItems...)
 	final := replacer.Replace(template)

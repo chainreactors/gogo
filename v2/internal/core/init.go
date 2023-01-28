@@ -6,10 +6,10 @@ import (
 	"github.com/chainreactors/files"
 	. "github.com/chainreactors/gogo/v2/internal/plugin"
 	. "github.com/chainreactors/gogo/v2/pkg"
-	. "github.com/chainreactors/gogo/v2/pkg/utils"
 	"github.com/chainreactors/ipcs"
 	. "github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
+	"github.com/chainreactors/parsers/iutils"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -21,7 +21,7 @@ func LoadFile(file *os.File) []byte {
 	defer file.Close()
 	content, err := ioutil.ReadAll(file)
 	if err != nil {
-		Fatal(err.Error())
+		iutils.Fatal(err.Error())
 	}
 	return bytes.TrimSpace(content)
 }
@@ -42,7 +42,7 @@ func InitConfig(config *Config) (*Config, error) {
 			config.Threads = WindowsDefaultThreads
 		} else {
 			// linux系统判断fd限制, 如果-t 大于fd限制,则将-t 设置到fd-100
-			if fdlimit := GetFdLimit(); config.Threads > fdlimit {
+			if fdlimit := iutils.GetFdLimit(); config.Threads > fdlimit {
 				Log.Warnf("System fd limit: %d , Please exec 'ulimit -n 65535'", fdlimit)
 				Log.Warnf("Now set threads to %d", fdlimit-100)
 				config.Threads = fdlimit - 100
@@ -54,12 +54,12 @@ func InitConfig(config *Config) (*Config, error) {
 	if config.ListFile != "" {
 		file, err = files.Open(config.ListFile)
 		if err != nil {
-			Fatal(err.Error())
+			iutils.Fatal(err.Error())
 		}
 	} else if config.JsonFile != "" {
 		file, err = files.Open(config.JsonFile)
 		if err != nil {
-			Fatal(err.Error())
+			iutils.Fatal(err.Error())
 		}
 	} else if HasStdin() {
 		file = os.Stdin
@@ -131,9 +131,9 @@ func InitConfig(config *Config) (*Config, error) {
 
 	// 初始化ss模式ip探针,默认ss默认只探测ip为1的c段,可以通过-ipp参数指定,例如-ipp 1,254,253
 	if config.IpProbe != Default {
-		config.IpProbeList = Str2uintlist(config.IpProbe)
+		config.IpProbeList = iutils.Str2uintlist(config.IpProbe)
 	} else {
-		config.IpProbeList = Str2uintlist(DefaultIpProbe)
+		config.IpProbeList = iutils.Str2uintlist(DefaultIpProbe)
 	}
 
 	// 初始已完成,输出任务基本信息

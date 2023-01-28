@@ -2,7 +2,7 @@ package protocols
 
 import (
 	"fmt"
-	"github.com/chainreactors/gogo/v2/pkg/utils"
+	"github.com/chainreactors/parsers/iutils"
 	"regexp"
 	"strings"
 )
@@ -235,7 +235,7 @@ func (e *Extractor) ExtractKval(data map[string]interface{}) map[string]struct{}
 		if !ok {
 			continue
 		}
-		itemString := utils.ToString(item)
+		itemString := iutils.ToString(item)
 		if _, ok := results[itemString]; !ok {
 			results[itemString] = struct{}{}
 		}

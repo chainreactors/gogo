@@ -1,8 +1,6 @@
 package protocols
 
-import (
-	"github.com/chainreactors/gogo/v2/pkg/utils"
-)
+import "github.com/chainreactors/parsers/iutils"
 
 // operators contains the operators that can be applied on protocols
 type Operators struct {
@@ -95,7 +93,7 @@ func (operators *Operators) Execute(data map[string]interface{}, match matchFunc
 			if extractor.Name != "" {
 				result.Extracts[extractor.Name] = extractorResults
 			} else {
-				result.Extracts[utils.ToString(tmpname)] = extractorResults
+				result.Extracts[iutils.ToString(tmpname)] = extractorResults
 				tmpname++
 			}
 		}

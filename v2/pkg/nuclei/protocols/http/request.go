@@ -4,9 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"github.com/chainreactors/gogo/v2/pkg/nuclei/protocols"
-	. "github.com/chainreactors/gogo/v2/pkg/utils"
 	"github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
+	"github.com/chainreactors/parsers/iutils"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -126,15 +126,15 @@ func (r *Request) getMatchPart(part string, data protocols.InternalEvent) (strin
 
 	if part == "all" {
 		builder := &strings.Builder{}
-		builder.WriteString(ToString(data["body"]))
-		builder.WriteString(ToString(data["all_headers"]))
+		builder.WriteString(iutils.ToString(data["body"]))
+		builder.WriteString(iutils.ToString(data["all_headers"]))
 		itemStr = builder.String()
 	} else {
 		item, ok := data[part]
 		if !ok {
 			return "", false
 		}
-		itemStr = ToString(item)
+		itemStr = iutils.ToString(item)
 	}
 	return itemStr, true
 }
@@ -173,15 +173,15 @@ func (r *Request) MakeResultEvent(wrapped *protocols.InternalWrappedEvent) []*pr
 
 func (r *Request) makeResultEventItem(wrapped *protocols.InternalWrappedEvent) *protocols.ResultEvent {
 	data := &protocols.ResultEvent{
-		TemplateID: ToString(wrapped.InternalEvent["template-id"]),
+		TemplateID: iutils.ToString(wrapped.InternalEvent["template-id"]),
 		//Info:             wrapped.InternalEvent["template-info"].(map[string]interface{}),
 		Type:             "http",
-		Host:             ToString(wrapped.InternalEvent["host"]),
-		Matched:          ToString(wrapped.InternalEvent["matched"]),
+		Host:             iutils.ToString(wrapped.InternalEvent["host"]),
+		Matched:          iutils.ToString(wrapped.InternalEvent["matched"]),
 		Metadata:         wrapped.OperatorsResult.PayloadValues,
 		ExtractedResults: wrapped.OperatorsResult.OutputExtracts,
 		Timestamp:        time.Now(),
-		IP:               ToString(wrapped.InternalEvent["ip"]),
+		IP:               iutils.ToString(wrapped.InternalEvent["ip"]),
 	}
 	return data
 }
@@ -256,7 +256,7 @@ func (r *Request) Compile(options *protocols.ExecuterOptions) error {
 			case []string:
 				tmp := make([]string, len(payload.([]string)))
 				for i, p := range payload.([]string) {
-					tmp[i], _ = parsers.DSLParserToString(ToString(p))
+					tmp[i], _ = parsers.DSLParserToString(iutils.ToString(p))
 				}
 				r.Payloads[k] = tmp
 			}
@@ -329,7 +329,7 @@ func (r *Request) ExecuteRequestWithResults(reqURL string, dynamicValues map[str
 			break
 		}
 		if len(payloads) > 0 {
-			logs.Log.Debugf("payloads: %s", MaptoString(payloads))
+			logs.Log.Debugf("payloads: %s", iutils.MapToString(payloads))
 		}
 		var gotErr error
 		var skip bool
@@ -393,7 +393,7 @@ func respToMap(resp *http.Response, req *http.Request) map[string]interface{} {
 
 	for k, v := range resp.Header {
 		for _, i := range v {
-			data["all_headers"] = ToString(data["all_headers"]) + fmt.Sprintf("%s: %s\r\n", k, i)
+			data["all_headers"] = iutils.ToString(data["all_headers"]) + fmt.Sprintf("%s: %s\r\n", k, i)
 		}
 	}
 

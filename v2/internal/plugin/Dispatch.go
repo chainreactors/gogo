@@ -3,7 +3,7 @@ package plugin
 import (
 	"github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/logs"
-	"github.com/chainreactors/parsers"
+	"github.com/chainreactors/parsers/iutils"
 )
 
 type RunnerOpts struct {
@@ -87,6 +87,6 @@ func Dispatch(result *pkg.Result) {
 		Nuclei(result.GetHostBaseURL(), result)
 	}
 
-	result.Title = parsers.AsciiEncode(result.Title)
+	result.Title = iutils.AsciiEncode(result.Title)
 	return
 }

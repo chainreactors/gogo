@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"github.com/M09ic/go-ntlmssp"
 	"github.com/chainreactors/gogo/v2/pkg"
-	"github.com/chainreactors/gogo/v2/pkg/utils"
+	"github.com/chainreactors/parsers/iutils"
 )
 
 var data = pkg.Decode("YmXgZhZgYGCoYNBgYGZgYNghsAPEZWAEY0aGBSAGAwPDAQjlBiJYYju6XsucFJz/goNBW8AjgYmBgYGLCaLAL8THNzg4AKyfvYljEQMaYGPcKMvAwMAPAAAA//8=")
@@ -28,7 +28,7 @@ func wmiScan(result *pkg.Result) {
 	if off_ntlm != -1 {
 		result.Protocol = "wmi"
 		result.Status = "WMI"
-		tinfo := utils.ToStringMap(ntlmssp.NTLMInfo(ret[off_ntlm:]))
+		tinfo := iutils.ToStringMap(ntlmssp.NTLMInfo(ret[off_ntlm:]))
 		result.AddNTLMInfo(tinfo, "wmi")
 	}
 }

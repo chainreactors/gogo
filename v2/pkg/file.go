@@ -3,7 +3,7 @@ package pkg
 import (
 	"fmt"
 	"github.com/chainreactors/files"
-	"github.com/chainreactors/gogo/v2/pkg/utils"
+	"github.com/chainreactors/parsers/iutils"
 	"os"
 	"path"
 	"strings"
@@ -98,7 +98,7 @@ func GetFilename(config *Config, name string) string {
 	var basepath string
 
 	if config.FilePath == "" {
-		basepath = utils.GetExcPath()
+		basepath = iutils.GetExcPath()
 	} else {
 		basepath = config.FilePath
 	}
@@ -125,8 +125,8 @@ func GetFilename(config *Config, name string) string {
 		return basename
 	}
 
-	for IsExist(basename + utils.ToString(fileint)) {
+	for IsExist(basename + iutils.ToString(fileint)) {
 		fileint++
 	}
-	return basename + utils.ToString(fileint)
+	return basename + iutils.ToString(fileint)
 }

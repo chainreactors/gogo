@@ -5,10 +5,10 @@ import (
 	"errors"
 	"fmt"
 	. "github.com/chainreactors/files"
-	"github.com/chainreactors/gogo/v2/pkg/utils"
 	"github.com/chainreactors/ipcs"
 	"github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
+	"github.com/chainreactors/parsers/iutils"
 	"path"
 	"strings"
 )
@@ -87,7 +87,7 @@ func (config *Config) InitIP() error {
 			}
 		}
 
-		config.CIDRs = utils.Unique(config.CIDRs).(ipcs.CIDRs)
+		config.CIDRs = iutils.Unique(config.CIDRs).(ipcs.CIDRs)
 		if len(config.CIDRs) == 0 {
 			return fmt.Errorf("all targets format error, exit!")
 		}
@@ -108,7 +108,7 @@ func (config *Config) InitFile() error {
 		// 创建output的filehandle
 		config.File, err = newFile(config.Filename, config.Compress)
 		if err != nil {
-			utils.Fatal(err.Error())
+			iutils.Fatal(err.Error())
 		}
 		if config.FileOutputf == "json" {
 			var rescommaflag bool
@@ -171,7 +171,7 @@ func (config *Config) Validate() error {
 	legalFormat := []string{"url", "ip", "port", "frameworks", "framework", "frame", "vuln", "vulns", "protocol", "scheme", "title", "target", "hash", "language", "host", "cert", "color", "c", "json", "j", "full", "jsonlines", "jl", "zombie", "sc", "csv", "status", "os"}
 	if config.FileOutputf != Default {
 		for _, form := range strings.Split(config.FileOutputf, ",") {
-			if !utils.SliceContains(legalFormat, form) {
+			if !iutils.StringsContains(legalFormat, form) {
 				logs.Log.Warnf("illegal file output format: %s, Please use one or more of the following formats: %s", form, strings.Join(legalFormat, ", "))
 			}
 		}
@@ -179,7 +179,7 @@ func (config *Config) Validate() error {
 
 	if config.Outputf != "full" {
 		for _, form := range strings.Split(config.Outputf, ",") {
-			if !utils.SliceContains(legalFormat, form) {
+			if !iutils.StringsContains(legalFormat, form) {
 				logs.Log.Warnf("illegal output format: %s, Please use one or more of the following formats: %s", form, strings.Join(legalFormat, ", "))
 			}
 		}
@@ -203,7 +203,7 @@ func (config *Config) Validate() error {
 		err = errors.New("cannot set -j and -l flags at same time")
 	}
 
-	if !HasPingPriv() && (strings.Contains(config.Ports, "icmp") || strings.Contains(config.Ports, "ping") || utils.SliceContains(config.AliveSprayMod, "icmp")) {
+	if !HasPingPriv() && (strings.Contains(config.Ports, "icmp") || strings.Contains(config.Ports, "ping") || iutils.StringsContains(config.AliveSprayMod, "icmp")) {
 		logs.Log.Warn("current user is not root, icmp scan not work")
 	}
 
@@ -233,21 +233,21 @@ func (config *Config) IsScan() bool {
 }
 
 func (config *Config) IsSmart() bool {
-	if utils.SliceContains([]string{SUPERSMART, SMART, SUPERSMARTB}, config.Mod) {
+	if iutils.StringsContains([]string{SUPERSMART, SMART, SUPERSMARTB}, config.Mod) {
 		return true
 	}
 	return false
 }
 
 func (config *Config) IsBSmart() bool {
-	if utils.SliceContains([]string{SUPERSMART, SUPERSMARTB}, config.Mod) {
+	if iutils.StringsContains([]string{SUPERSMART, SUPERSMARTB}, config.Mod) {
 		return true
 	}
 	return false
 }
 
 func (config *Config) IsCSmart() bool {
-	if utils.SliceContains([]string{SMART, SUPERSMARTC}, config.Mod) {
+	if iutils.StringsContains([]string{SMART, SUPERSMARTC}, config.Mod) {
 		return true
 	}
 	return false

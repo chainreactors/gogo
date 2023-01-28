@@ -3,9 +3,9 @@ package plugin
 import (
 	"github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/gogo/v2/pkg/fingers"
-	"github.com/chainreactors/gogo/v2/pkg/utils"
 	"github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
+	"github.com/chainreactors/parsers/iutils"
 	"strings"
 )
 
@@ -20,7 +20,7 @@ func NotFoundScan(result *pkg.Result) {
 	}
 
 	logs.Log.Debugf("request 404page %s %d", url, resp.StatusCode)
-	if utils.ToString(resp.StatusCode) == result.Status {
+	if iutils.ToString(resp.StatusCode) == result.Status {
 		return
 	}
 	content := string(parsers.ReadRaw(resp))

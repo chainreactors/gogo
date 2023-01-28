@@ -7,7 +7,7 @@ import (
 	"errors"
 	"github.com/M09ic/go-ntlmssp"
 	. "github.com/chainreactors/gogo/v2/pkg"
-	"github.com/chainreactors/gogo/v2/pkg/utils"
+	"github.com/chainreactors/parsers/iutils"
 )
 
 var v1d1 = Decode("YmBgaP0f7OtUxMDAwCARfIIBBfz/B6aSGJgCnBX8XEPC/YO8FQKC/N2DHH0VDPUMGJh8HP18Hf3AzPDMvJT88mKFtPwihfD8ouz0ovzSgmIFYz3DRAYmH19DPaMIAwMjmBYjPUMGJr8QBR9fBQM9QyMGAAAAAP//")
@@ -66,7 +66,7 @@ func smbScan(result *Result) {
 	}
 
 	result.Protocol = "smb"
-	result.AddNTLMInfo(utils.ToStringMap(ntlmssp.NTLMInfo(ret)), "smb")
+	result.AddNTLMInfo(iutils.ToStringMap(ntlmssp.NTLMInfo(ret)), "smb")
 }
 
 func smb1Scan(target string) ([]byte, error) {

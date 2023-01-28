@@ -1,8 +1,8 @@
 package pkg
 
 import (
-	"github.com/chainreactors/gogo/v2/pkg/utils"
 	"github.com/chainreactors/parsers"
+	"github.com/chainreactors/parsers/iutils"
 	"net/http"
 	"strings"
 )
@@ -33,7 +33,7 @@ func CollectHttpInfo(result *Result, resp *http.Response) {
 	result.Httpresp = parsers.NewResponse(resp)
 	result.Content = strings.ToLower(string(result.Httpresp.RawContent))
 	result.Protocol = resp.Request.URL.Scheme
-	result.Status = utils.ToString(resp.StatusCode)
+	result.Status = iutils.ToString(resp.StatusCode)
 	result.Language = result.Httpresp.Language
 	result.Midware = result.Httpresp.Server
 	result.Title = result.Httpresp.Title
@@ -56,5 +56,5 @@ func FormatCertDomains(domains []string) []string {
 		}
 		hosts = append(hosts, domain)
 	}
-	return utils.SliceUnique(hosts)
+	return iutils.StringsUnique(hosts)
 }

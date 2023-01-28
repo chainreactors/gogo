@@ -5,8 +5,8 @@ import (
 	"fmt"
 	. "github.com/chainreactors/files"
 	. "github.com/chainreactors/gogo/v2/pkg"
-	"github.com/chainreactors/gogo/v2/pkg/utils"
 	"github.com/chainreactors/parsers"
+	"github.com/chainreactors/parsers/iutils"
 	"os"
 	"strings"
 )
@@ -44,7 +44,7 @@ func FormatOutput(filename, outFilename, outf, filenamef string, filters []strin
 	} else {
 		file, err = Open(filename)
 		if err != nil {
-			utils.Fatal(err.Error())
+			iutils.Fatal(err.Error())
 		}
 	}
 
@@ -78,7 +78,7 @@ func FormatOutput(filename, outFilename, outf, filenamef string, filters []strin
 	if outFilename != "" {
 		fileHandle, err := NewFile(outFilename, false, false, false)
 		if err != nil {
-			utils.Fatal("" + err.Error())
+			iutils.Fatal("" + err.Error())
 		}
 		fmt.Println("Output filename: " + outFilename)
 		defer fileHandle.Close()

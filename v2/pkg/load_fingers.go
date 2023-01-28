@@ -2,7 +2,7 @@ package pkg
 
 import (
 	"github.com/chainreactors/gogo/v2/pkg/fingers"
-	"github.com/chainreactors/gogo/v2/pkg/utils"
+	"github.com/chainreactors/parsers/iutils"
 )
 
 var (
@@ -17,7 +17,7 @@ var (
 func LoadFinger(t string) fingers.Fingers {
 	fs, err := fingers.LoadFingers(LoadConfig(t))
 	if err != nil {
-		utils.Fatal(err.Error())
+		iutils.Fatal(err.Error())
 	}
 	return fs
 }

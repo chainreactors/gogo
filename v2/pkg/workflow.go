@@ -2,8 +2,8 @@ package pkg
 
 import (
 	"encoding/json"
-	"github.com/chainreactors/gogo/v2/pkg/utils"
 	"github.com/chainreactors/parsers"
+	"github.com/chainreactors/parsers/iutils"
 )
 
 func ParseWorkflowsFromInput(content []byte) []*Workflow {
@@ -11,7 +11,7 @@ func ParseWorkflowsFromInput(content []byte) []*Workflow {
 	var err error
 	err = json.Unmarshal(content, &workflows)
 	if err != nil {
-		utils.Fatal("workflow load FAIL, " + err.Error())
+		iutils.Fatal("workflow load FAIL, " + err.Error())
 	}
 	return workflows
 }
