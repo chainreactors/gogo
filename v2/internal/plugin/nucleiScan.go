@@ -2,7 +2,6 @@ package plugin
 
 import (
 	. "github.com/chainreactors/gogo/v2/pkg"
-	"github.com/chainreactors/gogo/v2/pkg/fingers"
 	"github.com/chainreactors/gogo/v2/pkg/nuclei/templates"
 	"github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
@@ -35,7 +34,7 @@ chainLoop: // 实现chain
 			res, ok := template.Execute(target)
 			if ok {
 				for name, extract := range res.Extracts {
-					result.AddExtract(fingers.NewExtracted(name, extract))
+					result.AddExtract(&parsers.Extracted{Name: name, ExtractResult: extract})
 				}
 				vulns = append(vulns, &parsers.Vuln{Name: template.Id, Payload: res.PayloadValues, Detail: res.DynamicValues, SeverityLevel: parsers.GetSeverityLevel(template.Info.Severity)})
 				chainsTemplates = append(chainsTemplates, diffTemplates(ts, choiceTemplates(template.Chains))...)

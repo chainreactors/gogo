@@ -5,16 +5,16 @@ import (
 	"github.com/chainreactors/files"
 	. "github.com/chainreactors/gogo/v2/internal/plugin"
 	. "github.com/chainreactors/gogo/v2/pkg"
-	"github.com/chainreactors/gogo/v2/pkg/fingers"
 	nucleihttp "github.com/chainreactors/gogo/v2/pkg/nuclei/protocols/http"
-	. "github.com/chainreactors/gogo/v2/pkg/utils"
 	"github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
+	"github.com/chainreactors/parsers/iutils"
 	"golang.org/x/net/proxy"
 	"net"
 	"net/http"
 	"net/url"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -125,24 +125,16 @@ func (r *Runner) Init() {
 		Opt.Noscan = r.NoScan
 	}
 
-	if r.Extracts != "" {
-		exts := strings.Split(r.Extracts, ",")
-		for _, extract := range exts {
-			if reg, ok := fingers.PresetExtracts[extract]; ok {
-				Extractors[extract] = reg
-			}
-		}
-	}
-	for _, extract := range r.Extract {
-		if reg, ok := fingers.PresetExtracts[extract]; ok {
-			Extractors[extract] = reg
+	// 加载配置文件中的全局变量
+	templatesLoader()
+	for _, e := range r.Extract {
+		if reg, ok := ExtractRegexps[e]; ok {
+			Extractors[e] = reg
 		} else {
-			Extractors[extract] = CompileRegexp(extract)
+			Extractors[e] = []*regexp.Regexp{regexp.MustCompile(e)}
 		}
 	}
 
-	// 加载配置文件中的全局变量
-	templatesLoader()
 	if r.AttackType != "" {
 		ExecuterOptions.Options.AttackType = r.AttackType
 	}
@@ -216,7 +208,7 @@ func (r *Runner) Run() {
 		} else if IsExist(r.WorkFlowName) {
 			file, err := files.Open(r.WorkFlowName)
 			if err != nil {
-				Fatal(err.Error())
+				iutils.Fatal(err.Error())
 			}
 			workflowMap["tmp"] = ParseWorkflowsFromInput(LoadFile(file))
 			r.WorkFlowName = "tmp"
@@ -254,7 +246,7 @@ func (r *Runner) runWithCMD() {
 
 	preparedConfig, err := InitConfig(&config)
 	if err != nil {
-		Fatal(err.Error())
+		iutils.Fatal(err.Error())
 	}
 	RunTask(*preparedConfig) // 运行
 	r.Close(&config)
@@ -310,14 +302,14 @@ func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) {
 
 			preparedConfig, err := InitConfig(config)
 			if err != nil {
-				Fatal(err.Error())
+				iutils.Fatal(err.Error())
 			}
 			RunTask(*preparedConfig) // 运行
 			r.Close(config)
 			r.ResetGlobals()
 		}
 	} else {
-		Fatal("not fount workflow " + r.WorkFlowName)
+		iutils.Fatal("not fount workflow " + r.WorkFlowName)
 	}
 }
 
@@ -325,12 +317,12 @@ func (r *Runner) Close(config *Config) {
 	config.Close() // 关闭result与extract写入管道
 
 	if r.HiddenFile {
-		Chtime(config.Filename)
+		iutils.Chtime(config.Filename)
 		if config.SmartBFile != nil && config.SmartBFile.InitSuccess {
-			Chtime(config.SmartBFilename)
+			iutils.Chtime(config.SmartBFilename)
 		}
 		if config.SmartCFile != nil && config.SmartCFile.InitSuccess {
-			Chtime(config.SmartBFilename)
+			iutils.Chtime(config.SmartBFilename)
 		}
 	}
 
@@ -364,10 +356,8 @@ func (r *Runner) ResetGlobals() {
 
 func printConfigs(t string) {
 	if t == "port" {
-		LoadPortConfig()
 		Printportconfig()
 	} else if t == "nuclei" {
-		nucleiLoader("", nil)
 		PrintNucleiPoc()
 	} else if t == "workflow" {
 		PrintWorkflow()
@@ -385,6 +375,7 @@ func nucleiLoader(pocfile string, payloads []string) {
 
 func templatesLoader() {
 	LoadPortConfig()
+	LoadExtractor()
 	AllHttpFingers = LoadFinger("http")
 	Mmh3Fingers, Md5Fingers = LoadHashFinger(AllHttpFingers)
 	TcpFingers = LoadFinger("tcp").GroupByPort()

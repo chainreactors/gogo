@@ -8,7 +8,7 @@ on:
 
 jobs:
   goreleaser:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       -
         name: Checkout
@@ -27,11 +27,11 @@ jobs:
         run: sudo apt install upx -y
       -
         name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v3
+        uses: goreleaser/goreleaser-action@v4
         with:
           distribution: goreleaser
           version: latest
-          args: release --rm-dist
+          args: release --rm-dist --skip-validate
           workdir: v2/
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}

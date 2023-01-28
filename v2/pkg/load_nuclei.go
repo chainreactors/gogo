@@ -6,8 +6,8 @@ import (
 	"github.com/chainreactors/files"
 	"github.com/chainreactors/gogo/v2/pkg/nuclei/protocols"
 	"github.com/chainreactors/gogo/v2/pkg/nuclei/templates"
-	"github.com/chainreactors/gogo/v2/pkg/utils"
 	"github.com/chainreactors/parsers"
+	"github.com/chainreactors/parsers/iutils"
 	"io/ioutil"
 	"strings"
 )
@@ -31,7 +31,7 @@ func ParserCmdPayload(payloads []string) *protocols.ExecuterOptions {
 			} else {
 				content = files.DecryptFile(f, nil)
 			}
-			vars[payload[:i]] = utils.CleanSpiltCFLR(string(content))
+			vars[payload[:i]] = CleanSpiltCFLR(string(content))
 		} else {
 			fmt.Println("[warn] incorrect format, skip " + payload)
 		}
@@ -53,7 +53,7 @@ func LoadNuclei(filename string) map[string][]*templates.Template {
 			var err error
 			content, err = ioutil.ReadFile(filename)
 			if err != nil {
-				utils.Fatal(err.Error())
+				iutils.Fatal(err.Error())
 			}
 		} else {
 			content = parsers.Base64Decode(filename)
@@ -68,13 +68,13 @@ func LoadTemplates(content []byte) map[string][]*templates.Template {
 	var templatemap = make(map[string][]*templates.Template)
 	err := json.Unmarshal(content, &t)
 	if err != nil {
-		utils.Fatal("nuclei config load FAIL!, " + err.Error())
+		iutils.Fatal("nuclei config load FAIL!, " + err.Error())
 	}
 	for _, template := range t {
 		// 以指纹归类
 		err = template.Compile(*ExecuterOptions)
 		if err != nil {
-			utils.Fatal("" + err.Error())
+			iutils.Fatal("" + err.Error())
 		}
 
 		for _, finger := range template.Fingers {

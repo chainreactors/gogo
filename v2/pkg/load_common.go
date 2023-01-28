@@ -2,9 +2,10 @@ package pkg
 
 import (
 	"encoding/json"
-	"github.com/chainreactors/gogo/v2/pkg/fingers"
-	"github.com/chainreactors/gogo/v2/pkg/utils"
 	"github.com/chainreactors/ipcs"
+	"github.com/chainreactors/parsers"
+	"github.com/chainreactors/parsers/iutils"
+	"regexp"
 	"strings"
 )
 
@@ -13,7 +14,9 @@ var (
 	PortMap = ipcs.PortMap
 	TagMap  = ipcs.TagMap
 	//WorkFlowMap    map[string][]*Workflow
-	Extractors = make(fingers.Extractors)
+	Extractor      []*parsers.Extractor
+	Extractors                                 = make(parsers.Extractors)
+	ExtractRegexps map[string][]*regexp.Regexp = map[string][]*regexp.Regexp{}
 )
 
 type PortFinger struct {
@@ -27,7 +30,7 @@ func LoadPortConfig() {
 	err := json.Unmarshal(LoadConfig("port"), &portfingers)
 
 	if err != nil {
-		utils.Fatal("port config load FAIL!, " + err.Error())
+		iutils.Fatal("port config load FAIL!, " + err.Error())
 	}
 	for _, v := range portfingers {
 		v.Ports = ipcs.ParsePorts(v.Ports)
@@ -41,12 +44,32 @@ func LoadPortConfig() {
 	}
 }
 
+func LoadExtractor() {
+	err := json.Unmarshal(LoadConfig("extract"), &Extractor)
+	if err != nil {
+		iutils.Fatal("extract config load FAIL!, " + err.Error())
+	}
+
+	for _, extract := range Extractor {
+		extract.Compile()
+
+		ExtractRegexps[extract.Name] = extract.CompiledRegexps
+		for _, tag := range extract.Tags {
+			if _, ok := ExtractRegexps[tag]; !ok {
+				ExtractRegexps[tag] = extract.CompiledRegexps
+			} else {
+				ExtractRegexps[tag] = append(ExtractRegexps[tag], extract.CompiledRegexps...)
+			}
+		}
+	}
+}
+
 func LoadWorkFlow() WorkflowMap {
 	var workflows []*Workflow
 	var err error
 	err = json.Unmarshal(LoadConfig("workflow"), &workflows)
 	if err != nil {
-		utils.Fatal("workflow load FAIL, " + err.Error())
+		iutils.Fatal("workflow load FAIL, " + err.Error())
 	}
 
 	// 设置默认参数

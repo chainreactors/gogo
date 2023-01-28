@@ -3,13 +3,13 @@ package core
 import (
 	"fmt"
 	. "github.com/chainreactors/gogo/v2/pkg"
-	"github.com/chainreactors/gogo/v2/pkg/fingers"
 	"os"
 	"strings"
 	"text/tabwriter"
 )
 
 func Printportconfig() {
+	LoadPortConfig()
 	fmt.Println("当前已有端口配置: (根据端口类型分类)")
 	for k, v := range *NameMap {
 		fmt.Println("	", k, ": ", strings.Join(v, ","))
@@ -21,6 +21,7 @@ func Printportconfig() {
 }
 
 func PrintNucleiPoc() {
+	nucleiLoader("", nil)
 	fmt.Println("Nuclei Pocs")
 	for k, v := range TemplateMap {
 		fmt.Println(k + ":")
@@ -75,9 +76,13 @@ func PrintWorkflow() {
 }
 
 func PrintExtract() {
+	LoadExtractor()
 	fmt.Println("name\tregexp")
-	for name, extract := range fingers.PresetExtracts {
-		fmt.Printf("%s\t%q\n", name, extract.String())
+	for name, extract := range ExtractRegexps {
+		fmt.Println(name + ":")
+		for i, e := range extract {
+			fmt.Printf("\t%d: %s\n", i, e.String())
+		}
 	}
 }
 

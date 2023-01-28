@@ -3,8 +3,8 @@ package pkg
 import (
 	"fmt"
 	"github.com/chainreactors/gogo/v2/pkg/fingers"
-	"github.com/chainreactors/gogo/v2/pkg/utils"
 	"github.com/chainreactors/parsers"
+	"github.com/chainreactors/parsers/iutils"
 	"net"
 	"net/http"
 	"strings"
@@ -65,14 +65,14 @@ func (result *Result) AddFrameworks(fs []*parsers.Framework) {
 	}
 }
 
-func (result *Result) AddExtract(extract *fingers.Extracted) {
+func (result *Result) AddExtract(extract *parsers.Extracted) {
 	if result.Extracteds == nil {
 		result.Extracteds = map[string][]string{}
 	}
 	result.Extracteds[extract.Name] = extract.ExtractResult
 }
 
-func (result *Result) AddExtracts(extracts []*fingers.Extracted) {
+func (result *Result) AddExtracts(extracts []*parsers.Extracted) {
 	for _, extract := range extracts {
 		result.AddExtract(extract)
 	}
@@ -80,7 +80,7 @@ func (result *Result) AddExtracts(extracts []*fingers.Extracted) {
 
 func (result *Result) GuessFramework() {
 	for _, v := range PortMap.Get(result.Port) {
-		if TagMap.Get(v) == nil && !utils.SliceContains([]string{"top1", "top2", "top3", "other", "windows"}, v) {
+		if TagMap.Get(v) == nil && !iutils.StringsContains([]string{"top1", "top2", "top3", "other", "windows"}, v) {
 			result.AddFramework(&parsers.Framework{Name: v, From: fingers.GUESS})
 		}
 	}

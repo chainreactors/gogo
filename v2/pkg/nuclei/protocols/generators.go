@@ -2,7 +2,7 @@ package protocols
 
 import (
 	"errors"
-	"github.com/chainreactors/gogo/v2/pkg/utils"
+	"github.com/chainreactors/parsers/iutils"
 	"strings"
 )
 
@@ -23,7 +23,7 @@ func loadPayloads(payloads map[string]interface{}) (map[string][]string, error) 
 		case interface{}:
 			s := make([]string, len(payload.([]interface{})))
 			for i, v := range pt.([]interface{}) {
-				s[i] = utils.ToString(v)
+				s[i] = iutils.ToString(v)
 			}
 			loadedPayloads[name] = s
 		}
@@ -269,7 +269,7 @@ func BuildPayloadFromOptions(options *Options) map[string]interface{} {
 	m := make(map[string]interface{})
 	// merge with vars
 	if len(options.VarsPayload) > 0 {
-		m = utils.MergeMaps(m, options.VarsPayload)
+		m = iutils.MergeMaps(m, options.VarsPayload)
 	}
 
 	// merge with env vars

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/chainreactors/files"
-	"github.com/chainreactors/gogo/v2/pkg/utils"
 	"github.com/chainreactors/ipcs"
 	. "github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
@@ -248,7 +247,7 @@ func LoadResultFile(file *os.File) interface{} {
 	} else if !IsJson(content) {
 		// 解析按行分割的 ip:port:framework 输入
 		var results parsers.GOGOResults
-		for _, target := range utils.CleanSpiltCFLR(string(content)) {
+		for _, target := range CleanSpiltCFLR(string(content)) {
 			var result *parsers.GOGOResult
 			if strings.Contains(target, ":") {
 				if strings.Contains(target, "http") {
