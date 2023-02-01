@@ -39,7 +39,7 @@ type Runner struct {
 	Config Config
 }
 
-func (r *Runner) PreInit() bool {
+func (r *Runner) Prepare() bool {
 	// 初始化日志工具
 	if r.Quiet {
 		logs.Log = logs.NewLogger(10, true)
