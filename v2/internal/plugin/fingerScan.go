@@ -27,15 +27,16 @@ func fingerScan(result *Result) {
 			return
 		}
 		sender := func(sendData []byte) (string, bool) {
-			conn, err := NewSocket("tcp", result.GetTarget(), RunOpt.Delay)
+			conn, err := NewSocket("tcp", result.GetTarget(), RunOpt.Delay/2+1)
 			if err != nil {
 				return "", false
 			}
-			data, err := conn.Request(sendData, 1024)
-			//data, err := SocketSend(conn, sendData, 1024)
+			defer conn.Close()
+			data, err := conn.QuickRequest(sendData, 1024)
 			if err != nil {
 				return "", false
 			}
+
 			return string(data), true
 		}
 

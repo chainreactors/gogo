@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	. "github.com/chainreactors/files"
+	"github.com/chainreactors/gogo/v2/internal/plugin"
 	"github.com/chainreactors/ipcs"
 	"github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
@@ -185,7 +186,6 @@ func (config *Config) Validate() error {
 		}
 	}
 
-	var err error
 	if config.JsonFile != "" {
 		if config.Ports != "top1" {
 			logs.Log.Warn("json input can not config ports")
@@ -195,19 +195,23 @@ func (config *Config) Validate() error {
 		}
 	}
 
+	if plugin.RunOpt.Delay <= 1 {
+		logs.Log.Warn("delay less than 1s, it may cause the target to miss the scan")
+	}
+
 	if config.IP == "" && config.ListFile == "" && config.JsonFile == "" && !config.IsJsonInput && !config.IsListInput { // 一些导致报错的参数组合
-		err = errors.New("no any target, please set -ip or -l or -j or stdin")
+		return errors.New("no any target, please set -ip or -l or -j or stdin")
 	}
 
 	if config.JsonFile != "" && config.ListFile != "" {
-		err = errors.New("cannot set -j and -l flags at same time")
+		return errors.New("cannot set -j and -l flags at same time")
 	}
 
 	if !HasPingPriv() && (strings.Contains(config.Ports, "icmp") || strings.Contains(config.Ports, "ping") || iutils.StringsContains(config.AliveSprayMod, "icmp")) {
 		logs.Log.Warn("current user is not root, icmp scan not work")
 	}
 
-	return err
+	return nil
 }
 
 func (config *Config) Close() {
