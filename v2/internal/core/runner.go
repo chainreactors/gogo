@@ -54,7 +54,7 @@ func (r *Runner) Prepare() bool {
 	RunOpt = RunnerOpts{
 		Delay:      r.Delay,
 		HttpsDelay: r.HttpsDelay,
-		SuffixStr:  r.SuffixStr,
+		//SuffixStr:  r.SuffixStr,
 	}
 	Opt.PluginDebug = r.PluginDebug
 	parsers.NoGuess = r.NoGuess

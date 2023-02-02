@@ -65,7 +65,7 @@ type AdvanceOption struct {
 	Payloads    []string `long:"payload" description:"String, specify nuclei payload"`
 	AttackType  string   `long:"attack-type" description:"nuclei attack types, sniper|clusterbomb|pitchfork" choice:"pitchfork" choice:"clusterbomb" choice:"sniper"`
 	Extract     []string `long:"extract" description:"String, custom Extract regexp"`
-	SuffixStr   string   `long:"suffix" description:"String, url path"`
+	//SuffixStr   string   `long:"suffix" description:"String, url path"`
 }
 
 type MiscOption struct {

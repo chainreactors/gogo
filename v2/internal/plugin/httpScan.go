@@ -89,22 +89,18 @@ func initScan(result *pkg.Result) {
 func systemHttp(result *pkg.Result) {
 	var delay int
 	// 如果是400或者不可识别协议,则使用https
-	var ishttps bool
 	target := result.GetTarget()
 	if result.Status == "400" || result.Protocol == "tcp" {
 		target = "https://" + target
-		ishttps = true
 	} else {
 		target = "http://" + target
 	}
 
-	if RunOpt.SuffixStr != "" {
-		target += "/" + RunOpt.SuffixStr
-	}
-	//如果是https或者30x跳转,则增加超时时间
-	if ishttps || strings.HasPrefix(result.Status, "3") {
-		delay = RunOpt.Delay + RunOpt.HttpsDelay
-	}
+	//if RunOpt.SuffixStr != "" {
+	//	target += "/" + RunOpt.SuffixStr
+	//}
+
+	delay = RunOpt.Delay + RunOpt.HttpsDelay //增加超时时间
 	conn := result.GetHttpConn(delay)
 	req, _ := http.NewRequest("GET", target, nil)
 	req.Header = headers
@@ -117,8 +113,10 @@ func systemHttp(result *pkg.Result) {
 	}
 	logs.Log.Debugf("request %s , %d ", target, resp.StatusCode)
 	if resp.TLS != nil {
-		// 证书在错误处理之前, 因为有可能存在证书,但是服务已关闭
-		result.Protocol = "https"
+		if result.Status == "400" || (resp.Request.Response != nil && resp.Request.Response.StatusCode != 302) {
+			result.Protocol = "https"
+		}
+
 		result.Host = strings.Join(resp.TLS.PeerCertificates[0].DNSNames, ",")
 		if len(resp.TLS.PeerCertificates[0].DNSNames) > 0 && len(resp.TLS.PeerCertificates[0].DNSNames) < 3 && result.HttpHosts == nil {
 			// 经验公式: 通常只有cdn会绑定超过2个host, 正常情况只有一个host或者带上www的两个host
