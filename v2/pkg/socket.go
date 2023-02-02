@@ -57,6 +57,22 @@ func (s *Socket) Request(data []byte, max int) ([]byte, error) {
 	return buf[:n], err
 }
 
+func (s *Socket) QuickRequest(data []byte, max int) ([]byte, error) {
+	_ = s.Conn.SetDeadline(time.Now().Add(s.Timeout))
+	var err error
+	_, err = s.Conn.Write(data)
+	if err != nil {
+		return []byte{}, err
+	}
+	s.Count++
+	buf := make([]byte, max)
+	n, err := s.Conn.Read(buf)
+	if err != nil {
+		return []byte{}, err
+	}
+	return buf[:n], err
+}
+
 func (s *Socket) Close() {
 	s.Conn.Close()
 }

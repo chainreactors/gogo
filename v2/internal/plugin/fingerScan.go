@@ -31,11 +31,12 @@ func fingerScan(result *Result) {
 			if err != nil {
 				return "", false
 			}
-			data, err := conn.Request(sendData, 1024)
-			//data, err := SocketSend(conn, sendData, 1024)
+			defer conn.Close()
+			data, err := conn.QuickRequest(sendData, 1024)
 			if err != nil {
 				return "", false
 			}
+
 			return string(data), true
 		}
 
