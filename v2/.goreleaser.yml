@@ -9,7 +9,7 @@ before:
 builds:
   -
     main: .
-    binary: gogo
+    binary: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
     goos:
       - windows
       - linux
@@ -30,6 +30,7 @@ builds:
       - all=-trimpath={{.Env.GOPATH}}
     gcflags:
       - all=-trimpath={{.Env.GOPATH}}
+    no_unique_dist_dir: true
 #    hooks:
 #      post:
 #        - cmd: "upx {{ .ProjectName }}*"
@@ -38,7 +39,7 @@ builds:
 archives:
   -
     name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
-    format: zip
+    format: binary
     replacements:
       amd64_v1: amd64
 
