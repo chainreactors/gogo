@@ -145,9 +145,9 @@ func InitConfig(config *Config) (*Config, error) {
 
 func printTaskInfo(config *Config, taskname string) {
 	// 输出任务的基本信息
-	Log.Importantf("Current goroutines: %d, Version Level: %d,Exploit: %s, PortSpray Scan: %t", config.Threads, RunOpt.VersionLevel, RunOpt.Exploit, config.PortSpray)
+	Log.Importantf("Current goroutines: %d, Version Level: %d,Exploit: %s, PortSpray: %t", config.Threads, RunOpt.VersionLevel, RunOpt.Exploit, config.PortSpray)
 	if config.Results == nil {
-		Log.Importantf("Starting task %s ,total ports: %d , mod: %s", taskname, len(config.PortList), config.Mod)
+		Log.Importantf("Start task %s ,total ports: %d , mod: %s", taskname, len(config.PortList), config.Mod)
 		// 输出端口信息
 		if len(config.PortList) > 500 {
 			Log.Important("too much ports , only show top 500 ports: " + strings.Join(config.PortList[:500], ",") + "......")
@@ -155,7 +155,7 @@ func printTaskInfo(config *Config, taskname string) {
 			Log.Important("ports: " + strings.Join(config.PortList, ","))
 		}
 	} else {
-		Log.Importantf("Starting results task: %s ,total target: %d", taskname, len(config.Results))
+		Log.Importantf("Start results task: %s ,total target: %d", taskname, len(config.Results))
 	}
 }
 

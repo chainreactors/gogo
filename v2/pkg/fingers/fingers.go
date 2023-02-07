@@ -84,7 +84,7 @@ func (finger *Finger) Match(content string, level int, sender func([]byte) (stri
 		var c string
 		var ok bool
 		if level >= rule.Level && rule.SendData != nil {
-			logs.Log.Debugf("active match with %s", rule.SendDataStr)
+			logs.Log.Debugf("active detect with %s", rule.SendDataStr)
 			c, ok = sender(rule.SendData)
 			if ok {
 				isactive = true

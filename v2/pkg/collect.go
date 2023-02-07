@@ -32,7 +32,6 @@ func CollectHttpInfo(result *Result, resp *http.Response) {
 	result.IsHttp = true
 	result.Httpresp = parsers.NewResponse(resp)
 	result.Content = strings.ToLower(string(result.Httpresp.RawContent))
-	result.Protocol = resp.Request.URL.Scheme
 	result.Status = iutils.ToString(resp.StatusCode)
 	result.Language = result.Httpresp.Language
 	result.Midware = result.Httpresp.Server

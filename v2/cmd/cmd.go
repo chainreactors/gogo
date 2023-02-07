@@ -19,7 +19,7 @@ func Gogo() {
 		return
 	}
 
-	if ok := runner.PreInit(); !ok {
+	if ok := runner.Prepare(); !ok {
 		os.Exit(0)
 	}
 	runner.Init()

@@ -33,15 +33,15 @@ func (wininfo windowsInfo) toString() string {
 	return fmt.Sprintf("%s %s %s %s", wininfo.version, wininfo.hostname, wininfo.netbiosstat, strings.Join(wininfo.networks, ","))
 }
 
-type IPMapResult map[string]*parsers.GOGOResult
+type PortMapResult map[string]*parsers.GOGOResult
 
-func (imap IPMapResult) Get(port string) *parsers.GOGOResult {
+func (imap PortMapResult) Get(port string) *parsers.GOGOResult {
 	if result, ok := imap[port]; ok {
 		return result
 	}
 	return &parsers.GOGOResult{}
 }
-func (imap IPMapResult) getWindowsInfo() windowsInfo {
+func (imap PortMapResult) getWindowsInfo() windowsInfo {
 	var wininfo = windowsInfo{}
 	if imap.Get("445").Vulns != nil {
 		wininfo.version = imap["445"].Title
@@ -64,7 +64,7 @@ func (imap IPMapResult) getWindowsInfo() windowsInfo {
 	return wininfo
 }
 
-func (imap IPMapResult) isWin() bool {
+func (imap PortMapResult) isWin() bool {
 	for _, port := range winport {
 		if _, ok := imap[port]; ok {
 			return true
@@ -81,19 +81,18 @@ func (rd *ResultsData) GetConfig() *Config {
 	return &Config{GOGOConfig: &rd.Config}
 }
 
-func (rd *ResultsData) groupByIP() map[string]IPMapResult {
-	pfs := make(map[string]IPMapResult)
-	//ipfs := make(map[string]ipformat)
+func (rd *ResultsData) groupByIP() map[string]PortMapResult {
+	pfs := make(map[string]PortMapResult)
 	for _, result := range rd.Data {
 		if pfs[result.Ip] == nil {
-			pfs[result.Ip] = make(IPMapResult)
+			pfs[result.Ip] = make(PortMapResult)
 		}
 		pfs[result.Ip][result.Port] = result
 	}
 	return pfs
 }
 
-func (rd *ResultsData) groupBySortedIP() (map[string]IPMapResult, []string) {
+func (rd *ResultsData) groupBySortedIP() (map[string]PortMapResult, []string) {
 	pfs := rd.groupByIP()
 	ips := make([]string, len(pfs))
 	var i = 0
