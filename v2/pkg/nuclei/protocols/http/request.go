@@ -253,9 +253,9 @@ func (r *Request) Compile(options *protocols.ExecuterOptions) error {
 		}
 		for k, payload := range r.Payloads {
 			switch payload.(type) {
-			case []string:
-				tmp := make([]string, len(payload.([]string)))
-				for i, p := range payload.([]string) {
+			case []interface{}:
+				tmp := make([]string, len(payload.([]interface{})))
+				for i, p := range payload.([]interface{}) {
 					tmp[i], _ = parsers.DSLParserToString(iutils.ToString(p))
 				}
 				r.Payloads[k] = tmp
