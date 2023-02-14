@@ -97,6 +97,9 @@ func (finger *Finger) Match(content string, level int, sender func([]byte) (stri
 			if finger.Focus {
 				frame.IsFocus = true
 			}
+			//if vuln == nil && isactive {
+			//	vuln = &parsers.Vuln{Name: finger.Name + " detect", SeverityLevel: INFO, Detail: map[string]interface{}{"path": rule.SendDataStr}}
+			//}
 			if isactive && hasFrame && ishttp {
 				frame.Data = c
 			}

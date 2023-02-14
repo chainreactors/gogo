@@ -39,7 +39,7 @@ jobs:
       - name: Upload assets
         uses: actions/upload-artifact@v3
         with:
-          name: gogo_${{ github.ref }}
+          name: gogo_archive
           path: |
             v2/dist/gogo*
             tools/*

@@ -24,11 +24,10 @@ func wmiScan(result *pkg.Result) {
 		return
 	}
 
-	off_ntlm := bytes.Index(ret, []byte("NTLMSSP"))
-	if off_ntlm != -1 {
+	if bytes.Index(ret, []byte("NTLMSSP")) != -1 {
 		result.Protocol = "wmi"
 		result.Status = "WMI"
-		tinfo := iutils.ToStringMap(ntlmssp.NTLMInfo(ret[off_ntlm:]))
+		tinfo := iutils.ToStringMap(ntlmssp.NTLMInfo(ret))
 		result.AddNTLMInfo(tinfo, "wmi")
 	}
 }
