@@ -167,6 +167,10 @@ func (config *Config) InitFile() error {
 }
 
 func (config *Config) Validate() error {
+	if config.Filename != "" && IsExist(config.Filename) {
+		return fmt.Errorf("file %s already exist!", config.Filename)
+	}
+
 	// 一些命令行参数错误处理,如果check没过直接退出程序或输出警告
 	legalFormat := []string{"url", "ip", "port", "frameworks", "framework", "frame", "vuln", "vulns", "protocol", "scheme", "title", "target", "hash", "language", "host", "cert", "color", "c", "json", "j", "full", "jsonlines", "jl", "zombie", "sc", "csv", "status", "os"}
 	if config.FileOutputf != Default {
