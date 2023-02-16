@@ -9,8 +9,11 @@ import (
 	"github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
 	"github.com/chainreactors/parsers/iutils"
+	"os"
+	"os/signal"
 	"path"
 	"strings"
+	"syscall"
 )
 
 const (
@@ -110,6 +113,18 @@ func (config *Config) InitFile() error {
 		if err != nil {
 			iutils.Fatal(err.Error())
 		}
+
+		go func() {
+			c := make(chan os.Signal, 2)
+			signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+			go func() {
+				<-c
+				logs.Log.Debug("save and exit!")
+				config.File.SafeSync()
+				os.Exit(0)
+			}()
+		}()
+
 		if config.FileOutputf == "json" {
 			var rescommaflag bool
 			config.File.Write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("scan")))
