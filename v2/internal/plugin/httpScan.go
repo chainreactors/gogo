@@ -113,7 +113,8 @@ func systemHttp(result *pkg.Result) {
 	}
 	logs.Log.Debugf("request %s , %d ", target, resp.StatusCode)
 	if resp.TLS != nil {
-		if result.Status == "400" || (resp.Request.Response != nil && resp.Request.Response.StatusCode != 302) {
+		if result.Status == "400" || (resp.Request.Response != nil && resp.Request.Response.StatusCode != 302) || resp.Request.Response == nil {
+			// 去掉302跳转到https的情况
 			result.Protocol = "https"
 		}
 
