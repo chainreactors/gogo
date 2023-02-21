@@ -13,6 +13,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"sync/atomic"
 )
 
 type targetConfig struct {
@@ -52,7 +53,7 @@ func DefaultMod(targets interface{}, config Config) {
 		result := tc.NewResult()
 		plugin.Dispatch(result)
 		if result.Open {
-			Opt.AliveSum++
+			atomic.AddInt32(&Opt.AliveSum, 1)
 			if len(config.OutputFilters) > 0 {
 				for _, filter := range config.OutputFilters {
 					if !result.Filter(filter[0], filter[1], filter[2]) {
@@ -221,7 +222,7 @@ func aliveScan(tc targetConfig, temp *sync.Map) {
 
 	if result.Open {
 		temp.Store(result.Ip, true)
-		Opt.AliveSum++
+		atomic.AddInt32(&Opt.AliveSum, 1)
 	}
 }
 
@@ -232,7 +233,7 @@ func cidrAlived(ip string, temp *sync.Map, mask int) {
 	if !ok {
 		temp.Store(alivecidr, 1)
 		Log.Importantf("Found %s/%d", ip, mask)
-		Opt.AliveSum++
+		atomic.AddInt32(&Opt.AliveSum, 1)
 	}
 }
 

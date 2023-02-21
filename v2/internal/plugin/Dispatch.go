@@ -4,10 +4,11 @@ import (
 	"github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers/iutils"
+	"sync/atomic"
 )
 
 type RunnerOpts struct {
-	Sum          int
+	Sum          int32
 	Exploit      string
 	VersionLevel int
 	Delay        int
@@ -24,7 +25,7 @@ func Dispatch(result *pkg.Result) {
 			logs.Log.Errorf("scan %s unexcept error, %v", result.GetTarget(), err)
 		}
 	}()
-	RunOpt.Sum++
+	atomic.AddInt32(&RunOpt.Sum, 1)
 	if result.Port == "137" || result.Port == "nbt" {
 		nbtScan(result)
 		return

@@ -87,7 +87,7 @@ type ConfigOption struct {
 }
 
 type Options struct {
-	AliveSum    int
+	AliveSum    int32
 	Noscan      bool
 	PluginDebug bool
 }
