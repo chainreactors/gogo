@@ -90,7 +90,7 @@ func systemHttp(result *pkg.Result) {
 	var delay int
 	// 如果是400或者不可识别协议,则使用https
 	target := result.GetTarget()
-	if result.Status == "400" || result.Protocol == "tcp" {
+	if result.Status == "400" || result.Protocol == "tcp" || (strings.HasPrefix(result.Status, "3") && strings.Contains(result.Content, "location: https")) {
 		target = "https://" + target
 	} else {
 		target = "http://" + target

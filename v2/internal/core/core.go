@@ -55,6 +55,7 @@ func DefaultMod(targets interface{}, config Config) {
 		if result.Open {
 			atomic.AddInt32(&Opt.AliveSum, 1)
 			if len(config.OutputFilters) > 0 {
+				// 输出时过滤, 节省操作步骤时用, --output-filter
 				for _, filter := range config.OutputFilters {
 					if !result.Filter(filter[0], filter[1], filter[2]) {
 						Log.Debug("[filtered] " + output(result, config.Outputf))
@@ -63,9 +64,10 @@ func DefaultMod(targets interface{}, config Config) {
 					}
 				}
 			}
-			// 格式化title编码, 防止输出二进制数据
+
 			Log.Console(output(result, config.Outputf))
 
+			// 文件输出
 			if config.File != nil {
 				if !config.File.Initialized {
 					Log.Important("init file: " + config.File.Filename)
