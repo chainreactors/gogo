@@ -56,7 +56,7 @@ func getFramework(result *Result, fingermap fingers.FingerMapper, sender func(se
 	var alreadyFrameworks = make(map[string]bool)
 	for _, finger := range fingermap[result.Port] {
 		frame, vuln := matcher(result, finger, sender)
-		alreadyFrameworks[result.Port] = true
+		alreadyFrameworks[finger.Name] = true
 		if frame != nil {
 			if vuln != nil {
 				result.AddVuln(vuln)
@@ -70,13 +70,14 @@ func getFramework(result *Result, fingermap fingers.FingerMapper, sender func(se
 		}
 	}
 
-	for port, fs := range fingermap {
-		if _, ok := alreadyFrameworks[port]; ok {
-			continue
-		} else {
-			alreadyFrameworks[port] = true
-		}
+	for _, fs := range fingermap {
 		for _, finger := range fs {
+			if _, ok := alreadyFrameworks[finger.Name]; ok {
+				continue
+			} else {
+				alreadyFrameworks[finger.Name] = true
+			}
+
 			frame, vuln := matcher(result, finger, sender)
 			if frame != nil {
 				result.AddFramework(frame)
