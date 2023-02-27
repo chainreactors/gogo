@@ -2,14 +2,14 @@ package plugin
 
 import (
 	. "github.com/chainreactors/gogo/v2/pkg"
-	"github.com/chainreactors/gogo/v2/pkg/nuclei/templates"
 	"github.com/chainreactors/logs"
+	"github.com/chainreactors/neutron/templates_gogo"
 	"github.com/chainreactors/parsers"
 	"strings"
 )
 
 //tamplate =
-func Nuclei(target string, result *Result) {
+func Neutron(target string, result *Result) {
 	if RunOpt.Exploit != "none" {
 		if RunOpt.Exploit != "auto" {
 			executeTemplates(result, strings.Split(RunOpt.Exploit, ","), target)

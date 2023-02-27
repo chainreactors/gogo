@@ -60,18 +60,18 @@ type SmartOption struct {
 type AdvanceOption struct {
 	PortSpray   bool     `short:"s" long:"spray" description:"Bool, enable port-first spray generator. if ports number > 500, auto enable"`
 	NoSpray     bool     `long:"no-spray" description:"Bool, force to close spray"`
-	ExploitName string   `short:"E" long:"exploit-name" description:"String, specify nuclei template name"` // 指定漏扫poc名字
-	ExploitFile string   `long:"ef" description:"String, load specified templates file "`                   // 指定漏扫文件
-	Payloads    []string `long:"payload" description:"String, specify nuclei payload"`
-	AttackType  string   `long:"attack-type" description:"nuclei attack types, sniper|clusterbomb|pitchfork" choice:"pitchfork" choice:"clusterbomb" choice:"sniper"`
+	ExploitName string   `short:"E" long:"exploit-name" description:"String, specify neutron template name"` // 指定漏扫poc名字
+	ExploitFile string   `long:"ef" description:"String, load specified templates file "`                    // 指定漏扫文件
+	Payloads    []string `long:"payload" description:"String, specify neutron payload"`
+	AttackType  string   `long:"attack-type" description:"neutron attack types, sniper|clusterbomb|pitchfork" choice:"pitchfork" choice:"clusterbomb" choice:"sniper"`
 	Extract     []string `long:"extract" description:"String, custom Extract regexp"`
 	//SuffixStr   string   `long:"suffix" description:"String, url path"`
 }
 
 type MiscOption struct {
 	Key         string `short:"k" long:"key" description:"String, file encrypt key"`
-	Ver         bool   `long:"version" description:"Bool, show version"`                                                                                  // 输出版本号
-	Printer     string `short:"P" long:"print" choice:"port" choice:"workflow" choice:"nuclei" choice:"extract" description:"String, show preset config"` // 输出特定的预设
+	Ver         bool   `long:"version" description:"Bool, show version"`                                                                                   // 输出版本号
+	Printer     string `short:"P" long:"print" choice:"port" choice:"workflow" choice:"neutron" choice:"extract" description:"String, show preset config"` // 输出特定的预设
 	Debug       bool   `long:"debug" description:"Bool, show debug info"`
 	PluginDebug bool   `long:"plugin-debug" description:"Bool, show plugin debug stack"`
 	Proxy       string `long:"proxy" description:"String, socks5 proxy url, e.g. socks5://127.0.0.1:11111"`
@@ -79,7 +79,7 @@ type MiscOption struct {
 }
 
 type ConfigOption struct {
-	Exploit    bool `short:"e" long:"exploit" description:"Bool,enable nuclei exploit scan"`                                         // 启用漏洞扫描
+	Exploit    bool `short:"e" long:"exploit" description:"Bool,enable neutron exploit scan"`                                        // 启用漏洞扫描
 	Verbose    bool `short:"v" long:"verbose" description:"Bool, enable active finger scan"`                                         // version level1
 	Threads    int  `short:"t" long:"thread" description:"Int, concurrent thread number,linux default: 4000, windows default: 1000"` // 线程数
 	Delay      int  `short:"d" long:"timeout" default:"2" description:"Int, socket and http timeout"`

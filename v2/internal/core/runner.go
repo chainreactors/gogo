@@ -5,8 +5,8 @@ import (
 	"github.com/chainreactors/files"
 	. "github.com/chainreactors/gogo/v2/internal/plugin"
 	. "github.com/chainreactors/gogo/v2/pkg"
-	nucleihttp "github.com/chainreactors/gogo/v2/pkg/nuclei/protocols/http"
 	"github.com/chainreactors/logs"
+	neuhttp "github.com/chainreactors/neutron/protocols/http"
 	"github.com/chainreactors/parsers"
 	"github.com/chainreactors/parsers/iutils"
 	"golang.org/x/net/proxy"
@@ -82,7 +82,7 @@ func (r *Runner) Prepare() bool {
 		if err == nil {
 			ProxyUrl = uri
 			Proxy = http.ProxyURL(uri)
-			nucleihttp.Proxy = Proxy
+			neuhttp.Proxy = Proxy
 			ProxyDialTimeout = func(network, address string, duration time.Duration) (net.Conn, error) {
 				forward := &net.Dialer{Timeout: duration}
 				dial, err := proxy.FromURL(uri, forward)
@@ -138,7 +138,7 @@ func (r *Runner) Init() {
 	if r.AttackType != "" {
 		ExecuterOptions.Options.AttackType = r.AttackType
 	}
-	nucleiLoader(r.ExploitFile, r.Payloads)
+	neutronLoader(r.ExploitFile, r.Payloads)
 }
 
 func (r *Runner) PrepareConfig() {
@@ -358,7 +358,7 @@ func printConfigs(t string) {
 	if t == "port" {
 		Printportconfig()
 	} else if t == "nuclei" {
-		PrintNucleiPoc()
+		PrintNeutronPoc()
 	} else if t == "workflow" {
 		PrintWorkflow()
 	} else if t == "extract" {
@@ -368,9 +368,9 @@ func printConfigs(t string) {
 	}
 }
 
-func nucleiLoader(pocfile string, payloads []string) {
+func neutronLoader(pocfile string, payloads []string) {
 	ExecuterOptions = ParserCmdPayload(payloads)
-	TemplateMap = LoadNuclei(pocfile)
+	TemplateMap = LoadNeutron(pocfile)
 }
 
 func templatesLoader() {

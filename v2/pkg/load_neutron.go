@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/chainreactors/files"
-	"github.com/chainreactors/gogo/v2/pkg/nuclei/protocols"
-	"github.com/chainreactors/gogo/v2/pkg/nuclei/templates"
+	"github.com/chainreactors/neutron/protocols"
+	"github.com/chainreactors/neutron/templates_gogo"
 	"github.com/chainreactors/parsers"
 	"github.com/chainreactors/parsers/iutils"
 	"io/ioutil"
@@ -44,7 +44,7 @@ func ParserCmdPayload(payloads []string) *protocols.ExecuterOptions {
 
 var TemplateMap map[string][]*templates.Template
 
-func LoadNuclei(filename string) map[string][]*templates.Template {
+func LoadNeutron(filename string) map[string][]*templates.Template {
 	if filename == "" {
 		return LoadTemplates(LoadConfig("nuclei"))
 	} else {
@@ -68,11 +68,11 @@ func LoadTemplates(content []byte) map[string][]*templates.Template {
 	var templatemap = make(map[string][]*templates.Template)
 	err := json.Unmarshal(content, &t)
 	if err != nil {
-		iutils.Fatal("nuclei config load FAIL!, " + err.Error())
+		iutils.Fatal("neutron config load FAIL!, " + err.Error())
 	}
 	for _, template := range t {
 		// 以指纹归类
-		err = template.Compile(*ExecuterOptions)
+		err = template.Compile(ExecuterOptions)
 		if err != nil {
 			iutils.Fatal("" + err.Error())
 		}
