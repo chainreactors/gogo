@@ -352,6 +352,7 @@ func (r *Runner) ResetGlobals() {
 	Opt.Noscan = false
 	RunOpt.Exploit = "none"
 	RunOpt.VersionLevel = 0
+	ResetFlag()
 }
 
 func printConfigs(t string) {
