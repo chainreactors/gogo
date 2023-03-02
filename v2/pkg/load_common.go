@@ -90,9 +90,9 @@ func LoadWorkFlow() WorkflowMap {
 		if w.File == "" {
 			w.File = "auto"
 		}
-		if w.Path == "" {
-			w.Path = "."
-		}
+		//if w.Path == "" {
+		//	w.Path = "."
+		//}
 		if w.Exploit == "" {
 			w.Exploit = "none"
 		}

@@ -6,7 +6,8 @@ require (
 	github.com/M09ic/go-ntlmssp v1.2.10-0.20221207030820-de2792a93fef
 	github.com/chainreactors/files v0.2.4
 	github.com/chainreactors/ipcs v0.0.9
-	github.com/chainreactors/logs v0.6.1
+	github.com/chainreactors/logs v0.7.0
+	github.com/chainreactors/neutron v0.0.0-20230227122754-80dc76323a1c
 	github.com/chainreactors/parsers v0.3.0
 	github.com/jessevdk/go-flags v1.5.0
 	github.com/panjf2000/ants/v2 v2.5.0

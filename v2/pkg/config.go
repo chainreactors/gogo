@@ -9,8 +9,11 @@ import (
 	"github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
 	"github.com/chainreactors/parsers/iutils"
+	"os"
+	"os/signal"
 	"path"
 	"strings"
+	"syscall"
 )
 
 const (
@@ -110,6 +113,18 @@ func (config *Config) InitFile() error {
 		if err != nil {
 			iutils.Fatal(err.Error())
 		}
+
+		go func() {
+			c := make(chan os.Signal, 2)
+			signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+			go func() {
+				<-c
+				logs.Log.Debug("save and exit!")
+				config.File.SafeSync()
+				os.Exit(0)
+			}()
+		}()
+
 		if config.FileOutputf == "json" {
 			var rescommaflag bool
 			config.File.Write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("scan")))
@@ -167,6 +182,10 @@ func (config *Config) InitFile() error {
 }
 
 func (config *Config) Validate() error {
+	if config.Filename != "" && IsExist(config.Filename) {
+		return fmt.Errorf("file %s already exist!", config.Filename)
+	}
+
 	// 一些命令行参数错误处理,如果check没过直接退出程序或输出警告
 	legalFormat := []string{"url", "ip", "port", "frameworks", "framework", "frame", "vuln", "vulns", "protocol", "scheme", "title", "target", "hash", "language", "host", "cert", "color", "c", "json", "j", "full", "jsonlines", "jl", "zombie", "sc", "csv", "status", "os"}
 	if config.FileOutputf != Default {

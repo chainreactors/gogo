@@ -13,6 +13,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"sync/atomic"
 )
 
 type targetConfig struct {
@@ -52,8 +53,9 @@ func DefaultMod(targets interface{}, config Config) {
 		result := tc.NewResult()
 		plugin.Dispatch(result)
 		if result.Open {
-			Opt.AliveSum++
+			atomic.AddInt32(&Opt.AliveSum, 1)
 			if len(config.OutputFilters) > 0 {
+				// 输出时过滤, 节省操作步骤时用, --output-filter
 				for _, filter := range config.OutputFilters {
 					if !result.Filter(filter[0], filter[1], filter[2]) {
 						Log.Debug("[filtered] " + output(result, config.Outputf))
@@ -62,9 +64,10 @@ func DefaultMod(targets interface{}, config Config) {
 					}
 				}
 			}
-			// 格式化title编码, 防止输出二进制数据
+
 			Log.Console(output(result, config.Outputf))
 
+			// 文件输出
 			if config.File != nil {
 				if !config.File.Initialized {
 					Log.Important("init file: " + config.File.Filename)
@@ -221,7 +224,7 @@ func aliveScan(tc targetConfig, temp *sync.Map) {
 
 	if result.Open {
 		temp.Store(result.Ip, true)
-		Opt.AliveSum++
+		atomic.AddInt32(&Opt.AliveSum, 1)
 	}
 }
 
@@ -232,7 +235,7 @@ func cidrAlived(ip string, temp *sync.Map, mask int) {
 	if !ok {
 		temp.Store(alivecidr, 1)
 		Log.Importantf("Found %s/%d", ip, mask)
-		Opt.AliveSum++
+		atomic.AddInt32(&Opt.AliveSum, 1)
 	}
 }
 

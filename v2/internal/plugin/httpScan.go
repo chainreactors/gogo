@@ -90,7 +90,7 @@ func systemHttp(result *pkg.Result) {
 	var delay int
 	// 如果是400或者不可识别协议,则使用https
 	target := result.GetTarget()
-	if result.Status == "400" || result.Protocol == "tcp" {
+	if result.Status == "400" || result.Protocol == "tcp" || (strings.HasPrefix(result.Status, "3") && strings.Contains(result.Content, "location: https")) {
 		target = "https://" + target
 	} else {
 		target = "http://" + target
@@ -113,7 +113,8 @@ func systemHttp(result *pkg.Result) {
 	}
 	logs.Log.Debugf("request %s , %d ", target, resp.StatusCode)
 	if resp.TLS != nil {
-		if result.Status == "400" || (resp.Request.Response != nil && resp.Request.Response.StatusCode != 302) {
+		if result.Status == "400" || (resp.Request.Response != nil && resp.Request.Response.StatusCode != 302) || resp.Request.Response == nil {
+			// 去掉302跳转到https的情况
 			result.Protocol = "https"
 		}
 
@@ -122,6 +123,8 @@ func systemHttp(result *pkg.Result) {
 			// 经验公式: 通常只有cdn会绑定超过2个host, 正常情况只有一个host或者带上www的两个host
 			result.HttpHosts = append(result.HttpHosts, pkg.FormatCertDomains(resp.TLS.PeerCertificates[0].DNSNames)...)
 		}
+	} else {
+		result.Protocol = "http"
 	}
 
 	result.Error = ""

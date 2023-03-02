@@ -20,9 +20,9 @@ func Printportconfig() {
 	}
 }
 
-func PrintNucleiPoc() {
-	nucleiLoader("", nil)
-	fmt.Println("Nuclei Pocs")
+func PrintNeutronPoc() {
+	neutronLoader("", nil)
+	fmt.Println("Neutron Pocs")
 	for k, v := range TemplateMap {
 		fmt.Println(k + ":")
 		for _, t := range v {

@@ -26,6 +26,11 @@ func WriteAlivedResult(file *files.File, ips []string) {
 	}
 }
 
+func ResetFlag() {
+	smartcommaflag = false
+	pingcommaflag = false
+}
+
 func HasStdin() bool {
 	stat, err := os.Stdin.Stat()
 	if err != nil {
