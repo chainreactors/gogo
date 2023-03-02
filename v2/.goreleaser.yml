@@ -31,10 +31,6 @@ builds:
     gcflags:
       - all=-trimpath={{.Env.GOPATH}}
     no_unique_dist_dir: true
-#    hooks:
-#      post:
-#        - cmd: "upx {{ .ProjectName }}*"
-#          dir: "{{ dir .Path }}"
 
 archives:
   -
