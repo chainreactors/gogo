@@ -29,7 +29,7 @@ func NotFoundScan(result *pkg.Result) {
 	}
 
 	for _, finger := range pkg.AllHttpFingers {
-		framework, _, ok := fingers.FingerMatcher(finger, strings.ToLower(content), 0, nil)
+		framework, _, ok := fingers.FingerMatcher(finger, map[string]string{"content": strings.ToLower(content)}, 0, nil)
 		if ok {
 			framework.From = fingers.NOTFOUND
 			result.AddFramework(framework)

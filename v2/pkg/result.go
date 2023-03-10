@@ -46,7 +46,7 @@ func (result *Result) GetHttpConn(delay int) *http.Client {
 }
 
 func (result *Result) AddVuln(vuln *parsers.Vuln) {
-	result.Vulns = append(result.Vulns, vuln)
+	result.Vulns[vuln.Name] = vuln
 }
 
 func (result *Result) AddVulns(vulns []*parsers.Vuln) {
@@ -91,6 +91,13 @@ func (result *Result) IsHttps() bool {
 		return true
 	}
 	return false
+}
+
+func (result *Result) ContentMap() map[string]string {
+	return map[string]string{
+		"content": result.Content,
+		"cert":    strings.Join(result.HttpHosts, ","),
+	}
 }
 
 //从错误中收集信息

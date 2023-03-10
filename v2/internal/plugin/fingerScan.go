@@ -94,7 +94,7 @@ func getFramework(result *Result, fingermap fingers.FingerMapper, sender func(se
 }
 
 func httpFingerMatch(result *Result, finger *fingers.Finger, sender func(sendData []byte) (string, bool)) (*parsers.Framework, *parsers.Vuln) {
-	frame, vuln, ok := fingers.FingerMatcher(finger, result.Content, RunOpt.VersionLevel, sender)
+	frame, vuln, ok := fingers.FingerMatcher(finger, result.ContentMap(), RunOpt.VersionLevel, sender)
 	if ok {
 		if frame.Data != "" {
 			result.Title = parsers.MatchTitle(frame.Data)
@@ -105,7 +105,7 @@ func httpFingerMatch(result *Result, finger *fingers.Finger, sender func(sendDat
 }
 
 func tcpFingerMatch(result *Result, finger *fingers.Finger, sender func(sendData []byte) (string, bool)) (*parsers.Framework, *parsers.Vuln) {
-	frame, vuln, ok := fingers.FingerMatcher(finger, result.Content, RunOpt.VersionLevel, sender)
+	frame, vuln, ok := fingers.FingerMatcher(finger, result.ContentMap(), RunOpt.VersionLevel, sender)
 	if ok {
 		return frame, vuln
 	}
