@@ -87,8 +87,8 @@ func InitConfig(config *Config) (*Config, error) {
 			config.Results = data.(parsers.GOGOResults)
 		case *ResultsData:
 			config.Results = data.(*ResultsData).Data
-		case *SmartData:
-			config.IPlist = data.(*SmartData).Data
+		case *SmartResult:
+			config.IPlist = data.(*SmartResult).List()
 		default:
 			return nil, fmt.Errorf("not support result type, maybe use -l flag")
 		}

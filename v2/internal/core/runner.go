@@ -131,7 +131,12 @@ func (r *Runner) Init() {
 		if reg, ok := ExtractRegexps[e]; ok {
 			Extractors[e] = reg
 		} else {
-			Extractors[e] = []*regexp.Regexp{regexp.MustCompile(e)}
+			Extractors[e] = []*parsers.Extractor{
+				&parsers.Extractor{
+					Name:            e,
+					CompiledRegexps: []*regexp.Regexp{regexp.MustCompile(e)},
+				},
+			}
 		}
 	}
 
@@ -166,7 +171,7 @@ func (r *Runner) PrepareConfig() {
 	}
 
 	if r.FileOutputf == Default {
-		r.Config.FileOutputf = "json"
+		r.Config.FileOutputf = "jl"
 	} else {
 		r.Config.FileOutputf = r.FileOutputf
 	}

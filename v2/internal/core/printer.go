@@ -81,7 +81,7 @@ func PrintExtract() {
 	for name, extract := range ExtractRegexps {
 		fmt.Println(name + ":")
 		for i, e := range extract {
-			fmt.Printf("\t%d: %s\n", i, e.String())
+			fmt.Printf("\t%d: %s\n", i, e.Name)
 		}
 	}
 }

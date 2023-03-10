@@ -78,7 +78,7 @@ type ResultsData struct {
 }
 
 func (rd *ResultsData) GetConfig() *Config {
-	return &Config{GOGOConfig: &rd.Config}
+	return &Config{GOGOConfig: rd.Config}
 }
 
 func (rd *ResultsData) groupByIP() map[string]PortMapResult {
@@ -201,32 +201,48 @@ func autofixjson(content []byte) []byte {
 	return content
 }
 
-func LoadResult(content []byte) (*ResultsData, error) {
+func parseResult(content []byte) (parsers.GOGOResults, error) {
 	// 自动修复未完成任务的json
 	var err error
 
-	var resultsdata *ResultsData
-	err = json.Unmarshal(content, &resultsdata)
+	var results parsers.GOGOResults
+	err = json.Unmarshal(content, &results)
 	if err != nil {
 		return nil, err
 	}
-	return resultsdata, nil
+	return results, nil
 }
 
-type SmartData struct {
-	Config Config   `json:"config"`
-	Data   []string `json:"data"`
-	IP     string   `json:"ip"`
+type SmartResult struct {
+	Config *Config
+	Data   map[string][]string `json:"data"`
 }
 
-func loadSmartResult(content []byte) (*SmartData, error) {
+func (sr *SmartResult) List() []string {
+	var cidrs []string
+	for _, c := range sr.Data {
+		cidrs = append(cidrs, c...)
+	}
+	return cidrs
+}
+
+func parseSmartResult(content []byte) (map[string][]string, error) {
 	var err error
-	var smartdata *SmartData
+	var smartdata map[string][]string
 	err = json.Unmarshal(content, &smartdata)
 	if err != nil {
 		return nil, err
 	}
 	return smartdata, nil
+}
+
+func parseConfig(line []byte) (*Config, error) {
+	var config *Config
+	err := json.Unmarshal(line, &config)
+	if err != nil {
+		return nil, err
+	}
+	return config, nil
 }
 
 func LoadResultFile(file *os.File) interface{} {
@@ -235,16 +251,9 @@ func LoadResultFile(file *os.File) interface{} {
 	content := files.DecryptFile(file, files.Key)
 
 	content = bytes.TrimSpace(content) // 去除前后空格
-	if bytes.Contains(content, []byte("\"smartb\",")) || bytes.Contains(content, []byte("\"smartc\",")) || bytes.Contains(content, []byte("\"ping\",")) {
-		// 解析启发式扫描结果
-		content = autofixjson(content)
-		data, err = loadSmartResult(content)
-	} else if bytes.Contains(content, []byte("\"scan\",")) {
-		// 解析扫描结果
-		content = autofixjson(content)
-		data, err = LoadResult(content)
-	} else if !IsJson(content) {
-		// 解析按行分割的 ip:port:framework 输入
+	lines := bytes.Split(content, []byte{0x0a})
+	config, err := parseConfig(lines[0])
+	if err != nil {
 		var results parsers.GOGOResults
 		for _, target := range CleanSpiltCFLR(string(content)) {
 			var result *parsers.GOGOResult
@@ -289,21 +298,50 @@ func LoadResultFile(file *os.File) interface{} {
 			}
 		}
 		return results
-	} else {
-		return content
 	}
-	if err != nil {
-		fmt.Println("[-] json error, " + err.Error())
-		return content
+
+	if !bytes.Equal(lines[len(lines)-1], []byte("[\"done\"]")) {
+		Log.Important("Task has not been completed,auto fix json")
+		Log.Important("Task has not been completed,auto fix json")
+		Log.Important("Task has not been completed,auto fix json")
+	}
+
+	var res bytes.Buffer
+	switch config.JsonType {
+	case "smartb", "smartc", "alive":
+		sr := &SmartResult{
+			Config: config,
+		}
+		for i, line := range lines {
+			if i == 0 || i == len(lines)-1 {
+				continue
+			}
+			lines[i] = line[1 : len(line)-1]
+		}
+		res.WriteString("{")
+		res.Write(bytes.Join(lines[1:len(lines)-1], []byte{','}))
+		res.WriteString("}")
+		sr.Data, err = parseSmartResult(res.Bytes())
+		if err != nil {
+			fmt.Println("[-] json error, " + err.Error())
+			return content
+		}
+		return sr
+	case "scan":
+		rd := &ResultsData{
+			&parsers.GOGOData{
+				Config: config.GOGOConfig,
+			},
+		}
+		res.WriteString("[")
+		res.Write(bytes.Join(lines[1:len(lines)-1], []byte{','}))
+		res.WriteString("]")
+		rd.Data, err = parseResult(res.Bytes())
+		if err != nil {
+			fmt.Println("[-] json error, " + err.Error())
+			return content
+		}
+		return rd
 	}
 	return data
-}
-
-func IsJson(content []byte) bool {
-	var tmp interface{}
-	err := json.Unmarshal(content, &tmp)
-	if err != nil {
-		return false
-	}
-	return true
 }

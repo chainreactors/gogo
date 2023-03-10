@@ -35,7 +35,7 @@ func FormatOutput(filename, outFilename, outf, filenamef string, filters []strin
 	var outfunc func(s string)
 	var iscolor bool
 	var rd *ResultsData
-	var sd *SmartData
+	var sd *SmartResult
 	var text string
 	var file *os.File
 	var err error
@@ -62,11 +62,11 @@ func FormatOutput(filename, outFilename, outf, filenamef string, filters []strin
 			config.Filenamef = filenamef
 			outFilename = GetFilename(config, outf)
 		}
-	case *SmartData:
-		sd = data.(*SmartData)
+	case *SmartResult:
+		sd = data.(*SmartResult)
 		if filenamef == "clear" {
 			sd.Config.Filenamef = filenamef
-			outFilename = GetFilename(&sd.Config, "cidr")
+			outFilename = GetFilename(sd.Config, "cidr")
 		}
 	case []byte:
 		text = string(data.([]byte))
@@ -92,7 +92,7 @@ func FormatOutput(filename, outFilename, outf, filenamef string, filters []strin
 	}
 
 	if sd != nil && sd.Data != nil {
-		outfunc(strings.Join(sd.Data, "\n"))
+		outfunc(strings.Join(sd.List(), "\n"))
 		return
 	} else if rd != nil && rd.Data != nil {
 		if len(filters) > 0 {

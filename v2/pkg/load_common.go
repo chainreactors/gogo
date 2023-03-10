@@ -5,7 +5,6 @@ import (
 	"github.com/chainreactors/ipcs"
 	"github.com/chainreactors/parsers"
 	"github.com/chainreactors/parsers/iutils"
-	"regexp"
 	"strings"
 )
 
@@ -15,8 +14,8 @@ var (
 	TagMap  = ipcs.TagMap
 	//WorkFlowMap    map[string][]*Workflow
 	Extractor      []*parsers.Extractor
-	Extractors                                 = make(parsers.Extractors)
-	ExtractRegexps map[string][]*regexp.Regexp = map[string][]*regexp.Regexp{}
+	Extractors     = make(parsers.Extractors)
+	ExtractRegexps = map[string][]*parsers.Extractor{}
 )
 
 type PortFinger struct {
@@ -53,12 +52,12 @@ func LoadExtractor() {
 	for _, extract := range Extractor {
 		extract.Compile()
 
-		ExtractRegexps[extract.Name] = extract.CompiledRegexps
+		ExtractRegexps[extract.Name] = []*parsers.Extractor{extract}
 		for _, tag := range extract.Tags {
 			if _, ok := ExtractRegexps[tag]; !ok {
-				ExtractRegexps[tag] = extract.CompiledRegexps
+				ExtractRegexps[tag] = []*parsers.Extractor{extract}
 			} else {
-				ExtractRegexps[tag] = append(ExtractRegexps[tag], extract.CompiledRegexps...)
+				ExtractRegexps[tag] = append(ExtractRegexps[tag], extract)
 			}
 		}
 	}

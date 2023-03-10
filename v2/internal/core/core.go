@@ -161,10 +161,10 @@ func SmartMod(target *ipcs.CIDR, config Config) {
 	}
 	Log.Importantf("Smart scan: %s finished, found %d alive cidrs", target, len(iplist))
 	if config.IsBSmart() {
-		WriteSmartResult(config.SmartBFile, iplist.Strings())
+		WriteSmartResult(config.SmartBFile, target.String(), iplist.Strings())
 	}
 	if config.IsCSmart() {
-		WriteSmartResult(config.SmartCFile, iplist.Strings())
+		WriteSmartResult(config.SmartCFile, target.String(), iplist.Strings())
 	}
 
 	if Opt.Noscan || config.Mod == SUPERSMARTC {
@@ -213,7 +213,7 @@ func AliveMod(targets interface{}, config Config) {
 	}
 	Log.Importantf("found %d alived ips", len(iplist))
 	if config.AliveFile != nil {
-		WriteAlivedResult(config.AliveFile, iplist.Strings())
+		WriteSmartResult(config.AliveFile, "alive", iplist.Strings())
 	}
 	DefaultMod(iplist, config)
 }

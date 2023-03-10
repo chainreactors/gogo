@@ -125,24 +125,27 @@ func (config *Config) InitFile() error {
 			}()
 		}()
 
-		if config.FileOutputf == "json" {
-			var rescommaflag bool
-			config.File.Write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("scan")))
-			config.File.ClosedAppend = "]}"
-			config.File.Handler = func(res string) string {
-				if rescommaflag {
-					// 只有json输出才需要手动添加逗号
-					res = "," + res
-				}
-				if config.FileOutputf == "json" {
-					// 如果json格式输出,则除了第一次输出,之后都会带上逗号
-					rescommaflag = true
-				}
-				return res
-			}
+		if config.FileOutputf == "jl" || config.FileOutputf == "jsonlines" {
+			//var rescommaflag bool
+			//config.File.Write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("scan")))
+			config.File.WriteLine(config.ToJson("scan"))
+			config.File.ClosedAppend = "[\"done\"]"
+			//config.File.Handler = func(res string) string {
+			//	if rescommaflag {
+			//		// 只有json输出才需要手动添加逗号
+			//		res = "," + res
+			//	}
+			//	if config.FileOutputf == "json" {
+			//		// 如果json格式输出,则除了第一次输出,之后都会带上逗号
+			//		rescommaflag = true
+			//	}
+			//	return res
+			//}
 		} else if config.FileOutputf == SUPERSMARTB {
-			config.File.Write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("smart")))
-			config.File.ClosedAppend = "]}"
+			config.File.WriteLine(config.ToJson("smart"))
+			config.File.ClosedAppend = "[\"done\"]"
+			//config.File.Write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("smart")))
+			//config.File.ClosedAppend = "]}"
 		} else if config.FileOutputf == "csv" {
 			config.File.Write("ip,port,url,status,title,host,language,midware,frame,vuln,extract\n")
 		}
@@ -155,8 +158,10 @@ func (config *Config) InitFile() error {
 			return err
 		}
 
-		config.SmartBFile.Write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("smartb")))
-		config.SmartBFile.ClosedAppend = "]}"
+		//config.SmartBFile.Write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("smartb")))
+		//config.SmartBFile.ClosedAppend = "]}"
+		config.SmartBFile.WriteLine(config.ToJson("smartb"))
+		config.SmartBFile.ClosedAppend = "[\"done\"]"
 	}
 
 	if config.SmartCFilename != "" {
@@ -165,8 +170,10 @@ func (config *Config) InitFile() error {
 			return err
 		}
 
-		config.SmartCFile.Write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("smartc")))
-		config.SmartCFile.ClosedAppend = "]}"
+		//config.SmartCFile.Write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("smartc")))
+		//config.SmartCFile.ClosedAppend = "]}"
+		config.SmartCFile.WriteLine(config.ToJson("smartc"))
+		config.SmartCFile.ClosedAppend = "[\"done\"]"
 	}
 
 	if config.AlivedFilename != "" {
@@ -174,8 +181,10 @@ func (config *Config) InitFile() error {
 		if err != nil {
 			return err
 		}
-		config.AliveFile.Write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("ping")))
-		config.AliveFile.ClosedAppend = "]}"
+		//config.AliveFile.Write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("ping")))
+		//config.AliveFile.ClosedAppend = "]}"
+		config.AliveFile.WriteLine("alive")
+		config.AliveFile.ClosedAppend = "[\"done\"]"
 	}
 
 	return nil
