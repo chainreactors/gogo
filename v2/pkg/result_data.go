@@ -300,12 +300,20 @@ func LoadResultFile(file *os.File) interface{} {
 		return results
 	}
 
+	var finished bool = true
 	if !bytes.Equal(lines[len(lines)-1], []byte("[\"done\"]")) {
+		finished = false
 		Log.Important("Task has not been completed,auto fix json")
 		Log.Important("Task has not been completed,auto fix json")
 		Log.Important("Task has not been completed,auto fix json")
 	}
 
+	var last int
+	if finished {
+		last = len(lines) - 1
+	} else {
+		last = len(lines)
+	}
 	var res bytes.Buffer
 	switch config.JsonType {
 	case "smartb", "smartc", "alive":
@@ -313,13 +321,13 @@ func LoadResultFile(file *os.File) interface{} {
 			Config: config,
 		}
 		for i, line := range lines {
-			if i == 0 || i == len(lines)-1 {
+			if i == 0 || (finished && i == last) {
 				continue
 			}
-			lines[i] = line[1 : len(line)-1]
+			lines[i] = line[1:last]
 		}
 		res.WriteString("{")
-		res.Write(bytes.Join(lines[1:len(lines)-1], []byte{','}))
+		res.Write(bytes.Join(lines[1:last], []byte{','}))
 		res.WriteString("}")
 		sr.Data, err = parseSmartResult(res.Bytes())
 		if err != nil {
@@ -334,7 +342,7 @@ func LoadResultFile(file *os.File) interface{} {
 			},
 		}
 		res.WriteString("[")
-		res.Write(bytes.Join(lines[1:len(lines)-1], []byte{','}))
+		res.Write(bytes.Join(lines[1:last], []byte{','}))
 		res.WriteString("]")
 		rd.Data, err = parseResult(res.Bytes())
 		if err != nil {

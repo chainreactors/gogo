@@ -8,7 +8,7 @@ require (
 	github.com/chainreactors/ipcs v0.0.9
 	github.com/chainreactors/logs v0.7.1-0.20221214153111-85f123ff6580
 	github.com/chainreactors/neutron v0.0.0-20230227122754-80dc76323a1c
-	github.com/chainreactors/parsers v0.3.1-0.20230310104445-a427c2fe20f2
+	github.com/chainreactors/parsers v0.3.1-0.20230311054618-e2d074dbf879
 	github.com/jessevdk/go-flags v1.5.0
 	github.com/panjf2000/ants/v2 v2.5.0
 	golang.org/x/net v0.0.0-20190603091049-60506f45cf65
