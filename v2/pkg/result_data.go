@@ -191,16 +191,6 @@ func (rd *ResultsData) ToCobaltStrike() string {
 	return s
 }
 
-func autofixjson(content []byte) []byte {
-	if string(content[len(content)-2:]) != "]}" {
-		content = append(content, "]}"...)
-		Log.Important("Task has not been completed,auto fix json")
-		Log.Important("Task has not been completed,auto fix json")
-		Log.Important("Task has not been completed,auto fix json")
-	}
-	return content
-}
-
 func parseResult(content []byte) (parsers.GOGOResults, error) {
 	// 自动修复未完成任务的json
 	var err error
