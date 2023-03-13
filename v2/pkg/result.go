@@ -31,7 +31,7 @@ type Result struct {
 	Httpresp   *parsers.Response `json:"-"`
 	Error      string            `json:"-"`
 	ErrStat    int               `json:"-"`
-	Content    string            `json:"-"`
+	Content    []byte            `json:"-"`
 }
 
 func (result *Result) GetHttpConn(delay int) *http.Client {
@@ -91,8 +91,8 @@ func (result *Result) IsHttps() bool {
 	return false
 }
 
-func (result *Result) ContentMap() map[string]string {
-	return map[string]string{
+func (result *Result) ContentMap() map[string]interface{} {
+	return map[string]interface{}{
 		"content": result.Content,
 		"cert":    strings.Join(result.HttpHosts, ","),
 	}

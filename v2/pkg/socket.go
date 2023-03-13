@@ -58,6 +58,7 @@ func (s *Socket) Request(data []byte, max int) ([]byte, error) {
 }
 
 func (s *Socket) QuickRequest(data []byte, max int) ([]byte, error) {
+	// read small data, without wait for 500ms
 	_ = s.Conn.SetDeadline(time.Now().Add(s.Timeout))
 	var err error
 	_, err = s.Conn.Write(data)

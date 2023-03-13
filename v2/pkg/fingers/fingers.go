@@ -1,6 +1,7 @@
 package fingers
 
 import (
+	"bytes"
 	"encoding/json"
 	"github.com/chainreactors/ipcs"
 	"github.com/chainreactors/logs"
@@ -73,7 +74,7 @@ func (finger *Finger) ToResult(hasFrame, hasVuln bool, res string, index int) (f
 	return frame, vuln
 }
 
-func (finger *Finger) Match(content map[string]string, level int, sender func([]byte) (string, bool)) (*parsers.Framework, *parsers.Vuln, bool) {
+func (finger *Finger) Match(content map[string]interface{}, level int, sender func([]byte) ([]byte, bool)) (*parsers.Framework, *parsers.Vuln, bool) {
 	// 只进行被动的指纹判断, 将无视rules中的senddata字段
 	for i, rule := range finger.Rules {
 		var ishttp bool
@@ -81,14 +82,14 @@ func (finger *Finger) Match(content map[string]string, level int, sender func([]
 		if finger.Protocol == "http" {
 			ishttp = true
 		}
-		var c string
+		var c []byte
 		var ok bool
 		if level >= rule.Level && rule.SendData != nil {
 			logs.Log.Debugf("active detect with %s", rule.SendDataStr)
 			c, ok = sender(rule.SendData)
 			if ok {
 				isactive = true
-				content["content"] = strings.ToLower(c)
+				content["content"] = bytes.ToLower(c)
 			}
 		}
 		hasFrame, hasVuln, res := RuleMatcher(rule, content, ishttp)
@@ -105,7 +106,7 @@ func (finger *Finger) Match(content map[string]string, level int, sender func([]
 			}
 			if frame.Version == "" && rule.Regexps.CompiledVersionRegexp != nil {
 				for _, reg := range rule.Regexps.CompiledVersionRegexp {
-					res, _ := compiledMatch(reg, content["content"])
+					res, _ := compiledMatch(reg, content["content"].([]byte))
 					if res != "" {
 						logs.Log.Debugf("%s version hit, regexp: %s", finger.Name, reg.String())
 						frame.Version = res
@@ -213,7 +214,7 @@ func (rs Rules) Compile(name string) error {
 	return nil
 }
 
-func (rule *Rule) Match(content string, ishttp bool) (bool, bool, string) {
+func (rule *Rule) Match(content []byte, ishttp bool) (bool, bool, string) {
 	// 漏洞匹配优先
 	for _, reg := range rule.Regexps.CompiledVulnRegexp {
 		res, ok := compiledMatch(reg, content)
@@ -224,13 +225,13 @@ func (rule *Rule) Match(content string, ishttp bool) (bool, bool, string) {
 
 	var body, header string
 	if ishttp {
-		cs := strings.Index(content, "\r\n\r\n")
+		cs := bytes.Index(content, []byte("\r\n\r\n"))
 		if cs != -1 {
-			body = content[cs+4:]
-			header = content[:cs]
+			body = string(content[cs+4:])
+			header = string(content[:cs])
 		}
 	} else {
-		body = content
+		body = string(content)
 	}
 
 	// body匹配
