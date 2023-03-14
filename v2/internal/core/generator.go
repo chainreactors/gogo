@@ -41,25 +41,48 @@ func (gen *IpGenerator) smartIpGenerator(cidr *utils.CIDR) {
 	if err != nil {
 		return
 	}
+	ccs := make(map[string]*utils.CIDR)
+	for _, c := range cs {
+		ccs[c.String()] = c
+	}
 
-	for ip := range cs.SprayRange() {
-		if isnotAlive(ip.Mask24().String(), gen.alivedMap) {
-			gen.ch <- ip.String()
+	for i := 0; i < 256; i++ {
+		for s, c := range ccs {
+			if isnotAlive(s, gen.alivedMap) {
+				//println(c.Next().String())
+				gen.ch <- c.Next().String()
+			}
 		}
 	}
 }
 
 func (gen *IpGenerator) sSmartGenerator(cidr *utils.CIDR) {
-	cs, err := cidr.Split(16)
+	bcs, err := cidr.Split(16)
 	if err != nil {
 		return
 	}
 
-	for ip := range cs.SprayRange() {
-		if isnotAlive(ip.Mask16().String(), gen.alivedMap) {
-			gen.ch <- ip.String()
+	ccs := make(map[string]utils.CIDRs)
+	for _, b := range bcs {
+		tmp, _ := b.Split(24)
+		ccs[b.String()] = tmp
+	}
+
+	var count int
+	for i := 0; i < 256; i++ {
+		for b, c := range ccs {
+			ip := c[i].Next()
+			for _, p := range gen.ipProbe {
+				count++
+				tip := ip.Copy()
+				tip.IP[3] = byte(p)
+				if isnotAlive(b, gen.alivedMap) {
+					gen.ch <- ip.String()
+				}
+			}
 		}
 	}
+	println(count)
 }
 
 func (gen *IpGenerator) generatorDispatch(cidr *utils.CIDR, mod string) chan string {
