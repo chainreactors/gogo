@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/chainreactors/files"
-	"github.com/chainreactors/ipcs"
 	. "github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
+	"github.com/chainreactors/utils"
 	"os"
 	"sort"
 	"strings"
@@ -15,7 +15,11 @@ import (
 
 func sortIP(ips []string) []string {
 	sort.Slice(ips, func(i, j int) bool {
-		return ipcs.Ip2Int(ips[i]) < ipcs.Ip2Int(ips[j])
+		if utils.ParseIP(ips[i]).Compare(utils.ParseIP(ips[j])) < 0 {
+			return true
+		} else {
+			return false
+		}
 	})
 	return ips
 }
@@ -266,11 +270,9 @@ func LoadResultFile(file *os.File) interface{} {
 				host := targetpair[0]
 
 				if len(targetpair) >= 2 {
-					if !ipcs.IsIpv4(host) {
-						if parsedIP, err := ipcs.ParseIP(host); err != nil {
-							result = parsers.NewGOGOResult(parsedIP.String(), targetpair[1])
-							result.Host = host
-						}
+					if parsedIP := utils.ParseIP(host); parsedIP != nil {
+						result = parsers.NewGOGOResult(parsedIP.String(), targetpair[1])
+						result.Host = host
 					} else {
 						result = parsers.NewGOGOResult(host, targetpair[1])
 					}

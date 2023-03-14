@@ -5,10 +5,10 @@ import (
 	"errors"
 	"fmt"
 	. "github.com/chainreactors/files"
-	"github.com/chainreactors/ipcs"
 	"github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
 	"github.com/chainreactors/parsers/iutils"
+	"github.com/chainreactors/utils"
 	"os"
 	"os/signal"
 	"path"
@@ -27,7 +27,7 @@ const (
 type Config struct {
 	*parsers.GOGOConfig
 	// ip
-	CIDRs ipcs.CIDRs `json:"-"`
+	CIDRs utils.CIDRs `json:"-"`
 
 	// port and probe
 	//Ports         string   `json:"ports"` // 预设字符串
@@ -79,9 +79,9 @@ func (config *Config) InitIP() error {
 	if config.IPlist != nil {
 		for _, ip := range config.IPlist {
 			var host string
-			cidr, err := ipcs.ParseCIDR(ip)
-			if err != nil {
-				logs.Log.Warn("Parse Ip Failed, skipped, " + err.Error())
+			cidr := utils.ParseCIDR(ip)
+			if cidr == nil {
+				logs.Log.Warnf("Parse Ip %s Failed, skipped ", ip)
 				continue
 			}
 			config.CIDRs = append(config.CIDRs, cidr)
@@ -90,9 +90,9 @@ func (config *Config) InitIP() error {
 			}
 		}
 
-		config.CIDRs = iutils.Unique(config.CIDRs).(ipcs.CIDRs)
+		config.CIDRs = iutils.Unique(config.CIDRs).(utils.CIDRs)
 		if len(config.CIDRs) == 0 {
-			return fmt.Errorf("all targets format error, exit!")
+			return fmt.Errorf("all targets format error, exit")
 		}
 	}
 	return nil

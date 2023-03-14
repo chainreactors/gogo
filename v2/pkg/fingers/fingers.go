@@ -3,9 +3,9 @@ package fingers
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/chainreactors/ipcs"
 	"github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
+	"github.com/chainreactors/utils"
 	"regexp"
 	"strings"
 )
@@ -322,7 +322,7 @@ func LoadFingers(content []byte) (fingers Fingers, err error) {
 	}
 
 	for _, finger := range fingers {
-		err := finger.Compile(ipcs.ParsePorts)
+		err := finger.Compile(utils.ParsePorts)
 		if err != nil {
 			return nil, err
 		}
