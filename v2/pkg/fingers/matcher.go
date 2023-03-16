@@ -42,6 +42,9 @@ func RuleMatcher(rule *Rule, content map[string]interface{}, ishttp bool) (bool,
 		return hasFrame, hasVuln, version
 	}
 
-	hasFrame = rule.MatchCert(content["cert"].(string))
+	if content["cert"] != nil {
+		hasFrame = rule.MatchCert(content["cert"].(string))
+	}
+
 	return hasFrame, hasVuln, version
 }
