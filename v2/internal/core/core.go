@@ -66,7 +66,6 @@ func DefaultMod(targets interface{}, config Config) {
 			}
 
 			Log.Console(output(result, config.Outputf))
-
 			// 文件输出
 			if config.File != nil {
 				if !config.File.Initialized {

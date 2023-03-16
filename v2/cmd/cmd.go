@@ -25,5 +25,10 @@ func Gogo() {
 	runner.Init()
 	runner.Run()
 
-	logs.Log.Close(true)
+	if runner.Debug {
+		// debug模式不会删除.sock.lock
+		logs.Log.Close(false)
+	} else {
+		logs.Log.Close(true)
+	}
 }
