@@ -100,11 +100,19 @@ func SmartMod(target *utils.CIDR, config Config) {
 	var mask int
 	switch config.Mod {
 	case SUPERSMART, SUPERSMARTB:
+		if target.Mask > 16 {
+			Log.Error(target.String() + " is less than B class, skipped")
+			return
+		}
 		mask = 16
 		if config.PortProbe == Default {
 			config.PortProbeList = []string{DefaultSuperSmartPortProbe}
 		}
 	default:
+		if target.Mask > 16 {
+			Log.Error(target.String() + " is less than C class, skipped")
+			return
+		}
 		mask = 24
 		if config.PortProbe == Default {
 			config.PortProbeList = []string{DefaultSmartPortProbe}
@@ -136,7 +144,7 @@ func SmartMod(target *utils.CIDR, config Config) {
 		if result.Open {
 			cidrAlived(result.Ip, temp, mask)
 		} else if result.Error != "" {
-			Log.Debugf("tcp stat: %s, errmsg: %s", portstat[result.ErrStat], result.Error)
+			Log.Debugf("%s stat: %s, errmsg: %s", result.GetTarget(), portstat[result.ErrStat], result.Error)
 		}
 		wg.Done()
 	})
@@ -167,7 +175,7 @@ func SmartMod(target *utils.CIDR, config Config) {
 		WriteSmartResult(config.SmartCFile, target.String(), iplist.Strings())
 	}
 
-	if Opt.Noscan || config.Mod == SUPERSMARTC {
+	if Opt.NoScan || config.Mod == SUPERSMARTC {
 		// -no 被设置的时候停止后续扫描
 		return
 	}

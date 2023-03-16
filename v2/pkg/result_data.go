@@ -121,15 +121,13 @@ func (rd *ResultsData) ToFormat(isColor bool) string {
 			if !(p.Port == "icmp") {
 				if isColor {
 					// 颜色输出
-					s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s\t%s [%s] %s %s %s\n",
-						p.Protocol,
-						ip,
-						port,
+					url := fmt.Sprintf("%s://%s:%s", p.Protocol, ip, port)
+					s += fmt.Sprintf("\t%s\t%s\t%s\t%s\t%s [%s] %s %s %s\n",
+						GreenLine(url),
 						p.Midware,
 						p.Language,
 						Blue(p.Frameworks.String()),
-						p.Host,
-						//p.Hash,
+						Cyan(p.Host),
 						Yellow(p.Status),
 						Blue(p.Title),
 						Red(p.Vulns.String()),
@@ -144,8 +142,6 @@ func (rd *ResultsData) ToFormat(isColor bool) string {
 						p.Language,
 						p.Frameworks.String(),
 						p.Host,
-						//p.Cert,
-						//p.Hash,
 						p.Status,
 						p.Title,
 						p.Vulns.String(),

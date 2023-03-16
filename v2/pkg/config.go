@@ -64,6 +64,57 @@ type Config struct {
 	OutputFilters  [][]string          `json:"-"`
 }
 
+func (config *Config) Validate() error {
+	if config.Filename != "" && IsExist(config.Filename) {
+		return fmt.Errorf("file %s already exist!", config.Filename)
+	}
+
+	// 一些命令行参数错误处理,如果check没过直接退出程序或输出警告
+	legalFormat := []string{"url", "ip", "port", "frameworks", "framework", "frame", "vuln", "vulns", "protocol", "scheme", "title", "target", "hash", "language", "host", "cert", "color", "c", "json", "j", "full", "jsonlines", "jl", "zombie", "sc", "csv", "status", "os"}
+	if config.FileOutputf != Default {
+		for _, form := range strings.Split(config.FileOutputf, ",") {
+			if !iutils.StringsContains(legalFormat, form) {
+				logs.Log.Warnf("illegal file output format: %s, Please use one or more of the following formats: %s", form, strings.Join(legalFormat, ", "))
+			}
+		}
+	}
+
+	if config.Outputf != "full" {
+		for _, form := range strings.Split(config.Outputf, ",") {
+			if !iutils.StringsContains(legalFormat, form) {
+				logs.Log.Warnf("illegal output format: %s, Please use one or more of the following formats: %s", form, strings.Join(legalFormat, ", "))
+			}
+		}
+	}
+
+	if config.JsonFile != "" {
+		if config.Ports != "top1" {
+			logs.Log.Warn("json input can not config ports")
+		}
+		if config.Mod != Default {
+			logs.Log.Warn("input json can not config . Mod,default scanning")
+		}
+	}
+
+	//if plugin.RunOpt.Delay <= 1 {
+	//	logs.Log.Warn("delay less than 1s, it may cause the target to miss the scan")
+	//}
+
+	if config.IP == "" && config.ListFile == "" && config.JsonFile == "" && !config.IsJsonInput && !config.IsListInput { // 一些导致报错的参数组合
+		return errors.New("no any target, please set -ip or -l or -j or stdin")
+	}
+
+	if config.JsonFile != "" && config.ListFile != "" {
+		return errors.New("cannot set -j and -l flags at same time")
+	}
+
+	if !HasPingPriv() && (strings.Contains(config.Ports, "icmp") || strings.Contains(config.Ports, "ping") || iutils.StringsContains(config.AliveSprayMod, "icmp")) {
+		logs.Log.Warn("current user is not root, icmp scan not work")
+	}
+
+	return nil
+}
+
 func (config *Config) InitIP() error {
 	config.HostsMap = make(map[string][]string)
 	// 优先处理ip
@@ -185,57 +236,6 @@ func (config *Config) InitFile() error {
 		//config.AliveFile.ClosedAppend = "]}"
 		config.AliveFile.WriteLine("alive")
 		config.AliveFile.ClosedAppend = "[\"done\"]"
-	}
-
-	return nil
-}
-
-func (config *Config) Validate() error {
-	if config.Filename != "" && IsExist(config.Filename) {
-		return fmt.Errorf("file %s already exist!", config.Filename)
-	}
-
-	// 一些命令行参数错误处理,如果check没过直接退出程序或输出警告
-	legalFormat := []string{"url", "ip", "port", "frameworks", "framework", "frame", "vuln", "vulns", "protocol", "scheme", "title", "target", "hash", "language", "host", "cert", "color", "c", "json", "j", "full", "jsonlines", "jl", "zombie", "sc", "csv", "status", "os"}
-	if config.FileOutputf != Default {
-		for _, form := range strings.Split(config.FileOutputf, ",") {
-			if !iutils.StringsContains(legalFormat, form) {
-				logs.Log.Warnf("illegal file output format: %s, Please use one or more of the following formats: %s", form, strings.Join(legalFormat, ", "))
-			}
-		}
-	}
-
-	if config.Outputf != "full" {
-		for _, form := range strings.Split(config.Outputf, ",") {
-			if !iutils.StringsContains(legalFormat, form) {
-				logs.Log.Warnf("illegal output format: %s, Please use one or more of the following formats: %s", form, strings.Join(legalFormat, ", "))
-			}
-		}
-	}
-
-	if config.JsonFile != "" {
-		if config.Ports != "top1" {
-			logs.Log.Warn("json input can not config ports")
-		}
-		if config.Mod != Default {
-			logs.Log.Warn("input json can not config . Mod,default scanning")
-		}
-	}
-
-	//if plugin.RunOpt.Delay <= 1 {
-	//	logs.Log.Warn("delay less than 1s, it may cause the target to miss the scan")
-	//}
-
-	if config.IP == "" && config.ListFile == "" && config.JsonFile == "" && !config.IsJsonInput && !config.IsListInput { // 一些导致报错的参数组合
-		return errors.New("no any target, please set -ip or -l or -j or stdin")
-	}
-
-	if config.JsonFile != "" && config.ListFile != "" {
-		return errors.New("cannot set -j and -l flags at same time")
-	}
-
-	if !HasPingPriv() && (strings.Contains(config.Ports, "icmp") || strings.Contains(config.Ports, "ping") || iutils.StringsContains(config.AliveSprayMod, "icmp")) {
-		logs.Log.Warn("current user is not root, icmp scan not work")
 	}
 
 	return nil

@@ -1,7 +1,6 @@
 package core
 
 import (
-	"encoding/json"
 	"fmt"
 	. "github.com/chainreactors/files"
 	. "github.com/chainreactors/gogo/v2/pkg"
@@ -33,7 +32,6 @@ func output(result *Result, outType string) string {
 
 func FormatOutput(filename, outFilename, outf, filenamef string, filters []string, filterOr bool) {
 	var outfunc func(s string)
-	var iscolor bool
 	var rd *ResultsData
 	var sd *SmartResult
 	var text string
@@ -110,30 +108,27 @@ func FormatOutput(filename, outFilename, outf, filenamef string, filters []strin
 			rd.Data = results
 		}
 
-		if outf == "c" {
-			iscolor = true
-		}
-
-		if outf == "cs" {
+		switch outf {
+		case "cs":
 			outfunc(rd.ToCobaltStrike())
-		} else if outf == "zombie" {
-			outfunc(rd.ToZombie())
-		} else if outf == "c" || outf == "full" {
-			outfunc(rd.ToFormat(iscolor))
-		} else if outf == "json" {
-			content, err := json.Marshal(rd)
-			if err != nil {
-				fmt.Println(err.Error())
-				return
+		case "full":
+			outfunc(rd.ToFormat(false))
+		case "color", "c":
+			outfunc(rd.ToFormat(true))
+		case "json":
+			outfunc(rd.ToJson())
+		case "jl", "jsonline", "jsonlines":
+			for _, l := range rd.Data {
+				outfunc(l.JsonOutput() + "\n")
 			}
-			outfunc(string(content))
-		} else if outf == "csv" {
+		case "csv":
 			outfunc(rd.ToCsv())
-		} else if outf == "extract" {
+		case "extract":
 			outfunc(rd.ToExtracteds())
-		} else {
+		default:
 			outfunc(rd.ToValues(outf))
 		}
+
 	} else if text != "" {
 		if outFilename != "" {
 			outfunc(text)
