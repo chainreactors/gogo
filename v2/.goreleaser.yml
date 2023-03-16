@@ -26,6 +26,7 @@ builds:
     ldflags: "-s -w -X 'github.com/chainreactors/gogo/v2/internal/core.ver=={{ .Tag }}'"
     flags:
       - -trimpath
+      - -tags=forceposix
     asmflags:
       - all=-trimpath={{.Env.GOPATH}}
     gcflags:

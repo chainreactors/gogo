@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"github.com/chainreactors/gogo/v2/internal/plugin"
 	. "github.com/chainreactors/gogo/v2/pkg"
-	"github.com/chainreactors/ipcs"
 	. "github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
+	"github.com/chainreactors/utils"
 	"github.com/panjf2000/ants/v2"
 	"net"
 	"runtime/debug"
@@ -66,7 +66,6 @@ func DefaultMod(targets interface{}, config Config) {
 			}
 
 			Log.Console(output(result, config.Outputf))
-
 			// 文件输出
 			if config.File != nil {
 				if !config.File.Initialized {
@@ -95,16 +94,24 @@ func DefaultMod(targets interface{}, config Config) {
 	wgs.Wait()
 }
 
-func SmartMod(target *ipcs.CIDR, config Config) {
+func SmartMod(target *utils.CIDR, config Config) {
 	// 初始化mask
 	var mask int
 	switch config.Mod {
 	case SUPERSMART, SUPERSMARTB:
+		if target.Mask > 16 {
+			Log.Error(target.String() + " is less than B class, skipped")
+			return
+		}
 		mask = 16
 		if config.PortProbe == Default {
 			config.PortProbeList = []string{DefaultSuperSmartPortProbe}
 		}
 	default:
+		if target.Mask > 16 {
+			Log.Error(target.String() + " is less than C class, skipped")
+			return
+		}
 		mask = 24
 		if config.PortProbe == Default {
 			config.PortProbeList = []string{DefaultSmartPortProbe}
@@ -136,7 +143,7 @@ func SmartMod(target *ipcs.CIDR, config Config) {
 		if result.Open {
 			cidrAlived(result.Ip, temp, mask)
 		} else if result.Error != "" {
-			Log.Debugf("tcp stat: %s, errmsg: %s", portstat[result.ErrStat], result.Error)
+			Log.Debugf("%s stat: %s, errmsg: %s", result.GetTarget(), portstat[result.ErrStat], result.Error)
 		}
 		wg.Done()
 	})
@@ -147,9 +154,9 @@ func SmartMod(target *ipcs.CIDR, config Config) {
 	}
 	wg.Wait()
 
-	var iplist ipcs.CIDRs
+	var iplist utils.CIDRs
 	temp.Range(func(ip, _ interface{}) bool {
-		iplist = append(iplist, ipcs.NewCIDR(ip.(string), mask))
+		iplist = append(iplist, utils.NewCIDR(ip.(string), mask))
 		return true
 	})
 
@@ -161,13 +168,13 @@ func SmartMod(target *ipcs.CIDR, config Config) {
 	}
 	Log.Importantf("Smart scan: %s finished, found %d alive cidrs", target, len(iplist))
 	if config.IsBSmart() {
-		WriteSmartResult(config.SmartBFile, iplist.Strings())
+		WriteSmartResult(config.SmartBFile, target.String(), iplist.Strings())
 	}
 	if config.IsCSmart() {
-		WriteSmartResult(config.SmartCFile, iplist.Strings())
+		WriteSmartResult(config.SmartCFile, target.String(), iplist.Strings())
 	}
 
-	if Opt.Noscan || config.Mod == SUPERSMARTC {
+	if Opt.NoScan || config.Mod == SUPERSMARTC {
 		// -no 被设置的时候停止后续扫描
 		return
 	}
@@ -201,9 +208,9 @@ func AliveMod(targets interface{}, config Config) {
 
 	wgs.Wait()
 
-	var iplist ipcs.CIDRs
+	var iplist utils.CIDRs
 	alivedmap.Range(func(ip, _ interface{}) bool {
-		iplist = append(iplist, &ipcs.CIDR{&ipcs.IP{IP: net.ParseIP(ip.(string)).To4()}, 32})
+		iplist = append(iplist, utils.ParseCIDR(ip.(string)))
 		return true
 	})
 
@@ -213,7 +220,7 @@ func AliveMod(targets interface{}, config Config) {
 	}
 	Log.Importantf("found %d alived ips", len(iplist))
 	if config.AliveFile != nil {
-		WriteAlivedResult(config.AliveFile, iplist.Strings())
+		WriteSmartResult(config.AliveFile, "alive", iplist.Strings())
 	}
 	DefaultMod(iplist, config)
 }
@@ -251,7 +258,7 @@ func createDefaultScan(config Config) {
 	}
 }
 
-func createDeclineScan(cidrs ipcs.CIDRs, config Config) {
+func createDeclineScan(cidrs utils.CIDRs, config Config) {
 	// 启发式扫描逐步降级,从喷洒B段到喷洒C段到默认扫描
 	if config.Mod == SUPERSMART {
 		// 如果port数量为1, 直接扫描的耗时小于启发式

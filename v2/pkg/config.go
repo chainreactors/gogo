@@ -5,10 +5,10 @@ import (
 	"errors"
 	"fmt"
 	. "github.com/chainreactors/files"
-	"github.com/chainreactors/ipcs"
 	"github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
 	"github.com/chainreactors/parsers/iutils"
+	"github.com/chainreactors/utils"
 	"os"
 	"os/signal"
 	"path"
@@ -27,7 +27,7 @@ const (
 type Config struct {
 	*parsers.GOGOConfig
 	// ip
-	CIDRs ipcs.CIDRs `json:"-"`
+	CIDRs utils.CIDRs `json:"-"`
 
 	// port and probe
 	//Ports         string   `json:"ports"` // 预设字符串
@@ -62,123 +62,6 @@ type Config struct {
 	Filters        []string            `json:"-"`
 	FilterOr       bool                `json:"-"`
 	OutputFilters  [][]string          `json:"-"`
-}
-
-func (config *Config) InitIP() error {
-	config.HostsMap = make(map[string][]string)
-	// 优先处理ip
-	if config.IP != "" {
-		if strings.Contains(config.IP, ",") {
-			config.IPlist = strings.Split(config.IP, ",")
-		} else {
-			config.IPlist = append(config.IPlist, config.IP)
-		}
-	}
-
-	// 如果输入的是文件,则格式化所有输入值.如果无有效ip
-	if config.IPlist != nil {
-		for _, ip := range config.IPlist {
-			var host string
-			cidr, err := ipcs.ParseCIDR(ip)
-			if err != nil {
-				logs.Log.Warn("Parse Ip Failed, skipped, " + err.Error())
-				continue
-			}
-			config.CIDRs = append(config.CIDRs, cidr)
-			if cidr.IP.Host != "" {
-				config.HostsMap[cidr.IP.String()] = append(config.HostsMap[cidr.IP.String()], host)
-			}
-		}
-
-		config.CIDRs = iutils.Unique(config.CIDRs).(ipcs.CIDRs)
-		if len(config.CIDRs) == 0 {
-			return fmt.Errorf("all targets format error, exit!")
-		}
-	}
-	return nil
-}
-
-func (config *Config) InitFile() error {
-	var err error
-	// 初始化res文件handler
-	if config.Filename != "" {
-		if config.Tee {
-			logs.Log.Clean = false
-		} else {
-			logs.Log.Clean = true
-		}
-
-		// 创建output的filehandle
-		config.File, err = newFile(config.Filename, config.Compress)
-		if err != nil {
-			iutils.Fatal(err.Error())
-		}
-
-		go func() {
-			c := make(chan os.Signal, 2)
-			signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-			go func() {
-				<-c
-				logs.Log.Debug("save and exit!")
-				config.File.SafeSync()
-				os.Exit(0)
-			}()
-		}()
-
-		if config.FileOutputf == "json" {
-			var rescommaflag bool
-			config.File.Write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("scan")))
-			config.File.ClosedAppend = "]}"
-			config.File.Handler = func(res string) string {
-				if rescommaflag {
-					// 只有json输出才需要手动添加逗号
-					res = "," + res
-				}
-				if config.FileOutputf == "json" {
-					// 如果json格式输出,则除了第一次输出,之后都会带上逗号
-					rescommaflag = true
-				}
-				return res
-			}
-		} else if config.FileOutputf == SUPERSMARTB {
-			config.File.Write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("smart")))
-			config.File.ClosedAppend = "]}"
-		} else if config.FileOutputf == "csv" {
-			config.File.Write("ip,port,url,status,title,host,language,midware,frame,vuln,extract\n")
-		}
-	}
-
-	// -af 参数下的启发式扫描结果file初始化
-	if config.SmartBFilename != "" {
-		config.SmartBFile, err = newFile(config.SmartBFilename, config.Compress)
-		if err != nil {
-			return err
-		}
-
-		config.SmartBFile.Write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("smartb")))
-		config.SmartBFile.ClosedAppend = "]}"
-	}
-
-	if config.SmartCFilename != "" {
-		config.SmartCFile, err = newFile(config.SmartCFilename, config.Compress)
-		if err != nil {
-			return err
-		}
-
-		config.SmartCFile.Write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("smartc")))
-		config.SmartCFile.ClosedAppend = "]}"
-	}
-
-	if config.AlivedFilename != "" {
-		config.AliveFile, err = newFile(config.AlivedFilename, config.Compress)
-		if err != nil {
-			return err
-		}
-		config.AliveFile.Write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("ping")))
-		config.AliveFile.ClosedAppend = "]}"
-	}
-
-	return nil
 }
 
 func (config *Config) Validate() error {
@@ -227,6 +110,132 @@ func (config *Config) Validate() error {
 
 	if !HasPingPriv() && (strings.Contains(config.Ports, "icmp") || strings.Contains(config.Ports, "ping") || iutils.StringsContains(config.AliveSprayMod, "icmp")) {
 		logs.Log.Warn("current user is not root, icmp scan not work")
+	}
+
+	return nil
+}
+
+func (config *Config) InitIP() error {
+	config.HostsMap = make(map[string][]string)
+	// 优先处理ip
+	if config.IP != "" {
+		if strings.Contains(config.IP, ",") {
+			config.IPlist = strings.Split(config.IP, ",")
+		} else {
+			config.IPlist = append(config.IPlist, config.IP)
+		}
+	}
+
+	// 如果输入的是文件,则格式化所有输入值.如果无有效ip
+	if config.IPlist != nil {
+		for _, ip := range config.IPlist {
+			var host string
+			cidr := utils.ParseCIDR(ip)
+			if cidr == nil {
+				logs.Log.Warnf("Parse Ip %s Failed, skipped ", ip)
+				continue
+			}
+			config.CIDRs = append(config.CIDRs, cidr)
+			if cidr.IP.Host != "" {
+				config.HostsMap[cidr.IP.String()] = append(config.HostsMap[cidr.IP.String()], host)
+			}
+		}
+
+		config.CIDRs = iutils.Unique(config.CIDRs).(utils.CIDRs)
+		if len(config.CIDRs) == 0 {
+			return fmt.Errorf("all targets format error, exit")
+		}
+	}
+	return nil
+}
+
+func (config *Config) InitFile() error {
+	var err error
+	// 初始化res文件handler
+	if config.Filename != "" {
+		if config.Tee {
+			logs.Log.Clean = false
+		} else {
+			logs.Log.Clean = true
+		}
+
+		// 创建output的filehandle
+		config.File, err = newFile(config.Filename, config.Compress)
+		if err != nil {
+			iutils.Fatal(err.Error())
+		}
+
+		go func() {
+			c := make(chan os.Signal, 2)
+			signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+			go func() {
+				<-c
+				logs.Log.Debug("save and exit!")
+				config.File.SafeSync()
+				os.Exit(0)
+			}()
+		}()
+
+		if config.FileOutputf == "jl" || config.FileOutputf == "jsonlines" {
+			//var rescommaflag bool
+			//config.File.Write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("scan")))
+			config.File.WriteLine(config.ToJson("scan"))
+			config.File.ClosedAppend = "[\"done\"]"
+			//config.File.Handler = func(res string) string {
+			//	if rescommaflag {
+			//		// 只有json输出才需要手动添加逗号
+			//		res = "," + res
+			//	}
+			//	if config.FileOutputf == "json" {
+			//		// 如果json格式输出,则除了第一次输出,之后都会带上逗号
+			//		rescommaflag = true
+			//	}
+			//	return res
+			//}
+		} else if config.FileOutputf == SUPERSMARTB {
+			config.File.WriteLine(config.ToJson("smart"))
+			config.File.ClosedAppend = "[\"done\"]"
+			//config.File.Write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("smart")))
+			//config.File.ClosedAppend = "]}"
+		} else if config.FileOutputf == "csv" {
+			config.File.Write("ip,port,url,status,title,host,language,midware,frame,vuln,extract\n")
+		}
+	}
+
+	// -af 参数下的启发式扫描结果file初始化
+	if config.SmartBFilename != "" {
+		config.SmartBFile, err = newFile(config.SmartBFilename, config.Compress)
+		if err != nil {
+			return err
+		}
+
+		//config.SmartBFile.Write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("smartb")))
+		//config.SmartBFile.ClosedAppend = "]}"
+		config.SmartBFile.WriteLine(config.ToJson("smartb"))
+		config.SmartBFile.ClosedAppend = "[\"done\"]"
+	}
+
+	if config.SmartCFilename != "" {
+		config.SmartCFile, err = newFile(config.SmartCFilename, config.Compress)
+		if err != nil {
+			return err
+		}
+
+		//config.SmartCFile.Write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("smartc")))
+		//config.SmartCFile.ClosedAppend = "]}"
+		config.SmartCFile.WriteLine(config.ToJson("smartc"))
+		config.SmartCFile.ClosedAppend = "[\"done\"]"
+	}
+
+	if config.AlivedFilename != "" {
+		config.AliveFile, err = newFile(config.AlivedFilename, config.Compress)
+		if err != nil {
+			return err
+		}
+		//config.AliveFile.Write(fmt.Sprintf("{\"config\":%s,\"data\":[", config.ToJson("ping")))
+		//config.AliveFile.ClosedAppend = "]}"
+		config.AliveFile.WriteLine("alive")
+		config.AliveFile.ClosedAppend = "[\"done\"]"
 	}
 
 	return nil

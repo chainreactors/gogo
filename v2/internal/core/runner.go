@@ -68,7 +68,13 @@ func (r *Runner) Prepare() bool {
 
 	r.PrepareConfig()
 	if r.FormatterFilename != "" {
-		FormatOutput(r.FormatterFilename, r.Config.Filename, r.Config.Outputf, r.Config.Filenamef, r.Filters, r.FilterOr)
+		var formatOut string
+		if r.Outputf == Default {
+			formatOut = "color"
+		} else {
+			formatOut = r.Outputf
+		}
+		FormatOutput(r.FormatterFilename, r.Config.Filename, formatOut, r.Config.Filenamef, r.Filters, r.FilterOr)
 		return false
 	}
 	// 输出 Config
@@ -122,7 +128,7 @@ func (r *Runner) Init() {
 	}
 
 	if r.NoScan {
-		Opt.Noscan = r.NoScan
+		Opt.NoScan = r.NoScan
 	}
 
 	// 加载配置文件中的全局变量
@@ -131,7 +137,12 @@ func (r *Runner) Init() {
 		if reg, ok := ExtractRegexps[e]; ok {
 			Extractors[e] = reg
 		} else {
-			Extractors[e] = []*regexp.Regexp{regexp.MustCompile(e)}
+			Extractors[e] = []*parsers.Extractor{
+				&parsers.Extractor{
+					Name:            e,
+					CompiledRegexps: []*regexp.Regexp{regexp.MustCompile(e)},
+				},
+			}
 		}
 	}
 
@@ -166,7 +177,7 @@ func (r *Runner) PrepareConfig() {
 	}
 
 	if r.FileOutputf == Default {
-		r.Config.FileOutputf = "json"
+		r.Config.FileOutputf = "jl"
 	} else {
 		r.Config.FileOutputf = r.FileOutputf
 	}
@@ -281,7 +292,7 @@ func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) {
 
 			// 全局变量的处理
 			if !r.NoScan {
-				Opt.Noscan = workflow.NoScan
+				Opt.NoScan = workflow.NoScan
 			}
 
 			if r.Verbose {
@@ -349,7 +360,7 @@ func (r *Runner) Close(config *Config) {
 }
 
 func (r *Runner) ResetGlobals() {
-	Opt.Noscan = false
+	Opt.NoScan = false
 	RunOpt.Exploit = "none"
 	RunOpt.VersionLevel = 0
 	ResetFlag()

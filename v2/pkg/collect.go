@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"bytes"
 	"github.com/chainreactors/parsers"
 	"github.com/chainreactors/parsers/iutils"
 	"net/http"
@@ -8,9 +9,8 @@ import (
 )
 
 func CollectSocketInfo(result *Result, socketContent []byte) {
-	result.Content = strings.ToLower(string(socketContent))
-	content := string(socketContent)
-	ishttp, statuscode := GetStatusCode(content)
+	result.Content = bytes.ToLower(socketContent)
+	ishttp, statuscode := GetStatusCode(socketContent)
 	if ishttp {
 		result.Httpresp = parsers.NewResponseWithRaw(socketContent)
 		result.Status = statuscode
@@ -20,9 +20,9 @@ func CollectSocketInfo(result *Result, socketContent []byte) {
 		result.Midware = result.Httpresp.Server
 		result.Title = result.Httpresp.Title
 	} else {
-		result.Title = parsers.MatchTitle(content)
+		result.Title = parsers.MatchTitle(socketContent)
 	}
-	result.AddExtracts(Extractors.Extract(content))
+	result.AddExtracts(Extractors.Extract(string(socketContent)))
 }
 
 func CollectHttpInfo(result *Result, resp *http.Response) {
@@ -31,18 +31,18 @@ func CollectHttpInfo(result *Result, resp *http.Response) {
 	}
 	result.IsHttp = true
 	result.Httpresp = parsers.NewResponse(resp)
-	result.Content = strings.ToLower(string(result.Httpresp.RawContent))
+	result.Content = bytes.ToLower(result.Httpresp.RawContent)
 	result.Status = iutils.ToString(resp.StatusCode)
 	result.Language = result.Httpresp.Language
 	result.Midware = result.Httpresp.Server
 	result.Title = result.Httpresp.Title
-	result.AddExtracts(Extractors.Extract(result.Content))
+	result.AddExtracts(Extractors.Extract(string(result.Httpresp.RawContent)))
 }
 
 //从socket中获取http状态码
-func GetStatusCode(content string) (bool, string) {
-	if len(content) > 12 && strings.HasPrefix(content, "HTTP") {
-		return true, content[9:12]
+func GetStatusCode(content []byte) (bool, string) {
+	if len(content) > 12 && bytes.HasPrefix(content, []byte("HTTP")) {
+		return true, string(content[9:12])
 	}
 	return false, "tcp"
 }

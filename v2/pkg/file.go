@@ -1,8 +1,10 @@
 package pkg
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/chainreactors/files"
+	"github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers/iutils"
 	"os"
 	"path"
@@ -12,19 +14,30 @@ import (
 var smartcommaflag bool
 var pingcommaflag bool
 
-func WriteSmartResult(file *files.File, ips []string) {
+func WriteSmartResult(file *files.File, target string, ips []string) {
+	var m map[string][]string = map[string][]string{}
+	m[target] = ips
+	marshal, err := json.Marshal(m)
+	if err != nil {
+		logs.Log.Error(err.Error())
+	}
+
 	if file != nil {
-		file.SafeWrite(commaStream(ips, &smartcommaflag))
+		file.SafeWrite(string(marshal) + "\n")
 		file.SafeSync()
 	}
 }
 
-func WriteAlivedResult(file *files.File, ips []string) {
-	if file != nil {
-		file.SafeWrite(commaStream(ips, &pingcommaflag))
-		file.SafeSync()
-	}
-}
+//func WriteAlivedResult(file *files.File, ips []string) {
+//	marshal, err := json.Marshal(ips)
+//	if err != nil {
+//		logs.Log.Error(err.Error())
+//	}
+//	if file != nil {
+//		file.SafeWrite(string(marshal))
+//		file.SafeSync()
+//	}
+//}
 
 func ResetFlag() {
 	smartcommaflag = false

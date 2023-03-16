@@ -22,6 +22,7 @@ func icmpScan(result *pkg.Result) {
 	delay := time.Duration(RunOpt.Delay / 2)
 	conn, err := net.DialTimeout("ip4:icmp", host, delay*time.Second)
 	if err != nil {
+		result.ErrStat = 7
 		result.Error = err.Error()
 		return
 	}

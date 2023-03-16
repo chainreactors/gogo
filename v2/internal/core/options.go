@@ -17,6 +17,7 @@ var portstat = map[int]string{
 	4:  "denied",
 	5:  "down",
 	6:  "error_host",
+	7:  "icmp",
 	-1: "unknown",
 }
 
@@ -38,7 +39,7 @@ type OutputOption struct {
 	Filename        string   `short:"f" long:"file" description:"String, output filename"`
 	FilePath        string   `long:"path" description:"String, output file path"`
 	Outputf         string   `short:"o" long:"output" default:"default" description:"String,cmdline output format, default: full"`
-	FileOutputf     string   `short:"O" long:"file-output" default:"default" description:"String, file output format, default: json"` // 输出格式
+	FileOutputf     string   `short:"O" long:"file-output" default:"default" description:"String, file output format, default: jsonlines"` // 输出格式
 	OutputFilters   []string `long:"output-filter" description:"String, When scanning filter the output"`
 	OutputDelimiter string   `long:"output-delimiter" default:"\t" description:"String, output delimiter, default [TAB]"`
 	AutoFile        bool     `long:"af" description:"Bool, auto choice filename"`        // 自动生成格式化文件名
@@ -52,7 +53,7 @@ type OutputOption struct {
 type SmartOption struct {
 	Mod       string `short:"m" long:"mod" choice:"s" choice:"ss" choice:"default" choice:"sc" default:"default" description:"String, smart mod"` // 扫描模式
 	Ping      bool   `long:"ping" description:"Bool, alive pre-scan"`
-	NoScan    bool   `long:"no" description:"Bool, just smart scan, return before default scan task"`
+	NoScan    bool   `short:"n" long:"no" description:"Bool, just smart scan, return before default scan task"`
 	PortProbe string `long:"sp" default:"default" description:"String, smart-port-probe, smart mod default: 80, supersmart mod default: icmp"` // 启发式扫描预设探针
 	IpProbe   string `long:"ipp"  default:"default" description:"String, IP-probe, default: 1,254"`
 }
@@ -88,11 +89,11 @@ type ConfigOption struct {
 
 type Options struct {
 	AliveSum    int32
-	Noscan      bool
+	NoScan      bool
 	PluginDebug bool
 }
 
 var Opt = Options{
 	AliveSum: 0,
-	Noscan:   false,
+	NoScan:   false,
 }

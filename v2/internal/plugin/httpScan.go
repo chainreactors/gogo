@@ -1,6 +1,7 @@
 package plugin
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/logs"
@@ -79,22 +80,19 @@ func initScan(result *pkg.Result) {
 	}
 
 	//所有30x,400,以及非http协议的开放端口都送到http包尝试获取更多信息
-	if result.Status == "400" || result.Protocol == "tcp" || strings.HasPrefix(result.Status, "3") {
-		systemHttp(result)
+	if result.Status == "400" || result.Protocol == "tcp" || (strings.HasPrefix(result.Status, "3") && bytes.Contains(result.Content, []byte("location: https"))) {
+		systemHttp(result, "https")
+	} else if strings.HasPrefix(result.Status, "3") {
+		systemHttp(result, "http")
 	}
 	return
 }
 
 //使用封装好了http
-func systemHttp(result *pkg.Result) {
+func systemHttp(result *pkg.Result, scheme string) {
 	var delay int
 	// 如果是400或者不可识别协议,则使用https
-	target := result.GetTarget()
-	if result.Status == "400" || result.Protocol == "tcp" || (strings.HasPrefix(result.Status, "3") && strings.Contains(result.Content, "location: https")) {
-		target = "https://" + target
-	} else {
-		target = "http://" + target
-	}
+	target := scheme + "://" + result.GetTarget()
 
 	//if RunOpt.SuffixStr != "" {
 	//	target += "/" + RunOpt.SuffixStr
@@ -119,7 +117,7 @@ func systemHttp(result *pkg.Result) {
 		}
 
 		result.Host = strings.Join(resp.TLS.PeerCertificates[0].DNSNames, ",")
-		if len(resp.TLS.PeerCertificates[0].DNSNames) > 0 && len(resp.TLS.PeerCertificates[0].DNSNames) < 3 && result.HttpHosts == nil {
+		if len(resp.TLS.PeerCertificates[0].DNSNames) > 0 {
 			// 经验公式: 通常只有cdn会绑定超过2个host, 正常情况只有一个host或者带上www的两个host
 			result.HttpHosts = append(result.HttpHosts, pkg.FormatCertDomains(resp.TLS.PeerCertificates[0].DNSNames)...)
 		}

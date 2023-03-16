@@ -9,9 +9,9 @@ import (
 
 // -default
 var (
-	NetbiosItemType map[string]string
-	GroupNames      map[string]string
-	UniqueNames     map[string]string
+	//NetbiosItemType map[string]string
+	groupNames  map[string]string
+	uniqueNames map[string]string
 )
 
 func Byte2Int(input []byte) (int, error) {
@@ -21,7 +21,7 @@ func Byte2Int(input []byte) (int, error) {
 }
 
 func init() {
-	UniqueNames = map[string]string{
+	uniqueNames = map[string]string{
 		"\x00": "Workstation Service",
 		"\x03": "Messenger Service",
 		"\x06": "RAS Server Service",
@@ -34,20 +34,20 @@ func init() {
 		"\x1B": "Domain Master Browser",
 	}
 
-	GroupNames = map[string]string{
+	groupNames = map[string]string{
 		"\x00": "Domain Name",
 		"\x1C": "Domain Controllers",
 		"\x1E": "Browser Service Elections",
 	}
 
-	NetbiosItemType = map[string]string{
-		"\x01\x00": "NetBIOS computer name",
-		"\x02\x00": "NetBIOS domain name",
-		"\x03\x00": "DNS computer name",
-		"\x04\x00": "DNS domain name",
-		"\x05\x00": "DNS tree name",
-		"\x07\x00": "Time stamp",
-	}
+	//NetbiosItemType = map[string]string{
+	//	"\x01\x00": "NetBIOS computer name",
+	//	"\x02\x00": "NetBIOS domain name",
+	//	"\x03\x00": "DNS computer name",
+	//	"\x04\x00": "DNS domain name",
+	//	"\x05\x00": "DNS tree name",
+	//	"\x07\x00": "Time stamp",
+	//}
 }
 
 var nbtdata = pkg.Decode("SktjYGBgZAADBWdvR7yAgUGRgREAAAD//w==")
@@ -103,11 +103,11 @@ func nbtScan(result *pkg.Result) {
 				//fmt.Printf("%s\t%s\t%s\n",name,"U",UNIQUE_NAMES[string(flag_bit)])
 			}
 		} else {
-			if _, ok := GroupNames[string(flag_bit)]; ok {
+			if _, ok := groupNames[string(flag_bit)]; ok {
 				if string(flag_bit) == "\x1C" {
 					DC = true
 				}
-			} else if _, ok := UniqueNames[string(flag_bit)]; ok {
+			} else if _, ok := uniqueNames[string(flag_bit)]; ok {
 				if string(flag_bit) == "\x20" {
 					Share = true
 				}

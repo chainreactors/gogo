@@ -23,6 +23,7 @@ func Dispatch(result *pkg.Result) {
 	defer func() {
 		if err := recover(); err != nil {
 			logs.Log.Errorf("scan %s unexcept error, %v", result.GetTarget(), err)
+			panic(err)
 		}
 	}()
 	atomic.AddInt32(&RunOpt.Sum, 1)

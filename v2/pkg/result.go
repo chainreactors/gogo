@@ -23,17 +23,15 @@ type Result struct {
 	HttpHosts   []string `json:"-"`
 	CurrentHost string   `json:"-"`
 
-	// language
-	IsHttp bool `json:"-"`
-	Open   bool `json:"-"`
-	//FrameworksMap map[string]bool `json:"-"`
+	IsHttp     bool              `json:"-"`
+	Open       bool              `json:"-"`
 	SmartProbe bool              `json:"-"`
 	TcpConn    *net.Conn         `json:"-"`
 	HttpConn   *http.Client      `json:"-"`
 	Httpresp   *parsers.Response `json:"-"`
 	Error      string            `json:"-"`
 	ErrStat    int               `json:"-"`
-	Content    string            `json:"-"`
+	Content    []byte            `json:"-"`
 }
 
 func (result *Result) GetHttpConn(delay int) *http.Client {
@@ -46,7 +44,7 @@ func (result *Result) GetHttpConn(delay int) *http.Client {
 }
 
 func (result *Result) AddVuln(vuln *parsers.Vuln) {
-	result.Vulns = append(result.Vulns, vuln)
+	result.Vulns[vuln.Name] = vuln
 }
 
 func (result *Result) AddVulns(vulns []*parsers.Vuln) {
@@ -91,6 +89,13 @@ func (result *Result) IsHttps() bool {
 		return true
 	}
 	return false
+}
+
+func (result *Result) ContentMap() map[string]interface{} {
+	return map[string]interface{}{
+		"content": result.Content,
+		"cert":    strings.Join(result.HttpHosts, ","),
+	}
 }
 
 //从错误中收集信息

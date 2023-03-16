@@ -172,10 +172,19 @@ go generate
 go build .
 ```
 
-### release
-下载: https://github.com/chainreactors/gogo/releases/latest
+如果需要编译windows xp/2003的版本, 请先使用高版本的go生成templates. 再使用go 1.11编译即可.
 
-理论上支持包括windows 2003在内的全操作系统, 某些稍微罕见的特殊版本可以联系我帮忙编译.
+## Similar or related works
+
+* [ServerScan](https://github.com/Adminisme/ServerScan) 早期的简易扫描器, 功能简单但开拓了思路
+* [fscan](https://github.com/shadow1ng/fscan) 简单粗暴的扫描器, 细节上有不少问题, 胜在简单. 参考其简单无脑的命令行, 设计了workflow相关功能.
+* [kscan](https://github.com/lcvvvv/kscan) 功能全面的扫描器, 从中选取合并了部分指纹
+* [ladongo](https://github.com/k8gege/LadonGo) 集成了各种常用功能, 从中学习了多个特殊端口的信息收集
+* [cube](https://github.com/JKme/cube) 与fscan类似, 从中学习了NTLM相关协议的信息收集
+
+gogo从这些相似的工作中改进自身. 感谢前人的工作. 
+
+细节上的对比请看[文档](https://chainreactors.github.io/wiki/gogo/design/)
 
 ## THANKS
 * https://github.com/projectdiscovery/nuclei-templates

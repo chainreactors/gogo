@@ -2,21 +2,20 @@ package pkg
 
 import (
 	"encoding/json"
-	"github.com/chainreactors/ipcs"
 	"github.com/chainreactors/parsers"
 	"github.com/chainreactors/parsers/iutils"
-	"regexp"
+	"github.com/chainreactors/utils"
 	"strings"
 )
 
 var (
-	NameMap = ipcs.NameMap
-	PortMap = ipcs.PortMap
-	TagMap  = ipcs.TagMap
+	NameMap = utils.NameMap
+	PortMap = utils.PortMap
+	TagMap  = utils.TagMap
 	//WorkFlowMap    map[string][]*Workflow
 	Extractor      []*parsers.Extractor
-	Extractors                                 = make(parsers.Extractors)
-	ExtractRegexps map[string][]*regexp.Regexp = map[string][]*regexp.Regexp{}
+	Extractors     = make(parsers.Extractors)
+	ExtractRegexps = map[string][]*parsers.Extractor{}
 )
 
 type PortFinger struct {
@@ -33,13 +32,13 @@ func LoadPortConfig() {
 		iutils.Fatal("port config load FAIL!, " + err.Error())
 	}
 	for _, v := range portfingers {
-		v.Ports = ipcs.ParsePorts(v.Ports)
-		ipcs.NameMap.Append(v.Name, v.Ports...)
+		v.Ports = utils.ParsePorts(v.Ports)
+		utils.NameMap.Append(v.Name, v.Ports...)
 		for _, t := range v.Tags {
-			ipcs.TagMap.Append(t, v.Ports...)
+			utils.TagMap.Append(t, v.Ports...)
 		}
 		for _, p := range v.Ports {
-			ipcs.PortMap.Append(p, v.Name)
+			utils.PortMap.Append(p, v.Name)
 		}
 	}
 }
@@ -53,12 +52,12 @@ func LoadExtractor() {
 	for _, extract := range Extractor {
 		extract.Compile()
 
-		ExtractRegexps[extract.Name] = extract.CompiledRegexps
+		ExtractRegexps[extract.Name] = []*parsers.Extractor{extract}
 		for _, tag := range extract.Tags {
 			if _, ok := ExtractRegexps[tag]; !ok {
-				ExtractRegexps[tag] = extract.CompiledRegexps
+				ExtractRegexps[tag] = []*parsers.Extractor{extract}
 			} else {
-				ExtractRegexps[tag] = append(ExtractRegexps[tag], extract.CompiledRegexps...)
+				ExtractRegexps[tag] = append(ExtractRegexps[tag], extract)
 			}
 		}
 	}

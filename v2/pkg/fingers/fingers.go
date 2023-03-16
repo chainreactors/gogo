@@ -1,10 +1,11 @@
 package fingers
 
 import (
+	"bytes"
 	"encoding/json"
-	"github.com/chainreactors/ipcs"
 	"github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
+	"github.com/chainreactors/utils"
 	"regexp"
 	"strings"
 )
@@ -73,7 +74,7 @@ func (finger *Finger) ToResult(hasFrame, hasVuln bool, res string, index int) (f
 	return frame, vuln
 }
 
-func (finger *Finger) Match(content string, level int, sender func([]byte) (string, bool)) (*parsers.Framework, *parsers.Vuln, bool) {
+func (finger *Finger) Match(content map[string]interface{}, level int, sender func([]byte) ([]byte, bool)) (*parsers.Framework, *parsers.Vuln, bool) {
 	// 只进行被动的指纹判断, 将无视rules中的senddata字段
 	for i, rule := range finger.Rules {
 		var ishttp bool
@@ -81,14 +82,14 @@ func (finger *Finger) Match(content string, level int, sender func([]byte) (stri
 		if finger.Protocol == "http" {
 			ishttp = true
 		}
-		var c string
+		var c []byte
 		var ok bool
 		if level >= rule.Level && rule.SendData != nil {
 			logs.Log.Debugf("active detect with %s", rule.SendDataStr)
 			c, ok = sender(rule.SendData)
 			if ok {
 				isactive = true
-				content = strings.ToLower(c)
+				content["content"] = bytes.ToLower(c)
 			}
 		}
 		hasFrame, hasVuln, res := RuleMatcher(rule, content, ishttp)
@@ -105,7 +106,7 @@ func (finger *Finger) Match(content string, level int, sender func([]byte) (stri
 			}
 			if frame.Version == "" && rule.Regexps.CompiledVersionRegexp != nil {
 				for _, reg := range rule.Regexps.CompiledVersionRegexp {
-					res, _ := compiledMatch(reg, content)
+					res, _ := compiledMatch(reg, content["content"].([]byte))
 					if res != "" {
 						logs.Log.Debugf("%s version hit, regexp: %s", finger.Name, reg.String())
 						frame.Version = res
@@ -129,6 +130,7 @@ type Regexps struct {
 	MMH3                  []string         `yaml:"mmh3,omitempty" json:"mmh3,omitempty"`
 	Regexp                []string         `yaml:"regexp,omitempty" json:"regexp,omitempty"`
 	Version               []string         `yaml:"version,omitempty" json:"version,omitempty"`
+	Cert                  []string         `yaml:"cert,omitempty" json:"cert,omitempty"`
 	CompliedRegexp        []*regexp.Regexp `yaml:"-" json:"-"`
 	CompiledVulnRegexp    []*regexp.Regexp `yaml:"-" json:"-"`
 	CompiledVersionRegexp []*regexp.Regexp `yaml:"-" json:"-"`
@@ -212,11 +214,8 @@ func (rs Rules) Compile(name string) error {
 	return nil
 }
 
-func (rule *Rule) Match(content string, ishttp bool) (bool, bool, string) {
+func (rule *Rule) Match(content []byte, ishttp bool) (bool, bool, string) {
 	// 漏洞匹配优先
-	if rule.Regexps == nil {
-		return false, false, ""
-	}
 	for _, reg := range rule.Regexps.CompiledVulnRegexp {
 		res, ok := compiledMatch(reg, content)
 		if ok {
@@ -226,13 +225,13 @@ func (rule *Rule) Match(content string, ishttp bool) (bool, bool, string) {
 
 	var body, header string
 	if ishttp {
-		cs := strings.Index(content, "\r\n\r\n")
+		cs := bytes.Index(content, []byte("\r\n\r\n"))
 		if cs != -1 {
-			body = content[cs+4:]
-			header = content[:cs]
+			body = string(content[cs+4:])
+			header = string(content[:cs])
 		}
 	} else {
-		body = content
+		body = string(content)
 	}
 
 	// body匹配
@@ -282,6 +281,15 @@ func (rule *Rule) Match(content string, ishttp bool) (bool, bool, string) {
 	return false, false, ""
 }
 
+func (rule *Rule) MatchCert(content string) bool {
+	for _, cert := range rule.Regexps.Cert {
+		if strings.Contains(content, cert) {
+			return true
+		}
+	}
+	return false
+}
+
 type Rules []*Rule
 
 type senddata []byte
@@ -314,7 +322,7 @@ func LoadFingers(content []byte) (fingers Fingers, err error) {
 	}
 
 	for _, finger := range fingers {
-		err := finger.Compile(ipcs.ParsePorts)
+		err := finger.Compile(utils.ParsePorts)
 		if err != nil {
 			return nil, err
 		}

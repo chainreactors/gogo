@@ -6,10 +6,10 @@ import (
 	"github.com/chainreactors/files"
 	. "github.com/chainreactors/gogo/v2/internal/plugin"
 	. "github.com/chainreactors/gogo/v2/pkg"
-	"github.com/chainreactors/ipcs"
 	. "github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
 	"github.com/chainreactors/parsers/iutils"
+	"github.com/chainreactors/utils"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -87,8 +87,8 @@ func InitConfig(config *Config) (*Config, error) {
 			config.Results = data.(parsers.GOGOResults)
 		case *ResultsData:
 			config.Results = data.(*ResultsData).Data
-		case *SmartData:
-			config.IPlist = data.(*SmartData).Data
+		case *SmartResult:
+			config.IPlist = data.(*SmartResult).List()
 		default:
 			return nil, fmt.Errorf("not support result type, maybe use -l flag")
 		}
@@ -113,7 +113,7 @@ func InitConfig(config *Config) (*Config, error) {
 		return nil, err
 	}
 	// 初始化端口配置
-	config.PortList = ipcs.ParsePort(config.Ports)
+	config.PortList = utils.ParsePort(config.Ports)
 
 	// 如果指定端口超过100,则自动启用spray
 	if len(config.PortList) > 500 && !config.NoSpray {
@@ -126,7 +126,7 @@ func InitConfig(config *Config) (*Config, error) {
 
 	// 初始化启发式扫描的端口探针
 	if config.PortProbe != Default {
-		config.PortProbeList = ipcs.ParsePort(config.PortProbe)
+		config.PortProbeList = utils.ParsePort(config.PortProbe)
 	}
 
 	// 初始化ss模式ip探针,默认ss默认只探测ip为1的c段,可以通过-ipp参数指定,例如-ipp 1,254,253
@@ -165,8 +165,12 @@ func RunTask(config Config) {
 		createDefaultScan(config)
 	case SMART, SUPERSMART, SUPERSMARTB:
 		if config.CIDRs != nil {
-			for _, ip := range config.CIDRs {
-				SmartMod(ip, config)
+			for _, cidr := range config.CIDRs {
+				if cidr.Ver == 4 {
+					SmartMod(cidr, config)
+				} else {
+					Log.Warnf("ipv6: %s not support smart mod, skipped", cidr.String())
+				}
 			}
 		} else {
 			Log.Warn("no validate ip/cidr")
@@ -180,12 +184,12 @@ func guessTime(targets interface{}, portcount, thread int) int {
 	ipcount := 0
 
 	switch targets.(type) {
-	case ipcs.CIDRs:
-		for _, cidr := range targets.(ipcs.CIDRs) {
-			ipcount += int(cidr.Count())
+	case utils.CIDRs:
+		for _, cidr := range targets.(utils.CIDRs) {
+			ipcount += cidr.Count()
 		}
-	case ipcs.CIDR:
-		ipcount += int(targets.(ipcs.CIDR).Count())
+	case utils.CIDR:
+		ipcount += targets.(*utils.CIDR).Count()
 	case parsers.GOGOResults:
 		ipcount = len(targets.(parsers.GOGOResults))
 		portcount = 1
@@ -195,7 +199,7 @@ func guessTime(targets interface{}, portcount, thread int) int {
 	return (portcount*ipcount/thread)*4 + 4
 }
 
-func guessSmartTime(cidr *ipcs.CIDR, config Config) int {
+func guessSmartTime(cidr *utils.CIDR, config Config) int {
 	var spc, ippc int
 	var mask int
 	spc = len(config.PortProbeList)

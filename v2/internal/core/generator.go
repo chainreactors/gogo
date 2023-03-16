@@ -3,9 +3,9 @@ package core
 import (
 	"github.com/chainreactors/gogo/v2/internal/plugin"
 	. "github.com/chainreactors/gogo/v2/pkg"
-	"github.com/chainreactors/ipcs"
 	. "github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
+	"github.com/chainreactors/utils"
 	"strings"
 	"sync"
 )
@@ -26,50 +26,66 @@ type IpGenerator struct {
 	ipProbe   []uint
 }
 
-func (gen *IpGenerator) defaultIpGenerator(cidr *ipcs.CIDR) {
-	start, fin := cidr.Range()
-	for i := start; i <= fin; i++ {
-		// 如果是广播地址或网络地址,则跳过
-		if (i)%256 != 255 && (i)%256 != 0 {
-			gen.ch <- ipcs.Int2Ip(i)
+func (gen *IpGenerator) defaultIpGenerator(cidr *utils.CIDR) {
+	for ip := range cidr.Range() {
+		if ip.Ver == 6 {
+			gen.ch <- "[" + ip.String() + "]"
+		} else {
+			gen.ch <- ip.String()
 		}
 	}
 }
 
-func (gen *IpGenerator) smartIpGenerator(cidr *ipcs.CIDR) {
-	start, fin := cidr.Range()
-	var outIP string
-	var C, B uint
+func (gen *IpGenerator) smartIpGenerator(cidr *utils.CIDR) {
+	cs, err := cidr.Split(24)
+	if err != nil {
+		return
+	}
+	ccs := make(map[string]*utils.CIDR)
+	for _, c := range cs {
+		ccs[c.String()] = c
+	}
 
-	for C = 1; C < 255; C++ {
-		for B = 0; B <= (fin-start)/256; B++ {
-			outIP = ipcs.Int2Ip(start + 256*B + C)
-			if isnotAlive(ipcs.Int2Ip(start+256*B), gen.alivedMap) {
-				gen.ch <- outIP
+	for i := 0; i < 256; i++ {
+		for s, c := range ccs {
+			if isnotAlive(s, gen.alivedMap) {
+				//println(c.Next().String())
+				gen.ch <- c.Next().String()
 			}
 		}
 	}
 }
 
-func (gen *IpGenerator) sSmartGenerator(cidr *ipcs.CIDR) {
-	start, fin := cidr.Range()
-	//ch := make(chan string)
-	startb := start / 65536 % 256
-	finb := fin / 65536 % 256
-	var c, b uint
-	//go func() {
-	for c = 0; c < 255; c++ {
-		for b = 0; b <= finb-startb; b++ {
-			if isnotAlive(ipcs.Int2Ip(start+b*65536+256), gen.alivedMap) {
-				for _, p := range gen.ipProbe {
-					gen.ch <- ipcs.Int2Ip(start + b*65536 + c*256 + p)
+func (gen *IpGenerator) sSmartGenerator(cidr *utils.CIDR) {
+	bcs, err := cidr.Split(16)
+	if err != nil {
+		return
+	}
+
+	ccs := make(map[string]utils.CIDRs)
+	for _, b := range bcs {
+		tmp, _ := b.Split(24)
+		ccs[b.String()] = tmp
+	}
+
+	var count int
+	for i := 0; i < 256; i++ {
+		for b, c := range ccs {
+			ip := c[i].Next()
+			for _, p := range gen.ipProbe {
+				count++
+				tip := ip.Copy()
+				tip.IP[3] = byte(p)
+				if isnotAlive(b, gen.alivedMap) {
+					gen.ch <- ip.String()
 				}
 			}
 		}
 	}
+	println(count)
 }
 
-func (gen *IpGenerator) generatorDispatch(cidr *ipcs.CIDR, mod string) chan string {
+func (gen *IpGenerator) generatorDispatch(cidr *utils.CIDR, mod string) chan string {
 	gen.ch = make(chan string)
 
 	go func() {
@@ -96,8 +112,8 @@ func isnotAlive(ip string, temp *sync.Map) bool {
 	return !ok
 }
 
-func NewTargetGenerator(config Config) *targetGenerator {
-	gen := targetGenerator{
+func NewTargetGenerator(config Config) *TargetGenerator {
+	gen := TargetGenerator{
 		ipGenerator: NewIpGenerator(config),
 		spray:       config.PortSpray,
 		hostsMap:    config.HostsMap,
@@ -105,7 +121,7 @@ func NewTargetGenerator(config Config) *targetGenerator {
 	return &gen
 }
 
-type targetGenerator struct {
+type TargetGenerator struct {
 	count       int
 	spray       bool
 	ch          chan targetConfig
@@ -113,7 +129,7 @@ type targetGenerator struct {
 	ipGenerator *IpGenerator
 }
 
-func (gen *targetGenerator) genFromDefault(cidrs ipcs.CIDRs, portlist []string) {
+func (gen *TargetGenerator) genFromDefault(cidrs utils.CIDRs, portlist []string) {
 	for _, cidr := range cidrs {
 		tmpalived := Opt.AliveSum
 		ch := gen.ipGenerator.generatorDispatch(cidr, Default)
@@ -132,7 +148,7 @@ func (gen *targetGenerator) genFromDefault(cidrs ipcs.CIDRs, portlist []string) 
 	}
 }
 
-func (gen *targetGenerator) genFromSpray(cidrs ipcs.CIDRs, portlist []string) {
+func (gen *TargetGenerator) genFromSpray(cidrs utils.CIDRs, portlist []string) {
 	//gen.ch = make(chan string)
 	var tmpPorts []string
 	for _, port := range portlist {
@@ -161,13 +177,13 @@ func (gen *targetGenerator) genFromSpray(cidrs ipcs.CIDRs, portlist []string) {
 	}
 }
 
-func (gen *targetGenerator) genFromResult(results parsers.GOGOResults) {
+func (gen *TargetGenerator) genFromResult(results parsers.GOGOResults) {
 	for _, result := range results {
 		gen.ch <- targetConfig{ip: result.Ip, port: result.Port, fingers: result.Frameworks}
 	}
 }
 
-func (gen *targetGenerator) generatorDispatch(targets interface{}, portlist []string) chan targetConfig {
+func (gen *TargetGenerator) generatorDispatch(targets interface{}, portlist []string) chan targetConfig {
 	gen.ch = make(chan targetConfig)
 	go func() {
 		switch targets.(type) {
@@ -175,9 +191,9 @@ func (gen *targetGenerator) generatorDispatch(targets interface{}, portlist []st
 			gen.genFromResult(targets.(parsers.GOGOResults))
 		default:
 			if gen.spray { // 端口喷洒
-				gen.genFromSpray(targets.(ipcs.CIDRs), portlist)
+				gen.genFromSpray(targets.(utils.CIDRs), portlist)
 			} else { // 默认模式 批量处理
-				gen.genFromDefault(targets.(ipcs.CIDRs), portlist)
+				gen.genFromDefault(targets.(utils.CIDRs), portlist)
 			}
 		}
 		close(gen.ch)
@@ -186,7 +202,7 @@ func (gen *targetGenerator) generatorDispatch(targets interface{}, portlist []st
 	return gen.ch
 }
 
-func (gen *targetGenerator) smartGenerator(cidr *ipcs.CIDR, portlist []string, mod string) chan targetConfig {
+func (gen *TargetGenerator) smartGenerator(cidr *utils.CIDR, portlist []string, mod string) chan targetConfig {
 	gen.ch = make(chan targetConfig)
 
 	go func() {
