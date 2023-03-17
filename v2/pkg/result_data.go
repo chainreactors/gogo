@@ -312,7 +312,7 @@ func LoadResultFile(file *os.File) interface{} {
 			if i == 0 || (finished && i == last) {
 				continue
 			}
-			lines[i] = line[1:last]
+			lines[i] = line[1 : len(line)-1]
 		}
 		res.WriteString("{")
 		res.Write(bytes.Join(lines[1:last], []byte{','}))
