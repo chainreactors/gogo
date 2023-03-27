@@ -36,7 +36,7 @@ func (finger *Finger) Compile(portHandler func([]string) []string) error {
 		if finger.Protocol == "http" {
 			finger.DefaultPort = []string{"80"}
 		}
-	} else {
+	} else if portHandler != nil {
 		finger.DefaultPort = portHandler(finger.DefaultPort)
 	}
 
@@ -75,8 +75,15 @@ func (finger *Finger) ToResult(hasFrame, hasVuln bool, res string, index int) (f
 }
 
 func (finger *Finger) Match(content map[string]interface{}, level int, sender func([]byte) ([]byte, bool)) (*parsers.Framework, *parsers.Vuln, bool) {
-	// 只进行被动的指纹判断, 将无视rules中的senddata字段
+	// sender用来处理需要主动发包的场景
+	// 如果sender留空只进行被动的指纹判断, 将无视rules中的senddata字段
+
 	for i, rule := range finger.Rules {
+		if level < rule.Level {
+			// 如果rule的rule小于指定的level等级, 则跳过该rule
+			continue
+		}
+
 		var ishttp bool
 		var isactive bool
 		if finger.Protocol == "http" {
@@ -84,7 +91,7 @@ func (finger *Finger) Match(content map[string]interface{}, level int, sender fu
 		}
 		var c []byte
 		var ok bool
-		if level >= rule.Level && rule.SendData != nil {
+		if rule.SendData != nil {
 			logs.Log.Debugf("active detect with %s", rule.SendDataStr)
 			c, ok = sender(rule.SendData)
 			if ok {
