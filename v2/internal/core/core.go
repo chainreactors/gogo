@@ -99,6 +99,7 @@ func SmartMod(target *utils.CIDR, config Config) {
 	var mask int
 	switch config.Mod {
 	case SUPERSMART, SUPERSMARTB:
+		// sc, ss
 		if target.Mask > 16 {
 			Log.Error(target.String() + " is less than B class, skipped")
 			return
@@ -108,7 +109,8 @@ func SmartMod(target *utils.CIDR, config Config) {
 			config.PortProbeList = []string{DefaultSuperSmartPortProbe}
 		}
 	default:
-		if target.Mask > 16 {
+		// s
+		if target.Mask > 24 {
 			Log.Error(target.String() + " is less than C class, skipped")
 			return
 		}

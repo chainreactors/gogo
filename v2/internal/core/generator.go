@@ -82,7 +82,6 @@ func (gen *IpGenerator) sSmartGenerator(cidr *utils.CIDR) {
 			}
 		}
 	}
-	println(count)
 }
 
 func (gen *IpGenerator) generatorDispatch(cidr *utils.CIDR, mod string) chan string {
