@@ -177,7 +177,7 @@ go build .
 ## Similar or related works
 
 * [ServerScan](https://github.com/Adminisme/ServerScan) 早期的简易扫描器, 功能简单但开拓了思路
-* [fscan](https://github.com/shadow1ng/fscan) 简单粗暴的扫描器, 细节上有不少问题, 胜在简单. 参考其简单无脑的命令行, 设计了workflow相关功能.
+* [fscan](https://github.com/shadow1ng/fscan) 简单粗暴的扫描器, 细节上有不少问题, 但胜在简单. 参考其直白的命令行，设计了workflow相关功能.
 * [kscan](https://github.com/lcvvvv/kscan) 功能全面的扫描器, 从中选取合并了部分指纹
 * [ladongo](https://github.com/k8gege/LadonGo) 集成了各种常用功能, 从中学习了多个特殊端口的信息收集
 * [cube](https://github.com/JKme/cube) 与fscan类似, 从中学习了NTLM相关协议的信息收集
