@@ -2,10 +2,11 @@ package pkg
 
 import (
 	"encoding/json"
+	"strings"
+
 	"github.com/chainreactors/parsers"
 	"github.com/chainreactors/parsers/iutils"
 	"github.com/chainreactors/utils"
-	"strings"
 )
 
 var (

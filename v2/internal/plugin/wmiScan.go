@@ -2,7 +2,9 @@ package plugin
 
 import (
 	"bytes"
+
 	"github.com/M09ic/go-ntlmssp"
+
 	"github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/parsers/iutils"
 )

@@ -1,13 +1,14 @@
 package core
 
 import (
+	"strings"
+	"sync"
+
 	"github.com/chainreactors/gogo/v2/internal/plugin"
 	. "github.com/chainreactors/gogo/v2/pkg"
 	. "github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
 	"github.com/chainreactors/utils"
-	"strings"
-	"sync"
 )
 
 func NewIpGenerator(config Config) *IpGenerator {

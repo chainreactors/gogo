@@ -3,16 +3,14 @@ package pkg
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/chainreactors/files"
-	"github.com/chainreactors/logs"
-	"github.com/chainreactors/parsers/iutils"
 	"os"
 	"path"
 	"strings"
-)
 
-var smartcommaflag bool
-var pingcommaflag bool
+	"github.com/chainreactors/files"
+	"github.com/chainreactors/logs"
+	"github.com/chainreactors/parsers/iutils"
+)
 
 func WriteSmartResult(file *files.File, target string, ips []string) {
 	var m map[string][]string = map[string][]string{}
@@ -26,22 +24,6 @@ func WriteSmartResult(file *files.File, target string, ips []string) {
 		file.SafeWrite(string(marshal) + "\n")
 		file.SafeSync()
 	}
-}
-
-//func WriteAlivedResult(file *files.File, ips []string) {
-//	marshal, err := json.Marshal(ips)
-//	if err != nil {
-//		logs.Log.Error(err.Error())
-//	}
-//	if file != nil {
-//		file.SafeWrite(string(marshal))
-//		file.SafeSync()
-//	}
-//}
-
-func ResetFlag() {
-	smartcommaflag = false
-	pingcommaflag = false
 }
 
 func HasStdin() bool {
@@ -70,20 +52,6 @@ func newFile(filename string, compress bool) (*files.File, error) {
 		return bs
 	}
 	return file, nil
-}
-
-func commaStream(ips []string, comma *bool) string {
-	//todo 手动实现流式json输出, 通过全局变量flag实现. 后续改成闭包
-	var builder strings.Builder
-	for _, ip := range ips {
-		if *comma {
-			builder.WriteString("," + "\"" + ip + "\"")
-		} else {
-			builder.WriteString("\"" + ip + "\"")
-			*comma = true
-		}
-	}
-	return builder.String()
 }
 
 func IsExist(filename string) bool {

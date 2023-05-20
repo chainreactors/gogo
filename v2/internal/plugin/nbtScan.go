@@ -2,9 +2,10 @@ package plugin
 
 import (
 	"encoding/hex"
-	"github.com/chainreactors/gogo/v2/pkg"
 	"strconv"
 	"strings"
+
+	"github.com/chainreactors/gogo/v2/pkg"
 )
 
 // -default

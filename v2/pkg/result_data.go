@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
+	"sort"
+	"strings"
+
 	"github.com/chainreactors/files"
 	. "github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
 	"github.com/chainreactors/utils"
-	"io"
-	"sort"
-	"strings"
 )
 
 func sortIP(ips []string) []string {

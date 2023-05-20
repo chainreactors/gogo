@@ -3,11 +3,12 @@ package fingers
 import (
 	"bytes"
 	"encoding/json"
+	"regexp"
+	"strings"
+
 	"github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
 	"github.com/chainreactors/utils"
-	"regexp"
-	"strings"
 )
 
 func compileRegexp(s string) (*regexp.Regexp, error) {

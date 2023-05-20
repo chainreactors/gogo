@@ -3,6 +3,10 @@ package core
 import (
 	"bytes"
 	"fmt"
+	"io/ioutil"
+	"os"
+	"strings"
+
 	"github.com/chainreactors/files"
 	. "github.com/chainreactors/gogo/v2/internal/plugin"
 	. "github.com/chainreactors/gogo/v2/pkg"
@@ -10,9 +14,6 @@ import (
 	"github.com/chainreactors/parsers"
 	"github.com/chainreactors/parsers/iutils"
 	"github.com/chainreactors/utils"
-	"io/ioutil"
-	"os"
-	"strings"
 )
 
 var syncFile = func() {}

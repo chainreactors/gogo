@@ -5,7 +5,9 @@ import (
 	"bytes"
 	"encoding/hex"
 	"errors"
+
 	"github.com/M09ic/go-ntlmssp"
+
 	. "github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/parsers/iutils"
 )

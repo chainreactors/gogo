@@ -2,18 +2,19 @@ package core
 
 import (
 	"fmt"
-	"github.com/chainreactors/gogo/v2/internal/plugin"
-	. "github.com/chainreactors/gogo/v2/pkg"
-	. "github.com/chainreactors/logs"
-	"github.com/chainreactors/parsers"
-	"github.com/chainreactors/utils"
-	"github.com/panjf2000/ants/v2"
 	"net"
 	"runtime/debug"
 	"sort"
 	"strings"
 	"sync"
 	"sync/atomic"
+
+	"github.com/chainreactors/gogo/v2/internal/plugin"
+	. "github.com/chainreactors/gogo/v2/pkg"
+	. "github.com/chainreactors/logs"
+	"github.com/chainreactors/parsers"
+	"github.com/chainreactors/utils"
+	"github.com/panjf2000/ants/v2"
 )
 
 type targetConfig struct {

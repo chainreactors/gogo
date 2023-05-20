@@ -2,14 +2,15 @@ package core
 
 import (
 	"fmt"
-	. "github.com/chainreactors/files"
-	. "github.com/chainreactors/gogo/v2/pkg"
-	"github.com/chainreactors/parsers"
-	"github.com/chainreactors/parsers/iutils"
 	"io"
 	"net/http"
 	"os"
 	"strings"
+
+	. "github.com/chainreactors/files"
+	. "github.com/chainreactors/gogo/v2/pkg"
+	"github.com/chainreactors/parsers"
+	"github.com/chainreactors/parsers/iutils"
 )
 
 func output(result *Result, outType string) string {

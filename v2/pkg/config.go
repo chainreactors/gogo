@@ -4,16 +4,17 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	. "github.com/chainreactors/files"
-	"github.com/chainreactors/logs"
-	"github.com/chainreactors/parsers"
-	"github.com/chainreactors/parsers/iutils"
-	"github.com/chainreactors/utils"
 	"os"
 	"os/signal"
 	"path"
 	"strings"
 	"syscall"
+
+	. "github.com/chainreactors/files"
+	"github.com/chainreactors/logs"
+	"github.com/chainreactors/parsers"
+	"github.com/chainreactors/parsers/iutils"
+	"github.com/chainreactors/utils"
 )
 
 const (

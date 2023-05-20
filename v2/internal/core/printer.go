@@ -2,10 +2,11 @@ package core
 
 import (
 	"fmt"
-	. "github.com/chainreactors/gogo/v2/pkg"
 	"os"
 	"strings"
 	"text/tabwriter"
+
+	. "github.com/chainreactors/gogo/v2/pkg"
 )
 
 func Printportconfig() {

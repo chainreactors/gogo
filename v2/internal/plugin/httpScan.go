@@ -3,10 +3,11 @@ package plugin
 import (
 	"bytes"
 	"fmt"
-	"github.com/chainreactors/gogo/v2/pkg"
-	"github.com/chainreactors/logs"
 	"net/http"
 	"strings"
+
+	"github.com/chainreactors/gogo/v2/pkg"
+	"github.com/chainreactors/logs"
 )
 
 var headers = http.Header{

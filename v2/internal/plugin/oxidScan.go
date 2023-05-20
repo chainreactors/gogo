@@ -1,8 +1,9 @@
 package plugin
 
 import (
-	"github.com/chainreactors/gogo/v2/pkg"
 	"strings"
+
+	"github.com/chainreactors/gogo/v2/pkg"
 )
 
 var oxid1 = pkg.Decode("YmXgZhZgYGDwYGBgYGRgYNghsAPEBbNB5JF/f2YmBEkL7D7NsIpB0aQKJMoS29H1Wuak4PwXHAzaAh4JTAwMDAAAAAD//w==")

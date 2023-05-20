@@ -2,9 +2,10 @@ package plugin
 
 import (
 	"encoding/binary"
+	"strings"
+
 	. "github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/parsers"
-	"strings"
 )
 
 var (

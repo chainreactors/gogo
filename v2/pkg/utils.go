@@ -1,10 +1,11 @@
 package pkg
 
 import (
+	"strings"
+
 	. "github.com/chainreactors/files"
 	"github.com/chainreactors/parsers"
 	"github.com/chainreactors/parsers/iutils"
-	"strings"
 )
 
 var (
