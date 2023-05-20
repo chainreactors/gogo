@@ -6,6 +6,8 @@ import (
 	. "github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/parsers"
 	"github.com/chainreactors/parsers/iutils"
+	"io"
+	"net/http"
 	"os"
 	"strings"
 )
@@ -32,13 +34,17 @@ func output(result *Result, outType string) string {
 
 func FormatOutput(filename, outFilename, outf, filenamef string, filters []string, filterOr bool) {
 	var outfunc func(s string)
-	var rd *ResultsData
-	var sd *SmartResult
-	var text string
-	var file *os.File
+	var file io.Reader
 	var err error
 	if filename == "stdin" {
 		file = os.Stdin
+	} else if strings.HasPrefix(filename, "http://") || strings.HasPrefix(filename, "https://") {
+		req, err := http.Get(filename)
+		if err != nil {
+			iutils.Fatal(err.Error())
+		}
+		defer req.Body.Close()
+		file = req.Body
 	} else {
 		file, err = Open(filename)
 		if err != nil {
@@ -51,6 +57,9 @@ func FormatOutput(filename, outFilename, outf, filenamef string, filters []strin
 	}
 
 	data := LoadResultFile(file)
+	var text string
+	var rd *ResultsData
+	var sd *SmartResult
 	switch data.(type) {
 	case *ResultsData:
 		rd = data.(*ResultsData)

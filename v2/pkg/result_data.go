@@ -8,7 +8,7 @@ import (
 	. "github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
 	"github.com/chainreactors/utils"
-	"os"
+	"io"
 	"sort"
 	"strings"
 )
@@ -235,7 +235,7 @@ func parseConfig(line []byte) (*Config, error) {
 	return config, nil
 }
 
-func LoadResultFile(file *os.File) interface{} {
+func LoadResultFile(file io.Reader) interface{} {
 	var data interface{}
 	var err error
 	content := files.DecryptFile(file, files.Key)

@@ -4,6 +4,8 @@ github.com/chainreactors/files v0.2.0/go.mod h1:/Xa9YXhjBlaC33JTD6ZTJFig6pcplak2
 github.com/chainreactors/files v0.2.3/go.mod h1:/Xa9YXhjBlaC33JTD6ZTJFig6pcplak2IDcovf42/6A=
 github.com/chainreactors/files v0.2.5-0.20230310102018-3d10f74c7d6b h1:FRKGDHJrXrYfHnoehgE98vBoKvMpa/8/+d4wG0Zgpg4=
 github.com/chainreactors/files v0.2.5-0.20230310102018-3d10f74c7d6b/go.mod h1:/Xa9YXhjBlaC33JTD6ZTJFig6pcplak2IDcovf42/6A=
+github.com/chainreactors/files v0.2.5-0.20230520122453-506e0606016c h1:nUhu6KfuWZvsNs1cBOtoyJJJZ9uGJrO0SBxA3CLKrT0=
+github.com/chainreactors/files v0.2.5-0.20230520122453-506e0606016c/go.mod h1:/Xa9YXhjBlaC33JTD6ZTJFig6pcplak2IDcovf42/6A=
 github.com/chainreactors/logs v0.6.1/go.mod h1:Y0EtAnoF0kiASIJUnXN0pcOt420iRpHOAnOhEphzRHA=
 github.com/chainreactors/logs v0.7.0/go.mod h1:Y0EtAnoF0kiASIJUnXN0pcOt420iRpHOAnOhEphzRHA=
 github.com/chainreactors/logs v0.7.1-0.20221214153111-85f123ff6580/go.mod h1:Y0EtAnoF0kiASIJUnXN0pcOt420iRpHOAnOhEphzRHA=

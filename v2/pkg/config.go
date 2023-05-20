@@ -57,7 +57,7 @@ type Config struct {
 	Outputf        string              `json:"-"`
 	FileOutputf    string              `json:"-"`
 	Filenamef      string              `json:"-"`
-	Results        parsers.GOGOResults `json:"-"` // json反序列化后的内网,保存在内存中
+	Results        parsers.GOGOResults `json:"-"` // json反序列化后的,保存在内存中
 	HostsMap       map[string][]string `json:"-"` // host映射表
 	Filters        []string            `json:"-"`
 	FilterOr       bool                `json:"-"`
