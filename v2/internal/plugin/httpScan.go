@@ -89,9 +89,9 @@ func initScan(result *pkg.Result) {
 	return
 }
 
-//使用封装好了http
+//使用net/http进行带redirect的请求
 func systemHttp(result *pkg.Result, scheme string) {
-	var delay int
+
 	// 如果是400或者不可识别协议,则使用https
 	target := scheme + "://" + result.GetTarget()
 
@@ -99,15 +99,16 @@ func systemHttp(result *pkg.Result, scheme string) {
 	//	target += "/" + RunOpt.SuffixStr
 	//}
 
-	delay = RunOpt.Delay + RunOpt.HttpsDelay //增加超时时间
-	conn := result.GetHttpConn(delay)
+	conn := result.GetHttpConn(RunOpt.Delay + RunOpt.HttpsDelay)
 	req, _ := http.NewRequest("GET", target, nil)
 	req.Header = headers
 
 	resp, err := conn.Do(req)
 	if err != nil {
+		// 有可能存在漏网之鱼, 是tls服务, 但tls的第一个响应为30x, 并30x的目的地址不可达或超时. 则会报错.
 		result.Error = err.Error()
 		logs.Log.Debugf("request %s , %s ", target, err.Error())
+		noRedirectHttp(result, req)
 		return
 	}
 	logs.Log.Debugf("request %s , %d ", target, resp.StatusCode)
@@ -118,21 +119,12 @@ func systemHttp(result *pkg.Result, scheme string) {
 			result.Protocol = "https"
 		}
 
-		result.Host = strings.Join(resp.TLS.PeerCertificates[0].DNSNames, ",")
-		if len(resp.TLS.PeerCertificates[0].DNSNames) > 0 {
-			// 经验公式: 通常只有cdn会绑定超过2个host, 正常情况只有一个host或者带上www的两个host
-			result.HttpHosts = append(result.HttpHosts, pkg.FormatCertDomains(resp.TLS.PeerCertificates[0].DNSNames)...)
-		}
+		collectTLS(result, resp)
 	} else if resp.Request != nil {
 		// 一种相对罕见的情况, 从https页面30x跳转到http页面. 则判断tls
 		result.Protocol = "https"
 
-		if resp.Request.Response.TLS != nil {
-			result.Host = strings.Join(resp.Request.Response.TLS.PeerCertificates[0].DNSNames, ",")
-			if len(resp.Request.Response.TLS.PeerCertificates[0].DNSNames) > 0 {
-				result.HttpHosts = append(result.HttpHosts, pkg.FormatCertDomains(resp.Request.Response.TLS.PeerCertificates[0].DNSNames)...)
-			}
-		}
+		collectTLS(result, resp.Request.Response)
 	} else {
 		result.Protocol = "http"
 	}
@@ -140,4 +132,40 @@ func systemHttp(result *pkg.Result, scheme string) {
 	result.Error = ""
 	pkg.CollectHttpInfo(result, resp)
 	return
+}
+
+// 302跳转后目的不可达时进行不redirect的信息收集
+// 暂时使用不太优雅的方案, 在极少数情况下才会触发, 会多进行一次https的交互.
+func noRedirectHttp(result *pkg.Result, req *http.Request) {
+	conn := pkg.HttpConnWithNoRedirect(RunOpt.Delay + RunOpt.HttpsDelay)
+	req.Header = headers
+	resp, err := conn.Do(req)
+	if err != nil {
+		// 有可能存在漏网之鱼, 是tls服务, 但tls的第一个响应为30x, 并30x的目的地址不可达或超时. 则会报错.
+		result.Error = err.Error()
+		logs.Log.Debugf("request (no redirect) %s , %s ", req.URL.String(), err.Error())
+		return
+	}
+
+	logs.Log.Debugf("request (no redirect) %s , %d ", req.URL.String(), resp.StatusCode)
+	if resp.TLS != nil {
+		if result.Status == "400" {
+			result.Protocol = "https"
+		}
+
+		collectTLS(result, resp)
+	} else {
+		result.Protocol = "http"
+	}
+
+	result.Error = ""
+	pkg.CollectHttpInfo(result, resp)
+}
+
+func collectTLS(result *pkg.Result, resp *http.Response) {
+	result.Host = strings.Join(resp.TLS.PeerCertificates[0].DNSNames, ",")
+	if len(resp.TLS.PeerCertificates[0].DNSNames) > 0 {
+		// 经验公式: 通常只有cdn会绑定超过2个host, 正常情况只有一个host或者带上www的两个host
+		result.HttpHosts = append(result.HttpHosts, pkg.FormatCertDomains(resp.TLS.PeerCertificates[0].DNSNames)...)
+	}
 }
