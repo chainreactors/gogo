@@ -113,7 +113,8 @@ func systemHttp(result *pkg.Result, scheme string) {
 	logs.Log.Debugf("request %s , %d ", target, resp.StatusCode)
 	if resp.TLS != nil {
 		if result.Status == "400" || (resp.Request.Response != nil && resp.Request.Response.StatusCode != 302) || resp.Request.Response == nil {
-			// 去掉302跳转到https的情况
+			// 1. 如果第一个包的状态码为400, 且这个包存在tls, 则判断为https
+			// 2. 去掉302跳转到https导致可能存在的误判
 			result.Protocol = "https"
 		}
 
@@ -121,6 +122,16 @@ func systemHttp(result *pkg.Result, scheme string) {
 		if len(resp.TLS.PeerCertificates[0].DNSNames) > 0 {
 			// 经验公式: 通常只有cdn会绑定超过2个host, 正常情况只有一个host或者带上www的两个host
 			result.HttpHosts = append(result.HttpHosts, pkg.FormatCertDomains(resp.TLS.PeerCertificates[0].DNSNames)...)
+		}
+	} else if resp.Request != nil {
+		// 一种相对罕见的情况, 从https页面30x跳转到http页面. 则判断tls
+		result.Protocol = "https"
+
+		if resp.Request.Response.TLS != nil {
+			result.Host = strings.Join(resp.Request.Response.TLS.PeerCertificates[0].DNSNames, ",")
+			if len(resp.Request.Response.TLS.PeerCertificates[0].DNSNames) > 0 {
+				result.HttpHosts = append(result.HttpHosts, pkg.FormatCertDomains(resp.Request.Response.TLS.PeerCertificates[0].DNSNames)...)
+			}
 		}
 	} else {
 		result.Protocol = "http"
