@@ -2,12 +2,15 @@ package core
 
 import (
 	"fmt"
+	"io"
+	"net/http"
+	"os"
+	"strings"
+
 	. "github.com/chainreactors/files"
 	. "github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/parsers"
 	"github.com/chainreactors/parsers/iutils"
-	"os"
-	"strings"
 )
 
 func output(result *Result, outType string) string {
@@ -32,13 +35,17 @@ func output(result *Result, outType string) string {
 
 func FormatOutput(filename, outFilename, outf, filenamef string, filters []string, filterOr bool) {
 	var outfunc func(s string)
-	var rd *ResultsData
-	var sd *SmartResult
-	var text string
-	var file *os.File
+	var file io.Reader
 	var err error
 	if filename == "stdin" {
 		file = os.Stdin
+	} else if strings.HasPrefix(filename, "http://") || strings.HasPrefix(filename, "https://") {
+		req, err := http.Get(filename)
+		if err != nil {
+			iutils.Fatal(err.Error())
+		}
+		defer req.Body.Close()
+		file = req.Body
 	} else {
 		file, err = Open(filename)
 		if err != nil {
@@ -51,6 +58,9 @@ func FormatOutput(filename, outFilename, outf, filenamef string, filters []strin
 	}
 
 	data := LoadResultFile(file)
+	var text string
+	var rd *ResultsData
+	var sd *SmartResult
 	switch data.(type) {
 	case *ResultsData:
 		rd = data.(*ResultsData)
@@ -136,5 +146,41 @@ func FormatOutput(filename, outFilename, outf, filenamef string, filters []strin
 	}
 }
 
-func Banner() {
+func Banner() string {
+	return `
+
+  WIKI: https://chainreactors.github.io/wiki/gogo/
+  
+  QUICKSTART:
+    simple example:
+      gogo -i 1.1.1.1/24 -p top2,win,db -ev
+
+    list input spray:
+      gogo -l ip.txt -p http 
+
+    stdin input:
+      sometool | gogo -L -p http -q | exploit
+
+    smart scan:
+      gogo -i 192.168.1.1/16 -m s -p top2,win,db --af
+
+    supersmart scan:
+      gogo -i 10.1.1.1/8 -m ss -p top2,win,db --af
+
+    smart+icmp scan:
+      gogo -i 192.168.1.1/16 -m s --ping -p top2,win,db --af
+
+    workflow:
+      spray -w 10
+
+  FORMAT:
+    standard format:
+      gogo -F 1.dat
+
+    json output:
+      gogo -F 1.dat -o json -f 1.json
+
+    filter output:
+      gogo -F 1.dat --filter frame::redis 
+`
 }

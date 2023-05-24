@@ -2,13 +2,14 @@ package pkg
 
 import (
 	"fmt"
-	"github.com/chainreactors/gogo/v2/pkg/fingers"
-	"github.com/chainreactors/parsers"
-	"github.com/chainreactors/parsers/iutils"
 	"net"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/chainreactors/gogo/v2/pkg/fingers"
+	"github.com/chainreactors/parsers"
+	"github.com/chainreactors/parsers/iutils"
 )
 
 func NewResult(ip, port string) *Result {

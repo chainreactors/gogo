@@ -1,12 +1,13 @@
 package plugin
 
 import (
-	. "github.com/chainreactors/gogo/v2/pkg"
-	"github.com/chainreactors/logs"
-	"github.com/chainreactors/parsers"
 	"net/http"
 	"strconv"
 	"strings"
+
+	. "github.com/chainreactors/gogo/v2/pkg"
+	"github.com/chainreactors/logs"
+	"github.com/chainreactors/parsers"
 )
 
 func hostScan(result *Result) {

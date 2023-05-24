@@ -1,10 +1,11 @@
 package plugin
 
 import (
+	"sync/atomic"
+
 	"github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers/iutils"
-	"sync/atomic"
 )
 
 type RunnerOpts struct {

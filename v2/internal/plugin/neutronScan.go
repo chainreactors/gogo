@@ -1,11 +1,12 @@
 package plugin
 
 import (
+	"strings"
+
 	. "github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/logs"
 	"github.com/chainreactors/neutron/templates_gogo"
 	"github.com/chainreactors/parsers"
-	"strings"
 )
 
 //tamplate =

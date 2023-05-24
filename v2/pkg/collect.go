@@ -2,10 +2,11 @@ package pkg
 
 import (
 	"bytes"
-	"github.com/chainreactors/parsers"
-	"github.com/chainreactors/parsers/iutils"
 	"net/http"
 	"strings"
+
+	"github.com/chainreactors/parsers"
+	"github.com/chainreactors/parsers/iutils"
 )
 
 func CollectSocketInfo(result *Result, socketContent []byte) {

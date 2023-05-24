@@ -1,13 +1,14 @@
 package core
 
 import (
+	"strings"
+	"sync"
+
 	"github.com/chainreactors/gogo/v2/internal/plugin"
 	. "github.com/chainreactors/gogo/v2/pkg"
 	. "github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
 	"github.com/chainreactors/utils"
-	"strings"
-	"sync"
 )
 
 func NewIpGenerator(config Config) *IpGenerator {
@@ -163,11 +164,8 @@ func (gen *TargetGenerator) genFromSpray(cidrs utils.CIDRs, portlist []string) {
 
 		tmpPorts = append(tmpPorts, port)
 		if Opt.AliveSum-tmpalive > 0 {
-			if len(tmpPorts) >= 100 {
-				tmpPorts = tmpPorts[:100]
-			}
-			if len(tmpPorts) > 10 {
-				Log.Importantf("Processed Port: %s, found %d ports", strings.Join(tmpPorts[:10], ",")+"......, "+port, Opt.AliveSum-tmpalive)
+			if len(tmpPorts) > 5 {
+				Log.Importantf("Processed Port: %s - %s, found %d ports", tmpPorts[0], tmpPorts[len(tmpPorts)-1], Opt.AliveSum-tmpalive)
 			} else {
 				Log.Importantf("Processed Port: %s, found %d ports", strings.Join(tmpPorts, ","), Opt.AliveSum-tmpalive)
 			}

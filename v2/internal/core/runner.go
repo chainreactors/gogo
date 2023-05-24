@@ -2,13 +2,6 @@ package core
 
 import (
 	"fmt"
-	"github.com/chainreactors/files"
-	. "github.com/chainreactors/gogo/v2/internal/plugin"
-	. "github.com/chainreactors/gogo/v2/pkg"
-	"github.com/chainreactors/logs"
-	neuhttp "github.com/chainreactors/neutron/protocols/http"
-	"github.com/chainreactors/parsers"
-	"github.com/chainreactors/parsers/iutils"
 	"golang.org/x/net/proxy"
 	"net"
 	"net/http"
@@ -17,6 +10,14 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/chainreactors/files"
+	. "github.com/chainreactors/gogo/v2/internal/plugin"
+	. "github.com/chainreactors/gogo/v2/pkg"
+	"github.com/chainreactors/logs"
+	neuhttp "github.com/chainreactors/neutron/protocols/http"
+	"github.com/chainreactors/parsers"
+	"github.com/chainreactors/parsers/iutils"
 )
 
 func NewRunner() *Runner {
@@ -70,7 +71,12 @@ func (r *Runner) Prepare() bool {
 	if r.FormatterFilename != "" {
 		var formatOut string
 		if r.Outputf == Default {
-			formatOut = "color"
+			if r.Config.Filenamef == "" {
+				formatOut = "color"
+			} else {
+				formatOut = "full"
+			}
+
 		} else {
 			formatOut = r.Outputf
 		}
@@ -363,7 +369,6 @@ func (r *Runner) ResetGlobals() {
 	Opt.NoScan = false
 	RunOpt.Exploit = "none"
 	RunOpt.VersionLevel = 0
-	ResetFlag()
 }
 
 func printConfigs(t string) {

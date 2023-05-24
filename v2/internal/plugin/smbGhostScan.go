@@ -3,6 +3,7 @@ package plugin
 
 import (
 	"bytes"
+
 	"github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/parsers"
 )

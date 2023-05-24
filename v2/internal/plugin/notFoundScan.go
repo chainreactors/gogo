@@ -2,6 +2,7 @@ package plugin
 
 import (
 	"bytes"
+
 	"github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/gogo/v2/pkg/fingers"
 	"github.com/chainreactors/logs"

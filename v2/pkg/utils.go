@@ -1,10 +1,11 @@
 package pkg
 
 import (
+	"strings"
+
 	. "github.com/chainreactors/files"
 	"github.com/chainreactors/parsers"
 	"github.com/chainreactors/parsers/iutils"
-	"strings"
 )
 
 var (
@@ -25,13 +26,6 @@ func Decode(input string) []byte {
 	b := parsers.Base64Decode(input)
 	return UnFlate(b)
 }
-
-//
-//func Encode(input []byte) string {
-//	s := Flate(input)
-//	s = XorEncode(s, Key, 0)
-//	return parsers.Base64Encode(s)
-//}
 
 func HasPingPriv() bool {
 	if Win || Root {

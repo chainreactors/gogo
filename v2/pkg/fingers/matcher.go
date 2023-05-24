@@ -1,9 +1,10 @@
 package fingers
 
 import (
-	"github.com/chainreactors/parsers"
 	"regexp"
 	"strings"
+
+	"github.com/chainreactors/parsers"
 )
 
 func compiledMatch(reg *regexp.Regexp, s []byte) (string, bool) {
