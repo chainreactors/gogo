@@ -245,6 +245,10 @@ func LoadResultFile(file io.Reader) interface{} {
 	lines := bytes.Split(content, []byte{0x0a})
 	config, err := parseConfig(lines[0])
 	if err != nil {
+		// 解析按行输入的result格式
+		// example: ip:port:[frame]   frame可选, 用作强行指定指纹, 留空自动忽略
+		// 192.168.1.1:80
+		// 192.168.1.2:8080:tomcat
 		var results parsers.GOGOResults
 		for _, target := range CleanSpiltCFLR(string(content)) {
 			var result *parsers.GOGOResult
@@ -289,7 +293,9 @@ func LoadResultFile(file io.Reader) interface{} {
 		return results
 	}
 
+	// 解析dat文件
 	var finished bool = true
+	// 判断扫描是否结束
 	if !bytes.Equal(lines[len(lines)-1], []byte("[\"done\"]")) {
 		finished = false
 		Log.Important("Task has not been completed,auto fix json")
@@ -297,6 +303,7 @@ func LoadResultFile(file io.Reader) interface{} {
 		Log.Important("Task has not been completed,auto fix json")
 	}
 
+	// 删除最后一行
 	var last int
 	if finished {
 		last = len(lines) - 1

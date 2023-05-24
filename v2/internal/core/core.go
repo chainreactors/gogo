@@ -211,9 +211,9 @@ func AliveMod(targets interface{}, config Config) {
 
 	wgs.Wait()
 
-	var iplist utils.CIDRs
+	var iplist []string
 	alivedmap.Range(func(ip, _ interface{}) bool {
-		iplist = append(iplist, utils.ParseCIDR(ip.(string)))
+		iplist = append(iplist, ip.(string))
 		return true
 	})
 
@@ -223,9 +223,9 @@ func AliveMod(targets interface{}, config Config) {
 	}
 	Log.Importantf("found %d alived ips", len(iplist))
 	if config.AliveFile != nil {
-		WriteSmartResult(config.AliveFile, "alive", iplist.Strings())
+		WriteSmartResult(config.AliveFile, "alive", iplist)
 	}
-	DefaultMod(iplist, config)
+	DefaultMod(utils.ParseIPs(iplist).CIDRs(), config)
 }
 
 func aliveScan(tc targetConfig, temp *sync.Map) {
