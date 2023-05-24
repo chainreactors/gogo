@@ -120,7 +120,7 @@ func systemHttp(result *pkg.Result, scheme string) {
 		}
 
 		collectTLS(result, resp)
-	} else if resp.Request != nil {
+	} else if resp.Request.Response != nil && resp.Request.Response.TLS != nil {
 		// 一种相对罕见的情况, 从https页面30x跳转到http页面. 则判断tls
 		result.Protocol = "https"
 
