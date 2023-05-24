@@ -45,7 +45,7 @@ func (tc *targetConfig) NewResult() *Result {
 //直接扫描
 func DefaultMod(targets interface{}, config Config) {
 	// 输出预估时间
-	Log.Importantf("Default Scan time is about %d seconds", guessTime(targets, len(config.PortList), config.Threads))
+	Log.Importantf("Default Scan is expected to take %d seconds", guessTime(targets, len(config.PortList), config.Threads))
 	var wgs sync.WaitGroup
 	targetGen := NewTargetGenerator(config)
 	targetCh := targetGen.generatorDispatch(targets, config.PortList)
@@ -193,7 +193,7 @@ func AliveMod(targets interface{}, config Config) {
 	}
 
 	var wgs sync.WaitGroup
-	Log.Importantf("Alived spray task time is about %d seconds",
+	Log.Importantf("Alived spray task is expected to take %d seconds",
 		guessTime(targets, len(config.AliveSprayMod), config.Threads))
 	targetGen := NewTargetGenerator(config)
 	alivedmap := targetGen.ipGenerator.alivedMap
@@ -277,7 +277,7 @@ func createDeclineScan(cidrs utils.CIDRs, config Config) {
 			}
 		} else {
 			spended := guessSmartTime(cidrs[0], config)
-			Log.Importantf("Every Sub smartscan task time is about %d seconds, total found %d B Class CIDRs about %d s", spended, len(cidrs), spended*len(cidrs))
+			Log.Importantf("Every smartscan subtask is expected to take %d seconds, total found %d B Class CIDRs about %d s", spended, len(cidrs), spended*len(cidrs))
 			for _, ip := range cidrs {
 				tmpalive := Opt.AliveSum
 				SmartMod(ip, config)
@@ -289,7 +289,7 @@ func createDeclineScan(cidrs utils.CIDRs, config Config) {
 	} else if config.Mod == SUPERSMARTB {
 		config.Mod = SUPERSMARTC
 		spended := guessSmartTime(cidrs[0], config)
-		Log.Importantf("Every Sub smartscan task time is about %d seconds, total found %d B Class CIDRs about %d s", spended, len(cidrs), spended*len(cidrs))
+		Log.Importantf("Every smartscan subtask is expected to take %d seconds, total found %d B Class CIDRs about %d s", spended, len(cidrs), spended*len(cidrs))
 
 		for _, ip := range cidrs {
 			SmartMod(ip, config)
