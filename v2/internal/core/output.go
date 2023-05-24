@@ -146,5 +146,41 @@ func FormatOutput(filename, outFilename, outf, filenamef string, filters []strin
 	}
 }
 
-func Banner() {
+func Banner() string {
+	return `
+
+  WIKI: https://chainreactors.github.io/wiki/gogo/
+  
+  QUICKSTART:
+    simple example:
+      gogo -i 1.1.1.1/24 -p top2,win,db -ev
+
+    list input spray:
+      gogo -l ip.txt -p http 
+
+    stdin input:
+      sometool | gogo -L -p http -q | exploit
+
+    smart scan:
+      gogo -i 192.168.1.1/16 -m s -p top2,win,db --af
+
+    supersmart scan:
+      gogo -i 10.1.1.1/8 -m ss -p top2,win,db --af
+
+    smart+icmp scan:
+      gogo -i 192.168.1.1/16 -m s --ping -p top2,win,db --af
+
+    workflow:
+      spray -w 10
+
+  FORMAT:
+    standard format:
+      gogo -F 1.dat
+
+    json output:
+      gogo -F 1.dat -o json -f 1.json
+
+    filter output:
+      gogo -F 1.dat --filter frame::redis 
+`
 }

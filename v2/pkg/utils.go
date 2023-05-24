@@ -27,13 +27,6 @@ func Decode(input string) []byte {
 	return UnFlate(b)
 }
 
-//
-//func Encode(input []byte) string {
-//	s := Flate(input)
-//	s = XorEncode(s, Key, 0)
-//	return parsers.Base64Encode(s)
-//}
-
 func HasPingPriv() bool {
 	if Win || Root {
 		return true

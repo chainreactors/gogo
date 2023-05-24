@@ -11,6 +11,7 @@ import (
 func Gogo() {
 	var runner core.Runner
 	parser := flags.NewParser(&runner, flags.Default)
+	parser.Usage = core.Banner()
 	_, err := parser.Parse()
 	if err != nil {
 		if err.(*flags.Error).Type != flags.ErrHelp {
