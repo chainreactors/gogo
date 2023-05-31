@@ -247,4 +247,3 @@ gogo从这些相似的工作中改进自身. 感谢前人的工作.
 
 * https://github.com/projectdiscovery/nuclei-templates
 * https://github.com/projectdiscovery/nuclei
-* https://github.com/JKme/cube
