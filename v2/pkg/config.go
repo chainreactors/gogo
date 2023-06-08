@@ -133,7 +133,7 @@ func (config *Config) InitIP() error {
 			var host string
 			cidr := utils.ParseCIDR(ip)
 			if cidr == nil {
-				logs.Log.Warnf("Parse IP %s Failed, skipped ", ip)
+				logs.Log.Warnf("Parse IP %s Failed, skipped ", strings.TrimSpace(ip))
 				continue
 			}
 			config.CIDRs = append(config.CIDRs, cidr)

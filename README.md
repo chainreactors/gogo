@@ -8,7 +8,7 @@
 * 自由的端口配置
 * 支持主动/被动指纹识别
 * 关键信息提取, 如title, cert 以及自定义提取信息的正则
-* 支持nuclei poc
+* 支持nuclei poc, poc目录: https://chainreactors.github.io/wiki/gogo/detail/#_6
 * 无害的扫描, 每个添加的poc都经过人工审核
 * 可控的启发式扫描
 * 超强的性能, 最快的速度, 尽可能小的内存与CPU占用.
