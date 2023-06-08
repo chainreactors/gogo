@@ -21,6 +21,8 @@
 
 完整的文档与教程位于wiki: https://chainreactors.github.io/wiki/gogo/
 
+指纹与poc仓库: https://github.com/chainreactors/gogo-templates
+
 ### 最简使用
 
 指定网段进行默认扫描, 并在命令行输出
@@ -223,10 +225,18 @@ cd gogo/v2
 go mod tidy   
 
 # generate template.go
-go generate
+# 注意: 如果需要使用go1.10编译windows03可用版本， 也需要先使用高版本的go generate生成相关依赖
+go generate  
 
 # build 
 go build .
+
+# windows server 2003 compile
+GOOS=windows GOARCH=386 go1.10 build .
+
+# 因为go1.10 还没有go mod, 可能会导致依赖报错. 如果发生了依赖报错, 可以使用go1.11 编译. 
+# go1.11 官方声明不支持windows server 2003 , 实测可以稳定运行(需要调低并发).
+GOOS=windows GOARCH=386 go1.11 build .
 ```
 
 如果需要编译windows xp/2003的版本, 请先使用高版本的go生成templates. 再使用go 1.11编译即可.
