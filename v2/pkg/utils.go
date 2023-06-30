@@ -10,6 +10,7 @@ import (
 
 var (
 	Win  = iutils.IsWin()
+	Mac  = iutils.IsMac()
 	Root = iutils.IsRoot()
 	//Key  = []byte{}
 )
