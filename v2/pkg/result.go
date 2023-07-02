@@ -30,6 +30,7 @@ type Result struct {
 	TcpConn    *net.Conn         `json:"-"`
 	HttpConn   *http.Client      `json:"-"`
 	Httpresp   *parsers.Response `json:"-"`
+	HasTitle   bool              `json:"-"`
 	Error      string            `json:"-"`
 	ErrStat    int               `json:"-"`
 	Content    []byte            `json:"-"`

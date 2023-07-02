@@ -21,7 +21,12 @@ func CollectSocketInfo(result *Result, socketContent []byte) {
 		result.Midware = result.Httpresp.Server
 		result.Title = result.Httpresp.Title
 	} else {
-		result.Title = parsers.MatchTitle(socketContent)
+		if title := parsers.MatchTitle(socketContent); title != "" {
+			result.HasTitle = true
+			result.Title = title
+		} else {
+			result.Title = parsers.MatchTitle(socketContent)
+		}
 	}
 	result.AddExtracts(Extractors.Extract(string(socketContent)))
 }
