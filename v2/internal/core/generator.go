@@ -152,7 +152,7 @@ func (gen *TargetGenerator) genFromSpray(cidrs utils.CIDRs, portlist []string) {
 	//gen.ch = make(chan string)
 	var tmpPorts []string
 	for _, port := range portlist {
-		tmpalive := Opt.AliveSum
+		lastalive := Opt.AliveSum
 
 		for _, cidr := range cidrs {
 			ch := gen.ipGenerator.generatorDispatch(cidr, Default)
@@ -163,11 +163,12 @@ func (gen *TargetGenerator) genFromSpray(cidrs utils.CIDRs, portlist []string) {
 		}
 
 		tmpPorts = append(tmpPorts, port)
-		if Opt.AliveSum-tmpalive > 0 {
+		// 减少-l 模式下的日志输出, 每处理了100个端口输出一次
+		if Opt.AliveSum-lastalive > 0 {
 			if len(tmpPorts) > 5 {
-				Log.Importantf("Processed Port: %s - %s, found %d ports", tmpPorts[0], tmpPorts[len(tmpPorts)-1], Opt.AliveSum-tmpalive)
+				Log.Importantf("Processed Port: %s - %s, found %d ports", tmpPorts[0], tmpPorts[len(tmpPorts)-1], Opt.AliveSum-lastalive)
 			} else {
-				Log.Importantf("Processed Port: %s, found %d ports", strings.Join(tmpPorts, ","), Opt.AliveSum-tmpalive)
+				Log.Importantf("Processed Port: %s, found %d ports", strings.Join(tmpPorts, ","), Opt.AliveSum-lastalive)
 			}
 			tmpPorts = []string{}
 		}
