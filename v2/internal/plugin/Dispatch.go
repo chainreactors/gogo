@@ -64,7 +64,11 @@ func Dispatch(result *pkg.Result) {
 	}
 
 	// 指纹识别, 会根据versionlevel自动选择合适的指纹
-	fingerScan(result)
+	if result.IsHttp {
+		httpFingerScan(result)
+	} else {
+		tcpFingerScan(result)
+	}
 
 	//主动信息收集
 	if RunOpt.VersionLevel > 0 && result.IsHttp {

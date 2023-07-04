@@ -392,6 +392,7 @@ func templatesLoader() {
 	Mmh3Fingers, Md5Fingers = LoadHashFinger(AllHttpFingers)
 	TcpFingers = LoadFinger("tcp").GroupByPort()
 	HttpFingers = AllHttpFingers.GroupByPort()
+	ActiveHttpFingers, PassiveHttpFingers = AllHttpFingers.GroupByMod()
 }
 
 func parseFilterString(s string) (k, v, op string) {

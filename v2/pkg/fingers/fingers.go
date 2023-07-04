@@ -26,6 +26,7 @@ type Finger struct {
 	Focus       bool     `yaml:"focus,omitempty" json:"focus,omitempty"`
 	Rules       Rules    `yaml:"rule,omitempty" json:"rule,omitempty"`
 	Tags        []string `yaml:"tag,omitempty" json:"tag,omitempty"`
+	IsActive    bool     `yaml:"-" json:"-"`
 }
 
 func (finger *Finger) Compile(portHandler func([]string) []string) error {
@@ -44,6 +45,13 @@ func (finger *Finger) Compile(portHandler func([]string) []string) error {
 	err := finger.Rules.Compile(finger.Name)
 	if err != nil {
 		return err
+	}
+
+	for _, r := range finger.Rules {
+		if r.IsActive {
+			finger.IsActive = true
+			break
+		}
 	}
 	return nil
 }
@@ -76,7 +84,8 @@ func (finger *Finger) ToResult(hasFrame, hasVuln bool, res string, index int) (f
 }
 
 func (finger *Finger) Match(content map[string]interface{}, level int, sender func([]byte) ([]byte, bool)) (*parsers.Framework, *parsers.Vuln, bool) {
-	// sender用来处理需要主动发包的场景
+	// sender用来处理需要主动发包的场景, 因为不通工具中的传入指不相同, 因此采用闭包的方式自定义result进行处理, 并允许添加更多的功能.
+	// 例如在spray中, sender可以用来配置header等, 也可以进行特定的path拼接
 	// 如果sender留空只进行被动的指纹判断, 将无视rules中的senddata字段
 
 	for i, rule := range finger.Rules {
@@ -197,34 +206,45 @@ type Rule struct {
 	Vuln        string    `yaml:"vuln,omitempty" json:"vuln,omitempty"`
 	Level       int       `yaml:"level,omitempty" json:"level,omitempty"`
 	FingerName  string    `yaml:"-" json:"-"`
+	IsActive    bool      `yaml:"-" json:"-"`
+}
+
+func (r *Rule) Compile(name string) error {
+	if r.Version == "" {
+		r.Version = "_"
+	}
+	r.FingerName = name
+	if r.SendDataStr != "" {
+		r.SendData, _ = parsers.DSLParser(r.SendDataStr)
+		if r.Level == 0 {
+			r.Level = 1
+		}
+		r.IsActive = true
+	}
+
+	if r.Regexps != nil {
+		err := r.Regexps.Compile()
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (rs Rules) Compile(name string) error {
 	for _, r := range rs {
-		if r.Version == "" {
-			r.Version = "_"
-		}
-		r.FingerName = name
-		if r.SendDataStr != "" {
-			r.SendData, _ = parsers.DSLParser(r.SendDataStr)
-			if r.Level == 0 {
-				r.Level = 1
-			}
-		}
-
-		if r.Regexps != nil {
-			err := r.Regexps.Compile()
-			if err != nil {
-				return err
-			}
+		err := r.Compile(name)
+		if err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (rule *Rule) Match(content []byte, ishttp bool) (bool, bool, string) {
+func (r *Rule) Match(content []byte, ishttp bool) (bool, bool, string) {
 	// 漏洞匹配优先
-	for _, reg := range rule.Regexps.CompiledVulnRegexp {
+	for _, reg := range r.Regexps.CompiledVulnRegexp {
 		res, ok := compiledMatch(reg, content)
 		if ok {
 			return true, true, res
@@ -243,34 +263,34 @@ func (rule *Rule) Match(content []byte, ishttp bool) (bool, bool, string) {
 	}
 
 	// body匹配
-	for _, bodyReg := range rule.Regexps.Body {
+	for _, bodyReg := range r.Regexps.Body {
 		if strings.Contains(body, bodyReg) {
-			logs.Log.Debugf("%s finger hit, body: %s", rule.FingerName, bodyReg)
+			logs.Log.Debugf("%s finger hit, body: %s", r.FingerName, bodyReg)
 			return true, false, ""
 		}
 	}
 
 	// 正则匹配
-	for _, reg := range rule.Regexps.CompliedRegexp {
+	for _, reg := range r.Regexps.CompliedRegexp {
 		res, ok := compiledMatch(reg, content)
 		if ok {
-			logs.Log.Debugf("%s finger hit, regexp: %s", rule.FingerName, reg.String())
+			logs.Log.Debugf("%s finger hit, regexp: %s", r.FingerName, reg.String())
 			return true, false, res
 		}
 	}
 
 	// MD5 匹配
-	for _, md5s := range rule.Regexps.MD5 {
+	for _, md5s := range r.Regexps.MD5 {
 		if md5s == parsers.Md5Hash([]byte(content)) {
-			logs.Log.Debugf("%s finger hit, md5: %s", rule.FingerName, md5s)
+			logs.Log.Debugf("%s finger hit, md5: %s", r.FingerName, md5s)
 			return true, false, ""
 		}
 	}
 
 	// mmh3 匹配
-	for _, mmh3s := range rule.Regexps.MMH3 {
+	for _, mmh3s := range r.Regexps.MMH3 {
 		if mmh3s == parsers.Mmh3Hash32([]byte(content)) {
-			logs.Log.Debugf("%s finger hit, mmh3: %s", rule.FingerName, mmh3s)
+			logs.Log.Debugf("%s finger hit, mmh3: %s", r.FingerName, mmh3s)
 			return true, false, ""
 		}
 	}
@@ -280,17 +300,17 @@ func (rule *Rule) Match(content []byte, ishttp bool) (bool, bool, string) {
 		return false, false, ""
 	}
 
-	for _, headerStr := range rule.Regexps.Header {
+	for _, headerStr := range r.Regexps.Header {
 		if strings.Contains(header, headerStr) {
-			logs.Log.Debugf("%s finger hit, header: %s", rule.FingerName, headerStr)
+			logs.Log.Debugf("%s finger hit, header: %s", r.FingerName, headerStr)
 			return true, false, ""
 		}
 	}
 	return false, false, ""
 }
 
-func (rule *Rule) MatchCert(content string) bool {
-	for _, cert := range rule.Regexps.Cert {
+func (r *Rule) MatchCert(content string) bool {
+	for _, cert := range r.Regexps.Cert {
 		if strings.Contains(content, cert) {
 			return true
 		}
@@ -323,6 +343,19 @@ func (fs Fingers) GroupByPort() FingerMapper {
 	return fingermap
 }
 
+func (fs Fingers) GroupByMod() (Fingers, Fingers) {
+	var active, passive Fingers
+	for _, f := range fs {
+		if f.IsActive {
+			active = append(active, f)
+		} else {
+			passive = append(passive, f)
+		}
+	}
+	return active, passive
+}
+
+// LoadFingers 加载指纹 迁移到fingers包从, 允许其他服务调用
 func LoadFingers(content []byte) (fingers Fingers, err error) {
 	err = json.Unmarshal(content, &fingers)
 	if err != nil {

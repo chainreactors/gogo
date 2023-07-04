@@ -10,7 +10,7 @@ import (
 
 var ProxyUrl *url.URL
 var Proxy func(*http.Request) (*url.URL, error)
-var maxRedirects = 0
+var maxRedirects = 5
 
 func HttpConn(delay int) *http.Client {
 	tr := &http.Transport{

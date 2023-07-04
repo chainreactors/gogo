@@ -6,14 +6,16 @@ import (
 )
 
 var (
-	Md5Fingers     map[string]string
-	Mmh3Fingers    map[string]string
-	AllHttpFingers fingers.Fingers
-	TcpFingers     fingers.FingerMapper
-	HttpFingers    fingers.FingerMapper
+	Md5Fingers         map[string]string
+	Mmh3Fingers        map[string]string
+	AllHttpFingers     fingers.Fingers
+	TcpFingers         fingers.FingerMapper
+	HttpFingers        fingers.FingerMapper
+	ActiveHttpFingers  fingers.Fingers
+	PassiveHttpFingers fingers.Fingers
 )
 
-//加载指纹到全局变量
+// LoadFinger 加载指纹到全局变量
 func LoadFinger(t string) fingers.Fingers {
 	fs, err := fingers.LoadFingers(LoadConfig(t))
 	if err != nil {
