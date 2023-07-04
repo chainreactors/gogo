@@ -36,6 +36,8 @@ github.com/chainreactors/parsers v0.3.2-0.20230704135114-9e6cbf325835 h1:HWhEIiX
 github.com/chainreactors/parsers v0.3.2-0.20230704135114-9e6cbf325835/go.mod h1:tA33N6UbYFnIT3k5tufOMfETxmEP20RZFyTSEnVXNUA=
 github.com/chainreactors/parsers v0.3.2-0.20230704140305-c50e2b7ab931 h1:ORmpl3PyazzmXkKwgI1rGZtoc1qi+V7H3ropQHDAZ2E=
 github.com/chainreactors/parsers v0.3.2-0.20230704140305-c50e2b7ab931/go.mod h1:tA33N6UbYFnIT3k5tufOMfETxmEP20RZFyTSEnVXNUA=
+github.com/chainreactors/parsers v0.3.2-0.20230704150053-b93daa87df37 h1:XuP+eWNW6PQLL72nrRTfqfEB61A6Hr7cBiwxm3CDyxE=
+github.com/chainreactors/parsers v0.3.2-0.20230704150053-b93daa87df37/go.mod h1:tA33N6UbYFnIT3k5tufOMfETxmEP20RZFyTSEnVXNUA=
 github.com/chainreactors/utils v0.0.14-0.20230314084720-a4d745cabc56 h1:1uhvEh7Of4fQJXRMsfGEZGy5NcETsM2yataQ0oYSw0k=
 github.com/chainreactors/utils v0.0.14-0.20230314084720-a4d745cabc56/go.mod h1:NKSu1V6EC4wa8QHtPfiJHlH9VjGfUQOx5HADK0xry3Y=
 github.com/chainreactors/utils v0.0.14-0.20230519042035-9b09287c74dc h1:0/NcD9WfcWmf5gJ6jNzA84BvMbxYJbK9Qi8kXEv4EQA=
