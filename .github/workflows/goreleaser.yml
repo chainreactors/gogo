@@ -15,7 +15,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-          token: ${{secrets.TOKEN}}
+          token: ${{ secrets.GITHUB_TOKEN }}
           submodules: recursive
       -
         name: Set up Go
@@ -35,7 +35,7 @@ jobs:
           args: release --rm-dist --skip-validate
           workdir: v2/
         env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GOPATH: "/home/runner/go"
 
       - name: upx
