@@ -2,6 +2,7 @@ package plugin
 
 import (
 	. "github.com/chainreactors/gogo/v2/pkg"
+	"github.com/chainreactors/gogo/v2/pkg/fingers"
 	"github.com/chainreactors/parsers"
 )
 
@@ -21,12 +22,11 @@ func passiveHttpMatch(result *Result) {
 				result.AddVuln(vuln)
 			}
 			result.AddFramework(frame)
+		} else {
+			historyMatch(result, f)
 		}
 	}
-	if result.NoFramework() {
-		// 如果没有匹配到,则尝试使用history匹配
-		historyMatch(result)
-	}
+
 }
 
 func activeHttpMatch(result *Result) {
@@ -51,22 +51,20 @@ func activeHttpMatch(result *Result) {
 			result.AddFramework(frame)
 		} else {
 			// 如果没有匹配到,则尝试使用history匹配
-			historyMatch(result)
+			historyMatch(result, f)
 		}
 	}
 }
 
-func historyMatch(result *Result) {
+func historyMatch(result *Result, f *fingers.Finger) {
 	for _, content := range result.Httpresp.History {
-		for _, f := range PassiveHttpFingers {
-			frame, vuln, ok := f.Match(content.ContentMap(), 0, nil)
-			if ok {
-				if vuln != nil {
-					result.AddVuln(vuln)
-				}
-				frame.From = 5
-				result.AddFramework(frame)
+		frame, vuln, ok := f.Match(content.ContentMap(), 0, nil)
+		if ok {
+			if vuln != nil {
+				result.AddVuln(vuln)
 			}
+			frame.From = 5
+			result.AddFramework(frame)
 		}
 	}
 }
