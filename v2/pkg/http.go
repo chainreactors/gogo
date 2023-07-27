@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"crypto/tls"
+	"github.com/chainreactors/logs"
 	"net"
 	"net/http"
 	"net/url"
@@ -41,9 +42,7 @@ func HttpConn(delay int) *http.Client {
 			//if req.URL.Host == "localhost" || req.URL.Host == "127.0.0.1" {
 			//	return http.ErrUseLastResponse
 			//}
-			if req.Header.Get("Referer") != "" {
-				delete(req.Header, "Referer")
-			}
+			logs.Log.Debugf("redirect to %s from %s", req.URL.String(), via[len(via)-1].URL.String())
 
 			if len(via) > maxRedirects {
 				return http.ErrUseLastResponse
