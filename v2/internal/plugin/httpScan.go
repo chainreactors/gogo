@@ -11,7 +11,7 @@ import (
 )
 
 var headers = http.Header{
-	"User-Agent": []string{"Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0;"},
+	"User-Agent": []string{"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"},
 }
 
 // -default
@@ -69,7 +69,7 @@ func initScan(result *pkg.Result) {
 		}
 		result.Status = "tcp"
 
-		bs, err = conn.Read(1)
+		bs, err = conn.Read(1) // 已经建立了连接, timeout不用过长时间, 如果没有返回值就可以直接进入下一步
 		if err != nil {
 			senddataStr := fmt.Sprintf("GET /%s HTTP/1.1\r\nHost: %s\r\n\r\n", result.Uri, target)
 			bs, err = conn.Request([]byte(senddataStr), 4096)
