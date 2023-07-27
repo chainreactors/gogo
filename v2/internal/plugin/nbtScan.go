@@ -127,6 +127,6 @@ func nbtScan(result *pkg.Result) {
 		result.Status += "DC"
 	}
 	result.Host = msg
-	result.Protocol = "NetBIOS"
+	result.Protocol = "netbios"
 	return
 }

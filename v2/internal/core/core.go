@@ -103,7 +103,6 @@ func SmartMod(target *utils.CIDR, config Config) {
 		// sc, ss
 		if target.Mask > 16 {
 			Log.Error(target.String() + " is less than B class, skipped")
-			return
 		}
 		mask = 16
 		if config.PortProbe == Default {

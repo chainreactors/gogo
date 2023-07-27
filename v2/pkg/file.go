@@ -56,7 +56,7 @@ func newFile(filename string, compress bool) (*files.File, error) {
 
 func IsExist(filename string) bool {
 	var exist = true
-	if _, err := os.Stat(filename); os.IsNotExist(err) {
+	if _, err := os.Stat(filename); err != nil {
 		exist = false
 	}
 	return exist

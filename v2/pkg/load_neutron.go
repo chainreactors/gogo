@@ -46,10 +46,10 @@ func ParserCmdPayload(payloads []string) *protocols.ExecuterOptions {
 var TemplateMap map[string][]*templates.Template
 
 func LoadNeutron(filename string) map[string][]*templates.Template {
+	var content []byte
 	if filename == "" {
 		return LoadTemplates(LoadConfig("nuclei"))
 	} else {
-		var content []byte
 		if IsExist(filename) {
 			var err error
 			content, err = ioutil.ReadFile(filename)

@@ -71,12 +71,7 @@ func (r *Runner) Prepare() bool {
 	if r.FormatterFilename != "" {
 		var formatOut string
 		if r.Outputf == Default {
-			if r.Config.Filenamef == "" {
-				formatOut = "color"
-			} else {
-				formatOut = "full"
-			}
-
+			formatOut = "full"
 		} else {
 			formatOut = r.Outputf
 		}
@@ -397,6 +392,7 @@ func templatesLoader() {
 	Mmh3Fingers, Md5Fingers = LoadHashFinger(AllHttpFingers)
 	TcpFingers = LoadFinger("tcp").GroupByPort()
 	HttpFingers = AllHttpFingers.GroupByPort()
+	ActiveHttpFingers, PassiveHttpFingers = AllHttpFingers.GroupByMod()
 }
 
 func parseFilterString(s string) (k, v, op string) {

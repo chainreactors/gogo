@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	. "github.com/chainreactors/files"
+	"github.com/chainreactors/files"
 	. "github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/parsers"
 	"github.com/chainreactors/parsers/iutils"
@@ -47,7 +47,7 @@ func FormatOutput(filename, outFilename, outf, filenamef string, filters []strin
 		defer req.Body.Close()
 		file = req.Body
 	} else {
-		file, err = Open(filename)
+		file, err = files.Open(filename)
 		if err != nil {
 			iutils.Fatal(err.Error())
 		}
@@ -84,7 +84,7 @@ func FormatOutput(filename, outFilename, outf, filenamef string, filters []strin
 
 	// 初始化再输出文件
 	if outFilename != "" {
-		fileHandle, err := NewFile(outFilename, false, false, false)
+		fileHandle, err := files.NewFile(outFilename, false, false, false)
 		if err != nil {
 			iutils.Fatal("" + err.Error())
 		}

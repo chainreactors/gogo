@@ -38,9 +38,9 @@ func InitConfig(config *Config) (*Config, error) {
 
 	if config.Threads == 0 { // if 默认线程
 		config.Threads = LinuxDefaultThreads
-		if Win {
+		if Win || Mac {
 			//windows系统默认协程数为1000
-			config.Threads = WindowsDefaultThreads
+			config.Threads = WindowsMacDefaultThreads
 		} else {
 			// linux系统判断fd限制, 如果-t 大于fd限制,则将-t 设置到fd-100
 			if fdlimit := iutils.GetFdLimit(); config.Threads > fdlimit {

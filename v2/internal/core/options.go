@@ -2,7 +2,7 @@ package core
 
 const (
 	LinuxDefaultThreads        = 4000
-	WindowsDefaultThreads      = 1000
+	WindowsMacDefaultThreads   = 1000
 	DefaultIpProbe             = "1,254"
 	DefaultSmartPortProbe      = "80"
 	DefaultSuperSmartPortProbe = "icmp"

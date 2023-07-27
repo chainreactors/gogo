@@ -8,7 +8,7 @@
 * 自由的端口配置
 * 支持主动/被动指纹识别
 * 关键信息提取, 如title, cert 以及自定义提取信息的正则
-* 支持nuclei poc
+* 支持nuclei poc, poc目录: https://chainreactors.github.io/wiki/gogo/detail/#_6
 * 无害的扫描, 每个添加的poc都经过人工审核
 * 可控的启发式扫描
 * 超强的性能, 最快的速度, 尽可能小的内存与CPU占用.
@@ -20,6 +20,8 @@
 ## QuickStart
 
 完整的文档与教程位于wiki: https://chainreactors.github.io/wiki/gogo/
+
+指纹与poc仓库: https://github.com/chainreactors/gogo-templates
 
 ### 最简使用
 
@@ -223,10 +225,18 @@ cd gogo/v2
 go mod tidy   
 
 # generate template.go
-go generate
+# 注意: 如果需要使用go1.10编译windows03可用版本， 也需要先使用高版本的go generate生成相关依赖
+go generate  
 
 # build 
 go build .
+
+# windows server 2003 compile
+GOOS=windows GOARCH=386 go1.10 build .
+
+# 因为go1.10 还没有go mod, 可能会导致依赖报错. 如果发生了依赖报错, 可以使用go1.11 编译. 
+# go1.11 官方声明不支持windows server 2003 , 实测可以稳定运行(需要调低并发).
+GOOS=windows GOARCH=386 go1.11 build .
 ```
 
 如果需要编译windows xp/2003的版本, 请先使用高版本的go生成templates. 再使用go 1.11编译即可.
