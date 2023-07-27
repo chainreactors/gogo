@@ -113,10 +113,22 @@ func systemHttp(result *pkg.Result, scheme string) {
 	}
 	logs.Log.Debugf("request %s , %d ", target, resp.StatusCode)
 	if resp.TLS != nil {
-		if result.Status == "400" || (resp.Request.Response != nil && resp.Request.Response.StatusCode != 302) || resp.Request.Response == nil {
-			// 1. 如果第一个包的状态码为400, 且这个包存在tls, 则判断为https
-			// 2. 去掉302跳转到https导致可能存在的误判
+		if result.Status == "400" {
+			// socket中得到的状态为400, 且存在tls的情况下
 			result.Protocol = "https"
+		} else if resp.StatusCode == 400 {
+			// 虽然获取到了tls, 但是状态码为400, 则根据scheme取反
+			// 某些中间件会自动打开tls端口, 但是证书为空, 返回400
+			if scheme == "http" {
+				result.Protocol = "https"
+			} else {
+				result.Protocol = "http"
+			}
+		} else if scheme == "http" && resp.Request.Response != nil && resp.Request.URL.Scheme == "https" {
+			// 去掉通过302 http跳转到https导致可能存在的误判
+			result.Protocol = "http"
+		} else {
+			result.Protocol = scheme
 		}
 
 		collectTLS(result, resp)
