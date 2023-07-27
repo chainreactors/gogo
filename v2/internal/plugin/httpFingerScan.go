@@ -3,6 +3,7 @@ package plugin
 import (
 	. "github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/gogo/v2/pkg/fingers"
+	"github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
 )
 
@@ -33,6 +34,7 @@ func activeHttpMatch(result *Result) {
 	sender := func(sendData []byte) ([]byte, bool) {
 		conn := result.GetHttpConn(RunOpt.Delay)
 		url := result.GetURL() + string(sendData)
+		logs.Log.Debugf("active detect: %s", url)
 		resp, err := conn.Get(url)
 		if err == nil {
 			return parsers.ReadRaw(resp), true

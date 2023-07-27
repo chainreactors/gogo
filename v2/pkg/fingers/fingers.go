@@ -102,7 +102,6 @@ func (finger *Finger) Match(content map[string]interface{}, level int, sender fu
 		var c []byte
 		var ok bool
 		if rule.SendData != nil {
-			logs.Log.Debugf("active detect with %s", rule.SendDataStr)
 			c, ok = sender(rule.SendData)
 			if ok {
 				isactive = true

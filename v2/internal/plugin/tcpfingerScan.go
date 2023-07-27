@@ -3,6 +3,7 @@ package plugin
 import (
 	. "github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/gogo/v2/pkg/fingers"
+	"github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
 )
 
@@ -14,11 +15,15 @@ func tcpFingerScan(result *Result) {
 	}
 
 	sender := func(sendData []byte) ([]byte, bool) {
-		conn, err := NewSocket("tcp", result.GetTarget(), RunOpt.Delay)
+		target := result.GetTarget()
+		logs.Log.Debugf("active detect: , data: ", target, sendData)
+		conn, err := NewSocket("tcp", target, RunOpt.Delay)
 		if err != nil {
+			logs.Log.Debugf("active detect %s error, %s", target, err.Error())
 			return nil, false
 		}
 		defer conn.Close()
+
 		data, err := conn.QuickRequest(sendData, 1024)
 		if err != nil {
 			return nil, false
