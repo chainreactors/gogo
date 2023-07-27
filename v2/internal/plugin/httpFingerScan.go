@@ -21,10 +21,11 @@ func passiveHttpMatch(result *Result) {
 				result.AddVuln(vuln)
 			}
 			result.AddFramework(frame)
-		} else {
-			// 如果没有匹配到,则尝试使用history匹配
-			historyMatch(result)
 		}
+	}
+	if result.NoFramework() {
+		// 如果没有匹配到,则尝试使用history匹配
+		historyMatch(result)
 	}
 }
 
