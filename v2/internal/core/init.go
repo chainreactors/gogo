@@ -62,7 +62,7 @@ func InitConfig(config *Config) (*Config, error) {
 		if err != nil {
 			iutils.Fatal(err.Error())
 		}
-	} else if HasStdin() {
+	} else if files.HasStdin() {
 		file = os.Stdin
 	}
 

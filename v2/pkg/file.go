@@ -26,18 +26,6 @@ func WriteSmartResult(file *files.File, target string, ips []string) {
 	}
 }
 
-func HasStdin() bool {
-	stat, err := os.Stdin.Stat()
-	if err != nil {
-		return false
-	}
-
-	isPipedFromChrDev := (stat.Mode() & os.ModeCharDevice) == 0
-	isPipedFromFIFO := (stat.Mode() & os.ModeNamedPipe) != 0
-
-	return isPipedFromChrDev || isPipedFromFIFO
-}
-
 func newFile(filename string, compress bool) (*files.File, error) {
 	file, err := files.NewFile(filename, compress, true, false)
 	if err != nil {
