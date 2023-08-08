@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/chainreactors/parsers"
-	"github.com/chainreactors/parsers/iutils"
+	"github.com/chainreactors/utils/iutils"
 )
 
 func ParseWorkflowsFromInput(content []byte) []*Workflow {

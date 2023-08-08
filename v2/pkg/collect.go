@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/chainreactors/parsers"
-	"github.com/chainreactors/parsers/iutils"
+	"github.com/chainreactors/utils/iutils"
 )
 
 func CollectSocketInfo(result *Result, socketContent []byte) {

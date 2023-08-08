@@ -17,7 +17,7 @@ import (
 	"github.com/chainreactors/logs"
 	neuhttp "github.com/chainreactors/neutron/protocols/http"
 	"github.com/chainreactors/parsers"
-	"github.com/chainreactors/parsers/iutils"
+	"github.com/chainreactors/utils/iutils"
 )
 
 func NewRunner() *Runner {

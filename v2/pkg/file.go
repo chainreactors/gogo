@@ -9,7 +9,7 @@ import (
 
 	"github.com/chainreactors/files"
 	"github.com/chainreactors/logs"
-	"github.com/chainreactors/parsers/iutils"
+	"github.com/chainreactors/utils/iutils"
 )
 
 func WriteSmartResult(file *files.File, target string, ips []string) {

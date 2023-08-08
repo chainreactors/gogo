@@ -9,7 +9,7 @@ import (
 	"github.com/M09ic/go-ntlmssp"
 
 	. "github.com/chainreactors/gogo/v2/pkg"
-	"github.com/chainreactors/parsers/iutils"
+	"github.com/chainreactors/utils/iutils"
 )
 
 var v1d1 = Decode("YmBgaP0f7OtUxMDAwCARfIIBBfz/B6aSGJgCnBX8XEPC/YO8FQKC/N2DHH0VDPUMGJh8HP18Hf3AzPDMvJT88mKFtPwihfD8ouz0ovzSgmIFYz3DRAYmH19DPaMIAwMjmBYjPUMGJr8QBR9fBQM9QyMGAAAAAP//")
