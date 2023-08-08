@@ -23,6 +23,8 @@ var portstat = map[int]string{
 
 type InputOption struct {
 	IP                string   `short:"i" long:"ip" description:"IP/CIDR, support comma-split ip/cidr, e.g. 192.168.1.1/24,172.16.1.1/24"`
+	Exclude           string   `long:"exclude" description:"IP/CIDR, exclude IP/CIDR, support comma-split"`
+	ExcludeList       string   `long:"exclude-file" description:"File, exclude IP/CIDR filename"`
 	Ports             string   `short:"p" long:"port" default:"top1" description:"Port, support comma-split preset('-P port' show all preset), range, alias port, e.g. top2,mysql,12345,10000-10100,oxid,smb"`
 	ListFile          string   `short:"l" long:"list" description:"File, list of IP/CIDR"`
 	IsListInput       bool     `short:"L" description:"Bool, same as -l, input from stdin"`

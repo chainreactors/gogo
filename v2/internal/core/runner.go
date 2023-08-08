@@ -68,6 +68,18 @@ func (r *Runner) Prepare() bool {
 	}
 
 	r.PrepareConfig()
+
+	var err error
+	if r.Exclude != "" {
+		r.Config.Excludes = strings.Split(r.Exclude, ",")
+	} else if r.ExcludeList != "" {
+		r.Config.Excludes, err = files.LoadFileToSlice(r.ExcludeList)
+		if err != nil {
+			logs.Log.Error(err.Error())
+			return false
+		}
+	}
+
 	if r.FormatterFilename != "" {
 		var formatOut string
 		if r.Outputf == Default {
