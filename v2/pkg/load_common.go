@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	"github.com/chainreactors/parsers"
-	"github.com/chainreactors/parsers/iutils"
 	"github.com/chainreactors/utils"
+	"github.com/chainreactors/utils/iutils"
 )
 
 var (

@@ -10,7 +10,7 @@ import (
 	"github.com/chainreactors/files"
 	. "github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/parsers"
-	"github.com/chainreactors/parsers/iutils"
+	"github.com/chainreactors/utils/iutils"
 )
 
 func output(result *Result, outType string) string {
@@ -135,6 +135,8 @@ func FormatOutput(filename, outFilename, outf, filenamef string, filters []strin
 			outfunc(rd.ToCsv())
 		case "extract":
 			outfunc(rd.ToExtracteds())
+		case "zombie":
+			outfunc(rd.ToZombie())
 		default:
 			outfunc(rd.ToValues(outf))
 		}

@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/chainreactors/parsers"
-	"github.com/chainreactors/parsers/iutils"
+	"github.com/chainreactors/utils/iutils"
 )
 
 func CollectSocketInfo(result *Result, socketContent []byte) {
@@ -38,6 +38,11 @@ func CollectHttpInfo(result *Result, resp *http.Response) {
 	}
 	result.IsHttp = true
 	result.Httpresp = parsers.NewResponse(resp)
+
+	// tolower 忽略大小写
+	for i, c := range result.Httpresp.History {
+		result.Httpresp.History[i].Raw = bytes.ToLower(c.Raw)
+	}
 	result.Content = bytes.ToLower(result.Httpresp.Raw)
 	result.Status = iutils.ToString(resp.StatusCode)
 	result.Language = result.Httpresp.Language

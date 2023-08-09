@@ -9,7 +9,7 @@ import (
 
 	"github.com/chainreactors/files"
 	"github.com/chainreactors/logs"
-	"github.com/chainreactors/parsers/iutils"
+	"github.com/chainreactors/utils/iutils"
 )
 
 func WriteSmartResult(file *files.File, target string, ips []string) {
@@ -24,18 +24,6 @@ func WriteSmartResult(file *files.File, target string, ips []string) {
 		file.SafeWrite(string(marshal) + "\n")
 		file.SafeSync()
 	}
-}
-
-func HasStdin() bool {
-	stat, err := os.Stdin.Stat()
-	if err != nil {
-		return false
-	}
-
-	isPipedFromChrDev := (stat.Mode() & os.ModeCharDevice) == 0
-	isPipedFromFIFO := (stat.Mode() & os.ModeNamedPipe) != 0
-
-	return isPipedFromChrDev || isPipedFromFIFO
 }
 
 func newFile(filename string, compress bool) (*files.File, error) {

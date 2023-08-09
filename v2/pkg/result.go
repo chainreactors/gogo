@@ -9,7 +9,7 @@ import (
 
 	"github.com/chainreactors/gogo/v2/pkg/fingers"
 	"github.com/chainreactors/parsers"
-	"github.com/chainreactors/parsers/iutils"
+	"github.com/chainreactors/utils/iutils"
 )
 
 func NewResult(ip, port string) *Result {

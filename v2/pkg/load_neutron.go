@@ -10,7 +10,7 @@ import (
 	"github.com/chainreactors/neutron/protocols"
 	"github.com/chainreactors/neutron/templates_gogo"
 	"github.com/chainreactors/parsers"
-	"github.com/chainreactors/parsers/iutils"
+	"github.com/chainreactors/utils/iutils"
 )
 
 var ExecuterOptions *protocols.ExecuterOptions

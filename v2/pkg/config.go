@@ -13,8 +13,8 @@ import (
 	. "github.com/chainreactors/files"
 	"github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
-	"github.com/chainreactors/parsers/iutils"
 	"github.com/chainreactors/utils"
+	"github.com/chainreactors/utils/iutils"
 )
 
 const (
@@ -28,8 +28,8 @@ const (
 type Config struct {
 	*parsers.GOGOConfig
 	// ip
-	CIDRs utils.CIDRs `json:"-"`
-
+	CIDRs    utils.CIDRs `json:"-"`
+	Excludes []string    `json:"-"`
 	// port and probe
 	//Ports         string   `json:"ports"` // 预设字符串
 	PortList      []string `json:"-"` // 处理完的端口列表
@@ -71,7 +71,13 @@ func (config *Config) Validate() error {
 	}
 
 	// 一些命令行参数错误处理,如果check没过直接退出程序或输出警告
-	legalFormat := []string{"url", "ip", "port", "frameworks", "framework", "frame", "vuln", "vulns", "protocol", "scheme", "title", "target", "hash", "language", "host", "cert", "color", "c", "json", "j", "full", "jsonlines", "jl", "zombie", "sc", "csv", "status", "os"}
+	legalFormat := []string{
+		"url", "ip", "port", "frameworks", "framework", "frame", "vuln",
+		"vulns", "protocol", "scheme", "title", "target", "hash",
+		"language", "host", "cert", "color", "c", "json", "j", "full",
+		"jsonlines", "jl", "zombie", "sc", "csv", "status", "os",
+	}
+
 	if config.FileOutputf != Default {
 		for _, form := range strings.Split(config.FileOutputf, ",") {
 			if !iutils.StringsContains(legalFormat, form) {
@@ -146,6 +152,22 @@ func (config *Config) InitIP() error {
 		if len(config.CIDRs) == 0 {
 			return fmt.Errorf("all targets format error, exit")
 		}
+	}
+
+	// init excluded ip
+	if config.Excludes != nil {
+		var cidrs utils.CIDRs
+		for _, eip := range config.Excludes {
+			cidr := utils.ParseCIDR(eip)
+			if cidr == nil {
+				logs.Log.Warnf("Parse IP %s Failed, skipped ", strings.TrimSpace(eip))
+				continue
+			}
+			for _, ip := range config.CIDRs {
+				cidrs = append(cidrs, utils.DifferenceCIDR(ip, cidr)...)
+			}
+		}
+		config.CIDRs = cidrs.Coalesce()
 	}
 	return nil
 }
