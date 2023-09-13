@@ -280,7 +280,7 @@ func (r *Rule) Match(content []byte, ishttp bool) (bool, bool, string) {
 
 	// MD5 匹配
 	for _, md5s := range r.Regexps.MD5 {
-		if md5s == parsers.Md5Hash([]byte(content)) {
+		if md5s == parsers.Md5Hash([]byte(body)) {
 			logs.Log.Debugf("%s finger hit, md5: %s", r.FingerName, md5s)
 			return true, false, ""
 		}
@@ -288,7 +288,7 @@ func (r *Rule) Match(content []byte, ishttp bool) (bool, bool, string) {
 
 	// mmh3 匹配
 	for _, mmh3s := range r.Regexps.MMH3 {
-		if mmh3s == parsers.Mmh3Hash32([]byte(content)) {
+		if mmh3s == parsers.Mmh3Hash32([]byte(body)) {
 			logs.Log.Debugf("%s finger hit, mmh3: %s", r.FingerName, mmh3s)
 			return true, false, ""
 		}
