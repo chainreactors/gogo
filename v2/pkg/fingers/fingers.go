@@ -101,7 +101,7 @@ func (finger *Finger) Match(content map[string]interface{}, level int, sender fu
 		}
 		var c []byte
 		var ok bool
-		if rule.SendData != nil {
+		if rule.SendData != nil && sender != nil {
 			c, ok = sender(rule.SendData)
 			if ok {
 				isactive = true
