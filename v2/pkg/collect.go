@@ -26,7 +26,7 @@ func CollectSocketInfo(result *Result, socketContent []byte) {
 			result.HasTitle = true
 			result.Title = title
 		} else {
-			result.Title = parsers.MatchTitle(socketContent)
+			result.Title = parsers.MatchCharacter(socketContent)
 		}
 	}
 	result.AddExtracts(Extractors.Extract(string(socketContent)))
