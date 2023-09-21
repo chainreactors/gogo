@@ -14,6 +14,7 @@ import (
 	"github.com/chainreactors/files"
 	. "github.com/chainreactors/gogo/v2/internal/plugin"
 	. "github.com/chainreactors/gogo/v2/pkg"
+	"github.com/chainreactors/gogo/v2/pkg/fingers"
 	"github.com/chainreactors/logs"
 	neuhttp "github.com/chainreactors/neutron/protocols/http"
 	"github.com/chainreactors/parsers"
@@ -125,14 +126,7 @@ func (r *Runner) Prepare() bool {
 func (r *Runner) Init() {
 	// 初始化各种全局变量
 	// 初始化指纹优先级
-	if r.Verbose {
-		RunOpt.VersionLevel = 1
-		//} else if r.Version2 {
-		//	RunOpt.VersionLevel = 2
-	} else {
-		RunOpt.VersionLevel = 0
-	}
-
+	RunOpt.VersionLevel = setVersionLevel(r.Verbose)
 	// 初始化漏洞
 	if r.ExploitName != "" {
 		RunOpt.Exploit = r.ExploitName
@@ -308,8 +302,8 @@ func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) {
 				Opt.NoScan = workflow.NoScan
 			}
 
-			if r.Verbose {
-				RunOpt.VersionLevel = 1
+			if r.Verbose != nil {
+				RunOpt.VersionLevel = setVersionLevel(r.Verbose)
 			} else {
 				RunOpt.VersionLevel = workflow.Verbose
 			}
@@ -401,9 +395,8 @@ func templatesLoader() {
 	LoadPortConfig()
 	LoadExtractor()
 	AllHttpFingers = LoadFinger("http")
-	Mmh3Fingers, Md5Fingers = LoadHashFinger(AllHttpFingers)
+	fingers.Mmh3Fingers, fingers.Md5Fingers, ActiveFavicons = LoadHashFinger(AllHttpFingers)
 	TcpFingers = LoadFinger("tcp").GroupByPort()
-	HttpFingers = AllHttpFingers.GroupByPort()
 	ActiveHttpFingers, PassiveHttpFingers = AllHttpFingers.GroupByMod()
 }
 
@@ -422,4 +415,13 @@ func parseFilterString(s string) (k, v, op string) {
 		return kv[0], kv[1], "!:"
 	}
 	return "", "", ""
+}
+
+func setVersionLevel(v []bool) int {
+	if len(v) == 1 {
+		return 1
+	} else if len(v) == 2 {
+		return 2
+	}
+	return 0
 }

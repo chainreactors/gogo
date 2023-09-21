@@ -11,6 +11,11 @@ import (
 	"github.com/chainreactors/utils"
 )
 
+var (
+	Md5Fingers  map[string]string
+	Mmh3Fingers map[string]string
+)
+
 func compileRegexp(s string) (*regexp.Regexp, error) {
 	reg, err := regexp.Compile(s)
 	if err != nil {
@@ -80,6 +85,9 @@ func (finger *Finger) ToResult(hasFrame, hasVuln bool, res string, index int) (f
 			vuln = &parsers.Vuln{Name: finger.Name, SeverityLevel: INFO}
 		}
 	}
+	if finger.IsActive {
+		vuln.Detail = map[string]interface{}{"path": finger.Rules[index].SendDataStr}
+	}
 	return frame, vuln
 }
 
@@ -89,7 +97,7 @@ func (finger *Finger) Match(content map[string]interface{}, level int, sender fu
 	// 如果sender留空只进行被动的指纹判断, 将无视rules中的senddata字段
 
 	for i, rule := range finger.Rules {
-		if level < rule.Level {
+		if rule.Level > level {
 			// 如果rule的rule小于指定的level等级, 则跳过该rule
 			continue
 		}
@@ -101,6 +109,7 @@ func (finger *Finger) Match(content map[string]interface{}, level int, sender fu
 		}
 		var c []byte
 		var ok bool
+		// 主动发包获取指纹
 		if rule.SendData != nil && sender != nil {
 			c, ok = sender(rule.SendData)
 			if ok {
@@ -120,6 +129,8 @@ func (finger *Finger) Match(content map[string]interface{}, level int, sender fu
 			if isactive && hasFrame && ishttp {
 				frame.Data = c
 			}
+
+			// 某些情况下指纹无法使用正则匹配, 但可以通过特征指定版本号
 			if frame.Version == "" && rule.Regexps.CompiledVersionRegexp != nil {
 				for _, reg := range rule.Regexps.CompiledVersionRegexp {
 					res, _ := compiledMatch(reg, content["content"].([]byte))
@@ -191,6 +202,7 @@ func (r *Regexps) Compile() error {
 }
 
 type Favicons struct {
+	Path string   `yaml:"path,omitempty" json:"path,omitempty"`
 	Mmh3 []string `yaml:"mmh3,omitempty" json:"mmh3,omitempty"`
 	Md5  []string `yaml:"md5,omitempty" json:"md5,omitempty"`
 }

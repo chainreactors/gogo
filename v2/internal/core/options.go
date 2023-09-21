@@ -82,11 +82,11 @@ type MiscOption struct {
 }
 
 type ConfigOption struct {
-	Exploit    bool `short:"e" long:"exploit" description:"Bool,enable neutron exploit scan"`                                        // 启用漏洞扫描
-	Verbose    bool `short:"v" long:"verbose" description:"Bool, enable active finger scan"`                                         // version level1
-	Threads    int  `short:"t" long:"thread" description:"Int, concurrent thread number,linux default: 4000, windows default: 1000"` // 线程数
-	Delay      int  `short:"d" long:"timeout" default:"2" description:"Int, socket and http timeout"`
-	HttpsDelay int  `short:"D" long:"ssl-timeout" default:"2" description:"Int, ssl and https timeout"`
+	Exploit    bool   `short:"e" long:"exploit" description:"Bool, enable neutron exploit scan"`                                       // 启用漏洞扫描
+	Verbose    []bool `short:"v" long:"verbose" description:"Bool, enable active finger scan"`                                         // version level1
+	Threads    int    `short:"t" long:"thread" description:"Int, concurrent thread number,linux default: 4000, windows default: 1000"` // 线程数
+	Delay      int    `short:"d" long:"timeout" default:"2" description:"Int, socket and http timeout"`
+	HttpsDelay int    `short:"D" long:"ssl-timeout" default:"2" description:"Int, ssl and https timeout"`
 }
 
 type Options struct {
