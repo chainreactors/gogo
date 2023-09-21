@@ -84,7 +84,7 @@ func (r *Runner) Prepare() bool {
 	if r.FormatterFilename != "" {
 		var formatOut string
 		if r.Outputf == Default {
-			formatOut = "full"
+			formatOut = "color"
 		} else {
 			formatOut = r.Outputf
 		}

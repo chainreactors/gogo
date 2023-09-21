@@ -27,6 +27,7 @@ func compileRegexp(s string) (*regexp.Regexp, error) {
 type Finger struct {
 	Name        string   `yaml:"name" json:"name"`
 	Protocol    string   `yaml:"protocol,omitempty" json:"protocol"`
+	Link        string   `yaml:"link,omitempty" json:"link,omitempty"`
 	DefaultPort []string `yaml:"default_port,omitempty" json:"default_port,omitempty"`
 	Focus       bool     `yaml:"focus,omitempty" json:"focus,omitempty"`
 	Rules       Rules    `yaml:"rule,omitempty" json:"rule,omitempty"`
