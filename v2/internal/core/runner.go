@@ -396,7 +396,7 @@ func templatesLoader() {
 	LoadExtractor()
 	AllHttpFingers = LoadFinger("http")
 	fingers.Mmh3Fingers, fingers.Md5Fingers, ActiveFavicons = LoadHashFinger(AllHttpFingers)
-	TcpFingers = LoadFinger("tcp").GroupByPort()
+	SocketFingers = LoadFinger("tcp").GroupByPort()
 	ActiveHttpFingers, PassiveHttpFingers = AllHttpFingers.GroupByMod()
 }
 

@@ -7,7 +7,7 @@ import (
 
 var (
 	AllHttpFingers     fingers.Fingers
-	TcpFingers         fingers.FingerMapper
+	SocketFingers      fingers.FingerMapper
 	ActiveFavicons     []*fingers.Favicons
 	ActiveHttpFingers  fingers.Fingers
 	PassiveHttpFingers fingers.Fingers
