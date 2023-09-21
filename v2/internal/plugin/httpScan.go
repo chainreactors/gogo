@@ -108,7 +108,9 @@ func systemHttp(result *pkg.Result, scheme string) {
 		// 有可能存在漏网之鱼, 是tls服务, 但tls的第一个响应为30x, 并30x的目的地址不可达或超时. 则会报错.
 		result.Error = err.Error()
 		logs.Log.Debugf("request %s , %s ", target, err.Error())
-		noRedirectHttp(result, req)
+		if result.IsHttp {
+			noRedirectHttp(result, req)
+		}
 		return
 	}
 	logs.Log.Debugf("request %s , %d ", target, resp.StatusCode)
