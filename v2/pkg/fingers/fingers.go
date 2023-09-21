@@ -84,10 +84,11 @@ func (finger *Finger) ToResult(hasFrame, hasVuln bool, res string, index int) (f
 		} else {
 			vuln = &parsers.Vuln{Name: finger.Name, SeverityLevel: INFO}
 		}
+		if finger.IsActive {
+			vuln.Detail = map[string]interface{}{"path": finger.Rules[index].SendDataStr}
+		}
 	}
-	if finger.IsActive {
-		vuln.Detail = map[string]interface{}{"path": finger.Rules[index].SendDataStr}
-	}
+
 	return frame, vuln
 }
 
@@ -97,11 +98,6 @@ func (finger *Finger) Match(content map[string]interface{}, level int, sender fu
 	// 如果sender留空只进行被动的指纹判断, 将无视rules中的senddata字段
 
 	for i, rule := range finger.Rules {
-		if rule.Level > level {
-			// 如果rule的rule小于指定的level等级, 则跳过该rule
-			continue
-		}
-
 		var ishttp bool
 		var isactive bool
 		if finger.Protocol == "http" {
@@ -110,7 +106,7 @@ func (finger *Finger) Match(content map[string]interface{}, level int, sender fu
 		var c []byte
 		var ok bool
 		// 主动发包获取指纹
-		if rule.SendData != nil && sender != nil {
+		if level >= rule.Level && rule.SendData != nil && sender != nil {
 			c, ok = sender(rule.SendData)
 			if ok {
 				isactive = true
