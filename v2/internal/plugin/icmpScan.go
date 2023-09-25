@@ -14,14 +14,14 @@ import (
 )
 
 const (
-	EchoRequestHeadLen  = 8
-	ECHO_REPLY_HEAD_LEN = 20
-	ICMP_DATA_Len       = 32
+	echoRequestHeadLen = 8
+	echoReplyHeadLen   = 20
+	icmpDataLen        = 32
 )
 
 var (
-	ICMPDATA       = []byte{0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6a, 0x6b, 0x6c, 0x6d, 0x6e, 0x6f, 0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0x77, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69}
-	ICMPSEQ  int16 = 1
+	icmpData       = []byte{0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6a, 0x6b, 0x6c, 0x6d, 0x6e, 0x6f, 0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0x77, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69}
+	icmpSEQ  int16 = 1
 )
 
 // -n i
@@ -37,16 +37,16 @@ func icmpScan(result *pkg.Result) {
 	defer conn.Close()
 	conn.SetDeadline(time.Now().Add(delay * time.Second)) // icmp 超时
 
-	var msg []byte = make([]byte, ICMP_DATA_Len+EchoRequestHeadLen)
+	var msg []byte = make([]byte, icmpDataLen+echoRequestHeadLen)
 	msg[0] = 8                            // echo
 	msg[1] = 0                            // code 0
 	msg[2] = 0                            // checksum
 	msg[3] = 0                            // checksum
 	msg[4], msg[5] = 0, 1                 //identifier[0] identifier[1]
-	msg[6], msg[7] = gensequence(ICMPSEQ) //sequence[0], sequence[1]
-	ICMPSEQ++
-	length := ICMP_DATA_Len + EchoRequestHeadLen
-	copy(msg[8:], ICMPDATA)
+	msg[6], msg[7] = gensequence(icmpSEQ) //sequence[0], sequence[1]
+	icmpSEQ++
+	length := icmpDataLen + echoRequestHeadLen
+	copy(msg[8:], icmpData)
 	check := checkSum(msg[0:length])
 	msg[2] = byte(check >> 8)
 	msg[3] = byte(check & 255)
@@ -58,7 +58,7 @@ func icmpScan(result *pkg.Result) {
 		return
 	}
 
-	var receive []byte = make([]byte, ECHO_REPLY_HEAD_LEN+length)
+	var receive []byte = make([]byte, echoReplyHeadLen+length)
 	n, err := conn.Read(receive)
 	if err != nil {
 		result.Error = err.Error()
@@ -66,7 +66,7 @@ func icmpScan(result *pkg.Result) {
 	}
 
 	logs.Log.Debugf("[debug] %q", receive[:n])
-	if receive[ECHO_REPLY_HEAD_LEN+4] != msg[4] || receive[ECHO_REPLY_HEAD_LEN+5] != msg[5] || receive[ECHO_REPLY_HEAD_LEN+6] != msg[6] || receive[ECHO_REPLY_HEAD_LEN+7] != msg[7] || receive[ECHO_REPLY_HEAD_LEN] == 11 {
+	if receive[echoReplyHeadLen+4] != msg[4] || receive[echoReplyHeadLen+5] != msg[5] || receive[echoReplyHeadLen+6] != msg[6] || receive[echoReplyHeadLen+7] != msg[7] || receive[echoReplyHeadLen] == 11 {
 		return
 	}
 
