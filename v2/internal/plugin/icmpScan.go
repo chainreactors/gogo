@@ -13,13 +13,20 @@ import (
 	"github.com/chainreactors/logs"
 )
 
+const (
+	EchoRequestHeadLen  = 8
+	ECHO_REPLY_HEAD_LEN = 20
+	ICMP_DATA_Len       = 32
+)
+
+var (
+	ICMPDATA       = []byte{0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6a, 0x6b, 0x6c, 0x6d, 0x6e, 0x6f, 0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0x77, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69}
+	ICMPSEQ  int16 = 1
+)
+
 // -n i
 func icmpScan(result *pkg.Result) {
-	var size int
-	var seq int16 = 1
-	const EchoRequestHeadLen = 8
 	host := result.Ip
-	size = 32
 	delay := time.Duration(RunOpt.Delay)
 	conn, err := net.DialTimeout("ip4:icmp", host, delay*time.Second)
 	if err != nil {
@@ -28,18 +35,18 @@ func icmpScan(result *pkg.Result) {
 		return
 	}
 	defer conn.Close()
-
 	conn.SetDeadline(time.Now().Add(delay * time.Second)) // icmp 超时
-	id0, id1 := genidentifier(host)
 
-	var msg []byte = make([]byte, size+EchoRequestHeadLen)
-	msg[0] = 8                        // echo
-	msg[1] = 0                        // code 0
-	msg[2] = 0                        // checksum
-	msg[3] = 0                        // checksum
-	msg[4], msg[5] = id0, id1         //identifier[0] identifier[1]
-	msg[6], msg[7] = gensequence(seq) //sequence[0], sequence[1]
-	length := size + EchoRequestHeadLen
+	var msg []byte = make([]byte, ICMP_DATA_Len+EchoRequestHeadLen)
+	msg[0] = 8                            // echo
+	msg[1] = 0                            // code 0
+	msg[2] = 0                            // checksum
+	msg[3] = 0                            // checksum
+	msg[4], msg[5] = 0, 1                 //identifier[0] identifier[1]
+	msg[6], msg[7] = gensequence(ICMPSEQ) //sequence[0], sequence[1]
+	ICMPSEQ++
+	length := ICMP_DATA_Len + EchoRequestHeadLen
+	copy(msg[8:], ICMPDATA)
 	check := checkSum(msg[0:length])
 	msg[2] = byte(check >> 8)
 	msg[3] = byte(check & 255)
@@ -51,7 +58,6 @@ func icmpScan(result *pkg.Result) {
 		return
 	}
 
-	const ECHO_REPLY_HEAD_LEN = 20
 	var receive []byte = make([]byte, ECHO_REPLY_HEAD_LEN+length)
 	n, err := conn.Read(receive)
 	if err != nil {
