@@ -143,9 +143,10 @@ func SmartMod(target *utils.CIDR, config Config) {
 		plugin.Dispatch(result)
 
 		if result.Open {
+			Log.Debug("cidr scan , " + result.String())
 			cidrAlived(result.Ip, temp, mask)
 		} else if result.Error != "" {
-			Log.Debugf("%s stat: %s, errmsg: %s", result.GetTarget(), portstat[result.ErrStat], result.Error)
+			//Log.Debugf("%s stat: %s, errmsg: %s", result.GetTarget(), portstat[result.ErrStat], result.Error)
 		}
 		wg.Done()
 	})
@@ -229,9 +230,11 @@ func AliveMod(targets interface{}, config Config) {
 
 func aliveScan(tc targetConfig, temp *sync.Map) {
 	result := NewResult(tc.ip, tc.port)
+	result.SmartProbe = true
 	plugin.Dispatch(result)
 
 	if result.Open {
+		Log.Debug("alive scan, " + result.String())
 		temp.Store(result.Ip, true)
 		atomic.AddInt32(&Opt.AliveSum, 1)
 	}

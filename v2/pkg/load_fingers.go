@@ -6,11 +6,9 @@ import (
 )
 
 var (
-	Md5Fingers         map[string]string
-	Mmh3Fingers        map[string]string
 	AllHttpFingers     fingers.Fingers
-	TcpFingers         fingers.FingerMapper
-	HttpFingers        fingers.FingerMapper
+	SocketFingers      fingers.FingerMapper
+	ActiveFavicons     []*fingers.Favicons
 	ActiveHttpFingers  fingers.Fingers
 	PassiveHttpFingers fingers.Fingers
 )
@@ -24,12 +22,16 @@ func LoadFinger(t string) fingers.Fingers {
 	return fs
 }
 
-func LoadHashFinger(fs fingers.Fingers) (map[string]string, map[string]string) {
+func LoadHashFinger(fs fingers.Fingers) (map[string]string, map[string]string, []*fingers.Favicons) {
 	md5hash := make(map[string]string)
 	mmh3hash := make(map[string]string)
+	var actives []*fingers.Favicons
 	for _, f := range fs {
 		for _, rule := range f.Rules {
 			if rule.Favicon != nil {
+				if rule.Favicon.Path != "" {
+					actives = append(actives, rule.Favicon)
+				}
 				for _, mmh3 := range rule.Favicon.Mmh3 {
 					mmh3hash[mmh3] = f.Name
 				}
@@ -39,5 +41,5 @@ func LoadHashFinger(fs fingers.Fingers) (map[string]string, map[string]string) {
 			}
 		}
 	}
-	return mmh3hash, md5hash
+	return mmh3hash, md5hash, actives
 }

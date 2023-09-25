@@ -36,6 +36,10 @@ type Result struct {
 	Content    []byte            `json:"-"`
 }
 
+func (result *Result) String() string {
+	return fmt.Sprintf("%s %s", result.GetBaseURL(), result.Status)
+}
+
 func (result *Result) GetHttpConn(delay int) *http.Client {
 	if result.HttpConn == nil {
 		result.HttpConn = HttpConn(delay)

@@ -49,3 +49,34 @@ func RuleMatcher(rule *Rule, content map[string]interface{}, ishttp bool) (bool,
 
 	return hasFrame, hasVuln, version
 }
+
+func FaviconMatch(content map[string]string) (*parsers.Framework, bool) {
+	var frame *parsers.Framework
+	if Md5Fingers[content["md5"]] != "" {
+		frame = &parsers.Framework{Name: Md5Fingers[content["md5"]], From: parsers.FrameFromICO}
+		return frame, true
+	}
+
+	if Mmh3Fingers[content["mmh3"]] != "" {
+		frame = &parsers.Framework{Name: Mmh3Fingers[content["mmh3"]], From: parsers.FrameFromICO}
+		return frame, true
+	}
+	return nil, false
+}
+
+func FaviconActiveMatch(favicon *Favicons, level int, sender func(string) ([]byte, bool)) (*parsers.Framework, bool) {
+	if level > 1 && sender != nil && favicon.Path != "" {
+		body, ok := sender(favicon.Path)
+		if ok {
+			content := map[string]string{
+				"md5":  parsers.Md5Hash(body),
+				"mmh3": parsers.Mmh3Hash32(body),
+			}
+			frame, ok := FaviconMatch(content)
+			if ok {
+				return frame, true
+			}
+		}
+	}
+	return nil, false
+}

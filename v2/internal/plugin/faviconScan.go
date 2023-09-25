@@ -2,6 +2,7 @@ package plugin
 
 import (
 	. "github.com/chainreactors/gogo/v2/pkg"
+	"github.com/chainreactors/gogo/v2/pkg/fingers"
 	"github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
 )
@@ -18,23 +19,42 @@ func faviconScan(result *Result) {
 		return
 	}
 	logs.Log.Debugf("request favicon %s %d", url, resp.StatusCode)
-	if resp.StatusCode != 200 {
+	if resp.StatusCode == 200 {
+		body := parsers.ReadBody(resp)
+		content := map[string]string{
+			"md5":  parsers.Md5Hash(body),
+			"mmh3": parsers.Mmh3Hash32(body),
+		}
+
+		frame, ok := fingers.FaviconMatch(content)
+		if ok {
+			result.AddFramework(frame)
+			return
+		}
+	}
+
+	sender := func(sendData string) ([]byte, bool) {
+		conn := result.GetHttpConn(RunOpt.Delay)
+		url := result.GetURL() + sendData
+		logs.Log.Debugf("favicon active detect: %s", url)
+		resp, err := conn.Get(url)
+		if err == nil && resp.StatusCode == 200 {
+			return parsers.ReadBody(resp), true
+		} else {
+			return nil, false
+		}
+	}
+
+	if RunOpt.VersionLevel < 2 {
 		return
 	}
-	content := parsers.ReadBody(resp)
 
-	// MD5 hash匹配
-	md5h := parsers.Md5Hash(content)
-	if Md5Fingers[md5h] != "" {
-		result.AddFramework(&parsers.Framework{Name: Md5Fingers[md5h], From: parsers.FrameFromICO})
-		return
-	}
-
-	// mmh3 hash匹配,指纹来自kscan
-	mmh3h := parsers.Mmh3Hash32(content)
-	if Mmh3Fingers[mmh3h] != "" {
-		result.AddFramework(&parsers.Framework{Name: Mmh3Fingers[mmh3h], From: parsers.FrameFromICO})
-		return
+	for _, favicon := range ActiveFavicons {
+		frame, ok := fingers.FaviconActiveMatch(favicon, RunOpt.VersionLevel, sender)
+		if ok {
+			result.AddFramework(frame)
+			return
+		}
 	}
 	return
 }
