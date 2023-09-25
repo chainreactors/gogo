@@ -72,13 +72,13 @@ func (gen *IpGenerator) sSmartGenerator(cidr *utils.CIDR) {
 	var count int
 	for i := 0; i < 256; i++ {
 		for b, c := range ccs {
-			ip := c[i].Next()
+			ip := c[i]
 			for _, p := range gen.ipProbe {
 				count++
 				tip := ip.Copy()
 				tip.IP[3] = byte(p)
 				if isnotAlive(b, gen.alivedMap) {
-					gen.ch <- ip.String()
+					gen.ch <- tip.String()
 				}
 			}
 		}
