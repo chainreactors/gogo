@@ -20,11 +20,27 @@ const (
 )
 
 var (
-	icmpData       = []byte{0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6a, 0x6b, 0x6c, 0x6d, 0x6e, 0x6f, 0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0x77, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69}
-	icmpSEQ  int16 = 1
+	icmpData         = []byte{0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6a, 0x6b, 0x6c, 0x6d, 0x6e, 0x6f, 0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0x77, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69}
+	icmpSEQ    int16 = 1
+	icmpStatus       = map[uint8]string{
+		0:  "pong",
+		3:  "unreachable",
+		4:  "quench",
+		5:  "redirect",
+		8:  "ping",
+		9:  "advertisement",
+		10: "solicitation",
+		11: "timeout",
+	}
 )
 
-// -n i
+func getICMPStatus(t uint8) string {
+	if icmpStatus[t] != "" {
+		return icmpStatus[t]
+	}
+	return "unknown"
+}
+
 func icmpScan(result *pkg.Result) {
 	host := result.Ip
 	delay := time.Duration(RunOpt.Delay)
@@ -52,6 +68,7 @@ func icmpScan(result *pkg.Result) {
 	msg[3] = byte(check & 255)
 
 	logs.Log.Debug("request icmp " + result.GetTarget())
+	result.ErrStat = 7
 	_, err = conn.Write(msg[0:length])
 	if err != nil {
 		result.Error = err.Error()
@@ -65,14 +82,14 @@ func icmpScan(result *pkg.Result) {
 		return
 	}
 
-	logs.Log.Debugf("[debug] %q", receive[:n])
+	logs.Log.Debugf(" %q", receive[:n])
 	if receive[echoReplyHeadLen+4] != msg[4] || receive[echoReplyHeadLen+5] != msg[5] || receive[echoReplyHeadLen+6] != msg[6] || receive[echoReplyHeadLen+7] != msg[7] || receive[echoReplyHeadLen] == 11 {
 		return
 	}
 
 	result.Open = true
 	result.Protocol = "icmp"
-	result.Status = "icmp"
+	result.Status = getICMPStatus(receive[echoReplyHeadLen])
 	return
 }
 
@@ -96,8 +113,4 @@ func gensequence(v int16) (byte, byte) {
 	ret1 := byte(v >> 8)
 	ret2 := byte(v & 255)
 	return ret1, ret2
-}
-
-func genidentifier(host string) (byte, byte) {
-	return host[0], host[1]
 }
