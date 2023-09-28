@@ -146,7 +146,7 @@ func SmartMod(target *utils.CIDR, config Config) {
 			Log.Debug("cidr scan , " + result.String())
 			cidrAlived(result.Ip, temp, mask)
 		} else if result.Error != "" {
-			//Log.Debugf("%s stat: %s, errmsg: %s", result.GetTarget(), portstat[result.ErrStat], result.Error)
+			Log.Debugf("%s stat: %s, errmsg: %s", result.GetTarget(), portstat[result.ErrStat], result.Error)
 		}
 		wg.Done()
 	})
