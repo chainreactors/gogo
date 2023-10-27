@@ -11,7 +11,7 @@ import (
 
 	"github.com/chainreactors/gogo/v2/internal/plugin"
 	. "github.com/chainreactors/gogo/v2/pkg"
-	. "github.com/chainreactors/logs"
+	"github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
 	"github.com/chainreactors/utils"
 	"github.com/panjf2000/ants/v2"
@@ -45,7 +45,7 @@ func (tc *targetConfig) NewResult() *Result {
 //直接扫描
 func DefaultMod(targets interface{}, config Config) {
 	// 输出预估时间
-	Log.Importantf("Default Scan is expected to take %d seconds", guessTime(targets, len(config.PortList), config.Threads))
+	logs.Log.Importantf("Default Scan is expected to take %d seconds", guessTime(targets, len(config.PortList), config.Threads))
 	var wgs sync.WaitGroup
 	targetGen := NewTargetGenerator(config)
 	targetCh := targetGen.generatorDispatch(targets, config.PortList)
@@ -59,23 +59,23 @@ func DefaultMod(targets interface{}, config Config) {
 				// 输出时过滤, 节省操作步骤时用, --output-filter
 				for _, filter := range config.OutputFilters {
 					if !result.Filter(filter[0], filter[1], filter[2]) {
-						Log.Debug("[filtered] " + output(result, config.Outputf))
+						logs.Log.Debug("[filtered] " + output(result, config.Outputf))
 						wgs.Done()
 						return
 					}
 				}
 			}
 
-			Log.Console(output(result, config.Outputf))
+			logs.Log.Console(output(result, config.Outputf))
 			// 文件输出
 			if config.File != nil {
 				if !config.File.Initialized {
-					Log.Important("init file: " + config.File.Filename)
+					logs.Log.Important("init file: " + config.File.Filename)
 				}
 				config.File.SafeWrite(output(result, config.FileOutputf))
 			}
 		} else if result.Error != "" {
-			Log.Debugf("%s stat: %s, errmsg: %s", result.GetTarget(), portstat[result.ErrStat], result.Error)
+			logs.Log.Debugf("%s stat: %s, errmsg: %s", result.GetTarget(), portstat[result.ErrStat], result.Error)
 		}
 		wgs.Done()
 	}, ants.WithPanicHandler(func(err interface{}) {
@@ -102,25 +102,25 @@ func SmartMod(target *utils.CIDR, config Config) {
 	case SUPERSMART, SUPERSMARTB:
 		// sc, ss
 		if target.Mask > 16 {
-			Log.Error(target.String() + " is less than B class, skipped")
+			logs.Log.Error(target.String() + " is less than B class, skipped")
 		}
 		mask = 16
 		if config.PortProbe == Default {
-			config.PortProbeList = []string{DefaultSuperSmartPortProbe}
+			config.PortProbeList = DefaultSuperSmartPortProbe
 		}
 	default:
 		// s
 		if target.Mask > 24 {
-			Log.Error(target.String() + " is less than C class, skipped")
+			logs.Log.Error(target.String() + " is less than C class, skipped")
 			return
 		}
 		mask = 24
 		if config.PortProbe == Default {
-			config.PortProbeList = []string{DefaultSmartPortProbe}
+			config.PortProbeList = DefaultSmartPortProbe
 		}
 	}
 	spended := guessSmartTime(target, config)
-	Log.Importantf("Spraying %s with %s, Estimated to take %d seconds", target, config.Mod, spended)
+	logs.Log.Importantf("Spraying %s with %s, Estimated to take %d seconds", target, config.Mod, spended)
 	var wg sync.WaitGroup
 
 	//var ipChannel chan string
@@ -132,7 +132,7 @@ func SmartMod(target *utils.CIDR, config Config) {
 	if config.IsBSmart() {
 		probeconfig += ", Smart IP probes: " + fmt.Sprintf("%v", config.IpProbeList)
 	}
-	Log.Important(probeconfig)
+	logs.Log.Important(probeconfig)
 
 	tcChannel := targetGen.smartGenerator(target, config.PortProbeList, config.Mod)
 
@@ -143,10 +143,10 @@ func SmartMod(target *utils.CIDR, config Config) {
 		plugin.Dispatch(result)
 
 		if result.Open {
-			Log.Debug("cidr scan , " + result.String())
+			logs.Log.Debug("cidr scan , " + result.String())
 			cidrAlived(result.Ip, temp, mask)
 		} else if result.Error != "" {
-			Log.Debugf("%s stat: %s, errmsg: %s", result.GetTarget(), portstat[result.ErrStat], result.Error)
+			logs.Log.Debugf("%s stat: %s, errmsg: %s", result.GetTarget(), portstat[result.ErrStat], result.Error)
 		}
 		wg.Done()
 	})
@@ -169,7 +169,7 @@ func SmartMod(target *utils.CIDR, config Config) {
 	} else {
 		return
 	}
-	Log.Importantf("Smart scan: %s finished, found %d alive cidrs", target, len(iplist))
+	logs.Log.Importantf("Smart scan: %s finished, found %d alive cidrs", target, len(iplist))
 	if config.IsBSmart() {
 		WriteSmartResult(config.SmartBFile, target.String(), iplist.Strings())
 	}
@@ -187,13 +187,13 @@ func SmartMod(target *utils.CIDR, config Config) {
 func AliveMod(targets interface{}, config Config) {
 	if !Win && !Root {
 		// linux的普通用户无权限使用icmp或arp扫描
-		Log.Warn("must be *unix's root, skipped ping/arp spray")
+		logs.Log.Warn("must be *unix's root, skipped ping/arp spray")
 		DefaultMod(targets, config)
 		return
 	}
 
 	var wgs sync.WaitGroup
-	Log.Importantf("Alived spray task is expected to take %d seconds",
+	logs.Log.Importantf("Alived spray task is expected to take %d seconds",
 		guessTime(targets, len(config.AliveSprayMod), config.Threads))
 	targetGen := NewTargetGenerator(config)
 	alivedmap := targetGen.ipGenerator.alivedMap
@@ -218,10 +218,10 @@ func AliveMod(targets interface{}, config Config) {
 	})
 
 	if len(iplist) == 0 {
-		Log.Important("not found any alived ip")
+		logs.Log.Important("not found any alived ip")
 		return
 	}
-	Log.Importantf("found %d alived ips", len(iplist))
+	logs.Log.Importantf("found %d alived ips", len(iplist))
 	if config.AliveFile != nil {
 		WriteSmartResult(config.AliveFile, "alive", iplist)
 	}
@@ -234,7 +234,7 @@ func aliveScan(tc targetConfig, temp *sync.Map) {
 	plugin.Dispatch(result)
 
 	if result.Open {
-		Log.Debug("alive scan, " + result.String())
+		logs.Log.Debug("alive scan, " + result.String())
 		temp.Store(result.Ip, true)
 		atomic.AddInt32(&Opt.AliveSum, 1)
 	}
@@ -246,7 +246,7 @@ func cidrAlived(ip string, temp *sync.Map, mask int) {
 	_, ok := temp.Load(alivecidr)
 	if !ok {
 		temp.Store(alivecidr, 1)
-		Log.Importantf("Found %s/%d", ip, mask)
+		logs.Log.Importantf("Found %s/%d", ip, mask)
 		atomic.AddInt32(&Opt.AliveSum, 1)
 	}
 }
@@ -271,7 +271,7 @@ func createDeclineScan(cidrs utils.CIDRs, config Config) {
 		// 因此, 如果post数量小于2, 则直接使用defaultScan
 		config.Mod = SMART
 		if len(config.PortList) < 3 {
-			Log.Important("port count less than 3, skipped smart scan.")
+			logs.Log.Important("port count less than 3, skipped smart scan.")
 			if config.HasAlivedScan() {
 				AliveMod(config.CIDRs, config)
 			} else {
@@ -279,11 +279,11 @@ func createDeclineScan(cidrs utils.CIDRs, config Config) {
 			}
 		} else {
 			spended := guessSmartTime(cidrs[0], config)
-			Log.Importantf("Every smartscan subtask is expected to take %d seconds, total found %d B Class CIDRs about %d s", spended, len(cidrs), spended*len(cidrs))
+			logs.Log.Importantf("Every smartscan subtask is expected to take %d seconds, total found %d B Class CIDRs about %d s", spended, len(cidrs), spended*len(cidrs))
 			for _, ip := range cidrs {
 				tmpalive := Opt.AliveSum
 				SmartMod(ip, config)
-				Log.Importantf("Found %d assets from CIDR %s", Opt.AliveSum-tmpalive, ip)
+				logs.Log.Importantf("Found %d assets from CIDR %s", Opt.AliveSum-tmpalive, ip)
 				syncFile()
 			}
 		}
@@ -291,7 +291,7 @@ func createDeclineScan(cidrs utils.CIDRs, config Config) {
 	} else if config.Mod == SUPERSMARTB {
 		config.Mod = SUPERSMARTC
 		spended := guessSmartTime(cidrs[0], config)
-		Log.Importantf("Every smartscan subtask is expected to take %d seconds, total found %d B Class CIDRs about %d s", spended, len(cidrs), spended*len(cidrs))
+		logs.Log.Importantf("Every smartscan subtask is expected to take %d seconds, total found %d B Class CIDRs about %d s", spended, len(cidrs), spended*len(cidrs))
 
 		for _, ip := range cidrs {
 			SmartMod(ip, config)

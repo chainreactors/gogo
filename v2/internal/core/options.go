@@ -1,11 +1,11 @@
 package core
 
-const (
+var (
 	LinuxDefaultThreads        = 4000
 	WindowsMacDefaultThreads   = 1000
-	DefaultIpProbe             = "1,254"
-	DefaultSmartPortProbe      = "80"
-	DefaultSuperSmartPortProbe = "icmp"
+	DefaultIpProbe             = []uint{1, 254}
+	DefaultSmartPortProbe      = []string{"80", "icmp"}
+	DefaultSuperSmartPortProbe = []string{"icmp"}
 )
 
 // return open: 0, closed: 1, filtered: 2, noroute: 3, denied: 4, down: 5, error_host: 6, unkown: -1
