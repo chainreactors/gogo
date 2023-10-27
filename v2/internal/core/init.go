@@ -8,9 +8,9 @@ import (
 	"strings"
 
 	"github.com/chainreactors/files"
-	. "github.com/chainreactors/gogo/v2/internal/plugin"
+	"github.com/chainreactors/gogo/v2/internal/plugin"
 	. "github.com/chainreactors/gogo/v2/pkg"
-	. "github.com/chainreactors/logs"
+	"github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
 	"github.com/chainreactors/utils"
 	"github.com/chainreactors/utils/iutils"
@@ -33,8 +33,8 @@ func InitConfig(config *Config) (*Config, error) {
 		return nil, err
 	}
 	// 初始化
-	config.Exploit = RunOpt.Exploit
-	config.VersionLevel = RunOpt.VersionLevel
+	config.Exploit = plugin.RunOpt.Exploit
+	config.VersionLevel = plugin.RunOpt.VersionLevel
 
 	if config.Threads == 0 { // if 默认线程
 		config.Threads = LinuxDefaultThreads
@@ -44,8 +44,8 @@ func InitConfig(config *Config) (*Config, error) {
 		} else {
 			// linux系统判断fd限制, 如果-t 大于fd限制,则将-t 设置到fd-100
 			if fdlimit := iutils.GetFdLimit(); config.Threads > fdlimit {
-				Log.Warnf("System fd limit: %d , Please exec 'ulimit -n 65535'", fdlimit)
-				Log.Warnf("Now set threads to %d", fdlimit-100)
+				logs.Log.Warnf("System fd limit: %d , Please exec 'ulimit -n 65535'", fdlimit)
+				logs.Log.Warnf("Now set threads to %d", fdlimit-100)
 				config.Threads = fdlimit - 100
 			}
 		}
@@ -134,7 +134,7 @@ func InitConfig(config *Config) (*Config, error) {
 	if config.IpProbe != Default {
 		config.IpProbeList = iutils.Str2uintlist(config.IpProbe)
 	} else {
-		config.IpProbeList = iutils.Str2uintlist(DefaultIpProbe)
+		config.IpProbeList = DefaultIpProbe
 	}
 
 	// 初始已完成,输出任务基本信息
@@ -146,17 +146,17 @@ func InitConfig(config *Config) (*Config, error) {
 
 func printTaskInfo(config *Config, taskname string) {
 	// 输出任务的基本信息
-	Log.Importantf("Current goroutines: %d, Version Level: %d,Exploit: %s, PortSpray: %t", config.Threads, RunOpt.VersionLevel, RunOpt.Exploit, config.PortSpray)
+	logs.Log.Importantf("Current goroutines: %d, Version Level: %d,Exploit: %s, PortSpray: %t", config.Threads, plugin.RunOpt.VersionLevel, plugin.RunOpt.Exploit, config.PortSpray)
 	if config.Results == nil {
-		Log.Importantf("Start task %s ,total ports: %d , mod: %s", taskname, len(config.PortList), config.Mod)
+		logs.Log.Importantf("Start task %s ,total ports: %d , mod: %s", taskname, len(config.PortList), config.Mod)
 		// 输出端口信息
 		if len(config.PortList) > 500 {
-			Log.Important("too much ports , only show top 500 ports: " + strings.Join(config.PortList[:500], ",") + "......")
+			logs.Log.Important("too much ports , only show top 500 ports: " + strings.Join(config.PortList[:500], ",") + "......")
 		} else {
-			Log.Important("ports: " + strings.Join(config.PortList, ","))
+			logs.Log.Important("ports: " + strings.Join(config.PortList, ","))
 		}
 	} else {
-		Log.Importantf("Start results task: %s ,total target: %d", taskname, len(config.Results))
+		logs.Log.Importantf("Start results task: %s ,total target: %d", taskname, len(config.Results))
 	}
 }
 
@@ -170,11 +170,11 @@ func RunTask(config Config) {
 				if cidr.Ver == 4 {
 					SmartMod(cidr, config)
 				} else {
-					Log.Warnf("ipv6: %s not support smart mod, skipped", cidr.String())
+					logs.Log.Warnf("ipv6: %s not support smart mod, skipped", cidr.String())
 				}
 			}
 		} else {
-			Log.Warn("no validate ip/cidr")
+			logs.Log.Warn("no validate ip/cidr")
 		}
 	default:
 		createDefaultScan(config)

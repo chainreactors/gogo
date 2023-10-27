@@ -173,7 +173,7 @@ func Banner() string {
       gogo -i 192.168.1.1/16 -m s --ping -p top2,win,db --af
 
     workflow:
-      spray -w 10
+      gogo -w 10
 
   FORMAT:
     standard format:

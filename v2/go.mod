@@ -4,11 +4,11 @@ go 1.10
 
 require (
 	github.com/M09ic/go-ntlmssp v0.0.0-20230312133735-dcccd454dfe0
-	github.com/chainreactors/files v0.2.5-0.20230731174853-acee21c8c45a
-	github.com/chainreactors/logs v0.7.1-0.20230316032643-ed7d85ca234f
-	github.com/chainreactors/neutron v0.0.0-20230808120822-95b6fa957a1b
-	github.com/chainreactors/parsers v0.3.2-0.20230808120435-5161f72479b4
-	github.com/chainreactors/utils v0.0.14-0.20230808134830-18624017e634
+	github.com/chainreactors/files v0.0.0-20230731174853-acee21c8c45a
+	github.com/chainreactors/logs v0.0.0-20231027080134-7a11bb413460
+	github.com/chainreactors/neutron v0.0.0-20231027080810-f1b57eb8151e
+	github.com/chainreactors/parsers v0.0.0-20231027075644-5d67f3a109d8
+	github.com/chainreactors/utils v0.0.0-20230928082055-ef5e1ae47f3e
 	github.com/jessevdk/go-flags v1.5.0
 	github.com/panjf2000/ants/v2 v2.5.0
 	golang.org/x/net v0.0.0-20190603091049-60506f45cf65
