@@ -1,0 +1,16 @@
+version: 2
+updates:
+
+  # Maintain dependencies for go modules
+  - package-ecosystem: "gomod"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    target-branch: "dev"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    labels:
+      - "Type: Maintenance"
+    allow:
+      - dependency-name: "github.com/chainreactors/*"
