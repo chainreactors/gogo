@@ -44,12 +44,13 @@ type Runner struct {
 func (r *Runner) Prepare() bool {
 	// 初始化日志工具
 	if r.Quiet {
-		logs.Log = logs.NewLogger(10, true)
+		logs.Log = logs.NewLogger(0)
+		logs.Log.SetQuiet(true)
 	} else {
 		if r.Debug {
-			logs.Log = logs.NewLogger(logs.Debug, false)
+			logs.Log = logs.NewLogger(logs.Debug)
 		}
-		logs.Log.LogFileName = ".sock.lock"
+		logs.Log.SetFile(".sock.lock")
 		logs.Log.Init()
 	}
 
