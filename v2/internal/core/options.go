@@ -69,6 +69,7 @@ type AdvanceOption struct {
 	AttackType  string   `long:"attack-type" description:"neutron attack types, sniper|clusterbomb|pitchfork" choice:"pitchfork" choice:"clusterbomb" choice:"sniper"`
 	Extract     []string `long:"extract" description:"String, custom Extract regexp"`
 	//SuffixStr   string   `long:"suffix" description:"String, url path"`
+	Opsec bool `long:"opsec" description:"Bool, opsec mode"`
 }
 
 type MiscOption struct {

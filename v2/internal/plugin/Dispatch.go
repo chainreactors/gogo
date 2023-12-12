@@ -14,8 +14,9 @@ type RunnerOpts struct {
 	VersionLevel int
 	Delay        int
 	HttpsDelay   int
-	SuffixStr    string
-	Debug        bool
+	//SuffixStr    string
+	Debug bool
+	Opsec bool // enable opsec
 }
 
 var RunOpt RunnerOpts

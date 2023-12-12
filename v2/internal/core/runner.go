@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+	"github.com/chainreactors/neutron/templates_gogo"
 	"golang.org/x/net/proxy"
 	"net"
 	"net/http"
@@ -48,15 +49,19 @@ func (r *Runner) Prepare() bool {
 		logs.Log.SetQuiet(true)
 	} else {
 		if r.Debug {
-			logs.Log = logs.NewLogger(logs.Debug)
+			logs.Log.SetLevel(logs.Debug)
 		}
 		logs.Log.SetFile(".sock.lock")
 		logs.Log.Init()
 	}
 
 	RunOpt = RunnerOpts{
-		Delay:      r.Delay,
-		HttpsDelay: r.HttpsDelay,
+		Delay:        r.Delay,
+		HttpsDelay:   r.HttpsDelay,
+		VersionLevel: setVersionLevel(r.Verbose),
+		Exploit:      setExploit(r.ExploitName, r.Exploit),
+		Debug:        r.Debug,
+		Opsec:        r.Opsec,
 		//SuffixStr:  r.SuffixStr,
 	}
 	Opt.PluginDebug = r.PluginDebug
@@ -125,20 +130,6 @@ func (r *Runner) Prepare() bool {
 }
 
 func (r *Runner) Init() {
-	// 初始化各种全局变量
-	// 初始化指纹优先级
-	RunOpt.VersionLevel = setVersionLevel(r.Verbose)
-	// 初始化漏洞
-	if r.ExploitName != "" {
-		RunOpt.Exploit = r.ExploitName
-	} else if r.Exploit {
-		RunOpt.Exploit = "auto"
-	}
-
-	if r.NoScan {
-		Opt.NoScan = r.NoScan
-	}
-
 	// 加载配置文件中的全局变量
 	templatesLoader()
 	for _, e := range r.Extract {
@@ -158,6 +149,12 @@ func (r *Runner) Init() {
 		ExecuterOptions.Options.AttackType = r.AttackType
 	}
 	neutronLoader(r.ExploitFile, r.Payloads)
+
+	if r.Opsec {
+		templates.OPSEC = true
+		fingers.OPSEC = true
+		RunOpt.Opsec = true
+	}
 }
 
 func (r *Runner) PrepareConfig() {
@@ -310,11 +307,7 @@ func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) {
 			}
 
 			if RunOpt.Exploit != "none" {
-				if r.Exploit {
-					RunOpt.Exploit = "auto"
-				} else {
-					RunOpt.Exploit = r.ExploitName
-				}
+				RunOpt.Exploit = setExploit(r.ExploitName, r.Exploit)
 			} else {
 				RunOpt.Exploit = workflow.Exploit
 			}
@@ -425,4 +418,13 @@ func setVersionLevel(v []bool) int {
 		return 2
 	}
 	return 0
+}
+
+func setExploit(name string, enable bool) string {
+	if name != "" {
+		return name
+	} else if enable {
+		return "auto"
+	}
+	return "none"
 }
