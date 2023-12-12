@@ -7,6 +7,14 @@ import (
 	"github.com/chainreactors/parsers"
 )
 
+func compileRegexp(s string) (*regexp.Regexp, error) {
+	reg, err := regexp.Compile(s)
+	if err != nil {
+		return nil, err
+	}
+	return reg, nil
+}
+
 func compiledMatch(reg *regexp.Regexp, s []byte) (string, bool) {
 	matched := reg.FindSubmatch(s)
 	if matched == nil {
