@@ -156,15 +156,17 @@ func (config *Config) InitIP() error {
 
 	// init excluded ip
 	if config.Excludes != nil {
-		var cidrs utils.CIDRs
+		cidrs := config.CIDRs
 		for _, eip := range config.Excludes {
-			cidr := utils.ParseCIDR(eip)
-			if cidr == nil {
+			ecidr := utils.ParseCIDR(eip)
+			if ecidr == nil {
 				logs.Log.Warnf("Parse IP %s Failed, skipped ", strings.TrimSpace(eip))
 				continue
 			}
-			for _, ip := range config.CIDRs {
-				cidrs = append(cidrs, utils.DifferenceCIDR(ip, cidr)...)
+			for i, c := range cidrs {
+				if c.ContainsCIDR(ecidr) {
+					cidrs = append(append(cidrs[:i], cidrs[i+1:]...), utils.DifferenceCIDR(c, ecidr)...)
+				}
 			}
 		}
 		config.CIDRs = cidrs.Coalesce()
