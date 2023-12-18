@@ -2,13 +2,14 @@ package plugin
 
 import (
 	"bytes"
+	"github.com/chainreactors/utils/encode"
 
 	"github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/gogo/v2/pkg/fingers"
 	"github.com/chainreactors/parsers"
 )
 
-var snmpPublicData = parsers.UnHexlify("302902010104067075626c6963a01c02049acb0442020100020100300e300c06082b060102010101000500")
+var snmpPublicData = encode.UnHexlify("302902010104067075626c6963a01c02049acb0442020100020100300e300c06082b060102010101000500")
 
 func snmpScan(result *pkg.Result) {
 	result.Port = "161"

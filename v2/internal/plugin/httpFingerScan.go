@@ -5,6 +5,7 @@ import (
 	"github.com/chainreactors/gogo/v2/pkg/fingers"
 	"github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
+	"net/http"
 )
 
 func httpFingerScan(result *Result) {
@@ -31,12 +32,14 @@ func passiveHttpMatch(result *Result) {
 }
 
 func activeHttpMatch(result *Result) {
+	var closureResp *http.Response
 	sender := func(sendData []byte) ([]byte, bool) {
 		conn := result.GetHttpConn(RunOpt.Delay)
 		url := result.GetURL() + string(sendData)
 		logs.Log.Debugf("active detect: %s", url)
 		resp, err := conn.Get(url)
 		if err == nil {
+			closureResp = resp
 			return parsers.ReadRaw(resp), true
 		} else {
 			return nil, false
@@ -51,6 +54,7 @@ func activeHttpMatch(result *Result) {
 				result.AddVuln(vuln)
 			}
 			result.AddFramework(frame)
+			CollectHttpInfo(result, closureResp)
 		} else {
 			// 如果没有匹配到,则尝试使用history匹配
 			historyMatch(result, f)

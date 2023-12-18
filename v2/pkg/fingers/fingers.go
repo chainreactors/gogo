@@ -3,6 +3,7 @@ package fingers
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/chainreactors/utils/encode"
 	"regexp"
 	"strings"
 
@@ -14,15 +15,9 @@ import (
 var (
 	Md5Fingers  map[string]string
 	Mmh3Fingers map[string]string
+	OPSEC       = false
+	FingerLog   = logs.Log
 )
-
-func compileRegexp(s string) (*regexp.Regexp, error) {
-	reg, err := regexp.Compile(s)
-	if err != nil {
-		return nil, err
-	}
-	return reg, nil
-}
 
 type Finger struct {
 	Name        string   `yaml:"name" json:"name"`
@@ -32,6 +27,7 @@ type Finger struct {
 	Focus       bool     `yaml:"focus,omitempty" json:"focus,omitempty"`
 	Rules       Rules    `yaml:"rule,omitempty" json:"rule,omitempty"`
 	Tags        []string `yaml:"tag,omitempty" json:"tag,omitempty"`
+	Opsec       bool     `yaml:"opsec,omitempty" json:"opsec,omitempty"`
 	IsActive    bool     `yaml:"-" json:"-"`
 }
 
@@ -108,10 +104,14 @@ func (finger *Finger) Match(content map[string]interface{}, level int, sender fu
 		var ok bool
 		// 主动发包获取指纹
 		if level >= rule.Level && rule.SendData != nil && sender != nil {
-			c, ok = sender(rule.SendData)
-			if ok {
-				isactive = true
-				content["content"] = bytes.ToLower(c)
+			if OPSEC == true && finger.Opsec == true {
+				FingerLog.Debugf("(opsec!!!) skip active finger %s scan", finger.Name)
+			} else {
+				c, ok = sender(rule.SendData)
+				if ok {
+					isactive = true
+					content["content"] = bytes.ToLower(c)
+				}
 			}
 		}
 		hasFrame, hasVuln, res := RuleMatcher(rule, content, ishttp)
@@ -132,7 +132,7 @@ func (finger *Finger) Match(content map[string]interface{}, level int, sender fu
 				for _, reg := range rule.Regexps.CompiledVersionRegexp {
 					res, _ := compiledMatch(reg, content["content"].([]byte))
 					if res != "" {
-						logs.Log.Debugf("%s version hit, regexp: %s", finger.Name, reg.String())
+						FingerLog.Debugf("%s version hit, regexp: %s", finger.Name, reg.String())
 						frame.Version = res
 						break
 					}
@@ -223,7 +223,7 @@ func (r *Rule) Compile(name string) error {
 	}
 	r.FingerName = name
 	if r.SendDataStr != "" {
-		r.SendData, _ = parsers.DSLParser(r.SendDataStr)
+		r.SendData, _ = encode.DSLParser(r.SendDataStr)
 		if r.Level == 0 {
 			r.Level = 1
 		}
@@ -273,7 +273,7 @@ func (r *Rule) Match(content []byte, ishttp bool) (bool, bool, string) {
 	// body匹配
 	for _, bodyReg := range r.Regexps.Body {
 		if strings.Contains(body, bodyReg) {
-			logs.Log.Debugf("%s finger hit, body: %s", r.FingerName, bodyReg)
+			FingerLog.Debugf("%s finger hit, body: %s", r.FingerName, bodyReg)
 			return true, false, ""
 		}
 	}
@@ -282,23 +282,23 @@ func (r *Rule) Match(content []byte, ishttp bool) (bool, bool, string) {
 	for _, reg := range r.Regexps.CompliedRegexp {
 		res, ok := compiledMatch(reg, content)
 		if ok {
-			logs.Log.Debugf("%s finger hit, regexp: %s", r.FingerName, reg.String())
+			FingerLog.Debugf("%s finger hit, regexp: %s", r.FingerName, reg.String())
 			return true, false, res
 		}
 	}
 
 	// MD5 匹配
 	for _, md5s := range r.Regexps.MD5 {
-		if md5s == parsers.Md5Hash([]byte(body)) {
-			logs.Log.Debugf("%s finger hit, md5: %s", r.FingerName, md5s)
+		if md5s == encode.Md5Hash([]byte(body)) {
+			FingerLog.Debugf("%s finger hit, md5: %s", r.FingerName, md5s)
 			return true, false, ""
 		}
 	}
 
 	// mmh3 匹配
 	for _, mmh3s := range r.Regexps.MMH3 {
-		if mmh3s == parsers.Mmh3Hash32([]byte(body)) {
-			logs.Log.Debugf("%s finger hit, mmh3: %s", r.FingerName, mmh3s)
+		if mmh3s == encode.Mmh3Hash32([]byte(body)) {
+			FingerLog.Debugf("%s finger hit, mmh3: %s", r.FingerName, mmh3s)
 			return true, false, ""
 		}
 	}
@@ -310,7 +310,7 @@ func (r *Rule) Match(content []byte, ishttp bool) (bool, bool, string) {
 
 	for _, headerStr := range r.Regexps.Header {
 		if strings.Contains(header, headerStr) {
-			logs.Log.Debugf("%s finger hit, header: %s", r.FingerName, headerStr)
+			FingerLog.Debugf("%s finger hit, header: %s", r.FingerName, headerStr)
 			return true, false, ""
 		}
 	}

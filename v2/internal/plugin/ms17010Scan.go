@@ -2,6 +2,7 @@ package plugin
 
 import (
 	"encoding/binary"
+	"github.com/chainreactors/logs"
 	"strings"
 
 	. "github.com/chainreactors/gogo/v2/pkg"
@@ -17,6 +18,10 @@ var (
 )
 
 func ms17010Scan(result *Result) {
+	if RunOpt.Opsec {
+		logs.Log.Debugf("opsec!!! skip MS-17010 plugin")
+		return
+	}
 	// connecting to a host in LAN if reachable should be very quick
 	result.Port = "445"
 	target := result.GetTarget()

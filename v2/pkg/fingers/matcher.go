@@ -1,11 +1,20 @@
 package fingers
 
 import (
+	"github.com/chainreactors/utils/encode"
 	"regexp"
 	"strings"
 
 	"github.com/chainreactors/parsers"
 )
+
+func compileRegexp(s string) (*regexp.Regexp, error) {
+	reg, err := regexp.Compile(s)
+	if err != nil {
+		return nil, err
+	}
+	return reg, nil
+}
 
 func compiledMatch(reg *regexp.Regexp, s []byte) (string, bool) {
 	matched := reg.FindSubmatch(s)
@@ -69,8 +78,8 @@ func FaviconActiveMatch(favicon *Favicons, level int, sender func(string) ([]byt
 		body, ok := sender(favicon.Path)
 		if ok {
 			content := map[string]string{
-				"md5":  parsers.Md5Hash(body),
-				"mmh3": parsers.Mmh3Hash32(body),
+				"md5":  encode.Md5Hash(body),
+				"mmh3": encode.Mmh3Hash32(body),
 			}
 			frame, ok := FaviconMatch(content)
 			if ok {

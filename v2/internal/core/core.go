@@ -36,9 +36,9 @@ func (tc *targetConfig) NewResult() *Result {
 		result.Frameworks = tc.fingers
 	}
 
-	if plugin.RunOpt.SuffixStr != "" && !strings.HasPrefix(plugin.RunOpt.SuffixStr, "/") {
-		result.Uri = "/" + plugin.RunOpt.SuffixStr
-	}
+	//if plugin.RunOpt.SuffixStr != "" && !strings.HasPrefix(plugin.RunOpt.SuffixStr, "/") {
+	//	result.Uri = "/" + plugin.RunOpt.SuffixStr
+	//}
 	return result
 }
 
