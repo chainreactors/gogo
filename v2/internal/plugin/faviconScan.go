@@ -5,6 +5,7 @@ import (
 	"github.com/chainreactors/gogo/v2/pkg/fingers"
 	"github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
+	"github.com/chainreactors/utils/encode"
 )
 
 // -v
@@ -22,8 +23,8 @@ func faviconScan(result *Result) {
 	if resp.StatusCode == 200 {
 		body := parsers.ReadBody(resp)
 		content := map[string]string{
-			"md5":  parsers.Md5Hash(body),
-			"mmh3": parsers.Mmh3Hash32(body),
+			"md5":  encode.Md5Hash(body),
+			"mmh3": encode.Mmh3Hash32(body),
 		}
 
 		frame, ok := fingers.FaviconMatch(content)

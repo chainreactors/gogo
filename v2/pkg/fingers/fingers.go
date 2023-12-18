@@ -3,6 +3,7 @@ package fingers
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/chainreactors/utils/encode"
 	"regexp"
 	"strings"
 
@@ -222,7 +223,7 @@ func (r *Rule) Compile(name string) error {
 	}
 	r.FingerName = name
 	if r.SendDataStr != "" {
-		r.SendData, _ = parsers.DSLParser(r.SendDataStr)
+		r.SendData, _ = encode.DSLParser(r.SendDataStr)
 		if r.Level == 0 {
 			r.Level = 1
 		}
@@ -288,7 +289,7 @@ func (r *Rule) Match(content []byte, ishttp bool) (bool, bool, string) {
 
 	// MD5 匹配
 	for _, md5s := range r.Regexps.MD5 {
-		if md5s == parsers.Md5Hash([]byte(body)) {
+		if md5s == encode.Md5Hash([]byte(body)) {
 			FingerLog.Debugf("%s finger hit, md5: %s", r.FingerName, md5s)
 			return true, false, ""
 		}
@@ -296,7 +297,7 @@ func (r *Rule) Match(content []byte, ishttp bool) (bool, bool, string) {
 
 	// mmh3 匹配
 	for _, mmh3s := range r.Regexps.MMH3 {
-		if mmh3s == parsers.Mmh3Hash32([]byte(body)) {
+		if mmh3s == encode.Mmh3Hash32([]byte(body)) {
 			FingerLog.Debugf("%s finger hit, mmh3: %s", r.FingerName, mmh3s)
 			return true, false, ""
 		}

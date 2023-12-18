@@ -3,13 +3,13 @@ package pkg
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/chainreactors/utils/encode"
 	"io/ioutil"
 	"strings"
 
 	"github.com/chainreactors/files"
 	"github.com/chainreactors/neutron/protocols"
 	"github.com/chainreactors/neutron/templates_gogo"
-	"github.com/chainreactors/parsers"
 	"github.com/chainreactors/utils/iutils"
 )
 
@@ -57,7 +57,7 @@ func LoadNeutron(filename string) map[string][]*templates.Template {
 				iutils.Fatal(err.Error())
 			}
 		} else {
-			content = parsers.Base64Decode(filename)
+			content = encode.Base64Decode(filename)
 		}
 		return LoadTemplates(content)
 	}

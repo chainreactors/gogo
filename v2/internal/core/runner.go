@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 	"github.com/chainreactors/neutron/templates_gogo"
+	"github.com/chainreactors/utils/encode"
 	"golang.org/x/net/proxy"
 	"net"
 	"net/http"
@@ -229,7 +230,7 @@ func (r *Runner) Run() {
 			workflowMap["tmp"] = ParseWorkflowsFromInput(LoadFile(file))
 			r.WorkFlowName = "tmp"
 		} else {
-			if bs, ok := parsers.DSLParser(r.WorkFlowName); ok {
+			if bs, ok := encode.DSLParser(r.WorkFlowName); ok {
 				workflowMap["tmp"] = ParseWorkflowsFromInput(bs)
 			} else {
 				workflowMap = LoadWorkFlow()

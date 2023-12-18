@@ -1,10 +1,10 @@
 package pkg
 
 import (
+	"github.com/chainreactors/utils/encode"
 	"strings"
 
 	. "github.com/chainreactors/files"
-	"github.com/chainreactors/parsers"
 	"github.com/chainreactors/utils/iutils"
 )
 
@@ -24,7 +24,7 @@ var (
 //}
 
 func Decode(input string) []byte {
-	b := parsers.Base64Decode(input)
+	b := encode.Base64Decode(input)
 	return UnFlate(b)
 }
 
