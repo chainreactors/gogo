@@ -193,9 +193,7 @@ func (rd *ResultsData) ToCobaltStrike() string {
 }
 
 func parseResult(content []byte) (parsers.GOGOResults, error) {
-	// 自动修复未完成任务的json
 	var err error
-
 	var results parsers.GOGOResults
 	err = json.Unmarshal(content, &results)
 	if err != nil {
