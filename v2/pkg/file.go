@@ -3,7 +3,6 @@ package pkg
 import (
 	"encoding/json"
 	"fmt"
-	"os"
 	"path"
 	"strings"
 
@@ -40,14 +39,6 @@ func newFile(filename string, compress bool) (*files.File, error) {
 		return bs
 	}
 	return file, nil
-}
-
-func IsExist(filename string) bool {
-	var exist = true
-	if _, err := os.Stat(filename); err != nil {
-		exist = false
-	}
-	return exist
 }
 
 func getAutoFilename(config *Config, outtype string) string {
@@ -95,11 +86,11 @@ func GetFilename(config *Config, name string) string {
 		return config.Filename
 	}
 
-	if !IsExist(basename) {
+	if !files.IsExist(basename) {
 		return basename
 	}
 
-	for IsExist(basename + iutils.ToString(fileint)) {
+	for files.IsExist(basename + iutils.ToString(fileint)) {
 		fileint++
 	}
 	return basename + iutils.ToString(fileint)

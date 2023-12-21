@@ -222,7 +222,7 @@ func (r *Runner) Run() {
 		if r.IsWorkFlow {
 			workflowMap["tmp"] = ParseWorkflowsFromInput(LoadFile(os.Stdin))
 			r.WorkFlowName = "tmp"
-		} else if IsExist(r.WorkFlowName) {
+		} else if files.IsExist(r.WorkFlowName) {
 			file, err := files.Open(r.WorkFlowName)
 			if err != nil {
 				iutils.Fatal(err.Error())
@@ -356,7 +356,7 @@ func (r *Runner) Close(config *Config) {
 	if config.AliveFile != nil && config.AliveFile.Initialized {
 		logs.Log.Important("Alived result: " + config.AlivedFilename)
 	}
-	if IsExist(config.Filename + "_extract") {
+	if files.IsExist(config.Filename + "_extract") {
 		logs.Log.Important("extractor result: " + config.Filename + "_extract")
 	}
 }
