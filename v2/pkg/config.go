@@ -179,9 +179,9 @@ func (config *Config) InitFile() error {
 	// 初始化res文件handler
 	if config.Filename != "" {
 		if config.Tee {
-			logs.Log.Clean = false
+			logs.Log.SetClean(false)
 		} else {
-			logs.Log.Clean = true
+			logs.Log.SetClean(true)
 		}
 
 		// 创建output的filehandle

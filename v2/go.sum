@@ -2,11 +2,14 @@ github.com/M09ic/go-ntlmssp v0.0.0-20230312133735-dcccd454dfe0 h1:9Y+BdzDIHfpKy0
 github.com/M09ic/go-ntlmssp v0.0.0-20230312133735-dcccd454dfe0/go.mod h1:yMNEF6ulbFipt3CakMhcmcNVACshPRG4Ap4l00V+mMs=
 github.com/chainreactors/files v0.0.0-20230731174853-acee21c8c45a h1:NdYhUYzzqyfp15Qj1ONAPV+fcymCQ/XJ509Ia2iyzvk=
 github.com/chainreactors/files v0.0.0-20230731174853-acee21c8c45a/go.mod h1:/Xa9YXhjBlaC33JTD6ZTJFig6pcplak2IDcovf42/6A=
+github.com/chainreactors/files v0.0.0-20231102192550-a652458cee26/go.mod h1:/Xa9YXhjBlaC33JTD6ZTJFig6pcplak2IDcovf42/6A=
 github.com/chainreactors/files v0.0.0-20231123083421-cea5b4ad18a8 h1:8Plpi6haQbU8NzH+JtU6bkGDWF/OeC+GFj8DIDuY5yk=
 github.com/chainreactors/files v0.0.0-20231123083421-cea5b4ad18a8/go.mod h1:/Xa9YXhjBlaC33JTD6ZTJFig6pcplak2IDcovf42/6A=
 github.com/chainreactors/logs v0.0.0-20231027075331-6c5f5ec35435/go.mod h1:VZFqkFDGmp7/JOMeraW+YI7kTGcgz9fgc/HArVFnrGQ=
 github.com/chainreactors/logs v0.0.0-20231027080134-7a11bb413460 h1:QYmvaEZHa0e3aQ9Aui9gkm3klPO+yHo5SoPTkoltr78=
 github.com/chainreactors/logs v0.0.0-20231027080134-7a11bb413460/go.mod h1:VZFqkFDGmp7/JOMeraW+YI7kTGcgz9fgc/HArVFnrGQ=
+github.com/chainreactors/logs v0.0.0-20231220102821-19f082ce37c1 h1:y4xbdWsmBu1aAyYez1rBN5mgFdAtPViNrsObu1aWbuk=
+github.com/chainreactors/logs v0.0.0-20231220102821-19f082ce37c1/go.mod h1:6Mv6W70JrtL6VClulZhmMRZnoYpcTahcDTKLMNEjK0o=
 github.com/chainreactors/neutron v0.0.0-20231027080810-f1b57eb8151e h1:10jQhKFpF1Gg7Jq538HwP4okHWyEPdN9KcaRDicNHcI=
 github.com/chainreactors/neutron v0.0.0-20231027080810-f1b57eb8151e/go.mod h1:Dgz6zHfyicB4+qhf8rYxNF+XTYtv/iimogujCt5SYbQ=
 github.com/chainreactors/neutron v0.0.0-20231212173609-fe673ddd94df h1:3F5TTxSP3QSYq/9e2jK/NOALkDuuSd9OIvVkycz5uz4=
