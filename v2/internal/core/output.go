@@ -1,6 +1,7 @@
 package core
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -91,7 +92,7 @@ func FormatOutput(filename, outFilename, outf, filenamef string, filters []strin
 		fmt.Println("Output filename: " + outFilename)
 		defer fileHandle.Close()
 		outfunc = func(s string) {
-			fileHandle.Write(s)
+			fileHandle.WriteString(s)
 		}
 	} else {
 		outfunc = func(s string) {
@@ -136,7 +137,13 @@ func FormatOutput(filename, outFilename, outf, filenamef string, filters []strin
 		case "extract":
 			outfunc(rd.ToExtracteds())
 		case "zombie":
-			outfunc(rd.ToZombie())
+			zs := rd.ToZombie()
+			marshal, err := json.Marshal(zs)
+			if err != nil {
+				fmt.Println(err.Error())
+				return
+			}
+			outfunc(string(marshal))
 		default:
 			outfunc(rd.ToValues(outf))
 		}

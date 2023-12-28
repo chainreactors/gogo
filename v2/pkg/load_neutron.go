@@ -50,7 +50,7 @@ func LoadNeutron(filename string) map[string][]*templates.Template {
 	if filename == "" {
 		return LoadTemplates(LoadConfig("nuclei"))
 	} else {
-		if IsExist(filename) {
+		if files.IsExist(filename) {
 			var err error
 			content, err = ioutil.ReadFile(filename)
 			if err != nil {

@@ -10,7 +10,7 @@ import (
 	"strings"
 	"syscall"
 
-	. "github.com/chainreactors/files"
+	"github.com/chainreactors/files"
 	"github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
 	"github.com/chainreactors/utils"
@@ -50,10 +50,10 @@ type Config struct {
 	SmartBFilename string              `json:"-"`
 	SmartCFilename string              `json:"-"`
 	AlivedFilename string              `json:"-"`
-	File           *File               `json:"-"`
-	SmartBFile     *File               `json:"-"`
-	SmartCFile     *File               `json:"-"`
-	AliveFile      *File               `json:"-"`
+	File           *files.File         `json:"-"`
+	SmartBFile     *files.File         `json:"-"`
+	SmartCFile     *files.File         `json:"-"`
+	AliveFile      *files.File         `json:"-"`
 	Tee            bool                `json:"-"`
 	Outputf        string              `json:"-"`
 	FileOutputf    string              `json:"-"`
@@ -66,7 +66,7 @@ type Config struct {
 }
 
 func (config *Config) Validate() error {
-	if config.Filename != "" && IsExist(config.Filename) {
+	if config.Filename != "" && files.IsExist(config.Filename) {
 		return fmt.Errorf("file %s already exist!", config.Filename)
 	}
 
@@ -208,7 +208,7 @@ func (config *Config) InitFile() error {
 			config.File.WriteLine(config.ToJson("smart"))
 			config.File.ClosedAppend = "[\"done\"]"
 		} else if config.FileOutputf == "csv" {
-			config.File.Write("ip,port,url,status,title,host,language,midware,frame,vuln,extract\n")
+			config.File.WriteString("ip,port,url,status,title,host,language,midware,frame,vuln,extract\n")
 		}
 	}
 
