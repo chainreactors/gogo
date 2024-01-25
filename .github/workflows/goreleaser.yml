@@ -38,10 +38,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GOPATH: "/home/runner/go"
 
-      - name: upx
-        run:  upx v2/dist/gogo*
-        continue-on-error: true
-
       - name: Upload assets
         uses: actions/upload-artifact@v3
         with:

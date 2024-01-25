@@ -33,6 +33,10 @@ builds:
       - all=-trimpath={{.Env.GOPATH}}
     no_unique_dist_dir: true
 
+upx:
+  -
+    enabled: true
+
 archives:
   -
     name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
