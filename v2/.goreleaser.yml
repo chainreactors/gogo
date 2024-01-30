@@ -36,6 +36,7 @@ builds:
 upx:
   -
     enabled: true
+    goos: [linux, windows]
 
 archives:
   -
