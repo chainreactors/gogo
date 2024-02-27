@@ -9,24 +9,23 @@ import (
 	"github.com/chainreactors/parsers"
 )
 
-//tamplate =
-func Neutron(target string, result *Result) {
+func NeutronScan(target string, result *Result) {
 	if RunOpt.Exploit != "none" {
 		if RunOpt.Exploit != "auto" {
 			executeTemplates(result, strings.Split(RunOpt.Exploit, ","), target)
 		} else {
-			titles := result.Frameworks.GetNames()
+			pocs := result.Frameworks.GetNames()
 			if result.IsHttp {
-				titles = append(titles, "http")
+				pocs = append(pocs, "http")
 			}
-			executeTemplates(result, titles, target)
+			executeTemplates(result, pocs, target)
 		}
 	}
 }
 
-func executeTemplates(result *Result, titles []string, target string) {
+func executeTemplates(result *Result, pocs []string, target string) {
 	var vulns []*parsers.Vuln
-	ts := choiceTemplates(titles)
+	ts := choiceTemplates(pocs)
 chainLoop: // 实现chain
 	for {
 		var chainsTemplates []*templates.Template
