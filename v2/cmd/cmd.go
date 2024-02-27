@@ -19,7 +19,6 @@ func Gogo() {
 		}
 		return
 	}
-
 	if ok := runner.Prepare(); !ok {
 		os.Exit(0)
 	}

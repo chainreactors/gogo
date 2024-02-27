@@ -14,11 +14,13 @@ import (
 )
 
 var ExecuterOptions *protocols.ExecuterOptions
+var OPSEC bool
 
 func ParserCmdPayload(payloads []string) *protocols.ExecuterOptions {
 	var options = &protocols.ExecuterOptions{
 		Options: &protocols.Options{
 			VarsPayload: map[string]interface{}{},
+			Opsec:       OPSEC,
 		},
 	}
 

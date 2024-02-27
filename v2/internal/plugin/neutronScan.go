@@ -31,7 +31,7 @@ chainLoop: // 实现chain
 		var chainsTemplates []*templates.Template
 		for _, template := range ts { // 遍历所有poc
 			logs.Log.Debugf("nuclei scan %s with %s", target, template.Id)
-			res, ok := template.Execute(target)
+			res, ok := template.Execute(target, nil)
 			if ok {
 				for name, extract := range res.Extracts {
 					result.AddExtract(&parsers.Extracted{Name: name, ExtractResult: extract})
