@@ -1,3 +1,3 @@
 [submodule "v2/templates"]
 	path = v2/templates
-	url = https://github.com/chainreactors/gogo-templates
+	url = https://github.com/chainreactors/templates

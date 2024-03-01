@@ -2,7 +2,6 @@ package core
 
 import (
 	"fmt"
-	"github.com/chainreactors/neutron/templates_gogo"
 	"github.com/chainreactors/utils/encode"
 	"golang.org/x/net/proxy"
 	"net"
@@ -89,6 +88,7 @@ func (r *Runner) Prepare() bool {
 	}
 
 	if r.FormatterFilename != "" {
+		LoadNeutron("")
 		var formatOut string
 		if r.Outputf == Default {
 			formatOut = "color"
@@ -152,7 +152,7 @@ func (r *Runner) Init() {
 	neutronLoader(r.ExploitFile, r.Payloads)
 
 	if r.Opsec {
-		templates.OPSEC = true
+		OPSEC = true
 		fingers.OPSEC = true
 		RunOpt.Opsec = true
 	}

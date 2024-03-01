@@ -92,7 +92,7 @@ func Dispatch(result *pkg.Result) {
 
 	// 如果exploit参数不为none,则进行漏洞探测
 	if RunOpt.Exploit != "none" {
-		Neutron(result.GetHostBaseURL(), result)
+		NeutronScan(result.GetHostBaseURL(), result)
 	}
 
 	result.Title = iutils.AsciiEncode(result.Title)

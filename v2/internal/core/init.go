@@ -150,8 +150,8 @@ func printTaskInfo(config *Config, taskname string) {
 	if config.Results == nil {
 		logs.Log.Importantf("Start task %s ,total ports: %d , mod: %s", taskname, len(config.PortList), config.Mod)
 		// 输出端口信息
-		if len(config.PortList) > 500 {
-			logs.Log.Important("too much ports , only show top 500 ports: " + strings.Join(config.PortList[:500], ",") + "......")
+		if len(config.PortList) > 100 {
+			logs.Log.Important("too much ports , only show top 100 ports: " + strings.Join(config.PortList[:100], ",") + "......")
 		} else {
 			logs.Log.Important("ports: " + strings.Join(config.PortList, ","))
 		}
