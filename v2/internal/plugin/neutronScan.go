@@ -30,16 +30,16 @@ chainLoop: // 实现chain
 	for {
 		var chainsTemplates []*templates.Template
 		for _, template := range ts { // 遍历所有poc
-			logs.Log.Debugf("nuclei scan %s with %s", target, template.Id)
+			logs.Log.Debugf("neutron scan %s with %s", target, template.Id)
 			res, err := template.Execute(target, nil)
 			if err == nil && res != nil {
 				for name, extract := range res.Extracts {
 					result.AddExtract(&parsers.Extracted{Name: name, ExtractResult: extract})
 				}
-				vulns = append(vulns, &parsers.Vuln{Name: template.Id, Payload: res.PayloadValues, Detail: res.DynamicValues, SeverityLevel: parsers.GetSeverityLevel(template.Info.Severity)})
+				vulns = append(vulns, &parsers.Vuln{Name: template.Id, Payload: res.PayloadValues, Detail: res.DynamicValues, SeverityLevel: parsers.GetSeverityLevel(template.Info.Severity), Tags: strings.Split(template.Info.Tags, ",")})
 				chainsTemplates = append(chainsTemplates, diffTemplates(ts, choiceTemplates(template.Chains))...)
 			} else {
-				logs.Log.Debugf("nuclei scan %s with %s error: %v", target, template.Id, err)
+				logs.Log.Debugf("neutron scan %s with %s error: %v", target, template.Id, err)
 			}
 		}
 		if chainsTemplates != nil {

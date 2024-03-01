@@ -15,6 +15,8 @@ github.com/chainreactors/neutron v0.0.0-20240301110513-43e97736a0a0 h1:7xZ+ebEmw
 github.com/chainreactors/neutron v0.0.0-20240301110513-43e97736a0a0/go.mod h1:SIJhRs9LYuE+znKjyPlS6R2BrU3PynWaW2Nlu+ZVnR0=
 github.com/chainreactors/parsers v0.0.0-20240301102019-cb0b75f400a0 h1:jtFtsCT+WBezoWzW0OPsrYzv+6ht+7+cWJMc2XxK3o8=
 github.com/chainreactors/parsers v0.0.0-20240301102019-cb0b75f400a0/go.mod h1:IS0hrYnccfJKU0NA12zdZk4mM7k/Qt4qnzMnFGBFLZI=
+github.com/chainreactors/parsers v0.0.0-20240301112247-d985ce2a8425 h1:SO+9FTntf85ruXOg01GZRVZtpf1Ffa2xXtzg/vhHiBY=
+github.com/chainreactors/parsers v0.0.0-20240301112247-d985ce2a8425/go.mod h1:IS0hrYnccfJKU0NA12zdZk4mM7k/Qt4qnzMnFGBFLZI=
 github.com/chainreactors/utils v0.0.0-20231031063336-9477f1b23886 h1:lS2T/uE9tg1MNDPrb44wawbNlD24zBlWoG0H+ZdwDAk=
 github.com/chainreactors/utils v0.0.0-20231031063336-9477f1b23886/go.mod h1:JA4eiQZm+7AsfjXBcIzIdVKBEhDCb16eNtWFCGTxlvs=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
