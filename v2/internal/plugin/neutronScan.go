@@ -5,7 +5,7 @@ import (
 
 	. "github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/logs"
-	"github.com/chainreactors/neutron/templates_gogo"
+	"github.com/chainreactors/neutron/templates"
 	"github.com/chainreactors/parsers"
 )
 
@@ -31,13 +31,15 @@ chainLoop: // 实现chain
 		var chainsTemplates []*templates.Template
 		for _, template := range ts { // 遍历所有poc
 			logs.Log.Debugf("nuclei scan %s with %s", target, template.Id)
-			res, ok := template.Execute(target, nil)
-			if ok {
+			res, err := template.Execute(target, nil)
+			if err == nil {
 				for name, extract := range res.Extracts {
 					result.AddExtract(&parsers.Extracted{Name: name, ExtractResult: extract})
 				}
 				vulns = append(vulns, &parsers.Vuln{Name: template.Id, Payload: res.PayloadValues, Detail: res.DynamicValues, SeverityLevel: parsers.GetSeverityLevel(template.Info.Severity)})
 				chainsTemplates = append(chainsTemplates, diffTemplates(ts, choiceTemplates(template.Chains))...)
+			} else {
+				logs.Log.Debugf("nuclei scan %s with %s error: %s", target, template.Id, err.Error())
 			}
 		}
 		if chainsTemplates != nil {

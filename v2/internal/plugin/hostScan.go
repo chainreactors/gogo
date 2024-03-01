@@ -19,7 +19,7 @@ func hostScan(result *Result) {
 	}
 
 	req, _ := http.NewRequest("GET", url, nil)
-	vuln := &parsers.Vuln{Name: "host", Detail: map[string]interface{}{}, SeverityLevel: parsers.SeverityINFO}
+	vuln := &parsers.Vuln{Name: "host", Detail: map[string][]string{}, SeverityLevel: parsers.SeverityINFO}
 	for _, host := range result.HttpHosts {
 		req.Host = host
 		resp, err := conn.Do(req)
@@ -38,7 +38,7 @@ func hostScan(result *Result) {
 				result.CurrentHost = host
 			}
 			result.Host = host
-			vuln.Detail[host] = title
+			vuln.Detail[host] = []string{title}
 		}
 	}
 	if len(vuln.Detail) > 0 {

@@ -13,7 +13,7 @@ var (
 	NameMap = utils.NameMap
 	PortMap = utils.PortMap
 	TagMap  = utils.TagMap
-	//WorkFlowMap    map[string][]*Workflow
+
 	Extractor      []*parsers.Extractor
 	Extractors     = make(parsers.Extractors)
 	ExtractRegexps = map[string][]*parsers.Extractor{}

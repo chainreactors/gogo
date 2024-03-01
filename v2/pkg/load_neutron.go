@@ -3,13 +3,14 @@ package pkg
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/chainreactors/parsers"
 	"github.com/chainreactors/utils/encode"
 	"io/ioutil"
 	"strings"
 
 	"github.com/chainreactors/files"
 	"github.com/chainreactors/neutron/protocols"
-	"github.com/chainreactors/neutron/templates_gogo"
+	"github.com/chainreactors/neutron/templates"
 	"github.com/chainreactors/utils/iutils"
 )
 
@@ -50,7 +51,7 @@ var TemplateMap map[string][]*templates.Template
 func LoadNeutron(filename string) map[string][]*templates.Template {
 	var content []byte
 	if filename == "" {
-		return LoadTemplates(LoadConfig("nuclei"))
+		return LoadTemplates(LoadConfig("neutron"))
 	} else {
 		if files.IsExist(filename) {
 			var err error
@@ -90,7 +91,18 @@ func LoadTemplates(content []byte) map[string][]*templates.Template {
 
 		// 以tag归类
 		for _, tag := range template.GetTags() {
-			templatemap[strings.ToLower(tag)] = append(templatemap[strings.ToLower(tag)], template)
+			tag := strings.ToLower(tag)
+			templatemap[tag] = append(templatemap[tag], template)
+		}
+
+		// add zombie-finger map
+		if template.Info.Zombie != "" {
+			for _, tag := range template.GetTags() {
+				parsers.ZombieMap[strings.ToLower(tag)] = template.Info.Zombie
+			}
+			for _, finger := range template.Fingers {
+				parsers.ZombieMap[finger] = template.Info.Zombie
+			}
 		}
 	}
 	return templatemap

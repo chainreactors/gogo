@@ -1,7 +1,8 @@
 package main
 
 import (
-	templates "github.com/chainreactors/neutron/templates_gogo"
+	"github.com/chainreactors/logs"
+	templates "github.com/chainreactors/neutron/templates"
 	"sigs.k8s.io/yaml"
 	"strings"
 )
@@ -41,8 +42,12 @@ requests:
 		panic(err)
 	}
 
-	res, ok := t.Execute("http://127.0.0.1:8080")
-	if ok {
+	res, err := t.Execute("http://127.0.0.1:8080", nil)
+	if err != nil {
+		logs.Log.Error(err.Error())
+		return
+	}
+	if res != nil {
 		println(res)
 	}
 }

@@ -82,7 +82,7 @@ func (finger *Finger) ToResult(hasFrame, hasVuln bool, res string, index int) (f
 			vuln = &parsers.Vuln{Name: finger.Name, SeverityLevel: INFO}
 		}
 		if finger.IsActive {
-			vuln.Detail = map[string]interface{}{"path": finger.Rules[index].SendDataStr}
+			vuln.Detail = map[string][]string{"path": []string{finger.Rules[index].SendDataStr}}
 		}
 	}
 

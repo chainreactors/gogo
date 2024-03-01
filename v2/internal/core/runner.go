@@ -88,6 +88,7 @@ func (r *Runner) Prepare() bool {
 	}
 
 	if r.FormatterFilename != "" {
+		LoadNeutron("")
 		var formatOut string
 		if r.Outputf == Default {
 			formatOut = "color"
