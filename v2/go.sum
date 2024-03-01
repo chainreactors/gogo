@@ -19,6 +19,8 @@ github.com/chainreactors/neutron v0.0.0-20240301091500-146befcf2708 h1:IhpnJaZ99
 github.com/chainreactors/neutron v0.0.0-20240301091500-146befcf2708/go.mod h1:SIJhRs9LYuE+znKjyPlS6R2BrU3PynWaW2Nlu+ZVnR0=
 github.com/chainreactors/neutron v0.0.0-20240301094645-f1f6d5808464 h1:gh1MLp687aGGjXB79ucPg+OVEkt306Be5i7TypU2Dus=
 github.com/chainreactors/neutron v0.0.0-20240301094645-f1f6d5808464/go.mod h1:SIJhRs9LYuE+znKjyPlS6R2BrU3PynWaW2Nlu+ZVnR0=
+github.com/chainreactors/neutron v0.0.0-20240301100258-c162c45ff0e6 h1:y3eGRd/HUE6lgA0EBliXORYbLtpeea1n3L6QYqNJ/Lg=
+github.com/chainreactors/neutron v0.0.0-20240301100258-c162c45ff0e6/go.mod h1:SIJhRs9LYuE+znKjyPlS6R2BrU3PynWaW2Nlu+ZVnR0=
 github.com/chainreactors/parsers v0.0.0-20240125061054-ac0c92abbe94 h1:y4LK5npTHc7YMAonFHH3lonvFzWUNSZG8M74GVvlLdE=
 github.com/chainreactors/parsers v0.0.0-20240125061054-ac0c92abbe94/go.mod h1:IS0hrYnccfJKU0NA12zdZk4mM7k/Qt4qnzMnFGBFLZI=
 github.com/chainreactors/parsers v0.0.0-20240229064316-6146c4e7de47 h1:vLgiZ6Ppuor88gx5g587FnMjILpGnu6qKwmMErBbIzc=
