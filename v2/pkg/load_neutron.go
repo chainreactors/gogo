@@ -105,5 +105,6 @@ func LoadTemplates(content []byte) map[string][]*templates.Template {
 			}
 		}
 	}
+	parsers.RegisterZombieServiceAlias()
 	return templatemap
 }
