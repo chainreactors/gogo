@@ -32,14 +32,14 @@ chainLoop: // 实现chain
 		for _, template := range ts { // 遍历所有poc
 			logs.Log.Debugf("nuclei scan %s with %s", target, template.Id)
 			res, err := template.Execute(target, nil)
-			if err == nil {
+			if err == nil && res != nil {
 				for name, extract := range res.Extracts {
 					result.AddExtract(&parsers.Extracted{Name: name, ExtractResult: extract})
 				}
 				vulns = append(vulns, &parsers.Vuln{Name: template.Id, Payload: res.PayloadValues, Detail: res.DynamicValues, SeverityLevel: parsers.GetSeverityLevel(template.Info.Severity)})
 				chainsTemplates = append(chainsTemplates, diffTemplates(ts, choiceTemplates(template.Chains))...)
 			} else {
-				logs.Log.Debugf("nuclei scan %s with %s error: %s", target, template.Id, err.Error())
+				logs.Log.Debugf("nuclei scan %s with %s error: %v", target, template.Id, err)
 			}
 		}
 		if chainsTemplates != nil {
