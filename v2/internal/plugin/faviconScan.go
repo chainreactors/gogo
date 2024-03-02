@@ -26,7 +26,7 @@ func faviconScan(result *Result) {
 			"md5":  encode.Md5Hash(body),
 			"mmh3": encode.Mmh3Hash32(body),
 		}
-
+		logs.Log.Debugf("%s favicon %v", url, content)
 		frame, ok := fingers.FaviconMatch(content)
 		if ok {
 			result.AddFramework(frame)
