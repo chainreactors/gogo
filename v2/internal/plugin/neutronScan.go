@@ -1,6 +1,7 @@
 package plugin
 
 import (
+	"github.com/chainreactors/fingers/common"
 	"strings"
 
 	. "github.com/chainreactors/gogo/v2/pkg"
@@ -24,7 +25,7 @@ func NeutronScan(target string, result *Result) {
 }
 
 func executeTemplates(result *Result, pocs []string, target string) {
-	var vulns []*parsers.Vuln
+	var vulns []*common.Vuln
 	ts := choiceTemplates(pocs)
 chainLoop: // 实现chain
 	for {
@@ -36,7 +37,7 @@ chainLoop: // 实现chain
 				for name, extract := range res.Extracts {
 					result.AddExtract(&parsers.Extracted{Name: name, ExtractResult: extract})
 				}
-				vulns = append(vulns, &parsers.Vuln{Name: template.Id, Payload: res.PayloadValues, Detail: res.DynamicValues, SeverityLevel: parsers.GetSeverityLevel(template.Info.Severity), Tags: strings.Split(template.Info.Tags, ",")})
+				vulns = append(vulns, &common.Vuln{Name: template.Id, Payload: res.PayloadValues, Detail: res.DynamicValues, SeverityLevel: common.GetSeverityLevel(template.Info.Severity), Tags: strings.Split(template.Info.Tags, ",")})
 				chainsTemplates = append(chainsTemplates, diffTemplates(ts, choiceTemplates(template.Chains))...)
 			} else {
 				logs.Log.Debugf("neutron scan %s with %s error: %v", target, template.Id, err)

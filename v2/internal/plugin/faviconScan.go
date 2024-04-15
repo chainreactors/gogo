@@ -2,7 +2,6 @@ package plugin
 
 import (
 	. "github.com/chainreactors/gogo/v2/pkg"
-	"github.com/chainreactors/gogo/v2/pkg/fingers"
 	"github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
 	"github.com/chainreactors/utils/encode"
@@ -22,40 +21,36 @@ func faviconScan(result *Result) {
 	logs.Log.Debugf("request favicon %s %d", url, resp.StatusCode)
 	if resp.StatusCode == 200 {
 		body := parsers.ReadBody(resp)
-		content := map[string]string{
-			"md5":  encode.Md5Hash(body),
-			"mmh3": encode.Mmh3Hash32(body),
-		}
-		logs.Log.Debugf("%s favicon %v", url, content)
-		frame, ok := fingers.FaviconMatch(content)
-		if ok {
+		md5h := encode.Md5Hash(body)
+		mmh3h := encode.Mmh3Hash32(body)
+		logs.Log.Debugf("%s favicon %s %s", url, md5h, mmh3h)
+		frame := FingerEngine.HashMatch(md5h, mmh3h)
+		if frame != nil {
 			result.AddFramework(frame)
 			return
-		}
-	}
-
-	sender := func(sendData string) ([]byte, bool) {
-		conn := result.GetHttpConn(RunOpt.Delay)
-		url := result.GetURL() + sendData
-		logs.Log.Debugf("favicon active detect: %s", url)
-		resp, err := conn.Get(url)
-		if err == nil && resp.StatusCode == 200 {
-			return parsers.ReadBody(resp), true
-		} else {
-			return nil, false
 		}
 	}
 
 	if RunOpt.VersionLevel < 2 {
 		return
 	}
-
-	for _, favicon := range ActiveFavicons {
-		frame, ok := fingers.FaviconActiveMatch(favicon, RunOpt.VersionLevel, sender)
-		if ok {
-			result.AddFramework(frame)
-			return
-		}
-	}
+	//sender := func(sendData string) ([]byte, bool) {
+	//	conn := result.GetHttpConn(RunOpt.Delay)
+	//	url := result.GetURL() + sendData
+	//	logs.Log.Debugf("favicon active detect: %s", url)
+	//	resp, err := conn.Get(url)
+	//	if err == nil && resp.StatusCode == 200 {
+	//		return parsers.ReadBody(resp), true
+	//	} else {
+	//		return nil, false
+	//	}
+	//}
+	//for _, favicon := range ActiveFavicons {
+	//	frame, ok := fingers.FaviconActiveMatch(favicon, RunOpt.VersionLevel, sender)
+	//	if ok {
+	//		result.AddFramework(frame)
+	//		return
+	//	}
+	//}
 	return
 }

@@ -68,7 +68,7 @@ func Dispatch(result *pkg.Result) {
 	if result.IsHttp {
 		httpFingerScan(result)
 	} else {
-		tcpFingerScan(result)
+		socketFingerScan(result)
 	}
 
 	//主动信息收集

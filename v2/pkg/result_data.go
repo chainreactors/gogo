@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/chainreactors/fingers/common"
 	"io"
 	"sort"
 	"strings"
@@ -278,7 +279,7 @@ func LoadResultFile(file io.Reader) interface{} {
 				}
 
 				if len(targetpair) == 3 {
-					result.Frameworks = map[string]*parsers.Framework{targetpair[2]: &parsers.Framework{Name: targetpair[2]}}
+					result.Frameworks = map[string]*common.Framework{targetpair[2]: &common.Framework{Name: targetpair[2]}}
 				}
 				if result != nil {
 					results = append(results, result)

@@ -2,13 +2,14 @@ package pkg
 
 import (
 	"fmt"
+	"github.com/chainreactors/fingers/common"
+	"github.com/chainreactors/fingers/fingers"
+	"github.com/chainreactors/parsers"
 	"net"
 	"net/http"
 	"strings"
 	"time"
 
-	"github.com/chainreactors/gogo/v2/pkg/fingers"
-	"github.com/chainreactors/parsers"
 	"github.com/chainreactors/utils/iutils"
 )
 
@@ -49,24 +50,29 @@ func (result *Result) GetHttpConn(delay int) *http.Client {
 	return result.HttpConn
 }
 
-func (result *Result) AddVuln(vuln *parsers.Vuln) {
+func (result *Result) AddVuln(vuln *common.Vuln) {
 	result.Vulns[vuln.Name] = vuln
 }
 
-func (result *Result) AddVulns(vulns []*parsers.Vuln) {
+func (result *Result) AddVulns(vulns []*common.Vuln) {
 	for _, v := range vulns {
 		result.AddVuln(v)
 	}
 }
 
-func (result *Result) AddFramework(f *parsers.Framework) {
+func (result *Result) AddFramework(f *common.Framework) {
 	result.Frameworks.Add(f)
 }
 
-func (result *Result) AddFrameworks(fs []*parsers.Framework) {
+func (result *Result) AddFrameworks(fs []*common.Framework) {
 	for _, f := range fs {
 		result.AddFramework(f)
 	}
+}
+
+func (result *Result) AddVulnsAndFrameworks(fs common.Frameworks, vs common.Vulns) {
+	result.AddFrameworks(fs.List())
+	result.AddVulns(vs.List())
 }
 
 func (result *Result) AddExtract(extract *parsers.Extracted) {
@@ -85,7 +91,7 @@ func (result *Result) AddExtracts(extracts []*parsers.Extracted) {
 func (result *Result) GuessFramework() {
 	for _, v := range PortMap.Get(result.Port) {
 		if TagMap.Get(v) == nil && !iutils.StringsContains([]string{"top1", "top2", "top3", "other", "windows"}, v) {
-			result.AddFramework(&parsers.Framework{Name: v, From: fingers.GUESS})
+			result.AddFramework(&common.Framework{Name: v, From: fingers.GUESS})
 		}
 	}
 }
@@ -104,7 +110,7 @@ func (result *Result) ContentMap() map[string]interface{} {
 	}
 }
 
-//从错误中收集信息
+// 从错误中收集信息
 func (result *Result) errHandler() {
 	if result.Error == "" {
 		return
@@ -138,5 +144,5 @@ func (result *Result) AddNTLMInfo(m map[string]string, t string) {
 	}
 	result.Title = m["MsvAvNbDomainName"] + "/" + m["MsvAvNbComputerName"]
 	result.Host = strings.Trim(m["MsvAvDnsDomainName"], "\x00") + "/" + m["MsvAvDnsComputerName"]
-	result.AddFramework(&parsers.Framework{Name: t, Version: m["Version"]})
+	result.AddFramework(&common.Framework{Name: t, Version: m["Version"]})
 }

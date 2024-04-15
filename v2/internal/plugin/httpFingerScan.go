@@ -2,10 +2,10 @@ package plugin
 
 import (
 	. "github.com/chainreactors/gogo/v2/pkg"
-	"github.com/chainreactors/gogo/v2/pkg/fingers"
 	"github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
 	"net/http"
+	"strings"
 )
 
 func httpFingerScan(result *Result) {
@@ -17,18 +17,12 @@ func httpFingerScan(result *Result) {
 }
 
 func passiveHttpMatch(result *Result) {
-	for _, f := range PassiveHttpFingers {
-		frame, vuln, ok := f.Match(result.ContentMap(), 0, nil)
-		if ok {
-			if vuln != nil {
-				result.AddVuln(vuln)
-			}
-			result.AddFramework(frame)
-		} else {
-			historyMatch(result, f)
-		}
+	fs, vs := FingerEngine.HTTPMatch(result.Content, strings.Join(result.HttpHosts, ","))
+	if len(fs) > 0 {
+		result.AddVulnsAndFrameworks(fs, vs)
 	}
 
+	historyMatch(result, result.Httpresp)
 }
 
 func activeHttpMatch(result *Result) {
@@ -46,31 +40,17 @@ func activeHttpMatch(result *Result) {
 		}
 	}
 
-	for _, f := range ActiveHttpFingers {
-		// 当前gogo中最大指纹level为1, 因此如果调用了这个函数, 则认定为level1
-		frame, vuln, ok := f.Match(result.ContentMap(), 1, sender)
-		if ok {
-			if vuln != nil {
-				result.AddVuln(vuln)
-			}
-			result.AddFramework(frame)
-			CollectHttpInfo(result, closureResp)
-		} else {
-			// 如果没有匹配到,则尝试使用history匹配
-			historyMatch(result, f)
-		}
+	fs, vs := FingerEngine.HTTPActiveMatch(RunOpt.VersionLevel, sender)
+	if len(fs) > 0 {
+		result.AddVulnsAndFrameworks(fs, vs)
 	}
+	resp := parsers.NewResponse(closureResp)
+	historyMatch(result, resp)
 }
 
-func historyMatch(result *Result, f *fingers.Finger) {
-	for _, content := range result.Httpresp.History {
-		frame, vuln, ok := f.Match(content.ContentMap(), 0, nil)
-		if ok {
-			if vuln != nil {
-				result.AddVuln(vuln)
-			}
-			frame.From = 5
-			result.AddFramework(frame)
-		}
+func historyMatch(result *Result, resp *parsers.Response) {
+	for _, content := range resp.History {
+		fs, vs := FingerEngine.HTTPMatch(content.Raw, "")
+		result.AddVulnsAndFrameworks(fs, vs)
 	}
 }

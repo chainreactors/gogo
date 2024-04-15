@@ -1,12 +1,11 @@
 package plugin
 
 import (
-	"bytes"
-
-	"github.com/chainreactors/gogo/v2/pkg"
-	"github.com/chainreactors/gogo/v2/pkg/fingers"
+	"github.com/chainreactors/fingers/fingers"
 	"github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
+
+	"github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/utils/iutils"
 )
 
@@ -29,11 +28,9 @@ func NotFoundScan(result *pkg.Result) {
 		return
 	}
 
-	for _, finger := range pkg.AllHttpFingers {
-		framework, _, ok := fingers.FingerMatcher(finger, map[string]interface{}{"content": bytes.ToLower(content)}, 0, nil)
-		if ok {
-			framework.From = fingers.NOTFOUND
-			result.AddFramework(framework)
-		}
+	fs, _ := pkg.FingerEngine.HTTPMatch(content, "")
+	for _, frame := range fs {
+		frame.From = fingers.NOTFOUND
+		result.AddFramework(frame)
 	}
 }
