@@ -36,14 +36,14 @@ jobs:
         run: echo "TAG=$(git describe --tags `git rev-list --tags --max-count=1`)" >> $GITHUB_ENV
 
       - name: Compile for Windows x64
-        run: go build -o gogo_windowsxp_amd64.exe -ldflags "-s -w -X 'github.com/chainreactors/gogo/v2/internal/core.ver=${{ github.ref_name }}'" -trimpath -tags=forceposix -asmflags "all=-trimpath=${{ env.GOPATH }}" -gcflags "all=-trimpath=${{ env.GOPATH }}" .
+        run: go build -o gogo_windowsxp_amd64.exe -ldflags "-s -w -X 'github.com/chainreactors/gogo/v2/internal/core.ver=${{ github.ref_name }}'" -tags=forceposix -asmflags "all=-trimpath=${{ env.GOPATH }}" -gcflags "all=-trimpath=${{ env.GOPATH }}" .
         env:
           GOOS: windows
           GOARCH: amd64
         working-directory: v2
 
       - name: Compile for Windows x64
-        run: go build -o gogo_windowsxp_386.exe -ldflags "-s -w -X 'github.com/chainreactors/gogo/v2/internal/core.ver=${{ github.ref_name }}'" -trimpath -tags=forceposix -asmflags "all=-trimpath=${{ env.GOPATH }}" -gcflags "all=-trimpath=${{ env.GOPATH }}" .
+        run: go build -o gogo_windowsxp_386.exe -ldflags "-s -w -X 'github.com/chainreactors/gogo/v2/internal/core.ver=${{ github.ref_name }}'"  -tags=forceposix -asmflags "all=-trimpath=${{ env.GOPATH }}" -gcflags "all=-trimpath=${{ env.GOPATH }}" .
         env:
           GOOS: windows
           GOARCH: '386'
