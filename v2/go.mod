@@ -7,7 +7,7 @@ require (
 	github.com/chainreactors/files v0.0.0-20231123083421-cea5b4ad18a8
 	github.com/chainreactors/fingers v0.0.0-20240415103906-0baf302754fa
 	github.com/chainreactors/logs v0.0.0-20240207121836-c946f072f81f
-	github.com/chainreactors/neutron v0.0.0-20240415083539-5ba37aa9c3b3
+	github.com/chainreactors/neutron v0.0.0-20240415105018-91ea3acc3710
 	github.com/chainreactors/parsers v0.0.0-20240415080936-e3e484abe2f7
 	github.com/chainreactors/utils v0.0.0-20240302165634-2b8494c9cfc3
 	github.com/jessevdk/go-flags v1.5.0
