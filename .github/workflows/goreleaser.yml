@@ -45,7 +45,7 @@ jobs:
           go-version: 1.21
       -
         name: Install upx
-        run: sudo apt install upx -y
+        run: sudo apt install upx zip -y
         continue-on-error: true
       -
         name: Run GoReleaser
@@ -59,23 +59,14 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GOPATH: "/home/runner/go"
 
-#      - name: Upload assets
-#        uses: actions/upload-artifact@v3
-#        with:
-#          name: gogo_archive
-#          path: |
-#            v2/dist/gogo*
-#            tools/*
-#            README.md
-#      - name: Upload Windows Binary to Release
-#        uses: actions/upload-release-asset@v1
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        with:
-#          upload_url: https://api.github.com/repos/${{ github.repository }}/releases/${{ steps.get_release.outputs.release_id }}/assets?name=gogo.exe
-#          asset_path: ./v2/gogo_windowsxp_amd64.exe
-#          asset_name: gogo_windowsxp_amd64.exe
-#          asset_content_type: application/octet-stream
+      - name: Upload assets
+        uses: actions/upload-artifact@v3
+        with:
+          name: gogo_archive
+          path: |
+            v2/dist/gogo*
+            tools/*
+            README.md
       - name: Set up Go 1.11
         uses: actions/setup-go@v3
         with:
@@ -94,6 +85,9 @@ jobs:
           GOOS: windows
           GOARCH: '386'
         working-directory: v2
+
+      - name: Zip files
+        run: zip -r gogo_archive.zip v2/dist/gogo* tools/* README.md
 
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
