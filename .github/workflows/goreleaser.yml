@@ -56,7 +56,6 @@ jobs:
           args: release --rm-dist --skip-validate
           workdir: v2/
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GOPATH: "/home/runner/go"
 
       - name: Upload assets
