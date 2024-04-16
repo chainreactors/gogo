@@ -7,6 +7,27 @@ on:
   workflow_dispatch:
 
 jobs:
+#  setup:
+#    runs-on: ubuntu-20.04
+#    outputs:
+#      upload_url: ${{ steps.create_release.outputs.upload_url }}
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v3
+#        with:
+#          fetch-depth: 0
+#          token: ${{ secrets.GITHUB_TOKEN }}
+#          submodules: recursive
+#      - name: Create Release Draft
+#        id: create_release
+#        uses: actions/create-release@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          tag_name: ${{ github.ref }}
+#          release_name: Release ${{ github.ref }}
+#          draft: true
+#          prerelease: false
   goreleaser:
     runs-on: ubuntu-20.04
     steps:
@@ -38,63 +59,49 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GOPATH: "/home/runner/go"
 
-      - name: Upload assets
-        uses: actions/upload-artifact@v3
-        with:
-          name: gogo_archive
-          path: |
-            v2/dist/gogo*
-            tools/*
-            README.md
-  goreleaser_low_window:
-    needs: goreleaser
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
-          submodules: recursive
-
-      - name: Set up Go 1.21
-        uses: actions/setup-go@v3
-        with:
-          go-version: 1.21
-
-      - name: Run go generate
-        run: go generate
-        working-directory: v2
-
+#      - name: Upload assets
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: gogo_archive
+#          path: |
+#            v2/dist/gogo*
+#            tools/*
+#            README.md
+#      - name: Upload Windows Binary to Release
+#        uses: actions/upload-release-asset@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          upload_url: https://api.github.com/repos/${{ github.repository }}/releases/${{ steps.get_release.outputs.release_id }}/assets?name=gogo.exe
+#          asset_path: ./v2/gogo_windowsxp_amd64.exe
+#          asset_name: gogo_windowsxp_amd64.exe
+#          asset_content_type: application/octet-stream
       - name: Set up Go 1.11
         uses: actions/setup-go@v3
         with:
           go-version: '1.11'
 
-      - name: Get latest git tag
-        id: get_tag
-        run: echo "TAG=$(git describe --tags `git rev-list --tags --max-count=1`)" >> $GITHUB_ENV
-
       - name: Compile for Windows x64
-        run: go build -o gogo_windowsxp_amd64.exe -ldflags "-s -w -X 'github.com/chainreactors/gogo/v2/internal/core.ver=${{ github.ref_name }}'" -tags=forceposix -asmflags "all=-trimpath=${{ env.GOPATH }}" -gcflags "all=-trimpath=${{ env.GOPATH }}" .
+        run: go build -o dist/gogo_windowsxp_amd64.exe -ldflags "-s -w -X 'github.com/chainreactors/gogo/v2/internal/core.ver=${{ github.ref }}'" -tags=forceposix -asmflags "all=-trimpath=${{ env.GOPATH }}" -gcflags "all=-trimpath=${{ env.GOPATH }}" .
         env:
           GOOS: windows
           GOARCH: amd64
         working-directory: v2
 
       - name: Compile for Windows x64
-        run: go build -o gogo_windowsxp_386.exe -ldflags "-s -w -X 'github.com/chainreactors/gogo/v2/internal/core.ver=${{ github.ref_name }}'"  -tags=forceposix -asmflags "all=-trimpath=${{ env.GOPATH }}" -gcflags "all=-trimpath=${{ env.GOPATH }}" .
+        run: go build -o dist/gogo_windowsxp_386.exe -ldflags "-s -w -X 'github.com/chainreactors/gogo/v2/internal/core.ver=${{ github.ref }}'"  -tags=forceposix -asmflags "all=-trimpath=${{ env.GOPATH }}" -gcflags "all=-trimpath=${{ env.GOPATH }}" .
         env:
           GOOS: windows
           GOARCH: '386'
         working-directory: v2
 
-      - name: Upload Windows Binary to Release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
         with:
-          upload_url: https://api.github.com/repos/${{ github.repository }}/releases/${{ steps.get_release.outputs.release_id }}/assets?name=gogo.exe
-          asset_path: ./v2/gogo_windowsxp_amd64.exe
-          asset_name: gogo_windowsxp_amd64.exe
-          asset_content_type: application/octet-stream
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: v2/dist/gogo*
+          tag: ${{ github.ref }}
+          overwrite: true
+          file_glob: true
+          draft: true
+
