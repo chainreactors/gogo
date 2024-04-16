@@ -55,6 +55,12 @@ func Dispatch(result *pkg.Result) {
 			smbGhostScan(result)
 		}
 		return
+	} else if result.Port == "mssqlntlm" {
+		mssqlScan(result)
+		return
+	} else if result.Port == "winrm" {
+		winrmScan(result)
+		return
 	} else {
 		initScan(result)
 	}

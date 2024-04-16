@@ -19,7 +19,7 @@ func socketFingerScan(result *Result) {
 
 	tcpsender := func(sendData []byte) ([]byte, bool) {
 		target := result.GetTarget()
-		logs.Log.Debugf("active detect: , data: ", target, sendData)
+		logs.Log.Debugf("active detect: %s, data: %q", target, sendData)
 		conn, err := NewSocket(TCP, target, RunOpt.Delay)
 		if err != nil {
 			logs.Log.Debugf("active detect %s error, %s", target, err.Error())

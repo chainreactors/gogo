@@ -391,9 +391,6 @@ func templatesLoader() {
 	LoadPortConfig()
 	LoadExtractor()
 	LoadFinger()
-	//fingers.Mmh3Fingers, fingers.Md5Fingers, ActiveFavicons = LoadHashFinger(AllHttpFingers)
-	//SocketFingers = LoadFinger("tcp").GroupByPort()
-	//ActiveHttpFingers, PassiveHttpFingers = AllHttpFingers.GroupByMod()
 }
 
 func parseFilterString(s string) (k, v, op string) {
