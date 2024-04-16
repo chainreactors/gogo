@@ -16,7 +16,7 @@ func socketFingerScan(result *Result) {
 		// 如果存在http代理，跳过tcp指纹识别
 		return
 	}
-
+	var closureResp []byte
 	tcpsender := func(sendData []byte) ([]byte, bool) {
 		target := result.GetTarget()
 		logs.Log.Debugf("active detect: %s, data: %q", target, sendData)
@@ -31,7 +31,7 @@ func socketFingerScan(result *Result) {
 		if err != nil {
 			return nil, false
 		}
-
+		closureResp = data
 		return data, true
 	}
 
@@ -59,6 +59,7 @@ func socketFingerScan(result *Result) {
 		if v != nil {
 			result.AddVuln(v)
 		}
+		CollectSocketInfo(result, closureResp)
 	}
 	return
 }

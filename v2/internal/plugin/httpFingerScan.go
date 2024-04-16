@@ -1,6 +1,7 @@
 package plugin
 
 import (
+	"github.com/chainreactors/fingers/common"
 	. "github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
@@ -22,7 +23,10 @@ func passiveHttpMatch(result *Result) {
 		result.AddVulnsAndFrameworks(fs, vs)
 	}
 
-	historyMatch(result, result.Httpresp)
+	fs, vs = historyMatch(result.Httpresp)
+	if len(fs) > 0 {
+		result.AddVulnsAndFrameworks(fs, vs)
+	}
 }
 
 func activeHttpMatch(result *Result) {
@@ -39,18 +43,31 @@ func activeHttpMatch(result *Result) {
 			return nil, false
 		}
 	}
-
+	var n int
 	fs, vs := FingerEngine.HTTPActiveMatch(RunOpt.VersionLevel, sender)
 	if len(fs) > 0 {
-		result.AddVulnsAndFrameworks(fs, vs)
+		n = result.Frameworks.Merge(fs)
+		result.Vulns.Merge(vs)
 	}
 	resp := parsers.NewResponse(closureResp)
-	historyMatch(result, resp)
+	fs, vs = historyMatch(resp)
+	if len(fs) > 0 {
+		n += result.Frameworks.Merge(fs)
+		result.Vulns.Merge(vs)
+	}
+	if n > 0 {
+		// 如果匹配到新的指纹, 重新收集基本信息
+		CollectHttpInfo(result, closureResp)
+	}
 }
 
-func historyMatch(result *Result, resp *parsers.Response) {
+func historyMatch(resp *parsers.Response) (common.Frameworks, common.Vulns) {
+	fs := make(common.Frameworks)
+	vs := make(common.Vulns)
 	for _, content := range resp.History {
-		fs, vs := FingerEngine.HTTPMatch(content.Raw, "")
-		result.AddVulnsAndFrameworks(fs, vs)
+		f, v := FingerEngine.HTTPMatch(content.Raw, "")
+		fs.Merge(f)
+		vs.Merge(v)
 	}
+	return fs, vs
 }

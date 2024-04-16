@@ -13,6 +13,12 @@ github.com/chainreactors/fingers v0.0.0-20240415103628-fca3cd62f273 h1:ZhaD4xQFo
 github.com/chainreactors/fingers v0.0.0-20240415103628-fca3cd62f273/go.mod h1:cO2a79lRNSaM6hu17xIyws5eWCWxjcRxY9IFPlss2lE=
 github.com/chainreactors/fingers v0.0.0-20240415103906-0baf302754fa h1:TZ6tZsG0hG6q3swa2djYd2B10VjaWNEqsA1fUJhUSAM=
 github.com/chainreactors/fingers v0.0.0-20240415103906-0baf302754fa/go.mod h1:cO2a79lRNSaM6hu17xIyws5eWCWxjcRxY9IFPlss2lE=
+github.com/chainreactors/fingers v0.0.0-20240416075822-e0e13791426c h1:VYhY16Y6BmX2DI2fOtAG1l23mnJSKuF27RBZ9zR2BsA=
+github.com/chainreactors/fingers v0.0.0-20240416075822-e0e13791426c/go.mod h1:cO2a79lRNSaM6hu17xIyws5eWCWxjcRxY9IFPlss2lE=
+github.com/chainreactors/fingers v0.0.0-20240416080211-489d5f31ab20 h1:SbFSz2mrdTNvNIdNR+g0psMfFbVVA38HXITvBrBlam0=
+github.com/chainreactors/fingers v0.0.0-20240416080211-489d5f31ab20/go.mod h1:cO2a79lRNSaM6hu17xIyws5eWCWxjcRxY9IFPlss2lE=
+github.com/chainreactors/fingers v0.0.0-20240416080452-7d5b653b17cb h1:bdgay9M0RDexWjQyIK3LWVOn/jXglcGUYEz88holuSY=
+github.com/chainreactors/fingers v0.0.0-20240416080452-7d5b653b17cb/go.mod h1:cO2a79lRNSaM6hu17xIyws5eWCWxjcRxY9IFPlss2lE=
 github.com/chainreactors/logs v0.0.0-20231027080134-7a11bb413460/go.mod h1:VZFqkFDGmp7/JOMeraW+YI7kTGcgz9fgc/HArVFnrGQ=
 github.com/chainreactors/logs v0.0.0-20240207121836-c946f072f81f h1:tcfp+CEdgiMvjyUzWab5edJtxUwRMSMEIkLybupIx0k=
 github.com/chainreactors/logs v0.0.0-20240207121836-c946f072f81f/go.mod h1:6Mv6W70JrtL6VClulZhmMRZnoYpcTahcDTKLMNEjK0o=
