@@ -54,8 +54,10 @@ changelog:
       - "{{ .Tag }}"
       - "^docs"
 
-#release:
-#  github:
-#    owner: chainreactors
-#    name: gogo
-#  draft: true
+release:
+  disable: true
+  skip_upload: true
+  github:
+    owner: chainreactors
+    name: gogo
+  draft: true
