@@ -55,6 +55,8 @@ changelog:
       - "^docs"
 
 release:
+  disable: true
+  skip_upload: true
   github:
     owner: chainreactors
     name: gogo

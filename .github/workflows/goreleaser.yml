@@ -7,6 +7,27 @@ on:
   workflow_dispatch:
 
 jobs:
+#  setup:
+#    runs-on: ubuntu-20.04
+#    outputs:
+#      upload_url: ${{ steps.create_release.outputs.upload_url }}
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v3
+#        with:
+#          fetch-depth: 0
+#          token: ${{ secrets.GITHUB_TOKEN }}
+#          submodules: recursive
+#      - name: Create Release Draft
+#        id: create_release
+#        uses: actions/create-release@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          tag_name: ${{ github.ref }}
+#          release_name: Release ${{ github.ref }}
+#          draft: true
+#          prerelease: false
   goreleaser:
     runs-on: ubuntu-20.04
     steps:
@@ -24,7 +45,7 @@ jobs:
           go-version: 1.21
       -
         name: Install upx
-        run: sudo apt install upx -y
+        run: sudo apt install upx zip -y
         continue-on-error: true
       -
         name: Run GoReleaser
@@ -38,11 +59,35 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GOPATH: "/home/runner/go"
 
-      - name: Upload assets
-        uses: actions/upload-artifact@v3
+      - name: Set up Go 1.11
+        uses: actions/setup-go@v3
         with:
-          name: gogo_archive
-          path: |
-            v2/dist/gogo*
-            tools/*
-            README.md
+          go-version: '1.11'
+
+      - name: Compile for Windows x64
+        run: go build -o dist/gogo_windowsxp_amd64.exe -ldflags "-s -w -X 'github.com/chainreactors/gogo/v2/internal/core.ver=${{ github.ref }}'" -tags=forceposix -asmflags "all=-trimpath=${{ env.GOPATH }}" -gcflags "all=-trimpath=${{ env.GOPATH }}" .
+        env:
+          GOOS: windows
+          GOARCH: amd64
+        working-directory: v2
+
+      - name: Compile for Windows x64
+        run: go build -o dist/gogo_windowsxp_386.exe -ldflags "-s -w -X 'github.com/chainreactors/gogo/v2/internal/core.ver=${{ github.ref }}'"  -tags=forceposix -asmflags "all=-trimpath=${{ env.GOPATH }}" -gcflags "all=-trimpath=${{ env.GOPATH }}" .
+        env:
+          GOOS: windows
+          GOARCH: '386'
+        working-directory: v2
+
+      - name: Zip files
+        run: zip -r v2/dist/gogo_archive.zip v2/dist/gogo* tools/* README.md
+
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: v2/dist/gogo*
+          tag: ${{ github.ref }}
+          overwrite: true
+          file_glob: true
+          draft: true
+

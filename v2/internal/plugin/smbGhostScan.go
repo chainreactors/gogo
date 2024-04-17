@@ -3,9 +3,9 @@ package plugin
 
 import (
 	"bytes"
+	"github.com/chainreactors/fingers/common"
 
 	"github.com/chainreactors/gogo/v2/pkg"
-	"github.com/chainreactors/parsers"
 )
 
 var sgpkt = pkg.Decode("YmBgOPAv2NfJgQEG5BlIBSoMHAyMDAwM9VjkKhgYGJhAmEmASYlJhYmBmYlZgFmQGSTHyKDGAKEVwPoJAWYGLqh6BAYBAAAAAP//")
@@ -25,6 +25,6 @@ func smbGhostScan(result *pkg.Result) {
 		return
 	}
 	if bytes.Equal(content[72:74], []byte{0x11, 0x03}) && bytes.Equal(content[74:76], []byte{0x02, 0x00}) {
-		result.AddVuln(&parsers.Vuln{Name: "SMBGHOST", SeverityLevel: parsers.SeverityCRITICAL})
+		result.AddVuln(&common.Vuln{Name: "SMBGHOST", SeverityLevel: common.SeverityCRITICAL})
 	}
 }

@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+	"github.com/chainreactors/fingers/common"
 	"net"
 	"runtime/debug"
 	"sort"
@@ -12,7 +13,6 @@ import (
 	"github.com/chainreactors/gogo/v2/internal/plugin"
 	. "github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/logs"
-	"github.com/chainreactors/parsers"
 	"github.com/chainreactors/utils"
 	"github.com/panjf2000/ants/v2"
 )
@@ -21,7 +21,7 @@ type targetConfig struct {
 	ip      string
 	port    string
 	hosts   []string
-	fingers parsers.Frameworks
+	fingers common.Frameworks
 }
 
 func (tc *targetConfig) NewResult() *Result {
@@ -42,7 +42,7 @@ func (tc *targetConfig) NewResult() *Result {
 	return result
 }
 
-//直接扫描
+// 直接扫描
 func DefaultMod(targets interface{}, config Config) {
 	// 输出预估时间
 	logs.Log.Importantf("Default Scan is expected to take %d seconds", guessTime(targets, len(config.PortList), config.Threads))

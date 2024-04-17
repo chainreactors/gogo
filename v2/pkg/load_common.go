@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"strings"
 
+	"github.com/chainreactors/fingers/fingers"
 	"github.com/chainreactors/parsers"
 	"github.com/chainreactors/utils"
 	"github.com/chainreactors/utils/iutils"
@@ -14,10 +15,21 @@ var (
 	PortMap = utils.PortMap
 	TagMap  = utils.TagMap
 
+	FingerEngine   *fingers.FingersRules
 	Extractor      []*parsers.Extractor
 	Extractors     = make(parsers.Extractors)
 	ExtractRegexps = map[string][]*parsers.Extractor{}
 )
+
+// LoadFinger 加载指纹到全局变量
+func LoadFinger() error {
+	engine, err := fingers.NewFingersEngine(LoadConfig("http"), LoadConfig("socket"))
+	if err != nil {
+		return err
+	}
+	FingerEngine = engine
+	return nil
+}
 
 type PortFinger struct {
 	Name  string   `json:"name"`

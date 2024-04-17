@@ -2,6 +2,11 @@ package core
 
 import (
 	"fmt"
+	"github.com/chainreactors/files"
+	"github.com/chainreactors/fingers/common"
+	"github.com/chainreactors/fingers/fingers"
+	"github.com/chainreactors/logs"
+	"github.com/chainreactors/parsers"
 	"github.com/chainreactors/utils/encode"
 	"golang.org/x/net/proxy"
 	"net"
@@ -12,13 +17,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/chainreactors/files"
 	. "github.com/chainreactors/gogo/v2/internal/plugin"
 	. "github.com/chainreactors/gogo/v2/pkg"
-	"github.com/chainreactors/gogo/v2/pkg/fingers"
-	"github.com/chainreactors/logs"
 	neuhttp "github.com/chainreactors/neutron/protocols/http"
-	"github.com/chainreactors/parsers"
 	"github.com/chainreactors/utils/iutils"
 )
 
@@ -65,7 +66,7 @@ func (r *Runner) Prepare() bool {
 		//SuffixStr:  r.SuffixStr,
 	}
 	Opt.PluginDebug = r.PluginDebug
-	parsers.NoGuess = r.NoGuess
+	common.NoGuess = r.NoGuess
 	files.Key = []byte(r.Key)
 
 	// 一些特殊的分支, 这些分支将会直接退出程序
@@ -389,10 +390,7 @@ func neutronLoader(pocfile string, payloads []string) {
 func templatesLoader() {
 	LoadPortConfig()
 	LoadExtractor()
-	AllHttpFingers = LoadFinger("http")
-	fingers.Mmh3Fingers, fingers.Md5Fingers, ActiveFavicons = LoadHashFinger(AllHttpFingers)
-	SocketFingers = LoadFinger("tcp").GroupByPort()
-	ActiveHttpFingers, PassiveHttpFingers = AllHttpFingers.GroupByMod()
+	LoadFinger()
 }
 
 func parseFilterString(s string) (k, v, op string) {

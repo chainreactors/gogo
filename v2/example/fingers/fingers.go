@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/chainreactors/gogo/v2/pkg/fingers"
+	"github.com/chainreactors/fingers/fingers"
 	"github.com/chainreactors/utils"
 	"sigs.k8s.io/yaml"
 	"strings"

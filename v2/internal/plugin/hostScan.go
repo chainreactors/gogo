@@ -1,6 +1,7 @@
 package plugin
 
 import (
+	"github.com/chainreactors/fingers/common"
 	"net/http"
 	"strconv"
 	"strings"
@@ -19,7 +20,7 @@ func hostScan(result *Result) {
 	}
 
 	req, _ := http.NewRequest("GET", url, nil)
-	vuln := &parsers.Vuln{Name: "host", Detail: map[string][]string{}, SeverityLevel: parsers.SeverityINFO}
+	vuln := &common.Vuln{Name: "host", Detail: map[string][]string{}, SeverityLevel: common.SeverityINFO}
 	for _, host := range result.HttpHosts {
 		req.Host = host
 		resp, err := conn.Do(req)

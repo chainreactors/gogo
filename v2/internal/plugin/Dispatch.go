@@ -55,6 +55,12 @@ func Dispatch(result *pkg.Result) {
 			smbGhostScan(result)
 		}
 		return
+	} else if result.Port == "mssqlntlm" {
+		mssqlScan(result)
+		return
+	} else if result.Port == "winrm" {
+		winrmScan(result)
+		return
 	} else {
 		initScan(result)
 	}
@@ -68,7 +74,7 @@ func Dispatch(result *pkg.Result) {
 	if result.IsHttp {
 		httpFingerScan(result)
 	} else {
-		tcpFingerScan(result)
+		socketFingerScan(result)
 	}
 
 	//主动信息收集

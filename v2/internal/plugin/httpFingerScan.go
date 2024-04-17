@@ -1,11 +1,12 @@
 package plugin
 
 import (
+	"github.com/chainreactors/fingers/common"
 	. "github.com/chainreactors/gogo/v2/pkg"
-	"github.com/chainreactors/gogo/v2/pkg/fingers"
 	"github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
 	"net/http"
+	"strings"
 )
 
 func httpFingerScan(result *Result) {
@@ -17,18 +18,15 @@ func httpFingerScan(result *Result) {
 }
 
 func passiveHttpMatch(result *Result) {
-	for _, f := range PassiveHttpFingers {
-		frame, vuln, ok := f.Match(result.ContentMap(), 0, nil)
-		if ok {
-			if vuln != nil {
-				result.AddVuln(vuln)
-			}
-			result.AddFramework(frame)
-		} else {
-			historyMatch(result, f)
-		}
+	fs, vs := FingerEngine.HTTPMatch(result.Content, strings.Join(result.HttpHosts, ","))
+	if len(fs) > 0 {
+		result.AddVulnsAndFrameworks(fs, vs)
 	}
 
+	fs, vs = historyMatch(result.Httpresp)
+	if len(fs) > 0 {
+		result.AddVulnsAndFrameworks(fs, vs)
+	}
 }
 
 func activeHttpMatch(result *Result) {
@@ -45,32 +43,31 @@ func activeHttpMatch(result *Result) {
 			return nil, false
 		}
 	}
-
-	for _, f := range ActiveHttpFingers {
-		// 当前gogo中最大指纹level为1, 因此如果调用了这个函数, 则认定为level1
-		frame, vuln, ok := f.Match(result.ContentMap(), 1, sender)
-		if ok {
-			if vuln != nil {
-				result.AddVuln(vuln)
-			}
-			result.AddFramework(frame)
-			CollectHttpInfo(result, closureResp)
-		} else {
-			// 如果没有匹配到,则尝试使用history匹配
-			historyMatch(result, f)
-		}
+	var n int
+	fs, vs := FingerEngine.HTTPActiveMatch(RunOpt.VersionLevel, sender)
+	if len(fs) > 0 {
+		n = result.Frameworks.Merge(fs)
+		result.Vulns.Merge(vs)
+	}
+	resp := parsers.NewResponse(closureResp)
+	fs, vs = historyMatch(resp)
+	if len(fs) > 0 {
+		n += result.Frameworks.Merge(fs)
+		result.Vulns.Merge(vs)
+	}
+	if n > 0 {
+		// 如果匹配到新的指纹, 重新收集基本信息
+		CollectHttpInfo(result, closureResp)
 	}
 }
 
-func historyMatch(result *Result, f *fingers.Finger) {
-	for _, content := range result.Httpresp.History {
-		frame, vuln, ok := f.Match(content.ContentMap(), 0, nil)
-		if ok {
-			if vuln != nil {
-				result.AddVuln(vuln)
-			}
-			frame.From = 5
-			result.AddFramework(frame)
-		}
+func historyMatch(resp *parsers.Response) (common.Frameworks, common.Vulns) {
+	fs := make(common.Frameworks)
+	vs := make(common.Vulns)
+	for _, content := range resp.History {
+		f, v := FingerEngine.HTTPMatch(content.Raw, "")
+		fs.Merge(f)
+		vs.Merge(v)
 	}
+	return fs, vs
 }
