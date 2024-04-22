@@ -5,7 +5,6 @@ import (
 	. "github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
-	"net/http"
 	"strings"
 )
 
@@ -30,14 +29,14 @@ func passiveHttpMatch(result *Result) {
 }
 
 func activeHttpMatch(result *Result) {
-	var closureResp *http.Response
+	var closureResp *parsers.Response
 	sender := func(sendData []byte) ([]byte, bool) {
 		conn := result.GetHttpConn(RunOpt.Delay)
 		url := result.GetURL() + string(sendData)
 		logs.Log.Debugf("active detect: %s", url)
 		resp, err := conn.Get(url)
 		if err == nil {
-			closureResp = resp
+			closureResp = parsers.NewResponse(resp)
 			return parsers.ReadRaw(resp), true
 		} else {
 			return nil, false
@@ -48,16 +47,19 @@ func activeHttpMatch(result *Result) {
 	if len(fs) > 0 {
 		n = result.Frameworks.Merge(fs)
 		result.Vulns.Merge(vs)
+	} else {
+		if closureResp != nil {
+			fs, vs = historyMatch(closureResp)
+			if len(fs) > 0 {
+				n += result.Frameworks.Merge(fs)
+				result.Vulns.Merge(vs)
+			}
+		}
 	}
-	resp := parsers.NewResponse(closureResp)
-	fs, vs = historyMatch(resp)
-	if len(fs) > 0 {
-		n += result.Frameworks.Merge(fs)
-		result.Vulns.Merge(vs)
-	}
+
 	if n > 0 {
 		// 如果匹配到新的指纹, 重新收集基本信息
-		CollectHttpInfo(result, closureResp)
+		CollectParsedResponse(result, closureResp)
 	}
 }
 

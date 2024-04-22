@@ -14,12 +14,10 @@ github.com/chainreactors/fingers v0.0.0-20240416082903-dea8c542c450/go.mod h1:cO
 github.com/chainreactors/logs v0.0.0-20231027080134-7a11bb413460/go.mod h1:VZFqkFDGmp7/JOMeraW+YI7kTGcgz9fgc/HArVFnrGQ=
 github.com/chainreactors/logs v0.0.0-20240207121836-c946f072f81f h1:tcfp+CEdgiMvjyUzWab5edJtxUwRMSMEIkLybupIx0k=
 github.com/chainreactors/logs v0.0.0-20240207121836-c946f072f81f/go.mod h1:6Mv6W70JrtL6VClulZhmMRZnoYpcTahcDTKLMNEjK0o=
-github.com/chainreactors/neutron v0.0.0-20240415105018-91ea3acc3710 h1:SeYkuobwiq2HUePpFgN89APATo9AAuVO5omMuyuhhJY=
-github.com/chainreactors/neutron v0.0.0-20240415105018-91ea3acc3710/go.mod h1:SIJhRs9LYuE+znKjyPlS6R2BrU3PynWaW2Nlu+ZVnR0=
 github.com/chainreactors/neutron v0.0.0-20240417160347-cb9446e38283 h1:ST2LoDCfcxYDtJ0HP4Nd8N1rm9CAj/WByoZnIhGWeIA=
 github.com/chainreactors/neutron v0.0.0-20240417160347-cb9446e38283/go.mod h1:SIJhRs9LYuE+znKjyPlS6R2BrU3PynWaW2Nlu+ZVnR0=
-github.com/chainreactors/parsers v0.0.0-20240415080936-e3e484abe2f7 h1:TyI+6bSa8C8wTRmSA27QehIQdMabo3QUNbFdAHZeEm8=
-github.com/chainreactors/parsers v0.0.0-20240415080936-e3e484abe2f7/go.mod h1:BuI21VlpmYHFr1jva/IN5I5jFvvCtYRyeldGK80wYCg=
+github.com/chainreactors/parsers v0.0.0-20240422093441-3409cc136ed3 h1:fNhkCMxjdIIR9NdWAheVFy2XBfy5haTLcyVjAeu9yXQ=
+github.com/chainreactors/parsers v0.0.0-20240422093441-3409cc136ed3/go.mod h1:BuI21VlpmYHFr1jva/IN5I5jFvvCtYRyeldGK80wYCg=
 github.com/chainreactors/utils v0.0.0-20240302165634-2b8494c9cfc3 h1:oFpBQBegsjNhKrzcjJUrqOgIJoa3Bc9OUmdRmYFHcXg=
 github.com/chainreactors/utils v0.0.0-20240302165634-2b8494c9cfc3/go.mod h1:JA4eiQZm+7AsfjXBcIzIdVKBEhDCb16eNtWFCGTxlvs=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=

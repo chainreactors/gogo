@@ -9,45 +9,46 @@ import (
 	"github.com/chainreactors/utils/iutils"
 )
 
-func CollectSocketInfo(result *Result, socketContent []byte) {
-	result.Content = bytes.ToLower(socketContent)
-	ishttp, statuscode := GetStatusCode(socketContent)
-	if ishttp {
-		result.Httpresp = parsers.NewResponseWithRaw(socketContent)
-		result.Status = statuscode
-		result.Protocol = "http"
-		result.IsHttp = true
-		result.Language = result.Httpresp.Language
-		result.Midware = result.Httpresp.Server
-		result.Title = result.Httpresp.Title
-		result.HasTitle = result.Httpresp.HasTitle
+func CollectSocketResponse(result *Result, socketContent []byte) {
+	if ishttp, _ := GetStatusCode(socketContent); ishttp {
+		CollectParsedResponse(result, parsers.NewResponseWithRaw(socketContent))
 	} else {
+		result.Content = bytes.ToLower(socketContent)
 		if title := parsers.MatchTitle(socketContent); title != "" {
 			result.HasTitle = true
 			result.Title = title
 		} else {
 			result.Title = parsers.MatchCharacter(socketContent)
 		}
+		result.AddExtracts(Extractors.Extract(string(socketContent)))
 	}
-	result.AddExtracts(Extractors.Extract(string(socketContent)))
 }
 
-func CollectHttpInfo(result *Result, resp *http.Response) {
+func CollectHttpResponse(result *Result, resp *http.Response) {
+	if resp == nil {
+		return
+	}
+
+	CollectParsedResponse(result, parsers.NewResponse(resp))
+}
+
+func CollectParsedResponse(result *Result, resp *parsers.Response) {
 	if resp == nil {
 		return
 	}
 	result.IsHttp = true
-	result.Httpresp = parsers.NewResponse(resp)
+	result.Httpresp = resp
 
 	// tolower 忽略大小写
 	for i, c := range result.Httpresp.History {
 		result.Httpresp.History[i].Raw = bytes.ToLower(c.Raw)
 	}
 	result.Content = bytes.ToLower(result.Httpresp.Raw)
-	result.Status = iutils.ToString(resp.StatusCode)
+	result.Status = iutils.ToString(resp.Resp.StatusCode)
 	result.Language = result.Httpresp.Language
 	result.Midware = result.Httpresp.Server
 	result.Title = result.Httpresp.Title
+	result.HasTitle = result.Httpresp.HasTitle
 	result.AddExtracts(Extractors.Extract(string(result.Httpresp.Raw)))
 }
 
