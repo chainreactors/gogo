@@ -18,6 +18,8 @@ github.com/chainreactors/neutron v0.0.0-20240417160347-cb9446e38283 h1:ST2LoDCfc
 github.com/chainreactors/neutron v0.0.0-20240417160347-cb9446e38283/go.mod h1:SIJhRs9LYuE+znKjyPlS6R2BrU3PynWaW2Nlu+ZVnR0=
 github.com/chainreactors/parsers v0.0.0-20240422093441-3409cc136ed3 h1:fNhkCMxjdIIR9NdWAheVFy2XBfy5haTLcyVjAeu9yXQ=
 github.com/chainreactors/parsers v0.0.0-20240422093441-3409cc136ed3/go.mod h1:BuI21VlpmYHFr1jva/IN5I5jFvvCtYRyeldGK80wYCg=
+github.com/chainreactors/parsers v0.0.0-20240422094636-b88693700dfc h1:lGgglOE1FGWD7gVZuF0cufxd7i9HJ2gltUewxXCfvs4=
+github.com/chainreactors/parsers v0.0.0-20240422094636-b88693700dfc/go.mod h1:BuI21VlpmYHFr1jva/IN5I5jFvvCtYRyeldGK80wYCg=
 github.com/chainreactors/utils v0.0.0-20240302165634-2b8494c9cfc3 h1:oFpBQBegsjNhKrzcjJUrqOgIJoa3Bc9OUmdRmYFHcXg=
 github.com/chainreactors/utils v0.0.0-20240302165634-2b8494c9cfc3/go.mod h1:JA4eiQZm+7AsfjXBcIzIdVKBEhDCb16eNtWFCGTxlvs=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
