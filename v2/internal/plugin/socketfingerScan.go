@@ -59,7 +59,7 @@ func socketFingerScan(result *Result) {
 		if v != nil {
 			result.AddVuln(v)
 		}
-		CollectSocketInfo(result, closureResp)
+		CollectSocketResponse(result, closureResp)
 	}
 	return
 }

@@ -97,7 +97,7 @@ func (result *Result) GuessFramework() {
 }
 
 func (result *Result) IsHttps() bool {
-	if strings.HasPrefix(result.Protocol, "https") {
+	if result.Protocol == "https" {
 		return true
 	}
 	return false

@@ -15,7 +15,7 @@ var headers = http.Header{
 }
 
 // -default
-//socket进行对网站的连接
+// socket进行对网站的连接
 func initScan(result *pkg.Result) {
 	var bs []byte
 	target := result.GetTarget()
@@ -29,7 +29,7 @@ func initScan(result *pkg.Result) {
 			return
 		}
 		result.Open = true
-		pkg.CollectHttpInfo(result, resp)
+		pkg.CollectHttpResponse(result, resp)
 	} else {
 		conn, err := pkg.NewSocket("tcp", target, RunOpt.Delay)
 		//conn, err := pkg.TcpSocketConn(target, RunOpt.Delay)
@@ -77,7 +77,7 @@ func initScan(result *pkg.Result) {
 				result.Error = err.Error()
 			}
 		}
-		pkg.CollectSocketInfo(result, bs)
+		pkg.CollectSocketResponse(result, bs)
 	}
 
 	//所有30x,400,以及非http协议的开放端口都送到http包尝试获取更多信息
@@ -89,7 +89,7 @@ func initScan(result *pkg.Result) {
 	return
 }
 
-//使用net/http进行带redirect的请求
+// 使用net/http进行带redirect的请求
 func systemHttp(result *pkg.Result, scheme string) {
 
 	// 如果是400或者不可识别协议,则使用https
@@ -144,7 +144,7 @@ func systemHttp(result *pkg.Result, scheme string) {
 	}
 
 	result.Error = ""
-	pkg.CollectHttpInfo(result, resp)
+	pkg.CollectHttpResponse(result, resp)
 	return
 }
 
@@ -173,7 +173,7 @@ func noRedirectHttp(result *pkg.Result, req *http.Request) {
 	}
 
 	result.Error = ""
-	pkg.CollectHttpInfo(result, resp)
+	pkg.CollectHttpResponse(result, resp)
 }
 
 func collectTLS(result *pkg.Result, resp *http.Response) {

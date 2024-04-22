@@ -30,6 +30,7 @@ func NewRunner() *Runner {
 }
 
 var ver = ""
+var logFile = ".sock.lock"
 
 type Runner struct {
 	MiscOption    `group:"Miscellaneous Options"`
@@ -52,7 +53,7 @@ func (r *Runner) Prepare() bool {
 		if r.Debug {
 			logs.Log.SetLevel(logs.Debug)
 		}
-		logs.Log.SetFile(".sock.lock")
+		logs.Log.SetFile(logFile)
 		logs.Log.Init()
 	}
 

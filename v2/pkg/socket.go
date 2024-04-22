@@ -74,8 +74,8 @@ func (s *Socket) QuickRequest(data []byte, max int) ([]byte, error) {
 	return buf[:n], err
 }
 
-func (s *Socket) Close() {
-	s.Conn.Close()
+func (s *Socket) Close() error {
+	return s.Conn.Close()
 }
 
 var ProxyDialTimeout func(network, address string, timeout time.Duration) (net.Conn, error)
