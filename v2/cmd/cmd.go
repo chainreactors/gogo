@@ -11,7 +11,7 @@ import (
 func Gogo() {
 	var runner core.Runner
 	parser := flags.NewParser(&runner, flags.Default)
-	parser.Usage = core.Banner()
+	parser.Usage = core.Usage()
 	_, err := parser.Parse()
 	if err != nil {
 		if err.(*flags.Error).Type != flags.ErrHelp {
@@ -22,6 +22,7 @@ func Gogo() {
 	if ok := runner.Prepare(); !ok {
 		os.Exit(0)
 	}
+	logs.Log.Important(core.Banner())
 	runner.Init()
 	runner.Run()
 

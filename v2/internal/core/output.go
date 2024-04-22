@@ -155,7 +155,7 @@ func FormatOutput(filename, outFilename, outf, filenamef string, filters []strin
 	}
 }
 
-func Banner() string {
+func Usage() string {
 	return `
 
   WIKI: https://chainreactors.github.io/wiki/gogo/
@@ -192,4 +192,8 @@ func Banner() string {
     filter output:
       gogo -F 1.dat --filter frame::redis 
 `
+}
+
+func Banner() string {
+	return fmt.Sprintf(`gogo:%s`, ver)
 }
