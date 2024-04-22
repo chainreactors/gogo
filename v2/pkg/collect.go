@@ -11,6 +11,7 @@ import (
 
 func CollectSocketResponse(result *Result, socketContent []byte) {
 	if ishttp, _ := GetStatusCode(socketContent); ishttp {
+		result.Protocol = "http"
 		CollectParsedResponse(result, parsers.NewResponseWithRaw(socketContent))
 	} else {
 		result.Content = bytes.ToLower(socketContent)
