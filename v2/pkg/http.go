@@ -18,6 +18,7 @@ func HttpConn(delay int) *http.Client {
 		Proxy: Proxy,
 		//TLSHandshakeTimeout : delay * time.Second,
 		TLSClientConfig: &tls.Config{
+			MinVersion:         tls.VersionTLS10,
 			Renegotiation:      tls.RenegotiateOnceAsClient,
 			InsecureSkipVerify: true,
 		},

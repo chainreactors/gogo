@@ -133,12 +133,12 @@ func systemHttp(result *pkg.Result, scheme string) {
 			result.Protocol = scheme
 		}
 
-		collectTLS(result, resp)
+		pkg.CollectTLS(result, resp)
 	} else if resp.Request.Response != nil && resp.Request.Response.TLS != nil {
 		// 一种相对罕见的情况, 从https页面30x跳转到http页面. 则判断tls
 		result.Protocol = "https"
 
-		collectTLS(result, resp.Request.Response)
+		pkg.CollectTLS(result, resp.Request.Response)
 	} else {
 		result.Protocol = "http"
 	}
@@ -167,19 +167,11 @@ func noRedirectHttp(result *pkg.Result, req *http.Request) {
 			result.Protocol = "https"
 		}
 
-		collectTLS(result, resp)
+		pkg.CollectTLS(result, resp)
 	} else {
 		result.Protocol = "http"
 	}
 
 	result.Error = ""
 	pkg.CollectHttpResponse(result, resp)
-}
-
-func collectTLS(result *pkg.Result, resp *http.Response) {
-	result.Host = strings.Join(resp.TLS.PeerCertificates[0].DNSNames, ",")
-	if len(resp.TLS.PeerCertificates[0].DNSNames) > 0 {
-		// 经验公式: 通常只有cdn会绑定超过2个host, 正常情况只有一个host或者带上www的两个host
-		result.HttpHosts = append(result.HttpHosts, pkg.FormatCertDomains(resp.TLS.PeerCertificates[0].DNSNames)...)
-	}
 }

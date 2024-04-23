@@ -71,3 +71,11 @@ func FormatCertDomains(domains []string) []string {
 	}
 	return iutils.StringsUnique(hosts)
 }
+
+func CollectTLS(result *Result, resp *http.Response) {
+	result.Host = strings.Join(resp.TLS.PeerCertificates[0].DNSNames, ",")
+	if len(resp.TLS.PeerCertificates[0].DNSNames) > 0 {
+		// 经验公式: 通常只有cdn会绑定超过2个host, 正常情况只有一个host或者带上www的两个host
+		result.HttpHosts = append(result.HttpHosts, FormatCertDomains(resp.TLS.PeerCertificates[0].DNSNames)...)
+	}
+}
