@@ -3,8 +3,11 @@ package plugin
 import (
 	"bytes"
 	"fmt"
+	"net"
 	"net/http"
+	"os"
 	"strings"
+	"syscall"
 
 	"github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/logs"
@@ -25,39 +28,22 @@ func initScan(result *pkg.Result) {
 		req, _ := http.NewRequest("GET", "http://"+target, nil)
 		resp, err := conn.Do(req)
 		if err != nil {
-			result.Error = err.Error()
+			result.Err = err
 			return
 		}
 		result.Open = true
 		pkg.CollectHttpResponse(result, resp)
 	} else {
-		conn, err := pkg.NewSocket("tcp", target, RunOpt.Delay)
-		//conn, err := pkg.TcpSocketConn(target, RunOpt.Delay)
-		if err != nil {
-			// return open: 0, closed: 1, filtered: 2, noroute: 3, denied: 4, down: 5, error_host: 6, unkown: -1
-			errMsg := err.Error()
-			result.Error = errMsg
-			if RunOpt.Debug {
-				if strings.Contains(errMsg, "refused") {
-					result.ErrStat = 1
-				} else if strings.Contains(errMsg, "timeout") {
-					result.ErrStat = 2
-				} else if strings.Contains(errMsg, "no route to host") {
-					result.ErrStat = 3
-				} else if strings.Contains(errMsg, "permission denied") {
-					result.ErrStat = 4
-				} else if strings.Contains(errMsg, "host is down") {
-					result.ErrStat = 5
-				} else if strings.Contains(errMsg, "no such host") {
-					result.ErrStat = 6
-				} else if strings.Contains(errMsg, "network is unreachable") {
-					result.ErrStat = 6
-				} else if strings.Contains(errMsg, "The requested address is not valid in its context.") {
-					result.ErrStat = 6
-				} else {
-					result.ErrStat = -1
-				}
+		defer func() {
+			// 如果进行了各种探测依旧为tcp协议, 则收集tcp端口状态
+			if result.Protocol == "tcp" {
+				result.Error = result.Err.Error()
+				result.ErrStat = handleError(result.Err)
 			}
+		}()
+		conn, err := pkg.NewSocket("tcp", target, RunOpt.Delay)
+		if err != nil {
+			result.Err = err
 			return
 		}
 		defer conn.Close()
@@ -67,14 +53,14 @@ func initScan(result *pkg.Result) {
 		if result.SmartProbe {
 			return
 		}
-		result.Status = "tcp"
+		result.Status = "open"
 
 		bs, err = conn.Read(1) // 已经建立了连接, timeout不用过长时间, 如果没有返回值就可以直接进入下一步
 		if err != nil {
 			senddataStr := fmt.Sprintf("GET /%s HTTP/1.1\r\nHost: %s\r\n\r\n", result.Uri, target)
 			bs, err = conn.Request([]byte(senddataStr), 4096)
 			if err != nil {
-				result.Error = err.Error()
+				result.Err = err
 			}
 		}
 		pkg.CollectSocketResponse(result, bs)
@@ -86,6 +72,7 @@ func initScan(result *pkg.Result) {
 	} else if strings.HasPrefix(result.Status, "3") {
 		systemHttp(result, "http")
 	}
+
 	return
 }
 
@@ -174,4 +161,40 @@ func noRedirectHttp(result *pkg.Result, req *http.Request) {
 
 	result.Error = ""
 	pkg.CollectHttpResponse(result, resp)
+}
+
+func handleError(err error) int {
+	if opErr, ok := err.(*net.OpError); ok {
+		if opErr.Timeout() {
+			return 2 // "filtered|closed"
+		}
+		if sysErr, ok := opErr.Err.(*os.SyscallError); ok {
+			switch sysErr.Err {
+			case syscall.ECONNREFUSED:
+				return 1 // "closed"
+			case syscall.EHOSTDOWN:
+				return 5 // "down"
+			case syscall.EHOSTUNREACH, syscall.ENETUNREACH:
+				return 3 // "noroute"
+			case syscall.WSAECONNRESET:
+				return 8
+			}
+		}
+	}
+
+	if _, ok := err.(*net.DNSError); ok {
+		return 6 // "error_host"
+	}
+
+	if _, ok := err.(*net.AddrError); ok {
+		return 6 // "error_host"
+	}
+
+	if sysErr, ok := err.(*os.SyscallError); ok {
+		if sysErr.Err == syscall.EACCES {
+			return 4 // "denied"
+		}
+	}
+
+	return -1 // "unknown"
 }

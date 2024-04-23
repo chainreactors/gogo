@@ -12,16 +12,21 @@ var (
 	Win  = iutils.IsWin()
 	Mac  = iutils.IsMac()
 	Root = iutils.IsRoot()
-	//Key  = []byte{}
 )
 
-//func CompileRegexp(s string) *regexp.Regexp {
-//	reg, err := regexp.Compile(s)
-//	if err != nil {
-//		iutils.Fatal(fmt.Sprintf("regexp string error: %s, %s", s, err.Error()))
-//	}
-//	return reg
-//}
+// return open: 0, closed: 1, filtered: 2, noroute: 3, denied: 4, down: 5, error_host: 6, unkown: -1
+var PortStat = map[int]string{
+	0:  "open",
+	1:  "closed",
+	2:  "filtered|closed",
+	3:  "noroute",
+	4:  "denied",
+	5:  "down",
+	6:  "error_host",
+	7:  "icmp",
+	8:  "rst",
+	-1: "unknown",
+}
 
 func Decode(input string) []byte {
 	b := encode.Base64Decode(input)

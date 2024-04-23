@@ -75,7 +75,7 @@ func DefaultMod(targets interface{}, config Config) {
 				config.File.SafeWrite(output(result, config.FileOutputf))
 			}
 		} else if result.Error != "" {
-			logs.Log.Debugf("%s stat: %s, errmsg: %s", result.GetTarget(), portstat[result.ErrStat], result.Error)
+			logs.Log.Debugf("%s stat: %s, errmsg: %s", result.GetTarget(), PortStat[result.ErrStat], result.Error)
 		}
 		wgs.Done()
 	}, ants.WithPanicHandler(func(err interface{}) {
@@ -146,7 +146,7 @@ func SmartMod(target *utils.CIDR, config Config) {
 			logs.Log.Debug("cidr scan , " + result.String())
 			cidrAlived(result.Ip, temp, mask)
 		} else if result.Error != "" {
-			logs.Log.Debugf("%s stat: %s, errmsg: %s", result.GetTarget(), portstat[result.ErrStat], result.Error)
+			logs.Log.Debugf("%s stat: %s, errmsg: %s", result.GetTarget(), PortStat[result.ErrStat], result.Error)
 		}
 		wg.Done()
 	})

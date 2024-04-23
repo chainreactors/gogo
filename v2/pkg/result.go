@@ -32,6 +32,7 @@ type Result struct {
 	HttpConn   *http.Client      `json:"-"`
 	Httpresp   *parsers.Response `json:"-"`
 	HasTitle   bool              `json:"-"`
+	Err        error             `json:"-"`
 	Error      string            `json:"-"`
 	ErrStat    int               `json:"-"`
 	Content    []byte            `json:"-"`
