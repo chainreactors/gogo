@@ -30,40 +30,58 @@ func passiveHttpMatch(result *Result) {
 
 func activeHttpMatch(result *Result) {
 	var closureResp *parsers.Response
+	var finalResp *parsers.Response
 	sender := func(sendData []byte) ([]byte, bool) {
 		conn := result.GetHttpConn(RunOpt.Delay)
 		url := result.GetURL() + string(sendData)
 		logs.Log.Debugf("active detect: %s", url)
 		resp, err := conn.Get(url)
 		if err == nil {
-			closureResp = parsers.NewResponse(resp)
 			return parsers.ReadRaw(resp), true
 		} else {
 			return nil, false
 		}
 	}
+
 	var n int
-	fs, vs := FingerEngine.HTTPActiveMatch(RunOpt.VersionLevel, sender)
-	if len(fs) > 0 {
-		n = result.Frameworks.Merge(fs)
-		result.Vulns.Merge(vs)
-	} else {
-		if closureResp != nil {
-			fs, vs = historyMatch(closureResp)
-			if len(fs) > 0 {
-				n += result.Frameworks.Merge(fs)
-				result.Vulns.Merge(vs)
+	callback := func(f *common.Framework, v *common.Vuln) {
+		var i int
+		if f != nil {
+			ok := result.Frameworks.Add(f)
+			if ok {
+				i += 1
 			}
+			if v != nil {
+				result.Vulns.Add(v)
+			}
+		} else {
+			if closureResp != nil {
+				fs, vs := historyMatch(closureResp)
+				if len(fs) > 0 {
+					i += result.Frameworks.Merge(fs)
+					result.Vulns.Merge(vs)
+				}
+			}
+		}
+
+		if i > 0 {
+			n += i
+			finalResp = closureResp
 		}
 	}
 
-	if n > 0 {
+	FingerEngine.HTTPActiveMatch(RunOpt.VersionLevel, sender, callback)
+
+	if finalResp != nil {
 		// 如果匹配到新的指纹, 重新收集基本信息
-		CollectParsedResponse(result, closureResp)
+		CollectParsedResponse(result, finalResp)
 	}
 }
 
 func historyMatch(resp *parsers.Response) (common.Frameworks, common.Vulns) {
+	if resp.History == nil {
+		return nil, nil
+	}
 	fs := make(common.Frameworks)
 	vs := make(common.Vulns)
 	for _, content := range resp.History {
