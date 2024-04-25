@@ -37,8 +37,10 @@ func initScan(result *pkg.Result) {
 		defer func() {
 			// 如果进行了各种探测依旧为tcp协议, 则收集tcp端口状态
 			if result.Protocol == "tcp" {
-				result.Error = result.Err.Error()
-				result.ErrStat = handleError(result.Err)
+				if result.Err != nil {
+					result.Error = result.Err.Error()
+					result.ErrStat = handleError(result.Err)
+				}
 			}
 		}()
 		conn, err := pkg.NewSocket("tcp", target, RunOpt.Delay)
