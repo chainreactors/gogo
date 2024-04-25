@@ -1,6 +1,7 @@
 package plugin
 
 import (
+	"github.com/chainreactors/fingers/common"
 	. "github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/logs"
 )
@@ -16,7 +17,17 @@ func socketFingerScan(result *Result) {
 		// 如果存在http代理，跳过tcp指纹识别
 		return
 	}
-	var closureResp []byte
+	var closureResp, finalResp []byte
+
+	callback := func(f *common.Framework, v *common.Vuln) {
+		if f != nil {
+			result.Frameworks.Add(f)
+			finalResp = closureResp
+		}
+		if v != nil {
+			result.Vulns.Add(v)
+		}
+	}
 	tcpsender := func(sendData []byte) ([]byte, bool) {
 		target := result.GetTarget()
 		logs.Log.Debugf("active detect: %s, data: %q", target, sendData)
@@ -52,14 +63,10 @@ func socketFingerScan(result *Result) {
 	//
 	//	return data, true
 	//}
+	FingerEngine.SocketMatch(result.Content, result.Port, RunOpt.VersionLevel, tcpsender, callback)
 
-	f, v := FingerEngine.SocketMatch(result.Content, result.Port, RunOpt.VersionLevel, tcpsender)
-	if f != nil {
-		result.AddFramework(f)
-		if v != nil {
-			result.AddVuln(v)
-		}
-		CollectSocketResponse(result, closureResp)
+	if finalResp != nil {
+		CollectSocketResponse(result, finalResp)
 	}
 	return
 }

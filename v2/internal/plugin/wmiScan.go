@@ -28,7 +28,7 @@ func wmiScan(result *pkg.Result) {
 
 	if bytes.Index(ret, []byte("NTLMSSP")) != -1 {
 		result.Protocol = "wmi"
-		result.Status = "WMI"
+		result.Status = "wmi"
 		result.AddNTLMInfo(iutils.ToStringMap(ntlmssp.NTLMInfo(ret)), "wmi")
 	}
 }

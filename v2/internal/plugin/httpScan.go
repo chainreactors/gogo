@@ -3,11 +3,10 @@ package plugin
 import (
 	"bytes"
 	"fmt"
-	"net/http"
-	"strings"
-
 	"github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/logs"
+	"net/http"
+	"strings"
 )
 
 var headers = http.Header{
@@ -25,39 +24,26 @@ func initScan(result *pkg.Result) {
 		req, _ := http.NewRequest("GET", "http://"+target, nil)
 		resp, err := conn.Do(req)
 		if err != nil {
-			result.Error = err.Error()
+			result.Err = err
 			return
 		}
 		result.Open = true
 		pkg.CollectHttpResponse(result, resp)
 	} else {
-		conn, err := pkg.NewSocket("tcp", target, RunOpt.Delay)
-		//conn, err := pkg.TcpSocketConn(target, RunOpt.Delay)
-		if err != nil {
-			// return open: 0, closed: 1, filtered: 2, noroute: 3, denied: 4, down: 5, error_host: 6, unkown: -1
-			errMsg := err.Error()
-			result.Error = errMsg
-			if RunOpt.Debug {
-				if strings.Contains(errMsg, "refused") {
-					result.ErrStat = 1
-				} else if strings.Contains(errMsg, "timeout") {
-					result.ErrStat = 2
-				} else if strings.Contains(errMsg, "no route to host") {
-					result.ErrStat = 3
-				} else if strings.Contains(errMsg, "permission denied") {
-					result.ErrStat = 4
-				} else if strings.Contains(errMsg, "host is down") {
-					result.ErrStat = 5
-				} else if strings.Contains(errMsg, "no such host") {
-					result.ErrStat = 6
-				} else if strings.Contains(errMsg, "network is unreachable") {
-					result.ErrStat = 6
-				} else if strings.Contains(errMsg, "The requested address is not valid in its context.") {
-					result.ErrStat = 6
-				} else {
-					result.ErrStat = -1
+		defer func() {
+			// 如果进行了各种探测依旧为tcp协议, 则收集tcp端口状态
+			if result.Protocol == "tcp" {
+				if result.Err != nil {
+					result.Error = result.Err.Error()
+					if RunOpt.Debug {
+						result.ErrStat = handleError(result.Err)
+					}
 				}
 			}
+		}()
+		conn, err := pkg.NewSocket("tcp", target, RunOpt.Delay)
+		if err != nil {
+			result.Err = err
 			return
 		}
 		defer conn.Close()
@@ -67,14 +53,14 @@ func initScan(result *pkg.Result) {
 		if result.SmartProbe {
 			return
 		}
-		result.Status = "tcp"
+		result.Status = "open"
 
 		bs, err = conn.Read(1) // 已经建立了连接, timeout不用过长时间, 如果没有返回值就可以直接进入下一步
 		if err != nil {
 			senddataStr := fmt.Sprintf("GET /%s HTTP/1.1\r\nHost: %s\r\n\r\n", result.Uri, target)
 			bs, err = conn.Request([]byte(senddataStr), 4096)
 			if err != nil {
-				result.Error = err.Error()
+				result.Err = err
 			}
 		}
 		pkg.CollectSocketResponse(result, bs)
@@ -86,6 +72,7 @@ func initScan(result *pkg.Result) {
 	} else if strings.HasPrefix(result.Status, "3") {
 		systemHttp(result, "http")
 	}
+
 	return
 }
 
@@ -133,12 +120,12 @@ func systemHttp(result *pkg.Result, scheme string) {
 			result.Protocol = scheme
 		}
 
-		collectTLS(result, resp)
+		pkg.CollectTLS(result, resp)
 	} else if resp.Request.Response != nil && resp.Request.Response.TLS != nil {
 		// 一种相对罕见的情况, 从https页面30x跳转到http页面. 则判断tls
 		result.Protocol = "https"
 
-		collectTLS(result, resp.Request.Response)
+		pkg.CollectTLS(result, resp.Request.Response)
 	} else {
 		result.Protocol = "http"
 	}
@@ -167,7 +154,7 @@ func noRedirectHttp(result *pkg.Result, req *http.Request) {
 			result.Protocol = "https"
 		}
 
-		collectTLS(result, resp)
+		pkg.CollectTLS(result, resp)
 	} else {
 		result.Protocol = "http"
 	}
@@ -176,10 +163,27 @@ func noRedirectHttp(result *pkg.Result, req *http.Request) {
 	pkg.CollectHttpResponse(result, resp)
 }
 
-func collectTLS(result *pkg.Result, resp *http.Response) {
-	result.Host = strings.Join(resp.TLS.PeerCertificates[0].DNSNames, ",")
-	if len(resp.TLS.PeerCertificates[0].DNSNames) > 0 {
-		// 经验公式: 通常只有cdn会绑定超过2个host, 正常情况只有一个host或者带上www的两个host
-		result.HttpHosts = append(result.HttpHosts, pkg.FormatCertDomains(resp.TLS.PeerCertificates[0].DNSNames)...)
+func handleError(err error) int {
+	errMsg := err.Error()
+	if strings.Contains(errMsg, "refused") {
+		return 1
+	} else if strings.Contains(errMsg, "timeout") {
+		return 2
+	} else if strings.Contains(errMsg, "no route to host") {
+		return 3
+	} else if strings.Contains(errMsg, "permission denied") {
+		return 4
+	} else if strings.Contains(errMsg, "host is down") {
+		return 5
+	} else if strings.Contains(errMsg, "no such host") {
+		return 6
+	} else if strings.Contains(errMsg, "network is unreachable") {
+		return 6
+	} else if strings.Contains(errMsg, "The requested address is not valid in its context.") {
+		return 6
+	} else if strings.Contains(errMsg, "WSAECONNRESET") {
+		return 8
+	} else {
+		return -1
 	}
 }
