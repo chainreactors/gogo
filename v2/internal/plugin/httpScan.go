@@ -3,14 +3,10 @@ package plugin
 import (
 	"bytes"
 	"fmt"
-	"net"
-	"net/http"
-	"os"
-	"strings"
-	"syscall"
-
 	"github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/logs"
+	"net/http"
+	"strings"
 )
 
 var headers = http.Header{
@@ -39,7 +35,9 @@ func initScan(result *pkg.Result) {
 			if result.Protocol == "tcp" {
 				if result.Err != nil {
 					result.Error = result.Err.Error()
-					result.ErrStat = handleError(result.Err)
+					if RunOpt.Debug {
+						result.ErrStat = handleError(result.Err)
+					}
 				}
 			}
 		}()
@@ -166,37 +164,26 @@ func noRedirectHttp(result *pkg.Result, req *http.Request) {
 }
 
 func handleError(err error) int {
-	if opErr, ok := err.(*net.OpError); ok {
-		if opErr.Timeout() {
-			return 2 // "filtered|closed"
-		}
-		if sysErr, ok := opErr.Err.(*os.SyscallError); ok {
-			switch sysErr.Err {
-			case syscall.ECONNREFUSED:
-				return 1 // "closed"
-			case syscall.EHOSTDOWN:
-				return 5 // "down"
-			case syscall.EHOSTUNREACH, syscall.ENETUNREACH:
-				return 3 // "noroute"
-			case syscall.WSAECONNRESET:
-				return 8
-			}
-		}
+	errMsg := err.Error()
+	if strings.Contains(errMsg, "refused") {
+		return 1
+	} else if strings.Contains(errMsg, "timeout") {
+		return 2
+	} else if strings.Contains(errMsg, "no route to host") {
+		return 3
+	} else if strings.Contains(errMsg, "permission denied") {
+		return 4
+	} else if strings.Contains(errMsg, "host is down") {
+		return 5
+	} else if strings.Contains(errMsg, "no such host") {
+		return 6
+	} else if strings.Contains(errMsg, "network is unreachable") {
+		return 6
+	} else if strings.Contains(errMsg, "The requested address is not valid in its context.") {
+		return 6
+	} else if strings.Contains(errMsg, "WSAECONNRESET") {
+		return 8
+	} else {
+		return -1
 	}
-
-	if _, ok := err.(*net.DNSError); ok {
-		return 6 // "error_host"
-	}
-
-	if _, ok := err.(*net.AddrError); ok {
-		return 6 // "error_host"
-	}
-
-	if sysErr, ok := err.(*os.SyscallError); ok {
-		if sysErr.Err == syscall.EACCES {
-			return 4 // "denied"
-		}
-	}
-
-	return -1 // "unknown"
 }
