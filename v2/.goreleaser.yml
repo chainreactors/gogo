@@ -29,8 +29,6 @@ builds:
         goarch: "386"
       - goos: linux
         goarch: mips64
-      - goos: solaris
-        goarch: amd64
       - goos: android
         goarch: amd64
       - goos: android
