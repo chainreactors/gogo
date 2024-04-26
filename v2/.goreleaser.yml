@@ -16,7 +16,7 @@ builds:
       - darwin
       - freebsd
       - solaris
-      - android
+#      - android
     goarch:
       - amd64
       - "386"
@@ -27,6 +27,8 @@ builds:
     ignore:
       - goos: darwin
         goarch: "386"
+      - goos: linux
+        goarch: mips64
       - goos: solaris
         goarch: amd64
       - goos: android
