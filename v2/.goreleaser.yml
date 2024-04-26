@@ -14,15 +14,26 @@ builds:
       - windows
       - linux
       - darwin
+      - freebsd
+      - openbsd
+      - solaris
+      - android
     goarch:
       - amd64
       - "386"
       - arm64
+      - arm
+      - mips
+      - mips64
     ignore:
       - goos: windows
         goarch: arm64
       - goos: darwin
         goarch: "386"
+      - goos: solaris
+        goarch: amd64
+      - goos: android
+        goarch: amd64
     ldflags: "-s -w -X 'github.com/chainreactors/gogo/v2/internal/core.ver=={{ .Tag }}'"
     flags:
       - -trimpath

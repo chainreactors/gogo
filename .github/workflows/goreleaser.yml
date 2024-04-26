@@ -7,27 +7,6 @@ on:
   workflow_dispatch:
 
 jobs:
-#  setup:
-#    runs-on: ubuntu-20.04
-#    outputs:
-#      upload_url: ${{ steps.create_release.outputs.upload_url }}
-#    steps:
-#      - name: Checkout
-#        uses: actions/checkout@v3
-#        with:
-#          fetch-depth: 0
-#          token: ${{ secrets.GITHUB_TOKEN }}
-#          submodules: recursive
-#      - name: Create Release Draft
-#        id: create_release
-#        uses: actions/create-release@v1
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        with:
-#          tag_name: ${{ github.ref }}
-#          release_name: Release ${{ github.ref }}
-#          draft: true
-#          prerelease: false
   goreleaser:
     runs-on: ubuntu-20.04
     steps:
@@ -47,6 +26,13 @@ jobs:
         name: Install upx
         run: sudo apt install upx zip -y
         continue-on-error: true
+
+      - name: Set up GCC
+        uses: egor-tensin/setup-gcc@v1
+        with:
+          version: latest
+          platform: x64
+
       -
         name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v5
