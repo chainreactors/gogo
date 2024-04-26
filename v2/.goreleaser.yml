@@ -16,7 +16,7 @@ builds:
       - darwin
       - freebsd
       - solaris
-#      - android
+      - android
     goarch:
       - amd64
       - "386"
