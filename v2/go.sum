@@ -9,16 +9,10 @@ github.com/chainreactors/files v0.0.0-20231102192550-a652458cee26/go.mod h1:/Xa9
 github.com/chainreactors/files v0.0.0-20231123083421-cea5b4ad18a8 h1:8Plpi6haQbU8NzH+JtU6bkGDWF/OeC+GFj8DIDuY5yk=
 github.com/chainreactors/files v0.0.0-20231123083421-cea5b4ad18a8/go.mod h1:/Xa9YXhjBlaC33JTD6ZTJFig6pcplak2IDcovf42/6A=
 github.com/chainreactors/fingers v0.0.0-20240304115656-fa8ca9fc375f/go.mod h1:cO2a79lRNSaM6hu17xIyws5eWCWxjcRxY9IFPlss2lE=
-github.com/chainreactors/fingers v0.0.0-20240416082903-dea8c542c450 h1:TYGscLJDvMb8AIJcNRtimnXmHpEgAxlyLE7xnIOWc7o=
-github.com/chainreactors/fingers v0.0.0-20240416082903-dea8c542c450/go.mod h1:cO2a79lRNSaM6hu17xIyws5eWCWxjcRxY9IFPlss2lE=
-github.com/chainreactors/fingers v0.0.0-20240425052203-818698d24cf3 h1:YbDDiXPd8iQEczQaSA1a8io+6Iql3JjMbXgzU0Xhd+s=
-github.com/chainreactors/fingers v0.0.0-20240425052203-818698d24cf3/go.mod h1:cO2a79lRNSaM6hu17xIyws5eWCWxjcRxY9IFPlss2lE=
-github.com/chainreactors/fingers v0.0.0-20240425060328-2b53851ce0f2 h1:0MoXTFOcnJvKWdj+QmkMkRjVcHyuw2X+bO9AVUbMhSI=
-github.com/chainreactors/fingers v0.0.0-20240425060328-2b53851ce0f2/go.mod h1:cO2a79lRNSaM6hu17xIyws5eWCWxjcRxY9IFPlss2lE=
-github.com/chainreactors/fingers v0.0.0-20240425061219-7e0fb4009458 h1:YBK0KXd9ePFdwD358HWJx1mBAsSLjrKYxcB2p3RZQ5U=
-github.com/chainreactors/fingers v0.0.0-20240425061219-7e0fb4009458/go.mod h1:cO2a79lRNSaM6hu17xIyws5eWCWxjcRxY9IFPlss2lE=
 github.com/chainreactors/fingers v0.0.0-20240425063355-2ed9bd9149d2 h1:DHnjmpeZYJWEsUqr6s0wqu1MYcWRFvHGYNS04dTzhdg=
 github.com/chainreactors/fingers v0.0.0-20240425063355-2ed9bd9149d2/go.mod h1:cO2a79lRNSaM6hu17xIyws5eWCWxjcRxY9IFPlss2lE=
+github.com/chainreactors/fingers v0.0.0-20240521093617-f8ffb3ecdc18 h1:gapflZSatRTQZ2c72wFBSGNEN57pwzUqm+vhlthIkOw=
+github.com/chainreactors/fingers v0.0.0-20240521093617-f8ffb3ecdc18/go.mod h1:cO2a79lRNSaM6hu17xIyws5eWCWxjcRxY9IFPlss2lE=
 github.com/chainreactors/logs v0.0.0-20231027080134-7a11bb413460/go.mod h1:VZFqkFDGmp7/JOMeraW+YI7kTGcgz9fgc/HArVFnrGQ=
 github.com/chainreactors/logs v0.0.0-20240207121836-c946f072f81f h1:tcfp+CEdgiMvjyUzWab5edJtxUwRMSMEIkLybupIx0k=
 github.com/chainreactors/logs v0.0.0-20240207121836-c946f072f81f/go.mod h1:6Mv6W70JrtL6VClulZhmMRZnoYpcTahcDTKLMNEjK0o=
@@ -57,12 +51,10 @@ github.com/kr/pretty v0.3.1/go.mod h1:hoEshYVHaxMs3cyo3Yncou5ZscifuDolrwPKZanG3x
 github.com/kr/text v0.2.0/go.mod h1:eLer722TekiGuMkidMxC/pM04lWEeraHUUmBw8l2grE=
 github.com/mholt/archiver v3.1.1+incompatible/go.mod h1:Dh2dOXnSdiLxRiPoVfIr/fI1TwETms9B8CTWfeh7ROU=
 github.com/nwaples/rardecode v1.1.3/go.mod h1:5DzqNKiOdpKKBH87u8VlvAnPZMXcGRhxWkRpHbbfGS0=
-github.com/panjf2000/ants/v2 v2.5.0 h1:1rWGWSnxCsQBga+nQbA4/iY6VMeNoOIAM0ZWh9u3q2Q=
-github.com/panjf2000/ants/v2 v2.5.0/go.mod h1:cU93usDlihJZ5CfRGNDYsiBYvoilLvBF5Qp/BT2GNRE=
+github.com/panjf2000/ants/v2 v2.9.1 h1:Q5vh5xohbsZXGcD6hhszzGqB7jSSc2/CRr3QKIga8Kw=
+github.com/panjf2000/ants/v2 v2.9.1/go.mod h1:7ZxyxsqE4vvW0M7LSD8aI3cKwgFhBHbxnlN8mDqHa1I=
 github.com/pierrec/lz4 v2.6.1+incompatible/go.mod h1:pdkljMzZIN41W+lC3N2tnIh5sFi+IEE17M5jbnwPHcY=
 github.com/pkg/diff v0.0.0-20210226163009-20ebb0f2a09e/go.mod h1:pJLUxLENpZxwdsKMEsNbx1VGcRFpLqf3715MtcvvzbA=
-github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
-github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/rogpeppe/go-internal v1.9.0/go.mod h1:WtVeX8xhTBvf0smdhujwtBcq4Qrzq/fJaraNFVN+nFs=
@@ -74,6 +66,7 @@ github.com/stretchr/objx v0.5.0/go.mod h1:Yh+to48EsGEfYuaHDzXPcE3xhTkx73EhmCGUpE
 github.com/stretchr/objx v0.5.2/go.mod h1:FRsXN1f5AsAjCGJKqEizvkpNtU+EGNCLh3NxZ/8L+MA=
 github.com/stretchr/testify v1.7.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.8.0/go.mod h1:yNjHg4UonilssWZ8iaSj1OCr/vHnekPRkoO+kdMU+MU=
+github.com/stretchr/testify v1.8.2/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
 github.com/stretchr/testify v1.8.4/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
 github.com/stretchr/testify v1.9.0 h1:HtqpIVDClZ4nwg75+f6Lvsy/wHu+3BoSGCbBAcpTsTg=
 github.com/stretchr/testify v1.9.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf8C91i36aY=
@@ -109,6 +102,7 @@ golang.org/x/sync v0.0.0-20190423024810-112230192c58/go.mod h1:RxMgew5VJxzue5/jJ
 golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
 golang.org/x/sync v0.1.0/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
 golang.org/x/sync v0.3.0/go.mod h1:FU7BRWz2tNW+3quACPkgCx/L+uEAv1htQ0V83Z9Rj+Y=
+golang.org/x/sync v0.6.0 h1:5BMeUDZ7vkXGfEr1x9B4bRcTH4lpkTkpdh0T/J+qjbQ=
 golang.org/x/sync v0.6.0/go.mod h1:Czt+wKu1gCyEFDUtn0jG5QVvpJ6rzVqr5aXyt9drQfk=
 golang.org/x/sys v0.0.0-20190215142949-d0b11bdaac8a/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
 golang.org/x/sys v0.0.0-20190412213103-97732733099d/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
@@ -150,7 +144,6 @@ golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543/go.mod h1:I/5z698sn9Ka8T
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405 h1:yhCVgyC4o1eVCa2tZl7eS0r+SDo693bJlVdllGtEeKM=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
-gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
 gopkg.in/yaml.v3 v3.0.1 h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=
 gopkg.in/yaml.v3 v3.0.1/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
 sigs.k8s.io/yaml v1.4.0 h1:Mk1wCc2gy/F0THH0TAp1QYyJNzRm2KCLy3o5ASXVI5E=
