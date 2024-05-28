@@ -14,7 +14,7 @@ func CollectSocketResponse(result *Result, socketContent []byte) {
 		result.Protocol = "http"
 		CollectParsedResponse(result, parsers.NewResponseWithRaw(socketContent))
 	} else {
-		result.Content = bytes.ToLower(socketContent)
+		result.Content = socketContent
 		if title := parsers.MatchTitle(socketContent); title != "" {
 			result.HasTitle = true
 			result.Title = title
