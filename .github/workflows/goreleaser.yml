@@ -57,7 +57,7 @@ jobs:
           GOARCH: amd64
         working-directory: v2
 
-      - name: Compile for Windows x64
+      - name: Compile for Windows x86
         run: go build -o dist/gogo_windowsxp_386.exe -ldflags "-s -w -X 'github.com/chainreactors/gogo/v2/internal/core.ver=${{ github.ref }}'"  -tags=forceposix -asmflags "all=-trimpath=${{ env.GOPATH }}" -gcflags "all=-trimpath=${{ env.GOPATH }}" .
         env:
           GOOS: windows

@@ -5,7 +5,7 @@ var (
 	WindowsMacDefaultThreads   = 1000
 	DefaultIpProbe             = []uint{1, 254}
 	DefaultSmartPortProbe      = []string{"80", "icmp"}
-	DefaultSuperSmartPortProbe = []string{"icmp"}
+	DefaultSuperSmartPortProbe = []string{"icmp", "23", "80"}
 )
 
 type InputOption struct {

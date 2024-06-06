@@ -268,7 +268,7 @@ func createDeclineScan(cidrs utils.CIDRs, config Config) {
 	if config.Mod == SUPERSMART {
 		// 如果port数量为1, 直接扫描的耗时小于启发式
 		// 如果port数量为2, 直接扫描的耗时约等于启发式扫描
-		// 因此, 如果post数量小于2, 则直接使用defaultScan
+		// 因此, 如果post数量小于等于2, 则直接使用defaultScan
 		config.Mod = SMART
 		if len(config.PortList) < 3 {
 			logs.Log.Important("port count less than 3, skipped smart scan.")
@@ -287,7 +287,6 @@ func createDeclineScan(cidrs utils.CIDRs, config Config) {
 				syncFile()
 			}
 		}
-
 	} else if config.Mod == SUPERSMARTB {
 		config.Mod = SUPERSMARTC
 		spended := guessSmartTime(cidrs[0], config)
