@@ -50,23 +50,23 @@ func DefaultMod(targets interface{}, config Config) {
 	targetGen := NewTargetGenerator(config)
 	targetCh := targetGen.generatorDispatch(targets, config.PortList)
 	scanPool, _ := ants.NewPoolWithFunc(config.Threads, func(i interface{}) {
+		defer wgs.Done()
 		tc := i.(targetConfig)
 		result := tc.NewResult()
 		plugin.Dispatch(result)
 		if result.Open {
 			atomic.AddInt32(&Opt.AliveSum, 1)
-			if len(config.OutputFilters) > 0 {
-				// 输出时过滤, 节省操作步骤时用, --output-filter
-				for _, filter := range config.OutputFilters {
-					if !result.Filter(filter[0], filter[1], filter[2]) {
-						logs.Log.Debug("[filtered] " + output(result, config.Outputf))
-						wgs.Done()
-						return
-					}
-				}
+
+			if !result.Filtered {
+				// 如果以及被过滤, 不需要进行进一步过滤
+				result.Filter(config.OutputFilters)
 			}
 
-			logs.Log.Console(output(result, config.Outputf))
+			if result.Filtered {
+				logs.Log.Debug("[filtered] " + output(result, config.Outputf))
+			} else {
+				logs.Log.Console(output(result, config.Outputf))
+			}
 			// 文件输出
 			if config.File != nil {
 				if !config.File.Initialized {
@@ -77,7 +77,6 @@ func DefaultMod(targets interface{}, config Config) {
 		} else if result.Error != "" {
 			logs.Log.Debugf("%s stat: %s, errmsg: %s", result.GetTarget(), PortStat[result.ErrStat], result.Error)
 		}
-		wgs.Done()
 	}, ants.WithPanicHandler(func(err interface{}) {
 		if Opt.PluginDebug == true {
 			debug.PrintStack()

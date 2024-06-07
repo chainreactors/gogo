@@ -26,6 +26,7 @@ type Result struct {
 	CurrentHost string   `json:"-"`
 
 	IsHttp     bool              `json:"-"`
+	Filtered   bool              `json:"-"`
 	Open       bool              `json:"-"`
 	SmartProbe bool              `json:"-"`
 	TcpConn    *net.Conn         `json:"-"`
@@ -40,6 +41,19 @@ type Result struct {
 
 func (result *Result) String() string {
 	return fmt.Sprintf("%s %s", result.GetBaseURL(), result.Status)
+}
+
+func (result *Result) Filter(rules [][]string) bool {
+	for _, rule := range rules {
+		if len(rule) != 3 {
+			continue
+		}
+		if result.GOGOResult.Filter(rule[0], rule[1], rule[2]) {
+			result.Filtered = true
+			break
+		}
+	}
+	return result.Filtered
 }
 
 func (result *Result) GetHttpConn(delay int) *http.Client {
