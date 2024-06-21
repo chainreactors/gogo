@@ -62,6 +62,9 @@ func mssqlScan(result *pkg.Result) {
 
 	r2, err := conn.Request(sspiMessage, 4096)
 	off_ntlm := bytes.Index(r2, []byte("NTLMSSP"))
+	if off_ntlm <= 0 {
+		return
+	}
 	data := r2[off_ntlm:]
 	defer conn.Close()
 	result.Open = true

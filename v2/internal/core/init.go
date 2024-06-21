@@ -41,7 +41,7 @@ func InitConfig(config *Config) (*Config, error) {
 		if Win || Mac {
 			//windows系统默认协程数为1000
 			config.Threads = WindowsMacDefaultThreads
-		} else {
+		} else if iutils.IsLinux() {
 			// linux系统判断fd限制, 如果-t 大于fd限制,则将-t 设置到fd-100
 			if fdlimit := iutils.GetFdLimit(); config.Threads > fdlimit {
 				logs.Log.Warnf("System fd limit: %d , Please exec 'ulimit -n 65535'", fdlimit)

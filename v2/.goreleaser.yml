@@ -3,7 +3,6 @@ project_name: gogo
 before:
   hooks:
     - go mod tidy
-    - go get sigs.k8s.io/yaml
     - go generate
 
 builds:
@@ -14,15 +13,27 @@ builds:
       - windows
       - linux
       - darwin
+      - freebsd
+      - solaris
+      - android
     goarch:
       - amd64
       - "386"
       - arm64
+      - arm
+      - mips
+      - mips64
     ignore:
-      - goos: windows
-        goarch: arm64
       - goos: darwin
         goarch: "386"
+      - goos: linux
+        goarch: mips64
+      - goos: android
+        goarch: amd64
+      - goos: android
+        goarch: 386
+      - goos: android
+        goarch: arm
     ldflags: "-s -w -X 'github.com/chainreactors/gogo/v2/internal/core.ver=={{ .Tag }}'"
     flags:
       - -trimpath
@@ -37,6 +48,9 @@ upx:
   -
     enabled: true
     goos: [linux, windows]
+    goarch:
+      - amd64
+      - "386"
 
 archives:
   -

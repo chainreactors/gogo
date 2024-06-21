@@ -5,38 +5,36 @@ var (
 	WindowsMacDefaultThreads   = 1000
 	DefaultIpProbe             = []uint{1, 254}
 	DefaultSmartPortProbe      = []string{"80", "icmp"}
-	DefaultSuperSmartPortProbe = []string{"icmp"}
+	DefaultSuperSmartPortProbe = []string{"icmp", "23", "80"}
 )
 
 type InputOption struct {
-	IP                string   `short:"i" long:"ip" description:"IP/CIDR, support comma-split ip/cidr, e.g. 192.168.1.1/24,172.16.1.1/24"`
-	Exclude           string   `long:"exclude" description:"IP/CIDR, exclude IP/CIDR, support comma-split"`
-	ExcludeList       string   `long:"exclude-file" description:"File, exclude IP/CIDR filename"`
-	Ports             string   `short:"p" long:"port" default:"top1" description:"Port, support comma-split preset('-P port' show all preset), range, alias port, e.g. top2,mysql,12345,10000-10100,oxid,smb"`
-	ListFile          string   `short:"l" long:"list" description:"File, list of IP/CIDR"`
-	IsListInput       bool     `short:"L" description:"Bool, same as -l, input from stdin"`
-	JsonFile          string   `short:"j" long:"json" description:"File, previous results file e.g. -j 1.dat1 or list of colon-split ip:port, e.g. 123.123.123.123:123"`
-	IsJsonInput       bool     `short:"J" description:"Bool, same as -j, input from stdin"`
-	FilterOr          bool     `long:"filter-or" description:"FilterOr"`
-	WorkFlowName      string   `short:"w" long:"workflow" description:"String, workflow name('-P workflow' show all workflow)"`
-	IsWorkFlow        bool     `short:"W" description:"Bool, same as -w, input from stdin"`
-	FormatterFilename string   `short:"F" long:"format" description:"File, to be formatted result file"` // 待格式化文件名
-	Filters           []string `long:"filter" description:"String, filter formatting(-F) results "`
+	IP                string `short:"i" long:"ip" description:"IP/CIDR, support comma-split ip/cidr, e.g. 192.168.1.1/24,172.16.1.1/24"`
+	Exclude           string `long:"exclude" description:"IP/CIDR, exclude IP/CIDR, support comma-split"`
+	ExcludeList       string `long:"exclude-file" description:"File, exclude IP/CIDR filename"`
+	Ports             string `short:"p" long:"port" default:"top1" description:"Port, support comma-split preset('-P port' show all preset), range, alias port, e.g. top2,mysql,12345,10000-10100,oxid,smb"`
+	ListFile          string `short:"l" long:"list" description:"File, list of IP/CIDR"`
+	IsListInput       bool   `short:"L" description:"Bool, same as -l, input from stdin"`
+	JsonFile          string `short:"j" long:"json" description:"File, previous results file e.g. -j 1.dat1 or list of colon-split ip:port, e.g. 123.123.123.123:123"`
+	IsJsonInput       bool   `short:"J" description:"Bool, same as -j, input from stdin"`
+	FilterOr          bool   `long:"filter-or" description:"FilterOr"`
+	WorkFlowName      string `short:"w" long:"workflow" description:"String, workflow name('-P workflow' show all workflow)"`
+	IsWorkFlow        bool   `short:"W" description:"Bool, same as -w, input from stdin"`
+	FormatterFilename string `short:"F" long:"format" description:"File, to be formatted result file"` // 待格式化文件名
 }
 
 type OutputOption struct {
-	Filename        string   `short:"f" long:"file" description:"String, output filename"`
-	FilePath        string   `long:"path" description:"String, output file path"`
-	Outputf         string   `short:"o" long:"output" default:"default" description:"String,cmdline output format, default: full"`
-	FileOutputf     string   `short:"O" long:"file-output" default:"default" description:"String, file output format, default: jsonlines"` // 输出格式
-	OutputFilters   []string `long:"output-filter" description:"String, When scanning filter the output"`
-	OutputDelimiter string   `long:"output-delimiter" default:"\t" description:"String, output delimiter, default [TAB]"`
-	AutoFile        bool     `long:"af" description:"Bool, auto choice filename"`        // 自动生成格式化文件名
-	HiddenFile      bool     `long:"hf" description:"Bool, auto choice hidden filename"` // 启用自动隐藏文件
-	Compress        bool     `short:"C" long:"compress" description:"Bool, close compress output file"`
-	Tee             bool     `long:"tee" description:"Bool, keep console output"`          // 是否开启命令行输出扫描结果
-	Quiet           bool     `short:"q" long:"quiet" description:"Bool, close log output"` // 是否开启命令行输出日志
-	NoGuess         bool     `long:"no-guess" description:"Bool, When formatting not output guess framework"`
+	Filename        string `short:"f" long:"file" description:"String, output filename"`
+	FilePath        string `long:"path" description:"String, output file path"`
+	Outputf         string `short:"o" long:"output" default:"default" description:"String,cmdline output format, default: full"`
+	FileOutputf     string `short:"O" long:"file-output" default:"default" description:"String, file output format, default: jsonlines"` // 输出格式
+	OutputDelimiter string `long:"output-delimiter" default:"\t" description:"String, output delimiter, default [TAB]"`
+	AutoFile        bool   `long:"af" description:"Bool, auto choice filename"`        // 自动生成格式化文件名
+	HiddenFile      bool   `long:"hf" description:"Bool, auto choice hidden filename"` // 启用自动隐藏文件
+	Compress        bool   `short:"C" long:"compress" description:"Bool, close compress output file"`
+	Tee             bool   `long:"tee" description:"Bool, keep console output"`          // 是否开启命令行输出扫描结果
+	Quiet           bool   `short:"q" long:"quiet" description:"Bool, close log output"` // 是否开启命令行输出日志
+	NoGuess         bool   `long:"no-guess" description:"Bool, When formatting not output guess framework"`
 }
 
 type SmartOption struct {
@@ -56,7 +54,10 @@ type AdvanceOption struct {
 	AttackType  string   `long:"attack-type" description:"neutron attack types, sniper|clusterbomb|pitchfork" choice:"pitchfork" choice:"clusterbomb" choice:"sniper"`
 	Extract     []string `long:"extract" description:"String, custom Extract regexp"`
 	//SuffixStr   string   `long:"suffix" description:"String, url path"`
-	Opsec bool `long:"opsec" description:"Bool, opsec mode"`
+	Opsec         bool     `long:"opsec" description:"Bool, opsec mode"`
+	Filters       []string `long:"filter" description:"String, filter formatting(-F) results "`
+	OutputFilters []string `long:"output-filter" description:"String, Filter output while scanning"`
+	ScanFilters   []string `long:"scan-filter" description:"String, Filter Scanning while scanning"`
 }
 
 type MiscOption struct {

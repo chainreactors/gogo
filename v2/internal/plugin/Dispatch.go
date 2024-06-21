@@ -14,6 +14,7 @@ type RunnerOpts struct {
 	VersionLevel int
 	Delay        int
 	HttpsDelay   int
+	ScanFilters  [][]string
 	//SuffixStr    string
 	Debug bool
 	Opsec bool // enable opsec
@@ -77,6 +78,10 @@ func Dispatch(result *pkg.Result) {
 		socketFingerScan(result)
 	}
 
+	if result.Filter(RunOpt.ScanFilters) {
+		// 如果被过滤, 则停止后续扫描深度扫描
+		return
+	}
 	//主动信息收集
 	if RunOpt.VersionLevel > 0 && result.IsHttp {
 		// favicon指纹只有-v大于0并且为http服务才启用

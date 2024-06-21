@@ -203,6 +203,13 @@ func (r *Runner) PrepareConfig() {
 		}
 	}
 
+	for _, filterStr := range r.ScanFilters {
+		k, v, op := parseFilterString(filterStr)
+		if op != "" {
+			RunOpt.ScanFilters = append(RunOpt.ScanFilters, []string{k, v, op})
+		}
+	}
+
 	if r.AutoFile {
 		r.Config.Filenamef = "auto"
 	} else if r.HiddenFile {

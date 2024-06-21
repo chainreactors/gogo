@@ -34,7 +34,7 @@ func hostScan(result *Result) {
 		raw := parsers.ReadRaw(resp)
 		title := parsers.MatchTitle(raw)
 
-		if result.Title != title {
+		if result.HasTitle && result.Title != title {
 			if result.CurrentHost == "" {
 				result.CurrentHost = host
 			}
