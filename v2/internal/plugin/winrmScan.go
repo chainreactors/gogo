@@ -12,6 +12,9 @@ import (
 )
 
 func winrmScan(result *pkg.Result) {
+	if pkg.OPSEC {
+		return
+	}
 	result.Port = "5985"
 	uri := fmt.Sprintf("http://%s/wsman", result.GetTarget())
 	logs.Log.Debugf("winrm scan %s", uri)
