@@ -3,7 +3,6 @@ project_name: gogo
 before:
   hooks:
     - go mod tidy
-    - go get sigs.k8s.io/yaml
     - go generate
 
 builds:
@@ -49,6 +48,9 @@ upx:
   -
     enabled: true
     goos: [linux, windows]
+    goarch:
+      - amd64
+      - "386"
 
 archives:
   -
