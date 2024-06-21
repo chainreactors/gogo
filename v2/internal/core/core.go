@@ -269,8 +269,8 @@ func createDeclineScan(cidrs utils.CIDRs, config Config) {
 		// 如果port数量为2, 直接扫描的耗时约等于启发式扫描
 		// 因此, 如果post数量小于等于2, 则直接使用defaultScan
 		config.Mod = SMART
-		if len(config.PortList) < 3 {
-			logs.Log.Important("port count less than 3, skipped smart scan.")
+		if len(config.PortList) <= 3 {
+			logs.Log.Important("ports less than 3, skipped smart scan.")
 			if config.HasAlivedScan() {
 				AliveMod(config.CIDRs, config)
 			} else {

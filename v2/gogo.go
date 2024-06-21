@@ -3,12 +3,15 @@ package main
 
 import (
 	"github.com/chainreactors/gogo/v2/cmd"
+	//_ "net/http/pprof"
 )
 
 func main() {
 	//cpufile, _ := os.Create("cpu.prof")
 	//pprof.StartCPUProfile(cpufile)
 	//defer pprof.StopCPUProfile()
-
+	//go func() {
+	//	http.ListenAndServe("localhost:6060", nil)
+	//}()
 	cmd.Gogo()
 }

@@ -18,7 +18,6 @@ func socketFingerScan(result *Result) {
 		return
 	}
 	var closureResp, finalResp []byte
-
 	callback := func(f *common.Framework, v *common.Vuln) {
 		if f != nil {
 			result.Frameworks.Add(f)
@@ -68,7 +67,7 @@ func socketFingerScan(result *Result) {
 		FingerEngine.SocketMatch(result.Content, result.Port, RunOpt.VersionLevel, tcpsender, callback)
 	} else {
 		if group, ok := FingerEngine.SocketGroupped[result.Port]; ok {
-			group.Match(result.ContentMap(), 1, tcpsender, callback, true)
+			group.Match(result.ToContent(), 1, tcpsender, callback, true)
 		}
 	}
 

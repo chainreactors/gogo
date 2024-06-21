@@ -118,10 +118,11 @@ func (result *Result) IsHttps() bool {
 	return false
 }
 
-func (result *Result) ContentMap() map[string]interface{} {
-	return map[string]interface{}{
-		"content": result.Content,
-		"cert":    strings.Join(result.HttpHosts, ","),
+func (result *Result) ToContent() *fingers.Content {
+	if result.IsHttp {
+		return fingers.NewContent(result.Content, strings.Join(result.HttpHosts, ","), true)
+	} else {
+		return fingers.NewContent(result.Content, "", false)
 	}
 }
 
