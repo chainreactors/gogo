@@ -124,11 +124,10 @@ func (rd *ResultsData) ToFormat(isColor bool) string {
 				if isColor {
 					// 颜色输出
 					url := fmt.Sprintf("%s://%s:%s", p.Protocol, ip, port)
-					s += fmt.Sprintf("\t%s\t%s\t%s\t%s\t%s [%s] %s %s %s\n",
+					s += fmt.Sprintf("\t%s\t%s\t%s\t%s [%s] %s %s %s\n",
 						GreenLine(url),
 						p.Midware,
-						p.Language,
-						Blue(p.Frameworks.String()),
+						p.FramesColorString(),
 						Cyan(p.Host),
 						Yellow(p.Status),
 						Blue(p.Title),
@@ -136,12 +135,11 @@ func (rd *ResultsData) ToFormat(isColor bool) string {
 						Blue(p.GetExtractStat()),
 					)
 				} else {
-					s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s\t%s [%s] %s %s %s\n",
+					s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s [%s] %s %s %s\n",
 						p.Protocol,
 						ip,
 						port,
 						p.Midware,
-						p.Language,
 						p.Frameworks.String(),
 						p.Host,
 						p.Status,

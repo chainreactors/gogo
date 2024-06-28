@@ -15,7 +15,7 @@ var (
 	PortMap = utils.PortMap
 	TagMap  = utils.TagMap
 
-	FingerEngine   *fingers.FingersRules
+	FingerEngine   *fingers.FingersEngine
 	Extractor      []*parsers.Extractor
 	Extractors     = make(parsers.Extractors)
 	ExtractRegexps = map[string][]*parsers.Extractor{}
@@ -23,11 +23,11 @@ var (
 
 // LoadFinger 加载指纹到全局变量
 func LoadFinger() error {
-	engine, err := fingers.NewFingersEngine(LoadConfig("http"), LoadConfig("socket"))
+	var err error
+	FingerEngine, err = fingers.NewFingersEngine(LoadConfig("http"), LoadConfig("socket"))
 	if err != nil {
 		return err
 	}
-	FingerEngine = engine
 	return nil
 }
 
