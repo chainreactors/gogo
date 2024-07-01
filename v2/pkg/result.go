@@ -106,7 +106,7 @@ func (result *Result) AddExtracts(extracts []*parsers.Extracted) {
 func (result *Result) GuessFramework() {
 	for _, v := range PortMap.Get(result.Port) {
 		if TagMap.Get(v) == nil && !iutils.StringsContains([]string{"top1", "top2", "top3", "other", "windows"}, v) {
-			result.AddFramework(&common.Framework{Name: v, From: fingers.GUESS})
+			result.AddFramework(common.NewFramework(v, common.FrameFromGUESS))
 		}
 	}
 }
@@ -160,5 +160,5 @@ func (result *Result) AddNTLMInfo(m map[string]string, t string) {
 	}
 	result.Title = m["MsvAvNbDomainName"] + "/" + m["MsvAvNbComputerName"]
 	result.Host = strings.Trim(m["MsvAvDnsDomainName"], "\x00") + "/" + m["MsvAvDnsComputerName"]
-	result.AddFramework(&common.Framework{Name: t, Version: m["Version"]})
+	result.AddFramework(common.NewFrameworkWithVersion(t, common.FrameFromDefault, m["Version"]))
 }

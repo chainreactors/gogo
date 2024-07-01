@@ -277,7 +277,7 @@ func LoadResultFile(file io.Reader) interface{} {
 				}
 
 				if len(targetpair) == 3 {
-					result.Frameworks = map[string]*common.Framework{targetpair[2]: &common.Framework{Name: targetpair[2]}}
+					result.Frameworks = map[string]*common.Framework{targetpair[2]: common.NewFramework(targetpair[2], common.FrameFromDefault)}
 				}
 				if result != nil {
 					results = append(results, result)

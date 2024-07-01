@@ -55,7 +55,7 @@ func initScan(result *pkg.Result) {
 		}
 		result.Status = "open"
 
-		bs, err = conn.Read(RunOpt.Delay) // 已经建立了连接, timeout不用过长时间, 如果没有返回值就可以直接进入下一步
+		bs, err = conn.Read(RunOpt.Delay)
 		if err != nil {
 			senddataStr := fmt.Sprintf("GET /%s HTTP/1.1\r\nHost: %s\r\n\r\n", result.Uri, target)
 			bs, err = conn.Request([]byte(senddataStr), 4096)
