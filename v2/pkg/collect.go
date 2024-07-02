@@ -46,7 +46,6 @@ func CollectParsedResponse(result *Result, resp *parsers.Response) {
 	}
 	result.Content = bytes.ToLower(result.Httpresp.Raw)
 	result.Status = iutils.ToString(resp.Resp.StatusCode)
-	result.Language = result.Httpresp.Language
 	result.Midware = result.Httpresp.Server
 	result.Title = result.Httpresp.Title
 	result.HasTitle = result.Httpresp.HasTitle
