@@ -98,6 +98,8 @@ github.com/chainreactors/fingers v0.0.0-20240701103336-582e82977506 h1:hH7PXBn+n
 github.com/chainreactors/fingers v0.0.0-20240701103336-582e82977506/go.mod h1:l8AO6ZbIL8WQ8PkihCK/MD6Iww/O+LY/osAhRJjThs4=
 github.com/chainreactors/fingers v0.0.0-20240701112353-ecc7954b4673 h1:ezIijqDJmoKFVmXxnUufUzKo/HBxQxp6QnQZvHxaBaY=
 github.com/chainreactors/fingers v0.0.0-20240701112353-ecc7954b4673/go.mod h1:l8AO6ZbIL8WQ8PkihCK/MD6Iww/O+LY/osAhRJjThs4=
+github.com/chainreactors/fingers v0.0.0-20240702104653-a66e34aa41df h1:1SrOHwdlU+X3/hxViU1ZCcwO+KRvSmJGtTstSph5xL0=
+github.com/chainreactors/fingers v0.0.0-20240702104653-a66e34aa41df/go.mod h1:l8AO6ZbIL8WQ8PkihCK/MD6Iww/O+LY/osAhRJjThs4=
 github.com/chainreactors/logs v0.0.0-20231027080134-7a11bb413460/go.mod h1:VZFqkFDGmp7/JOMeraW+YI7kTGcgz9fgc/HArVFnrGQ=
 github.com/chainreactors/logs v0.0.0-20240207121836-c946f072f81f h1:tcfp+CEdgiMvjyUzWab5edJtxUwRMSMEIkLybupIx0k=
 github.com/chainreactors/logs v0.0.0-20240207121836-c946f072f81f/go.mod h1:6Mv6W70JrtL6VClulZhmMRZnoYpcTahcDTKLMNEjK0o=
@@ -119,6 +121,8 @@ github.com/chainreactors/parsers v0.0.0-20240701110332-2f9057256d29 h1:0RJnI9nDG
 github.com/chainreactors/parsers v0.0.0-20240701110332-2f9057256d29/go.mod h1:91mj0+pHkKsXd1SGD6+jVW1tl6W25TuXgoESwK5dJh8=
 github.com/chainreactors/parsers v0.0.0-20240702070344-29de1801cc02 h1:IIV25etvLEs5S2mv3MMNScNgP+ZrTaiWVG/v/vZn+Q8=
 github.com/chainreactors/parsers v0.0.0-20240702070344-29de1801cc02/go.mod h1:91mj0+pHkKsXd1SGD6+jVW1tl6W25TuXgoESwK5dJh8=
+github.com/chainreactors/parsers v0.0.0-20240702104902-1ce563b7ef76 h1:i4sHuonM50X/Tbgl6kNd7CYJqfRxgDUORIphcSuj4Bs=
+github.com/chainreactors/parsers v0.0.0-20240702104902-1ce563b7ef76/go.mod h1:G/XLE5RAaUdqADkbhQ59mPrUAbsJLiQ2DN6CwtwNpBQ=
 github.com/chainreactors/utils v0.0.0-20240302165634-2b8494c9cfc3/go.mod h1:JA4eiQZm+7AsfjXBcIzIdVKBEhDCb16eNtWFCGTxlvs=
 github.com/chainreactors/utils v0.0.0-20240528085651-ba1b255482c1 h1:+awuysRKLmdLQbVK+HPSOGvO3dFGdNSbM2jyLh+VYOA=
 github.com/chainreactors/utils v0.0.0-20240528085651-ba1b255482c1/go.mod h1:JA4eiQZm+7AsfjXBcIzIdVKBEhDCb16eNtWFCGTxlvs=
