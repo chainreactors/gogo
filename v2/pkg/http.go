@@ -67,7 +67,7 @@ func HttpConnWithNoRedirect(delay int) *http.Client {
 			//DualStack: true,
 		}).DialContext,
 		MaxIdleConnsPerHost: 1,
-		MaxIdleConns:        4000,
+		MaxIdleConns:        2000,
 		IdleConnTimeout:     time.Duration(delay) * time.Second,
 		DisableKeepAlives:   false,
 	}

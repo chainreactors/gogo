@@ -20,7 +20,10 @@ type RunnerOpts struct {
 	Opsec bool // enable opsec
 }
 
-var RunOpt RunnerOpts
+var (
+	RunOpt         RunnerOpts
+	DefaultMaxSize = 1024 * 16 // 16k
+)
 
 func Dispatch(result *pkg.Result) {
 	defer func() {

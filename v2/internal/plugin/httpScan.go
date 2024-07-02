@@ -58,7 +58,7 @@ func initScan(result *pkg.Result) {
 		bs, err = conn.Read(RunOpt.Delay)
 		if err != nil {
 			senddataStr := fmt.Sprintf("GET /%s HTTP/1.1\r\nHost: %s\r\n\r\n", result.Uri, target)
-			bs, err = conn.Request([]byte(senddataStr), 4096)
+			bs, err = conn.Request([]byte(senddataStr), DefaultMaxSize)
 			if err != nil {
 				result.Err = err
 			}

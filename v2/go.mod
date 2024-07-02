@@ -8,7 +8,7 @@ require (
 	github.com/chainreactors/fingers v0.0.0-20240701112353-ecc7954b4673
 	github.com/chainreactors/logs v0.0.0-20240207121836-c946f072f81f
 	github.com/chainreactors/neutron v0.0.0-20240628163951-679753df51f6
-	github.com/chainreactors/parsers v0.0.0-20240701110332-2f9057256d29
+	github.com/chainreactors/parsers v0.0.0-20240702070344-29de1801cc02
 	github.com/chainreactors/utils v0.0.0-20240528085651-ba1b255482c1
 	github.com/hashicorp/go-version v1.7.0 // indirect
 	github.com/jessevdk/go-flags v1.5.0
