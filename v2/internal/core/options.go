@@ -13,6 +13,7 @@ type InputOption struct {
 	Exclude           string `long:"exclude" description:"IP/CIDR, exclude IP/CIDR, support comma-split"`
 	ExcludeList       string `long:"exclude-file" description:"File, exclude IP/CIDR filename"`
 	Ports             string `short:"p" long:"port" default:"top1" description:"Port, support comma-split preset('-P port' show all preset), range, alias port, e.g. top2,mysql,12345,10000-10100,oxid,smb"`
+	PortConfig        string `short:"P" long:"port-config" description:"File,custom port config file"`
 	ListFile          string `short:"l" long:"list" description:"File, list of IP/CIDR"`
 	IsListInput       bool   `short:"L" description:"Bool, same as -l, input from stdin"`
 	JsonFile          string `short:"j" long:"json" description:"File, previous results file e.g. -j 1.dat1 or list of colon-split ip:port, e.g. 123.123.123.123:123"`

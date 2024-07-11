@@ -132,9 +132,17 @@ func (r *Runner) Prepare() bool {
 	return true
 }
 
-func (r *Runner) Init() {
+func (r *Runner) Init() error {
 	// 加载配置文件中的全局变量
-	templatesLoader()
+	err := LoadPortConfig(r.PortConfig)
+	if err != nil {
+		return err
+	}
+	LoadExtractor()
+	err = LoadFinger()
+	if err != nil {
+		return err
+	}
 	for _, e := range r.Extract {
 		if reg, ok := ExtractRegexps[e]; ok {
 			Extractors[e] = reg
@@ -158,6 +166,7 @@ func (r *Runner) Init() {
 		fingers.OPSEC = true
 		RunOpt.Opsec = true
 	}
+	return nil
 }
 
 func (r *Runner) PrepareConfig() {
@@ -393,12 +402,6 @@ func printConfigs(t string) {
 func neutronLoader(pocfile string, payloads []string) {
 	ExecuterOptions = ParserCmdPayload(payloads)
 	TemplateMap = LoadNeutron(pocfile)
-}
-
-func templatesLoader() {
-	LoadPortConfig()
-	LoadExtractor()
-	LoadFinger()
 }
 
 func parseFilterString(s string) (k, v, op string) {

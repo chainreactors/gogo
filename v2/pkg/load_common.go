@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"strings"
 
 	"github.com/chainreactors/fingers/fingers"
@@ -29,14 +30,27 @@ func LoadFinger() error {
 	return nil
 }
 
-func LoadPortConfig() {
-	var portfingers []*utils.PortConfig
-	err := json.Unmarshal(LoadConfig("port"), &portfingers)
-
-	if err != nil {
-		iutils.Fatal("port config load FAIL!, " + err.Error())
+func LoadPortConfig(portConfig string) error {
+	var ports []*utils.PortConfig
+	var err error
+	if portConfig == "" {
+		err = json.Unmarshal(LoadConfig("port"), &ports)
+		if err != nil {
+			return err
+		}
+	} else {
+		content, err := ioutil.ReadFile(portConfig)
+		if err != nil {
+			return err
+		}
+		err = json.Unmarshal(content, &ports)
+		if err != nil {
+			return err
+		}
 	}
-	utils.PrePort = utils.NewPortPreset(portfingers)
+
+	utils.PrePort = utils.NewPortPreset(ports)
+	return nil
 }
 
 func LoadExtractor() {
