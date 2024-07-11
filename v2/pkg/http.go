@@ -2,15 +2,28 @@ package pkg
 
 import (
 	"crypto/tls"
+	"github.com/chainreactors/utils/httputils"
 	"net"
 	"net/http"
 	"net/url"
 	"time"
 )
 
-var ProxyUrl *url.URL
-var Proxy func(*http.Request) (*url.URL, error)
-var maxRedirects = 5
+var (
+	ProxyUrl     *url.URL
+	Proxy        func(*http.Request) (*url.URL, error)
+	maxRedirects = 5
+	headers      = http.Header{"User-Agent": []string{httputils.GetRandomUA()}}
+)
+
+func HTTPGet(client *http.Client, url string) (*http.Response, error) {
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header = headers
+	return client.Do(req)
+}
 
 func HttpConn(delay int) *http.Client {
 	tr := &http.Transport{

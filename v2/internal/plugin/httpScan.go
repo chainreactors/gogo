@@ -5,13 +5,8 @@ import (
 	"fmt"
 	"github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/logs"
-	"net/http"
 	"strings"
 )
-
-var headers = http.Header{
-	"User-Agent": []string{"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"},
-}
 
 // -default
 // socket进行对网站的连接
@@ -21,8 +16,10 @@ func initScan(result *pkg.Result) {
 	if pkg.ProxyUrl != nil && strings.HasPrefix(pkg.ProxyUrl.Scheme, "http") {
 		// 如果是http代理, 则使用http库代替socket
 		conn := result.GetHttpConn(RunOpt.Delay)
-		req, _ := http.NewRequest("GET", "http://"+target, nil)
-		resp, err := conn.Do(req)
+		resp, err := pkg.HTTPGet(conn, "http://"+target)
+		if err != nil {
+			return
+		}
 		if err != nil {
 			result.Err = err
 			return
@@ -78,25 +75,16 @@ func initScan(result *pkg.Result) {
 
 // 使用net/http进行带redirect的请求
 func systemHttp(result *pkg.Result, scheme string) {
-
 	// 如果是400或者不可识别协议,则使用https
 	target := scheme + "://" + result.GetTarget()
-
-	//if RunOpt.SuffixStr != "" {
-	//	target += "/" + RunOpt.SuffixStr
-	//}
-
 	conn := result.GetHttpConn(RunOpt.Delay + RunOpt.HttpsDelay)
-	req, _ := http.NewRequest("GET", target, nil)
-	req.Header = headers
-
-	resp, err := conn.Do(req)
+	resp, err := pkg.HTTPGet(conn, target)
 	if err != nil {
 		// 有可能存在漏网之鱼, 是tls服务, 但tls的第一个响应为30x, 并30x的目的地址不可达或超时. 则会报错.
 		result.Error = err.Error()
 		logs.Log.Debugf("request %s , %s ", target, err.Error())
 		if result.IsHttp {
-			noRedirectHttp(result, req)
+			noRedirectHttp(result, target)
 		}
 		return
 	}
@@ -137,18 +125,20 @@ func systemHttp(result *pkg.Result, scheme string) {
 
 // 302跳转后目的不可达时进行不redirect的信息收集
 // 暂时使用不太优雅的方案, 在极少数情况下才会触发, 会多进行一次https的交互.
-func noRedirectHttp(result *pkg.Result, req *http.Request) {
+func noRedirectHttp(result *pkg.Result, u string) {
 	conn := pkg.HttpConnWithNoRedirect(RunOpt.Delay + RunOpt.HttpsDelay)
-	req.Header = headers
-	resp, err := conn.Do(req)
+	resp, err := pkg.HTTPGet(conn, u)
+	if err != nil {
+		return
+	}
 	if err != nil {
 		// 有可能存在漏网之鱼, 是tls服务, 但tls的第一个响应为30x, 并30x的目的地址不可达或超时. 则会报错.
 		result.Error = err.Error()
-		logs.Log.Debugf("request (no redirect) %s , %s ", req.URL.String(), err.Error())
+		logs.Log.Debugf("request (no redirect) %s , %s ", u, err.Error())
 		return
 	}
 
-	logs.Log.Debugf("request (no redirect) %s , %d ", req.URL.String(), resp.StatusCode)
+	logs.Log.Debugf("request (no redirect) %s , %d ", u, resp.StatusCode)
 	if resp.TLS != nil {
 		if result.Status == "400" {
 			result.Protocol = "https"

@@ -36,7 +36,10 @@ func activeHttpMatch(result *Result) {
 		conn := result.GetHttpConn(RunOpt.Delay)
 		url := result.GetURL() + string(sendData)
 		logs.Log.Debugf("active detect: %s", url)
-		resp, err := conn.Get(url)
+		resp, err := HTTPGet(conn, url)
+		if err != nil {
+			return nil, false
+		}
 		if err == nil {
 			return httputils.ReadRaw(resp), true
 		} else {

@@ -9,7 +9,7 @@ require (
 	github.com/chainreactors/logs v0.0.0-20240207121836-c946f072f81f
 	github.com/chainreactors/neutron v0.0.0-20240628163951-679753df51f6
 	github.com/chainreactors/parsers v0.0.0-20240708072709-07deeece7ce2
-	github.com/chainreactors/utils v0.0.0-20240711193713-3f498c03d1b6
+	github.com/chainreactors/utils v0.0.0-20240711195624-66696b0879b2
 	github.com/hashicorp/go-version v1.7.0 // indirect
 	github.com/jessevdk/go-flags v1.5.0
 	github.com/panjf2000/ants/v2 v2.9.1
