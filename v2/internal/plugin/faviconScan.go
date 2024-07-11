@@ -3,8 +3,8 @@ package plugin
 import (
 	. "github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/logs"
-	"github.com/chainreactors/parsers"
 	"github.com/chainreactors/utils/encode"
+	"github.com/chainreactors/utils/httputils"
 )
 
 // -v
@@ -20,7 +20,7 @@ func faviconScan(result *Result) {
 	}
 	logs.Log.Debugf("request favicon %s %d", url, resp.StatusCode)
 	if resp.StatusCode == 200 {
-		body := parsers.ReadBody(resp)
+		body := httputils.ReadBody(resp)
 		md5h := encode.Md5Hash(body)
 		mmh3h := encode.Mmh3Hash32(body)
 		logs.Log.Debugf("%s favicon %s %s", url, md5h, mmh3h)

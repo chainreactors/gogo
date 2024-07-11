@@ -2,6 +2,7 @@ package plugin
 
 import (
 	"github.com/chainreactors/fingers/common"
+	"github.com/chainreactors/utils/httputils"
 	"net/http"
 	"strconv"
 	"strings"
@@ -31,7 +32,7 @@ func hostScan(result *Result) {
 		if strings.HasPrefix(strconv.Itoa(resp.StatusCode), "40") {
 			continue
 		}
-		raw := parsers.ReadRaw(resp)
+		raw := httputils.ReadRaw(resp)
 		title := parsers.MatchTitle(raw)
 
 		if result.HasTitle && result.Title != title {

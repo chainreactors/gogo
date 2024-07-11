@@ -11,9 +11,7 @@ import (
 )
 
 var (
-	NameMap = utils.NameMap
-	PortMap = utils.PortMap
-	TagMap  = utils.TagMap
+	PresetPorts = utils.PrePort
 
 	FingerEngine   *fingers.FingersEngine
 	Extractor      []*parsers.Extractor
@@ -31,29 +29,14 @@ func LoadFinger() error {
 	return nil
 }
 
-type PortFinger struct {
-	Name  string   `json:"name"`
-	Ports []string `json:"ports"`
-	Tags  []string `json:"tags"`
-}
-
 func LoadPortConfig() {
-	var portfingers []PortFinger
+	var portfingers []*utils.PortConfig
 	err := json.Unmarshal(LoadConfig("port"), &portfingers)
 
 	if err != nil {
 		iutils.Fatal("port config load FAIL!, " + err.Error())
 	}
-	for _, v := range portfingers {
-		v.Ports = utils.ParsePorts(v.Ports)
-		utils.NameMap.Append(v.Name, v.Ports...)
-		for _, t := range v.Tags {
-			utils.TagMap.Append(t, v.Ports...)
-		}
-		for _, p := range v.Ports {
-			utils.PortMap.Append(p, v.Name)
-		}
-	}
+	utils.PrePort = utils.NewPortPreset(portfingers)
 }
 
 func LoadExtractor() {

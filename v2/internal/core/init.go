@@ -114,7 +114,7 @@ func InitConfig(config *Config) (*Config, error) {
 		return nil, err
 	}
 	// 初始化端口配置
-	config.PortList = utils.ParsePort(config.Ports)
+	config.PortList = utils.ParsePortsString(config.Ports)
 
 	// 如果指定端口超过100,则自动启用spray
 	if len(config.PortList) > 500 && !config.NoSpray {
@@ -127,7 +127,7 @@ func InitConfig(config *Config) (*Config, error) {
 
 	// 初始化启发式扫描的端口探针
 	if config.PortProbe != Default {
-		config.PortProbeList = utils.ParsePort(config.PortProbe)
+		config.PortProbeList = utils.ParsePortsString(config.PortProbe)
 	}
 
 	// 初始化ss模式ip探针,默认ss默认只探测ip为1的c段,可以通过-ipp参数指定,例如-ipp 1,254,253
