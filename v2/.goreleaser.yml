@@ -37,7 +37,7 @@ builds:
     ldflags: "-s -w -X 'github.com/chainreactors/gogo/v2/internal/core.ver=={{ .Tag }}'"
     flags:
       - -trimpath
-      - -tags=forceposix
+      - -tags=forceposix,json
     asmflags:
       - all=-trimpath={{.Env.GOPATH}}
     gcflags:
