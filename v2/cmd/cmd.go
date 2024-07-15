@@ -23,7 +23,11 @@ func Gogo() {
 		os.Exit(0)
 	}
 	logs.Log.Important(core.Banner())
-	runner.Init()
+	err = runner.Init()
+	if err != nil {
+		logs.Log.Error(err.Error())
+		return
+	}
 	runner.Run()
 
 	if runner.Debug {

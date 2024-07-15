@@ -5,6 +5,7 @@ import (
 	. "github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
+	"github.com/chainreactors/utils/httputils"
 	"strings"
 )
 
@@ -35,9 +36,9 @@ func activeHttpMatch(result *Result) {
 		conn := result.GetHttpConn(RunOpt.Delay)
 		url := result.GetURL() + string(sendData)
 		logs.Log.Debugf("active detect: %s", url)
-		resp, err := conn.Get(url)
+		resp, err := HTTPGet(conn, url)
 		if err == nil {
-			return parsers.ReadRaw(resp), true
+			return httputils.ReadRaw(resp), true
 		} else {
 			return nil, false
 		}

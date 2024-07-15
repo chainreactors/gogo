@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"strings"
 
 	"github.com/chainreactors/fingers/fingers"
@@ -11,9 +12,7 @@ import (
 )
 
 var (
-	NameMap = utils.NameMap
-	PortMap = utils.PortMap
-	TagMap  = utils.TagMap
+	PresetPorts = utils.PrePort
 
 	FingerEngine   *fingers.FingersEngine
 	Extractor      []*parsers.Extractor
@@ -31,29 +30,27 @@ func LoadFinger() error {
 	return nil
 }
 
-type PortFinger struct {
-	Name  string   `json:"name"`
-	Ports []string `json:"ports"`
-	Tags  []string `json:"tags"`
-}
-
-func LoadPortConfig() {
-	var portfingers []PortFinger
-	err := json.Unmarshal(LoadConfig("port"), &portfingers)
-
-	if err != nil {
-		iutils.Fatal("port config load FAIL!, " + err.Error())
-	}
-	for _, v := range portfingers {
-		v.Ports = utils.ParsePorts(v.Ports)
-		utils.NameMap.Append(v.Name, v.Ports...)
-		for _, t := range v.Tags {
-			utils.TagMap.Append(t, v.Ports...)
+func LoadPortConfig(portConfig string) error {
+	var ports []*utils.PortConfig
+	var err error
+	if portConfig == "" {
+		err = json.Unmarshal(LoadConfig("port"), &ports)
+		if err != nil {
+			return err
 		}
-		for _, p := range v.Ports {
-			utils.PortMap.Append(p, v.Name)
+	} else {
+		content, err := ioutil.ReadFile(portConfig)
+		if err != nil {
+			return err
+		}
+		err = json.Unmarshal(content, &ports)
+		if err != nil {
+			return err
 		}
 	}
+
+	utils.PrePort = utils.NewPortPreset(ports)
+	return nil
 }
 
 func LoadExtractor() {

@@ -3,7 +3,7 @@ package plugin
 import (
 	"github.com/chainreactors/fingers/fingers"
 	"github.com/chainreactors/logs"
-	"github.com/chainreactors/parsers"
+	"github.com/chainreactors/utils/httputils"
 
 	"github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/utils/iutils"
@@ -23,7 +23,7 @@ func NotFoundScan(result *pkg.Result) {
 	if iutils.ToString(resp.StatusCode) == result.Status {
 		return
 	}
-	content := parsers.ReadRaw(resp)
+	content := httputils.ReadRaw(resp)
 	if len(content) == 0 {
 		return
 	}

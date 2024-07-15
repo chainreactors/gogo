@@ -13,7 +13,8 @@ type InputOption struct {
 	Exclude           string `long:"exclude" description:"IP/CIDR, exclude IP/CIDR, support comma-split"`
 	ExcludeList       string `long:"exclude-file" description:"File, exclude IP/CIDR filename"`
 	Ports             string `short:"p" long:"port" default:"top1" description:"Port, support comma-split preset('-P port' show all preset), range, alias port, e.g. top2,mysql,12345,10000-10100,oxid,smb"`
-	ListFile          string `short:"l" long:"list" description:"File, list of IP/CIDR"`
+	PortConfig        string `long:"port-config" description:"File,custom port config file"`
+	ListFile          string `short:"l" long:"list" desgcription:"File, list of IP/CIDR"`
 	IsListInput       bool   `short:"L" description:"Bool, same as -l, input from stdin"`
 	JsonFile          string `short:"j" long:"json" description:"File, previous results file e.g. -j 1.dat1 or list of colon-split ip:port, e.g. 123.123.123.123:123"`
 	IsJsonInput       bool   `short:"J" description:"Bool, same as -j, input from stdin"`
@@ -26,8 +27,8 @@ type InputOption struct {
 type OutputOption struct {
 	Filename        string `short:"f" long:"file" description:"String, output filename"`
 	FilePath        string `long:"path" description:"String, output file path"`
-	Outputf         string `short:"o" long:"output" default:"default" description:"String,cmdline output format, default: full"`
-	FileOutputf     string `short:"O" long:"file-output" default:"default" description:"String, file output format, default: jsonlines"` // 输出格式
+	Outputf         string `short:"o" long:"output" default:"default" description:"String,cmdline output format, default: full, \n \t format: color,full,json,jl(jsonline,jsonlines),extract,zombie,csv \n \t value: ip,port,stat(status),frame(framework),vuln,cpe,uri,wfn,title,target,url,midleware,protocol(schema)"`
+	FileOutputf     string `short:"O" long:"file-output" default:"default" description:"String, file output format,choices same as -o, default: jsonlines"` // 输出格式
 	OutputDelimiter string `long:"output-delimiter" default:"\t" description:"String, output delimiter, default [TAB]"`
 	AutoFile        bool   `long:"af" description:"Bool, auto choice filename"`        // 自动生成格式化文件名
 	HiddenFile      bool   `long:"hf" description:"Bool, auto choice hidden filename"` // 启用自动隐藏文件
@@ -51,7 +52,7 @@ type AdvanceOption struct {
 	ExploitName string   `short:"E" long:"exploit-name" description:"String, specify neutron template name"` // 指定漏扫poc名字
 	ExploitFile string   `long:"ef" description:"String, load specified templates file "`                    // 指定漏扫文件
 	Payloads    []string `long:"payload" description:"String, specify neutron payload"`
-	AttackType  string   `long:"attack-type" description:"neutron attack types, sniper|clusterbomb|pitchfork" choice:"pitchfork" choice:"clusterbomb" choice:"sniper"`
+	AttackType  string   `long:"attack-type" choice:"sniper" choice:"clusterbomb" choice:"pitchfork" description:"neutron attack types, sniper|clusterbomb|pitchfork" choice:"pitchfork" choice:"clusterbomb" choice:"sniper"`
 	Extract     []string `long:"extract" description:"String, custom Extract regexp"`
 	//SuffixStr   string   `long:"suffix" description:"String, url path"`
 	Opsec         bool     `long:"opsec" description:"Bool, opsec mode"`

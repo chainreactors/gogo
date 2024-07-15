@@ -66,6 +66,8 @@ func (r *Runner) Prepare() bool {
 		Opsec:        r.Opsec,
 		//SuffixStr:  r.SuffixStr,
 	}
+	ExecuterOptions.Options.Timeout = r.Delay + r.HttpsDelay
+	HttpTimeout = time.Duration(r.Delay+r.HttpsDelay) * time.Second
 	Opt.PluginDebug = r.PluginDebug
 	common.NoGuess = r.NoGuess
 	files.Key = []byte(r.Key)
@@ -111,7 +113,7 @@ func (r *Runner) Prepare() bool {
 		if err == nil {
 			ProxyUrl = uri
 			Proxy = http.ProxyURL(uri)
-			neuhttp.Proxy = Proxy
+			neuhttp.DefaultTransport.Proxy = Proxy
 			ProxyDialTimeout = func(network, address string, duration time.Duration) (net.Conn, error) {
 				forward := &net.Dialer{Timeout: duration}
 				dial, err := proxy.FromURL(uri, forward)
@@ -132,9 +134,17 @@ func (r *Runner) Prepare() bool {
 	return true
 }
 
-func (r *Runner) Init() {
+func (r *Runner) Init() error {
 	// 加载配置文件中的全局变量
-	templatesLoader()
+	err := LoadPortConfig(r.PortConfig)
+	if err != nil {
+		return err
+	}
+	LoadExtractor()
+	err = LoadFinger()
+	if err != nil {
+		return err
+	}
 	for _, e := range r.Extract {
 		if reg, ok := ExtractRegexps[e]; ok {
 			Extractors[e] = reg
@@ -154,10 +164,11 @@ func (r *Runner) Init() {
 	neutronLoader(r.ExploitFile, r.Payloads)
 
 	if r.Opsec {
-		OPSEC = true
 		fingers.OPSEC = true
 		RunOpt.Opsec = true
+		ExecuterOptions.Options.Opsec = true
 	}
+	return nil
 }
 
 func (r *Runner) PrepareConfig() {
@@ -391,14 +402,8 @@ func printConfigs(t string) {
 }
 
 func neutronLoader(pocfile string, payloads []string) {
-	ExecuterOptions = ParserCmdPayload(payloads)
+	ExecuterOptions.Options.VarsPayload = ParserCmdPayload(payloads)
 	TemplateMap = LoadNeutron(pocfile)
-}
-
-func templatesLoader() {
-	LoadPortConfig()
-	LoadExtractor()
-	LoadFinger()
 }
 
 func parseFilterString(s string) (k, v, op string) {
