@@ -67,6 +67,7 @@ func (r *Runner) Prepare() bool {
 		//SuffixStr:  r.SuffixStr,
 	}
 	ExecuterOptions.Options.Timeout = r.Delay + r.HttpsDelay
+	HttpTimeout = time.Duration(r.Delay+r.HttpsDelay) * time.Second
 	Opt.PluginDebug = r.PluginDebug
 	common.NoGuess = r.NoGuess
 	files.Key = []byte(r.Key)

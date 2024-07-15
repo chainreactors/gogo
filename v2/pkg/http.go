@@ -10,10 +10,29 @@ import (
 )
 
 var (
-	ProxyUrl     *url.URL
-	Proxy        func(*http.Request) (*url.URL, error)
-	maxRedirects = 5
-	headers      = http.Header{"User-Agent": []string{httputils.GetRandomUA()}}
+	ProxyUrl         *url.URL
+	Proxy            func(*http.Request) (*url.URL, error)
+	maxRedirects     = 5
+	HttpTimeout      time.Duration
+	headers          = http.Header{"User-Agent": []string{httputils.GetRandomUA()}}
+	DefaultTransport = &http.Transport{
+		Proxy: Proxy,
+		//TLSHandshakeTimeout : delay * time.Second,
+		TLSClientConfig: &tls.Config{
+			MinVersion:         tls.VersionTLS10,
+			Renegotiation:      tls.RenegotiateOnceAsClient,
+			InsecureSkipVerify: true,
+		},
+		DialContext: (&net.Dialer{
+			Timeout:   HttpTimeout,
+			KeepAlive: HttpTimeout,
+			//DualStack: true,
+		}).DialContext,
+		MaxIdleConnsPerHost: 1,
+		MaxIdleConns:        4000,
+		IdleConnTimeout:     HttpTimeout,
+		DisableKeepAlives:   false,
+	}
 )
 
 func HTTPGet(client *http.Client, url string) (*http.Response, error) {
@@ -26,24 +45,7 @@ func HTTPGet(client *http.Client, url string) (*http.Response, error) {
 }
 
 func HttpConn(delay int) *http.Client {
-	tr := &http.Transport{
-		Proxy: Proxy,
-		//TLSHandshakeTimeout : delay * time.Second,
-		TLSClientConfig: &tls.Config{
-			MinVersion:         tls.VersionTLS10,
-			Renegotiation:      tls.RenegotiateOnceAsClient,
-			InsecureSkipVerify: true,
-		},
-		DialContext: (&net.Dialer{
-			//Timeout:   time.Duration(delay) * time.Second,
-			//KeepAlive: time.Duration(delay) * time.Second,
-			//DualStack: true,
-		}).DialContext,
-		MaxIdleConnsPerHost: 1,
-		MaxIdleConns:        4000,
-		IdleConnTimeout:     time.Duration(delay) * time.Second,
-		DisableKeepAlives:   false,
-	}
+	tr := DefaultTransport
 
 	conn := &http.Client{
 		Transport: tr,
