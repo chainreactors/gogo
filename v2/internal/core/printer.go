@@ -10,7 +10,7 @@ import (
 )
 
 func Printportconfig() {
-	LoadPortConfig()
+	LoadPortConfig("")
 	fmt.Println("当前已有端口配置: (根据端口类型分类)")
 	for k, v := range PresetPorts.NameMap {
 		fmt.Println("	", k, ": ", strings.Join(v, ","))
