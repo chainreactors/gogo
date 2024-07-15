@@ -12,7 +12,7 @@ import (
 )
 
 func winrmScan(result *pkg.Result) {
-	if pkg.OPSEC {
+	if RunOpt.Opsec {
 		return
 	}
 	result.Port = "5985"

@@ -14,17 +14,13 @@ import (
 	"github.com/chainreactors/utils/iutils"
 )
 
-var ExecuterOptions *protocols.ExecuterOptions
-var OPSEC bool
+var ExecuterOptions *protocols.ExecuterOptions = &protocols.ExecuterOptions{
+	Options: &protocols.Options{
+		Timeout: 5,
+	},
+}
 
-func ParserCmdPayload(payloads []string) *protocols.ExecuterOptions {
-	var options = &protocols.ExecuterOptions{
-		Options: &protocols.Options{
-			VarsPayload: map[string]interface{}{},
-			Opsec:       OPSEC,
-		},
-	}
-
+func ParserCmdPayload(payloads []string) map[string]interface{} {
 	var vars = make(map[string]interface{})
 	for _, payload := range payloads {
 		if i := strings.Index(payload, "="); i != -1 {
@@ -40,10 +36,8 @@ func ParserCmdPayload(payloads []string) *protocols.ExecuterOptions {
 			fmt.Println("[warn] incorrect format, skip " + payload)
 		}
 	}
-	for k, v := range vars {
-		options.Options.VarsPayload[k] = v
-	}
-	return options
+
+	return vars
 }
 
 var TemplateMap map[string][]*templates.Template

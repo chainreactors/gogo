@@ -66,6 +66,7 @@ func (r *Runner) Prepare() bool {
 		Opsec:        r.Opsec,
 		//SuffixStr:  r.SuffixStr,
 	}
+	ExecuterOptions.Options.Timeout = r.Delay + r.HttpsDelay
 	Opt.PluginDebug = r.PluginDebug
 	common.NoGuess = r.NoGuess
 	files.Key = []byte(r.Key)
@@ -111,7 +112,7 @@ func (r *Runner) Prepare() bool {
 		if err == nil {
 			ProxyUrl = uri
 			Proxy = http.ProxyURL(uri)
-			neuhttp.Proxy = Proxy
+			neuhttp.DefaultTransport.Proxy = Proxy
 			ProxyDialTimeout = func(network, address string, duration time.Duration) (net.Conn, error) {
 				forward := &net.Dialer{Timeout: duration}
 				dial, err := proxy.FromURL(uri, forward)
@@ -162,9 +163,9 @@ func (r *Runner) Init() error {
 	neutronLoader(r.ExploitFile, r.Payloads)
 
 	if r.Opsec {
-		OPSEC = true
 		fingers.OPSEC = true
 		RunOpt.Opsec = true
+		ExecuterOptions.Options.Opsec = true
 	}
 	return nil
 }
@@ -400,7 +401,7 @@ func printConfigs(t string) {
 }
 
 func neutronLoader(pocfile string, payloads []string) {
-	ExecuterOptions = ParserCmdPayload(payloads)
+	ExecuterOptions.Options.VarsPayload = ParserCmdPayload(payloads)
 	TemplateMap = LoadNeutron(pocfile)
 }
 

@@ -85,8 +85,8 @@ github.com/chainreactors/fingers v0.0.0-20240715095653-2a8d3850cfc1 h1:Pc8xAaEgQ
 github.com/chainreactors/fingers v0.0.0-20240715095653-2a8d3850cfc1/go.mod h1:OeZVH7QM2l5OAgChBBUTlsU2iUwhqPB0er0p0F4UnwE=
 github.com/chainreactors/logs v0.0.0-20240207121836-c946f072f81f h1:tcfp+CEdgiMvjyUzWab5edJtxUwRMSMEIkLybupIx0k=
 github.com/chainreactors/logs v0.0.0-20240207121836-c946f072f81f/go.mod h1:6Mv6W70JrtL6VClulZhmMRZnoYpcTahcDTKLMNEjK0o=
-github.com/chainreactors/neutron v0.0.0-20240715112323-815b60b61299 h1:5aFGoudjkXx7fbStDd8JkicnwV5X67dqSwTAT7a8/AA=
-github.com/chainreactors/neutron v0.0.0-20240715112323-815b60b61299/go.mod h1:7SNhy9Stdc9OSGMfRksuoj9lDv10f/b4qIVNWk5K06Y=
+github.com/chainreactors/neutron v0.0.0-20240715130022-ac443bdb80f4 h1:vNbaJNIRcFOahy1anLiw39QfkLwyS5fsEvNN2gME1C4=
+github.com/chainreactors/neutron v0.0.0-20240715130022-ac443bdb80f4/go.mod h1:Xla6d5p04fcVHEQfQDDEq9pFsi1FdD/cs3WgTSIX31M=
 github.com/chainreactors/parsers v0.0.0-20240702104902-1ce563b7ef76/go.mod h1:G/XLE5RAaUdqADkbhQ59mPrUAbsJLiQ2DN6CwtwNpBQ=
 github.com/chainreactors/parsers v0.0.0-20240708072709-07deeece7ce2 h1:sE3SChgHLtPsEaqHo5tDSy8niDys1SO174C4eHlShSw=
 github.com/chainreactors/parsers v0.0.0-20240708072709-07deeece7ce2/go.mod h1:7rXdYz6jrdjF0WUH1ICcAXKIKKjKmJo2PU8u43V7jkA=
