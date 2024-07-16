@@ -12,8 +12,6 @@ import (
 )
 
 var (
-	PresetPorts = utils.PrePort
-
 	FingerEngine   *fingers.FingersEngine
 	Extractor      []*parsers.Extractor
 	Extractors     = make(parsers.Extractors)

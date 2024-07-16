@@ -89,6 +89,10 @@ github.com/chainreactors/fingers v0.0.0-20240715181037-4dbb468ecf8d h1:PO92uNrAL
 github.com/chainreactors/fingers v0.0.0-20240715181037-4dbb468ecf8d/go.mod h1:R03soobTE/AnZWtFgfQVYNM5QLH52NZ946wZTJVBXh4=
 github.com/chainreactors/fingers v0.0.0-20240715183710-884bb8fbec81 h1:uv7WTuLGUfjQvOlnwWPGR7yT1GWvVlHktHNdYpj9AOE=
 github.com/chainreactors/fingers v0.0.0-20240715183710-884bb8fbec81/go.mod h1:R03soobTE/AnZWtFgfQVYNM5QLH52NZ946wZTJVBXh4=
+github.com/chainreactors/fingers v0.0.0-20240716052615-a9a5b7a56456 h1:qu/FYpkBlnT989yMqBEvekZiTuqAUHZsrQzoV8X/2Vw=
+github.com/chainreactors/fingers v0.0.0-20240716052615-a9a5b7a56456/go.mod h1:R03soobTE/AnZWtFgfQVYNM5QLH52NZ946wZTJVBXh4=
+github.com/chainreactors/fingers v0.0.0-20240716060852-2fda69a0d7fa h1:+V0Rz+to7K+VsdZlM0OggwPS4BM4awQp8+bGHRVknIc=
+github.com/chainreactors/fingers v0.0.0-20240716060852-2fda69a0d7fa/go.mod h1:R03soobTE/AnZWtFgfQVYNM5QLH52NZ946wZTJVBXh4=
 github.com/chainreactors/logs v0.0.0-20240207121836-c946f072f81f h1:tcfp+CEdgiMvjyUzWab5edJtxUwRMSMEIkLybupIx0k=
 github.com/chainreactors/logs v0.0.0-20240207121836-c946f072f81f/go.mod h1:6Mv6W70JrtL6VClulZhmMRZnoYpcTahcDTKLMNEjK0o=
 github.com/chainreactors/neutron v0.0.0-20240715173317-9af9e51d3d00 h1:fONWVbht1ksVPwT0WUPievHKaay43m41dh4Q8a9dE/o=

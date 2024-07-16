@@ -67,7 +67,10 @@ func socketFingerScan(result *Result) {
 		FingerEngine.SocketMatch(result.Content, result.Port, RunOpt.VersionLevel, tcpsender, callback)
 	} else {
 		if group, ok := FingerEngine.SocketGroup[result.Port]; ok {
-			group.Match(result.ToContent(), 1, tcpsender, callback, true)
+			frames, _ := group.Match(result.ToContent(), 1, tcpsender, callback, true)
+			if len(frames) == 0 {
+				FingerEngine.SocketMatch(result.Content, "", RunOpt.VersionLevel, nil, callback)
+			}
 		}
 	}
 
