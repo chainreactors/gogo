@@ -5,6 +5,7 @@ import (
 	"github.com/chainreactors/fingers/common"
 	"github.com/chainreactors/fingers/fingers"
 	"github.com/chainreactors/parsers"
+	"github.com/chainreactors/utils"
 	"net"
 	"net/http"
 	"strings"
@@ -104,8 +105,8 @@ func (result *Result) AddExtracts(extracts []*parsers.Extracted) {
 }
 
 func (result *Result) GuessFramework() {
-	for _, v := range PresetPorts.PortMap.Get(result.Port) {
-		if PresetPorts.TagMap.Get(v) == nil && !iutils.StringsContains([]string{"top1", "top2", "top3", "other", "windows"}, v) {
+	for _, v := range utils.PrePort.PortMap.Get(result.Port) {
+		if utils.PrePort.TagMap.Get(v) == nil && !iutils.StringsContains([]string{"top1", "top2", "top3", "other", "windows"}, v) {
 			result.AddFramework(common.NewFramework(v, common.FrameFromGUESS))
 		}
 	}
