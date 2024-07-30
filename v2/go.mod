@@ -5,7 +5,7 @@ go 1.10
 require (
 	github.com/M09ic/go-ntlmssp v0.0.0-20230312133735-dcccd454dfe0
 	github.com/chainreactors/files v0.0.0-20240716182835-7884ee1e77f0
-	github.com/chainreactors/fingers v1.0.1-0.20240730095248-1ae282027f13
+	github.com/chainreactors/fingers v1.0.1-0.20240730173434-48ba7446b94b
 	github.com/chainreactors/logs v0.0.0-20240207121836-c946f072f81f
 	github.com/chainreactors/neutron v0.0.0-20240715184426-66d4353a43c6
 	github.com/chainreactors/parsers v0.0.0-20240708072709-07deeece7ce2
