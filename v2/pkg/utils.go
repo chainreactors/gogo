@@ -4,7 +4,6 @@ import (
 	"github.com/chainreactors/utils/encode"
 	"strings"
 
-	. "github.com/chainreactors/files"
 	"github.com/chainreactors/utils/iutils"
 )
 
@@ -30,7 +29,7 @@ var PortStat = map[int]string{
 
 func Decode(input string) []byte {
 	b := encode.Base64Decode(input)
-	return UnFlate(b)
+	return encode.MustDeflateDeCompress(b)
 }
 
 func HasPingPriv() bool {

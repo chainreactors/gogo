@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"encoding/json"
+	"github.com/chainreactors/fingers/resources"
 	"io/ioutil"
 	"strings"
 
@@ -21,7 +22,10 @@ var (
 // LoadFinger 加载指纹到全局变量
 func LoadFinger() error {
 	var err error
-	FingerEngine, err = fingers.NewFingersEngine(LoadConfig("http"), LoadConfig("socket"))
+	resources.PrePort = utils.PrePort
+	resources.FingersHTTPData = LoadConfig("http")
+	resources.FingersSocketData = LoadConfig("socket")
+	FingerEngine, err = fingers.NewFingersEngine()
 	if err != nil {
 		return err
 	}

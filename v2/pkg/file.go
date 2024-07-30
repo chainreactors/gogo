@@ -3,6 +3,7 @@ package pkg
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/chainreactors/utils/encode"
 	"path"
 	"strings"
 
@@ -34,7 +35,7 @@ func newFile(filename string, compress bool) (*files.File, error) {
 	var cursor int
 
 	file.Encoder = func(i []byte) []byte {
-		bs := files.XorEncode(files.Flate(i), files.Key, cursor)
+		bs := encode.XorEncode(encode.MustDeflateCompress(i), files.Key, cursor)
 		cursor += len(bs)
 		return bs
 	}

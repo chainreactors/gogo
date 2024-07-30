@@ -9,7 +9,7 @@ import (
 	"github.com/chainreactors/gogo/v2/pkg"
 )
 
-var snmpPublicData = encode.UnHexlify("302902010104067075626c6963a01c02049acb0442020100020100300e300c06082b060102010101000500")
+var snmpPublicData = encode.HexDecode("302902010104067075626c6963a01c02049acb0442020100020100300e300c06082b060102010101000500")
 
 func snmpScan(result *pkg.Result) {
 	result.Port = "161"

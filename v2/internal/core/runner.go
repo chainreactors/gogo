@@ -8,6 +8,7 @@ import (
 	"github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
 	"github.com/chainreactors/utils/encode"
+	"github.com/chainreactors/utils/fileutils"
 	"golang.org/x/net/proxy"
 	"net"
 	"net/http"
@@ -84,7 +85,7 @@ func (r *Runner) Prepare() bool {
 	if r.Exclude != "" {
 		r.Config.Excludes = strings.Split(r.Exclude, ",")
 	} else if r.ExcludeList != "" {
-		r.Config.Excludes, err = files.LoadFileToSlice(r.ExcludeList)
+		r.Config.Excludes, err = fileutils.LoadFileToSlice(r.ExcludeList)
 		if err != nil {
 			logs.Log.Error(err.Error())
 			return false
@@ -138,12 +139,12 @@ func (r *Runner) Init() error {
 	// 加载配置文件中的全局变量
 	err := LoadPortConfig(r.PortConfig)
 	if err != nil {
-		return err
+		return fmt.Errorf("load port config failed, %v", err)
 	}
 	LoadExtractor()
 	err = LoadFinger()
 	if err != nil {
-		return err
+		return fmt.Errorf("load finger config failed, %v", err)
 	}
 	for _, e := range r.Extract {
 		if reg, ok := ExtractRegexps[e]; ok {

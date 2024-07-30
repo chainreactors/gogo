@@ -31,7 +31,7 @@ builds:
       - goos: android
         goarch: amd64
       - goos: android
-        goarch: 386
+        goarch: "386"
       - goos: android
         goarch: arm
     ldflags: "-s -w -X 'github.com/chainreactors/gogo/v2/internal/core.ver=={{ .Tag }}'"
@@ -40,6 +40,7 @@ builds:
     tags:
       - forceposix
       - json
+      - noembed
     asmflags:
       - all=-trimpath={{.Env.GOPATH}}
     gcflags:
