@@ -1,10 +1,10 @@
 package pkg
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/chainreactors/parsers"
 	"github.com/chainreactors/utils/encode"
+	"gopkg.in/yaml.v3"
 	"io/ioutil"
 	"strings"
 
@@ -64,7 +64,7 @@ func LoadTemplates(content []byte) map[string][]*templates.Template {
 	var t []*templates.Template
 
 	var templatemap = make(map[string][]*templates.Template)
-	err := json.Unmarshal(content, &t)
+	err := yaml.Unmarshal(content, &t)
 	if err != nil {
 		iutils.Fatal("neutron config load FAIL!, " + err.Error())
 	}

@@ -86,21 +86,13 @@ github.com/chainreactors/fingers v1.0.1-0.20240730173434-48ba7446b94b h1:vkWz8O6
 github.com/chainreactors/fingers v1.0.1-0.20240730173434-48ba7446b94b/go.mod h1:uRGu4NFC/+VF8R3z9GrGQwMIyYJDDLw615nX/LtwQxM=
 github.com/chainreactors/logs v0.0.0-20240207121836-c946f072f81f h1:tcfp+CEdgiMvjyUzWab5edJtxUwRMSMEIkLybupIx0k=
 github.com/chainreactors/logs v0.0.0-20240207121836-c946f072f81f/go.mod h1:6Mv6W70JrtL6VClulZhmMRZnoYpcTahcDTKLMNEjK0o=
-github.com/chainreactors/neutron v0.0.0-20240715184426-66d4353a43c6 h1:VhV6KQnbIb2+44ODH9Qj6WW7b1fszW7VU3nrlcmd7M8=
-github.com/chainreactors/neutron v0.0.0-20240715184426-66d4353a43c6/go.mod h1:A6oRL1+WyEBCWwUeVcx0W5xONNS6lc6HJ0Y2R/tuXSc=
-github.com/chainreactors/neutron v0.0.0-20240715194532-a6cc6c007916 h1:rCd0XVTAdRAYKh2h+9QfFJWvRY0Gye+nMwXju4lgQbI=
-github.com/chainreactors/neutron v0.0.0-20240715194532-a6cc6c007916/go.mod h1:A6oRL1+WyEBCWwUeVcx0W5xONNS6lc6HJ0Y2R/tuXSc=
 github.com/chainreactors/neutron v0.0.0-20240829091112-f7d7ee172362 h1:tNLtCf7wFcvm2ILmIJjTTi63/R8If2NZseccRaP1jZQ=
 github.com/chainreactors/neutron v0.0.0-20240829091112-f7d7ee172362/go.mod h1:A6oRL1+WyEBCWwUeVcx0W5xONNS6lc6HJ0Y2R/tuXSc=
-github.com/chainreactors/parsers v0.0.0-20240708072709-07deeece7ce2 h1:sE3SChgHLtPsEaqHo5tDSy8niDys1SO174C4eHlShSw=
-github.com/chainreactors/parsers v0.0.0-20240708072709-07deeece7ce2/go.mod h1:7rXdYz6jrdjF0WUH1ICcAXKIKKjKmJo2PU8u43V7jkA=
 github.com/chainreactors/parsers v0.0.0-20240829055950-923f89a92b84 h1:F6umsdHLxKILxrH5wY2zVYwxMmb8XdCEc9apf7GWpOk=
 github.com/chainreactors/parsers v0.0.0-20240829055950-923f89a92b84/go.mod h1:7rXdYz6jrdjF0WUH1ICcAXKIKKjKmJo2PU8u43V7jkA=
 github.com/chainreactors/utils v0.0.0-20240528085651-ba1b255482c1/go.mod h1:JA4eiQZm+7AsfjXBcIzIdVKBEhDCb16eNtWFCGTxlvs=
 github.com/chainreactors/utils v0.0.0-20240704062557-662d623b74f4/go.mod h1:JA4eiQZm+7AsfjXBcIzIdVKBEhDCb16eNtWFCGTxlvs=
 github.com/chainreactors/utils v0.0.0-20240716182459-e85f2b01ee16/go.mod h1:LajXuvESQwP+qCMAvlcoSXppQCjuLlBrnQpu9XQ1HtU=
-github.com/chainreactors/utils v0.0.0-20240730101639-6eac10581648 h1:O8dr11GFBAqZ2LrPWbgG9sG+Yr0cep2wR6QjF/pk7rc=
-github.com/chainreactors/utils v0.0.0-20240730101639-6eac10581648/go.mod h1:LajXuvESQwP+qCMAvlcoSXppQCjuLlBrnQpu9XQ1HtU=
 github.com/chainreactors/utils v0.0.0-20240805193040-ff3b97aa3c3f h1:2NKmadFYP9vCwC0YrazgttFACleOhxScTPzg0i76YAY=
 github.com/chainreactors/utils v0.0.0-20240805193040-ff3b97aa3c3f/go.mod h1:LajXuvESQwP+qCMAvlcoSXppQCjuLlBrnQpu9XQ1HtU=
 github.com/chzyer/logex v1.1.10/go.mod h1:+Ywpsq7O8HXn0nuIou7OrIPyXbp3wmkHB+jjWRnGsAI=
@@ -140,7 +132,6 @@ github.com/envoyproxy/go-control-plane v0.9.10-0.20210907150352-cf90f659a021/go.
 github.com/envoyproxy/go-control-plane v0.10.1/go.mod h1:AY7fTTXNdv/aJ2O5jwpxAPOWUZ7hQAEvzN5Pf27BkQQ=
 github.com/envoyproxy/protoc-gen-validate v0.1.0/go.mod h1:iSmxcyjqTsJpI2R4NaDN7+kN2VEUnK/pcBlmesArF7c=
 github.com/envoyproxy/protoc-gen-validate v0.6.2/go.mod h1:2t7qjJNvHPx8IjnBOzl9E9/baC+qXE/TeeyBRzgJDws=
-github.com/expr-lang/expr v1.16.9 h1:WUAzmR0JNI9JCiF0/ewwHB1gmcGw5wW7nWt8gc6PpCI=
 github.com/expr-lang/expr v1.16.9/go.mod h1:8/vRC7+7HBzESEqt5kKpYXxrxkr31SaO8r40VO/1IT4=
 github.com/facebookincubator/flog v0.0.0-20190930132826-d2511d0ce33c/go.mod h1:QGzNH9ujQ2ZUr/CjDGZGWeDAVStrWNjHeEcjJL96Nuk=
 github.com/facebookincubator/nvdtools v0.1.5 h1:jbmDT1nd6+k+rlvKhnkgMokrCAzHoASWE5LtHbX2qFQ=
@@ -348,7 +339,6 @@ github.com/pierrec/lz4 v2.6.1+incompatible/go.mod h1:pdkljMzZIN41W+lC3N2tnIh5sFi
 github.com/pkg/diff v0.0.0-20210226163009-20ebb0f2a09e/go.mod h1:pJLUxLENpZxwdsKMEsNbx1VGcRFpLqf3715MtcvvzbA=
 github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
-github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/sftp v1.10.1/go.mod h1:lYOWFsE0bwd1+KfKJaKeuokY15vzFx25BLbzYYoAxZI=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=

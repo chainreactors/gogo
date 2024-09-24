@@ -1,8 +1,8 @@
 package pkg
 
 import (
-	"encoding/json"
 	"github.com/chainreactors/fingers/resources"
+	"gopkg.in/yaml.v3"
 	"io/ioutil"
 	"strings"
 
@@ -36,7 +36,7 @@ func LoadPortConfig(portConfig string) error {
 	var ports []*utils.PortConfig
 	var err error
 	if portConfig == "" {
-		err = json.Unmarshal(LoadConfig("port"), &ports)
+		err = yaml.Unmarshal(LoadConfig("port"), &ports)
 		if err != nil {
 			return err
 		}
@@ -45,7 +45,7 @@ func LoadPortConfig(portConfig string) error {
 		if err != nil {
 			return err
 		}
-		err = json.Unmarshal(content, &ports)
+		err = yaml.Unmarshal(content, &ports)
 		if err != nil {
 			return err
 		}
@@ -56,7 +56,7 @@ func LoadPortConfig(portConfig string) error {
 }
 
 func LoadExtractor() {
-	err := json.Unmarshal(LoadConfig("extract"), &Extractor)
+	err := yaml.Unmarshal(LoadConfig("extract"), &Extractor)
 	if err != nil {
 		iutils.Fatal("extract config load FAIL!, " + err.Error())
 	}
@@ -78,7 +78,7 @@ func LoadExtractor() {
 func LoadWorkFlow() WorkflowMap {
 	var workflows []*Workflow
 	var err error
-	err = json.Unmarshal(LoadConfig("workflow"), &workflows)
+	err = yaml.Unmarshal(LoadConfig("workflow"), &workflows)
 	if err != nil {
 		iutils.Fatal("workflow load FAIL, " + err.Error())
 	}

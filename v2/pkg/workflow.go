@@ -1,7 +1,7 @@
 package pkg
 
 import (
-	"encoding/json"
+	"gopkg.in/yaml.v3"
 
 	"github.com/chainreactors/parsers"
 	"github.com/chainreactors/utils/iutils"
@@ -10,7 +10,7 @@ import (
 func ParseWorkflowsFromInput(content []byte) []*Workflow {
 	var workflows []*Workflow
 	var err error
-	err = json.Unmarshal(content, &workflows)
+	err = yaml.Unmarshal(content, &workflows)
 	if err != nil {
 		iutils.Fatal("workflow load FAIL, " + err.Error())
 	}
