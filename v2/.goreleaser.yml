@@ -39,7 +39,6 @@ builds:
       - -trimpath
     tags:
       - forceposix
-      - json
       - noembed
     asmflags:
       - all=-trimpath={{.Env.GOPATH}}
