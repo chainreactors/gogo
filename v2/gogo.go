@@ -3,6 +3,7 @@ package main
 
 import (
 	"github.com/chainreactors/gogo/v2/cmd"
+	"os"
 	//_ "net/http/pprof"
 )
 
@@ -14,4 +15,5 @@ func main() {
 	//	http.ListenAndServe("localhost:6060", nil)
 	//}()
 	cmd.Gogo()
+	os.Exit(0)
 }
