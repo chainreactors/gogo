@@ -8,12 +8,12 @@
 * 自由的端口配置
 * 支持主动/被动指纹识别
 * 关键信息提取, 如title, cert 以及自定义提取信息的正则
-* 支持nuclei poc, poc目录: https://chainreactors.github.io/wiki/gogo/detail/#_6
+* 支持nuclei poc, 引擎: https://github.com/chainreactors/neutron
 * 无害的扫描, 每个添加的poc都经过人工审核
 * 可控的启发式扫描
 * 超强的性能, 最快的速度, 尽可能小的内存与CPU占用.
 * 最小发包原则, 尽可能少地发包获取最多的信息
-* 支持DSL, 可以通过简单的配置自定义自己的gogo
+* 支持DSL, 可以通过修改的配置文件自定义自己的gogo
 * 完善的输出与输出设计
 * 几乎不依赖第三方库, 纯原生go编写, 在windows 2003上也可以使用完整的漏洞/指纹识别功能
 
@@ -21,7 +21,7 @@
 
 完整的文档与教程位于wiki: https://chainreactors.github.io/wiki/gogo/
 
-指纹与poc仓库: https://github.com/chainreactors/gogo-templates
+指纹与poc仓库: https://github.com/chainreactors/templates
 
 ### 最简使用
 
