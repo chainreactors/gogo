@@ -21,8 +21,7 @@ type RunnerOpts struct {
 }
 
 var (
-	RunOpt         RunnerOpts
-	DefaultMaxSize = 1024 * 16 // 16k
+	RunOpt RunnerOpts
 )
 
 func Dispatch(result *pkg.Result) {

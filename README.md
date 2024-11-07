@@ -16,7 +16,7 @@
 * 支持DSL, 可以通过修改的配置文件自定义自己的gogo
 * 完善的输出与输出设计
 * 几乎不依赖第三方库, 纯原生go编写, 在windows 2003上也可以使用完整的漏洞/指纹识别功能
-
+ 
 ## QuickStart
 
 完整的文档与教程位于wiki: https://chainreactors.github.io/wiki/gogo/

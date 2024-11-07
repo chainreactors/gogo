@@ -30,7 +30,7 @@ func CollectHttpResponse(result *Result, resp *http.Response) {
 		return
 	}
 
-	CollectParsedResponse(result, parsers.NewResponse(resp))
+	CollectParsedResponse(result, parsers.NewResponse(resp, int64(DefaultMaxSize*2)))
 }
 
 func CollectParsedResponse(result *Result, resp *parsers.Response) {
