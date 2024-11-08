@@ -1,4 +1,4 @@
-package plugin
+package engine
 
 import (
 	"github.com/chainreactors/fingers/common"
@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-func httpFingerScan(result *Result) {
+func HTTPFingerScan(result *Result) {
 	passiveHttpMatch(result)
 	if RunOpt.VersionLevel > 0 {
 		activeHttpMatch(result)

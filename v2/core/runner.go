@@ -5,6 +5,7 @@ import (
 	"github.com/chainreactors/files"
 	"github.com/chainreactors/fingers/common"
 	"github.com/chainreactors/fingers/fingers"
+	. "github.com/chainreactors/gogo/v2/engine"
 	"github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
 	"github.com/chainreactors/utils/encode"
@@ -18,7 +19,6 @@ import (
 	"strings"
 	"time"
 
-	. "github.com/chainreactors/gogo/v2/internal/plugin"
 	. "github.com/chainreactors/gogo/v2/pkg"
 	neuhttp "github.com/chainreactors/neutron/protocols/http"
 	"github.com/chainreactors/utils/iutils"

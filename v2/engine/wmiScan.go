@@ -1,8 +1,7 @@
-package plugin
+package engine
 
 import (
 	"bytes"
-
 	"github.com/M09ic/go-ntlmssp"
 
 	"github.com/chainreactors/gogo/v2/pkg"
@@ -11,7 +10,7 @@ import (
 
 var data = pkg.Decode("YmXgZhZgYGCoYNBgYGZgYNghsAPEZWAEY0aGBSAGAwPDAQjlBiJYYju6XsucFJz/goNBW8AjgYmBgYGLCaLAL8THNzg4AKyfvYljEQMaYGPcKMvAwMAPAAAA//8=")
 
-func wmiScan(result *pkg.Result) {
+func WMIScan(result *pkg.Result) {
 	result.Port = "135"
 	target := result.GetTarget()
 	conn, err := pkg.NewSocket("tcp", target, RunOpt.Delay)

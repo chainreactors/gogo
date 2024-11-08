@@ -1,4 +1,4 @@
-package plugin
+package engine
 
 import (
 	. "github.com/chainreactors/gogo/v2/pkg"
@@ -9,7 +9,7 @@ import (
 
 // -v
 // 信息收集插件,通过匹配http服务的favicon md5值判断CMS
-func faviconScan(result *Result) {
+func FaviconScan(result *Result) {
 	var err error
 	conn := result.GetHttpConn(RunOpt.Delay)
 	url := result.GetURL() + "/favicon.ico"

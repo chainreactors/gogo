@@ -1,16 +1,15 @@
 // reference https://github.com/ly4k/SMBGhost
-package plugin
+package engine
 
 import (
 	"bytes"
 	"github.com/chainreactors/fingers/common"
-
 	"github.com/chainreactors/gogo/v2/pkg"
 )
 
 var sgpkt = pkg.Decode("YmBgOPAv2NfJgQEG5BlIBSoMHAyMDAwM9VjkKhgYGJhAmEmASYlJhYmBmYlZgFmQGSTHyKDGAKEVwPoJAWYGLqh6BAYBAAAAAP//")
 
-func smbGhostScan(result *pkg.Result) {
+func SMBGhostScan(result *pkg.Result) {
 	target := result.GetTarget()
 	conn, err := pkg.NewSocket("tcp", target, RunOpt.Delay)
 	if err != nil {

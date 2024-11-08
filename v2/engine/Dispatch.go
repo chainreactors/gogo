@@ -1,4 +1,4 @@
-package plugin
+package engine
 
 import (
 	"sync/atomic"
@@ -33,39 +33,39 @@ func Dispatch(result *pkg.Result) {
 	}()
 	atomic.AddInt32(&RunOpt.Sum, 1)
 	if result.Port == "137" || result.Port == "nbt" {
-		nbtScan(result)
+		NBTScan(result)
 		return
 	} else if result.Port == "135" || result.Port == "wmi" {
-		wmiScan(result)
+		WMIScan(result)
 		return
 	} else if result.Port == "oxid" {
-		oxidScan(result)
+		OXIDScan(result)
 		return
 	} else if result.Port == "icmp" || result.Port == "ping" {
-		icmpScan(result)
+		ICMPScan(result)
 		return
 	} else if result.Port == "snmp" || result.Port == "161" {
-		snmpScan(result)
+		SNMPScan(result)
 		return
 	} else if result.Port == "445" || result.Port == "smb" {
-		smbScan(result)
+		SMBScan(result)
 		if RunOpt.Exploit == "ms17010" {
-			ms17010Scan(result)
+			MS17010Scan(result)
 		} else if RunOpt.Exploit == "smbghost" || RunOpt.Exploit == "cve-2020-0796" {
-			smbGhostScan(result)
+			SMBGhostScan(result)
 		} else if RunOpt.Exploit == "auto" || RunOpt.Exploit == "smb" {
-			ms17010Scan(result)
-			smbGhostScan(result)
+			MS17010Scan(result)
+			SMBGhostScan(result)
 		}
 		return
 	} else if result.Port == "mssqlntlm" {
-		mssqlScan(result)
+		MSSqlScan(result)
 		return
 	} else if result.Port == "winrm" {
-		winrmScan(result)
+		WinrmScan(result)
 		return
 	} else {
-		initScan(result)
+		InitScan(result)
 	}
 
 	if !result.Open || result.SmartProbe {
@@ -75,9 +75,9 @@ func Dispatch(result *pkg.Result) {
 
 	// 指纹识别, 会根据versionlevel自动选择合适的指纹
 	if result.IsHttp {
-		httpFingerScan(result)
+		HTTPFingerScan(result)
 	} else {
-		socketFingerScan(result)
+		SocketFingerScan(result)
 	}
 
 	if result.Filter(RunOpt.ScanFilters) {
@@ -91,7 +91,7 @@ func Dispatch(result *pkg.Result) {
 			hostScan(result)
 		}
 
-		faviconScan(result)
+		FaviconScan(result)
 		if result.Status != "404" {
 			NotFoundScan(result)
 		}

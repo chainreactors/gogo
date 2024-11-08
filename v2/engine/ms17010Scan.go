@@ -1,4 +1,4 @@
-package plugin
+package engine
 
 import (
 	"encoding/binary"
@@ -17,7 +17,7 @@ var (
 	trans2SessionSetupRequest = Decode("YmBg8Psf7OtkxMDAwCDBfoABGXD8/8fA4cjAz8PAwMAIFVt2cwkDAwMPgxNIJwMjAx8DL4oeBgAAAAD//w==")
 )
 
-func ms17010Scan(result *Result) {
+func MS17010Scan(result *Result) {
 	if RunOpt.Opsec {
 		logs.Log.Debugf("opsec!!! skip MS-17010 plugin")
 		return

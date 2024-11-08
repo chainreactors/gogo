@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 	"github.com/chainreactors/fingers/common"
+	"github.com/chainreactors/gogo/v2/engine"
 	"net"
 	"runtime/debug"
 	"sort"
@@ -10,7 +11,6 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/chainreactors/gogo/v2/internal/plugin"
 	. "github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/logs"
 	"github.com/chainreactors/utils"
@@ -53,7 +53,7 @@ func DefaultMod(targets interface{}, config Config) {
 		defer wgs.Done()
 		tc := i.(targetConfig)
 		result := tc.NewResult()
-		plugin.Dispatch(result)
+		engine.Dispatch(result)
 		if result.Open {
 			atomic.AddInt32(&Opt.AliveSum, 1)
 
@@ -139,7 +139,7 @@ func SmartMod(target *utils.CIDR, config Config) {
 		tc := i.(targetConfig)
 		result := NewResult(tc.ip, tc.port)
 		result.SmartProbe = true
-		plugin.Dispatch(result)
+		engine.Dispatch(result)
 
 		if result.Open {
 			logs.Log.Debug("cidr scan , " + result.String())
@@ -230,7 +230,7 @@ func AliveMod(targets interface{}, config Config) {
 func aliveScan(tc targetConfig, temp *sync.Map) {
 	result := NewResult(tc.ip, tc.port)
 	result.SmartProbe = true
-	plugin.Dispatch(result)
+	engine.Dispatch(result)
 
 	if result.Open {
 		logs.Log.Debug("alive scan, " + result.String())

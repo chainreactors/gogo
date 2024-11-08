@@ -1,4 +1,4 @@
-package plugin
+package engine
 
 import (
 	"strings"
@@ -10,7 +10,7 @@ var oxid1 = pkg.Decode("YmXgZhZgYGDwYGBgYGRgYNghsAPEBbNB5JF/f2YmBEkL7D7NsIpB0aQK
 var oxid2 = pkg.Decode("YmVgYBZgYGCQYGBgYGSAAVYGAAAAAP//")
 
 // -default
-func oxidScan(result *pkg.Result) {
+func OXIDScan(result *pkg.Result) {
 	result.Port = "135"
 	target := result.GetTarget()
 	conn, err := pkg.NewSocket("tcp", target, RunOpt.Delay)

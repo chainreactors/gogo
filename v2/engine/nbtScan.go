@@ -1,4 +1,4 @@
-package plugin
+package engine
 
 import (
 	"encoding/hex"
@@ -53,7 +53,7 @@ func init() {
 
 var nbtdata = pkg.Decode("SktjYGBgZAADBWdvR7yAgUGRgREAAAD//w==")
 
-func nbtScan(result *pkg.Result) {
+func NBTScan(result *pkg.Result) {
 	var Share bool = false
 	var DC bool = false
 	result.Protocol = "udp"

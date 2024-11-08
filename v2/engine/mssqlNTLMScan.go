@@ -1,4 +1,4 @@
-package plugin
+package engine
 
 import (
 	"bytes"
@@ -47,7 +47,7 @@ var sspiMessage = []byte{
 	0x00, 0x00, 0xff,
 }
 
-func mssqlScan(result *pkg.Result) {
+func MSSqlScan(result *pkg.Result) {
 	result.Port = "1433"
 	target := result.GetTarget()
 	conn, err := pkg.NewSocket("tcp", target, RunOpt.Delay)

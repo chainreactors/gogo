@@ -1,4 +1,4 @@
-package plugin
+package engine
 
 import (
 	"encoding/base64"
@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-func winrmScan(result *pkg.Result) {
+func WinrmScan(result *pkg.Result) {
 	if RunOpt.Opsec {
 		return
 	}

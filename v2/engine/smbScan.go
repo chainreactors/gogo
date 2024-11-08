@@ -1,11 +1,10 @@
-package plugin
+package engine
 
 // from https://github.com/JKme/cube/blob/cb84da1f305f1f6a92ae3011c7be9c0f998c3571/plugins/probe/ntlm_smb.go
 import (
 	"bytes"
 	"encoding/hex"
 	"errors"
-
 	"github.com/M09ic/go-ntlmssp"
 
 	. "github.com/chainreactors/gogo/v2/pkg"
@@ -40,7 +39,7 @@ func ntlmdata(Flags []byte) []byte {
 	}
 }
 
-func smbScan(result *Result) {
+func SMBScan(result *Result) {
 	result.Port = "445"
 	target := result.GetTarget()
 	var err error

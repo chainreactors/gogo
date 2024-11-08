@@ -1,4 +1,4 @@
-package plugin
+package engine
 
 import (
 	"github.com/chainreactors/fingers/common"

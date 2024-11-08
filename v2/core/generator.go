@@ -1,10 +1,10 @@
 package core
 
 import (
+	"github.com/chainreactors/gogo/v2/engine"
 	"strings"
 	"sync"
 
-	"github.com/chainreactors/gogo/v2/internal/plugin"
 	. "github.com/chainreactors/gogo/v2/pkg"
 	. "github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
@@ -136,8 +136,8 @@ func (gen *TargetGenerator) genFromDefault(cidrs utils.CIDRs, portlist []string)
 		for ip := range ch {
 			for _, port := range portlist {
 				gen.ch <- targetConfig{ip: ip, port: port, hosts: gen.hostsMap[ip]}
-				if plugin.RunOpt.Sum%65535 == 65534 {
-					Log.Importantf("Current processing %s:%s, number: %d", ip, port, plugin.RunOpt.Sum)
+				if engine.RunOpt.Sum%65535 == 65534 {
+					Log.Importantf("Current processing %s:%s, number: %d", ip, port, engine.RunOpt.Sum)
 				}
 			}
 		}

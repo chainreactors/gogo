@@ -1,4 +1,4 @@
-package plugin
+package engine
 
 //Ladon Scanner for golang
 //Author: k8gege
@@ -41,7 +41,7 @@ func getICMPStatus(t uint8) string {
 	return "unknown"
 }
 
-func icmpScan(result *pkg.Result) {
+func ICMPScan(result *pkg.Result) {
 	host := result.Ip
 	delay := time.Duration(RunOpt.Delay)
 	conn, err := net.DialTimeout("ip4:icmp", host, delay*time.Second)

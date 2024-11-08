@@ -1,4 +1,4 @@
-package plugin
+package engine
 
 import (
 	"bytes"
@@ -10,7 +10,7 @@ import (
 
 // -default
 // socket进行对网站的连接
-func initScan(result *pkg.Result) {
+func InitScan(result *pkg.Result) {
 	var bs []byte
 	target := result.GetTarget()
 	if pkg.ProxyUrl != nil && strings.HasPrefix(pkg.ProxyUrl.Scheme, "http") {

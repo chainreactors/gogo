@@ -1,4 +1,4 @@
-package plugin
+package engine
 
 import (
 	"github.com/chainreactors/fingers/common"
@@ -11,7 +11,7 @@ var (
 	UDP = "udp"
 )
 
-func socketFingerScan(result *Result) {
+func SocketFingerScan(result *Result) {
 	// 如果是http协议,则判断cms,如果是tcp则匹配规则库.暂时不考虑udp
 	if Proxy != nil {
 		// 如果存在http代理，跳过tcp指纹识别
