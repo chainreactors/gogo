@@ -2,16 +2,16 @@ package cmd
 
 import (
 	"fmt"
-	core2 "github.com/chainreactors/gogo/v2/core"
+	"github.com/chainreactors/gogo/v2/core"
 	"github.com/chainreactors/logs"
 	"github.com/jessevdk/go-flags"
 	"os"
 )
 
 func Gogo() {
-	var runner core2.Runner
+	var runner core.Runner
 	parser := flags.NewParser(&runner, flags.Default)
-	parser.Usage = core2.Usage()
+	parser.Usage = core.Usage()
 	_, err := parser.Parse()
 	if err != nil {
 		if err.(*flags.Error).Type != flags.ErrHelp {
@@ -22,7 +22,7 @@ func Gogo() {
 	if ok := runner.Prepare(); !ok {
 		os.Exit(0)
 	}
-	logs.Log.Important(core2.Banner())
+	logs.Log.Important(core.Banner())
 	err = runner.Init()
 	if err != nil {
 		logs.Log.Error(err.Error())

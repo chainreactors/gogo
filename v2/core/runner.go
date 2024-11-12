@@ -70,6 +70,7 @@ func (r *Runner) Prepare() bool {
 	ExecuterOptions.Options.Timeout = r.Delay + r.HttpsDelay
 	HttpTimeout = time.Duration(r.Delay+r.HttpsDelay) * time.Second
 	Opt.PluginDebug = r.PluginDebug
+	Opt.NoScan = r.NoScan
 	common.NoGuess = r.NoGuess
 	files.Key = []byte(r.Key)
 
