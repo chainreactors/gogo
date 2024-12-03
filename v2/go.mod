@@ -9,7 +9,7 @@ require (
 	github.com/chainreactors/logs v0.0.0-20240207121836-c946f072f81f
 	github.com/chainreactors/neutron v0.0.0-20240924094734-5be76870bfa2
 	github.com/chainreactors/parsers v0.0.0-20241107171801-3f8b998dedc1
-	github.com/chainreactors/utils v0.0.0-20240805193040-ff3b97aa3c3f
+	github.com/chainreactors/utils v0.0.0-20241203074749-f12134efcf26
 	github.com/google/btree v1.0.0 // indirect
 	github.com/jessevdk/go-flags v1.5.0
 	github.com/panjf2000/ants/v2 v2.9.1

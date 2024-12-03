@@ -8,6 +8,7 @@ import (
 	. "github.com/chainreactors/gogo/v2/engine"
 	"github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
+	"github.com/chainreactors/utils"
 	"github.com/chainreactors/utils/encode"
 	"github.com/chainreactors/utils/fileutils"
 	"golang.org/x/net/proxy"
@@ -82,17 +83,20 @@ func (r *Runner) Prepare() bool {
 
 	r.PrepareConfig()
 
-	var err error
 	if r.Exclude != "" {
-		r.Config.Excludes = strings.Split(r.Exclude, ",")
+		r.Config.Excludes = utils.ParseCIDRs(strings.Split(r.Exclude, ","))
 	} else if r.ExcludeList != "" {
-		r.Config.Excludes, err = fileutils.LoadFileToSlice(r.ExcludeList)
+		ips, err := fileutils.LoadFileToSlice(r.ExcludeList)
 		if err != nil {
 			logs.Log.Error(err.Error())
 			return false
 		}
+		r.Config.Excludes = utils.ParseCIDRs(ips)
 	}
 
+	if r.Config.Excludes != nil {
+		RunOpt.ExcludeCIDRs = r.Config.Excludes
+	}
 	if r.FormatterFilename != "" {
 		LoadNeutron("")
 		var formatOut string

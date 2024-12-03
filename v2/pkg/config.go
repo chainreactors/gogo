@@ -29,7 +29,7 @@ type Config struct {
 	*parsers.GOGOConfig
 	// ip
 	CIDRs    utils.CIDRs `json:"-"`
-	Excludes []string    `json:"-"`
+	Excludes utils.CIDRs `json:"-"`
 	// port and probe
 	//Ports         string   `json:"ports"` // 预设字符串
 	PortList      []string `json:"-"` // 处理完的端口列表
@@ -154,26 +154,24 @@ func (config *Config) InitIP() error {
 		}
 	}
 
-	// init excluded ip
+	//config.CIDRs = config.ExcludeCIDRs(config.CIDRs)
+	return nil
+}
+
+func (config *Config) ExcludeCIDRs(cidrs utils.CIDRs) utils.CIDRs {
 	if config.Excludes != nil {
-		cidrs := config.CIDRs
-		for _, eip := range config.Excludes {
-			ecidr := utils.ParseCIDR(eip)
-			if ecidr == nil {
-				logs.Log.Warnf("Parse IP %s Failed, skipped ", strings.TrimSpace(eip))
-				continue
-			}
+		for _, ecidr := range config.Excludes {
 			for i, c := range cidrs {
 				if c.ContainsCIDR(ecidr) {
 					cidrs = append(append(cidrs[:i], cidrs[i+1:]...), utils.DifferenceCIDR(c, ecidr)...)
 				}
 			}
 		}
-		config.CIDRs = cidrs.Coalesce()
+		return cidrs.Coalesce()
+	} else {
+		return cidrs
 	}
-	return nil
 }
-
 func (config *Config) InitFile() error {
 	var err error
 	// 初始化res文件handler

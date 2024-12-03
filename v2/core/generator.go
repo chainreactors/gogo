@@ -184,14 +184,14 @@ func (gen *TargetGenerator) genFromResult(results parsers.GOGOResults) {
 func (gen *TargetGenerator) generatorDispatch(targets interface{}, portlist []string) chan targetConfig {
 	gen.ch = make(chan targetConfig)
 	go func() {
-		switch targets.(type) {
+		switch v := targets.(type) {
 		case parsers.GOGOResults:
-			gen.genFromResult(targets.(parsers.GOGOResults))
-		default:
+			gen.genFromResult(v)
+		case utils.CIDRs:
 			if gen.spray { // 端口喷洒
-				gen.genFromSpray(targets.(utils.CIDRs), portlist)
+				gen.genFromSpray(v, portlist)
 			} else { // 默认模式 批量处理
-				gen.genFromDefault(targets.(utils.CIDRs), portlist)
+				gen.genFromDefault(v, portlist)
 			}
 		}
 		close(gen.ch)

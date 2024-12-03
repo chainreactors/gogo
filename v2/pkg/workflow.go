@@ -45,7 +45,7 @@ func (w *Workflow) PrepareConfig(rconfig Config) *Config {
 			Ports:    w.Ports,
 			Mod:      w.Mod,
 		},
-
+		Excludes:    rconfig.Excludes,
 		IpProbe:     w.IpProbe,
 		PortProbe:   w.SmartProbe,
 		FilePath:    w.Path,

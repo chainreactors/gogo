@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"github.com/chainreactors/utils"
 	"sync/atomic"
 
 	"github.com/chainreactors/gogo/v2/pkg"
@@ -16,8 +17,9 @@ type RunnerOpts struct {
 	HttpsDelay   int
 	ScanFilters  [][]string
 	//SuffixStr    string
-	Debug bool
-	Opsec bool // enable opsec
+	Debug        bool
+	Opsec        bool // enable opsec
+	ExcludeCIDRs utils.CIDRs
 }
 
 var (
@@ -32,6 +34,10 @@ func Dispatch(result *pkg.Result) {
 		}
 	}()
 	atomic.AddInt32(&RunOpt.Sum, 1)
+	if RunOpt.ExcludeCIDRs != nil && RunOpt.ExcludeCIDRs.ContainsString(result.Ip) {
+		logs.Log.Debug("exclude ip: " + result.Ip)
+		return
+	}
 	if result.Port == "137" || result.Port == "nbt" {
 		NBTScan(result)
 		return

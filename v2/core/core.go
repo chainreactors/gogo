@@ -168,6 +168,7 @@ func SmartMod(target *utils.CIDR, config Config) {
 	} else {
 		return
 	}
+
 	logs.Log.Importantf("Smart scan: %s finished, found %d alive cidrs", target, len(iplist))
 	if config.IsBSmart() {
 		WriteSmartResult(config.SmartBFile, target.String(), iplist.Strings())
