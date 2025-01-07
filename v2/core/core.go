@@ -81,8 +81,6 @@ func DefaultMod(targets interface{}, config Config) {
 		if Opt.PluginDebug == true {
 			debug.PrintStack()
 		}
-
-		wgs.Done()
 	}))
 	defer scanPool.Release()
 
