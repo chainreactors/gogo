@@ -13,10 +13,6 @@ var (
 
 func SocketFingerScan(result *Result) {
 	// 如果是http协议,则判断cms,如果是tcp则匹配规则库.暂时不考虑udp
-	if Proxy != nil {
-		// 如果存在http代理，跳过tcp指纹识别
-		return
-	}
 	var closureResp, finalResp []byte
 	callback := func(f *common.Framework, v *common.Vuln) {
 		if f != nil {

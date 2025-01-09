@@ -8,12 +8,12 @@ import (
 	. "github.com/chainreactors/gogo/v2/engine"
 	"github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
+	"github.com/chainreactors/proxyclient"
 	"github.com/chainreactors/utils"
 	"github.com/chainreactors/utils/encode"
 	"github.com/chainreactors/utils/fileutils"
-	"golang.org/x/net/proxy"
+	"golang.org/x/net/context"
 	"net"
-	"net/http"
 	"net/url"
 	"os"
 	"regexp"
@@ -114,27 +114,25 @@ func (r *Runner) Prepare() bool {
 		return false
 	}
 
-	if r.Proxy != "" {
-		uri, err := url.Parse(r.Proxy)
-		if err == nil {
-			ProxyUrl = uri
-			Proxy = http.ProxyURL(uri)
-			neuhttp.DefaultTransport.Proxy = Proxy
-			ProxyDialTimeout = func(network, address string, duration time.Duration) (net.Conn, error) {
-				forward := &net.Dialer{Timeout: duration}
-				dial, err := proxy.FromURL(uri, forward)
-				if err != nil {
-					return nil, err
-				}
-				conn, err := dial.Dial(network, address)
-				if err != nil {
-					return nil, err
-				}
-				return conn, nil
+	if len(r.Proxy) != 0 {
+		var proxies []*url.URL
+		for _, u := range r.Proxy {
+			uri, err := url.Parse(u)
+			if err != nil {
+				logs.Log.Warnf("parse proxy error %s, skip proxy!", err.Error())
+			} else {
+				proxies = append(proxies, uri)
 			}
-
-		} else {
+		}
+		dialer, err := proxyclient.NewClientChain(proxies)
+		if err != nil {
 			logs.Log.Warnf("parse proxy error %s, skip proxy!", err.Error())
+		}
+		neuhttp.DefaultTransport.DialContext = dialer.DialContext
+		DefaultTransport.DialContext = dialer.DialContext
+		ProxyDialTimeout = func(network, address string, duration time.Duration) (net.Conn, error) {
+			ctx, _ := context.WithTimeout(context.Background(), duration)
+			return dialer.DialContext(ctx, network, address)
 		}
 	}
 	return true

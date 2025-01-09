@@ -9,12 +9,11 @@ require (
 	github.com/chainreactors/logs v0.0.0-20240207121836-c946f072f81f
 	github.com/chainreactors/neutron v0.0.0-20240924094734-5be76870bfa2
 	github.com/chainreactors/parsers v0.0.0-20241107171801-3f8b998dedc1
+	github.com/chainreactors/proxyclient v0.0.0-20250109073353-b2226d9e1713 // indirect
 	github.com/chainreactors/utils v0.0.0-20241203074749-f12134efcf26
-	github.com/google/btree v1.0.0 // indirect
 	github.com/jessevdk/go-flags v1.5.0
 	github.com/panjf2000/ants/v2 v2.9.1
-	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
-	golang.org/x/net v0.21.0
+	golang.org/x/net v0.23.0
 	gopkg.in/yaml.v3 v3.0.1
 	sigs.k8s.io/yaml v1.4.0 // generate only
 )

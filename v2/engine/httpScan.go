@@ -13,55 +13,41 @@ import (
 func InitScan(result *pkg.Result) {
 	var bs []byte
 	target := result.GetTarget()
-	if pkg.ProxyUrl != nil && strings.HasPrefix(pkg.ProxyUrl.Scheme, "http") {
-		// 如果是http代理, 则使用http库代替socket
-		conn := result.GetHttpConn(RunOpt.Delay)
-		resp, err := pkg.HTTPGet(conn, "http://"+target)
-		if err != nil {
-			return
-		}
-		if err != nil {
-			result.Err = err
-			return
-		}
-		result.Open = true
-		pkg.CollectHttpResponse(result, resp)
-	} else {
-		defer func() {
-			// 如果进行了各种探测依旧为tcp协议, 则收集tcp端口状态
-			if result.Protocol == "tcp" {
-				if result.Err != nil {
-					result.Error = result.Err.Error()
-					if RunOpt.Debug {
-						result.ErrStat = handleError(result.Err)
-					}
+	defer func() {
+		// 如果进行了各种探测依旧为tcp协议, 则收集tcp端口状态
+		if result.Protocol == "tcp" {
+			if result.Err != nil {
+				result.Error = result.Err.Error()
+				if RunOpt.Debug {
+					result.ErrStat = handleError(result.Err)
 				}
 			}
-		}()
-		conn, err := pkg.NewSocket("tcp", target, RunOpt.Delay)
+		}
+	}()
+
+	conn, err := pkg.NewSocket("tcp", target, RunOpt.Delay)
+	if err != nil {
+		result.Err = err
+		return
+	}
+	defer conn.Close()
+	result.Open = true
+
+	// 启发式扫描探测直接返回不需要后续处理
+	if result.SmartProbe {
+		return
+	}
+	result.Status = "open"
+
+	bs, err = conn.Read(RunOpt.Delay)
+	if err != nil {
+		senddataStr := fmt.Sprintf("GET /%s HTTP/1.1\r\nHost: %s\r\n\r\n", result.Uri, target)
+		bs, err = conn.Request([]byte(senddataStr), pkg.DefaultMaxSize)
 		if err != nil {
 			result.Err = err
-			return
 		}
-		defer conn.Close()
-		result.Open = true
-
-		// 启发式扫描探测直接返回不需要后续处理
-		if result.SmartProbe {
-			return
-		}
-		result.Status = "open"
-
-		bs, err = conn.Read(RunOpt.Delay)
-		if err != nil {
-			senddataStr := fmt.Sprintf("GET /%s HTTP/1.1\r\nHost: %s\r\n\r\n", result.Uri, target)
-			bs, err = conn.Request([]byte(senddataStr), pkg.DefaultMaxSize)
-			if err != nil {
-				result.Err = err
-			}
-		}
-		pkg.CollectSocketResponse(result, bs)
 	}
+	pkg.CollectSocketResponse(result, bs)
 
 	//所有30x,400,以及非http协议的开放端口都送到http包尝试获取更多信息
 	if result.Status == "400" || result.Protocol == "tcp" || (strings.HasPrefix(result.Status, "3") && bytes.Contains(result.Content, []byte("location: https"))) {
