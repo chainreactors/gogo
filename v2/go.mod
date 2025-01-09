@@ -10,7 +10,7 @@ require (
 	github.com/chainreactors/neutron v0.0.0-20241106063152-5f9e96552c59
 	github.com/chainreactors/parsers v0.0.0-20241107171801-3f8b998dedc1
 	github.com/chainreactors/proxyclient v0.0.0-20250109073353-b2226d9e1713
-	github.com/chainreactors/utils v0.0.0-20241209140746-65867d2f78b2
+	github.com/chainreactors/utils v0.0.0-20250109082818-178eed97b7ab
 	github.com/jessevdk/go-flags v1.6.1
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/panjf2000/ants/v2 v2.9.1
@@ -20,6 +20,8 @@ require (
 )
 
 replace (
+	golang.org/x/crypto => golang.org/x/crypto v0.0.0-20191205180655-e7c4368fe9dd
 	golang.org/x/net => golang.org/x/net v0.0.0-20200202094626-16171245cfb2
+	golang.org/x/sys => golang.org/x/sys v0.0.0-20200223170610-d5e6a3e2c0ae
 	golang.org/x/text => golang.org/x/text v0.3.3
 )
