@@ -7,7 +7,7 @@ require (
 	github.com/chainreactors/files v0.0.0-20240716182835-7884ee1e77f0
 	github.com/chainreactors/fingers v1.0.1
 	github.com/chainreactors/logs v0.0.0-20241030063019-8ca66a3ee307
-	github.com/chainreactors/neutron v0.0.0-20241106063152-5f9e96552c59
+	github.com/chainreactors/neutron v0.0.0-20250113061151-32771f256b1f
 	github.com/chainreactors/parsers v0.0.0-20241107171801-3f8b998dedc1
 	github.com/chainreactors/proxyclient v0.0.0-20250109073353-b2226d9e1713
 	github.com/chainreactors/utils v0.0.0-20250109082818-178eed97b7ab

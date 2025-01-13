@@ -5,8 +5,14 @@ import (
 	"github.com/chainreactors/gogo/v2/core"
 	"github.com/chainreactors/logs"
 	"github.com/jessevdk/go-flags"
+	"io/ioutil"
+	"log"
 	"os"
 )
+
+func init() {
+	log.SetOutput(ioutil.Discard)
+}
 
 func Gogo() {
 	var runner core.Runner
