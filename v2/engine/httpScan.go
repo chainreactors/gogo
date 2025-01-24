@@ -1,11 +1,11 @@
 package engine
 
 import (
-	"bytes"
 	"fmt"
+	"strings"
+
 	"github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/logs"
-	"strings"
 )
 
 // -default
@@ -49,20 +49,55 @@ func InitScan(result *pkg.Result) {
 	}
 	pkg.CollectSocketResponse(result, bs)
 
-	//所有30x,400,以及非http协议的开放端口都送到http包尝试获取更多信息
-	if result.Status == "400" || result.Protocol == "tcp" || (strings.HasPrefix(result.Status, "3") && bytes.Contains(result.Content, []byte("location: https"))) {
-		systemHttp(result, "https")
+	// 修改重定向判断逻辑
+	if result.Status == "400" || result.Protocol == "tcp" {
+		systemHttp(result, "https", "")
 	} else if strings.HasPrefix(result.Status, "3") {
-		systemHttp(result, "http")
+		// 从响应头中提取Location
+		location := extractLocation(result.Content)
+		if location != "" {
+			if strings.HasPrefix(strings.ToLower(location), "https://") {
+				systemHttp(result, "https", location)
+			} else {
+				systemHttp(result, "http", location)
+			}
+		} else {
+			// 如果没有Location头，使用原始目标
+			systemHttp(result, "http", "")
+		}
 	}
 
 	return
 }
 
+// 添加新的辅助函数来提取Location头
+func extractLocation(content []byte) string {
+	headers := string(content)
+	for _, line := range strings.Split(headers, "\n") {
+		if strings.HasPrefix(strings.ToLower(line), "location:") {
+			location := strings.TrimSpace(strings.TrimPrefix(line, "location:"))
+			location = strings.TrimPrefix(location, " ")
+			return location
+		}
+	}
+	return ""
+}
+
 // 使用net/http进行带redirect的请求
-func systemHttp(result *pkg.Result, scheme string) {
-	// 如果是400或者不可识别协议,则使用https
-	target := scheme + "://" + result.GetTarget()
+func systemHttp(result *pkg.Result, scheme string, location string) {
+	var target string
+	if location != "" {
+		// 使用重定向地址
+		target = location
+		// 确保URL格式正确
+		if !strings.HasPrefix(strings.ToLower(target), "http://") &&
+			!strings.HasPrefix(strings.ToLower(target), "https://") {
+			target = scheme + "://" + target
+		}
+	} else {
+		// 使用原始目标
+		target = scheme + "://" + result.GetTarget()
+	}
 	conn := result.GetHttpConn(RunOpt.Delay + RunOpt.HttpsDelay)
 	resp, err := pkg.HTTPGet(conn, target)
 	if err != nil {
