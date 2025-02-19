@@ -323,9 +323,7 @@ func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) {
 			}
 
 			// 全局变量的处理
-			if !r.NoScan {
-				Opt.NoScan = workflow.NoScan
-			}
+			Opt.NoScan = workflow.NoScan
 
 			if r.Verbose != nil {
 				RunOpt.VersionLevel = setVersionLevel(r.Verbose)

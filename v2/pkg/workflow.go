@@ -18,21 +18,21 @@ func ParseWorkflowsFromInput(content []byte) []*Workflow {
 }
 
 type Workflow struct {
-	Name        string   `json:"name"`
-	Description string   `json:"description"`
-	IP          string   `json:"ip"`
-	IPlist      []string `json:"iplist"`
-	Ports       string   `json:"ports"`
-	Mod         string   `json:"mod"`
-	Ping        bool     `json:"ping"`
-	NoScan      bool     `json:"no-scan"`
-	IpProbe     string   `json:"ip-probe"`
-	SmartProbe  string   `json:"port-probe"`
-	Exploit     string   `json:"exploit"`
-	Verbose     int      `json:"verbose"`
-	File        string   `json:"file"`
-	Path        string   `json:"path"`
-	Tags        []string `json:"tags"`
+	Name        string   `json:"name" yaml:"name"`
+	Description string   `json:"description" yaml:"description"`
+	IP          string   `json:"ip" yaml:"ip"`
+	IPlist      []string `json:"iplist" yaml:"iplist"`
+	Ports       string   `json:"ports" yaml:"ports"`
+	Mod         string   `json:"mod" yaml:"mod"`
+	Ping        bool     `json:"ping" yaml:"ping"`
+	NoScan      bool     `json:"no-scan" yaml:"no-scan"`
+	IpProbe     string   `json:"ip-probe" yaml:"ip-probe"`
+	SmartProbe  string   `json:"port-probe" yaml:"port-probe"`
+	Exploit     string   `json:"exploit" yaml:"exploit"`
+	Verbose     int      `json:"verbose" yaml:"verbose"`
+	File        string   `json:"file" yaml:"file"`
+	Path        string   `json:"path" yaml:"path"`
+	Tags        []string `json:"tags" yaml:"tags"`
 }
 
 func (w *Workflow) PrepareConfig(rconfig Config) *Config {
