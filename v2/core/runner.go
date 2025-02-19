@@ -100,10 +100,12 @@ func (r *Runner) Prepare() bool {
 	if r.FormatterFilename != "" {
 		LoadNeutron("")
 		var formatOut string
-		if r.Outputf == Default {
-			formatOut = "color"
-		} else {
+		if r.Outputf != Default {
 			formatOut = r.Outputf
+		} else if r.FileOutputf != Default {
+			formatOut = r.FileOutputf
+		} else {
+			formatOut = "color"
 		}
 		FormatOutput(r.FormatterFilename, r.Config.Filename, formatOut, r.Config.Filenamef, r.Filters, r.FilterOr)
 		return false
