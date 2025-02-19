@@ -16,6 +16,7 @@ func init() {
 
 func Gogo() {
 	var runner core.Runner
+	defer os.Exit(0)
 	parser := flags.NewParser(&runner, flags.Default)
 	parser.Usage = core.Usage()
 	_, err := parser.Parse()

@@ -3,8 +3,6 @@ package main
 
 import (
 	"github.com/chainreactors/gogo/v2/cmd"
-	//_ "net/http/pprof"
-	"os"
 )
 
 func main() {
@@ -28,5 +26,4 @@ func main() {
 	//}()
 
 	cmd.Gogo()
-	os.Exit(0)
 }
