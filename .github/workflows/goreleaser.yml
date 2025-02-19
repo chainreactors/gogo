@@ -26,13 +26,6 @@ jobs:
         name: Install upx
         run: sudo apt install upx zip -y
         continue-on-error: true
-
-      - name: Set up GCC
-        uses: egor-tensin/setup-gcc@v1
-        with:
-          version: latest
-          platform: x64
-
       -
         name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v5
@@ -44,6 +37,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GOPATH: "/home/runner/go"
+
+      - name: cat mod
+        run: cat v2/go.mod
 
       - name: Set up Go 1.11
         uses: actions/setup-go@v3
