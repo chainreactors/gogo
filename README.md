@@ -5,6 +5,10 @@
 
 ## Features
 
+blog posts:
+
+- https://chainreactors.github.io/wiki/blog/2022/11/15/gogo-introduce/
+
 * 自由的端口配置
 * 支持主动/被动指纹识别
 * 关键信息提取, 如title, cert 以及自定义提取信息的正则
