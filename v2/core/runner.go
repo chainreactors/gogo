@@ -146,10 +146,15 @@ func (r *Runner) Init() error {
 	if err != nil {
 		return fmt.Errorf("load port config failed, %v", err)
 	}
-	LoadExtractor()
-	err = LoadFinger()
+
+	err = LoadFinger(r.FingerFile)
 	if err != nil {
 		return fmt.Errorf("load finger config failed, %v", err)
+	}
+
+	err = LoadExtractor()
+	if err != nil {
+		return fmt.Errorf("extract config load FAIL!, %s", err.Error())
 	}
 	for _, e := range r.Extract {
 		if reg, ok := ExtractRegexps[e]; ok {

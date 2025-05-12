@@ -50,7 +50,8 @@ type AdvanceOption struct {
 	PortSpray   bool     `short:"s" long:"spray" description:"Bool, enable port-first spray generator. if ports number > 500, auto enable"`
 	NoSpray     bool     `long:"no-spray" description:"Bool, force to close spray"`
 	ExploitName string   `short:"E" long:"exploit-name" description:"String, specify neutron template name"` // 指定漏扫poc名字
-	ExploitFile string   `long:"ef" description:"String, load specified templates file "`                    // 指定漏扫文件
+	ExploitFile string   `long:"ef" description:"String, load specified templates file "`
+	FingerFile  []string `long:"ff" description:"String, load specified finger file" ` // 指定漏扫文件
 	Payloads    []string `long:"payload" description:"String, specify neutron payload"`
 	AttackType  string   `long:"attack-type" choice:"sniper" choice:"clusterbomb" choice:"pitchfork" description:"neutron attack types, sniper|clusterbomb|pitchfork" choice:"pitchfork" choice:"clusterbomb" choice:"sniper"`
 	Extract     []string `long:"extract" description:"String, custom Extract regexp"`

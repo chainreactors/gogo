@@ -20,7 +20,7 @@ var (
 )
 
 // LoadFinger 加载指纹到全局变量
-func LoadFinger() error {
+func LoadFinger(files []string) error {
 	var err error
 	resources.PrePort = utils.PrePort
 	resources.FingersHTTPData = LoadConfig("http")
@@ -29,6 +29,23 @@ func LoadFinger() error {
 	if err != nil {
 		return err
 	}
+
+	for _, file := range files {
+		content, err := LoadResource(file)
+		if err != nil {
+			return err
+		}
+		var fs fingers.Fingers
+		err = yaml.Unmarshal(content, &fs)
+		if err != nil {
+			return err
+		}
+		err = FingerEngine.Append(fs)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -55,10 +72,10 @@ func LoadPortConfig(portConfig string) error {
 	return nil
 }
 
-func LoadExtractor() {
+func LoadExtractor() error {
 	err := yaml.Unmarshal(LoadConfig("extract"), &Extractor)
 	if err != nil {
-		iutils.Fatal("extract config load FAIL!, " + err.Error())
+		return err
 	}
 
 	for _, extract := range Extractor {
@@ -73,6 +90,7 @@ func LoadExtractor() {
 			}
 		}
 	}
+	return nil
 }
 
 func LoadWorkFlow() WorkflowMap {

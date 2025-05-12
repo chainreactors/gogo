@@ -1,7 +1,11 @@
 package pkg
 
 import (
+	"fmt"
+	"github.com/chainreactors/files"
 	"github.com/chainreactors/utils/encode"
+	"io/ioutil"
+	"net/http"
 	"strings"
 
 	"github.com/chainreactors/utils/iutils"
@@ -46,4 +50,18 @@ func CleanSpiltCFLR(s string) []string {
 		ss[i] = strings.Trim(ss[i], "\r")
 	}
 	return ss
+}
+
+func LoadResource(url string) ([]byte, error) {
+	if files.IsExist(url) {
+		return ioutil.ReadFile(url)
+	} else if strings.HasPrefix(url, "http") {
+		resp, err := http.Get(url)
+		if err != nil {
+			return nil, err
+		}
+		return ioutil.ReadAll(resp.Body)
+	} else {
+		return nil, fmt.Errorf("invalid resources: %s", url)
+	}
 }
