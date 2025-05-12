@@ -114,7 +114,12 @@ func InitConfig(config *Config) (*Config, error) {
 		return nil, err
 	}
 	// 初始化端口配置
-	config.PortList = utils.ParsePortsString(config.Ports)
+	if config.Ports == "-" {
+		config.PortList = utils.ParsePortsString(config.Ports)
+		config.PortList = append(config.PortList, []string{"oxid", "icmp"}...)
+	} else {
+		config.PortList = utils.ParsePortsString(config.Ports)
+	}
 
 	// 如果指定端口超过100,则自动启用spray
 	if len(config.PortList) > 500 && !config.NoSpray {

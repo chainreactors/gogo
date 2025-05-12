@@ -3,7 +3,6 @@ package pkg
 import (
 	"github.com/chainreactors/fingers/resources"
 	"gopkg.in/yaml.v3"
-	"io/ioutil"
 	"strings"
 
 	"github.com/chainreactors/fingers/fingers"
@@ -58,7 +57,7 @@ func LoadPortConfig(portConfig string) error {
 			return err
 		}
 	} else {
-		content, err := ioutil.ReadFile(portConfig)
+		content, err := LoadResource(portConfig)
 		if err != nil {
 			return err
 		}
