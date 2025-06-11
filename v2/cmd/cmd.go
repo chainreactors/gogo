@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"time"
 )
 
 func init() {
@@ -26,6 +27,7 @@ func Gogo() {
 		}
 		return
 	}
+	defer time.Sleep(100 * time.Millisecond)
 	if ok := runner.Prepare(); !ok {
 		os.Exit(0)
 	}
