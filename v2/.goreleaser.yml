@@ -35,11 +35,15 @@ builds:
       - goos: android
         goarch: arm
     ldflags: "-s -w -X 'github.com/chainreactors/gogo/v2/internal/core.ver=={{ .Tag }}'"
+    env:
+      - CGO_ENABLED=0
     flags:
       - -trimpath
     tags:
       - forceposix
       - noembed
+      - osusergo
+      - netgo
     asmflags:
       - all=-trimpath={{.Env.GOPATH}}
     gcflags:
