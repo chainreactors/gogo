@@ -86,8 +86,6 @@ github.com/chainreactors/files v0.0.0-20231123083421-cea5b4ad18a8/go.mod h1:/Xa9
 github.com/chainreactors/files v0.0.0-20240716182835-7884ee1e77f0 h1:cU3sGEODXZsUZGBXfnz0nyxF6+37vA+ZGDx6L/FKN4o=
 github.com/chainreactors/files v0.0.0-20240716182835-7884ee1e77f0/go.mod h1:NSxGNMRWryAyrDzZpVwmujI22wbGw6c52bQOd5zEvyU=
 github.com/chainreactors/fingers v0.0.0-20240702104653-a66e34aa41df/go.mod h1:l8AO6ZbIL8WQ8PkihCK/MD6Iww/O+LY/osAhRJjThs4=
-github.com/chainreactors/fingers v1.0.1 h1:9Yh4RsWczYOIL/cBYswHLhFYVJUPw/BlmRSZSLvowjs=
-github.com/chainreactors/fingers v1.0.1/go.mod h1:UuWF2a0aWe2zJf1pi7qn9fdjBl4gQuV74bj80PGqd1g=
 github.com/chainreactors/fingers v1.0.2-0.20250512141956-7380518a85e9 h1:24+X02sZ+OzeVW87G86hY8spw8v4orIikOKPRYYtHaY=
 github.com/chainreactors/fingers v1.0.2-0.20250512141956-7380518a85e9/go.mod h1:UuWF2a0aWe2zJf1pi7qn9fdjBl4gQuV74bj80PGqd1g=
 github.com/chainreactors/logs v0.0.0-20240207121836-c946f072f81f/go.mod h1:6Mv6W70JrtL6VClulZhmMRZnoYpcTahcDTKLMNEjK0o=
@@ -98,6 +96,8 @@ github.com/chainreactors/neutron v0.0.0-20250113061151-32771f256b1f h1:z8saw5saC
 github.com/chainreactors/neutron v0.0.0-20250113061151-32771f256b1f/go.mod h1:PomxHcP/BecBL0R+u9h/F+zjnkDQhT/eeH9eFyhPkUE=
 github.com/chainreactors/parsers v0.0.0-20241107171801-3f8b998dedc1 h1:CZ7Hufis6P8pz32mMPmPoIDdM+uNHl8QKVdv3nANsNg=
 github.com/chainreactors/parsers v0.0.0-20241107171801-3f8b998dedc1/go.mod h1:7rXdYz6jrdjF0WUH1ICcAXKIKKjKmJo2PU8u43V7jkA=
+github.com/chainreactors/parsers v0.0.0-20250605044448-6bc270f12c0e h1:8AgGNkG1JoO6CIGlMNOecUCaQCnB/Ko/WI3Y6VgVPrI=
+github.com/chainreactors/parsers v0.0.0-20250605044448-6bc270f12c0e/go.mod h1:7rXdYz6jrdjF0WUH1ICcAXKIKKjKmJo2PU8u43V7jkA=
 github.com/chainreactors/proxyclient v1.0.3 h1:afnymFICAEqzG4rVMMJhd4Tqrx6LfTssUbo+T8P52vs=
 github.com/chainreactors/proxyclient v1.0.3/go.mod h1:kuB9olIK/GOW3lrpbYcJ2Uxb1aKsQPQmxewfCyIZ/0g=
 github.com/chainreactors/utils v0.0.0-20240528085651-ba1b255482c1/go.mod h1:JA4eiQZm+7AsfjXBcIzIdVKBEhDCb16eNtWFCGTxlvs=
@@ -106,7 +106,6 @@ github.com/chainreactors/utils v0.0.0-20240716182459-e85f2b01ee16/go.mod h1:LajX
 github.com/chainreactors/utils v0.0.0-20241209140746-65867d2f78b2/go.mod h1:LajXuvESQwP+qCMAvlcoSXppQCjuLlBrnQpu9XQ1HtU=
 github.com/chainreactors/utils v0.0.0-20250109082818-178eed97b7ab h1:jH3E9A4iiKCeC04J2r/HkqlwribtRfQMtvMDUih0CJQ=
 github.com/chainreactors/utils v0.0.0-20250109082818-178eed97b7ab/go.mod h1:LajXuvESQwP+qCMAvlcoSXppQCjuLlBrnQpu9XQ1HtU=
-github.com/chainreactors/words v0.0.0-20241002061906-25d8893158d9 h1:BXaPgD1pfBPvFSy9DHZDxW0bHX96ONZT6HW+WbXlZCk=
 github.com/chainreactors/words v0.0.0-20241002061906-25d8893158d9/go.mod h1:zfz367PUmyaX6oAqV9SktVqyRXKlEh0sel9Wsq9dd2c=
 github.com/chzyer/logex v1.1.10/go.mod h1:+Ywpsq7O8HXn0nuIou7OrIPyXbp3wmkHB+jjWRnGsAI=
 github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e/go.mod h1:nSuG5e5PlCu98SY8svDHJxuZscDgtXS6KTTbou5AhLI=
@@ -355,7 +354,6 @@ github.com/pelletier/go-toml v1.9.4/go.mod h1:u1nR/EPcESfeI/szUZKdtJ0xRNbUoANCko
 github.com/pkg/diff v0.0.0-20210226163009-20ebb0f2a09e/go.mod h1:pJLUxLENpZxwdsKMEsNbx1VGcRFpLqf3715MtcvvzbA=
 github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
-github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/sftp v1.10.1/go.mod h1:lYOWFsE0bwd1+KfKJaKeuokY15vzFx25BLbzYYoAxZI=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
