@@ -1,11 +1,11 @@
 package engine
 
 import (
-	"github.com/chainreactors/utils"
 	"sync/atomic"
 
 	"github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/logs"
+	"github.com/chainreactors/utils"
 	"github.com/chainreactors/utils/iutils"
 )
 

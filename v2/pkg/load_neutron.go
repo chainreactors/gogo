@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"github.com/chainreactors/parsers"
 	"github.com/chainreactors/utils/encode"
+	"github.com/chainreactors/utils/fileutils"
 	"gopkg.in/yaml.v3"
 	"io/ioutil"
 	"strings"
 
-	"github.com/chainreactors/files"
 	"github.com/chainreactors/neutron/protocols"
 	"github.com/chainreactors/neutron/templates"
 	"github.com/chainreactors/utils/iutils"
@@ -26,10 +26,10 @@ func ParserCmdPayload(payloads []string) map[string]interface{} {
 		if i := strings.Index(payload, "="); i != -1 {
 			//content := files.LoadCommonArg(payload[i+1:])
 			var content []byte
-			if f, err := files.Open(payload[i+1:]); err != nil {
+			if f, err := fileutils.Open(payload[i+1:]); err != nil {
 				content = []byte(payload[i+1:])
 			} else {
-				content = files.DecryptFile(f, nil)
+				content = fileutils.DecryptFile(f, nil)
 			}
 			vars[payload[:i]] = CleanSpiltCFLR(string(content))
 		} else {
@@ -47,7 +47,7 @@ func LoadNeutron(filename string) map[string][]*templates.Template {
 	if filename == "" {
 		return LoadTemplates(LoadConfig("neutron"))
 	} else {
-		if files.IsExist(filename) {
+		if fileutils.IsExist(filename) {
 			var err error
 			content, err = ioutil.ReadFile(filename)
 			if err != nil {

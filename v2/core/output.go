@@ -3,12 +3,12 @@ package core
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/chainreactors/utils/fileutils"
 	"io"
 	"net/http"
 	"os"
 	"strings"
 
-	"github.com/chainreactors/files"
 	. "github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/parsers"
 	"github.com/chainreactors/utils/iutils"
@@ -48,7 +48,7 @@ func FormatOutput(filename, outFilename, outf, filenamef string, filters []strin
 		defer req.Body.Close()
 		file = req.Body
 	} else {
-		file, err = files.Open(filename)
+		file, err = fileutils.Open(filename)
 		if err != nil {
 			iutils.Fatal(err.Error())
 		}
@@ -85,7 +85,7 @@ func FormatOutput(filename, outFilename, outf, filenamef string, filters []strin
 
 	// 初始化再输出文件
 	if outFilename != "" {
-		fileHandle, err := files.NewFile(outFilename, false, false, false)
+		fileHandle, err := fileutils.NewFile(outFilename, fileutils.ModeCreate, false, false)
 		if err != nil {
 			iutils.Fatal("" + err.Error())
 		}

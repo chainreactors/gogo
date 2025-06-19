@@ -3,12 +3,12 @@ package core
 import (
 	"bytes"
 	"fmt"
-	"github.com/chainreactors/gogo/v2/engine"
+	"github.com/chainreactors/utils/fileutils"
 	"io/ioutil"
 	"os"
 	"strings"
 
-	"github.com/chainreactors/files"
+	"github.com/chainreactors/gogo/v2/engine"
 	. "github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
@@ -53,16 +53,16 @@ func InitConfig(config *Config) (*Config, error) {
 
 	var file *os.File
 	if config.ListFile != "" {
-		file, err = files.Open(config.ListFile)
+		file, err = fileutils.Open(config.ListFile)
 		if err != nil {
 			iutils.Fatal(err.Error())
 		}
 	} else if config.JsonFile != "" {
-		file, err = files.Open(config.JsonFile)
+		file, err = fileutils.Open(config.JsonFile)
 		if err != nil {
 			iutils.Fatal(err.Error())
 		}
-	} else if files.HasStdin() {
+	} else if fileutils.HasStdin() {
 		file = os.Stdin
 	}
 
@@ -73,7 +73,7 @@ func InitConfig(config *Config) (*Config, error) {
 	}
 	syncFile = func() {
 		if config.File != nil {
-			config.File.SafeSync()
+			config.File.Sync()
 		}
 	}
 

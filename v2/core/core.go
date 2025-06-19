@@ -69,10 +69,10 @@ func DefaultMod(targets interface{}, config Config) {
 			}
 			// 文件输出
 			if config.File != nil {
-				if !config.File.Initialized {
-					logs.Log.Important("init file: " + config.File.Filename)
+				if !config.File.IsInitialized() {
+					logs.Log.Important("init file: " + config.File.GetFilename())
 				}
-				config.File.SafeWrite(output(result, config.FileOutputf))
+				config.File.WriteString(output(result, config.FileOutputf))
 			}
 		} else if result.Error != "" {
 			logs.Log.Debugf("%s stat: %s, errmsg: %s", result.GetTarget(), PortStat[result.ErrStat], result.Error)

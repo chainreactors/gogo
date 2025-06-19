@@ -21,7 +21,7 @@ func CollectSocketResponse(result *Result, socketContent []byte) {
 		} else {
 			result.Title = parsers.MatchCharacter(socketContent)
 		}
-		result.AddExtracts(Extractors.Extract(string(socketContent)))
+		result.AddExtracts(Extractors.Extract(string(socketContent), true))
 	}
 }
 
@@ -49,7 +49,7 @@ func CollectParsedResponse(result *Result, resp *parsers.Response) {
 	result.Midware = result.Httpresp.Server
 	result.Title = result.Httpresp.Title
 	result.HasTitle = result.Httpresp.HasTitle
-	result.AddExtracts(Extractors.Extract(string(result.Httpresp.Raw)))
+	result.AddExtracts(Extractors.Extract(string(result.Httpresp.Raw), true))
 }
 
 // GetStatusCode 从socket中获取http状态码

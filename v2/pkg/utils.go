@@ -2,8 +2,8 @@ package pkg
 
 import (
 	"fmt"
-	"github.com/chainreactors/files"
 	"github.com/chainreactors/utils/encode"
+	"github.com/chainreactors/utils/fileutils"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -53,7 +53,7 @@ func CleanSpiltCFLR(s string) []string {
 }
 
 func LoadResource(url string) ([]byte, error) {
-	if files.IsExist(url) {
+	if fileutils.IsExist(url) {
 		return ioutil.ReadFile(url)
 	} else if strings.HasPrefix(url, "http") {
 		resp, err := http.Get(url)

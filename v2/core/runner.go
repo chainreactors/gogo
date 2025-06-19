@@ -2,7 +2,6 @@ package core
 
 import (
 	"fmt"
-	"github.com/chainreactors/files"
 	"github.com/chainreactors/fingers/common"
 	"github.com/chainreactors/fingers/fingers"
 	. "github.com/chainreactors/gogo/v2/engine"
@@ -73,7 +72,7 @@ func (r *Runner) Prepare() bool {
 	Opt.PluginDebug = r.PluginDebug
 	Opt.NoScan = r.NoScan
 	common.NoGuess = r.NoGuess
-	files.Key = []byte(r.Key)
+	fileutils.Key = []byte(r.Key)
 
 	// 一些特殊的分支, 这些分支将会直接退出程序
 	if r.Ver {
@@ -253,8 +252,8 @@ func (r *Runner) Run() {
 		if r.IsWorkFlow {
 			workflowMap["tmp"] = ParseWorkflowsFromInput(LoadFile(os.Stdin))
 			r.WorkFlowName = "tmp"
-		} else if files.IsExist(r.WorkFlowName) {
-			file, err := files.Open(r.WorkFlowName)
+		} else if fileutils.IsExist(r.WorkFlowName) {
+			file, err := fileutils.Open(r.WorkFlowName)
 			if err != nil {
 				iutils.Fatal(err.Error())
 			}
@@ -360,10 +359,10 @@ func (r *Runner) Close(config *Config) {
 
 	if r.HiddenFile {
 		iutils.Chtime(config.Filename)
-		if config.SmartBFile != nil && config.SmartBFile.InitSuccess {
+		if config.SmartBFile != nil && config.SmartBFile.IsInitialized() {
 			iutils.Chtime(config.SmartBFilename)
 		}
-		if config.SmartCFile != nil && config.SmartCFile.InitSuccess {
+		if config.SmartCFile != nil && config.SmartCFile.IsInitialized() {
 			iutils.Chtime(config.SmartBFilename)
 		}
 	}
@@ -373,19 +372,19 @@ func (r *Runner) Close(config *Config) {
 	logs.Log.Important("Time consuming: " + time.Since(r.start).String())
 
 	// 输出文件名
-	if config.File != nil && config.File.InitSuccess {
+	if config.File != nil && config.File.IsInitialized() {
 		logs.Log.Importantf("Results: " + config.Filename)
 	}
-	if config.SmartBFile != nil && config.SmartBFile.InitSuccess {
+	if config.SmartBFile != nil && config.SmartBFile.IsInitialized() {
 		logs.Log.Important("B CIDRs result: " + config.SmartBFilename)
 	}
-	if config.SmartCFile != nil && config.SmartCFile.InitSuccess {
+	if config.SmartCFile != nil && config.SmartCFile.IsInitialized() {
 		logs.Log.Important("c CIDRs result: " + config.SmartCFilename)
 	}
-	if config.AliveFile != nil && config.AliveFile.Initialized {
+	if config.AliveFile != nil && config.AliveFile.IsInitialized() {
 		logs.Log.Important("Alived result: " + config.AlivedFilename)
 	}
-	if files.IsExist(config.Filename + "_extract") {
+	if fileutils.IsExist(config.Filename + "_extract") {
 		logs.Log.Important("extractor result: " + config.Filename + "_extract")
 	}
 }

@@ -5,11 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/chainreactors/fingers/common"
+	"github.com/chainreactors/utils/fileutils"
 	"io"
 	"sort"
 	"strings"
 
-	"github.com/chainreactors/files"
 	. "github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
 	"github.com/chainreactors/utils"
@@ -112,42 +112,63 @@ func (rd *ResultsData) groupBySortedIP() (map[string]PortMapResult, []string) {
 func (rd *ResultsData) ToFormat(isColor bool) string {
 	var s string
 
+	// 创建一个映射来跟踪已处理的IP:端口组合
+	seen := make(map[string]bool)
+
 	pfs, ips := rd.groupBySortedIP()
 	// 排序
 
 	for _, ip := range ips {
 		wininfo := pfs[ip].getWindowsInfo()
 		s += fmt.Sprintf("[+] %s %s\n", ip, wininfo.toString())
-		for port, p := range pfs[ip] {
-			// 跳过OXID与NetBois
-			if !(p.Port == "icmp") {
-				if isColor {
-					// 颜色输出
-					url := fmt.Sprintf("%s://%s:%s", p.Protocol, ip, port)
-					s += fmt.Sprintf("\t%s\t%s\t%s\t%s [%s] %s %s %s\n",
-						GreenLine(url),
-						p.Midware,
-						p.FramesColorString(),
-						Cyan(p.Host),
-						Yellow(p.Status),
-						Blue(p.Title),
-						Red(p.Vulns.String()),
-						Blue(p.GetExtractStat()),
-					)
-				} else {
-					s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s [%s] %s %s %s\n",
-						p.Protocol,
-						ip,
-						port,
-						p.Midware,
-						p.Frameworks.String(),
-						p.Host,
-						p.Status,
-						p.Title,
-						p.Vulns.String(),
-						p.GetExtractStat(),
-					)
-				}
+
+		// 为了有序输出，先收集并排序端口
+		var ports []string
+		for port := range pfs[ip] {
+			ports = append(ports, port)
+		}
+		sort.Strings(ports)
+
+		for _, port := range ports {
+			p := pfs[ip][port]
+			// 跳过OXID与NetBios
+			if p.Port == "icmp" {
+				continue
+			}
+
+			// 创建唯一键以检测重复
+			key := fmt.Sprintf("%s:%s", ip, port)
+			if seen[key] {
+				continue
+			}
+			seen[key] = true
+
+			if isColor {
+				// 颜色输出
+				url := fmt.Sprintf("%s://%s:%s", p.Protocol, ip, port)
+				s += fmt.Sprintf("\t%s\t%s\t%s\t%s [%s] %s %s %s\n",
+					GreenLine(url),
+					p.Midware,
+					p.FramesColorString(),
+					Cyan(p.Host),
+					Yellow(p.Status),
+					Blue(p.Title),
+					Red(p.Vulns.String()),
+					Blue(p.GetExtractStat()),
+				)
+			} else {
+				s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s [%s] %s %s %s\n",
+					p.Protocol,
+					ip,
+					port,
+					p.Midware,
+					p.Frameworks.String(),
+					p.Host,
+					p.Status,
+					p.Title,
+					p.Vulns.String(),
+					p.GetExtractStat(),
+				)
 			}
 		}
 	}
@@ -234,115 +255,191 @@ func parseConfig(line []byte) (*Config, error) {
 }
 
 func LoadResultFile(file io.Reader) interface{} {
-	var data interface{}
-	var err error
-	content := files.DecryptFile(file, files.Key)
+	content := fileutils.DecryptFile(file, fileutils.Key)
+	content = bytes.TrimSpace(content)
 
-	content = bytes.TrimSpace(content) // 去除前后空格
-	lines := bytes.Split(content, []byte{0x0a})
-	config, err := parseConfig(lines[0])
-	if err != nil {
-		// 解析按行输入的result格式
-		// example: ip:port:[frame]   frame可选, 用作强行指定指纹, 留空自动忽略
-		// 192.168.1.1:80
-		// 192.168.1.2:8080:tomcat
-		var results parsers.GOGOResults
-		for _, target := range CleanSpiltCFLR(string(content)) {
-			var result *parsers.GOGOResult
-			if strings.Contains(target, ":") {
-				if strings.Contains(target, "http") {
-					if strings.HasPrefix(target, "http://") {
-						target = strings.TrimLeft(target, "http://")
-						if !strings.Contains(target, ":") {
-							target = target + ":80"
-						}
-					} else if strings.HasPrefix(target, "https://") {
-						target = strings.TrimLeft(target, "https://")
-						if !strings.Contains(target, ":") {
-							target = target + ":443"
-						}
-					}
-				}
+	// 分割所有行
+	lines := bytes.Split(content, []byte{'\n'})
+	if len(lines) == 0 {
+		return nil
+	}
 
-				targetpair := strings.Split(target, ":")
-				host := targetpair[0]
+	var results []interface{}
+	currentSegment := [][]byte{}
 
-				if len(targetpair) >= 2 {
-					if parsedIP := utils.ParseIP(host); parsedIP != nil {
-						result = parsers.NewGOGOResult(parsedIP.String(), targetpair[1])
-						result.Host = host
-					} else {
-						result = parsers.NewGOGOResult(host, targetpair[1])
-					}
-				}
+	for _, line := range lines {
+		line = bytes.TrimSpace(line)
+		if len(line) == 0 {
+			continue
+		}
 
-				if len(targetpair) == 3 {
-					result.Frameworks = map[string]*common.Framework{targetpair[2]: common.NewFramework(targetpair[2], common.FrameFromDefault)}
-				}
-				if result != nil {
+		// 检查是否是新的配置段开始
+		if bytes.HasPrefix(line, []byte{'{'}) && bytes.Contains(line, []byte(`"json_type"`)) {
+			// 处理已收集的段
+			if len(currentSegment) > 0 {
+				if result := parseSegment(currentSegment); result != nil {
 					results = append(results, result)
 				}
-			} else {
-				//fmt.Printf("[-] format target: %s error\n\n", target)
-				return content
+			}
+			currentSegment = [][]byte{line}
+		} else {
+			currentSegment = append(currentSegment, line)
+		}
+	}
+
+	// 处理最后一个段
+	if len(currentSegment) > 0 {
+		if result := parseSegment(currentSegment); result != nil {
+			results = append(results, result)
+		}
+	}
+
+	// 根据结果数量返回适当的值
+	switch len(results) {
+	case 0:
+		return nil
+	case 1:
+		return results[0]
+	default:
+		var result *ResultsData
+		for _, r := range results {
+			if data, ok := r.(*ResultsData); ok {
+				if data.Config != nil {
+					result = data
+				}
+				if data.Data != nil {
+					result.Data = append(data.Data, r.(*ResultsData).Data...)
+				}
 			}
 		}
-		return results
+		return result
+	}
+}
+
+func parseSegment(segment [][]byte) interface{} {
+	if len(segment) == 0 {
+		return nil
 	}
 
-	// 解析dat文件
-	var finished bool = true
-	// 判断扫描是否结束
-	if !bytes.Equal(lines[len(lines)-1], []byte("[\"done\"]")) {
-		finished = false
-		Log.Important("Task has not been completed,auto fix json")
-		Log.Important("Task has not been completed,auto fix json")
-		Log.Important("Task has not been completed,auto fix json")
+	// 解析配置
+	config, err := parseConfig(segment[0])
+	if err != nil {
+		return nil
 	}
 
-	// 删除最后一行
-	var last int
-	if finished {
-		last = len(lines) - 1
+	// 检查是否以 done 结尾
+	var dataLines [][]byte
+	if bytes.Equal(segment[len(segment)-1], []byte(`["done"]`)) {
+		dataLines = segment[1 : len(segment)-1]
 	} else {
-		last = len(lines)
+		dataLines = segment[1:]
 	}
-	var res bytes.Buffer
+
+	// 根据配置类型处理数据
 	switch config.JsonType {
 	case "smartb", "smartc", "alive":
-		sr := &SmartResult{
-			Config: config,
-		}
-		for i, line := range lines {
-			if i == 0 || (finished && i == last) {
-				continue
-			}
-			lines[i] = line[1 : len(line)-1]
-		}
-		res.WriteString("{")
-		res.Write(bytes.Join(lines[1:last], []byte{','}))
-		res.WriteString("}")
-		sr.Data, err = parseSmartResult(res.Bytes())
-		if err != nil {
-			fmt.Println("[-] json error, " + err.Error())
-			return content
-		}
-		return sr
+		return parseSmartResultData(config, dataLines)
 	case "scan":
-		rd := &ResultsData{
-			&parsers.GOGOData{
-				Config: config.GOGOConfig,
-			},
+		return parseScanResultData(config, dataLines)
+	default:
+		return nil
+	}
+}
+
+func parseSmartResultData(config *Config, lines [][]byte) *SmartResult {
+	var res bytes.Buffer
+	res.WriteString("{")
+
+	for i, line := range lines {
+		if i > 0 {
+			res.WriteByte(',')
 		}
-		res.WriteString("[")
-		res.Write(bytes.Join(lines[1:last], []byte{','}))
-		res.WriteString("]")
-		rd.Data, err = parseResult(res.Bytes())
-		if err != nil {
-			fmt.Println("[-] json error, " + err.Error())
+		// 移除可能的方括号
+		if len(line) > 0 && line[0] == '[' {
+			line = line[1 : len(line)-1]
+		}
+		res.Write(line)
+	}
+	res.WriteString("}")
+
+	data, err := parseSmartResult(res.Bytes())
+	if err != nil {
+		fmt.Println("[-] json error, " + err.Error())
+		return nil
+	}
+
+	return &SmartResult{
+		Config: config,
+		Data:   data,
+	}
+}
+
+func parseScanResultData(config *Config, lines [][]byte) *ResultsData {
+	var res bytes.Buffer
+	res.WriteString("[")
+
+	for i, line := range lines {
+		if i > 0 {
+			res.WriteByte(',')
+		}
+		res.Write(line)
+	}
+	res.WriteString("]")
+
+	data, err := parseResult(res.Bytes())
+	if err != nil {
+		fmt.Println("[-] json error, " + err.Error())
+		return nil
+	}
+
+	return &ResultsData{
+		&parsers.GOGOData{
+			Config: config.GOGOConfig,
+			Data:   data,
+		},
+	}
+}
+
+func parseLegacyFormat(content []byte) interface{} {
+	var results parsers.GOGOResults
+	for _, target := range CleanSpiltCFLR(string(content)) {
+		var result *parsers.GOGOResult
+		if strings.Contains(target, ":") {
+			if strings.Contains(target, "http") {
+				if strings.HasPrefix(target, "http://") {
+					target = strings.TrimLeft(target, "http://")
+					if !strings.Contains(target, ":") {
+						target = target + ":80"
+					}
+				} else if strings.HasPrefix(target, "https://") {
+					target = strings.TrimLeft(target, "https://")
+					if !strings.Contains(target, ":") {
+						target = target + ":443"
+					}
+				}
+			}
+
+			targetpair := strings.Split(target, ":")
+			host := targetpair[0]
+
+			if len(targetpair) >= 2 {
+				if parsedIP := utils.ParseIP(host); parsedIP != nil {
+					result = parsers.NewGOGOResult(parsedIP.String(), targetpair[1])
+					result.Host = host
+				} else {
+					result = parsers.NewGOGOResult(host, targetpair[1])
+				}
+			}
+
+			if len(targetpair) == 3 {
+				result.Frameworks = map[string]*common.Framework{targetpair[2]: common.NewFramework(targetpair[2], common.FrameFromDefault)}
+			}
+			if result != nil {
+				results = append(results, result)
+			}
+		} else {
 			return content
 		}
-		return rd
 	}
-	return data
+	return results
 }

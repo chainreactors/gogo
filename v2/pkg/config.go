@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/chainreactors/utils/fileutils"
 	"os"
 	"os/signal"
 	"path"
 	"strings"
 	"syscall"
 
-	"github.com/chainreactors/files"
 	"github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
 	"github.com/chainreactors/utils"
@@ -50,10 +50,10 @@ type Config struct {
 	SmartBFilename string              `json:"-"`
 	SmartCFilename string              `json:"-"`
 	AlivedFilename string              `json:"-"`
-	File           *files.File         `json:"-"`
-	SmartBFile     *files.File         `json:"-"`
-	SmartCFile     *files.File         `json:"-"`
-	AliveFile      *files.File         `json:"-"`
+	File           *fileutils.File     `json:"-"`
+	SmartBFile     *fileutils.File     `json:"-"`
+	SmartCFile     *fileutils.File     `json:"-"`
+	AliveFile      *fileutils.File     `json:"-"`
 	Tee            bool                `json:"-"`
 	Outputf        string              `json:"-"`
 	FileOutputf    string              `json:"-"`
@@ -66,9 +66,9 @@ type Config struct {
 }
 
 func (config *Config) Validate() error {
-	if config.Filename != "" && files.IsExist(config.Filename) {
-		return fmt.Errorf("file %s already exist!", config.Filename)
-	}
+	//if config.Filename != "" && files.IsExist(config.Filename) {
+	//	return fmt.Errorf("file %s already exist!", config.Filename)
+	//}
 
 	// 一些命令行参数错误处理,如果check没过直接退出程序或输出警告
 	legalFormat := []string{
@@ -194,17 +194,17 @@ func (config *Config) InitFile() error {
 			go func() {
 				<-c
 				logs.Log.Debug("save and exit!")
-				config.File.SafeSync()
+				config.File.Sync()
 				os.Exit(0)
 			}()
 		}()
 
 		if config.FileOutputf == "jl" || config.FileOutputf == "jsonlines" {
 			config.File.WriteLine(config.ToJson("scan"))
-			config.File.ClosedAppend = "[\"done\"]"
+			config.File.ClosedAppend = "[\"done\"]\n"
 		} else if config.FileOutputf == SUPERSMARTB {
 			config.File.WriteLine(config.ToJson("smart"))
-			config.File.ClosedAppend = "[\"done\"]"
+			config.File.ClosedAppend = "[\"done\"]\n"
 		} else if config.FileOutputf == "csv" {
 			config.File.WriteString("ip,port,url,status,title,host,language,midware,frame,vuln,extract\n")
 		}
@@ -217,7 +217,7 @@ func (config *Config) InitFile() error {
 			return err
 		}
 		config.SmartBFile.WriteLine(config.ToJson("smartb"))
-		config.SmartBFile.ClosedAppend = "[\"done\"]"
+		config.SmartBFile.ClosedAppend = "[\"done\"]\n"
 	}
 
 	if config.SmartCFilename != "" {
@@ -226,7 +226,7 @@ func (config *Config) InitFile() error {
 			return err
 		}
 		config.SmartCFile.WriteLine(config.ToJson("smartc"))
-		config.SmartCFile.ClosedAppend = "[\"done\"]"
+		config.SmartCFile.ClosedAppend = "[\"done\"]\n"
 	}
 
 	if config.AlivedFilename != "" {
@@ -235,7 +235,7 @@ func (config *Config) InitFile() error {
 			return err
 		}
 		config.AliveFile.WriteLine(config.ToJson("alive"))
-		config.AliveFile.ClosedAppend = "[\"done\"]"
+		config.AliveFile.ClosedAppend = "[\"done\"]\n"
 	}
 
 	return nil

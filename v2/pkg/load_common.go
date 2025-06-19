@@ -19,7 +19,7 @@ var (
 )
 
 // LoadFinger 加载指纹到全局变量
-func LoadFinger(files []string) error {
+func LoadFinger(fileutils []string) error {
 	var err error
 	resources.PrePort = utils.PrePort
 	resources.FingersHTTPData = LoadConfig("http")
@@ -29,7 +29,7 @@ func LoadFinger(files []string) error {
 		return err
 	}
 
-	for _, file := range files {
+	for _, file := range fileutils {
 		content, err := LoadResource(file)
 		if err != nil {
 			return err

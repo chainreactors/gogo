@@ -94,8 +94,6 @@ github.com/chainreactors/logs v0.0.0-20241115105204-6132e39f5261 h1:gcRLCAF4ANvl
 github.com/chainreactors/logs v0.0.0-20241115105204-6132e39f5261/go.mod h1:6Mv6W70JrtL6VClulZhmMRZnoYpcTahcDTKLMNEjK0o=
 github.com/chainreactors/neutron v0.0.0-20250113061151-32771f256b1f h1:z8saw5saC8UVvKidCTBivKCF1NYch89Ol2CCJHk1sUA=
 github.com/chainreactors/neutron v0.0.0-20250113061151-32771f256b1f/go.mod h1:PomxHcP/BecBL0R+u9h/F+zjnkDQhT/eeH9eFyhPkUE=
-github.com/chainreactors/parsers v0.0.0-20241107171801-3f8b998dedc1 h1:CZ7Hufis6P8pz32mMPmPoIDdM+uNHl8QKVdv3nANsNg=
-github.com/chainreactors/parsers v0.0.0-20241107171801-3f8b998dedc1/go.mod h1:7rXdYz6jrdjF0WUH1ICcAXKIKKjKmJo2PU8u43V7jkA=
 github.com/chainreactors/parsers v0.0.0-20250605044448-6bc270f12c0e h1:8AgGNkG1JoO6CIGlMNOecUCaQCnB/Ko/WI3Y6VgVPrI=
 github.com/chainreactors/parsers v0.0.0-20250605044448-6bc270f12c0e/go.mod h1:7rXdYz6jrdjF0WUH1ICcAXKIKKjKmJo2PU8u43V7jkA=
 github.com/chainreactors/proxyclient v1.0.3 h1:afnymFICAEqzG4rVMMJhd4Tqrx6LfTssUbo+T8P52vs=
@@ -104,8 +102,8 @@ github.com/chainreactors/utils v0.0.0-20240528085651-ba1b255482c1/go.mod h1:JA4e
 github.com/chainreactors/utils v0.0.0-20240704062557-662d623b74f4/go.mod h1:JA4eiQZm+7AsfjXBcIzIdVKBEhDCb16eNtWFCGTxlvs=
 github.com/chainreactors/utils v0.0.0-20240716182459-e85f2b01ee16/go.mod h1:LajXuvESQwP+qCMAvlcoSXppQCjuLlBrnQpu9XQ1HtU=
 github.com/chainreactors/utils v0.0.0-20241209140746-65867d2f78b2/go.mod h1:LajXuvESQwP+qCMAvlcoSXppQCjuLlBrnQpu9XQ1HtU=
-github.com/chainreactors/utils v0.0.0-20250109082818-178eed97b7ab h1:jH3E9A4iiKCeC04J2r/HkqlwribtRfQMtvMDUih0CJQ=
-github.com/chainreactors/utils v0.0.0-20250109082818-178eed97b7ab/go.mod h1:LajXuvESQwP+qCMAvlcoSXppQCjuLlBrnQpu9XQ1HtU=
+github.com/chainreactors/utils v0.0.0-20250619053156-18018c8a659d h1:1PkdDD4Q27hzAMjQv15p3K36s1u/sOwWBKygftt/TIY=
+github.com/chainreactors/utils v0.0.0-20250619053156-18018c8a659d/go.mod h1:LajXuvESQwP+qCMAvlcoSXppQCjuLlBrnQpu9XQ1HtU=
 github.com/chainreactors/words v0.0.0-20241002061906-25d8893158d9/go.mod h1:zfz367PUmyaX6oAqV9SktVqyRXKlEh0sel9Wsq9dd2c=
 github.com/chzyer/logex v1.1.10/go.mod h1:+Ywpsq7O8HXn0nuIou7OrIPyXbp3wmkHB+jjWRnGsAI=
 github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e/go.mod h1:nSuG5e5PlCu98SY8svDHJxuZscDgtXS6KTTbou5AhLI=

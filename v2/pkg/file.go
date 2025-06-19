@@ -4,15 +4,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/chainreactors/utils/encode"
+	"github.com/chainreactors/utils/fileutils"
 	"path"
 	"strings"
 
-	"github.com/chainreactors/files"
 	"github.com/chainreactors/logs"
 	"github.com/chainreactors/utils/iutils"
 )
 
-func WriteSmartResult(file *files.File, target string, ips []string) {
+func WriteSmartResult(file *fileutils.File, target string, ips []string) {
 	var m map[string][]string = map[string][]string{}
 	m[target] = ips
 	marshal, err := json.Marshal(m)
@@ -21,13 +21,12 @@ func WriteSmartResult(file *files.File, target string, ips []string) {
 	}
 
 	if file != nil {
-		file.SafeWrite(string(marshal) + "\n")
-		file.SafeSync()
+		file.SyncWrite(string(marshal) + "\n")
 	}
 }
 
-func newFile(filename string, compress bool) (*files.File, error) {
-	file, err := files.NewFile(filename, compress, true, false)
+func newFile(filename string, compress bool) (*fileutils.File, error) {
+	file, err := fileutils.NewFile(filename, fileutils.ModeAppend, compress, false)
 	if err != nil {
 		return nil, err
 	}
@@ -35,7 +34,7 @@ func newFile(filename string, compress bool) (*files.File, error) {
 	var cursor int
 
 	file.Encoder = func(i []byte) []byte {
-		bs := encode.XorEncode(encode.MustDeflateCompress(i), files.Key, cursor)
+		bs := encode.XorEncode(encode.MustDeflateCompress(i), fileutils.Key, cursor)
 		cursor += len(bs)
 		return bs
 	}
@@ -87,11 +86,11 @@ func GetFilename(config *Config, name string) string {
 		return config.Filename
 	}
 
-	if !files.IsExist(basename) {
+	if !fileutils.IsExist(basename) {
 		return basename
 	}
 
-	for files.IsExist(basename + iutils.ToString(fileint)) {
+	for fileutils.IsExist(basename + iutils.ToString(fileint)) {
 		fileint++
 	}
 	return basename + iutils.ToString(fileint)
