@@ -9,7 +9,7 @@ require (
 	github.com/chainreactors/neutron v0.0.0-20250113061151-32771f256b1f
 	github.com/chainreactors/parsers v0.0.0-20250605044448-6bc270f12c0e
 	github.com/chainreactors/proxyclient v1.0.3
-	github.com/chainreactors/utils v0.0.0-20250619053156-18018c8a659d
+	github.com/chainreactors/utils v0.0.0-20250624171356-667aa721dae0
 	github.com/jessevdk/go-flags v1.6.1
 	github.com/panjf2000/ants/v2 v2.9.1
 	golang.org/x/net v0.23.0
