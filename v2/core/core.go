@@ -2,8 +2,6 @@ package core
 
 import (
 	"fmt"
-	"github.com/chainreactors/fingers/common"
-	"github.com/chainreactors/gogo/v2/engine"
 	"net"
 	"runtime/debug"
 	"sort"
@@ -11,6 +9,8 @@ import (
 	"sync"
 	"sync/atomic"
 
+	"github.com/chainreactors/fingers/common"
+	"github.com/chainreactors/gogo/v2/engine"
 	. "github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/logs"
 	"github.com/chainreactors/utils"

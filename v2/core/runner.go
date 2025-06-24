@@ -15,6 +15,7 @@ import (
 	"net"
 	"net/url"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
@@ -104,7 +105,14 @@ func (r *Runner) Prepare() bool {
 		} else if r.FileOutputf != Default {
 			formatOut = r.FileOutputf
 		} else {
-			formatOut = "color"
+			// 根据文件后缀自动识别格式
+			autoFormat := getFormatByFileExtension(r.Config.Filename)
+			switch autoFormat {
+			case "csv", "json":
+				formatOut = autoFormat
+			default:
+				formatOut = "color"
+			}
 		}
 		FormatOutput(r.FormatterFilename, r.Config.Filename, formatOut, r.Config.Filenamef, r.Filters, r.FilterOr)
 		return false
@@ -206,7 +214,14 @@ func (r *Runner) PrepareConfig() {
 	}
 
 	if r.FileOutputf == Default {
-		r.Config.FileOutputf = "jl"
+		// 根据文件后缀自动识别格式
+		autoFormat := getFormatByFileExtension(r.Filename)
+		if autoFormat == "dat" {
+			r.Config.FileOutputf = "jl" // dat格式默认使用jsonlines
+		} else {
+			r.Config.Compress = false
+			r.Config.FileOutputf = autoFormat
+		}
 	} else {
 		r.Config.FileOutputf = r.FileOutputf
 	}
@@ -447,4 +462,26 @@ func setExploit(name string, enable bool) string {
 		return "auto"
 	}
 	return "none"
+}
+
+// getFormatByFileExtension 根据文件扩展名自动识别输出格式
+// 支持的格式: txt, csv, json, dat(默认)
+func getFormatByFileExtension(filename string) string {
+	if filename == "" {
+		return "dat" // 默认格式
+	}
+
+	ext := strings.ToLower(filepath.Ext(filename))
+	switch ext {
+	case ".txt":
+		return "full"
+	case ".csv":
+		return "csv"
+	case ".json":
+		return "jl"
+	case ".dat":
+		return "dat"
+	default:
+		return "dat" // 默认格式
+	}
 }

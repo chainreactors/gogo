@@ -348,7 +348,6 @@ func parseSegment(segment [][]byte) interface{} {
 
 func parseSmartResultData(config *Config, lines [][]byte) *SmartResult {
 	var res bytes.Buffer
-	res.WriteString("{")
 
 	for i, line := range lines {
 		if i > 0 {
@@ -360,7 +359,6 @@ func parseSmartResultData(config *Config, lines [][]byte) *SmartResult {
 		}
 		res.Write(line)
 	}
-	res.WriteString("}")
 
 	data, err := parseSmartResult(res.Bytes())
 	if err != nil {
