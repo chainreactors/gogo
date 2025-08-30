@@ -27,7 +27,7 @@ type Workflow struct {
 	Ping        bool     `json:"ping" yaml:"ping"`
 	NoScan      bool     `json:"no-scan" yaml:"no-scan"`
 	IpProbe     string   `json:"ip-probe" yaml:"ip-probe"`
-	SmartProbe  string   `json:"port-probe" yaml:"port-probe"`
+	PortProbe   string   `json:"port-probe" yaml:"port-probe"`
 	Exploit     string   `json:"exploit" yaml:"exploit"`
 	Verbose     int      `json:"verbose" yaml:"verbose"`
 	File        string   `json:"file" yaml:"file"`
@@ -35,8 +35,17 @@ type Workflow struct {
 	Tags        []string `json:"tags" yaml:"tags"`
 }
 
+func (w *Workflow) Marshal() string {
+	out, err := yaml.Marshal(w)
+	if err != nil {
+		return ""
+	}
+	return string(out)
+}
+
 func (w *Workflow) PrepareConfig(rconfig Config) *Config {
 	var config = &Config{
+		RunnerOpt: rconfig.RunnerOpt,
 		GOGOConfig: &parsers.GOGOConfig{
 			IP:       w.IP,
 			IPlist:   w.IPlist,
@@ -47,7 +56,7 @@ func (w *Workflow) PrepareConfig(rconfig Config) *Config {
 		},
 		Excludes:    rconfig.Excludes,
 		IpProbe:     w.IpProbe,
-		PortProbe:   w.SmartProbe,
+		PortProbe:   w.PortProbe,
 		FilePath:    w.Path,
 		Outputf:     "full",
 		FileOutputf: "json",

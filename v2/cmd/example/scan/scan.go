@@ -7,7 +7,7 @@ import (
 
 func main() {
 	result := pkg.NewResult("127.0.0.1", "80")
-	engine.Dispatch(result)
+	engine.Dispatch(pkg.DefaultRunnerOption, result)
 
 	if result.Open {
 		println(result.FullOutput())

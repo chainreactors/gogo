@@ -23,7 +23,7 @@ func Printportconfig() {
 }
 
 func PrintNeutronPoc() {
-	neutronLoader("", nil)
+	NeutronLoader("", nil)
 	fmt.Println("Neutron Pocs")
 	for k, v := range TemplateMap {
 		fmt.Println(k + ":")
@@ -71,7 +71,7 @@ func PrintWorkflow() {
 			if w.IP == "" {
 				w.IP = "(to be input)"
 			}
-			fmt.Fprintf(table, "%d\t%s\t%s\t%s\t%t\t%s\t%s\t%d\t%s\t%s\t%s\t%s\n", i, w.IP, Pad(w.Ports, 15), w.Mod, w.Ping, Pad(w.SmartProbe, 12), Pad(w.IpProbe, 12), w.Verbose, w.Exploit, w.File, w.Path, w.Description)
+			fmt.Fprintf(table, "%d\t%s\t%s\t%s\t%t\t%s\t%s\t%d\t%s\t%s\t%s\t%s\n", i, w.IP, Pad(w.Ports, 15), w.Mod, w.Ping, Pad(w.PortProbe, 12), Pad(w.IpProbe, 12), w.Verbose, w.Exploit, w.File, w.Path, w.Description)
 		}
 	}
 	table.Flush()

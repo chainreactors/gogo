@@ -4,12 +4,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/chainreactors/utils/fileutils"
 	"os"
 	"os/signal"
 	"path"
 	"strings"
 	"syscall"
+
+	"github.com/chainreactors/utils/fileutils"
 
 	"github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
@@ -24,6 +25,33 @@ const (
 	SUPERSMARTB = "sc"      // 使用ip-probe探测存活的b段,. 递归下降到sb
 	Default     = "default" // 扫描完后退出
 )
+
+// DefaultConfig 包含所有默认值的配置实例
+// 基于 options.go 中的默认值和 runner.go 中的 PrepareConfig 方法
+var DefaultConfig = Config{
+	GOGOConfig: &parsers.GOGOConfig{
+		Ports: "top1",  // 默认端口预设
+		Mod:   Default, // "default" 扫描模式
+	},
+	RunnerOpt: DefaultRunnerOption, // 使用已定义的默认RunnerOption
+
+	// 端口和探针相关
+	PortProbe:   "default",      // 默认端口探针
+	IpProbe:     "default",      // 默认IP探针
+	IpProbeList: []uint{1, 254}, // 默认IP探针列表 [1, 254]
+
+	Compress:    true,      // 默认启用压缩（注意：runner中是!r.Compress）
+	Outputf:     "full",    // 默认完整输出格式
+	FileOutputf: "default", // 默认文件输出格式
+
+}
+
+func NewDefaultConfig(opt *RunnerOption) Config {
+	// 创建一个 DefaultConfig 的副本
+	config := DefaultConfig
+	config.RunnerOpt = opt
+	return config
+}
 
 type Config struct {
 	*parsers.GOGOConfig
@@ -64,6 +92,36 @@ type Config struct {
 	Filters        []string            `json:"-"`
 	FilterOr       bool                `json:"-"`
 	OutputFilters  [][]string          `json:"-"`
+}
+
+func (config *Config) ToWorkflow() *Workflow {
+	workflow := &Workflow{
+		// 基本目标信息
+		IP:     config.IP,
+		IPlist: config.IPlist,
+
+		// 扫描配置
+		Ports:     config.Ports,
+		Mod:       config.Mod,
+		NoScan:    config.NoScan,
+		IpProbe:   config.IpProbe,
+		PortProbe: config.PortProbe,
+		Exploit:   config.Exploit,
+		Verbose:   config.VersionLevel,
+
+		// 存活检测 - 如果AliveSprayMod包含icmp则启用Ping
+		Ping: len(config.AliveSprayMod) > 0 && iutils.StringsContains(config.AliveSprayMod, "icmp"),
+
+		// 输出配置
+		File: config.Filename,
+		Path: config.FilePath,
+
+		// 生成基本信息
+		Name:        config.GetTargetName(),
+		Description: fmt.Sprintf("Generated workflow for target: %s", config.GetTarget()),
+	}
+
+	return workflow
 }
 
 func (config *Config) Validate() error {
@@ -325,6 +383,17 @@ func (config *Config) ToJson(json_type string) string {
 		return err.Error()
 	}
 	return string(s)
+}
+
+var DefaultRunnerOption = &RunnerOption{
+	Exploit:      "none",
+	VersionLevel: 0,
+	Delay:        2,
+	HttpsDelay:   2,
+	ScanFilters:  nil,
+	Debug:        false,
+	Opsec:        false,
+	ExcludeCIDRs: nil,
 }
 
 type RunnerOption struct {

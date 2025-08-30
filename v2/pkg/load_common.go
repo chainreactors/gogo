@@ -106,8 +106,8 @@ func LoadWorkFlow() WorkflowMap {
 		if w.IpProbe == "" {
 			w.IpProbe = Default
 		}
-		if w.SmartProbe == "" {
-			w.SmartProbe = Default
+		if w.PortProbe == "" {
+			w.PortProbe = Default
 		}
 		if w.Ports == "" {
 			w.Ports = "top1"

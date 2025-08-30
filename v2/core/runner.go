@@ -169,7 +169,7 @@ func (r *Runner) Init() error {
 	if r.AttackType != "" {
 		ExecuterOptions.Options.AttackType = r.AttackType
 	}
-	neutronLoader(r.ExploitFile, r.Payloads)
+	NeutronLoader(r.ExploitFile, r.Payloads)
 
 	if r.Opsec {
 		fingers.OPSEC = true
@@ -413,7 +413,7 @@ func printConfigs(t string) {
 	}
 }
 
-func neutronLoader(pocfile string, payloads []string) {
+func NeutronLoader(pocfile string, payloads []string) {
 	ExecuterOptions.Options.VarsPayload = ParserCmdPayload(payloads)
 	TemplateMap = LoadNeutron(pocfile)
 }

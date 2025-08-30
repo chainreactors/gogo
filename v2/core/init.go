@@ -141,10 +141,6 @@ func InitConfig(config *Config) (*Config, error) {
 		config.IpProbeList = DefaultIpProbe
 	}
 
-	// 初始已完成,输出任务基本信息
-	taskname := config.GetTargetName()
-	// 输出任务的基本信息
-	printTaskInfo(config, taskname)
 	return config, nil
 }
 
@@ -165,6 +161,10 @@ func printTaskInfo(config *Config, taskname string) {
 }
 
 func RunTask(config Config) {
+	// 初始已完成,输出任务基本信息
+	taskname := config.GetTargetName()
+	// 输出任务的基本信息
+	printTaskInfo(&config, taskname)
 	switch config.Mod {
 	case Default:
 		createDefaultScan(config)
