@@ -9,9 +9,9 @@ import (
 
 // -v
 // 信息收集插件,通过匹配http服务的favicon md5值判断CMS
-func FaviconScan(result *Result) {
+func FaviconScan(opt *RunnerOption, result *Result) {
 	var err error
-	conn := result.GetHttpConn(RunOpt.Delay)
+	conn := result.GetHttpConn(opt.Delay)
 	url := result.GetURL() + "/favicon.ico"
 	resp, err := conn.Get(url)
 	if err != nil {
@@ -31,7 +31,7 @@ func FaviconScan(result *Result) {
 		}
 	}
 
-	if RunOpt.VersionLevel < 2 {
+	if opt.VersionLevel < 2 {
 		return
 	}
 	//sender := func(sendData string) ([]byte, bool) {

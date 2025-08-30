@@ -10,10 +10,10 @@ import (
 
 var data = pkg.Decode("YmXgZhZgYGCoYNBgYGZgYNghsAPEZWAEY0aGBSAGAwPDAQjlBiJYYju6XsucFJz/goNBW8AjgYmBgYGLCaLAL8THNzg4AKyfvYljEQMaYGPcKMvAwMAPAAAA//8=")
 
-func WMIScan(result *pkg.Result) {
+func WMIScan(opt *pkg.RunnerOption, result *pkg.Result) {
 	result.Port = "135"
 	target := result.GetTarget()
-	conn, err := pkg.NewSocket("tcp", target, RunOpt.Delay)
+	conn, err := pkg.NewSocket("tcp", target, opt.Delay)
 	if err != nil {
 		return
 	}

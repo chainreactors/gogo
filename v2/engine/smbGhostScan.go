@@ -9,9 +9,9 @@ import (
 
 var sgpkt = pkg.Decode("YmBgOPAv2NfJgQEG5BlIBSoMHAyMDAwM9VjkKhgYGJhAmEmASYlJhYmBmYlZgFmQGSTHyKDGAKEVwPoJAWYGLqh6BAYBAAAAAP//")
 
-func SMBGhostScan(result *pkg.Result) {
+func SMBGhostScan(opt *pkg.RunnerOption, result *pkg.Result) {
 	target := result.GetTarget()
-	conn, err := pkg.NewSocket("tcp", target, RunOpt.Delay)
+	conn, err := pkg.NewSocket("tcp", target, opt.Delay)
 	if err != nil {
 		return
 	}

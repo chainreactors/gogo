@@ -59,19 +59,9 @@ func (r *Runner) Prepare() bool {
 		logs.Log.Init()
 	}
 
-	RunOpt = RunnerOpts{
-		Delay:        r.Delay,
-		HttpsDelay:   r.HttpsDelay,
-		VersionLevel: setVersionLevel(r.Verbose),
-		Exploit:      setExploit(r.ExploitName, r.Exploit),
-		Debug:        r.Debug,
-		Opsec:        r.Opsec,
-		//SuffixStr:  r.SuffixStr,
-	}
 	ExecuterOptions.Options.Timeout = r.Delay + r.HttpsDelay
 	HttpTimeout = time.Duration(r.Delay+r.HttpsDelay) * time.Second
 	Opt.PluginDebug = r.PluginDebug
-	Opt.NoScan = r.NoScan
 	common.NoGuess = r.NoGuess
 	fileutils.Key = []byte(r.Key)
 
@@ -95,7 +85,7 @@ func (r *Runner) Prepare() bool {
 	}
 
 	if r.Config.Excludes != nil {
-		RunOpt.ExcludeCIDRs = r.Config.Excludes
+		r.Config.RunnerOpt.ExcludeCIDRs = r.Config.Excludes
 	}
 	if r.FormatterFilename != "" {
 		LoadNeutron("")
@@ -183,7 +173,7 @@ func (r *Runner) Init() error {
 
 	if r.Opsec {
 		fingers.OPSEC = true
-		RunOpt.Opsec = true
+		r.Config.RunnerOpt.Opsec = true
 		ExecuterOptions.Options.Opsec = true
 	}
 	return nil
@@ -199,6 +189,15 @@ func (r *Runner) PrepareConfig() {
 			Threads:   r.Threads,
 			PortSpray: r.PortSpray,
 			Mod:       r.Mod,
+		},
+		RunnerOpt: &RunnerOption{
+			Delay:        r.Delay,
+			HttpsDelay:   r.HttpsDelay,
+			VersionLevel: setVersionLevel(r.Verbose),
+			Exploit:      setExploit(r.ExploitName, r.Exploit),
+			Debug:        r.Debug,
+			Opsec:        r.Opsec,
+			//SuffixStr:  r.SuffixStr,
 		},
 		IsListInput: r.IsListInput,
 		IsJsonInput: r.IsJsonInput,
@@ -242,7 +241,7 @@ func (r *Runner) PrepareConfig() {
 	for _, filterStr := range r.ScanFilters {
 		k, v, op := parseFilterString(filterStr)
 		if op != "" {
-			RunOpt.ScanFilters = append(RunOpt.ScanFilters, []string{k, v, op})
+			r.Config.RunnerOpt.ScanFilters = append(r.Config.RunnerOpt.ScanFilters, []string{k, v, op})
 		}
 	}
 
@@ -341,19 +340,16 @@ func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) {
 				config.Filename = GetFilename(config, config.FileOutputf)
 			}
 
-			// 全局变量的处理
-			Opt.NoScan = workflow.NoScan
-
 			if r.Verbose != nil {
-				RunOpt.VersionLevel = setVersionLevel(r.Verbose)
+				r.Config.RunnerOpt.VersionLevel = setVersionLevel(r.Verbose)
 			} else {
-				RunOpt.VersionLevel = workflow.Verbose
+				r.Config.RunnerOpt.VersionLevel = workflow.Verbose
 			}
 
-			if RunOpt.Exploit != "none" {
-				RunOpt.Exploit = setExploit(r.ExploitName, r.Exploit)
+			if r.Config.RunnerOpt.Exploit != "none" {
+				r.Config.RunnerOpt.Exploit = setExploit(r.ExploitName, r.Exploit)
 			} else {
-				RunOpt.Exploit = workflow.Exploit
+				r.Config.RunnerOpt.Exploit = workflow.Exploit
 			}
 
 			preparedConfig, err := InitConfig(config)
@@ -362,7 +358,6 @@ func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) {
 			}
 			RunTask(*preparedConfig) // 运行
 			r.Close(config)
-			r.ResetGlobals()
 		}
 	} else {
 		iutils.Fatal("not fount workflow " + r.WorkFlowName)
@@ -383,7 +378,7 @@ func (r *Runner) Close(config *Config) {
 	}
 
 	// 任务统计
-	logs.Log.Importantf("Alived: %d, Total: %d", Opt.AliveSum, RunOpt.Sum)
+	logs.Log.Importantf("Alived: %d, Total: %d", Opt.AliveSum, RunSum)
 	logs.Log.Important("Time consuming: " + time.Since(r.start).String())
 
 	// 输出文件名
@@ -402,12 +397,6 @@ func (r *Runner) Close(config *Config) {
 	if fileutils.IsExist(config.Filename + "_extract") {
 		logs.Log.Important("extractor result: " + config.Filename + "_extract")
 	}
-}
-
-func (r *Runner) ResetGlobals() {
-	Opt.NoScan = false
-	RunOpt.Exploit = "none"
-	RunOpt.VersionLevel = 0
 }
 
 func printConfigs(t string) {

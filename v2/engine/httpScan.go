@@ -10,7 +10,7 @@ import (
 
 // -default
 // socket进行对网站的连接
-func InitScan(result *pkg.Result) {
+func InitScan(opt *pkg.RunnerOption, result *pkg.Result) {
 	var bs []byte
 	target := result.GetTarget()
 	defer func() {
@@ -18,14 +18,14 @@ func InitScan(result *pkg.Result) {
 		if result.Protocol == "tcp" {
 			if result.Err != nil {
 				result.Error = result.Err.Error()
-				if RunOpt.Debug {
+				if opt.Debug {
 					result.ErrStat = handleError(result.Err)
 				}
 			}
 		}
 	}()
 
-	conn, err := pkg.NewSocket("tcp", target, RunOpt.Delay)
+	conn, err := pkg.NewSocket("tcp", target, opt.Delay)
 	if err != nil {
 		result.Err = err
 		return
@@ -39,7 +39,7 @@ func InitScan(result *pkg.Result) {
 	}
 	result.Status = "open"
 
-	bs, err = conn.Read(RunOpt.Delay)
+	bs, err = conn.Read(opt.Delay)
 	if err != nil {
 		senddataStr := fmt.Sprintf("GET /%s HTTP/1.1\r\nHost: %s\r\n\r\n", result.Uri, target)
 		bs, err = conn.Request([]byte(senddataStr), pkg.DefaultMaxSize)
@@ -51,26 +51,26 @@ func InitScan(result *pkg.Result) {
 
 	//所有30x,400,以及非http协议的开放端口都送到http包尝试获取更多信息
 	if result.Status == "400" || result.Protocol == "tcp" || (strings.HasPrefix(result.Status, "3") && bytes.Contains(result.Content, []byte("location: https"))) {
-		systemHttp(result, "https")
+		systemHttp(opt, result, "https")
 	} else if strings.HasPrefix(result.Status, "3") {
-		systemHttp(result, "http")
+		systemHttp(opt, result, "http")
 	}
 
 	return
 }
 
 // 使用net/http进行带redirect的请求
-func systemHttp(result *pkg.Result, scheme string) {
+func systemHttp(opt *pkg.RunnerOption, result *pkg.Result, scheme string) {
 	// 如果是400或者不可识别协议,则使用https
 	target := scheme + "://" + result.GetTarget()
-	conn := result.GetHttpConn(RunOpt.Delay + RunOpt.HttpsDelay)
+	conn := result.GetHttpConn(opt.Delay + opt.HttpsDelay)
 	resp, err := pkg.HTTPGet(conn, target)
 	if err != nil {
 		// 有可能存在漏网之鱼, 是tls服务, 但tls的第一个响应为30x, 并30x的目的地址不可达或超时. 则会报错.
 		result.Error = err.Error()
 		logs.Log.Debugf("request %s , %s ", target, err.Error())
 		if result.IsHttp {
-			noRedirectHttp(result, target)
+			noRedirectHttp(opt, result, target)
 		}
 		return
 	}
@@ -111,8 +111,8 @@ func systemHttp(result *pkg.Result, scheme string) {
 
 // 302跳转后目的不可达时进行不redirect的信息收集
 // 暂时使用不太优雅的方案, 在极少数情况下才会触发, 会多进行一次https的交互.
-func noRedirectHttp(result *pkg.Result, u string) {
-	conn := pkg.HttpConnWithNoRedirect(RunOpt.Delay + RunOpt.HttpsDelay)
+func noRedirectHttp(opt *pkg.RunnerOption, result *pkg.Result, u string) {
+	conn := pkg.HttpConnWithNoRedirect(opt.Delay + opt.HttpsDelay)
 	resp, err := pkg.HTTPGet(conn, u)
 	if err != nil {
 		return

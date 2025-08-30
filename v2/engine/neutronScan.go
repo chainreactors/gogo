@@ -10,10 +10,10 @@ import (
 	"github.com/chainreactors/parsers"
 )
 
-func NeutronScan(target string, result *Result) {
-	if RunOpt.Exploit != "none" {
-		if RunOpt.Exploit != "auto" {
-			executeTemplates(result, strings.Split(RunOpt.Exploit, ","), target)
+func NeutronScan(opt *RunnerOption, target string, result *Result) {
+	if opt.Exploit != "none" {
+		if opt.Exploit != "auto" {
+			executeTemplates(result, strings.Split(opt.Exploit, ","), target)
 		} else {
 			pocs := result.Frameworks.GetNames()
 			if result.IsHttp {

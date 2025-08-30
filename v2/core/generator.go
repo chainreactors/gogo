@@ -136,8 +136,8 @@ func (gen *TargetGenerator) genFromDefault(cidrs utils.CIDRs, portlist []string)
 		for ip := range ch {
 			for _, port := range portlist {
 				gen.ch <- targetConfig{ip: ip, port: port, hosts: gen.hostsMap[ip]}
-				if engine.RunOpt.Sum%65535 == 65534 {
-					Log.Importantf("Current processing %s:%s, number: %d", ip, port, engine.RunOpt.Sum)
+				if engine.RunSum%65535 == 65534 {
+					Log.Importantf("Current processing %s:%s, number: %d", ip, port, engine.RunSum)
 				}
 			}
 		}

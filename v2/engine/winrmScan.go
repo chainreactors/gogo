@@ -11,14 +11,14 @@ import (
 	"strings"
 )
 
-func WinrmScan(result *pkg.Result) {
-	if RunOpt.Opsec {
+func WinrmScan(opt *pkg.RunnerOption, result *pkg.Result) {
+	if opt.Opsec {
 		return
 	}
 	result.Port = "5985"
 	uri := fmt.Sprintf("http://%s/wsman", result.GetTarget())
 	logs.Log.Debugf("winrm scan %s", uri)
-	conn := pkg.HttpConn(RunOpt.Delay)
+	conn := pkg.HttpConn(opt.Delay)
 	req, _ := http.NewRequest("POST", uri, nil)
 	req.Header.Add("Content-Type", "application/soap+xml;charset=UTF-8")
 	req.Header.Add("User-Agent", "Microsoft WinRM Client")

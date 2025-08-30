@@ -11,7 +11,7 @@ var (
 	UDP = "udp"
 )
 
-func SocketFingerScan(result *Result) {
+func SocketFingerScan(opt *RunnerOption, result *Result) {
 	// 如果是http协议,则判断cms,如果是tcp则匹配规则库.暂时不考虑udp
 	var closureResp, finalResp []byte
 	callback := func(f *common.Framework, v *common.Vuln) {
@@ -26,7 +26,7 @@ func SocketFingerScan(result *Result) {
 	tcpsender := func(sendData []byte) ([]byte, bool) {
 		target := result.GetTarget()
 		logs.Log.Debugf("active detect: %s, data: %q", target, sendData)
-		conn, err := NewSocket(TCP, target, RunOpt.Delay)
+		conn, err := NewSocket(TCP, target, opt.Delay)
 		if err != nil {
 			logs.Log.Debugf("active detect %s error, %s", target, err.Error())
 			return nil, false
@@ -59,13 +59,13 @@ func SocketFingerScan(result *Result) {
 	//	return data, true
 	//}
 
-	if RunOpt.VersionLevel > 0 {
-		FingerEngine.SocketMatch(result.Content, result.Port, RunOpt.VersionLevel, tcpsender, callback)
+	if opt.VersionLevel > 0 {
+		FingerEngine.SocketMatch(result.Content, result.Port, opt.VersionLevel, tcpsender, callback)
 	} else {
 		if group, ok := FingerEngine.SocketGroup[result.Port]; ok {
 			frames, _ := group.Match(result.ToContent(), 1, tcpsender, callback, true)
 			if len(frames) == 0 {
-				FingerEngine.SocketMatch(result.Content, "", RunOpt.VersionLevel, nil, callback)
+				FingerEngine.SocketMatch(result.Content, "", opt.VersionLevel, nil, callback)
 			}
 		}
 	}

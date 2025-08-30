@@ -53,14 +53,14 @@ func init() {
 
 var nbtdata = pkg.Decode("SktjYGBgZAADBWdvR7yAgUGRgREAAAD//w==")
 
-func NBTScan(result *pkg.Result) {
+func NBTScan(opt *pkg.RunnerOption, result *pkg.Result) {
 	var Share bool = false
 	var DC bool = false
 	result.Protocol = "udp"
 	result.Port = "137"
 	target := result.GetTarget()
 
-	conn, err := pkg.NewSocket("udp", target, RunOpt.Delay*2)
+	conn, err := pkg.NewSocket("udp", target, opt.Delay*2)
 	if err != nil {
 		return
 	}

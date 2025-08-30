@@ -9,8 +9,8 @@ import (
 	"github.com/chainreactors/utils/iutils"
 )
 
-func NotFoundScan(result *pkg.Result) {
-	conn := result.GetHttpConn(RunOpt.Delay)
+func NotFoundScan(opt *pkg.RunnerOption, result *pkg.Result) {
+	conn := result.GetHttpConn(opt.Delay)
 	url := result.GetURL() + pkg.RandomDir
 	resp, err := conn.Get(url)
 

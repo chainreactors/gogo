@@ -9,10 +9,10 @@ import (
 	"strings"
 )
 
-func HTTPFingerScan(result *Result) {
+func HTTPFingerScan(opt *RunnerOption, result *Result) {
 	passiveHttpMatch(result)
-	if RunOpt.VersionLevel > 0 {
-		activeHttpMatch(result)
+	if opt.VersionLevel > 0 {
+		activeHttpMatch(opt, result)
 	}
 	return
 }
@@ -29,11 +29,11 @@ func passiveHttpMatch(result *Result) {
 	}
 }
 
-func activeHttpMatch(result *Result) {
+func activeHttpMatch(opt *RunnerOption, result *Result) {
 	var closureResp *parsers.Response
 	var finalResp *parsers.Response
 	sender := func(sendData []byte) ([]byte, bool) {
-		conn := result.GetHttpConn(RunOpt.Delay)
+		conn := result.GetHttpConn(opt.Delay)
 		url := result.GetURL() + string(sendData)
 		logs.Log.Debugf("active detect: %s", url)
 		resp, err := HTTPGet(conn, url)
@@ -71,7 +71,7 @@ func activeHttpMatch(result *Result) {
 		}
 	}
 
-	FingerEngine.HTTPActiveMatch(RunOpt.VersionLevel, sender, callback)
+	FingerEngine.HTTPActiveMatch(opt.VersionLevel, sender, callback)
 
 	if finalResp != nil {
 		// 如果匹配到新的指纹, 重新收集基本信息

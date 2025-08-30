@@ -41,9 +41,9 @@ func getICMPStatus(t uint8) string {
 	return "unknown"
 }
 
-func ICMPScan(result *pkg.Result) {
+func ICMPScan(opt *pkg.RunnerOption, result *pkg.Result) {
 	host := result.Ip
-	delay := time.Duration(RunOpt.Delay)
+	delay := time.Duration(opt.Delay)
 	conn, err := net.DialTimeout("ip4:icmp", host, delay*time.Second)
 	if err != nil {
 		result.ErrStat = 7

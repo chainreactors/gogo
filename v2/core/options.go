@@ -82,11 +82,9 @@ type ConfigOption struct {
 
 type Options struct {
 	AliveSum    int32
-	NoScan      bool
 	PluginDebug bool
 }
 
 var Opt = Options{
 	AliveSum: 0,
-	NoScan:   false,
 }

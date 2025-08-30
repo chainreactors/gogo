@@ -27,6 +27,7 @@ const (
 
 type Config struct {
 	*parsers.GOGOConfig
+	RunnerOpt *RunnerOption
 	// ip
 	CIDRs    utils.CIDRs `json:"-"`
 	Excludes utils.CIDRs `json:"-"`
@@ -324,4 +325,16 @@ func (config *Config) ToJson(json_type string) string {
 		return err.Error()
 	}
 	return string(s)
+}
+
+type RunnerOption struct {
+	Exploit      string
+	VersionLevel int
+	Delay        int
+	HttpsDelay   int
+	ScanFilters  [][]string
+	//SuffixStr    string
+	Debug        bool
+	Opsec        bool // enable opsec
+	ExcludeCIDRs utils.CIDRs
 }

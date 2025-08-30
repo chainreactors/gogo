@@ -47,10 +47,10 @@ var sspiMessage = []byte{
 	0x00, 0x00, 0xff,
 }
 
-func MSSqlScan(result *pkg.Result) {
+func MSSqlScan(opt *pkg.RunnerOption, result *pkg.Result) {
 	result.Port = "1433"
 	target := result.GetTarget()
-	conn, err := pkg.NewSocket("tcp", target, RunOpt.Delay)
+	conn, err := pkg.NewSocket("tcp", target, opt.Delay)
 	if err != nil {
 		return
 	}

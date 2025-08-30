@@ -96,6 +96,8 @@ github.com/chainreactors/neutron v0.0.0-20250113061151-32771f256b1f h1:z8saw5saC
 github.com/chainreactors/neutron v0.0.0-20250113061151-32771f256b1f/go.mod h1:PomxHcP/BecBL0R+u9h/F+zjnkDQhT/eeH9eFyhPkUE=
 github.com/chainreactors/parsers v0.0.0-20250605044448-6bc270f12c0e h1:8AgGNkG1JoO6CIGlMNOecUCaQCnB/Ko/WI3Y6VgVPrI=
 github.com/chainreactors/parsers v0.0.0-20250605044448-6bc270f12c0e/go.mod h1:7rXdYz6jrdjF0WUH1ICcAXKIKKjKmJo2PU8u43V7jkA=
+github.com/chainreactors/parsers v0.0.0-20250830181747-c446a0504a42 h1:Acy/bfNIwDpDq+uC9g7p2ZCq8Cd7Q1iv5OY1aEjTEeQ=
+github.com/chainreactors/parsers v0.0.0-20250830181747-c446a0504a42/go.mod h1:7rXdYz6jrdjF0WUH1ICcAXKIKKjKmJo2PU8u43V7jkA=
 github.com/chainreactors/proxyclient v1.0.3 h1:afnymFICAEqzG4rVMMJhd4Tqrx6LfTssUbo+T8P52vs=
 github.com/chainreactors/proxyclient v1.0.3/go.mod h1:kuB9olIK/GOW3lrpbYcJ2Uxb1aKsQPQmxewfCyIZ/0g=
 github.com/chainreactors/utils v0.0.0-20240528085651-ba1b255482c1/go.mod h1:JA4eiQZm+7AsfjXBcIzIdVKBEhDCb16eNtWFCGTxlvs=

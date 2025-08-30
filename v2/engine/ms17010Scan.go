@@ -17,15 +17,15 @@ var (
 	trans2SessionSetupRequest = Decode("YmBg8Psf7OtkxMDAwCDBfoABGXD8/8fA4cjAz8PAwMAIFVt2cwkDAwMPgxNIJwMjAx8DL4oeBgAAAAD//w==")
 )
 
-func MS17010Scan(result *Result) {
-	if RunOpt.Opsec {
+func MS17010Scan(opt *RunnerOption, result *Result) {
+	if opt.Opsec {
 		logs.Log.Debugf("opsec!!! skip MS-17010 plugin")
 		return
 	}
 	// connecting to a host in LAN if reachable should be very quick
 	result.Port = "445"
 	target := result.GetTarget()
-	conn, err := NewSocket("tcp", target, RunOpt.Delay)
+	conn, err := NewSocket("tcp", target, opt.Delay)
 	if err != nil {
 		result.Error = err.Error()
 		return

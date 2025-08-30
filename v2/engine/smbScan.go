@@ -39,7 +39,7 @@ func ntlmdata(Flags []byte) []byte {
 	}
 }
 
-func SMBScan(result *Result) {
+func SMBScan(opt *RunnerOption, result *Result) {
 	result.Port = "445"
 	target := result.GetTarget()
 	var err error
@@ -47,14 +47,14 @@ func SMBScan(result *Result) {
 	//ff534d42 SMBv1的标示
 	//fe534d42 SMBv2的标示
 	//先发送探测SMBv1的payload，不支持的SMBv1的时候返回为空，然后尝试发送SMBv2的探测数据包
-	ret, err = smb1Scan(target)
+	ret, err = smb1Scan(opt, target)
 	if err != nil && err.Error() == "conn failed" {
 		return
 	}
 
 	if ret == nil {
 		result.Open = true
-		if ret, err = smb2Scan(target); ret != nil {
+		if ret, err = smb2Scan(opt, target); ret != nil {
 			result.Status = "SMB2"
 		} else {
 			result.Protocol = "tcp"
@@ -70,9 +70,9 @@ func SMBScan(result *Result) {
 	result.AddNTLMInfo(iutils.ToStringMap(ntlmssp.NTLMInfo(ret)), "smb")
 }
 
-func smb1Scan(target string) ([]byte, error) {
+func smb1Scan(opt *RunnerOption, target string) ([]byte, error) {
 	var err error
-	conn, err := NewSocket("tcp", target, RunOpt.Delay)
+	conn, err := NewSocket("tcp", target, opt.Delay)
 	if err != nil {
 		return nil, errors.New("conn failed")
 	}
@@ -96,9 +96,9 @@ func smb1Scan(target string) ([]byte, error) {
 	return nil, err
 }
 
-func smb2Scan(target string) ([]byte, error) {
+func smb2Scan(opt *RunnerOption, target string) ([]byte, error) {
 	var err error
-	conn, err := NewSocket("tcp", target, RunOpt.Delay)
+	conn, err := NewSocket("tcp", target, opt.Delay)
 	if err != nil {
 		return nil, err
 	}

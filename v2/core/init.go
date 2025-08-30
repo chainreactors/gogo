@@ -3,16 +3,15 @@ package core
 import (
 	"bytes"
 	"fmt"
-	"github.com/chainreactors/utils/fileutils"
 	"io/ioutil"
 	"os"
 	"strings"
 
-	"github.com/chainreactors/gogo/v2/engine"
 	. "github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/logs"
 	"github.com/chainreactors/parsers"
 	"github.com/chainreactors/utils"
+	"github.com/chainreactors/utils/fileutils"
 	"github.com/chainreactors/utils/iutils"
 )
 
@@ -33,8 +32,8 @@ func InitConfig(config *Config) (*Config, error) {
 		return nil, err
 	}
 	// 初始化
-	config.Exploit = engine.RunOpt.Exploit
-	config.VersionLevel = engine.RunOpt.VersionLevel
+	config.RunnerOpt.Exploit = config.Exploit
+	config.RunnerOpt.VersionLevel = config.VersionLevel
 
 	if config.Threads == 0 { // if 默认线程
 		config.Threads = LinuxDefaultThreads
@@ -151,7 +150,7 @@ func InitConfig(config *Config) (*Config, error) {
 
 func printTaskInfo(config *Config, taskname string) {
 	// 输出任务的基本信息
-	logs.Log.Importantf("Current goroutines: %d, Version Level: %d,Exploit: %s, PortSpray: %t", config.Threads, engine.RunOpt.VersionLevel, engine.RunOpt.Exploit, config.PortSpray)
+	logs.Log.Importantf("Current goroutines: %d, Version Level: %d,Exploit: %s, PortSpray: %t", config.Threads, config.RunnerOpt.VersionLevel, config.RunnerOpt.Exploit, config.PortSpray)
 	if config.Results == nil {
 		logs.Log.Importantf("Start task %s ,total ports: %d , mod: %s", taskname, len(config.PortList), config.Mod)
 		// 输出端口信息

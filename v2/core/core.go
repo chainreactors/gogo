@@ -53,7 +53,7 @@ func DefaultMod(targets interface{}, config Config) {
 		defer wgs.Done()
 		tc := i.(targetConfig)
 		result := tc.NewResult()
-		engine.Dispatch(result)
+		engine.Dispatch(config.RunnerOpt, result)
 		if result.Open {
 			atomic.AddInt32(&Opt.AliveSum, 1)
 
@@ -137,7 +137,7 @@ func SmartMod(target *utils.CIDR, config Config) {
 		tc := i.(targetConfig)
 		result := NewResult(tc.ip, tc.port)
 		result.SmartProbe = true
-		engine.Dispatch(result)
+		engine.Dispatch(config.RunnerOpt, result)
 
 		if result.Open {
 			logs.Log.Debug("cidr scan , " + result.String())
@@ -175,7 +175,7 @@ func SmartMod(target *utils.CIDR, config Config) {
 		WriteSmartResult(config.SmartCFile, target.String(), iplist.Strings())
 	}
 
-	if Opt.NoScan || config.Mod == SUPERSMARTC {
+	if config.NoScan || config.Mod == SUPERSMARTC {
 		// -no 被设置的时候停止后续扫描
 		return
 	}
@@ -197,7 +197,7 @@ func AliveMod(targets interface{}, config Config) {
 	alivedmap := targetGen.ipGenerator.alivedMap
 	targetCh := targetGen.generatorDispatch(targets, config.AliveSprayMod)
 	scanPool, _ := ants.NewPoolWithFunc(config.Threads, func(i interface{}) {
-		aliveScan(i.(targetConfig), alivedmap)
+		aliveScan(config.RunnerOpt, i.(targetConfig), alivedmap)
 		wgs.Done()
 	})
 	defer scanPool.Release()
@@ -226,10 +226,10 @@ func AliveMod(targets interface{}, config Config) {
 	DefaultMod(utils.ParseIPs(iplist).CIDRs(), config)
 }
 
-func aliveScan(tc targetConfig, temp *sync.Map) {
+func aliveScan(opt *RunnerOption, tc targetConfig, temp *sync.Map) {
 	result := NewResult(tc.ip, tc.port)
 	result.SmartProbe = true
-	engine.Dispatch(result)
+	engine.Dispatch(opt, result)
 
 	if result.Open {
 		logs.Log.Debug("alive scan, " + result.String())
