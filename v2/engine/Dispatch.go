@@ -2,6 +2,7 @@ package engine
 
 import (
 	"sync/atomic"
+	"time"
 
 	"github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/logs"
@@ -13,7 +14,9 @@ var (
 )
 
 func Dispatch(opt *pkg.RunnerOption, result *pkg.Result) {
+	timer := time.Now()
 	defer func() {
+		result.Timing = time.Since(timer).Milliseconds()
 		if err := recover(); err != nil {
 			logs.Log.Errorf("scan %s unexcept error, %v", result.GetTarget(), err)
 			panic(err)
