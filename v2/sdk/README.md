@@ -5,7 +5,7 @@ GoGo SDK 是基于 [chainreactors/gogo](https://github.com/chainreactors/gogo) �
 ## 特性
 
 - 🚀 **简单易用**: 只需几行代码即可开始扫描
-- 🎯 **四种扫描方法**: BatchScan（批量扫描）、WorkflowScan（工作流扫描）、Scan（单个扫描）
+- 🎯 **四种扫描方法**: Scan（批量扫描）、WorkflowScan（工作流扫描）、ScanOne（单个扫描）
 - 📡 **流式 API**: 支持实时返回扫描结果的 channel
 - 🔧 **直接调用底层**: 直接调用 `engine.Dispatch` 获得最佳性能
 - 🔇 **静默运行**: SDK 内部不产生控制台输出，仅通过日志系统记录调试信息
@@ -43,11 +43,11 @@ func main() {
     }
     
     // 批量端口扫描
-    results, err := gogoSDK.BatchScan("192.168.1.0/24", "80,443,22")
+    results, err := gogoSDK.Scan("127.0.0.1/32", "80,443,22")
     if err != nil {
         log.Fatal(err)
     }
-    
+
     fmt.Printf("发现 %d 个开放端口\n", len(results))
     for _, result := range results {
         fmt.Println(result.FullOutput())
@@ -101,21 +101,21 @@ if err != nil {
 
 ### 扫描方法
 
-#### 1. BatchScan - 批量端口扫描
+#### 1. Scan - 批量端口扫描
 
 批量端口扫描，支持 CIDR 网段扫描，通过 ants 协程池进行高效调度。
 
 ```go
-func (sdk *GogoEngine) BatchScan(ip, ports string) ([]*parsers.GOGOResult, error)
-func (sdk *GogoEngine) BatchScanStream(ip, ports string) (<-chan *parsers.GOGOResult, error)
+func (sdk *GogoEngine) Scan(ip, ports string) ([]*parsers.GOGOResult, error)
+func (sdk *GogoEngine) ScanStream(ip, ports string) (<-chan *parsers.GOGOResult, error)
 ```
 
 **参数:**
-- `ip`: 目标 CIDR 网段，如 "192.168.1.0/24"、"10.0.0.0/16"
+- `ip`: 目标 CIDR 网段，如 "127.0.0.1/32"
 - `ports`: 端口配置，如 "80,443,22" 或 "top100"
 
 **特性:**
-- ✅ 支持 CIDR 网段扫描（如 192.168.1.0/24）
+- ✅ 支持 CIDR 网段扫描（如 127.0.0.1/32）
 - ✅ 使用 ants 协程池进行高效并发调度
 - ✅ 自动解析网段中的所有 IP 地址
 - ✅ 支持多个端口批量扫描
@@ -127,14 +127,14 @@ func (sdk *GogoEngine) BatchScanStream(ip, ports string) (<-chan *parsers.GOGORe
 **示例:**
 ```go
 // 同步批量扫描整个网段
-results, err := gogoSDK.BatchScan("192.168.1.0/24", "80,443,22")
+results, err := gogoSDK.Scan("127.0.0.1/32", "80,443,22")
 if err != nil {
     log.Fatal(err)
 }
 fmt.Printf("网段扫描完成，发现 %d 个开放端口\n", len(results))
 
 // 流式批量扫描
-resultCh, err := gogoSDK.BatchScanStream("10.0.0.0/16", "top1000")
+resultCh, err := gogoSDK.ScanStream("127.0.0.1/32", "top1000")
 if err != nil {
     log.Fatal(err)
 }
@@ -143,12 +143,12 @@ for result := range resultCh {
 }
 ```
 
-#### 2. Scan - 单个目标扫描
+#### 2. ScanOne - 单个目标扫描
 
 对单个 IP 和单个端口进行直接扫描，不使用协程池调度。
 
 ```go
-func (sdk *GogoEngine) Scan(ip, port string) *parsers.GOGOResult
+func (sdk *GogoEngine) ScanOne(ip, port string) *parsers.GOGOResult
 ```
 
 **参数:**
@@ -168,7 +168,7 @@ func (sdk *GogoEngine) Scan(ip, port string) *parsers.GOGOResult
 **示例:**
 ```go
 // 单个目标扫描
-result := gogoSDK.Scan("192.168.1.1", "80")
+result := gogoSDK.ScanOne("127.0.0.1", "80")
 if result.Status != "" && result.Status != "closed" {
     fmt.Printf("端口开放: %s:%s [%s]\n", result.Ip, result.Port, result.Protocol)
     fmt.Println(result.FullOutput())
@@ -178,13 +178,13 @@ if result.Status != "" && result.Status != "closed" {
 
 // 批量单点扫描（手动循环）
 targets := []struct{ ip, port string }{
-    {"192.168.1.1", "80"},
-    {"192.168.1.1", "443"},
-    {"192.168.1.2", "22"},
+    {"127.0.0.1", "80"},
+    {"127.0.0.1", "443"},
+    {"127.0.0.1", "22"},
 }
 
 for _, target := range targets {
-    result := gogoSDK.Scan(target.ip, target.port)
+    result := gogoSDK.ScanOne(target.ip, target.port)
     if result.Status != "" && result.Status != "closed" {
         fmt.Printf("发现开放端口: %s:%s\n", result.Ip, result.Port)
     }
@@ -220,7 +220,7 @@ func (sdk *GogoEngine) WorkflowScanStream(workflow *pkg.Workflow) (<-chan *parse
 workflow := &pkg.Workflow{
     Name:        "web-security-scan",
     Description: "Web 安全扫描",
-    IP:          "192.168.1.0/24",
+    IP:          "127.0.0.1/32",
     Ports:       "80,443,8080,8443",
     Exploit:     "auto",
     Verbose:     2,
@@ -246,30 +246,30 @@ for result := range resultCh {
 
 | 方法 | 支持 CIDR | 协程池调度 | 适用场景 | 性能 |
 |------|-----------|------------|----------|------|
-| **BatchScan** | ✅ | ✅ | 网段端口扫描 | 高 |
-| **Scan** | ❌ | ❌ | 单点快速检测 | 中 |
+| **Scan** | ✅ | ✅ | 网段端口扫描 | 高 |
+| **ScanOne** | ❌ | ❌ | 单点快速检测 | 中 |
 | **WorkflowScan** | ✅ | ✅ | 复杂扫描策略 | 高 |
 
 ### 使用场景建议
 
-#### 使用 BatchScan 的场景：
+#### 使用 Scan 的场景：
 - 扫描整个网段的常用端口
 - 需要高并发批量扫描
 - 简单的端口开放性检测
 
 ```go
 // 扫描内网 C 段的 Web 端口
-results, err := gogoSDK.BatchScan("192.168.1.0/24", "80,443,8080,8443")
+results, err := gogoSDK.Scan("127.0.0.1/32", "80,443,8080,8443")
 ```
 
-#### 使用 Scan 的场景：
+#### 使用 ScanOne 的场景：
 - 快速检测单个服务是否可用
 - 验证特定 IP 端口的连通性
 - 不需要并发的简单检测
 
 ```go
 // 快速检测单个服务
-result := gogoSDK.Scan("192.168.1.1", "80")
+result := gogoSDK.ScanOne("127.0.0.1", "80")
 ```
 
 #### 使用 WorkflowScan 的场景：
@@ -282,7 +282,7 @@ result := gogoSDK.Scan("192.168.1.1", "80")
 workflow := &pkg.Workflow{
     Name:        "security-scan",
     Description: "安全扫描",
-    IP:          "192.168.1.0/24",
+    IP:          "127.0.0.1/32",
     Ports:       "top1000",
     Verbose:     2,
     Exploit:     "auto",
@@ -349,7 +349,7 @@ fmt.Println(result.Get("title"))   // 获取标题
 
 ```go
 // 扫描常用端口
-results, err := gogoSDK.BatchScan("192.168.1.0/24", "80,443,22,21,23")
+results, err := gogoSDK.Scan("127.0.0.1/32", "80,443,22,21,23")
 if err != nil {
     log.Fatal(err)
 }
@@ -370,7 +370,7 @@ if err != nil {
 }
 
 // 实时获取扫描结果
-resultCh, err := gogoSDK.BatchScanStream("10.0.0.0/16", "top1000")
+resultCh, err := gogoSDK.ScanStream("127.0.0.1/32", "top1000")
 if err != nil {
     log.Fatal(err)
 }
@@ -395,7 +395,7 @@ if err != nil {
 }
 
 // 单个目标扫描
-result := gogoSDK.Scan("192.168.1.1", "80")
+result := gogoSDK.ScanOne("127.0.0.1", "80")
 if result.Status != "" && result.Status != "closed" {
     fmt.Printf("端口开放: %s:%s [%s]\n", result.Ip, result.Port, result.Protocol)
     fmt.Println(result.FullOutput())
@@ -418,7 +418,7 @@ if err != nil {
 workflow := &pkg.Workflow{
     Name:        "comprehensive-scan",
     Description: "全面扫描",
-    IP:          "192.168.1.0/24",
+    IP:          "127.0.0.1/32",
     Ports:       "top100",
     Exploit:     "auto",   // 启用自动漏洞检测
     Verbose:     2,        // 启用深度指纹识别
@@ -505,13 +505,13 @@ go build -o gogo-cli sdk.go
 
 ```bash
 # 批量端口扫描
-./gogo-cli -i 192.168.1.0/24 -p 80,443,22
+./gogo-cli -i 127.0.0.1/32 -p 80,443,22
 
 # 流式扫描
-./gogo-cli -i 172.16.0.0/24 -p top1000 -s
+./gogo-cli -i 127.0.0.1/32 -p top1000 -s
 
 # 自定义线程数
-./gogo-cli -i 192.168.1.0/24 -t 1000 -p top100
+./gogo-cli -i 127.0.0.1/32 -t 1000 -p top100
 ```
 
 ### 命令行参数
@@ -525,9 +525,9 @@ go build -o gogo-cli sdk.go
 ## 注意事项
 
 1. **初始化要求**: 使用 SDK 前必须调用 `Init()` 方法进行初始化
-2. **方法区别**: 
-   - `BatchScan`: 支持 CIDR 网段，使用协程池调度
-   - `Scan`: 仅支持单个 IP 和端口，直接调用底层引擎
+2. **方法区别**:
+   - `Scan`: 支持 CIDR 网段，使用协程池调度
+   - `ScanOne`: 仅支持单个 IP 和端口，直接调用底层引擎
 3. **权限要求**: 某些扫描功能可能需要管理员权限
 4. **网络环境**: 确保网络连接正常，防火墙允许扫描
 5. **目标合法性**: 仅对授权的目标进行扫描
@@ -548,7 +548,7 @@ if err != nil {
 }
 
 // 批量扫描错误处理
-results, err := gogoSDK.BatchScan("192.168.1.0/24", "80,443")
+results, err := gogoSDK.Scan("127.0.0.1/32", "80,443")
 if err != nil {
     log.Printf("扫描失败: %v", err)
     return
@@ -567,7 +567,7 @@ for _, result := range results {
 }
 
 // 单个扫描错误处理
-result := gogoSDK.Scan("192.168.1.1", "80")
+result := gogoSDK.ScanOne("127.0.0.1", "80")
 if result.Status != "" && result.Status != "closed" {
     fmt.Println(result.FullOutput())
 } else {

@@ -58,8 +58,15 @@ func (sdk *GogoEngine) SetThreads(threads int) {
 	sdk.Threads = threads
 }
 
-// BatchScan 端口扫描，返回结果切片
-func (sdk *GogoEngine) BatchScan(ip, ports string) ([]*parsers.GOGOResult, error) {
+// ScanOne 单个目标扫描，返回单个结果
+func (sdk *GogoEngine) ScanOne(ip, port string) *parsers.GOGOResult {
+	result := pkg.NewResult(ip, port)
+	engine.Dispatch(sdk.RunOpt, result)
+	return result.GOGOResult
+}
+
+// Scan 批量端口扫描，返回结果切片
+func (sdk *GogoEngine) Scan(ip, ports string) ([]*parsers.GOGOResult, error) {
 	workflow := &pkg.Workflow{
 		Name:        "port-scan",
 		Description: "端口扫描",
@@ -72,8 +79,8 @@ func (sdk *GogoEngine) BatchScan(ip, ports string) ([]*parsers.GOGOResult, error
 	return sdk.executeWorkflow(workflow)
 }
 
-// BatchScanStream 端口扫描流式模式，返回实时结果 channel
-func (sdk *GogoEngine) BatchScanStream(ip, ports string) (<-chan *parsers.GOGOResult, error) {
+// ScanStream 批量端口扫描流式模式，返回实时结果 channel
+func (sdk *GogoEngine) ScanStream(ip, ports string) (<-chan *parsers.GOGOResult, error) {
 	workflow := &pkg.Workflow{
 		Name:        "port-scan",
 		Description: "端口扫描",
@@ -94,12 +101,6 @@ func (sdk *GogoEngine) WorkflowScan(workflow *pkg.Workflow) ([]*parsers.GOGOResu
 // WorkflowScanStream 自定义工作流扫描流式模式，返回实时结果 channel
 func (sdk *GogoEngine) WorkflowScanStream(workflow *pkg.Workflow) (<-chan *parsers.GOGOResult, error) {
 	return sdk.executeWorkflowStream(workflow)
-}
-
-func (sdk *GogoEngine) Scan(ip, port string) *parsers.GOGOResult {
-	result := pkg.NewResult(ip, port)
-	engine.Dispatch(sdk.RunOpt, result)
-	return result.GOGOResult
 }
 
 // executeWorkflow 执行工作流，返回所有结果
