@@ -32,8 +32,8 @@ func InitConfig(config *Config) (*Config, error) {
 		return nil, err
 	}
 	// 初始化
-	config.RunnerOpt.Exploit = config.Exploit
-	config.RunnerOpt.VersionLevel = config.VersionLevel
+	//config.RunnerOpt.Exploit = config.Exploit
+	//config.RunnerOpt.VersionLevel = config.VersionLevel
 
 	if config.Threads == 0 { // if 默认线程
 		config.Threads = LinuxDefaultThreads
