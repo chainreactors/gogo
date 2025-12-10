@@ -16,7 +16,7 @@ var (
 func Dispatch(opt *pkg.RunnerOption, result *pkg.Result) {
 	timer := time.Now()
 	defer func() {
-		result.Timing = time.Since(timer).Milliseconds()
+		result.Timing = int64(time.Since(timer) / time.Millisecond)
 		if err := recover(); err != nil {
 			logs.Log.Errorf("scan %s unexcept error, %v", result.GetTarget(), err)
 			panic(err)
