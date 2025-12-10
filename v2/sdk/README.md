@@ -1,584 +1,518 @@
-# GoGo SDK 使用指南
+# GoGo SDK
 
-GoGo SDK 是基于 [chainreactors/gogo](https://github.com/chainreactors/gogo) 项目构建的网络扫描 SDK，提供了简洁易用的 Go 语言接口。
+GoGo SDK 提供了简洁的 Go API，用于端口扫描和服务指纹识别。
 
-## 特性
+## 核心概念
 
-- 🚀 **简单易用**: 只需几行代码即可开始扫描
-- 🎯 **四种扫描方法**: Scan（批量扫描）、WorkflowScan（工作流扫描）、ScanOne（单个扫描）
-- 📡 **流式 API**: 支持实时返回扫描结果的 channel
-- 🔧 **直接调用底层**: 直接调用 `engine.Dispatch` 获得最佳性能
-- 🔇 **静默运行**: SDK 内部不产生控制台输出，仅通过日志系统记录调试信息
-- 📋 **统一返回类型**: 所有方法统一返回 `*parsers.GOGOResult`
+SDK 由两部分组成：
+
+1. **GogoEngine**: 管理持久化状态（指纹库、端口配置等）
+2. **核心 API**:
+   - `ScanStream`: 批量端口扫描（流式），返回 channel
+   - `WorkflowStream`: 自定义工作流扫描（流式），返回 channel
+   - `ScanOne`: 单目标快速扫描
+
+其他 API（`Scan`、`Workflow`）都是对 Stream API 的简单封装，你也可以根据需要自行封装。
 
 ## 快速开始
 
-### 安装
+```go
+import "github.com/chainreactors/gogo/v2/sdk"
 
-```bash
-go get github.com/chainreactors/gogo/v2
+// 1. 创建 GogoEngine
+engine := sdk.NewGogoEngine(nil)
+
+// 2. 初始化（加载指纹库等）
+engine.Init()
+
+// 3. 使用
+ctx := context.Background()
+
+// 单目标扫描
+result := engine.ScanOne(ctx, "127.0.0.1", "80")
+fmt.Printf("%s [%s]\n", result.GetTarget(), result.Status)
+
+// 批量端口扫描（流式）
+resultCh, _ := engine.ScanStream(ctx, "192.168.1.0/24", "80,443,8080")
+for result := range resultCh {
+    fmt.Printf("%s:%s [%s] %s\n", result.Ip, result.Port, result.Status, result.Title)
+}
+
+// 工作流扫描
+workflow := &pkg.Workflow{
+    Name:    "web-scan",
+    IP:      "example.com",
+    Ports:   "top100",
+    Verbose: 1,
+}
+resultCh, _ := engine.WorkflowStream(ctx, workflow)
+for result := range resultCh {
+    fmt.Printf("%s - %v\n", result.GetTarget(), result.Frameworks)
+}
 ```
 
-### 基本使用
+## 配置
+
+### 使用默认配置
 
 ```go
-package main
+engine := sdk.NewGogoEngine(nil)
+```
 
-import (
-    "fmt"
-    "log"
-    
-    "github.com/chainreactors/gogo/v2/pkg"
-    "github.com/chainreactors/gogo/v2/sdk"
-)
+默认配置包含：基础扫描、无漏洞检测、2秒超时、1000 线程。
 
-func main() {
-    // 创建 SDK 实例
-    gogoSDK := sdk.NewGogoSDK(pkg.DefaultRunnerOption)
-    
-    // 初始化 SDK（加载配置文件）
-    err := gogoSDK.Init()
-    if err != nil {
-        log.Fatal("SDK 初始化失败:", err)
-    }
-    
-    // 批量端口扫描
-    results, err := gogoSDK.Scan("127.0.0.1/32", "80,443,22")
-    if err != nil {
-        log.Fatal(err)
-    }
+### 自定义配置
 
-    fmt.Printf("发现 %d 个开放端口\n", len(results))
-    for _, result := range results {
-        fmt.Println(result.FullOutput())
-    }
+```go
+opt := &pkg.RunnerOption{
+    VersionLevel: 2,       // 深度指纹识别（0-2）
+    Exploit:      "auto",  // 启用漏洞检测
+    Delay:        3,       // 超时时间（秒）
+    Opsec:        true,    // 启用隐蔽模式
 }
+
+engine := sdk.NewGogoEngine(opt)
+engine.SetThreads(500)  // 设置线程数
+```
+
+### 运行时修改
+
+```go
+engine.SetThreads(500)
 ```
 
 ## API 参考
 
 ### GogoEngine
 
-主要的 SDK 结构体，提供四种核心扫描功能。
-
-#### 创建实例
-
 ```go
-// 创建 SDK 实例（需要传入 RunnerOption）
-gogoSDK := sdk.NewGogoSDK(pkg.DefaultRunnerOption)
+// 创建实例
+engine := sdk.NewGogoEngine(opt)  // opt 为 nil 时使用默认配置
 
-// 设置线程数（可选，默认 1000）
-gogoSDK.SetThreads(500)
+// 初始化（必须调用）
+engine.Init()
 
-// 重要：必须调用 Init() 方法初始化 SDK
-err := gogoSDK.Init()
-if err != nil {
-    log.Fatal("SDK 初始化失败:", err)
-}
+// 设置参数
+engine.SetThreads(threads)
 ```
 
-#### 初始化方法
-
-SDK 提供了 `Init()` 方法来加载必要的配置文件：
+### 核心 API
 
 ```go
-func (sdk *GogoEngine) Init() error
+// 单目标扫描
+ScanOne(ctx, ip, port) -> *GOGOResult
+
+// 批量扫描（流式）
+ScanStream(ctx, ip, ports) -> channel
+
+// 工作流扫描（流式）
+WorkflowStream(ctx, workflow) -> channel
 ```
 
-**功能:**
-- 加载端口配置文件
-- 加载指纹识别规则
-- 加载漏洞检测模板
-
-**示例:**
-```go
-gogoSDK := sdk.NewGogoSDK(pkg.DefaultRunnerOption)
-err := gogoSDK.Init()
-if err != nil {
-    return fmt.Errorf("SDK 初始化失败: %v", err)
-}
-```
-
-### 扫描方法
-
-#### 1. Scan - 批量端口扫描
-
-批量端口扫描，支持 CIDR 网段扫描，通过 ants 协程池进行高效调度。
+### 便捷 API
 
 ```go
-func (sdk *GogoEngine) Scan(ip, ports string) ([]*parsers.GOGOResult, error)
-func (sdk *GogoEngine) ScanStream(ip, ports string) (<-chan *parsers.GOGOResult, error)
+// 批量扫描（同步）
+Scan(ctx, ip, ports) -> []*GOGOResult
+
+// 工作流扫描（同步）
+Workflow(ctx, workflow) -> []*GOGOResult
 ```
 
-**参数:**
-- `ip`: 目标 CIDR 网段，如 "127.0.0.1/32"
-- `ports`: 端口配置，如 "80,443,22" 或 "top100"
+## 配置选项
 
-**特性:**
-- ✅ 支持 CIDR 网段扫描（如 127.0.0.1/32）
-- ✅ 使用 ants 协程池进行高效并发调度
-- ✅ 自动解析网段中的所有 IP 地址
-- ✅ 支持多个端口批量扫描
+### RunnerOption 配置
 
-**返回:**
-- 同步版本返回 `[]*parsers.GOGOResult` 结果切片
-- 流式版本返回 `<-chan *parsers.GOGOResult` 实时结果 channel
+**扫描配置**
+- `VersionLevel`: 指纹识别级别（0: 基础, 1: 标准, 2: 深度）
+- `Exploit`: 漏洞检测模式（"none", "auto", "ms17010", "smbghost" 等）
+- `Delay`: HTTP 超时时间（秒）
+- `HttpsDelay`: HTTPS 超时时间（秒）
+- `Opsec`: 启用隐蔽模式
+- `Debug`: 调试模式
 
-**示例:**
-```go
-// 同步批量扫描整个网段
-results, err := gogoSDK.Scan("127.0.0.1/32", "80,443,22")
-if err != nil {
-    log.Fatal(err)
-}
-fmt.Printf("网段扫描完成，发现 %d 个开放端口\n", len(results))
+**过滤配置**
+- `ScanFilters`: 结果过滤规则
+- `ExcludeCIDRs`: 排除的 IP 段
 
-// 流式批量扫描
-resultCh, err := gogoSDK.ScanStream("127.0.0.1/32", "top1000")
-if err != nil {
-    log.Fatal(err)
-}
-for result := range resultCh {
-    fmt.Printf("发现端口: %s:%s\n", result.Ip, result.Port)
-}
-```
+### Workflow 配置
 
-#### 2. ScanOne - 单个目标扫描
+**基本配置**
+- `Name`: 工作流名称
+- `Description`: 工作流描述
+- `IP`: 目标 IP 或 CIDR（如 "192.168.1.0/24"）
+- `Ports`: 端口配置（如 "80,443" 或 "top100"）
 
-对单个 IP 和单个端口进行直接扫描，不使用协程池调度。
+**扫描配置**
+- `Verbose`: 详细级别（同 VersionLevel，0-2）
+- `Exploit`: 漏洞利用模式
+- `Ping`: 启用 ICMP 存活检测
+- `NoScan`: 仅检测存活，不扫描端口
 
-```go
-func (sdk *GogoEngine) ScanOne(ip, port string) *parsers.GOGOResult
-```
+**输出配置**
+- `File`: 输出文件名
+- `Path`: 输出路径
 
-**参数:**
-- `ip`: 单个目标 IP 地址（不支持 CIDR）
-- `port`: 单个目标端口
-
-**特性:**
-- ❌ 不支持 CIDR 网段（仅支持单个 IP）
-- ❌ 不使用协程池调度
-- ✅ 直接调用底层扫描引擎
-- ✅ 立即返回扫描结果
-- ✅ 适用于快速单点检测
-
-**返回:**
-- 返回 `*parsers.GOGOResult` 单个扫描结果
-
-**示例:**
-```go
-// 单个目标扫描
-result := gogoSDK.ScanOne("127.0.0.1", "80")
-if result.Status != "" && result.Status != "closed" {
-    fmt.Printf("端口开放: %s:%s [%s]\n", result.Ip, result.Port, result.Protocol)
-    fmt.Println(result.FullOutput())
-} else {
-    fmt.Printf("端口关闭: %s:%s\n", result.Ip, result.Port)
-}
-
-// 批量单点扫描（手动循环）
-targets := []struct{ ip, port string }{
-    {"127.0.0.1", "80"},
-    {"127.0.0.1", "443"},
-    {"127.0.0.1", "22"},
-}
-
-for _, target := range targets {
-    result := gogoSDK.ScanOne(target.ip, target.port)
-    if result.Status != "" && result.Status != "closed" {
-        fmt.Printf("发现开放端口: %s:%s\n", result.Ip, result.Port)
-    }
-}
-```
-
-#### 3. WorkflowScan - 自定义工作流扫描
-
-使用完全自定义的工作流配置进行扫描，支持复杂的扫描策略。
-
-```go
-func (sdk *GogoEngine) WorkflowScan(workflow *pkg.Workflow) ([]*parsers.GOGOResult, error)
-func (sdk *GogoEngine) WorkflowScanStream(workflow *pkg.Workflow) (<-chan *parsers.GOGOResult, error)
-```
-
-**特性:**
-- ✅ 支持 CIDR 网段扫描
-- ✅ 使用 ants 协程池调度
-- ✅ 支持复杂的扫描配置
-- ✅ 支持指纹识别和漏洞检测
-
-**Workflow 参数说明:**
-- `Name`: 工作流名称（可选）
-- `Description`: 工作流描述（可选）
-- `IP`: 目标 CIDR 网段
-- `Ports`: 端口配置
-- `Exploit`: 漏洞利用模式（"none", "auto", 或具体漏洞名）
-- `Verbose`: 详细级别（0-2）
-
-**示例:**
-```go
-// 创建自定义工作流
-workflow := &pkg.Workflow{
-    Name:        "web-security-scan",
-    Description: "Web 安全扫描",
-    IP:          "127.0.0.1/32",
-    Ports:       "80,443,8080,8443",
-    Exploit:     "auto",
-    Verbose:     2,
-}
-
-// 执行自定义工作流
-results, err := gogoSDK.WorkflowScan(workflow)
-if err != nil {
-    log.Fatal(err)
-}
-
-// 流式工作流扫描
-resultCh, err := gogoSDK.WorkflowScanStream(workflow)
-if err != nil {
-    log.Fatal(err)
-}
-for result := range resultCh {
-    fmt.Println(result.FullOutput())
-}
-```
-
-### 方法对比
-
-| 方法 | 支持 CIDR | 协程池调度 | 适用场景 | 性能 |
-|------|-----------|------------|----------|------|
-| **Scan** | ✅ | ✅ | 网段端口扫描 | 高 |
-| **ScanOne** | ❌ | ❌ | 单点快速检测 | 中 |
-| **WorkflowScan** | ✅ | ✅ | 复杂扫描策略 | 高 |
-
-### 使用场景建议
-
-#### 使用 Scan 的场景：
-- 扫描整个网段的常用端口
-- 需要高并发批量扫描
-- 简单的端口开放性检测
-
-```go
-// 扫描内网 C 段的 Web 端口
-results, err := gogoSDK.Scan("127.0.0.1/32", "80,443,8080,8443")
-```
-
-#### 使用 ScanOne 的场景：
-- 快速检测单个服务是否可用
-- 验证特定 IP 端口的连通性
-- 不需要并发的简单检测
-
-```go
-// 快速检测单个服务
-result := gogoSDK.ScanOne("127.0.0.1", "80")
-```
-
-#### 使用 WorkflowScan 的场景：
-- 需要指纹识别和漏洞检测
-- 复杂的扫描策略配置
-- 需要详细的扫描结果
-
-```go
-// 全面的安全扫描
-workflow := &pkg.Workflow{
-    Name:        "security-scan",
-    Description: "安全扫描",
-    IP:          "127.0.0.1/32",
-    Ports:       "top1000",
-    Verbose:     2,
-    Exploit:     "auto",
-}
-results, err := gogoSDK.WorkflowScan(workflow)
-```
-
-### parsers.GOGOResult 结构体
-
-扫描结果的数据结构，SDK 统一返回此类型。
-
-```go
-type GOGOResult struct {
-    Ip         string              `json:"ip"`         // IP 地址
-    Port       string              `json:"port"`       // 端口
-    Protocol   string              `json:"protocol"`   // 协议类型
-    Status     string              `json:"status"`     // 状态信息
-    Uri        string              `json:"uri,omitempty"`        // URI 路径
-    Host       string              `json:"host,omitempty"`       // 主机名
-    Frameworks common.Frameworks   `json:"frameworks,omitempty"` // 识别的框架
-    Vulns      common.Vulns        `json:"vulns,omitempty"`      // 发现的漏洞
-    Extracteds map[string][]string `json:"extracted,omitempty"`  // 提取的信息
-    Title      string              `json:"title,omitempty"`      // 页面标题
-    Midware    string              `json:"midware,omitempty"`    // 中间件信息
-}
-```
-
-#### 结果输出方法
-
-`parsers.GOGOResult` 结构体提供了多种输出方法：
-
-```go
-// 完整输出（推荐使用）
-fmt.Println(result.FullOutput())
-
-// 彩色输出（适用于终端）
-fmt.Println(result.ColorOutput())
-
-// JSON 输出
-fmt.Println(result.JsonOutput())
-
-// CSV 输出
-fmt.Println(result.CsvOutput())
-
-// 获取目标标识
-fmt.Println(result.GetTarget())
-
-// 获取基础URL
-fmt.Println(result.GetBaseURL())
-
-// 获取完整URL
-fmt.Println(result.GetURL())
-
-// 获取指定字段值
-fmt.Println(result.Get("ip"))      // 获取 IP
-fmt.Println(result.Get("port"))    // 获取端口
-fmt.Println(result.Get("status"))  // 获取状态
-fmt.Println(result.Get("title"))   // 获取标题
-```
-
-## 使用示例
-
-### 1. 基础批量扫描
-
-```go
-// 扫描常用端口
-results, err := gogoSDK.Scan("127.0.0.1/32", "80,443,22,21,23")
-if err != nil {
-    log.Fatal(err)
-}
-
-for _, result := range results {
-    fmt.Printf("开放端口: %s:%s [%s]\n", result.Ip, result.Port, result.Protocol)
-}
-```
-
-### 2. 流式批量扫描
-
-```go
-// 初始化 SDK
-gogoSDK := sdk.NewGogoSDK(pkg.DefaultRunnerOption)
-err := gogoSDK.Init()
-if err != nil {
-    log.Fatal("SDK 初始化失败:", err)
-}
-
-// 实时获取扫描结果
-resultCh, err := gogoSDK.ScanStream("127.0.0.1/32", "top1000")
-if err != nil {
-    log.Fatal(err)
-}
-
-fmt.Println("开始实时扫描...")
-count := 0
-for result := range resultCh {
-    count++
-    fmt.Printf("[%d] 发现端口: %s:%s [%s]\n", count, result.Ip, result.Port, result.Protocol)
-}
-fmt.Printf("扫描完成！总共发现 %d 个开放端口\n", count)
-```
-
-### 3. 单个目标扫描
-
-```go
-// 初始化 SDK
-gogoSDK := sdk.NewGogoSDK(pkg.DefaultRunnerOption)
-err := gogoSDK.Init()
-if err != nil {
-    log.Fatal("SDK 初始化失败:", err)
-}
-
-// 单个目标扫描
-result := gogoSDK.ScanOne("127.0.0.1", "80")
-if result.Status != "" && result.Status != "closed" {
-    fmt.Printf("端口开放: %s:%s [%s]\n", result.Ip, result.Port, result.Protocol)
-    fmt.Println(result.FullOutput())
-} else {
-    fmt.Printf("端口关闭: %s:%s\n", result.Ip, result.Port)
-}
-```
-
-### 4. 工作流扫描
-
-```go
-// 初始化 SDK
-gogoSDK := sdk.NewGogoSDK(pkg.DefaultRunnerOption)
-err := gogoSDK.Init()
-if err != nil {
-    log.Fatal("SDK 初始化失败:", err)
-}
-
-// 创建自定义工作流
-workflow := &pkg.Workflow{
-    Name:        "comprehensive-scan",
-    Description: "全面扫描",
-    IP:          "127.0.0.1/32",
-    Ports:       "top100",
-    Exploit:     "auto",   // 启用自动漏洞检测
-    Verbose:     2,        // 启用深度指纹识别
-}
-
-// 执行工作流扫描
-results, err := gogoSDK.WorkflowScan(workflow)
-if err != nil {
-    log.Fatal(err)
-}
-
-// 使用 FullOutput() 显示详细结果
-fmt.Printf("工作流扫描完成！发现 %d 个服务\n", len(results))
-for _, result := range results {
-    fmt.Println(result.FullOutput())
-}
-```
-
-## 端口配置
+### 端口配置
 
 支持多种端口配置方式：
-
-- **具体端口**: `"80,443,22,21"`
+- **具体端口**: `"80,443,8080"`
 - **端口范围**: `"8000-8100"`
 - **预设端口**: `"top1"`, `"top10"`, `"top100"`, `"top1000"`
 - **混合配置**: `"80,443,8000-8100,top100"`
+- **特殊端口**: `"icmp"`, `"ping"`, `"smb"`, `"snmp"` 等
 
-## 详细级别 (Verbose)
-
-- **0**: 基础扫描，只检测端口开放状态
-- **1**: 启用指纹识别，识别服务和框架
-- **2**: 启用深度扫描，包含详细的指纹识别和信息收集
-
-## 漏洞利用模式 (Exploit)
-
-- **"none"**: 不进行漏洞扫描
-- **"auto"**: 自动选择合适的漏洞检测模块
-- **具体漏洞名**: 如 `"ms17010"`, `"weblogic"` 等
-
-## 线程池配置
-
-SDK 支持自定义线程池大小，以优化扫描性能：
-
-### 线程数建议
-
-- **小网段 (< 1000 IP)**: 100-500 线程
-- **中等网段 (1000-10000 IP)**: 500-2000 线程  
-- **大网段 (> 10000 IP)**: 2000-5000 线程
-- **Windows 系统**: 建议不超过 1000 线程
-
-### 配置方式
+## 结果结构
 
 ```go
-// 创建时设置线程数
-gogoSDK := sdk.NewGogoSDK(pkg.DefaultRunnerOption)
-gogoSDK.SetThreads(1000)
-err := gogoSDK.Init()
-
-// 针对不同场景的配置
-gogoSDK := sdk.NewGogoSDK(pkg.DefaultRunnerOption)
-switch scanType {
-case "internal":
-    gogoSDK.SetThreads(2000) // 内网扫描
-case "external":
-    gogoSDK.SetThreads(500)  // 外网扫描
-case "stealth":
-    gogoSDK.SetThreads(100)  // 隐蔽扫描
+type GOGOResult struct {
+    Ip         string              // IP 地址
+    Port       string              // 端口
+    Protocol   string              // 协议类型（http, https, tcp 等）
+    Status     string              // 状态信息
+    Title      string              // 页面标题
+    Host       string              // 主机名
+    Frameworks common.Frameworks   // 识别的框架
+    Vulns      common.Vulns        // 发现的漏洞
+    Extracteds map[string][]string // 提取的信息
+    Timing     int64               // 扫描耗时（毫秒）
 }
-err := gogoSDK.Init()
 ```
 
-## 命令行工具
-
-SDK 提供了完整的命令行工具示例：
-
-### 编译运行
-
-```bash
-cd cmd/example/sdk
-go build -o gogo-cli sdk.go
-```
-
-### 基本用法
-
-```bash
-# 批量端口扫描
-./gogo-cli -i 127.0.0.1/32 -p 80,443,22
-
-# 流式扫描
-./gogo-cli -i 127.0.0.1/32 -p top1000 -s
-
-# 自定义线程数
-./gogo-cli -i 127.0.0.1/32 -t 1000 -p top100
-```
-
-### 命令行参数
-
-- `-i`: 目标 IP/CIDR（必需）
-- `-p`: 端口配置（默认: top1）
-- `-t`: 线程数（默认: 1000）
-- `-s`: 启用流式输出
-- `-h`: 显示帮助
-
-## 注意事项
-
-1. **初始化要求**: 使用 SDK 前必须调用 `Init()` 方法进行初始化
-2. **方法区别**:
-   - `Scan`: 支持 CIDR 网段，使用协程池调度
-   - `ScanOne`: 仅支持单个 IP 和端口，直接调用底层引擎
-3. **权限要求**: 某些扫描功能可能需要管理员权限
-4. **网络环境**: 确保网络连接正常，防火墙允许扫描
-5. **目标合法性**: 仅对授权的目标进行扫描
-6. **资源限制**: 大网段扫描会消耗较多系统资源
-7. **Channel 缓冲**: 流式 API 使用缓冲 channel，如果处理速度过慢可能会丢失结果
-8. **线程数配置**: 合理配置线程数以获得最佳性能
-9. **静默运行**: SDK 内部不会产生控制台输出，所有调试信息通过日志系统记录
-10. **结果输出**: 推荐使用 `result.FullOutput()` 方法获取完整的格式化结果
-
-## 错误处理
-
+**常用方法**：
 ```go
-// 初始化错误处理
-gogoSDK := sdk.NewGogoSDK(pkg.DefaultRunnerOption)
-err := gogoSDK.Init()
-if err != nil {
-    log.Fatalf("SDK 初始化失败: %v", err)
-}
-
-// 批量扫描错误处理
-results, err := gogoSDK.Scan("127.0.0.1/32", "80,443")
-if err != nil {
-    log.Printf("扫描失败: %v", err)
-    return
-}
-
-// 检查是否有结果
-if len(results) == 0 {
-    log.Println("未发现任何开放端口")
-    return
-}
-
-// 处理结果
-for _, result := range results {
-    // 使用 FullOutput() 显示完整结果
-    fmt.Println(result.FullOutput())
-}
-
-// 单个扫描错误处理
-result := gogoSDK.ScanOne("127.0.0.1", "80")
-if result.Status != "" && result.Status != "closed" {
-    fmt.Println(result.FullOutput())
-} else {
-    fmt.Printf("端口关闭: %s:%s\n", result.Ip, result.Port)
-}
+result.FullOutput()   // 完整格式化输出
+result.ColorOutput()  // 彩色输出
+result.JsonOutput()   // JSON 格式
+result.GetTarget()    // 获取目标标识 "ip:port"
+result.GetBaseURL()   // 获取基础 URL
+result.GetURL()       // 获取完整 URL
 ```
 
 ## 完整示例
 
-查看 `cmd/example/sdk/sdk.go` 文件获取完整的使用示例，包含批量扫描模式的演示。
+### 示例 1: 简单端口扫描
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "github.com/chainreactors/gogo/v2/sdk"
+)
+
+func main() {
+    engine := sdk.NewGogoEngine(nil)
+    engine.Init()
+
+    ctx := context.Background()
+    results, _ := engine.Scan(ctx, "127.0.0.1", "80,443,22")
+
+    for _, r := range results {
+        fmt.Printf("[+] %s:%s [%s] %s\n", r.Ip, r.Port, r.Status, r.Title)
+    }
+}
+```
+
+### 示例 2: 网段扫描（流式）
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "time"
+    "github.com/chainreactors/gogo/v2/sdk"
+)
+
+func main() {
+    engine := sdk.NewGogoEngine(nil)
+    engine.SetThreads(1000)
+    engine.Init()
+
+    // 设置 5 分钟超时
+    ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+    defer cancel()
+
+    resultCh, _ := engine.ScanStream(ctx, "192.168.1.0/24", "top100")
+
+    count := 0
+    for result := range resultCh {
+        count++
+        fmt.Printf("[%d] %s:%s [%s] %s\n",
+            count, result.Ip, result.Port, result.Status, result.Title)
+    }
+    fmt.Printf("Total: %d services found\n", count)
+}
+```
+
+### 示例 3: 深度指纹识别
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "github.com/chainreactors/gogo/v2/pkg"
+    "github.com/chainreactors/gogo/v2/sdk"
+)
+
+func main() {
+    // 深度扫描配置
+    opt := &pkg.RunnerOption{
+        VersionLevel: 2,       // 深度指纹识别
+        Delay:        3,
+        Exploit:      "none",
+    }
+
+    engine := sdk.NewGogoEngine(opt)
+    engine.SetThreads(200)
+    engine.Init()
+
+    workflow := &pkg.Workflow{
+        Name:    "deep-scan",
+        IP:      "example.com",
+        Ports:   "80,443,8080,8443",
+        Verbose: 2,
+    }
+
+    ctx := context.Background()
+    results, _ := engine.Workflow(ctx, workflow)
+
+    for _, r := range results {
+        fmt.Printf("\n[+] %s:%s\n", r.Ip, r.Port)
+        fmt.Printf("    Title: %s\n", r.Title)
+        fmt.Printf("    Protocol: %s\n", r.Protocol)
+
+        if len(r.Frameworks) > 0 {
+            fmt.Println("    Frameworks:")
+            for name, frame := range r.Frameworks {
+                fmt.Printf("      - %s: %s\n", name, frame.Version)
+            }
+        }
+    }
+}
+```
+
+### 示例 4: 漏洞检测
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "github.com/chainreactors/gogo/v2/pkg"
+    "github.com/chainreactors/gogo/v2/sdk"
+)
+
+func main() {
+    opt := &pkg.RunnerOption{
+        VersionLevel: 1,
+        Exploit:      "auto",  // 自动漏洞检测
+    }
+
+    engine := sdk.NewGogoEngine(opt)
+    engine.Init()
+
+    workflow := &pkg.Workflow{
+        Name:    "vuln-scan",
+        IP:      "192.168.1.0/24",
+        Ports:   "445,3389",  // SMB 和 RDP
+        Exploit: "auto",
+        Verbose: 1,
+    }
+
+    ctx := context.Background()
+    resultCh, _ := engine.WorkflowStream(ctx, workflow)
+
+    for result := range resultCh {
+        if len(result.Vulns) > 0 {
+            fmt.Printf("[!] %s:%s - Found vulnerabilities:\n", result.Ip, result.Port)
+            for name, vuln := range result.Vulns {
+                fmt.Printf("    - %s: %s\n", name, vuln.Description)
+            }
+        }
+    }
+}
+```
+
+### 示例 5: Context 取消
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    "os/signal"
+    "syscall"
+    "github.com/chainreactors/gogo/v2/sdk"
+)
+
+func main() {
+    engine := sdk.NewGogoEngine(nil)
+    engine.Init()
+
+    // 创建可取消的 context
+    ctx, cancel := context.WithCancel(context.Background())
+    defer cancel()
+
+    // 监听中断信号
+    sigCh := make(chan os.Signal, 1)
+    signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
+
+    go func() {
+        <-sigCh
+        fmt.Println("\n[!] Received interrupt signal, cancelling...")
+        cancel()
+    }()
+
+    // 开始扫描
+    resultCh, _ := engine.ScanStream(ctx, "10.0.0.0/8", "top1")
+
+    count := 0
+    for result := range resultCh {
+        count++
+        fmt.Printf("[%d] %s:%s\n", count, result.Ip, result.Port)
+    }
+
+    fmt.Printf("\nScan finished, found %d results\n", count)
+}
+```
+
+### 示例 6: 多实例共享配置
+
+```go
+package main
+
+import (
+    "context"
+    "github.com/chainreactors/gogo/v2/sdk"
+)
+
+func main() {
+    // 第一个实例初始化指纹库
+    engine1 := sdk.NewGogoEngine(nil)
+    engine1.Init()
+
+    // 第二个实例共享已加载的指纹库
+    engine2 := sdk.NewGogoEngine(nil)
+    engine2.SetThreads(500)
+    // 不需要再次 Init
+
+    ctx := context.Background()
+
+    // 并发使用
+    go engine1.Scan(ctx, "192.168.1.0/24", "80,443")
+    go engine2.Scan(ctx, "192.168.2.0/24", "80,443")
+}
+```
+
+## 高级用法
+
+### 自定义过滤规则
+
+```go
+opt := &pkg.RunnerOption{
+    ScanFilters: [][]string{
+        {"status", "==", "closed"},     // 过滤关闭的端口
+        {"title", "contains", "404"},   // 过滤 404 页面
+    },
+}
+
+engine := sdk.NewGogoEngine(opt)
+```
+
+### 排除 IP 段
+
+```go
+import "github.com/chainreactors/utils"
+
+opt := &pkg.RunnerOption{
+    ExcludeCIDRs: utils.CIDRs{
+        utils.ParseCIDR("192.168.1.100/32"),
+        utils.ParseCIDR("192.168.1.200-210"),
+    },
+}
+
+engine := sdk.NewGogoEngine(opt)
+```
+
+### 隐蔽扫描
+
+```go
+opt := &pkg.RunnerOption{
+    Opsec:  true,  // 启用隐蔽模式
+    Delay:  5,     // 增加超时时间
+}
+
+engine := sdk.NewGogoEngine(opt)
+engine.SetThreads(50)  // 降低并发数
+```
+
+## 性能优化
+
+### 线程数配置建议
+
+| 场景 | 推荐线程数 | 说明 |
+|------|-----------|------|
+| 小网段 (< 256 IP) | 100-300 | 快速扫描 |
+| 中等网段 (256-4096 IP) | 500-1000 | 平衡性能 |
+| 大网段 (> 4096 IP) | 1000-2000 | 高性能 |
+| 外网扫描 | 100-500 | 避免触发防护 |
+| 隐蔽扫描 | 10-50 | 低速扫描 |
+
+### 超时配置
+
+```go
+opt := &pkg.RunnerOption{
+    Delay:      2,  // HTTP 超时（秒）
+    HttpsDelay: 3,  // HTTPS 超时（秒）
+}
+```
+
+### Context 超时
+
+```go
+// 为整个扫描任务设置超时
+ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+defer cancel()
+
+results, _ := engine.Scan(ctx, "192.168.1.0/24", "top1000")
+```
+
+## 注意事项
+
+1. **必须初始化**: 创建 `GogoEngine` 后必须调用 `Init()` 加载指纹库
+2. **Context 管理**: 所有 API 都需要传入 context，建议使用 `WithTimeout` 避免无限等待
+3. **共享状态**: 多个 `GogoEngine` 实例共享已加载的指纹库
+4. **自动清理**: Stream 模式会自动清理资源
+5. **权限要求**: ICMP 扫描需要管理员权限
+6. **合法性**: 仅对授权的目标进行扫描
+
+## 与 Spray SDK 对比
+
+| 特性 | GoGo SDK | Spray SDK |
+|------|----------|-----------|
+| **用途** | 端口扫描 + 服务识别 | Web 路径扫描 + 指纹识别 |
+| **输入** | IP/CIDR + 端口 | URL + 字典 |
+| **协议** | TCP/UDP/ICMP | HTTP/HTTPS |
+| **底层 API** | `ScanStream` / `WorkflowStream` | `CheckStream` / `BruteStream` |
+| **上层 API** | `Scan` / `Workflow` | `Check` / `Brute` |
+| **单目标** | `ScanOne` | - |
+| **配置** | `RunnerOption` / `Workflow` | `core.Option` |
+
+**共同点**：
+- ✅ Stream API 为底层，Sync API 为上层封装
+- ✅ 所有 API 都支持 context
+- ✅ 共享持久化状态（指纹库等）
+- ✅ 统一的命名规范
 
 ## 许可证
 
-本项目基于原 gogo 项目的许可证。
+MIT License

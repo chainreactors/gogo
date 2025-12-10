@@ -1,6 +1,7 @@
 package sdk
 
 import (
+	"context"
 	"fmt"
 	"sync"
 	"sync/atomic"
@@ -17,15 +18,6 @@ import (
 type GogoEngine struct {
 	Threads int // 线程池大小，默认为 0 表示使用系统默认值
 	RunOpt  *pkg.RunnerOption
-}
-
-type TargetConfig struct {
-	IP   string
-	Port string
-}
-
-func (tc *TargetConfig) NewResult() *pkg.Result {
-	return pkg.NewResult(tc.IP, tc.Port)
 }
 
 func (sdk *GogoEngine) Init() error {
@@ -45,10 +37,13 @@ func (sdk *GogoEngine) Init() error {
 	return nil
 }
 
-// NewGogoSDK 创建新的 GoGo SDK 实例
-func NewGogoSDK(opt *pkg.RunnerOption) *GogoEngine {
+// NewGogoEngine 创建新的 GoGo SDK 实例
+func NewGogoEngine(opt *pkg.RunnerOption) *GogoEngine {
+	if opt == nil {
+		opt = pkg.DefaultRunnerOption
+	}
 	return &GogoEngine{
-		Threads: 1000, // 0 表示使用系统默认值
+		Threads: 1000,
 		RunOpt:  opt,
 	}
 }
@@ -59,53 +54,37 @@ func (sdk *GogoEngine) SetThreads(threads int) {
 }
 
 // ScanOne 单个目标扫描，返回单个结果
-func (sdk *GogoEngine) ScanOne(ip, port string) *parsers.GOGOResult {
+func (sdk *GogoEngine) ScanOne(ctx context.Context, ip, port string) *parsers.GOGOResult {
 	result := pkg.NewResult(ip, port)
+
+	// 检查 context 是否已取消
+	select {
+	case <-ctx.Done():
+		return result.GOGOResult
+	default:
+	}
+
 	engine.Dispatch(sdk.RunOpt, result)
 	return result.GOGOResult
 }
 
-// Scan 批量端口扫描，返回结果切片
-func (sdk *GogoEngine) Scan(ip, ports string) ([]*parsers.GOGOResult, error) {
+// ScanStream 批量端口扫描流式模式（底层API），返回实时结果 channel
+func (sdk *GogoEngine) ScanStream(ctx context.Context, ip, ports string) (<-chan *parsers.GOGOResult, error) {
 	workflow := &pkg.Workflow{
 		Name:        "port-scan",
 		Description: "端口扫描",
 		IP:          ip,
 		Ports:       ports,
 		Exploit:     "none",
-		Verbose:     0, // 基础扫描
+		Verbose:     0,
 	}
 
-	return sdk.executeWorkflow(workflow)
+	return sdk.workflowStream(ctx, workflow)
 }
 
-// ScanStream 批量端口扫描流式模式，返回实时结果 channel
-func (sdk *GogoEngine) ScanStream(ip, ports string) (<-chan *parsers.GOGOResult, error) {
-	workflow := &pkg.Workflow{
-		Name:        "port-scan",
-		Description: "端口扫描",
-		IP:          ip,
-		Ports:       ports,
-		Exploit:     "none",
-		Verbose:     0, // 基础扫描
-	}
-
-	return sdk.executeWorkflowStream(workflow)
-}
-
-// WorkflowScan 自定义工作流扫描，返回结果切片
-func (sdk *GogoEngine) WorkflowScan(workflow *pkg.Workflow) ([]*parsers.GOGOResult, error) {
-	return sdk.executeWorkflow(workflow)
-}
-
-// WorkflowScanStream 自定义工作流扫描流式模式，返回实时结果 channel
-func (sdk *GogoEngine) WorkflowScanStream(workflow *pkg.Workflow) (<-chan *parsers.GOGOResult, error) {
-	return sdk.executeWorkflowStream(workflow)
-}
-
-// executeWorkflow 执行工作流，返回所有结果
-func (sdk *GogoEngine) executeWorkflow(workflow *pkg.Workflow) ([]*parsers.GOGOResult, error) {
-	resultCh, err := sdk.executeWorkflowStream(workflow)
+// Scan 批量端口扫描，返回结果切片（基于 ScanStream）
+func (sdk *GogoEngine) Scan(ctx context.Context, ip, ports string) ([]*parsers.GOGOResult, error) {
+	resultCh, err := sdk.ScanStream(ctx, ip, ports)
 	if err != nil {
 		return nil, err
 	}
@@ -118,12 +97,32 @@ func (sdk *GogoEngine) executeWorkflow(workflow *pkg.Workflow) ([]*parsers.GOGOR
 	return results, nil
 }
 
-// executeWorkflowStream 执行工作流的核心函数，返回结果 channel
-func (sdk *GogoEngine) executeWorkflowStream(workflow *pkg.Workflow) (<-chan *parsers.GOGOResult, error) {
+// WorkflowStream 自定义工作流扫描流式模式（底层API），返回实时结果 channel
+func (sdk *GogoEngine) WorkflowStream(ctx context.Context, workflow *pkg.Workflow) (<-chan *parsers.GOGOResult, error) {
+	return sdk.workflowStream(ctx, workflow)
+}
+
+// Workflow 自定义工作流扫描，返回结果切片（基于 WorkflowStream）
+func (sdk *GogoEngine) Workflow(ctx context.Context, workflow *pkg.Workflow) ([]*parsers.GOGOResult, error) {
+	resultCh, err := sdk.WorkflowStream(ctx, workflow)
+	if err != nil {
+		return nil, err
+	}
+
+	var results []*parsers.GOGOResult
+	for result := range resultCh {
+		results = append(results, result)
+	}
+
+	return results, nil
+}
+
+// workflowStream 执行工作流的核心函数，返回结果 channel
+func (sdk *GogoEngine) workflowStream(ctx context.Context, workflow *pkg.Workflow) (<-chan *parsers.GOGOResult, error) {
 	logs.Log.Important("workflow " + workflow.Name + " starting")
 
 	// 创建基础配置
-	baseConfig := pkg.NewDefaultConfig(pkg.DefaultRunnerOption)
+	baseConfig := pkg.NewDefaultConfig(sdk.RunOpt)
 	config := workflow.PrepareConfig(baseConfig)
 
 	// 初始化配置
@@ -152,7 +151,15 @@ func (sdk *GogoEngine) executeWorkflowStream(workflow *pkg.Workflow) (<-chan *pa
 		scanPool, _ := ants.NewPoolWithFunc(preparedConfig.Threads, func(i interface{}) {
 			defer wg.Done()
 
-			result := i.(*TargetConfig).NewResult()
+			// 检查 context 是否已取消
+			select {
+			case <-ctx.Done():
+				return
+			default:
+			}
+
+			ipPort := i.([]string)
+			result := pkg.NewResult(ipPort[0], ipPort[1])
 
 			// 调用扫描引擎
 			engine.Dispatch(preparedConfig.RunnerOpt, result)
@@ -162,6 +169,8 @@ func (sdk *GogoEngine) executeWorkflowStream(workflow *pkg.Workflow) (<-chan *pa
 				// 发送结果到 channel
 				select {
 				case resultCh <- result.GOGOResult:
+				case <-ctx.Done():
+					return
 				default:
 					logs.Log.Debugf("result channel full, dropping result for %s", result.GetTarget())
 				}
@@ -172,18 +181,23 @@ func (sdk *GogoEngine) executeWorkflowStream(workflow *pkg.Workflow) (<-chan *pa
 		// 扫描目标
 		for _, cidr := range preparedConfig.CIDRs {
 			for ip := range cidr.Range() {
+				// 检查 context 是否已取消
+				select {
+				case <-ctx.Done():
+					logs.Log.Debug("workflow cancelled by context")
+					wg.Wait()
+					return
+				default:
+				}
+
 				ipStr := ip.String()
 				if ip.Ver == 6 {
 					ipStr = "[" + ipStr + "]"
 				}
 
 				for _, port := range preparedConfig.PortList {
-					target := &TargetConfig{
-						IP:   ipStr,
-						Port: port,
-					}
 					wg.Add(1)
-					_ = scanPool.Invoke(target)
+					_ = scanPool.Invoke([]string{ipStr, port})
 				}
 			}
 		}
