@@ -9,7 +9,7 @@ require (
 	github.com/chainreactors/neutron v0.0.0-20250113061151-32771f256b1f
 	github.com/chainreactors/parsers v0.0.0-20251202162218-4b2258465d0a
 	github.com/chainreactors/proxyclient v1.0.3
-	github.com/chainreactors/utils v0.0.0-20250831165528-f06246b0f311
+	github.com/chainreactors/utils v0.0.0-20251216161625-70054cf04e88
 	github.com/jessevdk/go-flags v1.6.1
 	github.com/panjf2000/ants/v2 v2.9.1
 	github.com/stretchr/testify v1.10.0
