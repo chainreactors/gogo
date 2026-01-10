@@ -1,11 +1,11 @@
 package pkg
 
 import (
-	"github.com/chainreactors/fingers/resources"
-	"gopkg.in/yaml.v3"
 	"strings"
+	"gopkg.in/yaml.v3"
 
 	"github.com/chainreactors/fingers/fingers"
+	"github.com/chainreactors/fingers/resources"
 	"github.com/chainreactors/parsers"
 	"github.com/chainreactors/utils"
 	"github.com/chainreactors/utils/iutils"
@@ -22,9 +22,18 @@ var (
 func LoadFinger(fileutils []string) error {
 	var err error
 	resources.PrePort = utils.PrePort
-	resources.FingersHTTPData = LoadConfig("http")
-	resources.FingersSocketData = LoadConfig("socket")
-	FingerEngine, err = fingers.NewFingersEngine()
+
+	httpfs, err := fingers.LoadFingers(LoadConfig("http"))
+	if err != nil {
+		return err
+	}
+
+	socketfs, err := fingers.LoadFingers(LoadConfig("socket"))
+	if err != nil {
+		return err
+	}
+
+	FingerEngine, err = fingers.NewEngine(httpfs, socketfs)
 	if err != nil {
 		return err
 	}

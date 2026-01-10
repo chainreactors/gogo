@@ -1,12 +1,12 @@
 module github.com/chainreactors/gogo/v2
 
-go 1.10
+go 1.11
 
 require (
 	github.com/M09ic/go-ntlmssp v0.0.0-20230312133735-dcccd454dfe0
-	github.com/chainreactors/fingers v1.0.2-0.20251202165109-ce668e80a672
+	github.com/chainreactors/fingers v1.1.1-0.20260110164933-65840487c1eb
 	github.com/chainreactors/logs v0.0.0-20241115105204-6132e39f5261
-	github.com/chainreactors/neutron v0.0.0-20250113061151-32771f256b1f
+	github.com/chainreactors/neutron v0.0.0-20251216154716-7c28cb6fdf03
 	github.com/chainreactors/parsers v0.0.0-20251202162218-4b2258465d0a
 	github.com/chainreactors/proxyclient v1.0.3
 	github.com/chainreactors/utils v0.0.0-20251216161625-70054cf04e88
