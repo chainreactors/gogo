@@ -1,0 +1,92 @@
+name: nightly
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  nightly:
+    runs-on: ubuntu-22.04
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+          submodules: recursive
+      -
+        name: Set nightly tag
+        run: |
+          DATE=$(date -u +%Y%m%d)
+          echo "DATE=$DATE" >> $GITHUB_ENV
+          echo "TAG=nightly-$DATE" >> $GITHUB_ENV
+          echo "RELEASE_NAME=Nightly $DATE" >> $GITHUB_ENV
+      -
+        name: Create or update nightly tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -f "$TAG"
+          git push --force origin "$TAG"
+      -
+        name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.17
+      -
+        name: Install upx
+        run: sudo apt install upx zip -y
+        continue-on-error: true
+      -
+        name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v5
+        with:
+          distribution: goreleaser
+          version: latest
+          args: release --rm-dist --skip-validate
+          workdir: v2/
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GOPATH: "/home/runner/go"
+
+      - name: cat mod
+        run: cat v2/go.mod
+
+      - name: Set up Go 1.11
+        uses: actions/setup-go@v3
+        with:
+          go-version: '1.11'
+
+      - name: Compile for Windows x64
+        run: go build -o dist/gogo_windowsxp_amd64.exe -ldflags "-s -w -X 'github.com/chainreactors/gogo/v2/internal/core.ver=${{ env.TAG }}'" -tags="forceposix" -asmflags "all=-trimpath=${{ env.GOPATH }}" -gcflags "all=-trimpath=${{ env.GOPATH }}" .
+        env:
+          GOOS: windows
+          GOARCH: amd64
+        working-directory: v2
+
+      - name: Compile for Windows x86
+        run: go build -o dist/gogo_windowsxp_386.exe -ldflags "-s -w -X 'github.com/chainreactors/gogo/v2/internal/core.ver=${{ env.TAG }}'"  -tags="forceposix" -asmflags "all=-trimpath=${{ env.GOPATH }}" -gcflags "all=-trimpath=${{ env.GOPATH }}" .
+        env:
+          GOOS: windows
+          GOARCH: '386'
+        working-directory: v2
+
+      - name: Zip files
+        run: zip -r v2/dist/gogo_archive.zip v2/dist/gogo* tools/* README.md
+
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: v2/dist/gogo*
+          tag: ${{ env.TAG }}
+          overwrite: true
+          file_glob: true
+          prerelease: true
+          release_name: ${{ env.RELEASE_NAME }}
