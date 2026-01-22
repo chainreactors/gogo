@@ -25,7 +25,7 @@ jobs:
         run: |
           DATE=$(date -u +%Y%m%d)
           echo "DATE=$DATE" >> $GITHUB_ENV
-          echo "TAG=nightly-$DATE" >> $GITHUB_ENV
+          echo "TAG=v0.0.0-nightly.$DATE" >> $GITHUB_ENV
           echo "RELEASE_NAME=Nightly $DATE" >> $GITHUB_ENV
       -
         name: Create or update nightly tag
@@ -49,7 +49,7 @@ jobs:
         with:
           distribution: goreleaser
           version: latest
-          args: release --rm-dist --skip-validate
+          args: release --clean --skip=validate
           workdir: v2/
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
