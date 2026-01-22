@@ -4,12 +4,13 @@ go 1.11
 
 require (
 	github.com/M09ic/go-ntlmssp v0.0.0-20230312133735-dcccd454dfe0
-	github.com/chainreactors/fingers v1.1.1-0.20260110164933-65840487c1eb
+	github.com/chainreactors/fingers v1.1.1-0.20260122025044-ef3ff90e9df3
 	github.com/chainreactors/logs v0.0.0-20241115105204-6132e39f5261
 	github.com/chainreactors/neutron v0.0.0-20251216154716-7c28cb6fdf03
 	github.com/chainreactors/parsers v0.0.0-20251202162218-4b2258465d0a
 	github.com/chainreactors/proxyclient v1.0.3
 	github.com/chainreactors/utils v0.0.0-20251216161625-70054cf04e88
+	github.com/google/btree v1.0.0 // indirect
 	github.com/jessevdk/go-flags v1.6.1
 	github.com/panjf2000/ants/v2 v2.9.1
 	github.com/stretchr/testify v1.10.0

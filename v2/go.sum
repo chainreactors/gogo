@@ -90,6 +90,8 @@ github.com/chainreactors/files v0.0.0-20240716182835-7884ee1e77f0/go.mod h1:NSxG
 github.com/chainreactors/fingers v0.0.0-20240702104653-a66e34aa41df/go.mod h1:l8AO6ZbIL8WQ8PkihCK/MD6Iww/O+LY/osAhRJjThs4=
 github.com/chainreactors/fingers v1.1.1-0.20260110164933-65840487c1eb h1:9u/2GbuFjli7cUHBCTu3nkOc3MFVdgD9dZwSP4X/BgM=
 github.com/chainreactors/fingers v1.1.1-0.20260110164933-65840487c1eb/go.mod h1:yQfW4ertJoAux3KZd6e8ijcSVWfIdHOocdTBcQSj9Mw=
+github.com/chainreactors/fingers v1.1.1-0.20260122025044-ef3ff90e9df3 h1:9pejSMCnQa/43rGDierY1s9welnmD9pTiChcsln7tS8=
+github.com/chainreactors/fingers v1.1.1-0.20260122025044-ef3ff90e9df3/go.mod h1:yQfW4ertJoAux3KZd6e8ijcSVWfIdHOocdTBcQSj9Mw=
 github.com/chainreactors/logs v0.0.0-20240207121836-c946f072f81f/go.mod h1:6Mv6W70JrtL6VClulZhmMRZnoYpcTahcDTKLMNEjK0o=
 github.com/chainreactors/logs v0.0.0-20241030063019-8ca66a3ee307/go.mod h1:6Mv6W70JrtL6VClulZhmMRZnoYpcTahcDTKLMNEjK0o=
 github.com/chainreactors/logs v0.0.0-20241115105204-6132e39f5261 h1:gcRLCAF4ANvltkdh7cnLFCNrogwl0Qh8oNaYrKHMyz4=
@@ -106,6 +108,7 @@ github.com/chainreactors/utils v0.0.0-20240716182459-e85f2b01ee16/go.mod h1:LajX
 github.com/chainreactors/utils v0.0.0-20250831165528-f06246b0f311/go.mod h1:LajXuvESQwP+qCMAvlcoSXppQCjuLlBrnQpu9XQ1HtU=
 github.com/chainreactors/utils v0.0.0-20251216161625-70054cf04e88 h1:gHLGN6CVu0+I3lyO2mxFXa2knbeVFqtbPf9woFuAW04=
 github.com/chainreactors/utils v0.0.0-20251216161625-70054cf04e88/go.mod h1:LajXuvESQwP+qCMAvlcoSXppQCjuLlBrnQpu9XQ1HtU=
+github.com/chainreactors/words v0.0.0-20241002061906-25d8893158d9 h1:BXaPgD1pfBPvFSy9DHZDxW0bHX96ONZT6HW+WbXlZCk=
 github.com/chainreactors/words v0.0.0-20241002061906-25d8893158d9/go.mod h1:zfz367PUmyaX6oAqV9SktVqyRXKlEh0sel9Wsq9dd2c=
 github.com/chzyer/logex v1.1.10/go.mod h1:+Ywpsq7O8HXn0nuIou7OrIPyXbp3wmkHB+jjWRnGsAI=
 github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e/go.mod h1:nSuG5e5PlCu98SY8svDHJxuZscDgtXS6KTTbou5AhLI=
@@ -134,6 +137,7 @@ github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSs
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/dgrijalva/jwt-go/v4 v4.0.0-preview1/go.mod h1:+hnT3ywWDTAFrW5aE+u2Sa/wT555ZqwoCS+pk3p6ry4=
+github.com/dlclark/regexp2 v1.11.5 h1:Q/sSnsKerHeCkc/jSTNq1oCm7KiVgUMZRDUoRu0JQZQ=
 github.com/dlclark/regexp2 v1.11.5/go.mod h1:DHkYz0B9wPfa6wondMfaivmHpzrQ3v9q8cnmRbL6yW8=
 github.com/envoyproxy/go-control-plane v0.9.0/go.mod h1:YTl/9mNaCwkRvm6d1a2C3ymFceY/DCBVvsKhRF0iEA4=
 github.com/envoyproxy/go-control-plane v0.9.1-0.20191026205805-5f8ba28d4473/go.mod h1:YTl/9mNaCwkRvm6d1a2C3ymFceY/DCBVvsKhRF0iEA4=
@@ -354,6 +358,7 @@ github.com/pelletier/go-toml v1.9.4/go.mod h1:u1nR/EPcESfeI/szUZKdtJ0xRNbUoANCko
 github.com/pkg/diff v0.0.0-20210226163009-20ebb0f2a09e/go.mod h1:pJLUxLENpZxwdsKMEsNbx1VGcRFpLqf3715MtcvvzbA=
 github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
+github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/sftp v1.10.1/go.mod h1:lYOWFsE0bwd1+KfKJaKeuokY15vzFx25BLbzYYoAxZI=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
