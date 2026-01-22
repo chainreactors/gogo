@@ -260,10 +260,8 @@ func (config *Config) InitFile() error {
 
 		if config.FileOutputf == "jl" || config.FileOutputf == "jsonlines" {
 			config.File.WriteLine(config.ToJson("scan"))
-			config.File.ClosedAppend = "[\"done\"]\n"
 		} else if config.FileOutputf == SUPERSMARTB {
 			config.File.WriteLine(config.ToJson("smart"))
-			config.File.ClosedAppend = "[\"done\"]\n"
 		} else if config.FileOutputf == "csv" {
 			config.File.WriteString("ip,port,url,status,title,host,language,midware,frame,vuln,extract\n")
 		}
@@ -276,7 +274,6 @@ func (config *Config) InitFile() error {
 			return err
 		}
 		config.SmartBFile.WriteLine(config.ToJson("smartb"))
-		config.SmartBFile.ClosedAppend = "[\"done\"]\n"
 	}
 
 	if config.SmartCFilename != "" {
@@ -285,7 +282,6 @@ func (config *Config) InitFile() error {
 			return err
 		}
 		config.SmartCFile.WriteLine(config.ToJson("smartc"))
-		config.SmartCFile.ClosedAppend = "[\"done\"]\n"
 	}
 
 	if config.AlivedFilename != "" {
@@ -294,7 +290,6 @@ func (config *Config) InitFile() error {
 			return err
 		}
 		config.AliveFile.WriteLine(config.ToJson("alive"))
-		config.AliveFile.ClosedAppend = "[\"done\"]\n"
 	}
 
 	return nil

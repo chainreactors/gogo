@@ -347,55 +347,46 @@ func parseSegment(segment [][]byte) interface{} {
 }
 
 func parseSmartResultData(config *Config, lines [][]byte) *SmartResult {
-	var res bytes.Buffer
-
-	for i, line := range lines {
-		if i > 0 {
-			res.WriteByte(',')
+	data := make(map[string][]string)
+	for _, line := range lines {
+		line = bytes.TrimSpace(line)
+		if len(line) == 0 || bytes.Equal(line, []byte(`["done"]`)) {
+			continue
 		}
-		// 移除可能的方括号
-		if len(line) > 0 && line[0] == '[' {
-			line = line[1 : len(line)-1]
+
+		var chunk map[string][]string
+		if err := json.Unmarshal(line, &chunk); err != nil {
+			fmt.Println("[-] json error, " + err.Error())
+			return nil
 		}
-		res.Write(line)
+		for k, v := range chunk {
+			data[k] = v
+		}
 	}
 
-	data, err := parseSmartResult(res.Bytes())
-	if err != nil {
-		fmt.Println("[-] json error, " + err.Error())
-		return nil
-	}
-
-	return &SmartResult{
-		Config: config,
-		Data:   data,
-	}
+	return &SmartResult{Config: config, Data: data}
 }
 
 func parseScanResultData(config *Config, lines [][]byte) *ResultsData {
-	var res bytes.Buffer
-	res.WriteString("[")
-
-	for i, line := range lines {
-		if i > 0 {
-			res.WriteByte(',')
+	var data parsers.GOGOResults
+	for _, line := range lines {
+		line = bytes.TrimSpace(line)
+		if len(line) == 0 || bytes.Equal(line, []byte(`["done"]`)) {
+			continue
 		}
-		res.Write(line)
-	}
-	res.WriteString("]")
 
-	data, err := parseResult(res.Bytes())
-	if err != nil {
-		fmt.Println("[-] json error, " + err.Error())
-		return nil
+		var result parsers.GOGOResult
+		if err := json.Unmarshal(line, &result); err != nil {
+			fmt.Println("[-] json error, " + err.Error())
+			return nil
+		}
+		data = append(data, &result)
 	}
 
-	return &ResultsData{
-		&parsers.GOGOData{
-			Config: config.GOGOConfig,
-			Data:   data,
-		},
-	}
+	return &ResultsData{&parsers.GOGOData{
+		Config: config.GOGOConfig,
+		Data:   data,
+	}}
 }
 
 func parseLegacyFormat(content []byte) interface{} {
