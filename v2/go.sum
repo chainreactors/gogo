@@ -88,16 +88,14 @@ github.com/chainreactors/files v0.0.0-20231123083421-cea5b4ad18a8/go.mod h1:/Xa9
 github.com/chainreactors/files v0.0.0-20240716182835-7884ee1e77f0 h1:cU3sGEODXZsUZGBXfnz0nyxF6+37vA+ZGDx6L/FKN4o=
 github.com/chainreactors/files v0.0.0-20240716182835-7884ee1e77f0/go.mod h1:NSxGNMRWryAyrDzZpVwmujI22wbGw6c52bQOd5zEvyU=
 github.com/chainreactors/fingers v0.0.0-20240702104653-a66e34aa41df/go.mod h1:l8AO6ZbIL8WQ8PkihCK/MD6Iww/O+LY/osAhRJjThs4=
-github.com/chainreactors/fingers v1.1.1-0.20260110164933-65840487c1eb h1:9u/2GbuFjli7cUHBCTu3nkOc3MFVdgD9dZwSP4X/BgM=
-github.com/chainreactors/fingers v1.1.1-0.20260110164933-65840487c1eb/go.mod h1:yQfW4ertJoAux3KZd6e8ijcSVWfIdHOocdTBcQSj9Mw=
-github.com/chainreactors/fingers v1.1.1-0.20260122025044-ef3ff90e9df3 h1:9pejSMCnQa/43rGDierY1s9welnmD9pTiChcsln7tS8=
-github.com/chainreactors/fingers v1.1.1-0.20260122025044-ef3ff90e9df3/go.mod h1:yQfW4ertJoAux3KZd6e8ijcSVWfIdHOocdTBcQSj9Mw=
+github.com/chainreactors/fingers v1.1.2-0.20260203043619-4f90dd60c787 h1:y5iwL9f4yWGgju7bXfogIyViV4ArQu6ZjjlKf05zVSw=
+github.com/chainreactors/fingers v1.1.2-0.20260203043619-4f90dd60c787/go.mod h1:owlti2VYK2YpnLqdZ1HWACK4upuyFgjDOfSdm36pAjw=
 github.com/chainreactors/logs v0.0.0-20240207121836-c946f072f81f/go.mod h1:6Mv6W70JrtL6VClulZhmMRZnoYpcTahcDTKLMNEjK0o=
 github.com/chainreactors/logs v0.0.0-20241030063019-8ca66a3ee307/go.mod h1:6Mv6W70JrtL6VClulZhmMRZnoYpcTahcDTKLMNEjK0o=
 github.com/chainreactors/logs v0.0.0-20241115105204-6132e39f5261 h1:gcRLCAF4ANvltkdh7cnLFCNrogwl0Qh8oNaYrKHMyz4=
 github.com/chainreactors/logs v0.0.0-20241115105204-6132e39f5261/go.mod h1:6Mv6W70JrtL6VClulZhmMRZnoYpcTahcDTKLMNEjK0o=
-github.com/chainreactors/neutron v0.0.0-20251216154716-7c28cb6fdf03 h1:blvDRzJnh6HB15hDFXqze5cF6LPJVOB5OFk610ZewLY=
-github.com/chainreactors/neutron v0.0.0-20251216154716-7c28cb6fdf03/go.mod h1:CktNFh1I1sNwFI9Ml+t0X/uuEoO4eAW5Dmb/cuzV8BY=
+github.com/chainreactors/neutron v0.0.0-20260203032004-95c9e8431214 h1:jCYHc6bfMhmXZYcwlkCLO5HAmNxEfnNHKnph7/Pd6iE=
+github.com/chainreactors/neutron v0.0.0-20260203032004-95c9e8431214/go.mod h1:CktNFh1I1sNwFI9Ml+t0X/uuEoO4eAW5Dmb/cuzV8BY=
 github.com/chainreactors/parsers v0.0.0-20251202162218-4b2258465d0a h1:rv5QkkR8/wgeFrqKqXYdfW3afYIzQGXeyk/DU0Cd/dQ=
 github.com/chainreactors/parsers v0.0.0-20251202162218-4b2258465d0a/go.mod h1:7rXdYz6jrdjF0WUH1ICcAXKIKKjKmJo2PU8u43V7jkA=
 github.com/chainreactors/proxyclient v1.0.3 h1:afnymFICAEqzG4rVMMJhd4Tqrx6LfTssUbo+T8P52vs=
@@ -108,7 +106,6 @@ github.com/chainreactors/utils v0.0.0-20240716182459-e85f2b01ee16/go.mod h1:LajX
 github.com/chainreactors/utils v0.0.0-20250831165528-f06246b0f311/go.mod h1:LajXuvESQwP+qCMAvlcoSXppQCjuLlBrnQpu9XQ1HtU=
 github.com/chainreactors/utils v0.0.0-20251216161625-70054cf04e88 h1:gHLGN6CVu0+I3lyO2mxFXa2knbeVFqtbPf9woFuAW04=
 github.com/chainreactors/utils v0.0.0-20251216161625-70054cf04e88/go.mod h1:LajXuvESQwP+qCMAvlcoSXppQCjuLlBrnQpu9XQ1HtU=
-github.com/chainreactors/words v0.0.0-20241002061906-25d8893158d9 h1:BXaPgD1pfBPvFSy9DHZDxW0bHX96ONZT6HW+WbXlZCk=
 github.com/chainreactors/words v0.0.0-20241002061906-25d8893158d9/go.mod h1:zfz367PUmyaX6oAqV9SktVqyRXKlEh0sel9Wsq9dd2c=
 github.com/chzyer/logex v1.1.10/go.mod h1:+Ywpsq7O8HXn0nuIou7OrIPyXbp3wmkHB+jjWRnGsAI=
 github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e/go.mod h1:nSuG5e5PlCu98SY8svDHJxuZscDgtXS6KTTbou5AhLI=
@@ -358,7 +355,6 @@ github.com/pelletier/go-toml v1.9.4/go.mod h1:u1nR/EPcESfeI/szUZKdtJ0xRNbUoANCko
 github.com/pkg/diff v0.0.0-20210226163009-20ebb0f2a09e/go.mod h1:pJLUxLENpZxwdsKMEsNbx1VGcRFpLqf3715MtcvvzbA=
 github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
-github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/sftp v1.10.1/go.mod h1:lYOWFsE0bwd1+KfKJaKeuokY15vzFx25BLbzYYoAxZI=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
