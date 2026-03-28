@@ -1,6 +1,6 @@
 module github.com/chainreactors/gogo/v2
 
-go 1.11
+go 1.21
 
 require (
 	github.com/M09ic/go-ntlmssp v0.0.0-20230312133735-dcccd454dfe0
