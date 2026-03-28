@@ -15,14 +15,39 @@ import (
 	"github.com/chainreactors/utils"
 )
 
+type sortableIP struct {
+	raw    string
+	parsed *utils.IP
+}
+
 func sortIP(ips []string) []string {
-	sort.Slice(ips, func(i, j int) bool {
-		if utils.ParseIP(ips[i]).Compare(utils.ParseIP(ips[j])) < 0 {
-			return true
-		} else {
+	parsedIPs := make([]sortableIP, len(ips))
+	for i, ip := range ips {
+		parsedIPs[i] = sortableIP{
+			raw:    ip,
+			parsed: utils.ParseIP(ip),
+		}
+	}
+
+	sort.Slice(parsedIPs, func(i, j int) bool {
+		left := parsedIPs[i].parsed
+		right := parsedIPs[j].parsed
+
+		switch {
+		case left == nil && right == nil:
+			return parsedIPs[i].raw < parsedIPs[j].raw
+		case left == nil:
 			return false
+		case right == nil:
+			return true
+		default:
+			return left.Compare(right) < 0
 		}
 	})
+
+	for i := range parsedIPs {
+		ips[i] = parsedIPs[i].raw
+	}
 	return ips
 }
 
@@ -88,7 +113,7 @@ func (rd *ResultsData) GetConfig() *Config {
 }
 
 func (rd *ResultsData) groupByIP() map[string]PortMapResult {
-	pfs := make(map[string]PortMapResult)
+	pfs := make(map[string]PortMapResult, len(rd.Data))
 	for _, result := range rd.Data {
 		if pfs[result.Ip] == nil {
 			pfs[result.Ip] = make(PortMapResult)
@@ -110,69 +135,91 @@ func (rd *ResultsData) groupBySortedIP() (map[string]PortMapResult, []string) {
 }
 
 func (rd *ResultsData) ToFormat(isColor bool) string {
-	var s string
-
-	// 创建一个映射来跟踪已处理的IP:端口组合
-	seen := make(map[string]bool)
-
 	pfs, ips := rd.groupBySortedIP()
-	// 排序
+	var s strings.Builder
+	s.Grow(len(rd.Data) * 192)
 
 	for _, ip := range ips {
-		wininfo := pfs[ip].getWindowsInfo()
-		s += fmt.Sprintf("[+] %s %s\n", ip, wininfo.toString())
+		imap := pfs[ip]
+		wininfo := imap.getWindowsInfo()
+		s.WriteString("[+] ")
+		s.WriteString(ip)
+		s.WriteByte(' ')
+		s.WriteString(wininfo.toString())
+		s.WriteByte('\n')
 
-		// 为了有序输出，先收集并排序端口
-		var ports []string
-		for port := range pfs[ip] {
+		ports := make([]string, 0, len(imap))
+		for port := range imap {
 			ports = append(ports, port)
 		}
 		sort.Strings(ports)
 
 		for _, port := range ports {
-			p := pfs[ip][port]
-			// 跳过OXID与NetBios
+			p := imap[port]
 			if p.Port == "icmp" {
 				continue
 			}
 
-			// 创建唯一键以检测重复
-			key := fmt.Sprintf("%s:%s", ip, port)
-			if seen[key] {
-				continue
-			}
-			seen[key] = true
-
 			if isColor {
-				// 颜色输出
-				url := fmt.Sprintf("%s://%s:%s", p.Protocol, ip, port)
-				s += fmt.Sprintf("\t%s\t%s\t%s\t%s [%s] %s %s %s\n",
-					GreenLine(url),
-					p.Midware,
-					p.FramesColorString(),
-					Cyan(p.Host),
-					Yellow(p.Status),
-					Blue(p.Title),
-					Red(p.Vulns.String()),
-					Blue(p.GetExtractStat()),
-				)
+				writeColorResultLine(&s, p, ip, port)
 			} else {
-				s += fmt.Sprintf("\t%s://%s:%s\t%s\t%s\t%s [%s] %s %s %s\n",
-					p.Protocol,
-					ip,
-					port,
-					p.Midware,
-					p.Frameworks.String(),
-					p.Host,
-					p.Status,
-					p.Title,
-					p.Vulns.String(),
-					p.GetExtractStat(),
-				)
+				writePlainResultLine(&s, p, ip, port)
 			}
 		}
 	}
-	return s
+	return s.String()
+}
+
+func appendBaseURL(builder *strings.Builder, protocol, ip, port string) {
+	builder.WriteString(protocol)
+	builder.WriteString("://")
+	builder.WriteString(ip)
+	builder.WriteByte(':')
+	builder.WriteString(port)
+}
+
+func writePlainResultLine(builder *strings.Builder, result *parsers.GOGOResult, ip, port string) {
+	builder.WriteByte('\t')
+	appendBaseURL(builder, result.Protocol, ip, port)
+	builder.WriteByte('\t')
+	builder.WriteString(result.Midware)
+	builder.WriteByte('\t')
+	builder.WriteString(result.Frameworks.String())
+	builder.WriteByte('\t')
+	builder.WriteString(result.Host)
+	builder.WriteString(" [")
+	builder.WriteString(result.Status)
+	builder.WriteString("] ")
+	builder.WriteString(result.Title)
+	builder.WriteByte(' ')
+	builder.WriteString(result.Vulns.String())
+	builder.WriteByte(' ')
+	builder.WriteString(result.GetExtractStat())
+	builder.WriteByte('\n')
+}
+
+func writeColorResultLine(builder *strings.Builder, result *parsers.GOGOResult, ip, port string) {
+	var url strings.Builder
+	url.Grow(len(result.Protocol) + len(ip) + len(port) + 4)
+	appendBaseURL(&url, result.Protocol, ip, port)
+
+	builder.WriteByte('\t')
+	builder.WriteString(GreenLine(url.String()))
+	builder.WriteByte('\t')
+	builder.WriteString(result.Midware)
+	builder.WriteByte('\t')
+	builder.WriteString(result.FramesColorString())
+	builder.WriteByte('\t')
+	builder.WriteString(Cyan(result.Host))
+	builder.WriteString(" [")
+	builder.WriteString(Yellow(result.Status))
+	builder.WriteString("] ")
+	builder.WriteString(Blue(result.Title))
+	builder.WriteByte(' ')
+	builder.WriteString(Red(result.Vulns.String()))
+	builder.WriteByte(' ')
+	builder.WriteString(Blue(result.GetExtractStat()))
+	builder.WriteByte('\n')
 }
 
 func (rd *ResultsData) ToExtracteds() string {
