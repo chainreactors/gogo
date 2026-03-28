@@ -40,9 +40,10 @@ var DefaultConfig = Config{
 	IpProbe:     "default",      // 默认IP探针
 	IpProbeList: []uint{1, 254}, // 默认IP探针列表 [1, 254]
 
-	Compress:    true,      // 默认启用压缩（注意：runner中是!r.Compress）
-	Outputf:     "full",    // 默认完整输出格式
-	FileOutputf: "default", // 默认文件输出格式
+	Compress:        true,      // 默认启用压缩（注意：runner中是!r.Compress）
+	Outputf:         "full",    // 默认完整输出格式
+	FileOutputf:     "default", // 默认文件输出格式
+	OutputDelimiter: "\t",      // 默认 value 输出分隔符
 
 }
 
@@ -74,24 +75,25 @@ type Config struct {
 	Compress    bool `json:"-"`
 
 	// output
-	FilePath       string              `json:"-"`
-	Filename       string              `json:"-"`
-	SmartBFilename string              `json:"-"`
-	SmartCFilename string              `json:"-"`
-	AlivedFilename string              `json:"-"`
-	File           *fileutils.File     `json:"-"`
-	SmartBFile     *fileutils.File     `json:"-"`
-	SmartCFile     *fileutils.File     `json:"-"`
-	AliveFile      *fileutils.File     `json:"-"`
-	Tee            bool                `json:"-"`
-	Outputf        string              `json:"-"`
-	FileOutputf    string              `json:"-"`
-	Filenamef      string              `json:"-"`
-	Results        parsers.GOGOResults `json:"-"` // json反序列化后的,保存在内存中
-	HostsMap       map[string][]string `json:"-"` // host映射表
-	Filters        []string            `json:"-"`
-	FilterOr       bool                `json:"-"`
-	OutputFilters  [][]string          `json:"-"`
+	FilePath        string              `json:"-"`
+	Filename        string              `json:"-"`
+	SmartBFilename  string              `json:"-"`
+	SmartCFilename  string              `json:"-"`
+	AlivedFilename  string              `json:"-"`
+	File            *fileutils.File     `json:"-"`
+	SmartBFile      *fileutils.File     `json:"-"`
+	SmartCFile      *fileutils.File     `json:"-"`
+	AliveFile       *fileutils.File     `json:"-"`
+	Tee             bool                `json:"-"`
+	Outputf         string              `json:"-"`
+	FileOutputf     string              `json:"-"`
+	OutputDelimiter string              `json:"-"`
+	Filenamef       string              `json:"-"`
+	Results         parsers.GOGOResults `json:"-"` // json反序列化后的,保存在内存中
+	HostsMap        map[string][]string `json:"-"` // host映射表
+	Filters         []string            `json:"-"`
+	FilterOr        bool                `json:"-"`
+	OutputFilters   [][]string          `json:"-"`
 }
 
 func (config *Config) ToWorkflow() *Workflow {

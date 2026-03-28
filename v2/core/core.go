@@ -63,16 +63,16 @@ func DefaultMod(targets interface{}, config Config) {
 			}
 
 			if result.Filtered {
-				logs.Log.Debug("[filtered] " + output(result, config.Outputf))
+				logs.Log.Debug("[filtered] " + output(result, config.Outputf, config.OutputDelimiter))
 			} else {
-				logs.Log.Console(output(result, config.Outputf))
+				logs.Log.Console(output(result, config.Outputf, config.OutputDelimiter))
 			}
 			// 文件输出
 			if config.File != nil {
 				if !config.File.IsInitialized() {
 					logs.Log.Important("init file: " + config.File.GetFilename())
 				}
-				config.File.WriteString(output(result, config.FileOutputf))
+				config.File.WriteString(output(result, config.FileOutputf, config.OutputDelimiter))
 			}
 		} else if result.Error != "" {
 			logs.Log.Debugf("%s stat: %s, errmsg: %s", result.GetTarget(), PortStat[result.ErrStat], result.Error)

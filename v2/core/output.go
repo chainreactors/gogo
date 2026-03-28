@@ -14,7 +14,39 @@ import (
 	"github.com/chainreactors/utils/iutils"
 )
 
-func output(result *Result, outType string) string {
+func normalizeOutputDelimiter(delimiter string) string {
+	if delimiter == "" {
+		return "\t"
+	}
+	return delimiter
+}
+
+func outputValues(result *Result, outType, delimiter string) string {
+	outs := strings.Split(outType, ",")
+	values := make([]string, len(outs))
+	for i, out := range outs {
+		values[i] = result.Get(out)
+	}
+	return strings.Join(values, normalizeOutputDelimiter(delimiter)) + "\n"
+}
+
+func outputResultsValues(results parsers.GOGOResults, outType, delimiter string) string {
+	outs := strings.Split(outType, ",")
+	lines := make([]string, len(results))
+	delimiter = normalizeOutputDelimiter(delimiter)
+
+	for i, result := range results {
+		values := make([]string, len(outs))
+		for j, out := range outs {
+			values[j] = result.Get(out)
+		}
+		lines[i] = strings.Join(values, delimiter)
+	}
+
+	return strings.Join(lines, "\n")
+}
+
+func output(result *Result, outType, delimiter string) string {
 	var out string
 
 	switch outType {
@@ -29,12 +61,12 @@ func output(result *Result, outType string) string {
 	case "csv":
 		out = result.CsvOutput()
 	default:
-		out = result.ValuesOutput(outType)
+		out = outputValues(result, outType, delimiter)
 	}
 	return out
 }
 
-func FormatOutput(filename, outFilename, outf, filenamef string, filters []string, filterOr bool) {
+func FormatOutput(filename, outFilename, outf, filenamef, delimiter string, filters []string, filterOr bool) {
 	var outfunc func(s string)
 	var file io.Reader
 	var err error
@@ -145,7 +177,7 @@ func FormatOutput(filename, outFilename, outf, filenamef string, filters []strin
 			}
 			outfunc(string(marshal))
 		default:
-			outfunc(rd.ToValues(outf))
+			outfunc(outputResultsValues(rd.Data, outf, delimiter))
 		}
 
 	} else if text != "" {

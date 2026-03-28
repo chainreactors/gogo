@@ -104,7 +104,7 @@ func (r *Runner) Prepare() bool {
 				formatOut = "color"
 			}
 		}
-		FormatOutput(r.FormatterFilename, r.Config.Filename, formatOut, r.Config.Filenamef, r.Filters, r.FilterOr)
+		FormatOutput(r.FormatterFilename, r.Config.Filename, formatOut, r.Config.Filenamef, r.Config.OutputDelimiter, r.Filters, r.FilterOr)
 		return false
 	}
 	// 输出 Config
@@ -199,17 +199,18 @@ func (r *Runner) PrepareConfig() {
 			Opsec:        r.Opsec,
 			//SuffixStr:  r.SuffixStr,
 		},
-		IsListInput: r.IsListInput,
-		IsJsonInput: r.IsJsonInput,
-		PortProbe:   r.PortProbe,
-		IpProbe:     r.IpProbe,
-		NoSpray:     r.NoSpray,
-		Filename:    r.Filename,
-		FilePath:    r.FilePath,
-		Compress:    !r.Compress,
-		Tee:         r.Tee,
-		Filters:     r.Filters,
-		FilterOr:    r.FilterOr,
+		IsListInput:     r.IsListInput,
+		IsJsonInput:     r.IsJsonInput,
+		PortProbe:       r.PortProbe,
+		IpProbe:         r.IpProbe,
+		NoSpray:         r.NoSpray,
+		Filename:        r.Filename,
+		FilePath:        r.FilePath,
+		Compress:        !r.Compress,
+		Tee:             r.Tee,
+		Filters:         r.Filters,
+		FilterOr:        r.FilterOr,
+		OutputDelimiter: r.OutputDelimiter,
 	}
 
 	if r.FileOutputf == Default {
