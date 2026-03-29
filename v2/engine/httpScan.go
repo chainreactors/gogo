@@ -75,7 +75,7 @@ func systemHttp(opt *pkg.RunnerOption, result *pkg.Result, scheme string) {
 		return
 	}
 	logs.Log.Debugf("request %s , %d ", target, resp.StatusCode)
-	if resp.TLS != nil {
+	if pkg.HasTLS(resp) {
 		if result.Status == "400" {
 			// socket中得到的状态为400, 且存在tls的情况下
 			result.Protocol = "https"
@@ -95,7 +95,7 @@ func systemHttp(opt *pkg.RunnerOption, result *pkg.Result, scheme string) {
 		}
 
 		pkg.CollectTLS(result, resp)
-	} else if resp.Request.Response != nil && resp.Request.Response.TLS != nil {
+	} else if resp.Request.Response != nil && pkg.HasTLS(resp.Request.Response) {
 		// 一种相对罕见的情况, 从https页面30x跳转到http页面. 则判断tls
 		result.Protocol = "https"
 
@@ -125,7 +125,7 @@ func noRedirectHttp(opt *pkg.RunnerOption, result *pkg.Result, u string) {
 	}
 
 	logs.Log.Debugf("request (no redirect) %s , %d ", u, resp.StatusCode)
-	if resp.TLS != nil {
+	if pkg.HasTLS(resp) {
 		if result.Status == "400" {
 			result.Protocol = "https"
 		}

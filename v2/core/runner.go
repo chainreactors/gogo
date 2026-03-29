@@ -2,6 +2,13 @@ package core
 
 import (
 	"fmt"
+	"net/url"
+	"os"
+	"path/filepath"
+	"regexp"
+	"strings"
+	"time"
+
 	"github.com/chainreactors/fingers/common"
 	"github.com/chainreactors/fingers/fingers"
 	. "github.com/chainreactors/gogo/v2/engine"
@@ -11,17 +18,8 @@ import (
 	"github.com/chainreactors/utils"
 	"github.com/chainreactors/utils/encode"
 	"github.com/chainreactors/utils/fileutils"
-	"golang.org/x/net/context"
-	"net"
-	"net/url"
-	"os"
-	"path/filepath"
-	"regexp"
-	"strings"
-	"time"
 
 	. "github.com/chainreactors/gogo/v2/pkg"
-	neuhttp "github.com/chainreactors/neutron/protocols/http"
 	"github.com/chainreactors/utils/iutils"
 )
 
@@ -53,7 +51,7 @@ func (r *Runner) Prepare() bool {
 		logs.Log.SetQuiet(true)
 	} else {
 		if r.Debug {
-			logs.Log.SetLevel(logs.Debug)
+			logs.Log.SetLevel(logs.DebugLevel)
 		}
 		logs.Log.SetFile(logFile)
 		logs.Log.Init()
@@ -127,12 +125,7 @@ func (r *Runner) Prepare() bool {
 		if err != nil {
 			logs.Log.Warnf("parse proxy error %s, skip proxy!", err.Error())
 		}
-		neuhttp.DefaultTransport.DialContext = dialer.DialContext
-		DefaultTransport.DialContext = dialer.DialContext
-		ProxyDialTimeout = func(network, address string, duration time.Duration) (net.Conn, error) {
-			ctx, _ := context.WithTimeout(context.Background(), duration)
-			return dialer.DialContext(ctx, network, address)
-		}
+		installProxyDialer(dialer.DialContext)
 	}
 	return true
 }

@@ -172,7 +172,7 @@ func RunTask(config Config) {
 		if config.CIDRs != nil {
 			for _, cidr := range config.CIDRs {
 				if cidr.Ver == 4 {
-					SmartMod(cidr, config)
+					SmartMod(cidr, &config)
 				} else {
 					logs.Log.Warnf("ipv6: %s not support smart mod, skipped", cidr.String())
 				}

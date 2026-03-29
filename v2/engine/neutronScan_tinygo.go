@@ -1,12 +1,12 @@
-//go:build !tinygo
-// +build !tinygo
+//go:build tinygo
+// +build tinygo
 
 package engine
 
 import (
-	"github.com/chainreactors/fingers/common"
 	"strings"
 
+	"github.com/chainreactors/fingers/common"
 	. "github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/logs"
 	"github.com/chainreactors/neutron/templates"
@@ -30,17 +30,23 @@ func NeutronScan(opt *RunnerOption, target string, result *Result) {
 func executeTemplates(result *Result, pocs []string, target string) {
 	var vulns []*common.Vuln
 	ts := choiceTemplates(pocs)
-chainLoop: // 实现chain
+chainLoop:
 	for {
 		var chainsTemplates []*templates.Template
-		for _, template := range ts { // 遍历所有poc
+		for _, template := range ts {
 			logs.Log.Debugf("neutron scan %s with %s", target, template.Id)
 			res, err := template.Execute(target, nil)
 			if err == nil && res != nil {
 				for name, extract := range res.Extracts {
 					result.AddExtract(&parsers.Extracted{Name: name, ExtractResult: extract})
 				}
-				vulns = append(vulns, &common.Vuln{Name: template.Id, Payload: res.PayloadValues, Detail: res.DynamicValues, SeverityLevel: common.GetSeverityLevel(template.Info.Severity), Tags: strings.Split(template.Info.Tags, ",")})
+				vulns = append(vulns, &common.Vuln{
+					Name:          template.Id,
+					Payload:       res.PayloadValues,
+					Detail:        res.DynamicValues,
+					SeverityLevel: common.GetSeverityLevel(template.Info.Severity),
+					Tags:          strings.Split(template.Info.Tags, ","),
+				})
 				chainsTemplates = append(chainsTemplates, diffTemplates(ts, choiceTemplates(template.Chains))...)
 			} else {
 				logs.Log.Debugf("neutron scan %s with %s error: %v", target, template.Id, err)
@@ -49,9 +55,8 @@ chainLoop: // 实现chain
 		if chainsTemplates != nil {
 			ts = chainsTemplates
 			goto chainLoop
-		} else {
-			break
 		}
+		break
 	}
 	result.AddVulns(vulns)
 }
@@ -82,7 +87,7 @@ func uniqueTemplates(ts []*templates.Template) []*templates.Template {
 	}
 	uniquetemplates := make([]*templates.Template, len(tmpTemplates))
 	i := 0
-	for template, _ := range tmpTemplates {
+	for template := range tmpTemplates {
 		uniquetemplates[i] = template
 		i++
 	}

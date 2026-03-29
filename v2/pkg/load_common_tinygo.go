@@ -1,13 +1,13 @@
-//go:build !tinygo
-// +build !tinygo
+//go:build tinygo
+// +build tinygo
 
 package pkg
 
 import (
-	"gopkg.in/yaml.v3"
 	"strings"
 
-	"github.com/chainreactors/fingers/fingerprinthub"
+	"gopkg.in/yaml.v3"
+
 	"github.com/chainreactors/fingers/fingers"
 	"github.com/chainreactors/fingers/resources"
 	"github.com/chainreactors/parsers"
@@ -16,14 +16,12 @@ import (
 )
 
 var (
-	FingerEngine         *fingers.FingersEngine
-	FingerprintHubEngine *fingerprinthub.FingerPrintHubEngine
-	Extractor            []*parsers.Extractor
-	Extractors           = make(parsers.Extractors)
-	ExtractRegexps       = map[string][]*parsers.Extractor{}
+	FingerEngine   *fingers.FingersEngine
+	Extractor      []*parsers.Extractor
+	Extractors     = make(parsers.Extractors)
+	ExtractRegexps = map[string][]*parsers.Extractor{}
 )
 
-// LoadFinger 加载指纹到全局变量
 func LoadFinger(fileutils []string) error {
 	var err error
 	resources.PrePort = utils.PrePort
@@ -39,14 +37,6 @@ func LoadFinger(fileutils []string) error {
 	}
 
 	FingerEngine, err = fingers.NewEngine(httpfs, socketfs)
-	if err != nil {
-		return err
-	}
-
-	FingerprintHubEngine, err = fingerprinthub.NewFingerPrintHubEngine(
-		LoadConfig("fingerprinthub_web"),
-		[]byte("[]"),
-	)
 	if err != nil {
 		return err
 	}
@@ -94,37 +84,20 @@ func LoadPortConfig(portConfig string) error {
 }
 
 func LoadExtractor() error {
-	err := yaml.Unmarshal(LoadConfig("extract"), &Extractor)
-	if err != nil {
-		return err
-	}
-
-	for _, extract := range Extractor {
-		extract.Compile()
-
-		ExtractRegexps[extract.Name] = []*parsers.Extractor{extract}
-		for _, tag := range extract.Tags {
-			if _, ok := ExtractRegexps[tag]; !ok {
-				ExtractRegexps[tag] = []*parsers.Extractor{extract}
-			} else {
-				ExtractRegexps[tag] = append(ExtractRegexps[tag], extract)
-			}
-		}
-	}
+	Extractor = nil
+	Extractors = make(parsers.Extractors)
+	ExtractRegexps = map[string][]*parsers.Extractor{}
 	return nil
 }
 
 func LoadWorkFlow() WorkflowMap {
 	var workflows []*Workflow
-	var err error
-	err = yaml.Unmarshal(LoadConfig("workflow"), &workflows)
+	err := yaml.Unmarshal(LoadConfig("workflow"), &workflows)
 	if err != nil {
 		iutils.Fatal("workflow load FAIL, " + err.Error())
 	}
 
-	// 设置默认参数
 	for _, w := range workflows {
-		// 参数默认值
 		if w.IpProbe == "" {
 			w.IpProbe = Default
 		}
@@ -140,15 +113,12 @@ func LoadWorkFlow() WorkflowMap {
 		if w.File == "" {
 			w.File = "auto"
 		}
-		//if w.Path == "" {
-		//	w.Path = "."
-		//}
 		if w.Exploit == "" {
 			w.Exploit = "none"
 		}
 	}
 
-	var tmpmap = make(map[string][]*Workflow)
+	tmpmap := make(map[string][]*Workflow)
 	for _, workflow := range workflows {
 		tmpmap[strings.ToLower(workflow.Name)] = append(tmpmap[strings.ToLower(workflow.Name)], workflow)
 		for _, tag := range workflow.Tags {

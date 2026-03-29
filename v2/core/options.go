@@ -27,7 +27,7 @@ type InputOption struct {
 type OutputOption struct {
 	Filename        string `short:"f" long:"file" description:"String, output filename"`
 	FilePath        string `long:"path" description:"String, output file path"`
-	Outputf         string `short:"o" long:"output" default:"default" description:"String,cmdline output format, default: full, \n \t format: color,full,json,jl(jsonline,jsonlines),extract,zombie,csv \n \t value: ip,port,stat(status),frame(framework),vuln,cpe,uri,wfn,title,target,url,midleware,protocol(schema)"`
+	Outputf         string `short:"o" long:"output" default:"default" description:"cmd output format"`
 	FileOutputf     string `short:"O" long:"file-output" default:"default" description:"String, file output format,choices same as -o, default: jsonlines"` // 输出格式
 	OutputDelimiter string `long:"output-delimiter" default:"\t" description:"String, output delimiter, default [TAB]"`
 	AutoFile        bool   `long:"af" description:"Bool, auto choice filename"`        // 自动生成格式化文件名
@@ -53,7 +53,7 @@ type AdvanceOption struct {
 	ExploitFile string   `long:"ef" description:"String, load specified templates file "`
 	FingerFile  []string `long:"ff" description:"String, load specified finger file" ` // 指定漏扫文件
 	Payloads    []string `long:"payload" description:"String, specify neutron payload"`
-	AttackType  string   `long:"attack-type" choice:"sniper" choice:"clusterbomb" choice:"pitchfork" description:"neutron attack types, sniper|clusterbomb|pitchfork" choice:"pitchfork" choice:"clusterbomb" choice:"sniper"`
+	AttackType  string   `long:"attack-type" choice:"sniper" choice:"clusterbomb" choice:"pitchfork" description:"attack type"`
 	Extract     []string `long:"extract" description:"String, custom Extract regexp"`
 	//SuffixStr   string   `long:"suffix" description:"String, url path"`
 	Opsec         bool     `long:"opsec" description:"Bool, opsec mode"`

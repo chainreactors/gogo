@@ -92,7 +92,7 @@ func DefaultMod(targets interface{}, config Config) {
 	wgs.Wait()
 }
 
-func SmartMod(target *utils.CIDR, config Config) {
+func SmartMod(target *utils.CIDR, config *Config) {
 	// 初始化mask
 	var mask int
 	switch config.Mod {
@@ -116,12 +116,12 @@ func SmartMod(target *utils.CIDR, config Config) {
 			config.PortProbeList = DefaultSmartPortProbe
 		}
 	}
-	spended := guessSmartTime(target, config)
+	spended := guessSmartTime(target, *config)
 	logs.Log.Importantf("Spraying %s with %s, Estimated to take %d seconds", target, config.Mod, spended)
 	var wg sync.WaitGroup
 
 	//var ipChannel chan string
-	targetGen := NewTargetGenerator(config)
+	targetGen := NewTargetGenerator(*config)
 	temp := targetGen.ipGenerator.alivedMap
 
 	// 输出启发式扫描探针
@@ -179,7 +179,7 @@ func SmartMod(target *utils.CIDR, config Config) {
 		// -no 被设置的时候停止后续扫描
 		return
 	}
-	createDeclineScan(iplist, config)
+	createDeclineScan(iplist, *config)
 }
 
 func AliveMod(targets interface{}, config Config) {
@@ -280,7 +280,7 @@ func createDeclineScan(cidrs utils.CIDRs, config Config) {
 			logs.Log.Importantf("Every smartscan subtask is expected to take %d seconds, total found %d B Class CIDRs about %d s", spended, len(cidrs), spended*len(cidrs))
 			for _, ip := range cidrs {
 				tmpalive := Opt.AliveSum
-				SmartMod(ip, config)
+				SmartMod(ip, &config)
 				logs.Log.Importantf("Found %d assets from CIDR %s", Opt.AliveSum-tmpalive, ip)
 				syncFile()
 			}
@@ -291,7 +291,7 @@ func createDeclineScan(cidrs utils.CIDRs, config Config) {
 		logs.Log.Importantf("Every smartscan subtask is expected to take %d seconds, total found %d B Class CIDRs about %d s", spended, len(cidrs), spended*len(cidrs))
 
 		for _, ip := range cidrs {
-			SmartMod(ip, config)
+			SmartMod(ip, &config)
 		}
 	} else {
 		config.Mod = Default

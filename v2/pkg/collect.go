@@ -12,7 +12,7 @@ import (
 func CollectSocketResponse(result *Result, socketContent []byte) {
 	if ishttp, _ := GetStatusCode(socketContent); ishttp {
 		result.Protocol = "http"
-		CollectParsedResponse(result, parsers.NewResponseWithRaw(socketContent))
+		CollectParsedResponse(result, newResponseFromRaw(socketContent))
 	} else {
 		result.Content = socketContent
 		if title := parsers.MatchTitle(socketContent); title != "" {
@@ -30,7 +30,7 @@ func CollectHttpResponse(result *Result, resp *http.Response) {
 		return
 	}
 
-	CollectParsedResponse(result, parsers.NewResponse(resp, int64(DefaultMaxSize*2)))
+	CollectParsedResponse(result, newResponseFromHTTP(resp, int64(DefaultMaxSize*2)))
 }
 
 func CollectParsedResponse(result *Result, resp *parsers.Response) {
@@ -72,9 +72,10 @@ func FormatCertDomains(domains []string) []string {
 }
 
 func CollectTLS(result *Result, resp *http.Response) {
-	result.Host = strings.Join(resp.TLS.PeerCertificates[0].DNSNames, ",")
-	if len(resp.TLS.PeerCertificates[0].DNSNames) > 0 {
+	domains := peerDNSNames(resp)
+	result.Host = strings.Join(domains, ",")
+	if len(domains) > 0 {
 		// 经验公式: 通常只有cdn会绑定超过2个host, 正常情况只有一个host或者带上www的两个host
-		result.HttpHosts = append(result.HttpHosts, FormatCertDomains(resp.TLS.PeerCertificates[0].DNSNames)...)
+		result.HttpHosts = append(result.HttpHosts, FormatCertDomains(domains)...)
 	}
 }

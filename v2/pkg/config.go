@@ -4,11 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"os"
-	"os/signal"
 	"path"
 	"strings"
-	"syscall"
 
 	"github.com/chainreactors/utils/fileutils"
 
@@ -249,16 +246,7 @@ func (config *Config) InitFile() error {
 			iutils.Fatal(err.Error())
 		}
 
-		go func() {
-			c := make(chan os.Signal, 2)
-			signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-			go func() {
-				<-c
-				logs.Log.Debug("save and exit!")
-				config.File.Sync()
-				os.Exit(0)
-			}()
-		}()
+		installFileSyncSignalHandler(config.File)
 
 		if config.FileOutputf == "jl" || config.FileOutputf == "jsonlines" {
 			config.File.WriteLine(config.ToJson("scan"))
