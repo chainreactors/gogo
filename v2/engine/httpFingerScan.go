@@ -60,10 +60,6 @@ func passiveHttpMatch(result *Result) {
 }
 
 func activeHttpMatch(opt *RunnerOption, result *Result) {
-	var closureResp *http.Response
-	var finalResp *http.Response
-
-	// 创建统一的 GogoRoundTripper，两个引擎共用
 	transport := &GogoRoundTripper{
 		result: result,
 		opt:    opt,
@@ -71,29 +67,17 @@ func activeHttpMatch(opt *RunnerOption, result *Result) {
 
 	baseURL := result.GetURL()
 
-	// FingerEngine 使用统一的 http.RoundTripper
-	var n int
 	callback := func(f *common.Framework, v *common.Vuln) {
-		var i int
 		if f != nil {
-			ok := result.Frameworks.Add(f)
-			if ok {
-				i += 1
-			}
+			result.Frameworks.Add(f)
 			if v != nil {
 				result.Vulns.Add(v)
 			}
-		}
-
-		if i > 0 {
-			n += i
-			finalResp = closureResp
 		}
 	}
 
 	FingerEngine.HTTPActiveMatch(baseURL, 2, transport, callback)
 
-	// FingerprintHub active matching - 使用同一个 http.RoundTripper
 	if opt.VersionLevel >= 2 && FingerprintHubEngine != nil {
 		fphCallback := func(f *common.Framework, v *common.Vuln) {
 			if f != nil {
@@ -111,12 +95,6 @@ func activeHttpMatch(opt *RunnerOption, result *Result) {
 		if len(vs) > 0 {
 			result.AddVulns(vs.List())
 		}
-	}
-
-	if finalResp != nil {
-		// TODO: CollectParsedResponse needs parsers.Response, but finalResp is now http.Response
-		// Need to investigate the correct HTTP client to use
-		// CollectParsedResponse(result, finalResp)
 	}
 }
 

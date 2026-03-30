@@ -1,5 +1,5 @@
-//go:build tinygo
-// +build tinygo
+//go:build tinygo && !emptytemplates
+// +build tinygo,!emptytemplates
 
 package pkg
 
@@ -8,6 +8,7 @@ import (
 
 	"gopkg.in/yaml.v3"
 
+	"github.com/chainreactors/fingers/fingerprinthub"
 	"github.com/chainreactors/fingers/fingers"
 	"github.com/chainreactors/fingers/resources"
 	"github.com/chainreactors/parsers"
@@ -16,10 +17,11 @@ import (
 )
 
 var (
-	FingerEngine   *fingers.FingersEngine
-	Extractor      []*parsers.Extractor
-	Extractors     = make(parsers.Extractors)
-	ExtractRegexps = map[string][]*parsers.Extractor{}
+	FingerEngine         *fingers.FingersEngine
+	FingerprintHubEngine *fingerprinthub.FingerPrintHubEngine
+	Extractor            []*parsers.Extractor
+	Extractors           = make(parsers.Extractors)
+	ExtractRegexps       = map[string][]*parsers.Extractor{}
 )
 
 func LoadFinger(fileutils []string) error {
@@ -37,6 +39,14 @@ func LoadFinger(fileutils []string) error {
 	}
 
 	FingerEngine, err = fingers.NewEngine(httpfs, socketfs)
+	if err != nil {
+		return err
+	}
+
+	FingerprintHubEngine, err = fingerprinthub.NewFingerPrintHubEngine(
+		LoadConfig("fingerprinthub_web"),
+		[]byte("[]"),
+	)
 	if err != nil {
 		return err
 	}
@@ -87,6 +97,24 @@ func LoadExtractor() error {
 	Extractor = nil
 	Extractors = make(parsers.Extractors)
 	ExtractRegexps = map[string][]*parsers.Extractor{}
+
+	err := yaml.Unmarshal(LoadConfig("extract"), &Extractor)
+	if err != nil {
+		return err
+	}
+
+	for _, extract := range Extractor {
+		extract.Compile()
+
+		ExtractRegexps[extract.Name] = []*parsers.Extractor{extract}
+		for _, tag := range extract.Tags {
+			if _, ok := ExtractRegexps[tag]; !ok {
+				ExtractRegexps[tag] = []*parsers.Extractor{extract}
+			} else {
+				ExtractRegexps[tag] = append(ExtractRegexps[tag], extract)
+			}
+		}
+	}
 	return nil
 }
 

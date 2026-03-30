@@ -32,3 +32,7 @@ gen
 /bbin
 /script
 /v2/pkg/templates.go
+/v2/dist/
+/v2/.toolchain/
+.sock.lock
+/cpu.prof

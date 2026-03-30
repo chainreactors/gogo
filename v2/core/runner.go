@@ -377,7 +377,7 @@ func (r *Runner) Close(config *Config) {
 
 	// 输出文件名
 	if config.File != nil && config.File.IsInitialized() {
-		logs.Log.Importantf("Results: " + config.Filename)
+		logs.Log.Important("Results: " + config.Filename)
 	}
 	if config.SmartBFile != nil && config.SmartBFile.IsInitialized() {
 		logs.Log.Important("B CIDRs result: " + config.SmartBFilename)

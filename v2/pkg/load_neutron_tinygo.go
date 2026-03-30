@@ -1,5 +1,5 @@
-//go:build tinygo
-// +build tinygo
+//go:build tinygo && !emptytemplates
+// +build tinygo,!emptytemplates
 
 package pkg
 

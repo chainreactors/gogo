@@ -51,38 +51,40 @@ func passiveHttpMatch(result *Result) {
 }
 
 func activeHttpMatch(opt *RunnerOption, result *Result) {
-	var closureResp *http.Response
-	var finalResp *http.Response
-
 	transport := &GogoRoundTripper{
 		result: result,
 		opt:    opt,
 	}
 
 	baseURL := result.GetURL()
-	var n int
 	callback := func(f *common.Framework, v *common.Vuln) {
-		var i int
 		if f != nil {
-			ok := result.Frameworks.Add(f)
-			if ok {
-				i += 1
+			result.Frameworks.Add(f)
+			if v != nil {
+				result.Vulns.Add(v)
+			}
+		}
+	}
+
+	FingerEngine.HTTPActiveMatch(baseURL, 2, transport, callback)
+
+	if opt.VersionLevel >= 2 && FingerprintHubEngine != nil {
+		fphCallback := func(f *common.Framework, v *common.Vuln) {
+			if f != nil {
+				result.Frameworks.Add(f)
 			}
 			if v != nil {
 				result.Vulns.Add(v)
 			}
 		}
 
-		if i > 0 {
-			n += i
-			finalResp = closureResp
+		fs, vs := FingerprintHubEngine.HTTPActiveMatch(baseURL, opt.VersionLevel, transport, fphCallback)
+		if len(fs) > 0 {
+			result.AddFrameworks(fs.List())
 		}
-	}
-
-	FingerEngine.HTTPActiveMatch(baseURL, 2, transport, callback)
-
-	if finalResp != nil {
-		_ = closureResp
+		if len(vs) > 0 {
+			result.AddVulns(vs.List())
+		}
 	}
 }
 
