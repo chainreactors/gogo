@@ -351,11 +351,21 @@ func LoadResultFile(file io.Reader) interface{} {
 		var result *ResultsData
 		for _, r := range results {
 			if data, ok := r.(*ResultsData); ok {
-				if data.Config != nil {
-					result = data
+				if result == nil {
+					result = &ResultsData{&parsers.GOGOData{
+						Config: data.Config,
+						IP:     data.IP,
+					}}
+				} else {
+					if result.Config == nil {
+						result.Config = data.Config
+					}
+					if result.IP == "" {
+						result.IP = data.IP
+					}
 				}
 				if data.Data != nil {
-					result.Data = append(data.Data, r.(*ResultsData).Data...)
+					result.Data = append(result.Data, data.Data...)
 				}
 			}
 		}

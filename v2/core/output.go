@@ -32,15 +32,21 @@ func outputValues(result *Result, outType, delimiter string) string {
 
 func outputResultsValues(results parsers.GOGOResults, outType, delimiter string) string {
 	outs := strings.Split(outType, ",")
-	lines := make([]string, len(results))
+	lines := make([]string, 0, len(results))
+	seen := make(map[string]struct{}, len(results))
 	delimiter = normalizeOutputDelimiter(delimiter)
 
-	for i, result := range results {
+	for _, result := range results {
 		values := make([]string, len(outs))
 		for j, out := range outs {
 			values[j] = result.Get(out)
 		}
-		lines[i] = strings.Join(values, delimiter)
+		line := strings.Join(values, delimiter)
+		if _, ok := seen[line]; ok {
+			continue
+		}
+		seen[line] = struct{}{}
+		lines = append(lines, line)
 	}
 
 	return strings.Join(lines, "\n")
@@ -69,7 +75,6 @@ func output(result *Result, outType, delimiter string) string {
 func FormatOutput(filename, outFilename, outf, filenamef, delimiter string, filters []string, filterOr bool) {
 	var outfunc func(s string)
 	var file io.Reader
-	var err error
 	if filename == "stdin" {
 		file = os.Stdin
 	} else if strings.HasPrefix(filename, "http://") || strings.HasPrefix(filename, "https://") {
@@ -80,10 +85,12 @@ func FormatOutput(filename, outFilename, outf, filenamef, delimiter string, filt
 		defer req.Body.Close()
 		file = req.Body
 	} else {
-		file, err = fileutils.Open(filename)
+		fileHandle, err := fileutils.Open(filename)
 		if err != nil {
 			iutils.Fatal(err.Error())
 		}
+		defer fileHandle.Close()
+		file = fileHandle
 	}
 
 	if filenamef == "auto" {
