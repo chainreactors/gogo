@@ -64,6 +64,10 @@ func LoadNeutron(filename string) map[string][]*templates.Template {
 }
 
 func LoadTemplates(content []byte) map[string][]*templates.Template {
+	if len(content) == 0 {
+		return make(map[string][]*templates.Template)
+	}
+
 	var t []*templates.Template
 
 	var templatemap = make(map[string][]*templates.Template)

@@ -94,6 +94,8 @@ func LoadPortConfig(portConfig string) error {
 }
 
 func LoadExtractor() error {
+	Extractors = make(parsers.Extractors)
+	ExtractRegexps = make(map[string][]*parsers.Extractor)
 	err := yaml.Unmarshal(LoadConfig("extract"), &Extractor)
 	if err != nil {
 		return err

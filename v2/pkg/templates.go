@@ -1,8 +1,11 @@
+//go:build !emptytemplates
+// +build !emptytemplates
+
 package pkg
 
 var RandomDir = "/g8kZMwp4oeKsL2in"
 
-func LoadConfig(typ string)[]byte  {
+func loadEmbeddedConfig(typ string)[]byte  {
 	if typ == "tcp" {
 		return Decode("")
 	}else if typ=="http"{

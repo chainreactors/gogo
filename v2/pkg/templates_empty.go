@@ -1,10 +1,10 @@
-//go:build tinygo && emptytemplates
-// +build tinygo,emptytemplates
+//go:build emptytemplates
+// +build emptytemplates
 
 package pkg
 
 var RandomDir = ""
 
-func LoadConfig(string) []byte {
+func loadEmbeddedConfig(string) []byte {
 	return nil
 }
