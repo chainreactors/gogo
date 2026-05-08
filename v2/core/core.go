@@ -282,7 +282,7 @@ func createDeclineScan(cidrs utils.CIDRs, config Config) {
 				tmpalive := Opt.AliveSum
 				SmartMod(ip, &config)
 				logs.Log.Importantf("Found %d assets from CIDR %s", Opt.AliveSum-tmpalive, ip)
-				syncFile()
+				config.SyncFile()
 			}
 		}
 	} else if config.Mod == SUPERSMARTB {

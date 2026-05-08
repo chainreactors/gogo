@@ -81,6 +81,7 @@ type Config struct {
 	SmartBFile      *fileutils.File     `json:"-"`
 	SmartCFile      *fileutils.File     `json:"-"`
 	AliveFile       *fileutils.File     `json:"-"`
+	FileSync        func()              `json:"-"`
 	Tee             bool                `json:"-"`
 	Outputf         string              `json:"-"`
 	FileOutputf     string              `json:"-"`
@@ -297,6 +298,19 @@ func (config *Config) Close() {
 	}
 	if config.AliveFile != nil {
 		config.AliveFile.Close()
+	}
+}
+
+func (config *Config) SyncFile() {
+	if config == nil {
+		return
+	}
+	if config.FileSync != nil {
+		config.FileSync()
+		return
+	}
+	if config.File != nil {
+		config.File.Sync()
 	}
 }
 

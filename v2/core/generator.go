@@ -117,6 +117,7 @@ func NewTargetGenerator(config Config) *TargetGenerator {
 		ipGenerator: NewIpGenerator(config),
 		spray:       config.PortSpray,
 		hostsMap:    config.HostsMap,
+		syncFile:    config.SyncFile,
 	}
 	return &gen
 }
@@ -127,6 +128,13 @@ type TargetGenerator struct {
 	ch          chan targetConfig
 	hostsMap    map[string][]string
 	ipGenerator *IpGenerator
+	syncFile    func()
+}
+
+func (gen *TargetGenerator) syncOutputFile() {
+	if gen.syncFile != nil {
+		gen.syncFile()
+	}
 }
 
 func (gen *TargetGenerator) genFromDefault(cidrs utils.CIDRs, portlist []string) {
@@ -144,7 +152,7 @@ func (gen *TargetGenerator) genFromDefault(cidrs utils.CIDRs, portlist []string)
 		if cidr.Count() > 1 {
 			Log.Importantf("Scanned %s with %d ports, found %d ports", cidr.String(), len(portlist), Opt.AliveSum-tmpalived)
 		}
-		syncFile()
+		gen.syncOutputFile()
 	}
 }
 
@@ -159,7 +167,7 @@ func (gen *TargetGenerator) genFromSpray(cidrs utils.CIDRs, portlist []string) {
 			for ip := range ch {
 				gen.ch <- targetConfig{ip: ip, port: port, hosts: gen.hostsMap[ip]}
 			}
-			syncFile()
+			gen.syncOutputFile()
 		}
 
 		tmpPorts = append(tmpPorts, port)

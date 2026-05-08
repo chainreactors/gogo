@@ -15,8 +15,6 @@ import (
 	"github.com/chainreactors/utils/iutils"
 )
 
-var syncFile = func() {}
-
 func LoadFile(file *os.File) []byte {
 	defer file.Close()
 	content, err := ioutil.ReadAll(file)
@@ -70,7 +68,7 @@ func InitConfig(config *Config) (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	syncFile = func() {
+	config.FileSync = func() {
 		if config.File != nil {
 			config.File.Sync()
 		}
