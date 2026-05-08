@@ -1,397 +1,409 @@
-# gogo TinyGo 兼容改动总览
+# gogo TinyGo 兼容改动与功能取舍总览
 
-## 目标
+## 1. 文档目的
 
-本轮改动的目标不是让 `gogo` 在 TinyGo 下做到与标准 Go 完全等价，而是：
+这份文档记录当前 `gogo` 为适配 TinyGo 所做的兼容性改动，以及哪些功能被显式降级、放弃，或者只在特定构建模式下保留。
 
-- 产出一个可编译、可运行、可扫描的 TinyGo 版本
-- 尽量保留主扫描链路和主输出链路
-- 对无法在当前 TinyGo 运行时中稳定修复的功能，明确降级或关闭，并记录原因
+目标不是追求与标准 Go 版本完全等价，而是：
 
-当前结果：
+- 保持 TinyGo 版本可构建、可运行、可扫描
+- 尽量保留核心扫描链路
+- 对无法等价实现的功能明确记录原因和边界
 
-- Windows TinyGo 构建成功
-- Linux 交叉构建成功
-- Windows 本地运行验证成功
-- 已验证本地 HTTP 服务扫描可正常输出结果
-- `neutron` 模板加载与执行链已在 TinyGo 下恢复
+本文档描述的是当前代码状态，不再保留早期排障阶段已经过时的结论。
 
-## 已验证结果
+## 2. 当前默认 TinyGo 构建状态
 
-### 构建产物
+当前推荐入口：
 
-- `dist/gogo_tinygo.exe`
-- `dist/gogo_tinygo_linux`
+- [build-tinygo.sh](/D:/Programing/go/chainreactors/gogo/v2/scripts/build-tinygo.sh)
+- [cmd/tinygo/main.go](/D:/Programing/go/chainreactors/gogo/v2/cmd/tinygo/main.go)
 
-### 已执行验证
+当前默认构建特征：
 
-- `tinygo build -tags tinygo -o dist/gogo_tinygo.exe ./cmd/tinygo`
-- `GOOS=linux GOARCH=amd64 tinygo build -tags tinygo -o dist/gogo_tinygo_linux ./cmd/tinygo`
-- `./dist/gogo_tinygo.exe -h`
-- `./dist/gogo_tinygo.exe -i 127.0.0.1 -p 18080 -d 1 -D 1 -t 8 -C -v -f dist/tinygo_scan.json -O jl`
+- 默认 profile: `release`
+- 默认 tags: `tinygo forceposix noembed osusergo netgo`
+- 默认启用 patched TinyGo toolchain
+- 默认保留 embedded templates，不会默认走 `emptytemplates`
+- 默认在可用时执行 `strip` 和 `upx --best --lzma`
 
-本地验证结果包含：
+已经完成的验证：
 
-- `protocol=http`
-- `status=200`
-- `midware=SimpleHTTP/0.6 Python/3.12.7`
-- 被动指纹识别可正常输出
+- `gogo/v2` 执行 `go test ./...` 通过
+- `fingers` 执行 `go build ./fingerprinthub` 通过
+- `neutron` 执行 `go build ./common ./protocols/http` 通过
+- `bash scripts/build-tinygo.sh -o dist/gogo_tinygo_smoke.exe` 通过
+- 本地 HTTP 靶标验证通过：
+  - 指纹识别成功
+  - `-e auto` 的 neutron 探测成功
+  - `-E CVE-2021-29441` 的强制模板执行成功
 
-## 保留的功能
+## 3. 主仓库兼容性改动
 
-当前 TinyGo 版本保留了以下核心能力：
-
-- 基础 CLI 启动与参数解析
-- IP/端口输入
-- 默认扫描链路
-- Socket 建连与基础端口探测
-- HTTP 基础识别
-- 被动指纹识别
-- 普通结果输出
-- JSONLines 结果文件输出
-- Windows 本地运行
-- Linux 交叉构建
-
-下列能力代码上仍然保留，但本轮没有单独做完整场景验证：
-
-- 智能扫描模式
-- 代理链拨号
-- workflow 入口
-- 非 HTTP 协议的多种扫描器
-
-## 主仓库改动说明
-
-### 1. 新增 TinyGo 专用入口
-
-新增：
-
-- `cmd/tinygo/main.go`
-- `cmd/tinygo/flags.go`
-
-原因：
-
-- 原入口通过 `go-flags` 走 `cmd.Gogo()`，在 Windows TinyGo 下早期运行路径不稳定
-- 新入口直接使用 TinyGo 专用参数解析，避免把启动问题和业务逻辑问题耦合在一起
-
-效果：
-
-- `-h`、`--version`、基础扫描参数可正常工作
-- 可以单独作为 TinyGo 构建入口使用
-
-### 2. 避免 Windows TinyGo 的栈探针问题
-
-修改：
-
-- `core/core.go`
-- `core/init.go`
-
-关键调整：
-
-- `SmartMod(target *utils.CIDR, config Config)` 改为 `SmartMod(target *utils.CIDR, config *Config)`
-
-原因：
-
-- Windows TinyGo 链接阶段曾出现 `___chkstk_ms`
-- 根因不是逻辑冲突，而是大对象按值传递造成主路径栈帧过大
-
-效果：
-
-- 规避了 Windows TinyGo 链接阶段的 stack probe 问题
-
-### 3. HTTP/TLS 路径拆分 TinyGo 变体
-
-新增或拆分：
-
-- `pkg/http_tinygo.go`
-- `pkg/tls_domains.go`
-- `pkg/tls_domains_tinygo.go`
-- `pkg/signal_hook.go`
-- `pkg/signal_hook_tinygo.go`
-
-原因：
-
-- TinyGo 下 `net/http` 与标准 Go 的能力并不完全等价
-- 文件信号处理在 TinyGo 下也不需要沿用标准 Go 实现
-
-效果：
-
-- 主 HTTP 请求链路可运行
-- TLS 相关信息采集可以显式降级
-
-### 4. Socket 原始 HTTP 响应改为手工解析
-
-新增：
-
-- `pkg/response_parse.go`
-- `pkg/response_parse_tinygo.go`
-
-修改：
-
-- `pkg/collect.go`
-
-原因：
-
-- 在 Windows TinyGo 下，`http.ReadResponse` 会导致运行时崩溃
-- `InitScan -> CollectSocketResponse -> parsers.NewResponseWithRaw` 是稳定复现点
-
-处理方式：
-
-- 标准 Go 继续走原有 `parsers.NewResponseWithRaw`
-- TinyGo 改成对原始 HTTP 响应做轻量手工解析，只提取主链路需要的字段
-
-效果：
-
-- 默认扫描路径可以稳定跑通
-- `status`、`title`、`midware` 等基础字段仍可输出
-
-### 5. Proxy hook 拆出 TinyGo 兼容层
-
-新增：
-
-- `core/proxy_dialer.go`
-- `core/proxy_dialer_tinygo.go`
-
-修改：
-
-- `core/runner.go`
-
-原因：
-
-- 早期为了绕开 `neutron/protocols/http` 的 TinyGo 启动期崩溃，`core` 不能在代理注入路径里直接碰 `neutron` HTTP transport
-
-处理方式：
-
-- 标准 Go 继续给 `neutron` HTTP transport 和 `gogo` 自身 transport 一起装配代理拨号器
-- TinyGo 仍只给 `gogo` 自身 transport 装配代理拨号器，把 `neutron` 的恢复与代理 hook 解耦
-
-效果：
-
-- `core` 侧不再承担 `neutron` 导入稳定性风险
-- `neutron` 模板链可单独修复并重新挂回 TinyGo 主流程
-
-### 6. 通过 netdev 初始化恢复 TinyGo 主机网络能力
-
-新增依赖：
-
-- `github.com/chainreactors/rem/x/netdev`
-- `github.com/chainreactors/rem/x/netdev/native`
-
-修改：
-
-- `cmd/tinygo/main.go`
-
-原因：
-
-- 不接入 netdev 时，TinyGo 主机网络路径会报 `Netdev not set`
-
-效果：
-
-- `net.Dial` / `net.DialTimeout` / HTTP 请求可在 TinyGo 下使用
-- Windows 本地扫描得以真正执行
-
-## 依赖仓库兼容改动
-
-本次 TinyGo 版本不是只改 `gogo` 本仓库，还依赖了多个上游仓库的本地兼容补丁。
-
-### neutron
-
-改动点：
-
-- 去掉 `publicsuffix-go`
-- 去掉 `govalidator`
-- HTTP client 拆出 `client_tinygo.go`
-- 去掉 `DualStack`
-- 缩短过长的模板 struct tag
-- `common/dsl` 从 eager `init()` 改为 `sync.Once` 惰性初始化
-- `common/utils.go` 去掉 `go-spew/spew` 调试依赖
-- `common/NeutronLog` 改为按需获取，避免包级全局直接绑定 `logs.Log`
-
-原因：
-
-- `publicsuffix` / `cookiejar` 链路不适合当前 TinyGo 目标
-- 一些第三方依赖或 struct tag 在 TinyGo 下存在编译限制
-- `neutron/common` 在 Windows TinyGo 下的真实崩溃点不是模板逻辑本身，而是包导入阶段的全局初始化
-- 其中 `common/utils.go` 里的 `spew` 调试链路会让 `neutron/common -> protocols/http -> templates` 在启动时直接触发 `0xC0000409`
-
-### fingers
-
-改动点：
-
-- `common/sender.go` 改为 `!tinygo`
-- 新增 `common/sender_tinygo.go`
-
-原因：
-
-- 原 sender 依赖的标准 transport 行为在 TinyGo 下不完全可用
-- 需要 TinyGo 专用的最小 sender 实现
-
-### parsers
-
-改动点：
-
-- `http_go1.17.go` 改为 `go1.17 && !tinygo`
-- 新增 `http_tinygo.go`
-
-原因：
-
-- TinyGo 下不能依赖标准 Go 那套完整的 `resp.TLS` 行为
-
-### utils
-
-改动点：
-
-- `ParseHostToIP` 改为走 `resolveHostIP`
-- 新增 `dns_lookup_tinygo.go`
-
-原因：
-
-- TinyGo 下 DNS 能力需要单独降级处理
-
-## 已恢复与仍降级的功能
-
-下面这些功能分成两类：
-
-- 已经定位根因并恢复
-- 仍然保留降级，因为继续硬修的收益暂时不够高
-
-### 1. Neutron 漏洞利用链
-
-当前状态：
-
-- TinyGo 版本下已恢复
+### 3.1 TinyGo 专用入口与网络初始化
 
 涉及文件：
 
-- `pkg/load_neutron_tinygo.go`
-- `engine/neutronScan_tinygo.go`
-- `neutron/common/dsl/dsl.go`
-- `neutron/common/utils.go`
+- [main.go](/D:/Programing/go/chainreactors/gogo/v2/cmd/tinygo/main.go)
+- [flags.go](/D:/Programing/go/chainreactors/gogo/v2/cmd/tinygo/flags.go)
+
+改动目的：
+
+- 避免直接复用标准 Go 入口时引入不必要的启动路径差异
+- 在 TinyGo 启动时显式注册 `rem/x/netdev/native`
+
+效果：
+
+- TinyGo 版本能够在主机环境下正常使用 `net.Dial`、HTTP 请求和扫描主链路
+- 解决了未注册 netdev 时的 `Netdev not set` 问题
+
+### 3.2 自动化 patched toolchain
+
+涉及文件：
+
+- [build-tinygo.sh](/D:/Programing/go/chainreactors/gogo/v2/scripts/build-tinygo.sh)
+- [README.md](/D:/Programing/go/chainreactors/gogo/v2/toolchain/tinygo/README.md)
+- [manifest.env](/D:/Programing/go/chainreactors/gogo/v2/toolchain/tinygo/manifest.env)
+- [regexp-syntax-repeat.patch](/D:/Programing/go/chainreactors/gogo/v2/toolchain/tinygo/regexp-syntax-repeat.patch)
+
+改动目的：
+
+- TinyGo 标准库的 `regexp/syntax` 对 counted repeat 的处理与标准 Go 不一致
+- 这会直接影响 extractor/模板里的正则语义，尤其是重复次数相关表达式
+
+处理方式：
+
+- 不修改机器全局 `GOROOT`
+- 构建时把 TinyGo host `GOROOT` 复制到 `v2/.toolchain/`
+- 仅对缓存副本打补丁
+- 构建完成后继续复用缓存
+
+当前补丁内容：
+
+- 为 `regexp/syntax/compile.go` 增加 `OpRepeat`
+- 调整 `simplify.go`，避免过早把 counted repeat 展开掉
+
+效果：
+
+- 默认 TinyGo 构建现在保留 extractor 正则语义
+- 避免为了规避 TinyGo 正则问题而整体关闭 extractor
+
+### 3.3 TinyGo 下的 raw HTTP 响应解析
+
+涉及文件：
+
+- [response_parse.go](/D:/Programing/go/chainreactors/gogo/v2/pkg/response_parse.go)
+- [response_parse_tinygo.go](/D:/Programing/go/chainreactors/gogo/v2/pkg/response_parse_tinygo.go)
+
+改动目的：
+
+- 标准 Go 版本直接使用 `parsers.NewResponseWithRaw`
+- TinyGo 下原始 HTTP 响应解析链路更容易在某些路径上出现不稳定行为
+
+处理方式：
+
+- 标准 Go 保持原逻辑
+- TinyGo 走轻量手工解析，只提取主扫描链路必需字段：
+  - status
+  - server
+  - title
+  - content/raw
+
+效果：
+
+- 默认扫描链路稳定
+- 输出字段满足核心识别与结果落盘需求
+
+### 3.4 TinyGo 下的 HTTP transport 和代理装配
+
+涉及文件：
+
+- [http_tinygo.go](/D:/Programing/go/chainreactors/gogo/v2/pkg/http_tinygo.go)
+- [proxy_dialer_tinygo.go](/D:/Programing/go/chainreactors/gogo/v2/core/proxy_dialer_tinygo.go)
+
+改动目的：
+
+- TinyGo 下不复用标准 Go 那套完整 `http.Transport` 行为
+- 只保留扫描主链路需要的最小能力
+
+当前策略：
+
+- `gogo` 自身的 HTTP 客户端使用最小 transport
+- 代理拨号器仍可注入到 `DefaultTransport.DialContext`
+
+效果：
+
+- 主扫描 HTTP 能力可用
+- 代理拨号保留最基本注入能力
+
+### 3.5 TinyGo 下恢复默认模板加载，并新增可选空模板模式
+
+涉及文件：
+
+- [load_common_tinygo.go](/D:/Programing/go/chainreactors/gogo/v2/pkg/load_common_tinygo.go)
+- [load_neutron_tinygo.go](/D:/Programing/go/chainreactors/gogo/v2/pkg/load_neutron_tinygo.go)
+- [load_common_empty_tinygo.go](/D:/Programing/go/chainreactors/gogo/v2/pkg/load_common_empty_tinygo.go)
+- [load_neutron_empty_tinygo.go](/D:/Programing/go/chainreactors/gogo/v2/pkg/load_neutron_empty_tinygo.go)
+- [templates_empty.go](/D:/Programing/go/chainreactors/gogo/v2/pkg/templates_empty.go)
+
+改动目的：
+
+- 默认 TinyGo 版本需要保留真实指纹、workflow、extractor、neutron 模板能力
+- 同时需要一个可选的极限瘦身模式，用于测试体积极限或产出最小壳
+
+当前策略：
+
+- 默认 TinyGo: `tinygo && !emptytemplates`
+  - 正常加载 fingers / FingerPrintHub / extractor / workflow / neutron
+- 极限瘦身模式: `tinygo && emptytemplates`
+  - 仅保留空引擎和空模板装载器
+
+效果：
+
+- 默认版本是“可用扫描器”
+- `emptytemplates` 是“主动裁剪版”，不是默认行为
+
+### 3.6 TinyGo 下保留 FingerPrintHub active path
+
+涉及文件：
+
+- [load_common_tinygo.go](/D:/Programing/go/chainreactors/gogo/v2/pkg/load_common_tinygo.go)
+- [httpFingerScan_tinygo.go](/D:/Programing/go/chainreactors/gogo/v2/engine/httpFingerScan_tinygo.go)
+
+改动目的：
+
+- 早期排障阶段曾临时关闭 FingerPrintHub active matching
+- 当前版本已恢复引擎加载和 active match 调用路径
+
+当前状态：
+
+- 代码路径已恢复
+- TinyGo 下模板装载前会先进行模板净化
+- 本轮没有对 FingerPrintHub active matching 单独做大规模回归，只保证其编译、装载和调用链存在
+
+### 3.7 TinyGo 下的 TLS / signal 降级
+
+涉及文件：
+
+- [tls_domains_tinygo.go](/D:/Programing/go/chainreactors/gogo/v2/pkg/tls_domains_tinygo.go)
+- [signal_hook_tinygo.go](/D:/Programing/go/chainreactors/gogo/v2/pkg/signal_hook_tinygo.go)
+
+当前行为：
+
+- `HasTLS(resp)` 在 TinyGo 下固定返回 `false`
+- `peerDNSNames(resp)` 在 TinyGo 下返回 `nil`
+- 文件同步 signal hook 在 TinyGo 下为空实现
+
+原因：
+
+- 这部分能力依赖的标准库行为和运行时细节在 TinyGo 下没有必要强行等价实现
+- 当前优先级低于“可构建、可扫描、可输出”
+
+## 4. 外部依赖仓库兼容性改动
+
+### 4.1 fingers
+
+涉及文件：
+
+- [fingerprinthub.go](/D:/Programing/go/chainreactors/fingers/fingerprinthub/fingerprinthub.go)
+- [sanitize_template.go](/D:/Programing/go/chainreactors/fingers/fingerprinthub/sanitize_template.go)
+- [sanitize_template_tinygo.go](/D:/Programing/go/chainreactors/fingers/fingerprinthub/sanitize_template_tinygo.go)
+
+改动目的：
+
+- `FingerprintHub` 原始数据里存在 `(?x)` 这类扩展正则前缀
+- 标准 Go 与 TinyGo 对这类模式的兼容边界不同
+
+处理方式：
+
+- 共享加载逻辑统一调用 `sanitizeTemplateForTinyGo`
+- 非 TinyGo 编译时，stub 为空实现
+- TinyGo 编译时，递归遍历模板数据，只去掉字符串前缀 `(?x)`
+
+说明：
+
+- 这不是运行时 fallback，而是 build tag 下的 target-specific normalization
+- 这样可以保持共享加载逻辑不分叉，且不影响标准 Go 语义
+
+### 4.2 neutron
+
+涉及文件：
+
+- [utils.go](/D:/Programing/go/chainreactors/neutron/common/utils.go)
+- [list.go](/D:/Programing/go/chainreactors/neutron/common/publicsuffix/list.go)
+- [table.go](/D:/Programing/go/chainreactors/neutron/common/publicsuffix/table.go)
+- [client_tinygo.go](/D:/Programing/go/chainreactors/neutron/protocols/http/client_tinygo.go)
+- [go.mod](/D:/Programing/go/chainreactors/neutron/go.mod)
+- [go.sum](/D:/Programing/go/chainreactors/neutron/go.sum)
+
+改动目的：
+
+- `publicsuffix-go` / `cookiejar` 链路不适合当前 TinyGo 目标
+- 需要一个更可控、更小的 TinyGo HTTP 执行路径
+
+处理方式：
+
+- 去掉外部 `publicsuffix-go`
+- 改为仓库内 `common/publicsuffix`
+- TinyGo 下使用最小 HTTP client，不再尝试复刻标准 Go 的完整 cookie jar / redirect 管理
+
+效果：
+
+- `neutron` 模板执行链已恢复并完成实际验证
+- 但 TinyGo 下的 HTTP client 语义不是标准 Go 等价实现
+
+### 4.3 templates 子模块
+
+涉及文件：
+
+- [nacos.yaml](/D:/Programing/go/chainreactors/gogo/v2/templates/fingers/http/cloud/nacos.yaml)
+
+改动目的：
+
+- 增强 Nacos 指纹识别，方便 `-e auto` 命中相关 neutron 模板
+
+说明：
+
+- 这项改动更偏数据层增强，不是 TinyGo runtime 修复
+- 但它直接参与了 TinyGo 版本的真实回归验证
+
+## 5. 当前保留的功能
+
+默认 TinyGo 构建当前保留：
+
+- CLI 启动与参数解析
+- 主机网络初始化
+- 端口扫描和默认扫描链路
+- HTTP 基础识别
+- 被动指纹识别
+- Fingers active HTTP match
+- Neutron 模板加载与执行
+- Extractor 加载与编译
+- JSONLines 结果输出
+- Workflow / port preset / extract preset 的正常装载
+
+已做过真实验证的链路：
+
+- 普通指纹扫描
+- `-e auto` neutron 扫描
+- `-E 模板名` 强制 neutron 扫描
+
+## 6. 当前已放弃或显式降级的功能
+
+这里的“放弃”分两类：
+
+- 默认 TinyGo 构建中被显式降级
+- 仅在 `emptytemplates` 极限瘦身模式下主动关闭
+
+### 6.1 默认 TinyGo 构建中的降级项
+
+#### A. TLS 证书域名提取
+
+状态：
+
+- 已放弃
+
+表现：
+
+- TinyGo 下不采集 TLS peer DNS names
+- TinyGo 下不把响应视为具备标准 Go 等价的 TLS 元数据
+
+原因：
+
+- 这部分对标准库和 TLS 运行时细节依赖较强
+- 对主扫描链路价值低于核心识别和执行稳定性
+
+#### B. signal 驱动的文件同步行为
+
+状态：
+
+- 已放弃
+
+表现：
+
+- TinyGo 下 `installFileSyncSignalHandler` 为空实现
+
+原因：
+
+- 不影响扫描主流程
+- 不值得为 TinyGo 单独保留复杂 signal 语义
+
+#### C. neutron HTTP client 的完整 cookie / redirect 语义
+
+状态：
+
+- 部分放弃
+
+表现：
+
+- TinyGo 下未启用 `cookiejar`
+- `FollowRedirects` / `MaxRedirects` / `CookieReuse` 这些配置结构仍存在，但当前最小 client 不保证与标准 Go 完全等价
+
+影响：
+
+- 依赖复杂 cookie 状态机或精细重定向控制的模板，可能与标准 Go 结果不一致
+
+原因：
+
+- 这是当前 TinyGo 版本里最典型的“可用优先”取舍
+- 目标是保留可执行模板链，而不是复刻全部 HTTP 客户端细节
+
+### 6.2 仅 `emptytemplates` 模式下主动放弃的功能
+
+状态：
+
+- 非默认行为
+- 只在显式添加 `emptytemplates` build tag 时生效
+
+被关闭的内容：
+
+- embedded 指纹模板
+- embedded neutron 模板
+- embedded extractor
+- embedded workflow
+- 基于这些 embedded 数据的扫描能力
+
+原因：
+
+- 用于测试最小体积极限
+- 用于生成最小可运行壳，而不是功能完整版本
+
+说明：
+
+- 这不是当前默认 TinyGo 构建的功能缺失
+- 默认 TinyGo 版本不走这个模式
+
+## 7. 之前放弃、现在已恢复的功能
+
+以下项目曾在排障早期被临时关闭，但当前默认 TinyGo 构建已经恢复：
+
+- neutron 模板加载
+- neutron 执行链
+- extractor 加载
+- extractor 正则语义
+- FingerPrintHub 引擎装载
 
 恢复原因：
 
-- 在 Windows TinyGo 下，`github.com/chainreactors/neutron/common` 单独导入即可稳定触发 `0xC0000409`
-- 继续拆分后确认 `common/dsl` 单独导入不崩，真正的启动期崩溃来自 `common/utils.go` 的调试依赖 `github.com/davecgh/go-spew/spew`
-- 移除 `spew` 后，`protocols/http`、`templates`、最终 `gogo` TinyGo 主程序都恢复正常启动
-- `common/dsl` 的惰性初始化一起保留，避免大批 DSL helper 在导入时一次性注册
+- `regexp/syntax` 通过 patched toolchain 修复了 counted repeat 语义
+- `neutron` 通过最小 HTTP client 和 `publicsuffix` 内置化避开了不稳定依赖
+- `fingers` 通过 TinyGo 专用模板净化，绕开了 `(?x)` 这类模式差异
 
-结论：
+## 8. 推荐维护原则
 
-- `neutron` 被放弃的根因已经找到，属于包导入阶段的全局/调试初始化问题，不是模板执行模型本身不可修
-- TinyGo 版本现在重新使用真实模板加载与执行链，而不是 stub
+后续继续做 TinyGo 兼容时，建议遵守下面几条：
 
-本轮结果：
+- 优先用 build tag 隔离 TinyGo 逻辑，不污染标准 Go 主路径
+- 优先保留共享调用点，把差异压缩到最小 shim/stub
+- 如果只是为了压缩体积而裁剪功能，优先放到 `emptytemplates` 这类显式模式里，不要影响默认构建
+- 对无法等价复刻的运行时行为，文档里明确写“降级”而不是假装兼容
+- patched toolchain 必须通过脚本自动化，不能依赖人工修改全局 `GOROOT`
 
-- 恢复 `neutron` 模板加载
-- 恢复 `neutron` 扫描执行
-- `gogo_tinygo` 已通过 `-h`、最小导入探针、本地 HTTP 扫描验证
+## 9. 相关提交
 
-### 2. FingerPrintHub active matching
+本轮相关提交：
 
-当前状态：
-
-- TinyGo 版本下已关闭
-
-涉及文件：
-
-- `pkg/load_common_tinygo.go`
-- `engine/httpFingerScan_tinygo.go`
-
-放弃原因：
-
-- `github.com/chainreactors/fingers/fingerprinthub` 在 Windows TinyGo 下单独导入时会直接触发运行时崩溃 `0xC0000409`
-- 崩溃发生在业务逻辑之前，属于运行时级别不稳定，不适合继续挂在主扫描链路上
-
-因此本轮选择：
-
-- 保留普通 `fingers` 被动识别
-- 关闭 FingerPrintHub 的 active matching
-
-### 3. Extractor 加载
-
-当前状态：
-
-- TinyGo 版本下已关闭内置 extractor 编译与加载
-
-涉及文件：
-
-- `pkg/load_common_tinygo.go`
-
-放弃原因：
-
-- `LoadExtractor()` 在 TinyGo Windows 下是可稳定复现的崩溃点
-- 崩溃发生在初始化阶段，尚未进入扫描主逻辑
-- 当前判断与正则编译链或相关标准库行为有关
-
-因此本轮选择：
-
-- TinyGo 版本将 extractor 初始化降级为空实现
-- 保证扫描主流程优先可用
-
-### 4. TLS 证书域名提取
-
-当前状态：
-
-- TinyGo 版本下关闭
-
-涉及文件：
-
-- `pkg/tls_domains_tinygo.go`
-
-放弃原因：
-
-- TinyGo 下 HTTPS/TLS 元数据路径与标准 Go 不等价
-- 本轮目标是先让 HTTP/Socket 主链路稳定，不继续在 TLS 元数据上深挖
-
-因此本轮选择：
-
-- 保留 HTTP 服务识别
-- 关闭证书域名提取和相关 TLS 细节收集
-
-## 兼容思路总结
-
-本轮 TinyGo 兼容策略不是“把所有功能都修到完整”，而是按以下优先级做裁剪：
-
-1. 先保证能编译
-2. 再保证能启动
-3. 再保证能扫描
-4. 最后才恢复高阶能力
-
-因此优先保留了：
-
-- CLI
-- 主扫描链路
-- HTTP 基础识别
-- 被动指纹
-- 文件输出
-
-优先放弃了：
-
-- exploit 执行
-- FingerPrintHub active match
-- extractor
-- TLS 元数据提取
-
-这几项都不是语义性小问题，而是已经定位到会导致 TinyGo Windows 运行时崩溃或初始化崩溃的链路。
-
-## 后续可继续推进的方向
-
-如果后面还要继续恢复功能，建议按下面顺序推进：
-
-### 优先级 1
-
-- 继续拆 `neutron/protocols` 与 `neutron/templates` 的导入树
-- 找到具体导致 `0xC0000409` 的子包或全局初始化
-
-### 优先级 2
-
-- 恢复 extractor
-- 重点排查正则编译链与 TinyGo Windows 的兼容问题
-
-### 优先级 3
-
-- 恢复 FingerPrintHub active matching
-- 先缩小到最小 import graph，再逐步回挂到 `HTTPFingerScan`
-
-### 优先级 4
-
-- 评估是否把 `rem/x/netdev` 内联到 `gogo`，减少对 `rem` 的外部依赖
+- `gogo`: `b76f19d` `Refine TinyGo compatibility and build tooling`
+- `fingers`: `07f7880` `Add TinyGo template sanitizer for FingerprintHub`
+- `neutron`: `dd59a0e` `Remove publicsuffix-go from TinyGo path`
+- `templates`: `71f9a74` `Refine nacos detection and drop debug spray dict`
