@@ -1,6 +1,7 @@
 package core
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
@@ -11,7 +12,18 @@ import (
 )
 
 type RunOptions struct {
-	Output io.Writer
+	Output     io.Writer
+	BeforeInit func() error
+	AfterInit  func() error
+}
+
+func Help() string {
+	var runner Runner
+	parser := flags.NewParser(&runner, flags.Default&^flags.PrintErrors)
+	parser.Usage = Usage()
+	var buf bytes.Buffer
+	parser.WriteHelp(&buf)
+	return buf.String()
 }
 
 func RunWithArgs(ctx context.Context, args []string, opts RunOptions) error {
@@ -53,10 +65,22 @@ func RunWithArgs(ctx context.Context, args []string, opts RunOptions) error {
 	default:
 	}
 	logs.Log.Important(Banner())
+	if opts.BeforeInit != nil {
+		if err := opts.BeforeInit(); err != nil {
+			logs.Log.Error(err.Error())
+			return err
+		}
+	}
 	err := runner.Init()
 	if err != nil {
 		logs.Log.Error(err.Error())
 		return err
+	}
+	if opts.AfterInit != nil {
+		if err := opts.AfterInit(); err != nil {
+			logs.Log.Error(err.Error())
+			return err
+		}
 	}
 	runner.Run()
 	if runner.Debug {
