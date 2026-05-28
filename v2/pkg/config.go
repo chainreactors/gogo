@@ -92,6 +92,7 @@ type Config struct {
 	Filters         []string            `json:"-"`
 	FilterOr        bool                `json:"-"`
 	OutputFilters   [][]string          `json:"-"`
+	ResultCallback  func(*Result)       `json:"-"`
 }
 
 func (config *Config) ToWorkflow() *Workflow {

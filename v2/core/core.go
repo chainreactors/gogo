@@ -56,6 +56,9 @@ func DefaultMod(targets interface{}, config Config) {
 		engine.Dispatch(config.RunnerOpt, result)
 		if result.Open {
 			atomic.AddInt32(&Opt.AliveSum, 1)
+			if config.ResultCallback != nil {
+				config.ResultCallback(result)
+			}
 
 			if !result.Filtered {
 				// 如果以及被过滤, 不需要进行进一步过滤
