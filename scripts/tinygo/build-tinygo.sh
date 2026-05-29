@@ -3,7 +3,8 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)"
-REPO_ROOT="$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd -P)"
+REPO_ROOT="$(CDPATH= cd -- "$SCRIPT_DIR/../.." && pwd -P)"
+V2_ROOT="$REPO_ROOT/v2"
 TOOLCHAIN_DIR="$REPO_ROOT/toolchain/tinygo"
 MANIFEST_FILE="$TOOLCHAIN_DIR/manifest.env"
 PATCH_FILE="$TOOLCHAIN_DIR/regexp-syntax-repeat.patch"
@@ -54,7 +55,7 @@ trap cleanup EXIT
 
 usage() {
     cat <<'EOF'
-Usage: bash scripts/build-tinygo.sh [options] [-- <extra tinygo args>]
+Usage: bash scripts/tinygo/build-tinygo.sh [options] [-- <extra tinygo args>]
 
 Options:
   -o, --output PATH     Output binary path. Relative paths are resolved from v2/.
@@ -68,9 +69,9 @@ Options:
   -h, --help            Show this help.
 
 Examples:
-  bash scripts/build-tinygo.sh
-  bash scripts/build-tinygo.sh -o dist/gogo_tinygo_release.exe
-  GOOS=linux GOARCH=amd64 bash scripts/build-tinygo.sh -- -opt=z
+  bash scripts/tinygo/build-tinygo.sh
+  bash scripts/tinygo/build-tinygo.sh -o dist/gogo_tinygo_release.exe
+  GOOS=linux GOARCH=amd64 bash scripts/tinygo/build-tinygo.sh -- -opt=z
 
 Environment:
   ALLOW_TOOLCHAIN_MISMATCH=1  bypass pinned Go/TinyGo version checks.
@@ -202,7 +203,7 @@ resolve_output_path() {
                 printf '%s\n' "$OUTPUT_PATH"
                 ;;
             *)
-                printf '%s/%s\n' "$REPO_ROOT" "$OUTPUT_PATH"
+                printf '%s/%s\n' "$V2_ROOT" "$OUTPUT_PATH"
                 ;;
         esac
         return
@@ -214,9 +215,9 @@ resolve_output_path() {
     host_goarch="$("$GO_CMD" env GOHOSTARCH)"
 
     if [ "$target_goos" = "$host_goos" ] && [ "$target_goarch" = "$host_goarch" ]; then
-        printf '%s/dist/gogo_tinygo%s\n' "$REPO_ROOT" "$suffix"
+        printf '%s/dist/gogo_tinygo%s\n' "$V2_ROOT" "$suffix"
     else
-        printf '%s/dist/gogo_tinygo_%s_%s%s\n' "$REPO_ROOT" "$target_goos" "$target_goarch" "$suffix"
+        printf '%s/dist/gogo_tinygo_%s_%s%s\n' "$V2_ROOT" "$target_goos" "$target_goarch" "$suffix"
     fi
 }
 
@@ -498,7 +499,7 @@ case "$BUILD_PROFILE" in
         ;;
 esac
 
-log "building ./cmd/tinygo"
+log "building v2/cmd/tinygo"
 log "using patched GOROOT: $PATCHED_GOROOT_UNIX"
 log "output: $OUTPUT_UNIX"
 log "profile: $BUILD_PROFILE"
@@ -507,12 +508,15 @@ log "upx mode: $UPX_MODE"
 
 export GOROOT="$PATCHED_GOROOT_NATIVE"
 
-"$TINYGO_CMD" build \
-    -tags "$BUILD_TAGS" \
-    "${TINYGO_FLAGS[@]}" \
-    "${EXTRA_TINYGO_ARGS[@]}" \
-    -o "$OUTPUT_NATIVE" \
-    ./cmd/tinygo
+(
+    cd "$V2_ROOT"
+    "$TINYGO_CMD" build \
+        -tags "$BUILD_TAGS" \
+        "${TINYGO_FLAGS[@]}" \
+        "${EXTRA_TINYGO_ARGS[@]}" \
+        -o "$OUTPUT_NATIVE" \
+        ./cmd/tinygo
+)
 
 if [ "$SHOULD_STRIP" -eq 1 ]; then
     if [ -n "$STRIP_CMD" ]; then

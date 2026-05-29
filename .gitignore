@@ -31,6 +31,7 @@ gen
 /release
 /bbin
 /script
+/.toolchain/
 /v2/pkg/templates.go
 /v2/dist/
 /v2/.toolchain/

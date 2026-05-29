@@ -7,7 +7,7 @@ Design:
 
 - Keep the patch in-repo.
 - Never mutate the machine-global `GOROOT` during normal builds.
-- Materialize a cached patched `GOROOT` under `v2/.toolchain/`.
+- Materialize a cached patched `GOROOT` under `.toolchain/` at the repo root.
 - Point TinyGo at that cached `GOROOT` only for the current build.
 
 Files:
@@ -18,18 +18,18 @@ Files:
 
 Entry point:
 
-- `scripts/build-tinygo.sh`
+- `scripts/tinygo/build-tinygo.sh`
 
 Typical usage:
 
 ```sh
-bash scripts/build-tinygo.sh
+bash scripts/tinygo/build-tinygo.sh
 ```
 
 The script will:
 
 1. Validate the host `Go` and `TinyGo` versions.
-2. Copy the current TinyGo host `GOROOT` into `v2/.toolchain/...`.
+2. Copy the current TinyGo host `GOROOT` into `.toolchain/...`.
 3. Apply the regexp patch if the copied tree is not already patched.
 4. Build `./cmd/tinygo` with that patched `GOROOT`.
 
@@ -38,7 +38,11 @@ set `ALLOW_TOOLCHAIN_MISMATCH=1` to bypass the version guard.
 
 Build profiles:
 
-- `minimal` (default)
+- `release` (default)
+  - Uses `-no-debug -opt=z`.
+  - Runs `strip` when available.
+  - Runs UPX automatically when available.
+- `minimal`
   - Inspired by the `rem/docs` TinyGo minimal-binary workflow.
   - Uses `-no-debug -opt=z`.
   - Adds `-gc=leaking` for non-Windows targets.
@@ -53,14 +57,14 @@ Examples:
 
 ```sh
 # default minimal build
-bash scripts/build-tinygo.sh
+bash scripts/tinygo/build-tinygo.sh
 
 # keep the safer GC behavior
-bash scripts/build-tinygo.sh --profile compat
+bash scripts/tinygo/build-tinygo.sh --profile compat
 
 # append extra build tags
-bash scripts/build-tinygo.sh --tags "noasm"
+bash scripts/tinygo/build-tinygo.sh --tags "noasm"
 
 # compress with UPX after build
-bash scripts/build-tinygo.sh --upx
+bash scripts/tinygo/build-tinygo.sh --upx
 ```
