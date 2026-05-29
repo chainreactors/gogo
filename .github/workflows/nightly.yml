@@ -36,9 +36,9 @@ jobs:
           git push --force origin "$TAG"
       -
         name: Set up Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v5
         with:
-          go-version: 1.17
+          go-version: '1.24'
       -
         name: Install upx
         run: sudo apt install upx zip -y
@@ -58,24 +58,43 @@ jobs:
       - name: cat mod
         run: cat v2/go.mod
 
+      # go1.11 can't parse a `go 1.24.0` go.mod, so build the WindowsXP binaries
+      # in GOPATH mode from a vendored tree. cmd/tinygo is excluded (it needs the
+      # tinygo compiler + rem/x/netdev); goregexp selects fingers' stdlib-regexp
+      # fallback so go-re2/wazero (go1.16+) aren't pulled in.
+      - name: Prepare go1.11 vendor tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          export GOPATH111="${RUNNER_TEMP}/go111-gopath"
+          src="${GOPATH111}/src/github.com/chainreactors/gogo/v2"
+          mkdir -p "$(dirname "$src")"
+          rsync -a --delete \
+            --exclude '.git' --exclude '.toolchain' --exclude 'dist' \
+            --exclude 'vendor' --exclude '*.exe' --exclude 'cmd/tinygo' \
+            v2/ "$src/"
+          cd "$src"
+          go mod vendor
+
       - name: Set up Go 1.11
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v5
         with:
-          go-version: '1.11'
+          go-version: '1.11.13'
 
-      - name: Compile for Windows x64
-        run: go build -o dist/gogo_windowsxp_amd64.exe -ldflags "-s -w -X 'github.com/chainreactors/gogo/v2/internal/core.ver=${{ env.TAG }}'" -tags="forceposix" -asmflags "all=-trimpath=${{ env.GOPATH }}" -gcflags "all=-trimpath=${{ env.GOPATH }}" .
-        env:
-          GOOS: windows
-          GOARCH: amd64
-        working-directory: v2
-
-      - name: Compile for Windows x86
-        run: go build -o dist/gogo_windowsxp_386.exe -ldflags "-s -w -X 'github.com/chainreactors/gogo/v2/internal/core.ver=${{ env.TAG }}'"  -tags="forceposix" -asmflags "all=-trimpath=${{ env.GOPATH }}" -gcflags "all=-trimpath=${{ env.GOPATH }}" .
-        env:
-          GOOS: windows
-          GOARCH: '386'
-        working-directory: v2
+      - name: Compile WindowsXP binaries with Go 1.11
+        shell: bash
+        run: |
+          set -euo pipefail
+          export GOPATH="${RUNNER_TEMP}/go111-gopath"
+          cd "${GOPATH}/src/github.com/chainreactors/gogo/v2"
+          mkdir -p "${GITHUB_WORKSPACE}/v2/dist"
+          for arch in amd64 386; do
+            GO111MODULE=off GOOS=windows GOARCH="$arch" CGO_ENABLED=0 \
+              go build \
+              -o "${GITHUB_WORKSPACE}/v2/dist/gogo_windowsxp_${arch}.exe" \
+              -ldflags "-s -w -X 'github.com/chainreactors/gogo/v2/internal/core.ver=${TAG}'" \
+              -tags="forceposix goregexp" .
+          done
 
       - name: Zip files
         run: zip -r v2/dist/gogo_archive.zip v2/dist/gogo* tools/* README.md

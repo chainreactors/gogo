@@ -2,7 +2,9 @@ project_name: gogo
 version: 1
 before:
   hooks:
-    - go mod tidy
+    # not 'go mod tidy': cmd/tinygo imports rem/x/netdev (only valid under the
+    # tinygo compiler) which tidy can't resolve. go.mod/go.sum stay consistent.
+    - go mod download
     - go generate
 
 builds:
