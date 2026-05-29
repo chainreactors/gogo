@@ -35,6 +35,9 @@ The script will:
 3. Apply the regexp patch if the copied tree is not already patched.
 4. Build `./cmd/tinygo` with that patched `GOROOT`.
 
+Default builds add `goregexp` so TinyGo uses the standard regexp backend instead
+of the `go-re2`/wazero path.
+
 If you intentionally upgrade the host toolchain before updating this patch,
 set `ALLOW_TOOLCHAIN_MISMATCH=1` to bypass the version guard.
 

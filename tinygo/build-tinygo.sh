@@ -32,7 +32,7 @@ WINDOWS_HOME_UNIX=""
 BUILD_PROFILE="release"
 UPX_MODE="auto"
 APPEND_TAGS=""
-DEFAULT_RELEASE_TAGS="forceposix noembed osusergo netgo"
+DEFAULT_RELEASE_TAGS="forceposix noembed osusergo netgo goregexp"
 STRIP_CMD=""
 UPX_CMD=""
 
@@ -121,6 +121,32 @@ to_native_path() {
     printf '%s\n' "$raw"
 }
 
+cmd_uses_windows_paths() {
+    local cmd="$1"
+    if is_windows_path "$cmd"; then
+        return 0
+    fi
+    case "$(basename "$cmd")" in
+        *.exe|*.EXE)
+            return 0
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+}
+
+path_for_cmd() {
+    local cmd="$1"
+    local unix_path="$2"
+    local native_path="$3"
+    if cmd_uses_windows_paths "$cmd"; then
+        printf '%s\n' "$native_path"
+    else
+        printf '%s\n' "$unix_path"
+    fi
+}
+
 detect_windows_home() {
     if [ -n "$WINDOWS_HOME_UNIX" ]; then
         printf '%s\n' "$WINDOWS_HOME_UNIX"
@@ -153,7 +179,7 @@ copy_tree() {
     if command -v tar >/dev/null 2>&1; then
         (
             cd "$src"
-            tar -cf - .
+            tar -chf - .
         ) | (
             cd "$dst"
             tar -xf -
@@ -161,7 +187,7 @@ copy_tree() {
         return
     fi
 
-    cp -a "$src"/. "$dst"/
+    cp -aL "$src"/. "$dst"/
 }
 
 regexp_patch_present() {
@@ -183,7 +209,7 @@ apply_regexp_patch() {
     log "applying regexp patch"
     (
         cd "$root"
-        "$GIT_CMD" apply "$PATCH_FILE"
+        GIT_CEILING_DIRECTORIES="$CACHE_ROOT" "$GIT_CMD" apply --recount "$PATCH_FILE"
     ) || fail "failed to apply $PATCH_FILE to $root"
 
     regexp_patch_present "$root" || fail "regexp patch verification failed after apply"
@@ -372,6 +398,70 @@ resolve_upx_cmd() {
     return 1
 }
 
+native_slash_path() {
+    to_native_path "$1" | sed 's#\\#/#g'
+}
+
+resolve_mingw_root() {
+    local candidate=""
+    if [ -n "${MINGW_ROOT:-}" ]; then
+        candidate="$(to_unix_path "$MINGW_ROOT")"
+        if [ -d "$candidate" ]; then
+            printf '%s\n' "$candidate"
+            return 0
+        fi
+    fi
+
+    if [ -n "$STRIP_CMD" ]; then
+        candidate="$(dirname "$(dirname "$STRIP_CMD")")"
+        if [ -d "$candidate/lib" ]; then
+            printf '%s\n' "$candidate"
+            return 0
+        fi
+    fi
+
+    for candidate in /d/SDK/msys2/mingw64 /c/msys64/mingw64; do
+        if [ -d "$candidate/lib" ]; then
+            printf '%s\n' "$candidate"
+            return 0
+        fi
+    done
+
+    return 1
+}
+
+resolve_mingw_libgcc_dir() {
+    local root="$1"
+    local libgcc=""
+    for libgcc in "$root"/lib/gcc/x86_64-w64-mingw32/*/libgcc.a; do
+        if [ -f "$libgcc" ]; then
+            dirname "$libgcc"
+            return 0
+        fi
+    done
+    return 1
+}
+
+add_windows_link_flags() {
+    if [ "$TARGET_GOOS" != "windows" ] || [ "$TARGET_GOARCH" != "amd64" ]; then
+        return
+    fi
+
+    local mingw_root=""
+    local libgcc_dir=""
+    if ! mingw_root="$(resolve_mingw_root 2>/dev/null)" || ! libgcc_dir="$(resolve_mingw_libgcc_dir "$mingw_root" 2>/dev/null)"; then
+        log "mingw libgcc not found; windows link may fail on ___chkstk_ms"
+        return
+    fi
+
+    local libgcc_dir_native=""
+    local mingw_lib_native=""
+    libgcc_dir_native="$(native_slash_path "$libgcc_dir")"
+    mingw_lib_native="$(native_slash_path "$mingw_root/lib")"
+    TINYGO_FLAGS+=(-ldflags "-extldflags \"-L$libgcc_dir_native -L$mingw_lib_native -lgcc\"")
+    log "windows link flags: using libgcc from $libgcc_dir"
+}
+
 if [ -n "$TINYGO_CMD" ]; then
     TINYGO_CMD="$(to_unix_path "$TINYGO_CMD")"
 else
@@ -407,6 +497,7 @@ PATCH_HASH_SHORT="${PATCH_HASH%${PATCH_HASH#????????????}}"
 CACHE_KEY="${PATCH_NAME}-${GO_VERSION}-${PATCH_HASH_SHORT}"
 PATCHED_GOROOT_UNIX="$CACHE_ROOT/$CACHE_KEY"
 PATCHED_GOROOT_NATIVE="$(to_native_path "$PATCHED_GOROOT_UNIX")"
+PATCHED_GOROOT_FOR_TINYGO="$(path_for_cmd "$TINYGO_CMD" "$PATCHED_GOROOT_UNIX" "$PATCHED_GOROOT_NATIVE")"
 PREPARED_MARKER="$PATCHED_GOROOT_UNIX/.prepared"
 
 if [ "${ALLOW_TOOLCHAIN_MISMATCH:-0}" != "1" ]; then
@@ -459,7 +550,7 @@ prepare_toolchain
 
 if [ "$PREPARE_ONLY" -eq 1 ]; then
     log "prepare-only complete"
-    log "GOROOT=$PATCHED_GOROOT_NATIVE"
+    log "GOROOT=$PATCHED_GOROOT_FOR_TINYGO"
     exit 0
 fi
 
@@ -468,6 +559,7 @@ TARGET_GOARCH="${GOARCH:-$("$GO_CMD" env GOHOSTARCH)}"
 OUTPUT_UNIX="$(resolve_output_path "$TARGET_GOOS" "$TARGET_GOARCH")"
 mkdir -p "$(dirname "$OUTPUT_UNIX")"
 OUTPUT_NATIVE="$(to_native_path "$OUTPUT_UNIX")"
+OUTPUT_FOR_TINYGO="$(path_for_cmd "$TINYGO_CMD" "$OUTPUT_UNIX" "$OUTPUT_NATIVE")"
 BUILD_TAGS="tinygo $DEFAULT_RELEASE_TAGS"
 
 if [ -n "$APPEND_TAGS" ]; then
@@ -499,14 +591,16 @@ case "$BUILD_PROFILE" in
         ;;
 esac
 
+add_windows_link_flags
+
 log "building v2/cmd/tinygo"
-log "using patched GOROOT: $PATCHED_GOROOT_UNIX"
+log "using patched GOROOT: $PATCHED_GOROOT_FOR_TINYGO"
 log "output: $OUTPUT_UNIX"
 log "profile: $BUILD_PROFILE"
 log "tags: $BUILD_TAGS"
 log "upx mode: $UPX_MODE"
 
-export GOROOT="$PATCHED_GOROOT_NATIVE"
+export GOROOT="$PATCHED_GOROOT_FOR_TINYGO"
 
 (
     cd "$V2_ROOT"
@@ -514,18 +608,19 @@ export GOROOT="$PATCHED_GOROOT_NATIVE"
         -tags "$BUILD_TAGS" \
         "${TINYGO_FLAGS[@]}" \
         "${EXTRA_TINYGO_ARGS[@]}" \
-        -o "$OUTPUT_NATIVE" \
+        -o "$OUTPUT_FOR_TINYGO" \
         ./cmd/tinygo
 )
 
 if [ "$SHOULD_STRIP" -eq 1 ]; then
     if [ -n "$STRIP_CMD" ]; then
+        OUTPUT_FOR_STRIP="$(path_for_cmd "$STRIP_CMD" "$OUTPUT_UNIX" "$OUTPUT_NATIVE")"
         case "$(basename "$STRIP_CMD")" in
             objcopy|objcopy.exe)
-                "$STRIP_CMD" --strip-all "$OUTPUT_NATIVE"
+                "$STRIP_CMD" --strip-all "$OUTPUT_FOR_STRIP"
                 ;;
             *)
-                "$STRIP_CMD" "$OUTPUT_NATIVE"
+                "$STRIP_CMD" "$OUTPUT_FOR_STRIP"
                 ;;
         esac
         log "stripped symbols with $(basename "$STRIP_CMD")"
@@ -552,7 +647,8 @@ esac
 
 if [ "$SHOULD_UPX" -eq 1 ]; then
     if [ -n "$UPX_CMD" ]; then
-        "$UPX_CMD" --best --lzma "$OUTPUT_NATIVE"
+        OUTPUT_FOR_UPX="$(path_for_cmd "$UPX_CMD" "$OUTPUT_UNIX" "$OUTPUT_NATIVE")"
+        "$UPX_CMD" --best --lzma "$OUTPUT_FOR_UPX"
         log "compressed with $(basename "$UPX_CMD") --best --lzma"
     elif [ "$UPX_MODE" = "force" ]; then
         fail "upx requested but not found"
