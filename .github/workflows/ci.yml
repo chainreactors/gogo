@@ -50,3 +50,86 @@ jobs:
 
       - name: Build packages
         run: go build ./...
+
+  go111-build:
+    name: Go 1.11 compatibility build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up Go for vendoring
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.x'
+          cache: true
+          cache-dependency-path: v2/go.sum
+
+      - name: Prepare Go 1.11 vendor tree
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          export GO111MODULE=on
+          export GOPATH="${RUNNER_TEMP}/go111-gopath"
+          src="${GOPATH}/src/github.com/chainreactors/gogo/v2"
+          mkdir -p "$(dirname "${src}")"
+          # NOTE: cmd/tinygo is excluded — it targets the TinyGo compiler (build
+          # tag 'tinygo') and imports github.com/chainreactors/rem/x/netdev, which
+          # is unrelated to the Go 1.11 WindowsXP build (root package + forceposix)
+          # and is not present in the public rem module. Excluding it keeps
+          # 'go mod vendor' from resolving that import. tinygo is tracked separately.
+          rsync -a --delete \
+            --exclude '.git' \
+            --exclude '.claude' \
+            --exclude '.tmp' \
+            --exclude '.toolchain' \
+            --exclude 'dist' \
+            --exclude 'vendor' \
+            --exclude '*.exe' \
+            --exclude 'cmd/tinygo' \
+            v2/ "${src}/"
+
+          cd "${src}"
+          go mod vendor
+
+          python3 - <<'PY'
+          from pathlib import Path
+
+          fingers = Path("vendor/github.com/chainreactors/fingers")
+          fph = fingers / "fingerprinthub/fingerprinthub.go"
+          text = fph.read_text()
+          text = text.replace('\n\t"io"\n', '\n')
+          text = text.replace("io.NopCloser", "ioutil.NopCloser")
+          text = text.replace("io.ReadAll", "ioutil.ReadAll")
+          fph.write_text(text)
+
+          resources = fingers / "resources/utils.go"
+          text = resources.read_text()
+          text = text.replace('"io"', '"io/ioutil"')
+          text = text.replace("io.ReadAll", "ioutil.ReadAll")
+          resources.write_text(text)
+          PY
+
+      - name: Set up Go 1.11
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.11.13'
+
+      - name: Build Windows 386 binary with Go 1.11
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          export GOPATH="${RUNNER_TEMP}/go111-gopath"
+          cd "${GOPATH}/src/github.com/chainreactors/gogo/v2"
+          mkdir -p dist
+
+          GO111MODULE=off \
+          GOOS=windows \
+          GOARCH=386 \
+          CGO_ENABLED=0 \
+          go build -o dist/gogo_windowsxp_386.exe -tags="forceposix" .
