@@ -94,7 +94,7 @@ github.com/chainreactors/parsers v0.0.0-20260517174207-da1ebd0e7f68 h1:WbG2RrE/a
 github.com/chainreactors/parsers v0.0.0-20260517174207-da1ebd0e7f68/go.mod h1:Y5HpZLDOUm+hPvWfsxvVemPbe5iX0zDpimgdWRI1S/g=
 github.com/chainreactors/proxyclient v1.0.4-0.20260218115902-74a84a4535b0 h1:WsXmNDgGL63ppkjfZvEcf+sNf1afLJfQ8cYzbxVwK7c=
 github.com/chainreactors/proxyclient v1.0.4-0.20260218115902-74a84a4535b0/go.mod h1:Yi0GCltPMYKS7QrCpwfUu2U9jX2zUQuQ0kwzH6dpbCU=
-github.com/chainreactors/rem v0.3.0 h1:i2vntwqkNC9W7j6KwoHNvvh14VT5IpIP9o3XhY30J6Y=
+github.com/chainreactors/rem v0.3.0 h1:2+vzTIjeeOoIYhC+t5uNWC1q8IA6nqbJ1caept5yOq4=
 github.com/chainreactors/rem v0.3.0/go.mod h1:Oxh6/IrsOG+i6o8Zf6cDMofE8sYr/yDu4bs3yVSINlY=
 github.com/chainreactors/utils v0.0.0-20260507101628-fd69d955ae21 h1:8Vf3BIolSLmZFeK8xYqKBDZi88g2iU9dtVIKohEFPW4=
 github.com/chainreactors/utils v0.0.0-20260507101628-fd69d955ae21/go.mod h1:LajXuvESQwP+qCMAvlcoSXppQCjuLlBrnQpu9XQ1HtU=
