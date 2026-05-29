@@ -36,6 +36,10 @@ builds:
         goarch: "386"
       - goos: android
         goarch: arm
+      # windows/arm64 needs a newer golang.org/x/sys than the one pinned for
+      # go1.11/WindowsXP compat (old x/sys lacks WSAData/Servent for arm64).
+      - goos: windows
+        goarch: arm64
     ldflags: "-s -w -X 'github.com/chainreactors/gogo/v2/internal/core.ver=={{ .Tag }}'"
     env:
       - CGO_ENABLED=0
