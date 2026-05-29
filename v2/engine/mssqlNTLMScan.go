@@ -50,7 +50,7 @@ var sspiMessage = []byte{
 func MSSqlScan(opt *pkg.RunnerOption, result *pkg.Result) {
 	result.Port = "1433"
 	target := result.GetTarget()
-	conn, err := pkg.NewSocket("tcp", target, opt.Delay)
+	conn, err := pkg.NewSocketWithDialer("tcp", target, opt.Delay, opt.ProxyDialTimeout)
 	if err != nil {
 		return
 	}

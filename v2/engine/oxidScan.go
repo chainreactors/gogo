@@ -13,7 +13,7 @@ var oxid2 = pkg.Decode("YmVgYBZgYGCQYGBgYGSAAVYGAAAAAP//")
 func OXIDScan(opt *pkg.RunnerOption, result *pkg.Result) {
 	result.Port = "135"
 	target := result.GetTarget()
-	conn, err := pkg.NewSocket("tcp", target, opt.Delay)
+	conn, err := pkg.NewSocketWithDialer("tcp", target, opt.Delay, opt.ProxyDialTimeout)
 	if err != nil {
 		result.Error = err.Error()
 		return

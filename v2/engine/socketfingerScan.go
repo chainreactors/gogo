@@ -26,7 +26,7 @@ func SocketFingerScan(opt *RunnerOption, result *Result) {
 	tcpsender := func(sendData []byte) ([]byte, bool) {
 		target := result.GetTarget()
 		logs.Log.Debugf("active detect: %s, data: %q", target, sendData)
-		conn, err := NewSocket(TCP, target, opt.Delay)
+		conn, err := NewSocketWithDialer(TCP, target, opt.Delay, opt.ProxyDialTimeout)
 		if err != nil {
 			logs.Log.Debugf("active detect %s error, %s", target, err.Error())
 			return nil, false

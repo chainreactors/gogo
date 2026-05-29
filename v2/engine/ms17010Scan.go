@@ -25,7 +25,7 @@ func MS17010Scan(opt *RunnerOption, result *Result) {
 	// connecting to a host in LAN if reachable should be very quick
 	result.Port = "445"
 	target := result.GetTarget()
-	conn, err := NewSocket("tcp", target, opt.Delay)
+	conn, err := NewSocketWithDialer("tcp", target, opt.Delay, opt.ProxyDialTimeout)
 	if err != nil {
 		result.Error = err.Error()
 		return

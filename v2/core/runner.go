@@ -124,8 +124,17 @@ func (r *Runner) Prepare() bool {
 		dialer, err := proxyclient.NewClientChain(proxies)
 		if err != nil {
 			logs.Log.Warnf("parse proxy error %s, skip proxy!", err.Error())
+		} else {
+			// 1) per-instance：socket/http 扫描经本 Runner 的 RunnerOption dialer。
+			configureRunnerProxy(r.Config.RunnerOpt, dialer.DialContext)
+			// 2) CLI 进程全局：gogo CLI 的 neutron 模板编译进全局 pkg.TemplateMap，
+			//    其 client 在编译期由 pkg.ExecuterOptions 烘焙，故需在此设置全局
+			//    dialer。这是 CLI 单进程单次运行的全局；并发多 Runner 不适用此路径
+			//    （SDK 不走 CLI Runner，neutron 代理由 neutron 引擎 Config 决定）。
+			if ExecuterOptions != nil && ExecuterOptions.Options != nil {
+				ExecuterOptions.Options.DialContext = dialer.DialContext
+			}
 		}
-		installProxyDialer(dialer.DialContext)
 	}
 	return true
 }

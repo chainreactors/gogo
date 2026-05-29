@@ -39,8 +39,16 @@ func HTTPGet(client *http.Client, url string) (*http.Response, error) {
 }
 
 func HttpConn(delay int) *http.Client {
+	return HttpConnWithDialer(delay, nil)
+}
+
+func HttpConnWithDialer(delay int, dialContext func(ctx context.Context, network, address string) (net.Conn, error)) *http.Client {
+	transport := DefaultTransport
+	if dialContext != nil {
+		transport = &HTTPTransport{DialContext: dialContext}
+	}
 	conn := &http.Client{
-		Transport: DefaultTransport,
+		Transport: transport,
 		Timeout:   time.Duration(delay) * time.Second,
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			if len(via) >= maxRedirects {
@@ -54,8 +62,16 @@ func HttpConn(delay int) *http.Client {
 }
 
 func HttpConnWithNoRedirect(delay int) *http.Client {
+	return HttpConnWithNoRedirectWithDialer(delay, nil)
+}
+
+func HttpConnWithNoRedirectWithDialer(delay int, dialContext func(ctx context.Context, network, address string) (net.Conn, error)) *http.Client {
+	transport := DefaultTransport
+	if dialContext != nil {
+		transport = &HTTPTransport{DialContext: dialContext}
+	}
 	conn := &http.Client{
-		Transport: DefaultTransport,
+		Transport: transport,
 		Timeout:   time.Duration(delay) * time.Second,
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			return errStopRedirect

@@ -19,7 +19,7 @@ type GogoRoundTripper struct {
 }
 
 func (g *GogoRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
-	conn := g.result.GetHttpConn(g.opt.Delay)
+	conn := g.result.GetHttpConnWithOpt(g.opt.Delay, g.opt)
 	logs.Log.Debugf("Active detect: %s %s", req.Method, req.URL.String())
 
 	httpResp, err := conn.Do(req)

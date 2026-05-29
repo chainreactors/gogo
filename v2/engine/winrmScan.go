@@ -18,7 +18,7 @@ func WinrmScan(opt *pkg.RunnerOption, result *pkg.Result) {
 	result.Port = "5985"
 	uri := fmt.Sprintf("http://%s/wsman", result.GetTarget())
 	logs.Log.Debugf("winrm scan %s", uri)
-	conn := pkg.HttpConn(opt.Delay)
+	conn := pkg.HttpConnWithDialer(opt.Delay, opt.ProxyDialContext)
 	req, _ := http.NewRequest("POST", uri, nil)
 	req.Header.Add("Content-Type", "application/soap+xml;charset=UTF-8")
 	req.Header.Add("User-Agent", "Microsoft WinRM Client")

@@ -23,7 +23,7 @@ type GogoRoundTripper struct {
 // RoundTrip 实现 http.RoundTripper 接口
 func (g *GogoRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
 	// 获取连接
-	conn := g.result.GetHttpConn(g.opt.Delay)
+	conn := g.result.GetHttpConnWithOpt(g.opt.Delay, g.opt)
 
 	// 使用原始请求，保留所有 headers、method、body 等信息
 	logs.Log.Debugf("Active detect: %s %s", req.Method, req.URL.String())

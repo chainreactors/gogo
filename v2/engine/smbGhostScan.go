@@ -11,7 +11,7 @@ var sgpkt = pkg.Decode("YmBgOPAv2NfJgQEG5BlIBSoMHAyMDAwM9VjkKhgYGJhAmEmASYlJhYmB
 
 func SMBGhostScan(opt *pkg.RunnerOption, result *pkg.Result) {
 	target := result.GetTarget()
-	conn, err := pkg.NewSocket("tcp", target, opt.Delay)
+	conn, err := pkg.NewSocketWithDialer("tcp", target, opt.Delay, opt.ProxyDialTimeout)
 	if err != nil {
 		return
 	}

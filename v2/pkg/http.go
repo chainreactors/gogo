@@ -4,18 +4,24 @@
 package pkg
 
 import (
+	"context"
 	"crypto/tls"
-	"github.com/chainreactors/utils/httputils"
+	"net"
 	"net/http"
 	"time"
+
+	"github.com/chainreactors/utils/httputils"
+	"github.com/chainreactors/utils/httpx"
 )
 
 var (
-	maxRedirects     = 5
-	HttpTimeout      time.Duration
-	headers          = http.Header{"User-Agent": []string{httputils.GetRandomUA()}}
+	maxRedirects = 5
+	HttpTimeout  time.Duration
+	headers      = http.Header{"User-Agent": []string{httputils.GetRandomUA()}}
+	// DefaultTransport 仅作为不可变的默认配置参考保留；运行时不再被改写，
+	// 也不再作为客户端共享 transport（每次构造经 utils/httpx 返回全新实例，
+	// 确保并发下不同代理互不干扰）。
 	DefaultTransport = &http.Transport{
-		//TLSHandshakeTimeout : delay * time.Second,
 		TLSClientConfig: &tls.Config{
 			MinVersion:         tls.VersionTLS10,
 			Renegotiation:      tls.RenegotiateOnceAsClient,
@@ -23,10 +29,24 @@ var (
 		},
 		MaxIdleConnsPerHost: 1,
 		MaxIdleConns:        4000,
-		IdleConnTimeout:     HttpTimeout,
 		DisableKeepAlives:   false,
 	}
 )
+
+// gogoClientConfig 返回 gogo 默认的 httpx.ClientConfig（可注入 dialContext）。
+func gogoClientConfig(delay int, followRedirects bool, dialContext httpx.DialContextFunc) httpx.ClientConfig {
+	return httpx.ClientConfig{
+		Timeout:             time.Duration(delay) * time.Second,
+		FollowRedirects:     followRedirects,
+		MaxRedirects:        maxRedirects,
+		InsecureSkipVerify:  true,
+		TLSConfig:           &tls.Config{MinVersion: tls.VersionTLS10, Renegotiation: tls.RenegotiateOnceAsClient, InsecureSkipVerify: true},
+		DialContext:         dialContext,
+		MaxIdleConns:        4000,
+		MaxIdleConnsPerHost: 1,
+		IdleConnTimeout:     HttpTimeout,
+	}
+}
 
 func HTTPGet(client *http.Client, url string) (*http.Response, error) {
 	req, err := http.NewRequest("GET", url, nil)
@@ -38,35 +58,20 @@ func HTTPGet(client *http.Client, url string) (*http.Response, error) {
 }
 
 func HttpConn(delay int) *http.Client {
-	conn := &http.Client{
-		Transport: DefaultTransport,
-		Timeout:   time.Duration(delay) * time.Second,
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			//if !followRedirects {
-			//	return http.ErrUseLastResponse
-			//}
-			//if req.URL.Host == "localhost" || req.URL.Host == "127.0.0.1" {
-			//	return http.ErrUseLastResponse
-			//}
-			if len(via) >= maxRedirects {
-				return http.ErrUseLastResponse
-			}
+	return HttpConnWithDialer(delay, nil)
+}
 
-			return nil
-		},
-	}
-
-	return conn
+// HttpConnWithDialer 创建一个 http.Client。dialContext 非 nil 时作为 Transport
+// 的 DialContext（用于代理）。每次返回全新实例，不读写任何全局状态。
+func HttpConnWithDialer(delay int, dialContext func(ctx context.Context, network, address string) (net.Conn, error)) *http.Client {
+	return httpx.NewHTTPClient(gogoClientConfig(delay, true, dialContext))
 }
 
 func HttpConnWithNoRedirect(delay int) *http.Client {
-	conn := &http.Client{
-		Transport: DefaultTransport,
-		Timeout:   time.Duration(delay) * time.Second,
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
-		},
-	}
+	return HttpConnWithNoRedirectWithDialer(delay, nil)
+}
 
-	return conn
+// HttpConnWithNoRedirectWithDialer 同 HttpConnWithDialer，但禁止重定向。
+func HttpConnWithNoRedirectWithDialer(delay int, dialContext func(ctx context.Context, network, address string) (net.Conn, error)) *http.Client {
+	return httpx.NewHTTPClient(gogoClientConfig(delay, false, dialContext))
 }

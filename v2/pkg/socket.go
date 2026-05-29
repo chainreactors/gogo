@@ -3,79 +3,23 @@ package pkg
 import (
 	"net"
 	"time"
+
+	"github.com/chainreactors/utils/httpx"
 )
 
+// Socket 复用 utils/httpx 的统一实现，消除与 zombie 的重复定义。
+type Socket = httpx.Socket
+
 func NewSocket(network, target string, delay int) (*Socket, error) {
-	s := &Socket{
-		Timeout: time.Duration(delay) * time.Second,
-	}
-	var conn net.Conn
-	var err error
-	if ProxyDialTimeout != nil {
-		conn, err = ProxyDialTimeout(network, target, s.Timeout)
-	} else {
-		conn, err = net.DialTimeout(network, target, s.Timeout)
-	}
-	if err != nil {
-		return nil, err
-	}
-
-	s.Conn = conn
-	return s, nil
+	return NewSocketWithDialer(network, target, delay, nil)
 }
 
-type Socket struct {
-	Conn    net.Conn
-	Count   int
-	Timeout time.Duration
+// NewSocketWithDialer 使用指定的 dialTimeout 创建 Socket。dialTimeout 为 nil 时
+// 直连（net.DialTimeout）。SDK 通过传入 opt.ProxyDialTimeout 实现实例级 /
+// 单任务级代理控制——不再依赖任何包级全局，天然并发安全。
+func NewSocketWithDialer(network, target string, delay int, dialTimeout func(string, string, time.Duration) (net.Conn, error)) (*Socket, error) {
+	return httpx.NewSocket(network, target, httpx.SocketConfig{
+		Timeout:     time.Duration(delay) * time.Second,
+		DialTimeout: dialTimeout,
+	})
 }
-
-func (s *Socket) Read(timeout int) ([]byte, error) {
-	buf := make([]byte, 16384)
-	s.Conn.SetReadDeadline(time.Now().Add(time.Duration(timeout) * time.Second))
-	n, err := s.Conn.Read(buf)
-	if err != nil {
-		return nil, err
-	}
-	return buf[:n], nil
-}
-
-func (s *Socket) Request(data []byte, max int) ([]byte, error) {
-	_ = s.Conn.SetDeadline(time.Now().Add(s.Timeout))
-	var err error
-	_, err = s.Conn.Write(data)
-	if err != nil {
-		return []byte{}, err
-	}
-	s.Count++
-	buf := make([]byte, max)
-	time.Sleep(time.Duration(500) * time.Millisecond)
-	n, err := s.Conn.Read(buf)
-	if err != nil {
-		return []byte{}, err
-	}
-	return buf[:n], err
-}
-
-func (s *Socket) QuickRequest(data []byte, max int) ([]byte, error) {
-	// read small data, without wait for 500ms
-	_ = s.Conn.SetDeadline(time.Now().Add(s.Timeout))
-	var err error
-	_, err = s.Conn.Write(data)
-	if err != nil {
-		return []byte{}, err
-	}
-	s.Count++
-	buf := make([]byte, max)
-	n, err := s.Conn.Read(buf)
-	if err != nil {
-		return []byte{}, err
-	}
-	return buf[:n], err
-}
-
-func (s *Socket) Close() error {
-	return s.Conn.Close()
-}
-
-var ProxyDialTimeout func(network, address string, timeout time.Duration) (net.Conn, error)

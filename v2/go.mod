@@ -6,11 +6,11 @@ require (
 	github.com/M09ic/go-ntlmssp v0.0.0-20230312133735-dcccd454dfe0
 	github.com/chainreactors/fingers v1.2.1-0.20260518103258-7a88bfa946ff
 	github.com/chainreactors/logs v0.0.0-20260508055944-c678762ed15c
-	github.com/chainreactors/neutron v0.0.0-20260517173800-28516c3539a3
+	github.com/chainreactors/neutron v0.0.0-20260529070459-2e4444b1ceb0
 	github.com/chainreactors/parsers v0.0.0-20260517174207-da1ebd0e7f68
 	github.com/chainreactors/proxyclient v1.0.4-0.20260218115902-74a84a4535b0
 	github.com/chainreactors/rem v0.3.0
-	github.com/chainreactors/utils v0.0.0-20260507101628-fd69d955ae21
+	github.com/chainreactors/utils v0.0.0-20260529070435-f03100630384
 	github.com/jessevdk/go-flags v1.6.1
 	github.com/panjf2000/ants/v2 v2.9.1
 	golang.org/x/net v0.47.0

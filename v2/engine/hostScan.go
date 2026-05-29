@@ -14,7 +14,7 @@ import (
 
 func hostScan(opt *RunnerOption, result *Result) {
 	url := result.GetBaseURL()
-	conn := result.GetHttpConn(opt.Delay)
+	conn := result.GetHttpConnWithOpt(opt.Delay, opt)
 	if len(result.HttpHosts) > 5 {
 		//经验公式: 绑定超过2个host可以认为是cdn, 5个留点冗余
 		return

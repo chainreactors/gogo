@@ -1,11 +1,14 @@
 package pkg
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/chainreactors/utils/fileutils"
 
@@ -406,4 +409,10 @@ type RunnerOption struct {
 	Debug        bool
 	Opsec        bool // enable opsec
 	ExcludeCIDRs utils.CIDRs
+
+	// 实例级 proxy 支持。为 nil 时表示不使用代理（直连），并回退到全局
+	// ProxyDialTimeout / DefaultTransport（保持 CLI 行为）。
+	// SDK 通过设置这两个字段实现 per-instance / per-task 代理控制。
+	ProxyDialTimeout func(network, address string, timeout time.Duration) (net.Conn, error)
+	ProxyDialContext func(ctx context.Context, network, address string) (net.Conn, error)
 }

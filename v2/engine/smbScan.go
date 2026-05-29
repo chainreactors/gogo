@@ -72,7 +72,7 @@ func SMBScan(opt *RunnerOption, result *Result) {
 
 func smb1Scan(opt *RunnerOption, target string) ([]byte, error) {
 	var err error
-	conn, err := NewSocket("tcp", target, opt.Delay)
+	conn, err := NewSocketWithDialer("tcp", target, opt.Delay, opt.ProxyDialTimeout)
 	if err != nil {
 		return nil, errors.New("conn failed")
 	}
@@ -98,7 +98,7 @@ func smb1Scan(opt *RunnerOption, target string) ([]byte, error) {
 
 func smb2Scan(opt *RunnerOption, target string) ([]byte, error) {
 	var err error
-	conn, err := NewSocket("tcp", target, opt.Delay)
+	conn, err := NewSocketWithDialer("tcp", target, opt.Delay, opt.ProxyDialTimeout)
 	if err != nil {
 		return nil, err
 	}

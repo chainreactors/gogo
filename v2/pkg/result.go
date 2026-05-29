@@ -66,6 +66,21 @@ func (result *Result) GetHttpConn(delay int) *http.Client {
 	return result.HttpConn
 }
 
+// GetHttpConnWithOpt 在 opt 配置了实例级 proxy 时返回带代理 DialContext 的
+// http.Client（每次新建以隔离不同任务的代理），否则回退到 GetHttpConn 的
+// 缓存逻辑。
+func (result *Result) GetHttpConnWithOpt(delay int, opt *RunnerOption) *http.Client {
+	if opt != nil && opt.ProxyDialContext != nil {
+		if result.HttpConn == nil {
+			result.HttpConn = HttpConnWithDialer(delay, opt.ProxyDialContext)
+		} else {
+			result.HttpConn.Timeout = time.Duration(delay) * time.Second
+		}
+		return result.HttpConn
+	}
+	return result.GetHttpConn(delay)
+}
+
 func (result *Result) AddVuln(vuln *common.Vuln) {
 	result.Vulns[vuln.Name] = vuln
 }

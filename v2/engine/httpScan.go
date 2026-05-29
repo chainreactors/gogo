@@ -25,7 +25,7 @@ func InitScan(opt *pkg.RunnerOption, result *pkg.Result) {
 		}
 	}()
 
-	conn, err := pkg.NewSocket("tcp", target, opt.Delay)
+	conn, err := pkg.NewSocketWithDialer("tcp", target, opt.Delay, opt.ProxyDialTimeout)
 	if err != nil {
 		result.Err = err
 		return
@@ -63,7 +63,7 @@ func InitScan(opt *pkg.RunnerOption, result *pkg.Result) {
 func systemHttp(opt *pkg.RunnerOption, result *pkg.Result, scheme string) {
 	// 如果是400或者不可识别协议,则使用https
 	target := scheme + "://" + result.GetTarget()
-	conn := result.GetHttpConn(opt.Delay + opt.HttpsDelay)
+	conn := result.GetHttpConnWithOpt(opt.Delay+opt.HttpsDelay, opt)
 	resp, err := pkg.HTTPGet(conn, target)
 	if err != nil {
 		// 有可能存在漏网之鱼, 是tls服务, 但tls的第一个响应为30x, 并30x的目的地址不可达或超时. 则会报错.
@@ -112,7 +112,7 @@ func systemHttp(opt *pkg.RunnerOption, result *pkg.Result, scheme string) {
 // 302跳转后目的不可达时进行不redirect的信息收集
 // 暂时使用不太优雅的方案, 在极少数情况下才会触发, 会多进行一次https的交互.
 func noRedirectHttp(opt *pkg.RunnerOption, result *pkg.Result, u string) {
-	conn := pkg.HttpConnWithNoRedirect(opt.Delay + opt.HttpsDelay)
+	conn := pkg.HttpConnWithNoRedirectWithDialer(opt.Delay+opt.HttpsDelay, opt.ProxyDialContext)
 	resp, err := pkg.HTTPGet(conn, u)
 	if err != nil {
 		return

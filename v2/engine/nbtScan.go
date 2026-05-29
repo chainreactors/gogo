@@ -60,7 +60,7 @@ func NBTScan(opt *pkg.RunnerOption, result *pkg.Result) {
 	result.Port = "137"
 	target := result.GetTarget()
 
-	conn, err := pkg.NewSocket("udp", target, opt.Delay*2)
+	conn, err := pkg.NewSocketWithDialer("udp", target, opt.Delay*2, opt.ProxyDialTimeout)
 	if err != nil {
 		return
 	}
