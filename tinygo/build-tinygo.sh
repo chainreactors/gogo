@@ -3,12 +3,12 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)"
-REPO_ROOT="$(CDPATH= cd -- "$SCRIPT_DIR/../.." && pwd -P)"
+REPO_ROOT="$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd -P)"
 V2_ROOT="$REPO_ROOT/v2"
-TOOLCHAIN_DIR="$REPO_ROOT/toolchain/tinygo"
+TOOLCHAIN_DIR="$SCRIPT_DIR/toolchain"
 MANIFEST_FILE="$TOOLCHAIN_DIR/manifest.env"
 PATCH_FILE="$TOOLCHAIN_DIR/regexp-syntax-repeat.patch"
-CACHE_ROOT="$REPO_ROOT/.toolchain"
+CACHE_ROOT="$SCRIPT_DIR/.toolchain"
 
 if [ ! -f "$MANIFEST_FILE" ]; then
     echo "missing toolchain manifest: $MANIFEST_FILE" >&2
@@ -55,7 +55,7 @@ trap cleanup EXIT
 
 usage() {
     cat <<'EOF'
-Usage: bash scripts/tinygo/build-tinygo.sh [options] [-- <extra tinygo args>]
+Usage: bash tinygo/build-tinygo.sh [options] [-- <extra tinygo args>]
 
 Options:
   -o, --output PATH     Output binary path. Relative paths are resolved from v2/.
@@ -69,9 +69,9 @@ Options:
   -h, --help            Show this help.
 
 Examples:
-  bash scripts/tinygo/build-tinygo.sh
-  bash scripts/tinygo/build-tinygo.sh -o dist/gogo_tinygo_release.exe
-  GOOS=linux GOARCH=amd64 bash scripts/tinygo/build-tinygo.sh -- -opt=z
+  bash tinygo/build-tinygo.sh
+  bash tinygo/build-tinygo.sh -o dist/gogo_tinygo_release.exe
+  GOOS=linux GOARCH=amd64 bash tinygo/build-tinygo.sh -- -opt=z
 
 Environment:
   ALLOW_TOOLCHAIN_MISMATCH=1  bypass pinned Go/TinyGo version checks.

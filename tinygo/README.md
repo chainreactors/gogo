@@ -1,35 +1,37 @@
 # TinyGo Toolchain Patch
 
-This directory stores the minimal stdlib patch needed for the TinyGo `gogo`
-build to preserve the original extractor regex semantics.
+This directory stores the TinyGo build wrapper and the minimal stdlib patch
+needed for the TinyGo `gogo` build to preserve the original extractor regex
+semantics.
 
 Design:
 
 - Keep the patch in-repo.
 - Never mutate the machine-global `GOROOT` during normal builds.
-- Materialize a cached patched `GOROOT` under `.toolchain/` at the repo root.
+- Materialize a cached patched `GOROOT` under `tinygo/.toolchain/`.
 - Point TinyGo at that cached `GOROOT` only for the current build.
 
 Files:
 
-- `manifest.env`: pinned toolchain versions for reproducible builds.
-- `regexp-syntax-repeat.patch`: patch for `src/regexp/syntax/compile.go`
+- `build-tinygo.sh`: TinyGo build wrapper for the `v2` module.
+- `toolchain/manifest.env`: pinned toolchain versions for reproducible builds.
+- `toolchain/regexp-syntax-repeat.patch`: patch for `src/regexp/syntax/compile.go`
   and `src/regexp/syntax/simplify.go`.
 
 Entry point:
 
-- `scripts/tinygo/build-tinygo.sh`
+- `tinygo/build-tinygo.sh`
 
 Typical usage:
 
 ```sh
-bash scripts/tinygo/build-tinygo.sh
+bash tinygo/build-tinygo.sh
 ```
 
 The script will:
 
 1. Validate the host `Go` and `TinyGo` versions.
-2. Copy the current TinyGo host `GOROOT` into `.toolchain/...`.
+2. Copy the current TinyGo host `GOROOT` into `tinygo/.toolchain/...`.
 3. Apply the regexp patch if the copied tree is not already patched.
 4. Build `./cmd/tinygo` with that patched `GOROOT`.
 
@@ -56,15 +58,15 @@ Build profiles:
 Examples:
 
 ```sh
-# default minimal build
-bash scripts/tinygo/build-tinygo.sh
+# default release build
+bash tinygo/build-tinygo.sh
 
 # keep the safer GC behavior
-bash scripts/tinygo/build-tinygo.sh --profile compat
+bash tinygo/build-tinygo.sh --profile compat
 
 # append extra build tags
-bash scripts/tinygo/build-tinygo.sh --tags "noasm"
+bash tinygo/build-tinygo.sh --tags "noasm"
 
 # compress with UPX after build
-bash scripts/tinygo/build-tinygo.sh --upx
+bash tinygo/build-tinygo.sh --upx
 ```

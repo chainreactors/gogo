@@ -31,7 +31,7 @@ gen
 /release
 /bbin
 /script
-/.toolchain/
+/tinygo/.toolchain/
 /v2/pkg/templates.go
 /v2/dist/
 /v2/.toolchain/
