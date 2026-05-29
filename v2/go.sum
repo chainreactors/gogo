@@ -90,6 +90,10 @@ github.com/chainreactors/neutron v0.0.0-20260517173800-28516c3539a3 h1:H3JhQsV3j
 github.com/chainreactors/neutron v0.0.0-20260517173800-28516c3539a3/go.mod h1:U8ZyyTVaRvqGY224XAKENQZW4M3pqM9BzMt4phZzAgc=
 github.com/chainreactors/neutron v0.0.0-20260529070459-2e4444b1ceb0 h1:cLtvuFQAOjW3R5GB2diFoz+mgcCglL09RWVMrqLPA8U=
 github.com/chainreactors/neutron v0.0.0-20260529070459-2e4444b1ceb0/go.mod h1:6+ADabXxJWTHcyHr6Wpdlamy6bBN4Y44sBrCJvd6Igs=
+github.com/chainreactors/neutron v0.0.0-20260529091026-f04eee4864a8 h1:cHhUfFkM41Ndkh0zYhgMAlpqaEBhPAMmtb1tFmjuHkw=
+github.com/chainreactors/neutron v0.0.0-20260529091026-f04eee4864a8/go.mod h1:6+ADabXxJWTHcyHr6Wpdlamy6bBN4Y44sBrCJvd6Igs=
+github.com/chainreactors/neutron v0.0.0-20260529092120-bfdad21dd0ad h1:wN/bkAisD2O7N3AtOePsOTMRfu1yovemoQ5xGHII8dE=
+github.com/chainreactors/neutron v0.0.0-20260529092120-bfdad21dd0ad/go.mod h1:6+ADabXxJWTHcyHr6Wpdlamy6bBN4Y44sBrCJvd6Igs=
 github.com/chainreactors/parsers v0.0.0-20260517174207-da1ebd0e7f68 h1:WbG2RrE/a/zDTdXthEqp1Hbxryqrmxvh4ViTAvBsKb8=
 github.com/chainreactors/parsers v0.0.0-20260517174207-da1ebd0e7f68/go.mod h1:Y5HpZLDOUm+hPvWfsxvVemPbe5iX0zDpimgdWRI1S/g=
 github.com/chainreactors/proxyclient v1.0.4-0.20260218115902-74a84a4535b0 h1:WsXmNDgGL63ppkjfZvEcf+sNf1afLJfQ8cYzbxVwK7c=
