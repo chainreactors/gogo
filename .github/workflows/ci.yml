@@ -96,24 +96,6 @@ jobs:
           cd "${src}"
           go mod vendor
 
-          python3 - <<'PY'
-          from pathlib import Path
-
-          fingers = Path("vendor/github.com/chainreactors/fingers")
-          fph = fingers / "fingerprinthub/fingerprinthub.go"
-          text = fph.read_text()
-          text = text.replace('\n\t"io"\n', '\n')
-          text = text.replace("io.NopCloser", "ioutil.NopCloser")
-          text = text.replace("io.ReadAll", "ioutil.ReadAll")
-          fph.write_text(text)
-
-          resources = fingers / "resources/utils.go"
-          text = resources.read_text()
-          text = text.replace('"io"', '"io/ioutil"')
-          text = text.replace("io.ReadAll", "ioutil.ReadAll")
-          resources.write_text(text)
-          PY
-
       - name: Set up Go 1.11
         uses: actions/setup-go@v5
         with:
@@ -132,4 +114,4 @@ jobs:
           GOOS=windows \
           GOARCH=386 \
           CGO_ENABLED=0 \
-          go build -o dist/gogo_windowsxp_386.exe -tags="forceposix" .
+          go build -o dist/gogo_windowsxp_386.exe -tags="forceposix goregexp" .
