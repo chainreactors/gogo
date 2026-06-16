@@ -96,6 +96,15 @@ type Config struct {
 	FilterOr        bool                `json:"-"`
 	OutputFilters   [][]string          `json:"-"`
 	ResultCallback  func(*Result)       `json:"-"`
+
+	Ctx context.Context `json:"-"`
+}
+
+func (config *Config) Context() context.Context {
+	if config.Ctx != nil {
+		return config.Ctx
+	}
+	return context.Background()
 }
 
 func (config *Config) ToWorkflow() *Workflow {

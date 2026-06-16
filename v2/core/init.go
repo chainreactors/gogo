@@ -173,6 +173,9 @@ func RunTask(config Config) {
 	case SMART, SUPERSMART, SUPERSMARTB:
 		if config.CIDRs != nil {
 			for _, cidr := range config.CIDRs {
+				if config.Context().Err() != nil {
+					return
+				}
 				if cidr.Ver == 4 {
 					SmartMod(cidr, &config)
 				} else {

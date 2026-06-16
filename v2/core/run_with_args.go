@@ -86,6 +86,7 @@ func RunWithArgs(ctx context.Context, args []string, opts RunOptions) error {
 			return err
 		}
 	}
+	runner.Config.Ctx = ctx
 	if err := runner.Run(); err != nil {
 		return err
 	}

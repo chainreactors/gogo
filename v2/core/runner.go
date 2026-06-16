@@ -351,8 +351,12 @@ func (r *Runner) runWithCMD() error {
 func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) error {
 	if workflows := workflowMap.Choice(r.WorkFlowName); len(workflows) > 0 {
 		for _, workflow := range workflows {
+			if r.Config.Context().Err() != nil {
+				break
+			}
 			logs.Log.Important("workflow " + workflow.Name + " starting")
 			config := workflow.PrepareConfig(r.Config)
+			config.Ctx = r.Config.Ctx
 
 			if config.Mod == SUPERSMARTB {
 				config.FileOutputf = SUPERSMARTB

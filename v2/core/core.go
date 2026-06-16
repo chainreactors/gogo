@@ -1,6 +1,7 @@
 package core
 
 import (
+	"context"
 	"fmt"
 	"net"
 	"runtime/debug"
@@ -16,6 +17,20 @@ import (
 	"github.com/chainreactors/utils"
 	"github.com/panjf2000/ants/v2"
 )
+
+func drainWithContext(ctx context.Context, ch <-chan targetConfig, fn func(targetConfig)) {
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case t, ok := <-ch:
+			if !ok {
+				return
+			}
+			fn(t)
+		}
+	}
+}
 
 type targetConfig struct {
 	ip      string
@@ -49,8 +64,12 @@ func DefaultMod(targets interface{}, config Config) {
 	var wgs sync.WaitGroup
 	targetGen := NewTargetGenerator(config)
 	targetCh := targetGen.generatorDispatch(targets, config.PortList)
+	ctx := config.Context()
 	scanPool, _ := ants.NewPoolWithFunc(config.Threads, func(i interface{}) {
 		defer wgs.Done()
+		if ctx.Err() != nil {
+			return
+		}
 		tc := i.(targetConfig)
 		result := tc.NewResult()
 		engine.Dispatch(config.RunnerOpt, result)
@@ -87,15 +106,17 @@ func DefaultMod(targets interface{}, config Config) {
 	}))
 	defer scanPool.Release()
 
-	for t := range targetCh {
+	drainWithContext(ctx, targetCh, func(t targetConfig) {
 		wgs.Add(1)
 		_ = scanPool.Invoke(t)
-	}
-
+	})
 	wgs.Wait()
 }
 
 func SmartMod(target *utils.CIDR, config *Config) {
+	if config.Context().Err() != nil {
+		return
+	}
 	// 初始化mask
 	var mask int
 	switch config.Mod {
@@ -136,7 +157,12 @@ func SmartMod(target *utils.CIDR, config *Config) {
 
 	tcChannel := targetGen.smartGenerator(target, config.PortProbeList, config.Mod)
 
+	ctx := config.Context()
 	scanPool, _ := ants.NewPoolWithFunc(config.Threads, func(i interface{}) {
+		defer wg.Done()
+		if ctx.Err() != nil {
+			return
+		}
 		tc := i.(targetConfig)
 		result := NewResult(tc.ip, tc.port)
 		result.SmartProbe = true
@@ -148,13 +174,12 @@ func SmartMod(target *utils.CIDR, config *Config) {
 		} else if result.Error != "" {
 			logs.Log.Debugf("%s stat: %s, errmsg: %s", result.GetTarget(), PortStat[result.ErrStat], result.Error)
 		}
-		wg.Done()
 	})
 	defer scanPool.Release()
-	for t := range tcChannel {
+	drainWithContext(ctx, tcChannel, func(t targetConfig) {
 		wg.Add(1)
 		_ = scanPool.Invoke(t)
-	}
+	})
 	wg.Wait()
 
 	var iplist utils.CIDRs
@@ -194,22 +219,25 @@ func AliveMod(targets interface{}, config Config) {
 	}
 
 	var wgs sync.WaitGroup
+	ctx := config.Context()
 	logs.Log.Importantf("Alived spray task is expected to take %d seconds",
 		guessTime(targets, len(config.AliveSprayMod), config.Threads))
 	targetGen := NewTargetGenerator(config)
 	alivedmap := targetGen.ipGenerator.alivedMap
 	targetCh := targetGen.generatorDispatch(targets, config.AliveSprayMod)
 	scanPool, _ := ants.NewPoolWithFunc(config.Threads, func(i interface{}) {
+		defer wgs.Done()
+		if ctx.Err() != nil {
+			return
+		}
 		aliveScan(config.RunnerOpt, i.(targetConfig), alivedmap)
-		wgs.Done()
 	})
 	defer scanPool.Release()
 
-	for t := range targetCh {
+	drainWithContext(ctx, targetCh, func(t targetConfig) {
 		wgs.Add(1)
 		_ = scanPool.Invoke(t)
-	}
-
+	})
 	wgs.Wait()
 
 	var iplist []string
@@ -225,6 +253,9 @@ func AliveMod(targets interface{}, config Config) {
 	logs.Log.Importantf("found %d alived ips", len(iplist))
 	if config.AliveFile != nil {
 		WriteSmartResult(config.AliveFile, "alive", iplist)
+	}
+	if config.Context().Err() != nil {
+		return
 	}
 	DefaultMod(utils.ParseIPs(iplist).CIDRs(), config)
 }
@@ -282,6 +313,9 @@ func createDeclineScan(cidrs utils.CIDRs, config Config) {
 			spended := guessSmartTime(cidrs[0], config)
 			logs.Log.Importantf("Every smartscan subtask is expected to take %d seconds, total found %d B Class CIDRs about %d s", spended, len(cidrs), spended*len(cidrs))
 			for _, ip := range cidrs {
+				if config.Context().Err() != nil {
+					return
+				}
 				tmpalive := Opt.AliveSum
 				SmartMod(ip, &config)
 				logs.Log.Importantf("Found %d assets from CIDR %s", Opt.AliveSum-tmpalive, ip)
@@ -294,6 +328,9 @@ func createDeclineScan(cidrs utils.CIDRs, config Config) {
 		logs.Log.Importantf("Every smartscan subtask is expected to take %d seconds, total found %d B Class CIDRs about %d s", spended, len(cidrs), spended*len(cidrs))
 
 		for _, ip := range cidrs {
+			if config.Context().Err() != nil {
+				return
+			}
 			SmartMod(ip, &config)
 		}
 	} else {
