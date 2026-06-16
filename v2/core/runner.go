@@ -143,27 +143,27 @@ func (r *Runner) Prepare() (bool, error) {
 }
 
 func (r *Runner) Init() error {
-	// 加载配置文件中的全局变量
-	err := LoadPortConfig(r.PortConfig)
-	if err != nil {
-		return fmt.Errorf("load port config failed, %v", err)
+	if err := LoadResources(); err != nil {
+		return err
 	}
 
-	err = LoadFinger(r.FingerFile)
-	if err != nil {
-		return fmt.Errorf("load finger config failed, %v", err)
+	// CLI-specific overrides: reload from explicit file paths if provided.
+	if r.PortConfig != "" {
+		if err := LoadPortConfig(r.PortConfig); err != nil {
+			return fmt.Errorf("load port config failed, %v", err)
+		}
 	}
-
-	err = LoadExtractor()
-	if err != nil {
-		return fmt.Errorf("extract config load FAIL!, %s", err.Error())
+	if len(r.FingerFile) > 0 {
+		if err := LoadFinger(r.FingerFile); err != nil {
+			return fmt.Errorf("load finger config failed, %v", err)
+		}
 	}
 	for _, e := range r.Extract {
 		if reg, ok := ExtractRegexps[e]; ok {
 			Extractors[e] = reg
 		} else {
 			Extractors[e] = []*parsers.Extractor{
-				&parsers.Extractor{
+				{
 					Name:            e,
 					CompiledRegexps: []*regexp.Regexp{regexp.MustCompile(e)},
 				},
@@ -174,9 +174,10 @@ func (r *Runner) Init() error {
 	if r.AttackType != "" {
 		ExecuterOptions.Options.AttackType = r.AttackType
 	}
-	err = NeutronLoader(r.ExploitFile, r.Payloads)
-	if err != nil {
-		return err
+	if r.ExploitFile != "" {
+		if err := NeutronLoader(r.ExploitFile, r.Payloads); err != nil {
+			return err
+		}
 	}
 
 	if r.Opsec {

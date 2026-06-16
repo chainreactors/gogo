@@ -22,6 +22,47 @@ func ResetResourceProvider() {
 	SetResourceProvider(nil)
 }
 
+// ResourceLoader is called by runner.Init to load all resources (ports, fingers,
+// extractors, neutron templates). When nil, the default loading from ResourceProvider
+// is used. Set to a no-op when the SDK engine has already injected resources.
+var resourceLoader struct {
+	sync.RWMutex
+	fn func() error
+}
+
+// SetResourceLoader overrides the default resource loading strategy.
+// Pass nil to restore default behavior.
+func SetResourceLoader(fn func() error) {
+	resourceLoader.Lock()
+	defer resourceLoader.Unlock()
+	resourceLoader.fn = fn
+}
+
+// LoadResources executes the configured resource loader. Returns nil immediately
+// if an external loader was set (e.g. SDK already loaded resources).
+func LoadResources() error {
+	resourceLoader.RLock()
+	fn := resourceLoader.fn
+	resourceLoader.RUnlock()
+	if fn != nil {
+		return fn()
+	}
+	return defaultLoadResources()
+}
+
+func defaultLoadResources() error {
+	if err := LoadPortConfig(""); err != nil {
+		return err
+	}
+	if err := LoadFinger(nil); err != nil {
+		return err
+	}
+	if err := LoadExtractor(); err != nil {
+		return err
+	}
+	return nil
+}
+
 // LoadEmbeddedConfig loads the standalone embedded config without consulting
 // an installed external provider.
 func LoadEmbeddedConfig(typ string) []byte {
