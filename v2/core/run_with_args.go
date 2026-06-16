@@ -55,7 +55,11 @@ func RunWithArgs(ctx context.Context, args []string, opts RunOptions) error {
 		return err
 	}
 
-	if ok := runner.Prepare(); !ok {
+	ok, err := runner.Prepare()
+	if err != nil {
+		return err
+	}
+	if !ok {
 		return nil
 	}
 	logs.Log.SetOutput(output)
@@ -71,7 +75,7 @@ func RunWithArgs(ctx context.Context, args []string, opts RunOptions) error {
 			return err
 		}
 	}
-	err := runner.Init()
+	err = runner.Init()
 	if err != nil {
 		logs.Log.Error(err.Error())
 		return err
@@ -82,7 +86,9 @@ func RunWithArgs(ctx context.Context, args []string, opts RunOptions) error {
 			return err
 		}
 	}
-	runner.Run()
+	if err := runner.Run(); err != nil {
+		return err
+	}
 	if runner.Debug {
 		logs.Log.Close(false)
 	} else {

@@ -15,13 +15,13 @@ import (
 	"github.com/chainreactors/utils/iutils"
 )
 
-func LoadFile(file *os.File) []byte {
+func LoadFile(file *os.File) ([]byte, error) {
 	defer file.Close()
 	content, err := ioutil.ReadAll(file)
 	if err != nil {
-		iutils.Fatal(err.Error())
+		return nil, err
 	}
-	return bytes.TrimSpace(content)
+	return bytes.TrimSpace(content), nil
 }
 
 func InitConfig(config *Config) (*Config, error) {
@@ -52,12 +52,12 @@ func InitConfig(config *Config) (*Config, error) {
 	if config.ListFile != "" {
 		file, err = fileutils.Open(config.ListFile)
 		if err != nil {
-			iutils.Fatal(err.Error())
+			return nil, err
 		}
 	} else if config.JsonFile != "" {
 		file, err = fileutils.Open(config.JsonFile)
 		if err != nil {
-			iutils.Fatal(err.Error())
+			return nil, err
 		}
 	} else if fileutils.HasStdin() {
 		file = os.Stdin
@@ -76,7 +76,11 @@ func InitConfig(config *Config) (*Config, error) {
 
 	if config.ListFile != "" || config.IsListInput {
 		// 如果从文件中读,初始化IP列表配置
-		config.IPlist = strings.Split(string(LoadFile(file)), "\n")
+		content, err := LoadFile(file)
+		if err != nil {
+			return nil, err
+		}
+		config.IPlist = strings.Split(string(content), "\n")
 	} else if config.JsonFile != "" || config.IsJsonInput {
 		// 如果输入的json不为空,则从json中加载result,并返回结果
 		data := LoadResultFile(file)

@@ -248,7 +248,7 @@ func (config *Config) InitFile() error {
 		// 创建output的filehandle
 		config.File, err = newFile(config.Filename, config.Compress)
 		if err != nil {
-			iutils.Fatal(err.Error())
+			return err
 		}
 
 		installFileSyncSignalHandler(config.File)

@@ -4,6 +4,7 @@
 package pkg
 
 import (
+	"fmt"
 	"gopkg.in/yaml.v3"
 	"strings"
 
@@ -12,7 +13,6 @@ import (
 	"github.com/chainreactors/fingers/resources"
 	"github.com/chainreactors/parsers"
 	"github.com/chainreactors/utils"
-	"github.com/chainreactors/utils/iutils"
 )
 
 var (
@@ -116,12 +116,12 @@ func LoadExtractor() error {
 	return nil
 }
 
-func LoadWorkFlow() WorkflowMap {
+func LoadWorkFlow() (WorkflowMap, error) {
 	var workflows []*Workflow
 	var err error
 	err = yaml.Unmarshal(LoadConfig("workflow"), &workflows)
 	if err != nil {
-		iutils.Fatal("workflow load FAIL, " + err.Error())
+		return nil, fmt.Errorf("workflow load FAIL, %s", err.Error())
 	}
 
 	// 设置默认参数
@@ -157,7 +157,7 @@ func LoadWorkFlow() WorkflowMap {
 			tmpmap[strings.ToLower(tag)] = append(tmpmap[strings.ToLower(tag)], workflow)
 		}
 	}
-	return tmpmap
+	return tmpmap, nil
 }
 
 type WorkflowMap map[string][]*Workflow

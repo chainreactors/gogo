@@ -39,7 +39,13 @@ func runTinyGo() {
 
 	defer time.Sleep(100 * time.Millisecond)
 
-	if ok := runner.Prepare(); !ok {
+	ok, err := runner.Prepare()
+	if err != nil {
+		logs.Log.Error(err.Error())
+		closeLogger(runner)
+		return
+	}
+	if !ok {
 		return
 	}
 
@@ -50,7 +56,11 @@ func runTinyGo() {
 		return
 	}
 
-	runner.Run()
+	if err := runner.Run(); err != nil {
+		logs.Log.Error(err.Error())
+		closeLogger(runner)
+		return
+	}
 	closeLogger(runner)
 }
 

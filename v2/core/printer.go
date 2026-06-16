@@ -23,7 +23,10 @@ func Printportconfig() {
 }
 
 func PrintNeutronPoc() {
-	NeutronLoader("", nil)
+	if err := NeutronLoader("", nil); err != nil {
+		fmt.Println("Error loading neutron: " + err.Error())
+		return
+	}
 	fmt.Println("Neutron Pocs")
 	for k, v := range TemplateMap {
 		fmt.Println(k + ":")
@@ -65,7 +68,12 @@ func PrintWorkflow() {
 
 	// 输出表头
 	fmt.Fprint(table, "index\tip          \tport     \tmod\tping\tport-probe\tip-probe\tversion\texploit\toutputFile\toutputPath\n")
-	for name, workflows := range LoadWorkFlow() {
+	wfMap, err := LoadWorkFlow()
+	if err != nil {
+		fmt.Println("Error loading workflows: " + err.Error())
+		return
+	}
+	for name, workflows := range wfMap {
 		fmt.Fprint(table, name+": \n")
 		for i, w := range workflows {
 			if w.IP == "" {

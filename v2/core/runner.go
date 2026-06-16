@@ -44,7 +44,7 @@ type Runner struct {
 	Config Config
 }
 
-func (r *Runner) Prepare() bool {
+func (r *Runner) Prepare() (bool, error) {
 	// 初始化日志工具
 	if r.Quiet {
 		logs.Log = logs.NewLogger(0)
@@ -66,7 +66,7 @@ func (r *Runner) Prepare() bool {
 	// 一些特殊的分支, 这些分支将会直接退出程序
 	if r.Ver {
 		fmt.Println(ver)
-		return false
+		return false, nil
 	}
 
 	r.PrepareConfig()
@@ -76,8 +76,7 @@ func (r *Runner) Prepare() bool {
 	} else if r.ExcludeList != "" {
 		ips, err := fileutils.LoadFileToSlice(r.ExcludeList)
 		if err != nil {
-			logs.Log.Error(err.Error())
-			return false
+			return false, err
 		}
 		r.Config.Excludes = utils.ParseCIDRs(ips)
 	}
@@ -86,7 +85,9 @@ func (r *Runner) Prepare() bool {
 		r.Config.RunnerOpt.ExcludeCIDRs = r.Config.Excludes
 	}
 	if r.FormatterFilename != "" {
-		LoadNeutron("")
+		if _, err := LoadNeutron(""); err != nil {
+			return false, err
+		}
 		var formatOut string
 		if r.Outputf != Default {
 			formatOut = r.Outputf
@@ -102,13 +103,15 @@ func (r *Runner) Prepare() bool {
 				formatOut = "color"
 			}
 		}
-		FormatOutput(r.FormatterFilename, r.Config.Filename, formatOut, r.Config.Filenamef, r.Config.OutputDelimiter, r.Filters, r.FilterOr)
-		return false
+		if err := FormatOutput(r.FormatterFilename, r.Config.Filename, formatOut, r.Config.Filenamef, r.Config.OutputDelimiter, r.Filters, r.FilterOr); err != nil {
+			return false, err
+		}
+		return false, nil
 	}
 	// 输出 Config
 	if r.Printer != "" {
 		printConfigs(r.Printer)
-		return false
+		return false, nil
 	}
 
 	if len(r.Proxy) != 0 {
@@ -136,7 +139,7 @@ func (r *Runner) Prepare() bool {
 			}
 		}
 	}
-	return true
+	return true, nil
 }
 
 func (r *Runner) Init() error {
@@ -171,7 +174,10 @@ func (r *Runner) Init() error {
 	if r.AttackType != "" {
 		ExecuterOptions.Options.AttackType = r.AttackType
 	}
-	NeutronLoader(r.ExploitFile, r.Payloads)
+	err = NeutronLoader(r.ExploitFile, r.Payloads)
+	if err != nil {
+		return err
+	}
 
 	if r.Opsec {
 		fingers.OPSEC = true
@@ -260,34 +266,58 @@ func (r *Runner) PrepareConfig() {
 
 }
 
-func (r *Runner) Run() {
+func (r *Runner) Run() error {
 	r.start = time.Now()
 	if r.WorkFlowName == "" && !r.IsWorkFlow {
-		r.runWithCMD()
+		return r.runWithCMD()
 	} else {
 		var workflowMap = WorkflowMap{}
 		if r.IsWorkFlow {
-			workflowMap["tmp"] = ParseWorkflowsFromInput(LoadFile(os.Stdin))
+			content, err := LoadFile(os.Stdin)
+			if err != nil {
+				return err
+			}
+			workflows, err := ParseWorkflowsFromInput(content)
+			if err != nil {
+				return err
+			}
+			workflowMap["tmp"] = workflows
 			r.WorkFlowName = "tmp"
 		} else if fileutils.IsExist(r.WorkFlowName) {
 			file, err := fileutils.Open(r.WorkFlowName)
 			if err != nil {
-				iutils.Fatal(err.Error())
+				return err
 			}
-			workflowMap["tmp"] = ParseWorkflowsFromInput(LoadFile(file))
+			content, err := LoadFile(file)
+			if err != nil {
+				return err
+			}
+			workflows, err := ParseWorkflowsFromInput(content)
+			if err != nil {
+				return err
+			}
+			workflowMap["tmp"] = workflows
 			r.WorkFlowName = "tmp"
 		} else {
 			if bs, ok := encode.DSLParser(r.WorkFlowName); ok {
-				workflowMap["tmp"] = ParseWorkflowsFromInput(bs)
+				workflows, err := ParseWorkflowsFromInput(bs)
+				if err != nil {
+					return err
+				}
+				workflowMap["tmp"] = workflows
 			} else {
-				workflowMap = LoadWorkFlow()
+				var err error
+				workflowMap, err = LoadWorkFlow()
+				if err != nil {
+					return err
+				}
 			}
 		}
-		r.runWithWorkFlow(workflowMap)
+		return r.runWithWorkFlow(workflowMap)
 	}
 }
 
-func (r *Runner) runWithCMD() {
+func (r *Runner) runWithCMD() error {
 	config := r.Config
 
 	if config.Filename != "" {
@@ -310,13 +340,14 @@ func (r *Runner) runWithCMD() {
 
 	preparedConfig, err := InitConfig(&config)
 	if err != nil {
-		iutils.Fatal(err.Error())
+		return err
 	}
 	RunTask(*preparedConfig) // 运行
 	r.Close(&config)
+	return nil
 }
 
-func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) {
+func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) error {
 	if workflows := workflowMap.Choice(r.WorkFlowName); len(workflows) > 0 {
 		for _, workflow := range workflows {
 			logs.Log.Important("workflow " + workflow.Name + " starting")
@@ -357,14 +388,15 @@ func (r *Runner) runWithWorkFlow(workflowMap WorkflowMap) {
 
 			preparedConfig, err := InitConfig(config)
 			if err != nil {
-				iutils.Fatal(err.Error())
+				return err
 			}
 			RunTask(*preparedConfig) // 运行
 			r.Close(config)
 		}
 	} else {
-		iutils.Fatal("not fount workflow " + r.WorkFlowName)
+		return fmt.Errorf("not found workflow %s", r.WorkFlowName)
 	}
+	return nil
 }
 
 func (r *Runner) Close(config *Config) {
@@ -416,9 +448,14 @@ func printConfigs(t string) {
 	}
 }
 
-func NeutronLoader(pocfile string, payloads []string) {
+func NeutronLoader(pocfile string, payloads []string) error {
 	ExecuterOptions.Options.VarsPayload = ParserCmdPayload(payloads)
-	TemplateMap = LoadNeutron(pocfile)
+	var err error
+	TemplateMap, err = LoadNeutron(pocfile)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func parseFilterString(s string) (k, v, op string) {

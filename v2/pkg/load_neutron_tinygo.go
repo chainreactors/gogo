@@ -13,7 +13,6 @@ import (
 	"github.com/chainreactors/parsers"
 	"github.com/chainreactors/utils/encode"
 	"github.com/chainreactors/utils/fileutils"
-	"github.com/chainreactors/utils/iutils"
 	"gopkg.in/yaml.v3"
 )
 
@@ -44,7 +43,7 @@ func ParserCmdPayload(payloads []string) map[string]interface{} {
 
 var TemplateMap map[string][]*templates.Template
 
-func LoadNeutron(filename string) map[string][]*templates.Template {
+func LoadNeutron(filename string) (map[string][]*templates.Template, error) {
 	var content []byte
 	if filename == "" {
 		return LoadTemplates(LoadConfig("neutron"))
@@ -54,7 +53,7 @@ func LoadNeutron(filename string) map[string][]*templates.Template {
 		var err error
 		content, err = ioutil.ReadFile(filename)
 		if err != nil {
-			iutils.Fatal(err.Error())
+			return nil, err
 		}
 	} else {
 		content = encode.Base64Decode(filename)
@@ -62,18 +61,18 @@ func LoadNeutron(filename string) map[string][]*templates.Template {
 	return LoadTemplates(content)
 }
 
-func LoadTemplates(content []byte) map[string][]*templates.Template {
+func LoadTemplates(content []byte) (map[string][]*templates.Template, error) {
 	var t []*templates.Template
 
 	templatemap := make(map[string][]*templates.Template)
 	err := yaml.Unmarshal(content, &t)
 	if err != nil {
-		iutils.Fatal("neutron config load FAIL!, " + err.Error())
+		return nil, fmt.Errorf("neutron config load FAIL!, %s", err.Error())
 	}
 	for _, template := range t {
 		err = template.Compile(ExecuterOptions)
 		if err != nil {
-			iutils.Fatal(err.Error())
+			return nil, err
 		}
 
 		for _, finger := range template.Fingers {
@@ -99,5 +98,5 @@ func LoadTemplates(content []byte) map[string][]*templates.Template {
 		}
 	}
 	parsers.RegisterZombieServiceAlias()
-	return templatemap
+	return templatemap, nil
 }

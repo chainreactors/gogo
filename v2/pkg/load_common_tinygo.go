@@ -4,6 +4,7 @@
 package pkg
 
 import (
+	"fmt"
 	"strings"
 
 	"gopkg.in/yaml.v3"
@@ -13,7 +14,6 @@ import (
 	"github.com/chainreactors/fingers/resources"
 	"github.com/chainreactors/parsers"
 	"github.com/chainreactors/utils"
-	"github.com/chainreactors/utils/iutils"
 )
 
 var (
@@ -118,11 +118,11 @@ func LoadExtractor() error {
 	return nil
 }
 
-func LoadWorkFlow() WorkflowMap {
+func LoadWorkFlow() (WorkflowMap, error) {
 	var workflows []*Workflow
 	err := yaml.Unmarshal(LoadConfig("workflow"), &workflows)
 	if err != nil {
-		iutils.Fatal("workflow load FAIL, " + err.Error())
+		return nil, fmt.Errorf("workflow load FAIL, %s", err.Error())
 	}
 
 	for _, w := range workflows {
@@ -153,7 +153,7 @@ func LoadWorkFlow() WorkflowMap {
 			tmpmap[strings.ToLower(tag)] = append(tmpmap[strings.ToLower(tag)], workflow)
 		}
 	}
-	return tmpmap
+	return tmpmap, nil
 }
 
 type WorkflowMap map[string][]*Workflow

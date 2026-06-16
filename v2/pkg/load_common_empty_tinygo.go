@@ -50,8 +50,8 @@ func LoadExtractor() error {
 	return nil
 }
 
-func LoadWorkFlow() WorkflowMap {
-	return WorkflowMap{}
+func LoadWorkFlow() (WorkflowMap, error) {
+	return WorkflowMap{}, nil
 }
 
 type WorkflowMap map[string][]*Workflow

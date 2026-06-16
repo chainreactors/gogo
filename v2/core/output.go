@@ -11,7 +11,6 @@ import (
 
 	. "github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/parsers"
-	"github.com/chainreactors/utils/iutils"
 )
 
 func normalizeOutputDelimiter(delimiter string) string {
@@ -72,7 +71,7 @@ func output(result *Result, outType, delimiter string) string {
 	return out
 }
 
-func FormatOutput(filename, outFilename, outf, filenamef, delimiter string, filters []string, filterOr bool) {
+func FormatOutput(filename, outFilename, outf, filenamef, delimiter string, filters []string, filterOr bool) error {
 	var outfunc func(s string)
 	var file io.Reader
 	if filename == "stdin" {
@@ -80,14 +79,14 @@ func FormatOutput(filename, outFilename, outf, filenamef, delimiter string, filt
 	} else if strings.HasPrefix(filename, "http://") || strings.HasPrefix(filename, "https://") {
 		req, err := http.Get(filename)
 		if err != nil {
-			iutils.Fatal(err.Error())
+			return err
 		}
 		defer req.Body.Close()
 		file = req.Body
 	} else {
 		fileHandle, err := fileutils.Open(filename)
 		if err != nil {
-			iutils.Fatal(err.Error())
+			return err
 		}
 		defer fileHandle.Close()
 		file = fileHandle
@@ -119,14 +118,14 @@ func FormatOutput(filename, outFilename, outf, filenamef, delimiter string, filt
 	case []byte:
 		text = string(data.([]byte))
 	default:
-		return
+		return nil
 	}
 
 	// 初始化再输出文件
 	if outFilename != "" {
 		fileHandle, err := fileutils.NewFile(outFilename, fileutils.ModeCreate, false, false)
 		if err != nil {
-			iutils.Fatal("" + err.Error())
+			return err
 		}
 		fmt.Println("Output filename: " + outFilename)
 		defer fileHandle.Close()
@@ -141,7 +140,7 @@ func FormatOutput(filename, outFilename, outf, filenamef, delimiter string, filt
 
 	if sd != nil && sd.Data != nil {
 		outfunc(strings.Join(sd.List(), "\n"))
-		return
+		return nil
 	} else if rd != nil && rd.Data != nil {
 		if len(filters) > 0 {
 			var results parsers.GOGOResults
@@ -179,8 +178,7 @@ func FormatOutput(filename, outFilename, outf, filenamef, delimiter string, filt
 			zs := rd.ToZombie()
 			marshal, err := json.Marshal(zs)
 			if err != nil {
-				fmt.Println(err.Error())
-				return
+				return err
 			}
 			outfunc(string(marshal))
 		default:
@@ -192,6 +190,7 @@ func FormatOutput(filename, outFilename, outf, filenamef, delimiter string, filt
 			outfunc(text)
 		}
 	}
+	return nil
 }
 
 func Usage() string {

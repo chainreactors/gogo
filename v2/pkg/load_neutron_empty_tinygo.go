@@ -20,10 +20,10 @@ func ParserCmdPayload([]string) map[string]interface{} {
 	return make(map[string]interface{})
 }
 
-func LoadNeutron(string) map[string][]*templates.Template {
-	return make(map[string][]*templates.Template)
+func LoadNeutron(string) (map[string][]*templates.Template, error) {
+	return make(map[string][]*templates.Template), nil
 }
 
-func LoadTemplates([]byte) map[string][]*templates.Template {
-	return make(map[string][]*templates.Template)
+func LoadTemplates([]byte) (map[string][]*templates.Template, error) {
+	return make(map[string][]*templates.Template), nil
 }

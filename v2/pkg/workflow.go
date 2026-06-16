@@ -1,20 +1,19 @@
 package pkg
 
 import (
+	"fmt"
 	"gopkg.in/yaml.v3"
 
 	"github.com/chainreactors/parsers"
-	"github.com/chainreactors/utils/iutils"
 )
 
-func ParseWorkflowsFromInput(content []byte) []*Workflow {
+func ParseWorkflowsFromInput(content []byte) ([]*Workflow, error) {
 	var workflows []*Workflow
-	var err error
-	err = yaml.Unmarshal(content, &workflows)
+	err := yaml.Unmarshal(content, &workflows)
 	if err != nil {
-		iutils.Fatal("workflow load FAIL, " + err.Error())
+		return nil, fmt.Errorf("workflow load FAIL, %s", err.Error())
 	}
-	return workflows
+	return workflows, nil
 }
 
 type Workflow struct {
