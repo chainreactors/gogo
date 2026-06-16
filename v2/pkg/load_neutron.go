@@ -75,10 +75,9 @@ func LoadTemplates(content []byte) (map[string][]*templates.Template, error) {
 		return nil, fmt.Errorf("neutron config load FAIL!, %s", err.Error())
 	}
 	for _, template := range t {
-		// 以指纹归类
 		err = template.Compile(ExecuterOptions)
 		if err != nil {
-			return nil, err
+			continue
 		}
 
 		for _, finger := range template.Fingers {
