@@ -29,81 +29,63 @@ func NeutronScan(opt *RunnerOption, target string, result *Result) {
 
 func executeTemplates(result *Result, pocs []string, target string) {
 	var vulns []*common.Vuln
-	ts := choiceTemplates(pocs)
-chainLoop:
-	for {
-		var chainsTemplates []*templates.Template
-		for _, template := range ts {
-			logs.Log.Debugf("neutron scan %s with %s", target, template.Id)
-			res, err := template.Execute(target, nil)
-			if err == nil && res != nil {
-				for name, extract := range res.Extracts {
-					result.AddExtract(&parsers.Extracted{Name: name, ExtractResult: extract})
-				}
-				vulns = append(vulns, &common.Vuln{
-					Name:          template.Id,
-					Payload:       res.PayloadValues,
-					Detail:        res.DynamicValues,
-					SeverityLevel: common.GetSeverityLevel(template.Info.Severity),
-					Tags:          strings.Split(template.Info.Tags, ","),
-				})
-				chainsTemplates = append(chainsTemplates, diffTemplates(ts, choiceTemplates(template.Chains))...)
-			} else {
-				logs.Log.Debugf("neutron scan %s with %s error: %v", target, template.Id, err)
-			}
+
+	index := make(map[string]*templates.Template)
+	startIDs := choiceTemplateIDs(pocs, index)
+
+	ChainExec.Execute(startIDs, func(id string, vars map[string]interface{}) *templates.ChainResult {
+		tmpl, ok := index[id]
+		if !ok {
+			return nil
 		}
-		if chainsTemplates != nil {
-			ts = chainsTemplates
-			goto chainLoop
+		logs.Log.Debugf("neutron scan %s with %s", target, id)
+		res, err := tmpl.Execute(target, nil)
+		if err != nil || res == nil {
+			logs.Log.Debugf("neutron scan %s with %s error: %v", target, id, err)
+			return nil
 		}
-		break
-	}
+		for name, extract := range res.Extracts {
+			result.AddExtract(&parsers.Extracted{Name: name, ExtractResult: extract})
+		}
+		vulns = append(vulns, &common.Vuln{
+			Name:          tmpl.Id,
+			Payload:       res.PayloadValues,
+			Detail:        res.DynamicValues,
+			SeverityLevel: common.GetSeverityLevel(tmpl.Info.Severity),
+			Tags:          strings.Split(tmpl.Info.Tags, ","),
+		})
+		return &templates.ChainResult{}
+	})
+
 	result.AddVulns(vulns)
 }
 
-func choiceTemplates(titles []string) []*templates.Template {
-	var ts []*templates.Template
+// choiceTemplateIDs selects templates by name/tag/finger, populates index, and returns unique IDs.
+func choiceTemplateIDs(titles []string, index map[string]*templates.Template) []string {
 	if len(titles) == 0 {
 		return nil
 	}
+	var sources [][]*templates.Template
 	if titles[0] == "all" {
-		for _, tmpTemplates := range TemplateMap {
-			ts = append(ts, tmpTemplates...)
+		for _, tmpls := range TemplateMap {
+			sources = append(sources, tmpls)
 		}
 	} else {
 		for _, t := range titles {
-			if tmpTemplates, ok := TemplateMap[strings.ToLower(t)]; ok {
-				ts = append(ts, tmpTemplates...)
+			if tmpls, ok := TemplateMap[strings.ToLower(t)]; ok {
+				sources = append(sources, tmpls)
 			}
 		}
 	}
-	return uniqueTemplates(ts)
-}
-
-func uniqueTemplates(ts []*templates.Template) []*templates.Template {
-	tmpTemplates := make(map[*templates.Template]bool)
-	for _, template := range ts {
-		tmpTemplates[template] = true
-	}
-	uniquetemplates := make([]*templates.Template, len(tmpTemplates))
-	i := 0
-	for template := range tmpTemplates {
-		uniquetemplates[i] = template
-		i++
-	}
-	return uniquetemplates
-}
-
-func diffTemplates(baseTemplates []*templates.Template, ts []*templates.Template) []*templates.Template {
-	tmpTemplates := make(map[*templates.Template]bool)
-	for _, template := range baseTemplates {
-		tmpTemplates[template] = true
-	}
-	var uniqueTemplates []*templates.Template
-	for _, t := range ts {
-		if _, ok := tmpTemplates[t]; !ok {
-			uniqueTemplates = append(uniqueTemplates, t)
+	var ids []string
+	for _, tmpls := range sources {
+		for _, tmpl := range tmpls {
+			if _, dup := index[tmpl.Id]; dup {
+				continue
+			}
+			index[tmpl.Id] = tmpl
+			ids = append(ids, tmpl.Id)
 		}
 	}
-	return uniqueTemplates
+	return ids
 }

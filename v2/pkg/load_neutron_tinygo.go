@@ -41,7 +41,10 @@ func ParserCmdPayload(payloads []string) map[string]interface{} {
 	return vars
 }
 
-var TemplateMap map[string][]*templates.Template
+var (
+	TemplateMap map[string][]*templates.Template
+	ChainExec   *templates.ChainExecutor
+)
 
 func LoadNeutron(filename string) (map[string][]*templates.Template, error) {
 	var content []byte
@@ -65,6 +68,7 @@ func LoadTemplates(content []byte) (map[string][]*templates.Template, error) {
 	var t []*templates.Template
 
 	templatemap := make(map[string][]*templates.Template)
+	chainExec := templates.NewChainExecutor(templates.ChainConfig{})
 	err := yaml.Unmarshal(content, &t)
 	if err != nil {
 		return nil, fmt.Errorf("neutron config load FAIL!, %s", err.Error())
@@ -81,6 +85,7 @@ func LoadTemplates(content []byte) (map[string][]*templates.Template, error) {
 
 		if template.Id != "" {
 			templatemap[strings.ToLower(template.Id)] = append(templatemap[strings.ToLower(template.Id)], template)
+			chainExec.Add(template.Id, template.Chains)
 		}
 
 		for _, tag := range template.GetTags() {
@@ -97,6 +102,7 @@ func LoadTemplates(content []byte) (map[string][]*templates.Template, error) {
 			}
 		}
 	}
+	ChainExec = chainExec
 	parsers.RegisterZombieServiceAlias()
 	return templatemap, nil
 }
