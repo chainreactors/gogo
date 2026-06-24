@@ -6,7 +6,7 @@ require (
 	github.com/M09ic/go-ntlmssp v0.0.0-20230312133735-dcccd454dfe0
 	github.com/chainreactors/fingers v1.2.1-0.20260529113019-a74fb88334cd
 	github.com/chainreactors/logs v0.0.0-20260508055944-c678762ed15c
-	github.com/chainreactors/neutron v0.0.0-20260529092120-bfdad21dd0ad
+	github.com/chainreactors/neutron v0.0.0-20260624180655-6264ae4da3f9
 	github.com/chainreactors/parsers v0.0.0-20260517174207-da1ebd0e7f68
 	github.com/chainreactors/proxyclient v1.0.4-0.20260218115902-74a84a4535b0
 	github.com/chainreactors/rem v0.3.0
