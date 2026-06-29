@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	. "github.com/chainreactors/gogo/v2/pkg"
-	"github.com/chainreactors/parsers"
+	"github.com/chainreactors/utils/parsers"
 )
 
 func normalizeOutputDelimiter(delimiter string) string {

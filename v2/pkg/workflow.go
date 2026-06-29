@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"gopkg.in/yaml.v3"
 
-	"github.com/chainreactors/parsers"
+	"github.com/chainreactors/utils/parsers"
 )
 
 func ParseWorkflowsFromInput(content []byte) ([]*Workflow, error) {

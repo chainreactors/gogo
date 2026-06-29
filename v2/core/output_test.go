@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	. "github.com/chainreactors/gogo/v2/pkg"
-	"github.com/chainreactors/parsers"
+	"github.com/chainreactors/utils/parsers"
 )
 
 func TestOutputValuesDoesNotAppendTrailingDelimiter(t *testing.T) {

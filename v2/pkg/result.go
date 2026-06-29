@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/chainreactors/fingers/common"
 	"github.com/chainreactors/fingers/fingers"
-	"github.com/chainreactors/parsers"
+	"github.com/chainreactors/utils/parsers"
 	"github.com/chainreactors/utils"
 	"net"
 	"net/http"

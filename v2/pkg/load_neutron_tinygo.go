@@ -10,7 +10,7 @@ import (
 
 	"github.com/chainreactors/neutron/protocols"
 	"github.com/chainreactors/neutron/templates"
-	"github.com/chainreactors/parsers"
+	"github.com/chainreactors/utils/parsers"
 	"github.com/chainreactors/utils/encode"
 	"github.com/chainreactors/utils/fileutils"
 	"gopkg.in/yaml.v3"

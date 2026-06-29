@@ -5,7 +5,7 @@ package pkg
 
 import (
 	"fmt"
-	"github.com/chainreactors/parsers"
+	"github.com/chainreactors/utils/parsers"
 	"github.com/chainreactors/utils/encode"
 	"github.com/chainreactors/utils/fileutils"
 	"gopkg.in/yaml.v3"

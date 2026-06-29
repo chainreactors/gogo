@@ -13,7 +13,7 @@ import (
 	"github.com/chainreactors/utils/fileutils"
 
 	"github.com/chainreactors/logs"
-	"github.com/chainreactors/parsers"
+	"github.com/chainreactors/utils/parsers"
 	"github.com/chainreactors/utils"
 	"github.com/chainreactors/utils/iutils"
 )

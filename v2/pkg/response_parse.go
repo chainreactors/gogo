@@ -6,7 +6,7 @@ package pkg
 import (
 	"net/http"
 
-	"github.com/chainreactors/parsers"
+	"github.com/chainreactors/utils/parsers"
 )
 
 func newResponseFromRaw(raw []byte) *parsers.Response {

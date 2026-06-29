@@ -7,7 +7,9 @@ import (
 	"io"
 	"os"
 
+	"github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/logs"
+	"github.com/chainreactors/utils/parsers"
 	"github.com/jessevdk/go-flags"
 )
 
@@ -15,6 +17,7 @@ type RunOptions struct {
 	Output     io.Writer
 	BeforeInit func() error
 	AfterInit  func() error
+	OnResult   func(*parsers.GOGOResult)
 }
 
 func Help() string {
@@ -84,6 +87,17 @@ func RunWithArgs(ctx context.Context, args []string, opts RunOptions) error {
 		if err := opts.AfterInit(); err != nil {
 			logs.Log.Error(err.Error())
 			return err
+		}
+	}
+	if opts.OnResult != nil {
+		existing := runner.Config.ResultCallback
+		runner.Config.ResultCallback = func(r *pkg.Result) {
+			if existing != nil {
+				existing(r)
+			}
+			if r.GOGOResult != nil {
+				opts.OnResult(r.GOGOResult)
+			}
 		}
 	}
 	runner.Config.Ctx = ctx

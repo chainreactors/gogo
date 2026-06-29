@@ -9,11 +9,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/chainreactors/fingers/common"
 	"github.com/chainreactors/fingers/fingers"
 	. "github.com/chainreactors/gogo/v2/engine"
 	"github.com/chainreactors/logs"
-	"github.com/chainreactors/parsers"
+	"github.com/chainreactors/utils/parsers"
 	"github.com/chainreactors/proxyclient"
 	"github.com/chainreactors/utils"
 	"github.com/chainreactors/utils/encode"
@@ -60,7 +59,7 @@ func (r *Runner) Prepare() (bool, error) {
 	ExecuterOptions.Options.Timeout = r.Delay + r.HttpsDelay
 	HttpTimeout = time.Duration(r.Delay+r.HttpsDelay) * time.Second
 	Opt.PluginDebug = r.PluginDebug
-	common.NoGuess = r.NoGuess
+	parsers.NoGuess = r.NoGuess
 	fileutils.Key = []byte(r.Key)
 
 	// 一些特殊的分支, 这些分支将会直接退出程序

@@ -11,7 +11,7 @@ import (
 	"github.com/chainreactors/fingers/fingerprinthub"
 	"github.com/chainreactors/fingers/fingers"
 	"github.com/chainreactors/fingers/resources"
-	"github.com/chainreactors/parsers"
+	"github.com/chainreactors/utils/parsers"
 	"github.com/chainreactors/utils"
 )
 

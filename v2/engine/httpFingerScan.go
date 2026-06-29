@@ -10,7 +10,7 @@ import (
 	"github.com/chainreactors/fingers/common"
 	. "github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/logs"
-	"github.com/chainreactors/parsers"
+	"github.com/chainreactors/utils/parsers"
 )
 
 // GogoRoundTripper 实现 http.RoundTripper 接口

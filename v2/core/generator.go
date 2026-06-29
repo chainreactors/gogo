@@ -8,7 +8,7 @@ import (
 	"github.com/chainreactors/gogo/v2/engine"
 	. "github.com/chainreactors/gogo/v2/pkg"
 	. "github.com/chainreactors/logs"
-	"github.com/chainreactors/parsers"
+	"github.com/chainreactors/utils/parsers"
 	"github.com/chainreactors/utils"
 )
 

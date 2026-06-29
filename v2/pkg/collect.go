@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/chainreactors/parsers"
+	"github.com/chainreactors/utils/parsers"
 	"github.com/chainreactors/utils/iutils"
 )
 

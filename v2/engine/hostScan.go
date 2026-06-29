@@ -9,7 +9,7 @@ import (
 
 	. "github.com/chainreactors/gogo/v2/pkg"
 	"github.com/chainreactors/logs"
-	"github.com/chainreactors/parsers"
+	"github.com/chainreactors/utils/parsers"
 )
 
 func hostScan(opt *RunnerOption, result *Result) {
