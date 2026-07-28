@@ -316,9 +316,9 @@ func createDeclineScan(cidrs utils.CIDRs, config Config) {
 				if config.Context().Err() != nil {
 					return
 				}
-				tmpalive := Opt.AliveSum
+				tmpalive := atomic.LoadInt32(&Opt.AliveSum)
 				SmartMod(ip, &config)
-				logs.Log.Importantf("Found %d assets from CIDR %s", Opt.AliveSum-tmpalive, ip)
+				logs.Log.Importantf("Found %d assets from CIDR %s", atomic.LoadInt32(&Opt.AliveSum)-tmpalive, ip)
 				config.SyncFile()
 			}
 		}

@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	"github.com/chainreactors/fingers/fingers"
@@ -418,7 +419,7 @@ func (r *Runner) Close(config *Config) {
 	}
 
 	// 任务统计
-	logs.Log.Importantf("Alived: %d, Total: %d", Opt.AliveSum, RunSum)
+	logs.Log.Importantf("Alived: %d, Total: %d", atomic.LoadInt32(&Opt.AliveSum), atomic.LoadInt32(&RunSum))
 	logs.Log.Important("Time consuming: " + time.Since(r.start).String())
 
 	// 输出文件名

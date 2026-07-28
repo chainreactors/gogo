@@ -4,12 +4,13 @@ import (
 	"context"
 	"strings"
 	"sync"
+	"sync/atomic"
 
 	"github.com/chainreactors/gogo/v2/engine"
 	. "github.com/chainreactors/gogo/v2/pkg"
 	. "github.com/chainreactors/logs"
-	"github.com/chainreactors/utils/parsers"
 	"github.com/chainreactors/utils"
+	"github.com/chainreactors/utils/parsers"
 )
 
 func NewIpGenerator(config Config) *IpGenerator {
@@ -157,7 +158,7 @@ func (gen *TargetGenerator) syncOutputFile() {
 
 func (gen *TargetGenerator) genFromDefault(cidrs utils.CIDRs, portlist []string) {
 	for _, cidr := range cidrs {
-		tmpalived := Opt.AliveSum
+		tmpalived := atomic.LoadInt32(&Opt.AliveSum)
 		ch := gen.ipGenerator.generatorDispatch(cidr, Default)
 		for ip := range ch {
 			for _, port := range portlist {
@@ -166,13 +167,14 @@ func (gen *TargetGenerator) genFromDefault(cidrs utils.CIDRs, portlist []string)
 				case <-gen.ctx.Done():
 					return
 				}
-				if engine.RunSum%65535 == 65534 {
-					Log.Importantf("Current processing %s:%s, number: %d", ip, port, engine.RunSum)
+				runSum := atomic.LoadInt32(&engine.RunSum)
+				if runSum%65535 == 65534 {
+					Log.Importantf("Current processing %s:%s, number: %d", ip, port, runSum)
 				}
 			}
 		}
 		if cidr.Count() > 1 {
-			Log.Importantf("Scanned %s with %d ports, found %d ports", cidr.String(), len(portlist), Opt.AliveSum-tmpalived)
+			Log.Importantf("Scanned %s with %d ports, found %d ports", cidr.String(), len(portlist), atomic.LoadInt32(&Opt.AliveSum)-tmpalived)
 		}
 		gen.syncOutputFile()
 	}
@@ -181,7 +183,7 @@ func (gen *TargetGenerator) genFromDefault(cidrs utils.CIDRs, portlist []string)
 func (gen *TargetGenerator) genFromSpray(cidrs utils.CIDRs, portlist []string) {
 	var tmpPorts []string
 	for _, port := range portlist {
-		lastalive := Opt.AliveSum
+		lastalive := atomic.LoadInt32(&Opt.AliveSum)
 
 		for _, cidr := range cidrs {
 			ch := gen.ipGenerator.generatorDispatch(cidr, Default)
@@ -196,11 +198,12 @@ func (gen *TargetGenerator) genFromSpray(cidrs utils.CIDRs, portlist []string) {
 		}
 
 		tmpPorts = append(tmpPorts, port)
-		if Opt.AliveSum-lastalive > 0 {
+		found := atomic.LoadInt32(&Opt.AliveSum) - lastalive
+		if found > 0 {
 			if len(tmpPorts) > 5 {
-				Log.Importantf("Processed Port: %s - %s, found %d ports", tmpPorts[0], tmpPorts[len(tmpPorts)-1], Opt.AliveSum-lastalive)
+				Log.Importantf("Processed Port: %s - %s, found %d ports", tmpPorts[0], tmpPorts[len(tmpPorts)-1], found)
 			} else {
-				Log.Importantf("Processed Port: %s, found %d ports", strings.Join(tmpPorts, ","), Opt.AliveSum-lastalive)
+				Log.Importantf("Processed Port: %s, found %d ports", strings.Join(tmpPorts, ","), found)
 			}
 			tmpPorts = []string{}
 		}
